@@ -9,6 +9,6 @@ public class JusticeUE4PluginEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "JusticeUE4Plugin" } );
+		ExtraModuleNames.AddRange( new string[] { "JusticeUE4Plugin", "OnlineSubsystemJustice" } );
 	}
 }

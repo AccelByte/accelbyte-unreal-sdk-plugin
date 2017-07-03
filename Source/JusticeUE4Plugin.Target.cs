@@ -9,6 +9,6 @@ public class JusticeUE4PluginTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "JusticeUE4Plugin" } );
+		ExtraModuleNames.AddRange( new string[] { "JusticeUE4Plugin", "OnlineSubsystemJustice" } );
 	}
 }

@@ -1,0 +1,9 @@
+{
+	"Changelist" : 3514769,
+	"CompatibleChangelist" : 3452394,
+	"BuildId" : "b2a97f5b-7870-4a03-babd-9ff020369c0b",
+	"Modules" : 
+	{
+		"OnlineSubsystemJustice" : "UE4Editor-OnlineSubsystemJustice.dylib"
+	}
+}
