@@ -9,7 +9,7 @@
 #include "OnlineIdentityJustice.h"
 #include "VoiceInterfaceImpl.h"
 #include "OnlineAchievementsInterfaceJustice.h"
-#include "IamClient.h"
+#include "JusticeIamClient.h"
 
 FThreadSafeCounter FOnlineSubsystemJustice::TaskCounter;
 
@@ -177,23 +177,19 @@ bool FOnlineSubsystemJustice::Init()
 		IdentityInterface = MakeShareable(new FOnlineIdentityJustice(this));
 		AchievementsInterface = MakeShareable(new FOnlineAchievementsJustice(this));
 		VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
-        
-        if (GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ApiUrl"), ApiUrl, GEngineIni))
+
+        if (GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
         {
-            UE_LOG_ONLINE(Display, TEXT("Justice API URL: %s"), *ApiUrl);
+            UE_LOG_ONLINE(Display, TEXT("Justice API URL: %s"), *BaseURL);
         }
         else
         {
-            UE_LOG_ONLINE(Error, TEXT("Required Justice API URL config ApiUrl is unset."));
+            UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
             bIsOk = false;
         }
 
         UE_LOG_ONLINE(Display,TEXT("Loaded OnlineSubsystem%s()"), TEXT("Justice"));
-
-        FIamClient* iam = new FIamClient();
-        iam->ClientLogin(ApiUrl, TEXT(""), TEXT(""));
-
-    }
+   }
     else
 	{
 		Shutdown();

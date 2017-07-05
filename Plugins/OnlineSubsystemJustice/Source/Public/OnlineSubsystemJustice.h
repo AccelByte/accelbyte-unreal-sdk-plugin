@@ -98,7 +98,7 @@ PACKAGE_SCOPE:
 		AchievementsInterface(nullptr),
 		OnlineAsyncTaskThreadRunnable(nullptr),
 		OnlineAsyncTaskThread(nullptr),
-        ApiUrl(nullptr)
+        BaseURL(nullptr)
 	{}
 
 	FOnlineSubsystemJustice() :
@@ -110,7 +110,7 @@ PACKAGE_SCOPE:
 		AchievementsInterface(nullptr),
 		OnlineAsyncTaskThreadRunnable(nullptr),
 		OnlineAsyncTaskThread(nullptr),
-        ApiUrl(nullptr)
+        BaseURL(nullptr)
     {}
 
 private:
@@ -143,7 +143,7 @@ private:
 	static FThreadSafeCounter TaskCounter;
     
     /** API Url */
-    FString ApiUrl;
+    FString BaseURL;
 };
 
 typedef TSharedPtr<FOnlineSubsystemJustice, ESPMode::ThreadSafe> FOnlineSubsystemJusticePtr;

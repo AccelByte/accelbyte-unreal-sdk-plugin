@@ -15,8 +15,8 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-    AJusticeUE4PluginGameModeBase();
+	AJusticeUE4PluginGameModeBase();
 
-    virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 
 };

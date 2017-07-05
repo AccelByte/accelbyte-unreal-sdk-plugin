@@ -7,6 +7,7 @@
 #include "OnlineSubsystem.h"
 #include "IPAddress.h"
 #include "SocketSubsystem.h"
+#include "JusticeIamClient.h"
 
 bool FUserOnlineAccountJustice::GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const
 {
@@ -66,52 +67,52 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials)
 {
-	FString ErrorStr;
-	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
-	
-	// valid local player index
-	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
-	{
-		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
-	}
-	else if (AccountCredentials.Id.IsEmpty())
-	{
-		ErrorStr = TEXT("Invalid account id, string empty");
-	}
-	else
-	{
-		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
-		if (UserId == NULL)
-		{
-			FString RandomUserId = GenerateRandomUserId(LocalUserNum);
-
-			FUniqueNetIdString NewUserId(RandomUserId);
-			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(RandomUserId));
-			UserAccountPtr->UserAttributes.Add(TEXT("id"), RandomUserId);
-
-			// update/add cached entry for user
-			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
-
-			// keep track of user ids for local users
-			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
-		}
-		else
-		{
-			const FUniqueNetIdString* UniqueIdStr = (FUniqueNetIdString*)(UserId->Get());
-			TSharedRef<FUserOnlineAccountJustice>* TempPtr = UserAccounts.Find(*UniqueIdStr);
-			check(TempPtr);
-			UserAccountPtr = *TempPtr;
-		}
-	}
-
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
-		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
-		return false;
-	}
-
-	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
+//	FString ErrorStr;
+//	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
+//	
+//	// valid local player index
+//	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
+//	{
+//		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
+//	}
+//	else if (AccountCredentials.Id.IsEmpty())
+//	{
+//		ErrorStr = TEXT("Invalid account id, string empty");
+//	}
+//	else
+//	{
+//		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
+//		if (UserId == NULL)
+//		{
+//			FString RandomUserId = GenerateRandomUserId(LocalUserNum);
+//
+//			FUniqueNetIdString NewUserId(RandomUserId);
+//			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(RandomUserId));
+//			UserAccountPtr->UserAttributes.Add(TEXT("id"), RandomUserId);
+//
+//			// update/add cached entry for user
+//			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
+//
+//			// keep track of user ids for local users
+//			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
+//		}
+//		else
+//		{
+//			const FUniqueNetIdString* UniqueIdStr = (FUniqueNetIdString*)(UserId->Get());
+//			TSharedRef<FUserOnlineAccountJustice>* TempPtr = UserAccounts.Find(*UniqueIdStr);
+//			check(TempPtr);
+//			UserAccountPtr = *TempPtr;
+//		}
+//	}
+//
+//	if (!ErrorStr.IsEmpty())
+//	{
+//		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
+//		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
+//		return false;
+//	}
+//
+//	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
 	return true;
 }
 
@@ -140,36 +141,40 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::AutoLogin(int32 LocalUserNum)
 {
-	FString LoginStr;
-	FString PasswordStr;
-	FString TypeStr;
-
-	FParse::Value(FCommandLine::Get(), TEXT("AUTH_LOGIN="), LoginStr);
-	FParse::Value(FCommandLine::Get(), TEXT("AUTH_PASSWORD="), PasswordStr);
-	FParse::Value(FCommandLine::Get(), TEXT("AUTH_TYPE="), TypeStr);
+	JusticeIamClient->ClientCredentialsTokenGrant();
 	
-	if (!LoginStr.IsEmpty())
-	{
-		if (!PasswordStr.IsEmpty())
-		{
-			if (!TypeStr.IsEmpty())
-			{
-				return Login(0, FOnlineAccountCredentials(TypeStr, LoginStr, PasswordStr));
-			}
-			else
-			{
-				UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_TYPE=<type>."));
-			}
-		}
-		else
-		{
-			UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_PASSWORD=<password>."));
-		}
-	}
-	else
-	{
-		UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_LOGIN=<login id>."));
-	}
+	return true;
+//
+//	FString LoginStr;
+//	FString PasswordStr;
+//	FString TypeStr;
+//
+//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_LOGIN="), LoginStr);
+//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_PASSWORD="), PasswordStr);
+//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_TYPE="), TypeStr);
+//	
+//	if (!LoginStr.IsEmpty())
+//	{
+//		if (!PasswordStr.IsEmpty())
+//		{
+//			if (!TypeStr.IsEmpty())
+//			{
+//				return Login(0, FOnlineAccountCredentials(TypeStr, LoginStr, PasswordStr));
+//			}
+//			else
+//			{
+//				UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_TYPE=<type>."));
+//			}
+//		}
+//		else
+//		{
+//			UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_PASSWORD=<password>."));
+//		}
+//	}
+//	else
+//	{
+//		UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_LOGIN=<login id>."));
+//	}
 	return false;
 }
 
@@ -277,6 +282,7 @@ FString FOnlineIdentityJustice::GetAuthToken(int32 LocalUserNum) const
 
 FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* InSubsystem)
 {
+	JusticeIamClient = MakeShareable(new FJusticeIamClient());
 }
 
 FOnlineIdentityJustice::FOnlineIdentityJustice()

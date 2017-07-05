@@ -14,14 +14,13 @@ AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
 
 void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
-    Super::InitGame(MapName, Options, ErrorMessage);
+	Super::InitGame(MapName, Options, ErrorMessage);
 
-    IOnlineSubsystem* const justice = IOnlineSubsystem::Get();
-    ensure(justice);
-    justice->Init();
+	IOnlineSubsystem* const justice = IOnlineSubsystem::Get();
+	check(justice);
+	justice->Init();
 
-    IOnlineIdentityPtr ident = justice->GetIdentityInterface();    
-    
-    //ident->Init();
+	IOnlineIdentityPtr ident = justice->GetIdentityInterface();    
+	ident->AutoLogin(0);
 }
 
