@@ -36,14 +36,13 @@ public:
 	}
 
 	void ClientCredentialsTokenGrant();
-	void SetBaseURL(const FString URL)   { BaseURL = URL; };
-
 	
 private:
 
 	FString BaseURL;
 	FString ClientId, ClientSecret;
 	FJusticeAccessToken ClientToken;
+	FJusticeAccessToken PlayerToken;
 
 	void ClientCredentialsTokenGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSucceeded);
  

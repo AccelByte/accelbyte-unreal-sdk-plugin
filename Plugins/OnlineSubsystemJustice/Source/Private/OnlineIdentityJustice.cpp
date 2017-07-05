@@ -67,9 +67,21 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials)
 {
+
+	if (!JusticeIamClient->PasswordTokenGrant(AccountCredentials.Id, AccountCredentials.Token))
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
+		return false;
+	}
+
+	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
+	return true;
+
+	
 //	FString ErrorStr;
 //	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
-//	
+//
 //	// valid local player index
 //	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 //	{
@@ -113,7 +125,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 //	}
 //
 //	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
-	return true;
+//	return true;
 }
 
 bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
@@ -132,6 +144,7 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 	}
 	else
 	{
+		
 		UE_LOG_ONLINE(Warning, TEXT("No logged in user found for LocalUserNum=%d."),
 			LocalUserNum);
 		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
@@ -141,7 +154,6 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::AutoLogin(int32 LocalUserNum)
 {
-	JusticeIamClient->ClientCredentialsTokenGrant();
 	
 	return true;
 //
