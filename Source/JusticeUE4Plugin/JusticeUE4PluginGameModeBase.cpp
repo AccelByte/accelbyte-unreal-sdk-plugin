@@ -15,12 +15,15 @@ AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
 void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
-
-	IOnlineSubsystem* const justice = IOnlineSubsystem::Get();
-	check(justice);
-	justice->Init();
-
-	IOnlineIdentityPtr ident = justice->GetIdentityInterface();    
-	ident->AutoLogin(0);
 }
 
+void AJusticeUE4PluginGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	IOnlineSubsystem* const justice = IOnlineSubsystem::Get();
+	justice->Init();
+	
+	IOnlineIdentityPtr ident = justice->GetIdentityInterface();
+	ident->Login(0, FOnlineAccountCredentials(TEXT("foo"),TEXT("bar"),TEXT("foobar")));
+}

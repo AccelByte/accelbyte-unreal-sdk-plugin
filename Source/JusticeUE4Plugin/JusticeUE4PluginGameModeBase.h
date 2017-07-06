@@ -18,5 +18,6 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 	AJusticeUE4PluginGameModeBase();
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
+	void BeginPlay();
 
 };

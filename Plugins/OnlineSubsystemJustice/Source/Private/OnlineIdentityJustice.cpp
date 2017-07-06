@@ -1,4 +1,5 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+#pragma clang optimize off
 
 #include "OnlineIdentityJustice.h"
 #include "Misc/CommandLine.h"
@@ -67,8 +68,45 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials)
 {
+	FString ErrorStr;
+	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
+	
+	// valid local player index
+	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
+	{
+		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
+	}
+	else if (AccountCredentials.Id.IsEmpty())
+	{
+		ErrorStr = TEXT("Invalid account id, string empty");
+	}
+	else
+	{
+		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
+		if (UserId == NULL)
+		{
+//			FString RandomUserId = GenerateRandomUserId(LocalUserNum);
+			FString RandomUserId = AccountCredentials.Id;
+			FUniqueNetIdString NewUserId(RandomUserId);
+			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(RandomUserId));
+			UserAccountPtr->UserAttributes.Add(TEXT("id"), RandomUserId);
 
-	if (!JusticeIamClient->PasswordTokenGrant(AccountCredentials.Id, AccountCredentials.Token))
+			// update/add cached entry for user
+			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
+
+			// keep track of user ids for local users
+			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
+		}
+		else
+		{
+			const FUniqueNetIdString* UniqueIdStr = (FUniqueNetIdString*)(UserId->Get());
+			TSharedRef<FUserOnlineAccountJustice>* TempPtr = UserAccounts.Find(*UniqueIdStr);
+			check(TempPtr);
+			UserAccountPtr = *TempPtr;
+		}
+	}
+
+	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
@@ -77,55 +115,6 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
 	return true;
-
-	
-//	FString ErrorStr;
-//	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
-//
-//	// valid local player index
-//	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
-//	{
-//		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
-//	}
-//	else if (AccountCredentials.Id.IsEmpty())
-//	{
-//		ErrorStr = TEXT("Invalid account id, string empty");
-//	}
-//	else
-//	{
-//		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
-//		if (UserId == NULL)
-//		{
-//			FString RandomUserId = GenerateRandomUserId(LocalUserNum);
-//
-//			FUniqueNetIdString NewUserId(RandomUserId);
-//			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(RandomUserId));
-//			UserAccountPtr->UserAttributes.Add(TEXT("id"), RandomUserId);
-//
-//			// update/add cached entry for user
-//			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
-//
-//			// keep track of user ids for local users
-//			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
-//		}
-//		else
-//		{
-//			const FUniqueNetIdString* UniqueIdStr = (FUniqueNetIdString*)(UserId->Get());
-//			TSharedRef<FUserOnlineAccountJustice>* TempPtr = UserAccounts.Find(*UniqueIdStr);
-//			check(TempPtr);
-//			UserAccountPtr = *TempPtr;
-//		}
-//	}
-//
-//	if (!ErrorStr.IsEmpty())
-//	{
-//		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
-//		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
-//		return false;
-//	}
-//
-//	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
-//	return true;
 }
 
 bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
@@ -144,7 +133,6 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 	}
 	else
 	{
-		
 		UE_LOG_ONLINE(Warning, TEXT("No logged in user found for LocalUserNum=%d."),
 			LocalUserNum);
 		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
@@ -154,6 +142,7 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::AutoLogin(int32 LocalUserNum)
 {
+	JusticeIamClient->ClientCredentialsTokenGrant();
 	
 	return true;
 //

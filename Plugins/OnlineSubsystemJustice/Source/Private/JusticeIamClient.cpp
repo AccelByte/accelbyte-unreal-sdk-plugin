@@ -38,7 +38,7 @@ void FJusticeIamClient::ClientCredentialsTokenGrant()
 void FJusticeIamClient::ClientCredentialsTokenGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSucceeded)
 {
 	FString ResponseStr = Response->GetContentAsString();
-	UE_LOG_ONLINE(Verbose, TEXT("Client token grant response. url=%s code=%d response=%s"),
+	UE_LOG_ONLINE(Error, TEXT("Client token grant response. url=%s code=%d response=%s"),
 				  *Request->GetURL(), Response->GetResponseCode(), *ResponseStr);
 
 	if (!bSucceeded || !Response.IsValid() || !EHttpResponseCodes::IsOk(Response->GetResponseCode()))
