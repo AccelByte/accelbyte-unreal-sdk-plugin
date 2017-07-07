@@ -26,4 +26,5 @@ void AJusticeUE4PluginGameModeBase::BeginPlay()
 	
 	IOnlineIdentityPtr ident = justice->GetIdentityInterface();
 	ident->Login(0, FOnlineAccountCredentials(TEXT("foo"),TEXT("bar"),TEXT("foobar")));
+	//ident->AutoLogin(0);
 }

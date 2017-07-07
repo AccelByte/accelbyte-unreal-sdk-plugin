@@ -9,7 +9,6 @@
 #include "OnlineIdentityJustice.h"
 #include "VoiceInterfaceImpl.h"
 #include "OnlineAchievementsInterfaceJustice.h"
-#include "JusticeIamClient.h"
 
 FThreadSafeCounter FOnlineSubsystemJustice::TaskCounter;
 

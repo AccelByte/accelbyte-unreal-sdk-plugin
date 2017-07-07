@@ -8,7 +8,35 @@
 #include "OnlineSubsystem.h"
 #include "IPAddress.h"
 #include "SocketSubsystem.h"
-#include "JusticeIamClient.h"
+
+
+FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* InSubsystem)
+{
+	FString BaseURL;
+	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
+	{
+		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+	}
+	IamBaseURL += TEXT("/iam");
+	
+//	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), OAuthClient.Id, GEngineIni))
+//	{
+//		UE_LOG_ONLINE(Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+//	}
+//	
+//	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), OAuthClient.Token, GEngineIni))
+//	{
+//		UE_LOG_ONLINE(Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+//	}
+}
+
+FOnlineIdentityJustice::FOnlineIdentityJustice()
+{
+}
+
+FOnlineIdentityJustice::~FOnlineIdentityJustice()
+{
+}
 
 bool FUserOnlineAccountJustice::GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const
 {
@@ -66,12 +94,57 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
 	return FString::Printf( TEXT( "%s-%s" ), *HostName, *FGuid::NewGuid().ToString() );
 }
 
+/*
+ * Process the response to an OAuth password token grant
+ */
+void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	FString ErrorStr;
+	FString ResponseStr = Response->GetContentAsString();
+	
+	if (!bWasSuccessful || !Response.IsValid())
+	{
+		ErrorStr = FString::Printf(TEXT("Bad response. url=%s code=%d response=%s"),
+								   *Request->GetURL(), Response->GetResponseCode(), *ResponseStr);
+	}
+	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	{
+		ErrorStr = FString::Printf(TEXT("Server response: code=%d, response=%s"),
+								   Response->GetResponseCode(), *ResponseStr);
+	}
+	else
+	{
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
+		{
+			ErrorStr = FString::Printf(TEXT("Bad json response. url=%s code=%d response=%s"),
+									   *Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
+		}
+//		else if (!UserAccountPtr->OAuthToken->Set(JsonObject))
+//		{
+//			ErrorStr = FString::Printf(TEXT("Missing fields in response. url=%s code=%d response=%s"),
+//									   *Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
+//		}
+	}
+
+	ErrorStr = FString::Printf(TEXT("Got: url=%s code=%d response=%s"),
+							*Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
+	
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG_ONLINE(Error, TEXT("Login request failed. %s"), *ErrorStr);
+//		TriggerOnLoginCompleteDelegates(-1, false, *UserAccountPtr->GetUserId(), ErrorStr);
+		return;
+	}
+}
+
+
 bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials)
 {
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 	
-	// valid local player index
 	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 	{
 		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
@@ -83,39 +156,63 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	else
 	{
 		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
-		if (UserId == NULL)
+		if (UserId == nullptr)
 		{
-//			FString RandomUserId = GenerateRandomUserId(LocalUserNum);
-			FString RandomUserId = AccountCredentials.Id;
-			FUniqueNetIdString NewUserId(RandomUserId);
-			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(RandomUserId));
-			UserAccountPtr->UserAttributes.Add(TEXT("id"), RandomUserId);
-
+			FUniqueNetIdString NewUserId(AccountCredentials.Id);
+			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id));
+			UserAccountPtr->UserAttributes.Add(TEXT("id"), AccountCredentials.Id);
+			
 			// update/add cached entry for user
 			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
-
+			
 			// keep track of user ids for local users
 			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
 		}
 		else
 		{
-			const FUniqueNetIdString* UniqueIdStr = (FUniqueNetIdString*)(UserId->Get());
-			TSharedRef<FUserOnlineAccountJustice>* TempPtr = UserAccounts.Find(*UniqueIdStr);
-			check(TempPtr);
-			UserAccountPtr = *TempPtr;
+			UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(AccountCredentials.Id));
 		}
+		
+		// Do online auth
+		TSharedRef<IHttpRequest> Request = FJusticeHTTP::Get().CreateRequest();
+		Request->SetURL(IamBaseURL + TEXT("/oauth/token"));
+		Request->SetVerb(TEXT("POST"));
+		Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BasicAuth(AccountCredentials.Id, AccountCredentials.Token));
+		Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded"));
+		Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
+		
+		auto PasswordGrant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
+											 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
+											 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+		
+		Request->SetContentAsString(PasswordGrant);
+		Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::LoginComplete);
+		Request->ProcessRequest();
+	
+		return true;
 	}
-
+	
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
 		return false;
 	}
-
+	
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 {
@@ -142,40 +239,36 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 
 bool FOnlineIdentityJustice::AutoLogin(int32 LocalUserNum)
 {
-	JusticeIamClient->ClientCredentialsTokenGrant();
+	FString LoginStr;
+	FString PasswordStr;
+	FString TypeStr;
+
+	FParse::Value(FCommandLine::Get(), TEXT("AUTH_LOGIN="), LoginStr);
+	FParse::Value(FCommandLine::Get(), TEXT("AUTH_PASSWORD="), PasswordStr);
+	FParse::Value(FCommandLine::Get(), TEXT("AUTH_TYPE="), TypeStr);
 	
-	return true;
-//
-//	FString LoginStr;
-//	FString PasswordStr;
-//	FString TypeStr;
-//
-//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_LOGIN="), LoginStr);
-//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_PASSWORD="), PasswordStr);
-//	FParse::Value(FCommandLine::Get(), TEXT("AUTH_TYPE="), TypeStr);
-//	
-//	if (!LoginStr.IsEmpty())
-//	{
-//		if (!PasswordStr.IsEmpty())
-//		{
-//			if (!TypeStr.IsEmpty())
-//			{
-//				return Login(0, FOnlineAccountCredentials(TypeStr, LoginStr, PasswordStr));
-//			}
-//			else
-//			{
-//				UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_TYPE=<type>."));
-//			}
-//		}
-//		else
-//		{
-//			UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_PASSWORD=<password>."));
-//		}
-//	}
-//	else
-//	{
-//		UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_LOGIN=<login id>."));
-//	}
+	if (!LoginStr.IsEmpty())
+	{
+		if (!PasswordStr.IsEmpty())
+		{
+			if (!TypeStr.IsEmpty())
+			{
+				return Login(0, FOnlineAccountCredentials(TypeStr, LoginStr, PasswordStr));
+			}
+			else
+			{
+				UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_TYPE=<type>."));
+			}
+		}
+		else
+		{
+			UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_PASSWORD=<password>."));
+		}
+	}
+	else
+	{
+		UE_LOG_ONLINE(Warning, TEXT("AutoLogin missing AUTH_LOGIN=<login id>."));
+	}
 	return false;
 }
 
@@ -279,19 +372,6 @@ FString FOnlineIdentityJustice::GetAuthToken(int32 LocalUserNum) const
 		}
 	}
 	return FString();
-}
-
-FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* InSubsystem)
-{
-	JusticeIamClient = MakeShareable(new FJusticeIamClient());
-}
-
-FOnlineIdentityJustice::FOnlineIdentityJustice()
-{
-}
-
-FOnlineIdentityJustice::~FOnlineIdentityJustice()
-{
 }
 
 void FOnlineIdentityJustice::GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate)
