@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/CoreOnline.h"
 #include "OnlineSubsystemTypes.h"
+#include "Online.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 
 class FJusticeOAuthToken
@@ -30,6 +31,7 @@ public:
 	// FOnlineUser
 	
 	virtual TSharedRef<const FUniqueNetId> GetUserId() const override { return UserIdPtr; }
+	virtual FString GetUserIdStr() const { return UserIdPtr->ToString(); }
 	virtual FString GetRealName() const override { return TEXT("DummyRealName"); }
 	virtual FString GetDisplayName(const FString& Platform = FString()) const override  { return TEXT("DummyDisplayName"); }
 	virtual bool GetUserAttribute(const FString& AttrName, FString& OutAttrValue) const override;
@@ -106,7 +108,8 @@ public:
 
 private:
 
-	 void LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr);
+	 void LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
+						TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
 
 	/**
 	 * Should use the initialization constructor instead

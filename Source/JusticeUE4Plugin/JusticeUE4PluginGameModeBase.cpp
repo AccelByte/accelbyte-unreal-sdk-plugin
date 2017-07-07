@@ -2,30 +2,46 @@
 
 #include "JusticeUE4PluginGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
-#include "Online.h"
 
 #define DO_CHECK 1
 
 AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
 {
-
 }
-
 
 void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
+
+	// Load Identity Interface
+	OnlineSub = IOnlineSubsystem::Get();
+	check(OnlineSub);
+
+	Identity = OnlineSub->GetIdentityInterface();
+	check(Identity.IsValid());
+
+	// Setup Login delegates
+	LoginCompleteHandle = Identity->AddOnLoginCompleteDelegate_Handle(
+			DefaultLocalUserNum,
+			FOnLoginCompleteDelegate::CreateUObject(this, &AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate));
 }
 
 void AJusticeUE4PluginGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	IOnlineSubsystem* const justice = IOnlineSubsystem::Get();
-	justice->Init();
+	// User login credentials
+	FOnlineAccountCredentials user;
+	user.Id    = TEXT("test@example.com");
+	user.Token = TEXT("123456");
+	user.Type  = TEXT("PasswordGrant");
 	
-	IOnlineIdentityPtr ident = justice->GetIdentityInterface();
-	ident->Login(0, FOnlineAccountCredentials(TEXT("c60af7f2ce0f40b59ff32c737253c695"),TEXT("testtest"),TEXT("Justice")));
-	//ident->AutoLogin(0);
+	Identity->Login(DefaultLocalUserNum, user);
+}
+
+void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr)
+{
+	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginCompleteHandle);
+	UE_LOG(LogOnline, Warning, TEXT("Login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
 }
 

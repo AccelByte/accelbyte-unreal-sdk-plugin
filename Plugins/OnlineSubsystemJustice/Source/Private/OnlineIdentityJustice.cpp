@@ -96,7 +96,7 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
  * Process the response to an OAuth password token grant
  */
 void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-										   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr)
+										   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
 {
 	FString ErrorStr;
 	
@@ -106,7 +106,7 @@ void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpRespons
 	}
 	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		ErrorStr = FString::Printf(TEXT("Server response: url=%s code=%d response=%s"),
+		ErrorStr = FString::Printf(TEXT("Server declined request. url=%s code=%d response=%s"),
 					*Request->GetURL(), Response->GetResponseCode(), *Response->GetContentAsString());
 	}
 	else
@@ -128,12 +128,13 @@ void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpRespons
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Error, TEXT("Login request failed. %s"), *ErrorStr);
-		TriggerOnLoginCompleteDelegates(-1, false, *UserAccountPtr->GetUserId(), ErrorStr);
+		UE_LOG_ONLINE(Warning, TEXT("Login request failed. %s"), *ErrorStr);
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
 		return;
 	}
 
-	TriggerOnLoginCompleteDelegates(-1, true, *UserAccountPtr->GetUserId(), ErrorStr);
+	UE_LOG_ONLINE(Verbose, TEXT("Login succeeded. %s"), *UserAccountPtr->GetUserIdStr());
+	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
 }
 
 bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCredentials& AccountCredentials)
@@ -168,23 +169,6 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		{
 			UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(AccountCredentials.Id));
 		}
-		
-		// Do online auth
-		TSharedRef<IHttpRequest> Request = FJusticeHTTP::Get().CreateRequest();
-		Request->SetURL(BaseURL + TEXT("/oauth/token"));
-		Request->SetVerb(TEXT("POST"));
-		Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BasicAuth(Client.Id, Client.Token));
-		Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded"));
-		Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
-		
-		auto PasswordGrant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
-											 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
-											 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
-		
-		Request->SetContentAsString(PasswordGrant);
-		Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::LoginComplete, UserAccountPtr);
-		Request->ProcessRequest();
-		return true;
 	}
 	
 	if (!ErrorStr.IsEmpty())
@@ -194,7 +178,27 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		return false;
 	}
 
-	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
+	// Do online auth
+	TSharedRef<IHttpRequest> Request = FJusticeHTTP::Get().CreateRequest();
+	Request->SetURL(BaseURL + TEXT("/oauth/token"));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BasicAuth(Client.Id, Client.Token));
+	Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded"));
+	Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
+	
+	FString PasswordGrant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
+										 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
+										 *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+
+	Request->SetContentAsString(PasswordGrant);
+	Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::LoginComplete, UserAccountPtr, LocalUserNum);
+	
+	if (!Request->ProcessRequest())
+	{
+		UE_LOG_ONLINE(Error, TEXT("HTTP request failed for user password grant. %s"), *AccountCredentials.Id);
+		return false;
+	}
+
 	return true;
 }
 
