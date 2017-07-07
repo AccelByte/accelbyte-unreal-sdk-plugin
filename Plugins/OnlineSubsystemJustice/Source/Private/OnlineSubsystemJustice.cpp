@@ -174,6 +174,7 @@ bool FOnlineSubsystemJustice::Init()
  		SessionInterface = MakeShareable(new FOnlineSessionJustice(this));
 		LeaderboardsInterface = MakeShareable(new FOnlineLeaderboardsJustice(this));
 		IdentityInterface = MakeShareable(new FOnlineIdentityJustice(this));
+
 		AchievementsInterface = MakeShareable(new FOnlineAchievementsJustice(this));
 		VoiceInterface = MakeShareable(new FOnlineVoiceImpl(this));
 
