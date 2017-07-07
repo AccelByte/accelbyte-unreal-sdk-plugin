@@ -193,7 +193,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, FUniqueNetIdString(), ErrorStr);
 		return false;
 	}
-	
+
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
 	return true;
 }
@@ -214,6 +214,7 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 	}
 	else
 	{
+		
 		UE_LOG_ONLINE(Warning, TEXT("No logged in user found for LocalUserNum=%d."),
 			LocalUserNum);
 		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
