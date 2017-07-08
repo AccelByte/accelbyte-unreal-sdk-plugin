@@ -95,8 +95,7 @@ inline FString GenerateRandomUserId(int32 LocalUserNum)
 /*
  * Process the response to an OAuth password token grant
  */
-void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-										   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
+void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
 {
 	FString ErrorStr;
 	
@@ -121,7 +120,7 @@ void FOnlineIdentityJustice::LoginComplete(FHttpRequestPtr Request, FHttpRespons
 		}
 		else if (!UserAccountPtr->Token.SetFromJsonObject(JsonObject))
 		{
-			ErrorStr = FString::Printf(TEXT("Missing fields in response. url=%s code=%d response=%s"),
+			ErrorStr = FString::Printf(TEXT("Bad token in response. url=%s code=%d response=%s"),
 						*Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
 		}
 	}
@@ -178,6 +177,9 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		return false;
 	}
 
+	
+	
+	
 	// Do online auth
 	TSharedRef<IHttpRequest> Request = FJusticeHTTP::Get().CreateRequest();
 	Request->SetURL(BaseURL + TEXT("/oauth/token"));
@@ -387,29 +389,98 @@ FString FOnlineIdentityJustice::GetAuthType() const
 	return TEXT("Justice OAuth");
 }
 
+FJusticeOAuthToken::FJusticeOAuthToken()
+{
+	NextTokenRefreshUtc = FDateTime::MinValue();
+	
+	TokenRefreshSplay = 300;
+	if (GConfig->GetInt(TEXT("OnlineSubsystemJustice"), TEXT("TokenRefreshSplay"), TokenRefreshSplay, GEngineIni))
+	{
+		if (TokenRefreshSplay < MinTokenRefreshSplay)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("Token refresh splay is too low, resetting to %d. %d"), TokenRefreshSplay, MinTokenRefreshSplay);
+			TokenRefreshSplay = MinTokenRefreshSplay;
+		}
+		UE_LOG_ONLINE(Verbose, TEXT("TokenRefreshSplay set to %d"), TokenRefreshSplay);
+	}
+
+	TokenRefreshRate = 2;
+	if (GConfig->GetInt(TEXT("OnlineSubsystemJustice"), TEXT("TokenRefreshRate"), TokenRefreshRate, GEngineIni))
+	{
+		if (TokenRefreshRate < MinTokenRefreshRate)
+		{
+			UE_LOG_ONLINE(Warning, TEXT("Token refresh rate is too low, reseting to %d times per period. %d"), MinTokenRefreshRate, TokenRefreshRate);
+			TokenRefreshRate = MinTokenRefreshRate;
+		}
+		UE_LOG_ONLINE(Verbose, TEXT("TokenRefreshRate set to %d"), TokenRefreshRate);
+	}
+}
+
 bool FJusticeOAuthToken::SetFromJsonObject(const TSharedPtr<FJsonObject> GrantResponse)
 {
+	FString ErrorStr;
+
 	// User token (only user tokens have refresh tokens)
 	if (GrantResponse->HasField(TEXT("refresh_token")))
 	{
-		if (GrantResponse->TryGetStringField(TEXT("access_token"),  AccessToken)  &&
-			GrantResponse->TryGetStringField(TEXT("refresh_token"), RefreshToken) &&
-			GrantResponse->TryGetStringField(TEXT("token_type"),    TokenType)    &&
-			GrantResponse->TryGetNumberField(TEXT("expires_in"),    ExpiresIn))
+		// todo: deserlize into a ustruct since we need the roles for servers.
+		if (!(GrantResponse->TryGetStringField(TEXT("access_token"), AccessToken)  &&
+			GrantResponse->TryGetStringField(TEXT("refresh_token"),  RefreshToken) &&
+			GrantResponse->TryGetStringField(TEXT("token_type"),     TokenType)    &&
+			GrantResponse->TryGetNumberField(TEXT("expires_in"),     ExpiresIn)))
 		{
-			return true;
+			ErrorStr = FString::Printf(TEXT("Bad json user token."));
 		}
 	}
-	else
+	else if (!(GrantResponse->TryGetStringField(TEXT("access_token"), AccessToken) &&
+			 GrantResponse->TryGetStringField(TEXT("token_type"),     TokenType)   &&
+			 GrantResponse->TryGetNumberField(TEXT("expires_in"),     ExpiresIn)))
 	{
-		// Client token (no refresh token)
-		if (GrantResponse->TryGetStringField(TEXT("access_token"), AccessToken) &&
-			GrantResponse->TryGetStringField(TEXT("token_type"),   TokenType)   &&
-			GrantResponse->TryGetNumberField(TEXT("expires_in"),   ExpiresIn))
-		{
-			return true;
-		}
+		ErrorStr = FString::Printf(TEXT("Bad json client token."));
 	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG_ONLINE(Verbose, *ErrorStr);
+		return false;
+	}
+
+	if (ExpiresIn < 1)
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Token expire time is too low. %d"), ExpiresIn);
+		return false;
+	}
+
+	// Pre-compute when the token should be refreshed
+	//
+	// The goal here is to refresh at sampling rate within the expire period
+	// so that we maintain a regular request rate and temporary request failures
+	// will be retried in the next refresh period.
+	//
+	FDateTime UtcNow    = FDateTime::UtcNow();
+	FTimespan Splay     = FTimespan::FromSeconds(FMath::FRandRange(MinTokenRefreshSplay, TokenRefreshSplay));
+	FTimespan Quotient  = FTimespan::FromSeconds(ExpiresIn / TokenRefreshRate);
+	NextTokenRefreshUtc = UtcNow + Quotient - Splay;
+	
+	if (NextTokenRefreshUtc < (UtcNow + MinNextTokenRefreshTime))
+	{
+		UE_LOG_ONLINE(Verbose, TEXT("Next token refresh too quick, setting to minium %s. %s"), *MinNextTokenRefreshTime.ToString(), *NextTokenRefreshUtc.ToString());
+		NextTokenRefreshUtc = UtcNow + MinNextTokenRefreshTime;
+	}
+
+	UE_LOG_ONLINE(Warning, TEXT("Next token refresh at %s UTC."), *NextTokenRefreshUtc.ToString());
+	return true;
+}
+
+
+bool FJusticeOAuthToken::ShouldRefresh()
+{
+	check(ExpiresIn > 0);
+	if (NextTokenRefreshUtc >= FDateTime::UtcNow())
+	{
+		return true;
+	}
+
 	return false;
 }
 
