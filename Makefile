@@ -1,29 +1,37 @@
 # Copyright (c) 2017 AccelByte Inc. All Rights Reserved.
 
 NAME=JusticeUE4Plugin
-
 UE_VER=UE_4.16
-BATCH=$(UE_ROOT)/$(UE_VER)/Engine/Build/BatchFiles/Mac
 
-UBT=/bin/sh $(BATCH)/RunMono.sh $(UE_ROOT)/$(UE_VER)/Engine/Binaries/DotNET/UnrealBuildTool.exe
-GENERATE=/bin/sh $(BATCH)/GenerateProjectFiles.sh
-EDITOR=$(UE_ROOT)/$(UE_VER)/Engine/Binaries/Mac/UE4Editor.app/Contents/MacOS/UE4Editor
+ifndef UE_ROOT
+$(error UE_ROOT is not set)
+endif
 
-build:
-	cd $(BATCH) && $(GENERATE) -project=$(PWD)/$(NAME).uproject -game
+BATCH_DIR=$(UE_ROOT)/$(UE_VER)/Engine/Build/BatchFiles/Mac
+BIN_DIR=$(UE_ROOT)/$(UE_VER)/Engine/Binaries
+
+UBT=/bin/sh $(BATCH_DIR)/RunMono.sh $(BIN_DIR)/DotNET/UnrealBuildTool.exe
+GENERATE=/bin/sh $(BATCH_DIR)/GenerateProjectFiles.sh
+PIE=$(BIN_DIR)/Mac/UE4Editor.app/Contents/MacOS/UE4Editor
+
+build: generate
 	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeUE4Plugin.uproject -editorrecompile -progress -NoHotReloadFromIDE
 
+generate:
+	cd $(BATCH_DIR) && $(GENERATE) -project=$(PWD)/$(NAME).uproject -game
+
 run:
-	$(EDITOR) $(PWD)/$(NAME).uproject
+	$(PIE) $(PWD)/$(NAME).uproject
 
 _rebuild:
 	$(MAKE) clean 
-	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeUE4Plugin.uproject -editorrecompile -progress -NoHotReloadFromIDE
-	$(MAKE) run
+	$(NAME) build
+#	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeUE4Plugin.uproject -editorrecompile -progress -NoHotReloadFromIDE
+#	$(MAKE) run
 
 autorebuild:
-	@watchman-make -p 'Plugins/OnlineSubsystemJustice/Source/**/*.cpp' 'Source/JusticeUE4Plugin/**/*.cpp' -t _rebuild --root $(PWD) --settle 50000
+	@watchman-make -p 'Plugins/OnlineSubsystemJustice/Source/**/*.cpp' 'Source/JusticeUE4Plugin/**/*.cpp' -t _rebuild --root . --settle 5
 
 clean:
-	rm -r Intermediate/ Binaries/
+	rm -fr Intermediate/ Binaries/
 

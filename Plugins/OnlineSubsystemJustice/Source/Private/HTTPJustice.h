@@ -14,16 +14,16 @@
  * Justice HTTP
  * We create our own transport class so that we can extend it to add tracing and metrics.
  */
-class FJusticeHTTP : public FHttpModule
+class FHTTPJustice : public FHttpModule
 {
 	
 public:
 	
-	FJusticeHTTP()
+	FHTTPJustice()
 	{
 	}
 	
-	~FJusticeHTTP()
+	~FHTTPJustice()
 	{
 	}
 

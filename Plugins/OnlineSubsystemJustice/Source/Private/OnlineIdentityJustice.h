@@ -8,30 +8,7 @@
 #include "Online.h"
 #include "Runtime/Core/Public/Misc/DateTime.h"
 #include "Interfaces/OnlineIdentityInterface.h"
-
-class FJusticeOAuthToken
-{
-
-public:
-	bool SetFromJsonObject(const TSharedPtr<FJsonObject> GrantResponse);
-	bool ShouldRefresh();
-	FJusticeOAuthToken();
-
-private:
-	FString AccessToken;
-	FString RefreshToken;
-	FString TokenType;
-	int32  ExpiresIn;
-	
-	int32 TokenRefreshSplay;
-	int32 TokenRefreshRate;
-	FDateTime NextTokenRefreshUtc;
-	
-	const int32 MinTokenRefresh      = 60;
-	const int32 MinTokenRefreshRate  = 1;
-	const int32 MinTokenRefreshSplay = 60;
-	const FTimespan MinNextTokenRefreshTime = FTimespan::FromSeconds(300);
-};
+#include "OnlineSubsystemJusticeTypes.h"
 
 
 /**
@@ -76,8 +53,7 @@ public:
 	TMap<FString, FString> UserAttributes;
 
 	/** Credentials */
-	FJusticeOAuthToken Token;
-
+	FOAuthTokenJustice Token;
 };
 
 /**
@@ -120,11 +96,12 @@ public:
 	 */
 	virtual ~FOnlineIdentityJustice();
 
-
 private:
 
-	 void LoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-						TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
+	void TokenGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
+						TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, bool bIsTokenRefresh);
+
+	void UpdateNextRefreshTime(FOAuthTokenJustice& OutToken);
 
 	/**
 	 * Should use the initialization constructor instead
@@ -140,9 +117,11 @@ private:
 	/** IAM Base URL Route */
 	FString BaseURL;
 	
-	/** OAuth Client Credentials */
+	/** Client OAuth Client Credentials */
 	FOnlineAccountCredentials Client;
-	FJusticeOAuthToken Token;
+	
+	/** Client OAuth Token */
+	FOAuthTokenJustice Token;
 
 };
 
