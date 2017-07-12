@@ -189,7 +189,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 
 	if (!bSuccessful || !Response.IsValid())
 	{
-		ErrorStr = FString::Printf(TEXT("unsuccessful or invalid response"));
+		ErrorStr = FString::Printf(TEXT("generic failure"));
 		UserAccountPtr->Token.ScheduelBackoffRefresh();
 	}
 	else if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
@@ -242,7 +242,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	}
 	else
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
+		UE_LOG_ONLINE(Log, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 	}
 }
@@ -293,7 +293,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	}
 	else
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token grant successful. user=%s %s elap_time=%fs"),
+		UE_LOG_ONLINE(Log, TEXT("Token grant successful. user=%s %s elap_time=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 
 		TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);

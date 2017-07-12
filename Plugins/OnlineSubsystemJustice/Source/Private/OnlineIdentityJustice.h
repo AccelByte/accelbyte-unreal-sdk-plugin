@@ -29,7 +29,7 @@ public:
 	};
 	void ScheduleNormalRefresh()
 	{
-		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 11);
+		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 2);
 		TokenRefreshBackoff = 0;
 	};
 	void ScheduelBackoffRefresh()

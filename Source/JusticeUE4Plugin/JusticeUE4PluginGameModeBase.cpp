@@ -42,6 +42,6 @@ void AJusticeUE4PluginGameModeBase::BeginPlay()
 void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr)
 {
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginCompleteHandle);
-	UE_LOG(LogOnline, Warning, TEXT("Login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
+	UE_LOG(LogOnline, Log, TEXT("Game received login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
 }
 
