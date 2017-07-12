@@ -8,4 +8,3 @@ FString FHTTPJustice::BasicAuth(const FString& Username, const FString& Password
 {
 	return TEXT("Basic " + FBase64::Encode(Username + ":" + Password));
 }
-

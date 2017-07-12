@@ -96,7 +96,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 {
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
-	
+
 	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 	{
 		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
@@ -114,7 +114,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id));
 			UserAccountPtr->UserAttributes.Add(TEXT("id"), AccountCredentials.Id);
 			
-			// fixme: need the LocalUserNum to call Login() on refresh, this a little annoying to convert to str and back to int
+			// FIXME: need the LocalUserNum to call Login() on refresh, this a little annoying to convert to str and back to int
 			UserAccountPtr->AdditionalAuthData.Add(TEXT("LocalUserNum"), FString::Printf(TEXT("%d"), LocalUserNum));
 
 			// update/add cached entry for user
@@ -127,113 +127,178 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		{
 			UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(AccountCredentials.Id));
 		}
-		
-		TSharedRef<IHttpRequest> Request = FHTTPJustice::Get().CreateRequest();
-		Request->SetURL(BaseURL + TEXT("/oauth/token"));
-		Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
-		Request->SetVerb(TEXT("POST"));
-		// We don't know what proxy/LB could be between us and the service that's validating
-		// each request, so we're explicit with our headers and encoding to avoid any interference.
-		Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
-		Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
-		Request->SetHeader(TEXT("Accept-Char"),   TEXT("utf-8"));
 
 		// Refresh grant
-		if (AccountCredentials.Token.IsEmpty() && !UserAccountPtr->Token.RefreshToken.IsEmpty())
+		if (UserAccountPtr->Token.ShouldRefresh())
 		{
+			TSharedRef<IHttpRequest> Request = FHTTPJustice::Get().CreateRequest();
+			Request->SetURL(BaseURL + TEXT("/oauth/token"));
+			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
+			Request->SetVerb(TEXT("POST"));
+			Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+			Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
+			Request->SetHeader(TEXT("Accept-Char"),   TEXT("utf-8"));
+
 			FString Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),
-									*FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.RefreshToken));
+											*FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.RefreshToken));
 			Request->SetContentAsString(Grant);
-			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenGrantComplete,
-														UserAccountPtr, LocalUserNum, true);
+			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenRefreshGrantComplete,
+														UserAccountPtr, LocalUserNum);
 			if (!Request->ProcessRequest())
 			{
-				ErrorStr = FString::Printf(TEXT("Refresh token grant for user %s failed. url=%s"),
-										   *AccountCredentials.Id, *Request->GetURL());
+				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
 			}
 		}
 		// Password grant
-		else
+		else if (!AccountCredentials.Token.IsEmpty())
 		{
+			TSharedRef<IHttpRequest> Request = FHTTPJustice::Get().CreateRequest();
+			Request->SetURL(BaseURL + TEXT("/oauth/token"));
+			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
+			Request->SetVerb(TEXT("POST"));
+			Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+			Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
+			Request->SetHeader(TEXT("Accept-Char"),   TEXT("utf-8"));
+
 			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
-										*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
-										*FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
-			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenGrantComplete,
-														UserAccountPtr, LocalUserNum, false);
+									*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
+									*FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
 			Request->SetContentAsString(Grant);
+			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete,
+														UserAccountPtr, LocalUserNum);
 			if (!Request->ProcessRequest())
 			{
-				ErrorStr = FString::Printf(TEXT("Password token grant for user %s failed. url=%s"),
-										   *AccountCredentials.Id, *Request->GetURL());
-				// May be a temporary error, since this is a refresh we don't trigger a login change delegate and can wait
-				// for the next refresh.
-				
+				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
 			}
 		}
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Login failed. %s"), *ErrorStr);
+		UE_LOG_ONLINE(Warning, TEXT("Login failed. user=%s error=%s"), *AccountCredentials.Id, *ErrorStr);
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
 		return false;
 	}
-
+	
 	return true;
 }
 
-void FOnlineIdentityJustice::TokenGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, bool bIsTokenRefresh)
+void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
 {
 	FString ErrorStr;
-	
+
 	if (!bSuccessful || !Response.IsValid())
 	{
-		ErrorStr = FString::Printf(TEXT("Request failed. url=%s"), *Request->GetURL());
+		ErrorStr = FString::Printf(TEXT("unsuccessful or invalid response"));
+		UserAccountPtr->Token.ScheduelBackoffRefresh();
+	}
+	else if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	{
+		FString ResponseStr = Response->GetContentAsString();
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			if (UserAccountPtr->Token.FromJson(JsonObject))
+			{
+				UserAccountPtr->Token.SetLastRefreshTimeToNow();
+				UserAccountPtr->Token.ScheduleNormalRefresh();
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserlize response from json object");
+			}
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserlize response from server");
+		}
+
+		if (!ErrorStr.IsEmpty())
+		{
+			UserAccountPtr->Token.ScheduelBackoffRefresh();
+		}
+	}
+	else if (EHttpResponseCodes::Denied == Response->GetResponseCode())
+	{
+		ErrorStr = TEXT("request denied, not attempting another token refresh");
+		UserAccountPtr->Token = FOAuthTokenJustice();
+
+		// FIXME: what are the right delegates to call in this case?
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
+		TriggerOnLoginChangedDelegates(LocalUserNum);
 	}
 	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		ErrorStr = FString::Printf(TEXT("Server declined grant request. url=%s code=%d response=%s"),
-								   *Request->GetURL(), Response->GetResponseCode(), *Response->GetContentAsString());
+		UserAccountPtr->Token.ScheduelBackoffRefresh();
+		ErrorStr = FString::Printf(TEXT("invalid reponse code"));
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. user=%s error=%s %s elap_time=%fs"),
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
+					  *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
+	}
+	else
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
+					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
+	}
+}
+
+void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
+{
+	FString ErrorStr;
+
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("unsuccessful or invalid response");
+	}
+	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	{
+		ErrorStr = TEXT("request denied");
 	}
 	else
 	{
 		FString ResponseStr = Response->GetContentAsString();
 		TSharedPtr<FJsonObject> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			ErrorStr = FString::Printf(TEXT("Bad json response. url=%s code=%d response=%s"),
-									   *Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
+			if (UserAccountPtr->Token.FromJson(JsonObject))
+			{
+				UserAccountPtr->Token.SetLastRefreshTimeToNow();
+				UserAccountPtr->Token.ScheduleNormalRefresh();
+			}
+			else
+			{
+				ErrorStr = TEXT("bad token in response");
+			}
 		}
-		else if (!UserAccountPtr->Token.FromJson(JsonObject))
+		else
 		{
-			ErrorStr = FString::Printf(TEXT("Bad token in response. url=%s code=%d response=%s"),
-									   *Request->GetURL(),Response->GetResponseCode(), *ResponseStr);
+			ErrorStr = TEXT("bad json response");
 		}
-	}
-	
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG_ONLINE(Warning, TEXT("Grant request failed. %s"), *ErrorStr);
-		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
-		TriggerOnLoginChangedDelegates(LocalUserNum);
-		return;
 	}
 
-	if (bIsTokenRefresh)
+	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token refresh grant succeeded. %s "), *UserAccountPtr->GetUserIdStr());
+		UserAccountPtr->Token = FOAuthTokenJustice();
+		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. user=%s error=%s elap_time=%fs"),
+					   *UserAccountPtr->GetUserIdStr(), *ErrorStr, Request->GetElapsedTime());
+
+		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
+		TriggerOnLoginChangedDelegates(LocalUserNum);
 	}
 	else
 	{
-		TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), ErrorStr);
-		TriggerOnLoginChangedDelegates(LocalUserNum);
-		UE_LOG_ONLINE(Warning, TEXT("Token password grant succeeded. %s "), *UserAccountPtr->GetUserIdStr());
-	}
-}
+		UE_LOG_ONLINE(Warning, TEXT("Token grant successful. user=%s %s elap_time=%fs"),
+					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 
-void FOnlineIdentityJustice::UpdateNextRefreshTime(FOAuthTokenJustice& OutToken)
-{
-	OutToken.NextTokenRefreshUtc = FDateTime::UtcNow() + FTimespan::FromSeconds(OutToken.ExpiresIn) - FTimespan::FromSeconds(60);
+		TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
+		TriggerOnLoginChangedDelegates(LocalUserNum);
+	}
 }
 
 bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)

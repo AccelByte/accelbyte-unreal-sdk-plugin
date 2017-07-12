@@ -6,7 +6,7 @@
 #include "Runtime/Core/Public/Misc/DateTime.h"
 #include "OnlineAsyncTaskManager.h"
 
-#define DEFAULT_REFRESH_TOKEN_CHECK_INTERVAL_SECONDS 10
+#define DEFAULT_REFRESH_TOKEN_CHECK_INTERVAL_SECONDS 60
 
 /**
  *	Justice version of the async task manager to register the various Justice callbacks with the engine

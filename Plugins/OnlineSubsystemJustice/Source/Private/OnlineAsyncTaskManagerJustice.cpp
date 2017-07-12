@@ -21,12 +21,14 @@ void FOnlineAsyncTaskManagerJustice::OnlineTick()
 		{
 			FString LocalUserNum;
 			UserAccountPtr->GetAuthAttribute(FString("LocalUserNum"), LocalUserNum);
-
+				
 			FOnlineAccountCredentials Credentials;
 			Credentials.Id = UserAccountPtr->GetUserId()->ToString();
 
-			IdentityInterface->Login(FCString::Atoi(*LocalUserNum), Credentials);
-			UE_LOG_ONLINE(Warning, TEXT("Refreshed Token for user %s."), *UserAccountPtr->GetUserId()->ToString());
+			if (!IdentityInterface->Login(FCString::Atoi(*LocalUserNum), Credentials))
+			{
+				UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token for user %s."), *UserAccountPtr->GetUserId()->ToString());
+			}
 		}
 	}
 }

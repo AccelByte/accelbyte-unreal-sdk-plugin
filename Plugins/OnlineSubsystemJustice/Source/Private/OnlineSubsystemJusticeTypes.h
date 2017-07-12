@@ -87,46 +87,4 @@ public:
 };
 
 
-class FOAuthTokenJustice :
-	public FOnlineJsonSerializable
-{
-	
-public:
-	
-	bool ShouldRefresh() { return NextTokenRefreshUtc >= FDateTime::UtcNow(); };
-	
-	FString AccesToken;
-	FString RefreshToken;
-	FString TokenType;
-	int32   ExpiresIn;
-	
-	/* todo: add these
-	 TArray Roles;
-	 TArray Permissions;
-	 */
-	
-	FString UserId;
-	FString DisplayName;
-	FString Namespace;
-	
-	// Tracking when to refresh the token
-	FDateTime LastTokenRefreshUtc;
-	FDateTime NextTokenRefreshUtc;
-	
-	BEGIN_ONLINE_JSON_SERIALIZER
-	ONLINE_JSON_SERIALIZE("access_token", AccesToken);
-	ONLINE_JSON_SERIALIZE("refresh_token", RefreshToken);
-	ONLINE_JSON_SERIALIZE("token_type", TokenType);
-	ONLINE_JSON_SERIALIZE("expires_in", ExpiresIn);
-	ONLINE_JSON_SERIALIZE("user_id", UserId);
-	ONLINE_JSON_SERIALIZE("display_name", DisplayName);
-	ONLINE_JSON_SERIALIZE("namespace", Namespace);
-	END_ONLINE_JSON_SERIALIZER
-};
-
-
-
-
-
-
 
