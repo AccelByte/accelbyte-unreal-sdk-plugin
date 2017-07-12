@@ -97,8 +97,7 @@ PACKAGE_SCOPE:
 		IdentityInterface(nullptr),
 		AchievementsInterface(nullptr),
 		OnlineAsyncTaskThreadRunnable(nullptr),
-		OnlineAsyncTaskThread(nullptr),
-        BaseURL(nullptr)
+		OnlineAsyncTaskThread(nullptr)
 	{}
 
 	FOnlineSubsystemJustice() :
@@ -109,8 +108,7 @@ PACKAGE_SCOPE:
 		IdentityInterface(nullptr),
 		AchievementsInterface(nullptr),
 		OnlineAsyncTaskThreadRunnable(nullptr),
-		OnlineAsyncTaskThread(nullptr),
-        BaseURL(nullptr)
+		OnlineAsyncTaskThread(nullptr)
     {}
 
 private:
