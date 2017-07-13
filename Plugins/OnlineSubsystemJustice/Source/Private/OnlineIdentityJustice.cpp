@@ -96,9 +96,6 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 
-//	UE_LOG_ONLINE(Verbose, TEXT("FOnlineIdentityJustice::Login(): LocalUserNum=%d AccountCredentials.Id=%s ShouldRefresh=%d"),
-//				  LocalUserNum, *AccountCredentials.Id, UserAccountPtr->Token.ShouldRefresh());
-	
 	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 	{
 		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
@@ -133,7 +130,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		// Refresh grant
 		if (UserAccountPtr->Token.ShouldRefresh())
 		{
-			TSharedRef<IHttpRequest> Request = FHTTPJustice::Get().CreateRequest();
+			TSharedRef<IHttpRequest> Request = FHTTPJustice::CreateRequest(UserAccountPtr->Token.Trace);
 			Request->SetURL(BaseURL + TEXT("/oauth/token"));
 			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 			Request->SetVerb(TEXT("POST"));
@@ -150,11 +147,14 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
 			}
+
+			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): refresh grant user=%s %s"),
+						  *AccountCredentials.Id, *UserAccountPtr->Token.Trace.ToString());
 		}
 		// Password grant
 		else if (!AccountCredentials.Token.IsEmpty())
 		{
-			TSharedRef<IHttpRequest> Request = FHTTPJustice::Get().CreateRequest();
+			TSharedRef<IHttpRequest> Request = FHTTPJustice::CreateRequest(UserAccountPtr->Token.Trace);
 			Request->SetURL(BaseURL + TEXT("/oauth/token"));
 			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 			Request->SetVerb(TEXT("POST"));
@@ -172,6 +172,9 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
 			}
+
+			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): password grant user=%s %s"),
+						  *AccountCredentials.Id, *UserAccountPtr->Token.Trace.ToString());
 		}
 	}
 
@@ -181,7 +184,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -248,12 +251,12 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. user=%s error=%s %s elap_time=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
 					  *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
+		return;
 	}
-	else
-	{
-		UE_LOG_ONLINE(Log, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
+
+	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
-	}
+	
 }
 
 void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)

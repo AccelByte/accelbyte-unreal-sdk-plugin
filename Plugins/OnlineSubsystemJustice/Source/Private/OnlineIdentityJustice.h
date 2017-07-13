@@ -9,23 +9,26 @@
 #include "Runtime/Core/Public/Misc/DateTime.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "OnlineSubsystemJusticeTypes.h"
+#include "Runtime/Core/Public/Misc/Guid.h"
+#include "OpenTracingJustice.h"
 
 class FOAuthTokenJustice :
 public FOnlineJsonSerializable
 {
 	
 public:
-	
-	FOAuthTokenJustice() :
+
+	FOAuthTokenJustice(const FOpenTracingJustice& Parent=FOpenTracingJustice()) :
 	ExpiresIn(0),
-	LastTokenRefreshUtc(0),
-	NextTokenRefreshUtc(0),
-	TokenRefreshBackoff(FTimespan::Zero())
+	LastTokenRefreshUtc(FDateTime::MinValue()),
+	NextTokenRefreshUtc(FDateTime::MinValue()),
+	TokenRefreshBackoff(FTimespan::Zero()),
+	Trace(Parent)
 	{ }
 
 	bool ShouldRefresh()
 	{
-		if (NextTokenRefreshUtc > 0 && !RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
+		if (NextTokenRefreshUtc > FDateTime::MinValue() && !RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
 		{
 			return NextTokenRefreshUtc <= FDateTime::UtcNow();
 		}
@@ -35,7 +38,7 @@ public:
 	{
 		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 2);
 		TokenRefreshBackoff = FTimespan::Zero();
-		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduelNormalRefresh(): %s"), *GetRefreshStr());
+		UE_LOG_ONLINE(VeryVerbose, TEXT("ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
 	void ScheduelBackoffRefresh()
 	{
@@ -45,7 +48,7 @@ public:
 		}
 		TokenRefreshBackoff *= 2;
 		NextTokenRefreshUtc = FDateTime::UtcNow() + TokenRefreshBackoff + FTimespan::FromSeconds(FMath::RandRange(1, 60));
-		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduelBackoffRefresh(): %s"), *GetRefreshStr());
+		UE_LOG_ONLINE(VeryVerbose, TEXT("ScheduelBackoffRefresh(): %s"), *GetRefreshStr());
 	};
 
 	FDateTime GetExpireTime()    { return LastTokenRefreshUtc - FTimespan::FromSeconds(ExpiresIn); };
@@ -82,6 +85,9 @@ public:
 	FDateTime LastTokenRefreshUtc;
 	FDateTime NextTokenRefreshUtc;
 	FTimespan TokenRefreshBackoff;
+
+	// Call tracing
+	FOpenTracingJustice Trace;
 };
 
 
@@ -110,8 +116,9 @@ public:
 
 	// FUserOnlineAccountJustice
 
-	FUserOnlineAccountJustice(const FString& InUserId=TEXT("")) 
-		: UserIdPtr(new FUniqueNetIdString(InUserId))
+	FUserOnlineAccountJustice(const FString& InUserId=TEXT(""))
+		:
+		UserIdPtr(new FUniqueNetIdString(InUserId))
 	{ }
 
 	virtual ~FUserOnlineAccountJustice()
@@ -173,9 +180,9 @@ public:
 private:
 
 	void TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-						TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
+									TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
 	void TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-						TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
+								   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
 
 	void ScheduleNextTokenRefresh(FOAuthTokenJustice& OutToken);
 

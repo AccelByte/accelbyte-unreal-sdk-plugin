@@ -9,12 +9,13 @@
 
 #include "UObject/CoreOnline.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
+#include "OpenTracingJustice.h"
 
 /**
  * Justice HTTP
  * We create our own transport class so that we can extend it to add tracing and metrics.
  */
-class FHTTPJustice : public FHttpModule
+class FHTTPJustice
 {
 	
 public:
@@ -28,6 +29,7 @@ public:
 	}
 
 	static FString BasicAuth(const FString& Username, const FString& Password);
+	static TSharedRef<IHttpRequest> CreateRequest(const FOpenTracingJustice& Parent);
 
 private:
 	
