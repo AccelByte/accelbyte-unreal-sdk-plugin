@@ -25,7 +25,11 @@ public:
 
 	bool ShouldRefresh()
 	{
-		return NextTokenRefreshUtc < 1 || RefreshToken.IsEmpty() ? false : NextTokenRefreshUtc <= FDateTime::UtcNow();
+		if (NextTokenRefreshUtc < 1 || RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
+		{
+			return NextTokenRefreshUtc <= FDateTime::UtcNow();
+		}
+		return false;
 	};
 	void ScheduleNormalRefresh()
 	{
@@ -36,6 +40,7 @@ public:
 	{
 		if (TokenRefreshBackoff < 1)
 		{
+			// init
 			TokenRefreshBackoff = FTimespan::FromSeconds(10);
 		}
 		TokenRefreshBackoff *= 2;

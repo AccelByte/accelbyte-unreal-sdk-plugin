@@ -188,49 +188,56 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 
 	if (!bSuccessful || !Response.IsValid())
 	{
-		ErrorStr = FString::Printf(TEXT("generic failure"));
+		ErrorStr = TEXT("request failed");
 		UserAccountPtr->Token.ScheduelBackoffRefresh();
 	}
-	else if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	else
 	{
-		FString ResponseStr = Response->GetContentAsString();
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		switch (Response->GetResponseCode())
 		{
-			if (UserAccountPtr->Token.FromJson(JsonObject))
+		case EHttpResponseCodes::Ok:
 			{
-				UserAccountPtr->Token.SetLastRefreshTimeToNow();
-				UserAccountPtr->Token.ScheduleNormalRefresh();
+				FString ResponseStr = Response->GetContentAsString();
+				TSharedPtr<FJsonObject> JsonObject;
+				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+				{
+					if (UserAccountPtr->Token.FromJson(JsonObject))
+					{
+						UserAccountPtr->Token.SetLastRefreshTimeToNow();
+						UserAccountPtr->Token.ScheduleNormalRefresh();
+					}
+					else
+					{
+						ErrorStr = TEXT("unable to deserlize response from json object");
+					}
+				}
+				else
+				{
+					ErrorStr = TEXT("unable to deserlize response from server");
+				}
+				
+				if (!ErrorStr.IsEmpty())
+				{
+					UserAccountPtr->Token.ScheduelBackoffRefresh();
+				}
 			}
-			else
-			{
-				ErrorStr = TEXT("unable to deserlize response from json object");
-			}
-		}
-		else
-		{
-			ErrorStr = TEXT("unable to deserlize response from server");
-		}
+			break;
 
-		if (!ErrorStr.IsEmpty())
-		{
+		case EHttpResponseCodes::Forbidden:
+		case EHttpResponseCodes::Denied:
+			ErrorStr = FString::Printf(TEXT("request denied code=%d"), Response->GetResponseCode());
+			UserAccountPtr->Token = FOAuthTokenJustice();
+
+			TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
+			TriggerOnLoginChangedDelegates(LocalUserNum);
+			break;
+
+		default:
 			UserAccountPtr->Token.ScheduelBackoffRefresh();
+			ErrorStr = FString::Printf(TEXT("unexpected reponse code=%d"), Response->GetResponseCode());
+			break;
 		}
-	}
-	else if (EHttpResponseCodes::Denied == Response->GetResponseCode())
-	{
-		ErrorStr = TEXT("request denied, not attempting another token refresh");
-		UserAccountPtr->Token = FOAuthTokenJustice();
-
-		// FIXME: what are the right delegates to call in this case?
-		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
-		TriggerOnLoginChangedDelegates(LocalUserNum);
-	}
-	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		UserAccountPtr->Token.ScheduelBackoffRefresh();
-		ErrorStr = FString::Printf(TEXT("invalid reponse code"));
 	}
 
 	if (!ErrorStr.IsEmpty())
@@ -252,33 +259,41 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 	if (!bSuccessful || !Response.IsValid())
 	{
-		ErrorStr = TEXT("unsuccessful or invalid response");
-	}
-	else if (!EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		ErrorStr = TEXT("request denied");
+		ErrorStr = TEXT("request failed");
 	}
 	else
 	{
-		FString ResponseStr = Response->GetContentAsString();
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		switch (Response->GetResponseCode())
 		{
-			if (UserAccountPtr->Token.FromJson(JsonObject))
+			case EHttpResponseCodes::Ok:
 			{
-				UserAccountPtr->Token.SetLastRefreshTimeToNow();
-				UserAccountPtr->Token.ScheduleNormalRefresh();
+				FString ResponseStr = Response->GetContentAsString();
+				TSharedPtr<FJsonObject> JsonObject;
+				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+				{
+					if (UserAccountPtr->Token.FromJson(JsonObject))
+					{
+						UserAccountPtr->Token.SetLastRefreshTimeToNow();
+						UserAccountPtr->Token.ScheduleNormalRefresh();
+					}
+					else
+					{
+						ErrorStr = TEXT("unable to deserlize response from json object");
+					}
+				}
+				else
+				{
+					ErrorStr = TEXT("unable to deserlize response from server");
+				}
 			}
-			else
-			{
-				ErrorStr = TEXT("bad token in response");
-			}
+			break;
+				
+			default:
+				ErrorStr = FString::Printf(TEXT("unexpcted response code=%d"), Response->GetResponseCode());
+			break;
 		}
-		else
-		{
-			ErrorStr = TEXT("bad json response");
-		}
+		
 	}
 
 	if (!ErrorStr.IsEmpty())
