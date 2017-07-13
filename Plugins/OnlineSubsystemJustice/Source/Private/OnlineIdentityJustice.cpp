@@ -96,6 +96,9 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 
+//	UE_LOG_ONLINE(Verbose, TEXT("FOnlineIdentityJustice::Login(): LocalUserNum=%d AccountCredentials.Id=%s ShouldRefresh=%d"),
+//				  LocalUserNum, *AccountCredentials.Id, UserAccountPtr->Token.ShouldRefresh());
+	
 	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 	{
 		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
@@ -298,10 +301,10 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UserAccountPtr->Token = FOAuthTokenJustice();
 		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. user=%s error=%s elap_time=%fs"),
 					   *UserAccountPtr->GetUserIdStr(), *ErrorStr, Request->GetElapsedTime());
 
+		UserAccountPtr->Token = FOAuthTokenJustice();
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
 		TriggerOnLoginChangedDelegates(LocalUserNum);
 	}

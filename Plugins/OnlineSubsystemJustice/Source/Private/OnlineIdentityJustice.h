@@ -20,12 +20,12 @@ public:
 	ExpiresIn(0),
 	LastTokenRefreshUtc(0),
 	NextTokenRefreshUtc(0),
-	TokenRefreshBackoff(0)
+	TokenRefreshBackoff(FTimespan::Zero())
 	{ }
 
 	bool ShouldRefresh()
 	{
-		if (NextTokenRefreshUtc < 1 || RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
+		if (NextTokenRefreshUtc > 0 && !RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
 		{
 			return NextTokenRefreshUtc <= FDateTime::UtcNow();
 		}
@@ -34,23 +34,24 @@ public:
 	void ScheduleNormalRefresh()
 	{
 		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 2);
-		TokenRefreshBackoff = 0;
+		TokenRefreshBackoff = FTimespan::Zero();
+		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduelNormalRefresh(): %s"), *GetRefreshStr());
 	};
 	void ScheduelBackoffRefresh()
 	{
-		if (TokenRefreshBackoff < 1)
+		if (TokenRefreshBackoff.IsZero())
 		{
-			// init
 			TokenRefreshBackoff = FTimespan::FromSeconds(10);
 		}
 		TokenRefreshBackoff *= 2;
 		NextTokenRefreshUtc = FDateTime::UtcNow() + TokenRefreshBackoff + FTimespan::FromSeconds(FMath::RandRange(1, 60));
+		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduelBackoffRefresh(): %s"), *GetRefreshStr());
 	};
 
 	FDateTime GetExpireTime()    { return LastTokenRefreshUtc - FTimespan::FromSeconds(ExpiresIn); };
 	FString   GetExpireTimeStr() { return GetExpireTime().ToIso8601(); };
-	FString   GetRefreshStr()    { return FString::Printf(TEXT("expire=%s refresh=%s backoff=%s"),
-								   *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), *TokenRefreshBackoff.ToString()); };
+	FString   GetRefreshStr()    { return FString::Printf(TEXT("expire=%s refresh=%s backoff=%.0f"),
+								   *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
 	void SetLastRefreshTimeToNow() { LastTokenRefreshUtc = FDateTime::UtcNow(); };
 	
 	FString AccessToken;
