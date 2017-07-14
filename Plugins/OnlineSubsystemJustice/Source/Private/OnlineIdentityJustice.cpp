@@ -258,13 +258,13 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. User=%s Error=%s %s ReqTime=%fs"),
+		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. User=%s Error=%s %s ReqTime=%.3f"),
 					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
 					  *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 		return;
 	}
 
-	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. User=%s %s ReqTime=%fs"),
+	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. User=%s %s ReqTime=%.3f"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 	
 }
@@ -314,7 +314,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. User=%s Error=%s %s ReqTime=%fs"),
+		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. User=%s Error=%s %s ReqTime=%.3f"),
 					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
 					  *Trace->ToString(), Request->GetElapsedTime());
 
@@ -324,7 +324,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	}
 	else
 	{
-		UE_LOG_ONLINE(Log, TEXT("Token grant successful. User=%s %s %s ReqTime=%fs"),
+		UE_LOG_ONLINE(Log, TEXT("Token grant successful. User=%s %s %s ReqTime=%.3f"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(),
 					  *Trace->ToString(), Request->GetElapsedTime());
 
