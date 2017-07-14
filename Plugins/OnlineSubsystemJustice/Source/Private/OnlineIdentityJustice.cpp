@@ -130,19 +130,24 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		// Refresh grant
 		if (UserAccountPtr->Token.ShouldRefresh())
 		{
-			TSharedRef<IHttpRequest> Request = FHTTPJustice::CreateRequest(UserAccountPtr->Token.Trace);
+			TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 			Request->SetURL(BaseURL + TEXT("/oauth/token"));
 			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 			Request->SetVerb(TEXT("POST"));
 			Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 			Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
 			Request->SetHeader(TEXT("Accept-Char"),   TEXT("utf-8"));
+			
+			TSharedRef<FOpenTracingJustice> Trace = MakeShareable(new FOpenTracingJustice(UserAccountPtr->Token.Trace));
+			Request->SetHeader(TEXT("X-B3-TraceId"),      Trace->GetTraceIdStr());
+			Request->SetHeader(TEXT("X-B3-SpanId"),       Trace->GetSpanIdStr());
+			Request->SetHeader(TEXT("X-B3-ParentSpanId"), Trace->GetParentSpanIdStr());
 
 			FString Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),
 											*FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.RefreshToken));
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenRefreshGrantComplete,
-														UserAccountPtr, LocalUserNum);
+														UserAccountPtr, LocalUserNum, Trace);
 			if (!Request->ProcessRequest())
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
@@ -154,7 +159,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		// Password grant
 		else if (!AccountCredentials.Token.IsEmpty())
 		{
-			TSharedRef<IHttpRequest> Request = FHTTPJustice::CreateRequest(UserAccountPtr->Token.Trace);
+			TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 			Request->SetURL(BaseURL + TEXT("/oauth/token"));
 			Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 			Request->SetVerb(TEXT("POST"));
@@ -162,12 +167,17 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
 			Request->SetHeader(TEXT("Accept-Char"),   TEXT("utf-8"));
 
+			TSharedRef<FOpenTracingJustice> Trace = MakeShareable(new FOpenTracingJustice(UserAccountPtr->Token.Trace));
+			Request->SetHeader(TEXT("X-B3-TraceId"),      Trace->GetTraceIdStr());
+			Request->SetHeader(TEXT("X-B3-SpanId"),       Trace->GetSpanIdStr());
+			Request->SetHeader(TEXT("X-B3-ParentSpanId"), Trace->GetParentSpanIdStr());
+
 			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
 									*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id),
 									*FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete,
-														UserAccountPtr, LocalUserNum);
+														UserAccountPtr, LocalUserNum, Trace);
 			if (!Request->ProcessRequest())
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
@@ -188,7 +198,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	return true;
 }
 
-void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
+void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FOpenTracingJustice> Trace)
 {
 	FString ErrorStr;
 
@@ -259,7 +269,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	
 }
 
-void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum)
+void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FOpenTracingJustice> Trace)
 {
 	FString ErrorStr;
 
@@ -304,8 +314,9 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. user=%s error=%s elap_time=%fs"),
-					   *UserAccountPtr->GetUserIdStr(), *ErrorStr, Request->GetElapsedTime());
+		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. user=%s error=%s %s elap_time=%fs"),
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
+					  *Trace->ToString(), Request->GetElapsedTime());
 
 		UserAccountPtr->Token = FOAuthTokenJustice();
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
@@ -313,8 +324,9 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	}
 	else
 	{
-		UE_LOG_ONLINE(Log, TEXT("Token grant successful. user=%s %s elap_time=%fs"),
-					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
+		UE_LOG_ONLINE(Log, TEXT("Token grant successful. user=%s %s %s elap_time=%fs"),
+					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(),
+					  *Trace->ToString(), Request->GetElapsedTime());
 
 		TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
 		TriggerOnLoginChangedDelegates(LocalUserNum);

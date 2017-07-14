@@ -180,9 +180,11 @@ public:
 private:
 
 	void TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-									TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
+									TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
+									TSharedRef<FOpenTracingJustice> Trace);
 	void TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
-								   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum);
+								   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
+								   TSharedRef<FOpenTracingJustice> Trace);
 
 	void ScheduleNextTokenRefresh(FOAuthTokenJustice& OutToken);
 
