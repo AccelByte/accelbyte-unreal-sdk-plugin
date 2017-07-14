@@ -27,7 +27,7 @@ void FOnlineAsyncTaskManagerJustice::OnlineTick()
 
 			if (!IdentityInterface->Login(FCString::Atoi(*LocalUserNum), Credentials))
 			{
-				UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token. user=%s"), *UserAccountPtr->GetUserId()->ToString());
+				UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token. User=%s"), *UserAccountPtr->GetUserId()->ToString());
 			}
 		}
 	}

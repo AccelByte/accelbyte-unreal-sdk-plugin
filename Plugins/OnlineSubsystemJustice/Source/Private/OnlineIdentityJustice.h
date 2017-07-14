@@ -53,7 +53,7 @@ public:
 
 	FDateTime GetExpireTime()    { return LastTokenRefreshUtc - FTimespan::FromSeconds(ExpiresIn); };
 	FString   GetExpireTimeStr() { return GetExpireTime().ToIso8601(); };
-	FString   GetRefreshStr()    { return FString::Printf(TEXT("expire=%s refresh=%s backoff=%.0f"),
+	FString   GetRefreshStr()    { return FString::Printf(TEXT("Expire=%s Refresh=%s Backoff=%.0f"),
 								   *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
 	void SetLastRefreshTimeToNow() { LastTokenRefreshUtc = FDateTime::UtcNow(); };
 	

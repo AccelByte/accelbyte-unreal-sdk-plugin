@@ -150,10 +150,10 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 														UserAccountPtr, LocalUserNum, Trace);
 			if (!Request->ProcessRequest())
 			{
-				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
+				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
 
-			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): refresh grant user=%s %s"),
+			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): refresh grant User=%s %s"),
 						  *AccountCredentials.Id, *UserAccountPtr->Token.Trace.ToString());
 		}
 		// Password grant
@@ -180,17 +180,17 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 														UserAccountPtr, LocalUserNum, Trace);
 			if (!Request->ProcessRequest())
 			{
-				ErrorStr = FString::Printf(TEXT("request failed. url=%s"), *Request->GetURL());
+				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
 
-			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): password grant user=%s %s"),
+			UE_LOG_ONLINE(VeryVerbose, TEXT("Login(): password grant User=%s %s"),
 						  *AccountCredentials.Id, *UserAccountPtr->Token.Trace.ToString());
 		}
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Login failed. user=%s error=%s"), *AccountCredentials.Id, *ErrorStr);
+		UE_LOG_ONLINE(Warning, TEXT("Login failed. User=%s Error=%s"), *AccountCredentials.Id, *ErrorStr);
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
 		return false;
 	}
@@ -242,7 +242,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 
 		case EHttpResponseCodes::Forbidden:
 		case EHttpResponseCodes::Denied:
-			ErrorStr = FString::Printf(TEXT("request denied code=%d"), Response->GetResponseCode());
+			ErrorStr = FString::Printf(TEXT("request denied Code=%d"), Response->GetResponseCode());
 			UserAccountPtr->Token = FOAuthTokenJustice();
 
 			TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
@@ -251,20 +251,20 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 
 		default:
 			UserAccountPtr->Token.ScheduelBackoffRefresh();
-			ErrorStr = FString::Printf(TEXT("unexpected reponse code=%d"), Response->GetResponseCode());
+			ErrorStr = FString::Printf(TEXT("unexpected reponse Code=%d"), Response->GetResponseCode());
 			break;
 		}
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. user=%s error=%s %s elap_time=%fs"),
+		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. User=%s Error=%s %s ReqTime=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
 					  *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 		return;
 	}
 
-	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. user=%s %s elap_time=%fs"),
+	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. User=%s %s ReqTime=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), Request->GetElapsedTime());
 	
 }
@@ -306,7 +306,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 			break;
 				
 			default:
-				ErrorStr = FString::Printf(TEXT("unexpcted response code=%d"), Response->GetResponseCode());
+				ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 			break;
 		}
 		
@@ -314,7 +314,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. user=%s error=%s %s elap_time=%fs"),
+		UE_LOG_ONLINE(Warning, TEXT("Token grant failed. User=%s Error=%s %s ReqTime=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *ErrorStr,
 					  *Trace->ToString(), Request->GetElapsedTime());
 
@@ -324,7 +324,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	}
 	else
 	{
-		UE_LOG_ONLINE(Log, TEXT("Token grant successful. user=%s %s %s elap_time=%fs"),
+		UE_LOG_ONLINE(Log, TEXT("Token grant successful. User=%s %s %s ReqTime=%fs"),
 					  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(),
 					  *Trace->ToString(), Request->GetElapsedTime());
 
