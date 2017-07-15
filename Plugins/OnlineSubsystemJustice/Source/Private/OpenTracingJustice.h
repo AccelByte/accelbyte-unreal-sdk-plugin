@@ -12,10 +12,6 @@ public:
 
 	FOpenTracingJustice()
 	{
-	}
-
-	FOpenTracingJustice()
-	{
 		// Root span
 		TraceId = FGuid::NewGuid();
 		ParentSpanId = TraceId;
