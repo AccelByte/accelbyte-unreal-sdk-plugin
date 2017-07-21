@@ -35,7 +35,7 @@ public:
 	};
 	void ScheduleNormalRefresh()
 	{
-		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 11);
+		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 2);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
