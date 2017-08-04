@@ -12,6 +12,8 @@
 #include "Runtime/Core/Public/Misc/Guid.h"
 #include "OpenTracingJustice.h"
 
+class Permission;
+
 class FOAuthTokenJustice : public FOnlineJsonSerializable
 {
 	
@@ -65,6 +67,9 @@ public:
 	 TArray Permissions;
 	 */
 	
+	FJsonSerializableArray JsonPermissions;
+	TArray<Permission> Permissions;
+		
 	FString UserId;
 	FString DisplayName;
 	FString Namespace;
@@ -77,7 +82,9 @@ public:
 	ONLINE_JSON_SERIALIZE("user_id", UserId);
 	ONLINE_JSON_SERIALIZE("display_name", DisplayName);
 	ONLINE_JSON_SERIALIZE("namespace", Namespace);
+	ONLINE_JSON_SERIALIZE_ARRAY("permissions", JsonPermissions);
 	END_ONLINE_JSON_SERIALIZER
+
 	
 	// Tracking when to refresh the token
 	FDateTime LastTokenRefreshUtc;
@@ -209,3 +216,17 @@ private:
 };
 
 typedef TSharedPtr<FOnlineIdentityJustice, ESPMode::ThreadSafe> FOnlineIdentityJusticePtr;
+
+class Permission
+{
+public:
+	Permission(FString resource, int32 action)
+	{
+		Resource = resource;
+		Action = action;
+	}
+
+	FString Resource;
+	int32 Action;
+
+};

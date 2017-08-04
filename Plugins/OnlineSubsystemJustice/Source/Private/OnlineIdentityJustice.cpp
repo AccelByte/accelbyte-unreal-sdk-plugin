@@ -109,7 +109,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	else
 	{
 		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
-		if (UserId == NULL)
+		if (UserId == nullptr)
 		{
 			FUniqueNetIdString NewUserId(AccountCredentials.Id);
 			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id));
@@ -158,11 +158,14 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 											*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);
+						
+
 			if (!Request->ProcessRequest())
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
 			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
+					
 		}
 	}
 
@@ -262,12 +265,24 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 			case EHttpResponseCodes::Ok:
 			{
 				FString ResponseStr = Response->GetContentAsString();
+
 				TSharedPtr<FJsonObject> JsonObject;
 				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 				{
 					if (UserAccountPtr->Token.FromJson(JsonObject))
 					{
+						TArray<TSharedPtr<FJsonValue>> permissions = JsonObject->GetArrayField(TEXT("permissions"));
+						
+						for (TSharedPtr<FJsonValue> permission : permissions)
+						{
+							TSharedPtr<FJsonObject> PermissionJasonObject= permission->AsObject();
+							FString Resource = PermissionJasonObject->GetStringField(TEXT("Resource"));
+							int32 Action = PermissionJasonObject->GetIntegerField(TEXT("Action"));
+							Permission PermissionObject = Permission(Resource, Action);
+							UserAccountPtr->Token.Permissions.Add(PermissionObject);
+						}
+
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
 					}
