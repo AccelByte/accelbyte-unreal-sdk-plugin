@@ -67,7 +67,6 @@ public:
 	 TArray Permissions;
 	 */
 	
-	FJsonSerializableArray JsonPermissions;
 	TArray<FPermission> Permissions;
 	TArray<FString> Roles;
 		
@@ -83,7 +82,6 @@ public:
 	ONLINE_JSON_SERIALIZE("user_id", UserId);
 	ONLINE_JSON_SERIALIZE("display_name", DisplayName);
 	ONLINE_JSON_SERIALIZE("namespace", Namespace);
-	ONLINE_JSON_SERIALIZE_ARRAY("permissions", JsonPermissions);
 	ONLINE_JSON_SERIALIZE_ARRAY("roles", Roles);
 	END_ONLINE_JSON_SERIALIZER
 
@@ -224,9 +222,6 @@ class FPermission
 public:
 	FString Resource;
 	int32 Action;
-	FPermission(FString resource, int32 action)
-	{
-		Resource = resource;
-		Action = action;
-	}
+	FPermission(FString resource, int32 action) :Resource(resource),Action(action)
+	{	}
 };

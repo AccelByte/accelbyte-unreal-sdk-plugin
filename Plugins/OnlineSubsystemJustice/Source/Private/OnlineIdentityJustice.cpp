@@ -154,7 +154,6 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		// Password grant
 		else if (!AccountCredentials.Token.IsEmpty())
 		{
-			//FIX ME : Harcoding grant type
 			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
 											*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
 			Request->SetContentAsString(Grant);
@@ -165,7 +164,6 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			}
 			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());					
 		}
-		// TODO : add client credentials 
 	}
 
 	if (!ErrorStr.IsEmpty())
@@ -271,14 +269,13 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 				{
 					if (UserAccountPtr->Token.FromJson(JsonObject))
 					{
-						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
-						
+						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));						
 						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
 						{
-							TSharedPtr<FJsonObject> JsonPermissionObject= Permission->AsObject();
+							TSharedPtr<FJsonObject> JsonPermissionObject= Permission->AsObject();							
 							FPermission PermissionObject = FPermission(
-								JsonPermissionObject->GetStringField(TEXT("Resource"))
-								,JsonPermissionObject->GetIntegerField(TEXT("Action")));
+								(FString)JsonPermissionObject->GetStringField(TEXT("Resource"))
+								,(int32)JsonPermissionObject->GetIntegerField(TEXT("Action")));
 							UserAccountPtr->Token.Permissions.Add(PermissionObject);
 						}
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
