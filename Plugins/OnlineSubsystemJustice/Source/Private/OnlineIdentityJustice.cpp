@@ -154,19 +154,18 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		// Password grant
 		else if (!AccountCredentials.Token.IsEmpty())
 		{
+			//FIX ME : Harcoding grant type
 			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
 											*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
 			Request->SetContentAsString(Grant);
-			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);
-						
-
+			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);						
 			if (!Request->ProcessRequest())
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
-			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
-					
+			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());					
 		}
+		// TODO : add client credentials 
 	}
 
 	if (!ErrorStr.IsEmpty())
@@ -272,17 +271,16 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 				{
 					if (UserAccountPtr->Token.FromJson(JsonObject))
 					{
-						TArray<TSharedPtr<FJsonValue>> permissions = JsonObject->GetArrayField(TEXT("permissions"));
+						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
 						
-						for (TSharedPtr<FJsonValue> permission : permissions)
+						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
 						{
-							TSharedPtr<FJsonObject> PermissionJasonObject= permission->AsObject();
-							FString Resource = PermissionJasonObject->GetStringField(TEXT("Resource"));
-							int32 Action = PermissionJasonObject->GetIntegerField(TEXT("Action"));
-							Permission PermissionObject = Permission(Resource, Action);
+							TSharedPtr<FJsonObject> JsonPermissionObject= Permission->AsObject();
+							FPermission PermissionObject = FPermission(
+								JsonPermissionObject->GetStringField(TEXT("Resource"))
+								,JsonPermissionObject->GetIntegerField(TEXT("Action")));
 							UserAccountPtr->Token.Permissions.Add(PermissionObject);
 						}
-
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
 					}
