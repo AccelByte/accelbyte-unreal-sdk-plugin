@@ -48,10 +48,86 @@ bool FUserOnlineAccountJustice::GetAuthAttribute(const FString& AttrName, FStrin
 
 bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FString& OutAttrValue) const
 {
-	const FString* FoundAttr = UserAttributes.Find(AttrName);
+	TArray<FString> KeyStringArray;
+	FString AskedPermission = OutAttrValue;
+	const FString* FoundAttr;
+	FString* DetailChecked;
+	FString* DataChecked;
+	const FString* UserId;
+
+	AttrName.ParseIntoArray(KeyStringArray, TEXT("_"), true);
+	if (KeyStringArray.Num() > 2) //check if the attributes being checked is permission
+	{
+		if (KeyStringArray.Num() == 3)//check if user id is missing 
+		{
+			UserId = UserAttributes.Find("Id");//TODO convert Id into UniqueNetId
+			DataChecked = &KeyStringArray[1];
+			DetailChecked = &KeyStringArray[2];
+		}
+		else
+		{
+			UserId = &KeyStringArray[1];
+			DataChecked = &KeyStringArray[2];
+			DetailChecked = &KeyStringArray[3];
+		}
+
+		//Force Searching The Permissions, starting from the most specific (the more general can override permission of the more specific resource)
+		FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *UserId + ":" + *DataChecked + ":" + *DetailChecked);
+		if (FoundAttr == NULL)
+		{
+			FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *UserId + ":" + *DataChecked + ":*");
+			if (FoundAttr == NULL)
+			{
+				FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *DataChecked);
+				if (FoundAttr == NULL)
+				{
+					FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *DataChecked + ":*");
+					if (FoundAttr == NULL)
+					{
+						FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":USER:" + *UserId + ":*");
+						if (FoundAttr == NULL)
+						{
+							FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":USER:*");
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		FoundAttr = UserAttributes.Find(AttrName);
+	}
+
 	if (FoundAttr != NULL)
 	{
 		OutAttrValue = *FoundAttr;
+		int32 ActionInt = FCString::Atoi(*OutAttrValue);
+		if (AskedPermission == "*" && ActionInt == 15) return true;
+		for (int i = 8; i > 0; i /= 2) //decode the action flag
+		{
+			if (ActionInt >= i)
+			{
+				switch (i)
+				{
+				case 8:
+					if (AskedPermission == "d")return true;
+					break;
+				case 4:
+					if (AskedPermission == "u")return true;
+					break;
+				case 2:
+					if (AskedPermission == "r")return true;
+					break;
+				case 1:
+					if (AskedPermission == "c")return true;
+					break;
+				default:
+					break;
+				}
+				ActionInt -= i;
+			}
+		}
 		return true;
 	}
 	return false;
@@ -272,11 +348,12 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));						
 						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
 						{
-							TSharedPtr<FJsonObject> JsonPermissionObject= Permission->AsObject();							
-							FPermission PermissionObject = FPermission(
-								(FString)JsonPermissionObject->GetStringField(TEXT("Resource"))
-								,(int32)JsonPermissionObject->GetIntegerField(TEXT("Action")));
+							TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
+							FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
+							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
+							FPermission PermissionObject = FPermission(Resource, Action);
 							UserAccountPtr->Token.Permissions.Add(PermissionObject);
+							UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
