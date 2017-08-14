@@ -48,87 +48,88 @@ bool FUserOnlineAccountJustice::GetAuthAttribute(const FString& AttrName, FStrin
 
 bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FString& OutAttrValue) const
 {
-	TArray<FString> KeyStringArray;
-	FString AskedPermission = OutAttrValue;
+	//instant return attribute value for other usage
+	TArray<FString> FullQuery;
 	const FString* FoundAttr;
-	FString* DetailChecked;
-	FString* DataChecked;
-	const FString* UserId;
 
-	AttrName.ParseIntoArray(KeyStringArray, TEXT("_"), true);
-	if (KeyStringArray.Num() > 2) //check if the attributes being checked is permission
+	AttrName.ParseIntoArray(FullQuery, TEXT(":"), true);
+	if (FullQuery.Num() < 2)
 	{
-		if (KeyStringArray.Num() == 3)//check if user id is missing 
+		FoundAttr = UserAttributes.Find(AttrName);
+		if (FoundAttr != NULL)
 		{
-			UserId = UserAttributes.Find("Id");//TODO convert Id into UniqueNetId
-			DataChecked = &KeyStringArray[1];
-			DetailChecked = &KeyStringArray[2];
+			OutAttrValue = *FoundAttr;
+			return true;
 		}
-		else
-		{
-			UserId = &KeyStringArray[1];
-			DataChecked = &KeyStringArray[2];
-			DetailChecked = &KeyStringArray[3];
-		}
+	}
 
-		//Force Searching The Permissions, starting from the most specific (the more general can override permission of the more specific resource)
-		FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *UserId + ":" + *DataChecked + ":" + *DetailChecked);
-		if (FoundAttr == NULL)
+	//check the action bit and make clean copy of query
+	int32 CheckedActionBit = -1;
+	TArray<FString> Query;
+	TArray<FString> KeyArray;
+	if (FullQuery[FullQuery.Num() - 2] == TEXT("action"))
+	{
+		CheckedActionBit = FCString::Atoi(*FullQuery.Last());
+		for (int32 i = 0; i < FullQuery.Num() - 2; i++)
 		{
-			FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *UserId + ":" + *DataChecked + ":*");
-			if (FoundAttr == NULL)
-			{
-				FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *DataChecked);
-				if (FoundAttr == NULL)
-				{
-					FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":" + *DataChecked + ":*");
-					if (FoundAttr == NULL)
-					{
-						FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":USER:" + *UserId + ":*");
-						if (FoundAttr == NULL)
-						{
-							FoundAttr = UserAttributes.Find("NAMESPACE:" + KeyStringArray[0] + ":USER:*");
-						}
-					}
-				}
-			}
+			Query.Add(FullQuery[i]);
 		}
 	}
 	else
 	{
-		FoundAttr = UserAttributes.Find(AttrName);
+		Query.Append(FullQuery);
 	}
 
-	if (FoundAttr != NULL)
+	//find perms and action bit to compare
+	UserAttributes.GetKeys(KeyArray);
+	bool bMatchFound = false;
+	for (FString Key : KeyArray)
 	{
-		OutAttrValue = *FoundAttr;
-		int32 ActionInt = FCString::Atoi(*OutAttrValue);
-		if (AskedPermission == "*" && ActionInt == 15) return true;
-		for (int i = 8; i > 0; i /= 2) //decode the action flag
+		//check for match possibility by the element number
+		TArray<FString> Permission;
+		Key.ParseIntoArray(Permission, TEXT(":"), true);
+		if (Permission.Num() != Query.Num())
 		{
-			if (ActionInt >= i)
+			continue;
+		}
+
+		//check the element of each query and permission position
+		bMatchFound = true;
+		for (int index = 0; index < Permission.Num(); index++)
+		{
+			//check if any match or wild card
+			if (Permission[index].Equals(Query[index], ESearchCase::CaseSensitive)
+				|| Permission[index].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive)
+				|| Query[index].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive))
 			{
-				switch (i)
-				{
-				case 8:
-					if (AskedPermission == "d")return true;
-					break;
-				case 4:
-					if (AskedPermission == "u")return true;
-					break;
-				case 2:
-					if (AskedPermission == "r")return true;
-					break;
-				case 1:
-					if (AskedPermission == "c")return true;
-					break;
-				default:
-					break;
-				}
-				ActionInt -= i;
+				continue;
+			}
+
+			//if nothing match check the string trails
+			FString CheckedTrails = Query[index];
+			if (!(
+				(CheckedTrails.Len() > 1)
+				&& CheckedTrails.RemoveFromEnd(TEXT("*"), ESearchCase::CaseSensitive)
+				&& Permission[index].Contains(CheckedTrails, ESearchCase::CaseSensitive, ESearchDir::FromStart)
+				))
+			{
+				bMatchFound = false;
+				break;
 			}
 		}
-		return true;
+
+		//check if bMatchFond has been invalidated
+		if (bMatchFound)
+		{
+			FoundAttr = UserAttributes.Find(Key);
+			if (FoundAttr != NULL)
+			{
+				OutAttrValue = *FoundAttr;
+				int VerifyBit = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
+				if (CheckedActionBit == -1 || VerifyBit == 0) return true;
+				return false;
+			}
+		}
 	}
 	return false;
 }
@@ -575,10 +576,3 @@ FString FOnlineIdentityJustice::GetAuthType() const
 {
 	return TEXT("Justice OAuth");
 }
-
-
-
-
-
-
-
