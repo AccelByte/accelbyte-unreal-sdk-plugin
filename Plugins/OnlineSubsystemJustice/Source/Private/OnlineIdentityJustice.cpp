@@ -95,22 +95,22 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 
 		//check the element of each query and permission position
 		bMatchFound = true;
-		for (int index = 0; index < Permission.Num(); index++)
+		for (int i = 0; i < Permission.Num(); i++)
 		{
 			//check if any match or wild card
-			if (Permission[index].Equals(Query[index], ESearchCase::CaseSensitive)
-				|| Permission[index].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive)
-				|| Query[index].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive))
+			if (Permission[i].Equals(Query[i], ESearchCase::CaseSensitive)
+				|| Permission[i].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive)
+				|| Query[i].Equals(*FString(TEXT("*")), ESearchCase::CaseSensitive))
 			{
 				continue;
 			}
 
 			//if nothing match check the string trails
-			FString CheckedTrails = Query[index];
+			FString CheckedTrails = Query[i];
 			if (!(
 				(CheckedTrails.Len() > 1)
 				&& CheckedTrails.RemoveFromEnd(TEXT("*"), ESearchCase::CaseSensitive)
-				&& Permission[index].Contains(CheckedTrails, ESearchCase::CaseSensitive, ESearchDir::FromStart)
+				&& Permission[i].Contains(CheckedTrails, ESearchCase::CaseSensitive, ESearchDir::FromStart)
 				))
 			{
 				bMatchFound = false;
