@@ -81,6 +81,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 	}
 
 	//find perms and action bit to compare
+	FString CheckedTrails;
 	UserAttributes.GetKeys(KeyArray);
 	bool bMatchFound = false;
 	for (FString Key : KeyArray)
@@ -126,7 +127,10 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 			{
 				OutAttrValue = *FoundAttr;
 				int VerifyBit = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
-				if (CheckedActionBit == -1 || VerifyBit == 0) return true;
+				if (CheckedActionBit == -1 || VerifyBit == 0)
+				{
+					return true;
+				}
 				return false;
 			}
 		}

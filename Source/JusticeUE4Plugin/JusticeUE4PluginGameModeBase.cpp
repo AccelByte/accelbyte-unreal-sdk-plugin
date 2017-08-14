@@ -44,17 +44,17 @@ void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, 
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginCompleteHandle);
 	UE_LOG(LogOnline, Log, TEXT("Game received login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
 	
-	//FString CheckedResource = TEXT("NAMESPACE:justice:PAYMENT:action:8");
-	//FString Result;
-	//if (Identity->GetUserAccount(UserId)->GetUserAttribute(CheckedResource, Result))
-	//{
-	//	//granting permissions
-	//	UE_LOG(LogTemp, Warning, TEXT("Granting permission of %s"), *CheckedResource);
-	//}
-	//else
-	//{
-	//	//denying permissions
-	//	UE_LOG(LogTemp, Warning, TEXT("Denying permission of %s"), *CheckedResource);
-	//}	
+	FString CheckedResource = TEXT("NAMESPACE:justice:PAYMENT:action:8");
+	FString Result;
+	if (Identity->GetUserAccount(UserId)->GetUserAttribute(CheckedResource, Result))
+	{
+		//granting permissions
+		UE_LOG(LogTemp, Warning, TEXT("Granting permission of %s"), *CheckedResource);
+	}
+	else
+	{
+		//denying permissions
+		UE_LOG(LogTemp, Warning, TEXT("Denying permission of %s"), *CheckedResource);
+	}	
 }
 
