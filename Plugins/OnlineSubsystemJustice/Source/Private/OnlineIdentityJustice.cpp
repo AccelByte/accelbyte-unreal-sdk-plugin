@@ -358,22 +358,8 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
 							FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
 							UserAccountPtr->Token.Permissions.Add(PermissionObject);
-							//UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
+							UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
-
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:USER:t9sk283j421i8:ORDER:rec231", "15");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:*:USER:*:ORDER:*", "15");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:*:USER:*:FULFILMENT:*", "7");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:ORDER:rec231", "15");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:evil:PAYMENT:*", "15");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:PAYMENT:*", "8");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:*:USER:*:FULFILLMENT:*:action:7", "5");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:CANCONNECT:TRUE", "8");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:ROLEID:GODMODE", "8");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:justice:ROLEID:GODMODE_HEALTH_ONLY", "8");
-						UserAccountPtr->SetUserAttribute("NAMESPACE:*:FILEUPLOAD", "10");
-
-
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
 					}

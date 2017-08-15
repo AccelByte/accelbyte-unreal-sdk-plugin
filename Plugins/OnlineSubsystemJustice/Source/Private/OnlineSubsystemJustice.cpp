@@ -132,6 +132,11 @@ IOnlineTurnBasedPtr FOnlineSubsystemJustice::GetTurnBasedInterface() const
     return nullptr;
 }
 
+FText FOnlineSubsystemJustice::GetOnlineServiceName() const
+{
+	return FText();
+}
+
 bool FOnlineSubsystemJustice::Tick(float DeltaTime)
 {
 	if (!FOnlineSubsystemImpl::Tick(DeltaTime))
