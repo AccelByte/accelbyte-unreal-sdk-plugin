@@ -12,7 +12,7 @@
 #include "Runtime/Core/Public/Misc/Guid.h"
 #include "OpenTracingJustice.h"
 
-class FPermission;
+class FPermissionJustice;
 
 class FOAuthTokenJustice : public FOnlineJsonSerializable
 {
@@ -67,7 +67,7 @@ public:
 	 TArray Permissions;
 	 */
 	
-	TArray<FPermission> Permissions;
+	TArray<FPermissionJustice> Permissions;
 	TArray<FString> Roles;
 		
 	FString UserId;
@@ -217,11 +217,11 @@ private:
 
 typedef TSharedPtr<FOnlineIdentityJustice, ESPMode::ThreadSafe> FOnlineIdentityJusticePtr;
 
-class FPermission
+class FPermissionJustice
 {
 public:
 	FString Resource;
 	int32 Action;
-	FPermission(FString resource, int32 action) :Resource(resource),Action(action)
+	FPermissionJustice(FString resource, int32 action) :Resource(resource),Action(action)
 	{	}
 };
