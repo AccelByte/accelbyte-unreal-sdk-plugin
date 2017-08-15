@@ -126,8 +126,8 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 			if (FoundAttr != NULL)
 			{
 				OutAttrValue = *FoundAttr;
-				int VerifyBit = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
-				if (CheckedActionBit == -1 || VerifyBit == 0)
+				int Verify = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
+				if (CheckedActionBit == -1 || Verify == 0)
 				{
 					return true;
 				}
@@ -356,7 +356,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 							TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
 							FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
 							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-							FPermission PermissionObject = FPermission(Resource, Action);
+							FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
 							UserAccountPtr->Token.Permissions.Add(PermissionObject);
 							UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
