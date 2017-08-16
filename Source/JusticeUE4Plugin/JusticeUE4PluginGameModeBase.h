@@ -7,7 +7,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "Online.h"
 #include "JusticeUE4PluginGameModeBase.generated.h"
-
 /**
  * 
  */
@@ -34,3 +33,4 @@ private:
 	const int32 DefaultLocalUserNum = 0;
 
 };
+

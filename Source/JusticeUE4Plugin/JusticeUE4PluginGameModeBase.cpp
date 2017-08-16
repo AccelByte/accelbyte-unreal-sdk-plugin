@@ -43,26 +43,4 @@ void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, 
 {
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginCompleteHandle);
 	UE_LOG(LogOnline, Log, TEXT("Game received login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
-
-	/*
-	//Query Example
-	FString CheckedResource = TEXT("NAMESPACE:justice:USER:t9sk283j21i8:ORDER:rec231:action:2");  //check permission of certain user to read certain order record	
-	FString CheckedResource = TEXT("NAMESPACE:evil:USER:*:ORDER:*:action:15");                    //Check any user's permission to do anything on any order record
-	FString CheckedResource = TEXT("NAMESPACE:justice:ROLEID:GODMODE");                           //check if a client/user have godmode role	
-	FString CheckedResource = TEXT("NAMESPACE:justice:ROLEID:GODMODE*");                          //check if a client/user have role prefixed with GODMODE
-	*/
-	FString CheckedResource = TEXT("NAMESPACE:justice:PAYMENT:action:8");
-	FString Result;	
-
-	if (Identity->GetUserAccount(UserId)->GetUserAttribute(CheckedResource, Result))
-	{
-		//granting permissions
-		UE_LOG(LogTemp, Warning, TEXT("Granting permission of %s"), *CheckedResource);
-	}
-	else
-	{
-		//denying permissions
-		UE_LOG(LogTemp, Warning, TEXT("Denying permission of %s"), *CheckedResource);
-	}	
 }
-
