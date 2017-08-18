@@ -1,45 +1,75 @@
 #include "AutomationTest.h"
 #include "AutomationCommon.h"
 #include "OnlineIdentityJustice.h"
+#include "FileHelper.h"
+#include "Paths.h"
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(FPermissionQueryTest, "PermissionQueryTest", (EAutomationTestFlags::EditorContext | EAutomationTestFlags::NonNullRHI | EAutomationTestFlags::EngineFilter))
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FPermissionQueryTest, "PermissionQueryTest", (EAutomationTestFlags::EditorContext | EAutomationTestFlags::NonNullRHI | EAutomationTestFlags::ProductFilter))
 //IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPermissionQueryTest, "PermissionQueryTest", (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter))
 
-//TODO : GetTests for complex automation
-//void FPermissionQueryTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
-//{
-//	TArray<FString> QueryArray;
-//	QueryArray.Add("NAMESPACE:justice:USER:t9sk283j421i8:ORDER:rec231:action:15");	//check exact query 				(exp deny)	
-//	QueryArray.Add("NAMESPACE:justice:USER:342t2345yw:ORDER:rec231:action:15");		//check 1 wc		 				(exp deny)	
-//	QueryArray.Add("NAMESPACE:evil:USER:3k123l4k1:ACHIEVEMENT:ach342w:action:15");	//check incorrct resource			(exp deny)
-//	OutBeautifiedNames.Append(QueryArray);
-//	OutTestCommands.Append(QueryArray);
-//}
+TSharedPtr<FUserOnlineAccount> AccountMock;
+
+void FPermissionQueryTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+{
+	TArray<FString> FileArray;
+	TArray<FString> QueryArray;
+
+	AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));
+
+	//TestCaseFileFormat [0]Source, [1]Action, [2]Query, [3]ExpectedResult(1 Grant 0 Deny)
+	FString FilePath = FString (FPaths::GameDir() + "Plugins/OnlineSubsystemJustice/TestCase/PermissionQueryTestCase.csv");
+	FFileHelper::LoadANSITextFileToStrings(*FilePath, NULL, FileArray);
+	if(FileArray.Num()>0)
+	{
+		for (FString FileLine : FileArray)
+		{
+			TArray<FString> FileLineParsed;
+			FileLine.ParseIntoArray(FileLineParsed, TEXT(","), false);
+			if ( !FileLineParsed[0].IsEmpty() && !FileLineParsed[1].IsEmpty() )
+			{
+				AccountMock->SetUserAttribute(FileLineParsed[0], FileLineParsed[1]);
+			}
+			QueryArray.Add(FileLineParsed[2]+","+FileLineParsed[3]);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[FAIL] Test cases was not loaded"));
+
+	}
+
+	OutBeautifiedNames.Append(QueryArray);
+	OutTestCommands.Append(QueryArray);
+}
 
 bool FPermissionQueryTest::RunTest(const FString & Parameters)
 {
-	UE_LOG(LogTemp, Warning, TEXT("RUNNING SIMPLE TEST PERMISSION QUERY"));
-
-	//mocking account
-	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));
-
-	//mock permission token
-	// TODO : add moro for complex testing 
-	AccountMock->SetUserAttribute("NAMESPACE:*:FILEUPLOAD", "10");
-
-	//querying permission token
-	// TODO : change "CheckedResource"
-	FString CheckedResource = "NAMESPACE:justice:FILEUPLOAD:action:8";
+	//Param format [0]Query,[1]ExpectedResult
+	//TODO CLEAN THIS SHIT
+	TArray<FString> QueryResultArray;
+	Parameters.ParseIntoArray(QueryResultArray, TEXT(","), false);
+	
+	//querying permission
 	FString Result;
 	if (AccountMock->GetUserAttribute(Parameters, Result))
 	{
 		//granting permissions
-		UE_LOG(LogTemp, Warning, TEXT("Granting permission of %s, result %s"), *Parameters, *Result);
+		UE_LOG(LogTemp, Warning, TEXT("GRANT permission of %s, action result %s"), *QueryResultArray[0], *Result);
+		if (QueryResultArray[1] == TEXT("0"))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL"));
+			return false;
+		}
 	}
 	else
 	{
 		//denying permissions
-		UE_LOG(LogTemp, Warning, TEXT("Denying permission of %s, result %s"), *Parameters, *Result);
+		UE_LOG(LogTemp, Warning, TEXT("DENY permission of %s, action result %s"), *QueryResultArray[0], *Result);
+		if (QueryResultArray[1] == TEXT("1"))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL"));
+			return false;
+		}
 	}
 	return true;
 }
