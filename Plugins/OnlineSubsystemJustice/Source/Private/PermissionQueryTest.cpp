@@ -45,13 +45,11 @@ void FPermissionQueryTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<
 bool FPermissionQueryTest::RunTest(const FString & Parameters)
 {
 	//Param format [0]Query,[1]ExpectedResult
-	//TODO CLEAN THIS SHIT
 	TArray<FString> QueryResultArray;
 	Parameters.ParseIntoArray(QueryResultArray, TEXT(","), false);
-	
 	//querying permission
 	FString Result;
-	if (AccountMock->GetUserAttribute(Parameters, Result))
+	if (AccountMock->GetUserAttribute(QueryResultArray[0], Result))
 	{
 		//granting permissions
 		UE_LOG(LogTemp, Warning, TEXT("GRANT permission of %s, action result %s"), *QueryResultArray[0], *Result);
