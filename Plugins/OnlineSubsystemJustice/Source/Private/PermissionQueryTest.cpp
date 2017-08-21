@@ -5,7 +5,6 @@
 #include "Paths.h"
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(FPermissionQueryTest, "PermissionQueryTest", (EAutomationTestFlags::EditorContext | EAutomationTestFlags::NonNullRHI | EAutomationTestFlags::ProductFilter))
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(FPermissionQueryTest, "PermissionQueryTest", (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter))
 
 TSharedPtr<FUserOnlineAccount> AccountMock;
 
@@ -35,7 +34,6 @@ void FPermissionQueryTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray<
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[FAIL] Test cases was not loaded"));
-
 	}
 
 	OutBeautifiedNames.Append(QueryArray);
@@ -52,20 +50,18 @@ bool FPermissionQueryTest::RunTest(const FString & Parameters)
 	if (AccountMock->GetUserAttribute(QueryResultArray[0], Result))
 	{
 		//granting permissions
-		UE_LOG(LogTemp, Warning, TEXT("GRANT permission of %s, action result %s"), *QueryResultArray[0], *Result);
 		if (QueryResultArray[1] == TEXT("0"))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL"));
+			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL : GRANT permission of %s, action result %s"), *QueryResultArray[0], *Result);
 			return false;
 		}
 	}
 	else
 	{
 		//denying permissions
-		UE_LOG(LogTemp, Warning, TEXT("DENY permission of %s, action result %s"), *QueryResultArray[0], *Result);
 		if (QueryResultArray[1] == TEXT("1"))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL"));
+			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL : DENY permission of %s, action result %s"), *QueryResultArray[0], *Result);
 			return false;
 		}
 	}
