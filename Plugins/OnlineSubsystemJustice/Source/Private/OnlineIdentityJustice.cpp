@@ -136,12 +136,15 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 				int Verify = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
 				if (CheckedActionBit == -1 || Verify == 0)
 				{
+					OutAttrValue = Key +":action:"+ *FoundAttr;
 					return true;
 				}
+				OutAttrValue = "Match found for "+Key+" but action permitted is "+*UserAttributes.Find(Key);
 				return false;
 			}
 		}
 	}
+	OutAttrValue = TEXT("No match found");
 	return false;
 }
 

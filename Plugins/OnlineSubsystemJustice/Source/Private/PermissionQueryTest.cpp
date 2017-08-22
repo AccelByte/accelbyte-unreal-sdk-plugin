@@ -4,185 +4,228 @@
 #define DETAIL_AUTOMATION_TEST_LOG
 
 const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); //Context: EditorContext (run via editor cli) ClientContext (run via external cli)
-TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 
-bool RunQuery(const FString & Parameters)
+bool RunQuery(TSharedPtr<FUserOnlineAccount> AccountMock, FString &Query, bool &bExpectedResult)
 {
-	//Param format [0]Query,[1]ExpectedResult
-	TArray<FString> QueryResultArray;
-	Parameters.ParseIntoArray(QueryResultArray, TEXT(","), false);
-	//querying permission
 	FString OutQuery;
-	bool Result = AccountMock->GetUserAttribute(QueryResultArray[0], OutQuery);
-	//AccountMock.Reset();
-	if (Result)
-	{
-		//granting permissions
-		if (QueryResultArray[1] == TEXT("0"))
-		{
+	bool bResult = AccountMock->GetUserAttribute(Query, OutQuery);
+
+	//Catch detailed result from query processing
 #ifdef DETAIL_AUTOMATION_TEST_LOG
-			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL : GRANT permission of %s, action result %s"), *QueryResultArray[0], *OutQuery);
-#endif // DETAIL_AUTOMATION_TEST_LOG
-			return false;
-		}
+	if (bResult)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Grant permission for %s, Picking %s"), *Query, *OutQuery);
 	}
 	else
 	{
-		//denying permissions
-		if (QueryResultArray[1] == TEXT("1"))
-		{
-#ifdef DETAIL_AUTOMATION_TEST_LOG
-			UE_LOG(LogTemp, Warning, TEXT("QUERY TEST FAIL : DENY permission of %s, action result %s"), *QueryResultArray[0], *OutQuery);
-#endif // DETAIL_AUTOMATION_TEST_LOG
-			return false;
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Deny permission for %s, %s"), *Query, *OutQuery);
 	}
-	return true;
+#endif // DETAIL_AUTOMATION_TEST_LOG
+
+	return bResult;
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(WildcardMatchOnQuery, "PermissionTest.WildcardMatch.OnQuery", AutomationFlagMask);
-void WildcardMatchOnQuery::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+bool AssertResult(bool &bExpectedResult, bool &bQueryResult)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	if (bExpectedResult == bQueryResult)
+	{
+		return true;
+	}
+	return false;
+}
 
-	//Wilcards on query test
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryCW, "PermissionTest.WildcardMatch.OnQuery.ConsecutiveWildcard", AutomationFlagMask);
+bool FWildcardMatchOnQueryCW::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:USER:accelpower:ORDER:Rec0x02"), TEXT("15"));
+	FString Query = TEXT("NAMESPACE:justice:USER:*:ORDER:*:action:15");
+	bool bExpectedResult = true;
+	
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	QueryArray.Add(FString("NAMESPACE:justice:USER:*:ORDER:*:action:*")		+ FString(",1")); //put wildcard in query
-	QueryArray.Add(FString("NAMESPACE:evil:USER:*:ORDER:*:action:*")		+ FString(",0")); //preceeding resource must match
-
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool WildcardMatchOnQuery::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(WildcardMatchOnPermission, "PermissionTest.WildcardMatch.OnPermission", AutomationFlagMask);
-void WildcardMatchOnPermission::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryPR, "PermissionTest.WildcardMatch.OnQuery.PreceedingResourceNotMatch", AutomationFlagMask);
+bool FWildcardMatchOnQueryPR::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:USER:accelpower:ORDER:Rec0x02"), TEXT("15"));
+	FString Query = TEXT("NAMESPACE:evil:USER:*:ORDER:*:action:*");
+	bool bExpectedResult = false;
 
-	//wildcard on permission test
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionAQ, "PermissionTest.WildcardMatch.OnPermission.AnyQuery", AutomationFlagMask);
+bool FWildcardMatchOnPermissionAQ::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:*:FULFILLMENT:*"), TEXT("15"));
+	FString Query = TEXT("NAMESPACE:evil:FULFILLMENT:GrantItem:action:7");
+	bool bExpectedResult = true;
+
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionMR, "PermissionTest.WildcardMatch.OnPermission.MissmatchResult", AutomationFlagMask);
+bool FWildcardMatchOnPermissionMR::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:*:FULFILLMENT:*"), TEXT("7"));
+	FString Query = TEXT("NAMESPACE:justice:DUTY:*:action:7");
+	bool bExpectedResult = false;
 
-	QueryArray.Add(FString("NAMESPACE:evil:FULFILLMENT:GrantItem:action:7")	+ FString(",1"));//any resource specification will be granted
-	QueryArray.Add(FString("NAMESPACE:justice:DUTY:*:action:7")				+ FString(",0"));//intended resource must matching
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool WildcardMatchOnPermission::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(WildcardMatchOnAction, "PermissionTest.WildcardMatch.OnAction", AutomationFlagMask);
-void WildcardMatchOnAction::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionCA, "PermissionTest.WildcardMatch.OnAction.CompleteAction", AutomationFlagMask);
+bool FWildcardMatchOnActionCA::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;	//format : {query},{expectedresult}
-
-	//wildcard on permission test
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:evil:ACHIEVEMENT:*"), TEXT("7"));
+	FString Query = TEXT("NAMESPACE:evil:ACHIEVEMENT:Daily:action:7");
+	bool bExpectedResult = true;
 
-	QueryArray.Add(FString("NAMESPACE:evil:ACHIEVEMENT:Daily:action:7") + FString(",1"));
-	QueryArray.Add(FString("NAMESPACE:evil:ACHIEVEMENT:*")				+ FString(",0"));//action need to be specified
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool WildcardMatchOnAction::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(LengthMatch, "PermissionTest.LengthMatch", AutomationFlagMask);
-void LengthMatch::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionMA, "PermissionTest.WildcardMatch.OnAction.MissingAction", AutomationFlagMask);
+bool FWildcardMatchOnActionMA::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:evil:ACHIEVEMENT:*"), TEXT("7"));
+	FString Query = TEXT("NAMESPACE:evil:ACHIEVEMENT:*");
+	bool bExpectedResult = false;
 
-	//Query length Test
-	AccountMock->SetUserAttribute(TEXT("NAMESPACE:evil:USER:accelpower:LEVEL:PET"), TEXT("15"));
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	QueryArray.Add(FString("NAMESPACE:evil:USER:accelpower:LEVEL:PET:action:15")	+ FString(",1"));
-	QueryArray.Add(FString("NAMESPACE:evil:LEVEL:PET:action:15")					+ FString(",0")); //query format incomplete
-
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool LengthMatch::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(BitmaskMatch, "PermissionTest.BitmaskMatch", AutomationFlagMask);
-void BitmaskMatch::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchPM, "PermissionTest.LengthMatch.PerfectMatch", AutomationFlagMask);
+bool FLengthMatchPM::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:evil:USER:accelpower:LEVEL:Pet"), TEXT("15"));
+	FString Query = TEXT("NAMESPACE:evil:USER:accelpower:LEVEL:Pet:action:15");
+	bool bExpectedResult = true;
 
-	//Bitmasking Test
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchMM, "PermissionTest.LengthMatch.MissMatch", AutomationFlagMask);
+bool FLengthMatchMM::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:evil:USER:accelpower:LEVEL:Pet"), TEXT("15"));
+	FString Query = TEXT("NAMESPACE:evil:LEVEL:Pet:action:15");
+	bool bExpectedResult = false;
+
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchIA, "PermissionTest.BitmaskMatch.InsufficientAction", AutomationFlagMask);
+bool FBitmaskMatchIA::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:FILEUPLOAD"), TEXT("10"));
+	FString Query = TEXT("NAMESPACE:justice:FILEUPLOAD:action:1");
+	bool bExpectedResult = false;
 
-	QueryArray.Add(FString("NAMESPACE:justice:FILEUPLOAD:action:1") + FString(",0"));//bitmask 10(read delete) doesnt contain 1(create)
-	QueryArray.Add(FString("NAMESPACE:justice:FILEUPLOAD:action:8") + FString(",1"));//bitmask 10(read delete) contains 8(delete)
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool BitmaskMatch::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(RoleMatch, "PermissionTest.RoleMatch", AutomationFlagMask);
-void RoleMatch::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchSA, "PermissionTest.BitmaskMatch.SufficientAction", AutomationFlagMask);
+bool FBitmaskMatchSA::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:FILEUPLOAD"), TEXT("10"));
+	FString Query = TEXT("NAMESPACE:justice:FILEUPLOAD:action:8");
+	bool bExpectedResult = true;
 
-	//Role Match Test
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMAtchRE, "PermissionTest.RoleMatch.RoleExist", AutomationFlagMask);
+bool FRoleMAtchRE::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:ROLEID:SUPPORT_MINIMUM"), TEXT("1"));
+	FString Query = TEXT("NAMESPACE:justice:ROLEID:SUPPORT_MINIMUM");
+	bool bExpectedResult = true;
 
-	//Role is set of permissions on several resources, no action needed to be specified
-	QueryArray.Add(FString("NAMESPACE:justice:ROLEID:SUPPORT_MINIMUM")		+ FString(",1"));
-	QueryArray.Add(FString("NAMESPACE:justice:ROLEID:SUPPORT_SUP_ADMIN")	+ FString(",0"));
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
-}
-bool RoleMatch::RunTest(const FString & Parameters)
-{
-	return RunQuery(Parameters);
+	return AssertResult(bExpectedResult, bQueryResult);
 }
 
-IMPLEMENT_COMPLEX_AUTOMATION_TEST(TrailMatch, "PermissionTest.TrailMatch", AutomationFlagMask);
-void TrailMatch::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString>& OutTestCommands) const
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMAtchNR, "PermissionTest.RoleMatch.NoRole", AutomationFlagMask);
+bool FRoleMAtchNR::RunTest(const FString & Parameters)
 {
-	TArray<FString> QueryArray;		//format : {query},{expectedresult}
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:ROLEID:SUPPORT_MINIMUM"), TEXT("1"));
+	FString Query = TEXT("NAMESPACE:justice:ROLEID:SUPPORT_SUPER_ADMIN");
+	bool bExpectedResult = false;
 
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchAS, "PermissionTest.TrailMatch.AcceptString", AutomationFlagMask);
+bool FTrailMatchAS::RunTest(const FString & Parameters)
+{
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
 	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:ROLEID:GODMODE_HEALTH_ONLY"), TEXT("1"));
+	FString Query = TEXT("NAMESPACE:justice:ROLEID:GODMODE*");
+	bool bExpectedResult = true;
 
-	QueryArray.Add(FString("NAMESPACE:justice:ROLEID:GODMODE")	+ FString(",0"));
-	QueryArray.Add(FString("NAMESPACE:justice:ROLEID:GODMODE*")	+ FString(",1"));//querying prefixed permission/role is allowed
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
 
-	OutTestCommands.Append(QueryArray);
-	OutBeautifiedNames.Append(QueryArray);
-
-	QueryArray.Empty();
+	return AssertResult(bExpectedResult, bQueryResult);
 }
-bool TrailMatch::RunTest(const FString & Parameters)
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchRS, "PermissionTest.TrailMatch.RejectString", AutomationFlagMask);
+bool FTrailMatchRS::RunTest(const FString & Parameters)
 {
-	return RunQuery(Parameters);
+	TSharedPtr<FUserOnlineAccount> AccountMock = MakeShareable(new FUserOnlineAccountJustice("test@accelbyte.com"));;
+	AccountMock->SetUserAttribute(TEXT("NAMESPACE:justice:ROLEID:GODMODE_HEALTH_ONLY"), TEXT("1"));
+	FString Query = TEXT("NAMESPACE:justice:ROLEID:GODMODE");
+	bool bExpectedResult = false;
+
+	bool bQueryResult = RunQuery(AccountMock, Query, bExpectedResult);
+	AccountMock.Reset();
+
+	return AssertResult(bExpectedResult, bQueryResult);
 }
