@@ -80,6 +80,13 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 		Query.Append(FullQuery);
 	}
 
+	//permission query without action specified will be denied instantly
+	if (!AttrName.Contains(TEXT("ROLE"), ESearchCase::CaseSensitive, ESearchDir::FromStart) && CheckedActionBit==-1)
+	{
+		OutAttrValue = TEXT("Action must be specified for permission query");
+		return false;
+	}
+
 	//find perms and action bit to compare
 	FString CheckedTrails;
 	UserAttributes.GetKeys(KeyArray);
