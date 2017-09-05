@@ -1,4 +1,5 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2017 AccelByte Inc. All Rights Reserved.
 
 #include "OnlineSubsystemJustice.h"
 #include "HAL/RunnableThread.h"
