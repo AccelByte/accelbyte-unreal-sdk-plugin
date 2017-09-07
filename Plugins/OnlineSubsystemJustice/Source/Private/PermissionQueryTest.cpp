@@ -1,7 +1,9 @@
+// Copyright (c) 2017 AccelByte Inc. All Rights Reserved.
 #include "AutomationTest.h"
 #include "OnlineIdentityJustice.h"
 
-const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); //Context: EditorContext (run via editor cli) ClientContext (run via external cli)
+const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
+// Context: EditorContext (run via editor cli) ClientContext (run via external cli)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryCW, "PermissionTest.WildcardMatch.OnQuery.ConsecutiveWildcard", AutomationFlagMask);
 bool FWildcardMatchOnQueryCW::RunTest(const FString & Parameters)
