@@ -12,6 +12,7 @@
 #include "OnlineSubsystemJusticeTypes.h"
 #include "Runtime/Core/Public/Misc/Guid.h"
 #include "OpenTracingJustice.h"
+#include "HTTPJustice.h"
 
 class FPermissionJustice;
 
@@ -166,7 +167,8 @@ public:
 	virtual FString GetPlayerNickname(const FUniqueNetId& UserId) const override;
 	virtual FString GetAuthToken(int32 LocalUserNum) const override;
 	virtual void GetUserPrivilege(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, const FOnGetUserPrivilegeCompleteDelegate& Delegate) override;
-	virtual FPlatformUserId GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) override;
+	virtual FPlatformUserId GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const override;
+	virtual void RevokeAuthToken(const FUniqueNetId& UserId, const FOnRevokeAuthTokenCompleteDelegate& Delegate) override;
 	virtual FString GetAuthType() const override;
 
 	// FOnlineIdentityJustice

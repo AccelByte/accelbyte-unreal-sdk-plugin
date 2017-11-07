@@ -573,7 +573,7 @@ void FOnlineIdentityJustice::GetUserPrivilege(const FUniqueNetId& UserId, EUserP
 	Delegate.ExecuteIfBound(UserId, Privilege, (uint32)EPrivilegeResults::NoFailures);
 }
 
-FPlatformUserId FOnlineIdentityJustice::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId)
+FPlatformUserId FOnlineIdentityJustice::GetPlatformUserIdFromUniqueNetId(const FUniqueNetId& UniqueNetId) const
 {
 	for (int i = 0; i < MAX_LOCAL_PLAYERS; ++i)
 	{
@@ -585,6 +585,10 @@ FPlatformUserId FOnlineIdentityJustice::GetPlatformUserIdFromUniqueNetId(const F
 	}
 
 	return PLATFORMUSERID_NONE;
+}
+
+void FOnlineIdentityJustice::RevokeAuthToken(const FUniqueNetId & UserId, const FOnRevokeAuthTokenCompleteDelegate & Delegate)
+{
 }
 
 FString FOnlineIdentityJustice::GetAuthType() const
