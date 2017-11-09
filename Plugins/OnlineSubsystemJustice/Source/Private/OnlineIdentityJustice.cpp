@@ -589,6 +589,7 @@ FPlatformUserId FOnlineIdentityJustice::GetPlatformUserIdFromUniqueNetId(const F
 
 void FOnlineIdentityJustice::RevokeAuthToken(const FUniqueNetId & UserId, const FOnRevokeAuthTokenCompleteDelegate & Delegate)
 {
+	unimplemented();
 }
 
 FString FOnlineIdentityJustice::GetAuthType() const
