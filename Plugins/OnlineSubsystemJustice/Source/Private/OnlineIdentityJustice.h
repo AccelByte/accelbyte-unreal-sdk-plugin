@@ -216,6 +216,7 @@ private:
 	/** Client OAuth Token */
 	FOAuthTokenJustice Token;
 
+
 };
 
 typedef TSharedPtr<FOnlineIdentityJustice, ESPMode::ThreadSafe> FOnlineIdentityJusticePtr;
