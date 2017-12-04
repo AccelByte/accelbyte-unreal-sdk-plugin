@@ -11,7 +11,7 @@
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "OnlineSubsystemJusticeTypes.h"
 #include "Runtime/Core/Public/Misc/Guid.h"
-#include "OpenTracingJustice.h"
+#include "AWSXRayJustice.h"
 #include "HTTPJustice.h"
 
 class FPermissionJustice;
@@ -189,10 +189,10 @@ private:
 
 	void TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
 									TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
-									TSharedRef<FOpenTracingJustice> RequestTrace);
+									TSharedRef<FAWSXRayJustice> RequestTrace);
 	void TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
 								   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
-								   TSharedRef<FOpenTracingJustice> RequestTrace);
+								   TSharedRef<FAWSXRayJustice> RequestTrace);
 
 	void ScheduleNextTokenRefresh(FOAuthTokenJustice& OutToken);
 

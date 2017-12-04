@@ -8,6 +8,7 @@
 #include "OnlineSubsystem.h"
 #include "IPAddress.h"
 #include "SocketSubsystem.h"
+#include "AWSXRayJustice.h"
 
 FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* InSubsystem)
 {
@@ -188,7 +189,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FOpenTracingJustice> RequestTrace = MakeShareable(new FOpenTracingJustice());
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 
 	if (LocalUserNum < 0 || LocalUserNum >= MAX_LOCAL_PLAYERS)
 	{
@@ -221,12 +222,14 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(AccountCredentials.Id));
 		}
 
+
 		Request->SetURL(BaseURL + TEXT("/oauth/token"));
 		Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 		Request->SetVerb(TEXT("POST"));
 		Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 		Request->SetHeader(TEXT("Accept"),        TEXT("application/json"));
-		Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->FOpenTracingJustice::XRayTraceIDStr());
+		
+		Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
 		// Refresh grant
 		if (UserAccountPtr->Token.ShouldRefresh())
@@ -238,7 +241,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			{
 				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
-			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): refresh grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->XRayTraceIDStr());
+			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): refresh grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
 		}
 		// Password grant
 		else if (!AccountCredentials.Token.IsEmpty())
@@ -252,23 +255,23 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 				ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 			}
 	
-			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->XRayTraceIDStr());
+			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): password grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
 		}
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Login failed. User=%s Error=%s %s ReqTime=%.3f"), *AccountCredentials.Id, *ErrorStr, *RequestTrace->XRayTraceIDStr(), Request->GetElapsedTime());
+		UE_LOG_ONLINE(Warning, TEXT("Login failed. User=%s Error=%s %s ReqTime=%.3f"), *AccountCredentials.Id, *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), ErrorStr);
 		return false;
 	}
 
-	UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): request dispatched. User=%s %s"), *AccountCredentials.Id, *RequestTrace->XRayTraceIDStr());
+	UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): request dispatched. User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
 
 	return true;
 }
 
-void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FOpenTracingJustice> RequestTrace)
+void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FAWSXRayJustice> RequestTrace)
 {
 	FString ErrorStr;
 
@@ -328,17 +331,17 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->XRayTraceIDStr(), Request->GetElapsedTime());
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 		UserAccountPtr->Token = FOAuthTokenJustice();
 		return;
 	}
 
 	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. User=%s %s %s ReqTime=%.3f"),
-				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->XRayTraceIDStr(), Request->GetElapsedTime());
+				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 	
 }
 
-void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FOpenTracingJustice> RequestTrace)
+void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FAWSXRayJustice> RequestTrace)
 {
 	FString ErrorStr;
 
@@ -395,7 +398,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Token password grant failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->XRayTraceIDStr(), Request->GetElapsedTime());
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 		UserAccountPtr->Token = FOAuthTokenJustice();
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
 		TriggerOnLoginChangedDelegates(LocalUserNum);
@@ -403,7 +406,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	}
 	
 	UE_LOG_ONLINE(Log, TEXT("Token password grant successful. User=%s %s %s ReqTime=%.3f"),
-				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->XRayTraceIDStr(), Request->GetElapsedTime());
+				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
 	TriggerOnLoginChangedDelegates(LocalUserNum);
 }
