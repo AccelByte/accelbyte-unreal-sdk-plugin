@@ -21,7 +21,7 @@ class FOAuthTokenJustice : public FOnlineJsonSerializable
 	
 public:
 
-	FOAuthTokenJustice(const FOpenTracingJustice& Parent=FOpenTracingJustice()) :
+	FOAuthTokenJustice(const FAWSXRayJustice& Parent= FAWSXRayJustice()) :
 	ExpiresIn(0),
 	LastTokenRefreshUtc(FDateTime::MinValue()),
 	NextTokenRefreshUtc(FDateTime::MinValue()),
@@ -94,7 +94,7 @@ public:
 	FTimespan TokenRefreshBackoff;
 
 	// Trace the token
-	FOpenTracingJustice Trace;
+	FAWSXRayJustice Trace;
 };
 
 

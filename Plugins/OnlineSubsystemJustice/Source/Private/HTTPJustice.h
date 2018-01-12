@@ -9,7 +9,6 @@
 
 #include "UObject/CoreOnline.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
-#include "OpenTracingJustice.h"
 
 /**
  * Justice HTTP
@@ -29,7 +28,6 @@ public:
 	}
 
 	static FString BasicAuth(const FString& Username, const FString& Password);
-	static TSharedRef<IHttpRequest> CreateRequest(const FOpenTracingJustice& Parent);
 
 private:
 	
