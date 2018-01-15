@@ -8,6 +8,7 @@
 #include "OnlineAsyncTaskManager.h"
 
 #define DEFAULT_REFRESH_TOKEN_CHECK_INTERVAL_SECONDS 60
+DECLARE_DELEGATE_ThreeParams(FOnScheduleTickDelegate, struct FDateTime, int32, class FOnlineSubsystemJustice*);
 
 /**
  *	Justice version of the async task manager to register the various Justice callbacks with the engine
@@ -40,4 +41,13 @@ public:
 
 	// FOnlineAsyncTaskManager
 	virtual void OnlineTick() override;
+	void UpdateDelegateSchedule(FString name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate);
+	void UnregisterDelegate(FString name);
+	struct FSchedule 
+	{		
+		FTimespan Schedule;
+		FDateTime NextUpdate;
+		FOnScheduleTickDelegate Delegate;
+	};
+	TMap<FString, FSchedule> RegisteredUpdatedDelegate;
 };

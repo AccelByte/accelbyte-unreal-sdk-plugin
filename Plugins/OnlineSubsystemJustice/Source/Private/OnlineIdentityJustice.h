@@ -216,6 +216,10 @@ private:
 	/** Client OAuth Token */
 	FOAuthTokenJustice Token;
 
+	const FString UPDATE_KEY = "UpdateKey";
+	FOnlineAsyncTaskManagerJustice*  OnlineAsyncTaskManagerJustice;
+	void OnRefreshToken(struct FDateTime time , int32 nextTick, class FOnlineSubsystemJustice* onlineSubsytemJustice);
+	FOnScheduleTickDelegate OnRefreshTokenLogDelegate;
 
 };
 

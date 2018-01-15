@@ -27,12 +27,29 @@ FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* In
 	{
 		UE_LOG_ONLINE(Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
 	}
+	OnlineAsyncTaskManagerJustice = InSubsystem->GetOnlineAsyncTaskManager();
 }
 
 FOnlineIdentityJustice::FOnlineIdentityJustice()
 {
 }
 
+void FOnlineIdentityJustice::OnRefreshToken(FDateTime time, int32 nextTick, FOnlineSubsystemJustice * onlineSubsytemJustice)
+{
+	for (TSharedPtr<FUserOnlineAccount> UserAccountPtr : GetAllUserAccounts())
+	{
+		FString LocalUserNum;
+		UserAccountPtr->GetAuthAttribute(FString("LocalUserNum"), LocalUserNum);
+				
+		FOnlineAccountCredentials Credentials;
+		Credentials.Id = UserAccountPtr->GetUserId()->ToString();
+
+		if (!Login(FCString::Atoi(*LocalUserNum), Credentials))
+		{
+			UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token. User=%s"), *UserAccountPtr->GetUserId()->ToString());
+		}
+	}
+}
 FOnlineIdentityJustice::~FOnlineIdentityJustice()
 {
 }
@@ -295,6 +312,12 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 					{
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
+
+						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
+						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(UPDATE_KEY, 
+																			  FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) / 2),
+																		      UserAccountPtr->Token.NextTokenRefreshUtc, 
+																			  OnRefreshTokenLogDelegate);
 					}
 					else
 					{

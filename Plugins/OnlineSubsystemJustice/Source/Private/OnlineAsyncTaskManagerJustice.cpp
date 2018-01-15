@@ -13,23 +13,28 @@ void FOnlineAsyncTaskManagerJustice::OnlineTick()
 	check(JusticeSubsystem);
 	check(FPlatformTLS::GetCurrentThreadId() == OnlineThreadId || !FPlatformProcess::SupportsMultithreading());
 	
-	if ((FDateTime::UtcNow() - LastTokenRefreshCheckUtc) > FTimespan::FromSeconds(RefreshTokenCheckInterval))
+	for (auto& CheckRegisteredDelegate : RegisteredUpdatedDelegate)
 	{
-		LastTokenRefreshCheckUtc = FDateTime::UtcNow();
+		UE_LOG_ONLINE(Log, TEXT("NextTick Schedule= %s, UtcNow= %s"), *CheckRegisteredDelegate.Value.NextUpdate.ToIso8601(), *FDateTime::UtcNow().ToIso8601());
+		if (FDateTime::UtcNow() >= CheckRegisteredDelegate.Value.NextUpdate) {
+			CheckRegisteredDelegate.Value.Delegate.Execute(LastTokenRefreshCheckUtc, RefreshTokenCheckInterval, JusticeSubsystem);
+			FDateTime NextTick_Update = FDateTime::UtcNow() + FTimespan::FromSeconds(CheckRegisteredDelegate.Value.Schedule.GetSeconds());
 
-		IOnlineIdentityPtr IdentityInterface = JusticeSubsystem->GetIdentityInterface();
-		for (TSharedPtr<FUserOnlineAccount> UserAccountPtr : IdentityInterface->GetAllUserAccounts())
-		{
-			FString LocalUserNum;
-			UserAccountPtr->GetAuthAttribute(FString("LocalUserNum"), LocalUserNum);
-				
-			FOnlineAccountCredentials Credentials;
-			Credentials.Id = UserAccountPtr->GetUserId()->ToString();
-
-			if (!IdentityInterface->Login(FCString::Atoi(*LocalUserNum), Credentials))
-			{
-				UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token. User=%s"), *UserAccountPtr->GetUserId()->ToString());
-			}
-		}
+			UpdateDelegateSchedule(CheckRegisteredDelegate.Key, CheckRegisteredDelegate.Value.Schedule, NextTick_Update, CheckRegisteredDelegate.Value.Delegate);
+			UE_LOG_ONLINE(Warning, TEXT("Rescheduling RegisteredUpdateDelegate"));
+		}	
 	}
+}
+void FOnlineAsyncTaskManagerJustice::UpdateDelegateSchedule(FString name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate)
+ {
+	FSchedule HashValue;
+	HashValue.Schedule = schedule;
+	HashValue.NextUpdate = NextTick;
+	HashValue.Delegate = delegate;
+	UE_LOG(LogOnline, Log, TEXT("Hashing parameter into a table with updating delegate concepts"));
+	RegisteredUpdatedDelegate.Add(name, HashValue);
+}
+void FOnlineAsyncTaskManagerJustice::UnregisterDelegate(FString name) 
+{
+	RegisteredUpdatedDelegate.Remove(name);	
 }
