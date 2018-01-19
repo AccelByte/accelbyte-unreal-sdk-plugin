@@ -314,7 +314,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 						UserAccountPtr->Token.ScheduleNormalRefresh();
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
-						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(UPDATE_KEY, 
+						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
 																			  FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) / 2),
 																		      UserAccountPtr->Token.NextTokenRefreshUtc, 
 																			  OnRefreshTokenLogDelegate);

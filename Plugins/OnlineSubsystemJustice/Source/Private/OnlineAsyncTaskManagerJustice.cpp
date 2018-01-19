@@ -13,7 +13,7 @@ void FOnlineAsyncTaskManagerJustice::OnlineTick()
 	check(JusticeSubsystem);
 	check(FPlatformTLS::GetCurrentThreadId() == OnlineThreadId || !FPlatformProcess::SupportsMultithreading());
 	
-	for (auto& CheckRegisteredDelegate : RegisteredUpdatedDelegate)
+	for (TPair<int, FSchedule>& CheckRegisteredDelegate : RegisteredUpdatedDelegate)
 	{
 		UE_LOG_ONLINE(Log, TEXT("NextTick Schedule= %s, UtcNow= %s"), *CheckRegisteredDelegate.Value.NextUpdate.ToIso8601(), *FDateTime::UtcNow().ToIso8601());
 		if (FDateTime::UtcNow() >= CheckRegisteredDelegate.Value.NextUpdate) {
@@ -25,16 +25,16 @@ void FOnlineAsyncTaskManagerJustice::OnlineTick()
 		}	
 	}
 }
-void FOnlineAsyncTaskManagerJustice::UpdateDelegateSchedule(FString name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate)
+void FOnlineAsyncTaskManagerJustice::UpdateDelegateSchedule(int name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate)
  {
-	FSchedule HashValue;
-	HashValue.Schedule = schedule;
-	HashValue.NextUpdate = NextTick;
-	HashValue.Delegate = delegate;
+	FSchedule UpdateSchedule;
+	UpdateSchedule.Schedule = schedule;
+	UpdateSchedule.NextUpdate = NextTick;
+	UpdateSchedule.Delegate = delegate;
 	UE_LOG(LogOnline, Log, TEXT("Hashing parameter into a table with updating delegate concepts"));
-	RegisteredUpdatedDelegate.Add(name, HashValue);
+	RegisteredUpdatedDelegate.Add(name, UpdateSchedule);
 }
-void FOnlineAsyncTaskManagerJustice::UnregisterDelegate(FString name) 
+void FOnlineAsyncTaskManagerJustice::UnregisterDelegate(int name) 
 {
 	RegisteredUpdatedDelegate.Remove(name);	
 }

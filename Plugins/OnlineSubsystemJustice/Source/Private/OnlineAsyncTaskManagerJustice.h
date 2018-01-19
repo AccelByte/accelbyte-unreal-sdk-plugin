@@ -41,13 +41,13 @@ public:
 
 	// FOnlineAsyncTaskManager
 	virtual void OnlineTick() override;
-	void UpdateDelegateSchedule(FString name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate);
-	void UnregisterDelegate(FString name);
+	void UpdateDelegateSchedule(int name, FTimespan schedule, FDateTime NextTick, FOnScheduleTickDelegate delegate);
+	void UnregisterDelegate(int name);
 	struct FSchedule 
 	{		
 		FTimespan Schedule;
 		FDateTime NextUpdate;
 		FOnScheduleTickDelegate Delegate;
 	};
-	TMap<FString, FSchedule> RegisteredUpdatedDelegate;
+	TMap<int, FSchedule> RegisteredUpdatedDelegate;
 };
