@@ -374,32 +374,27 @@ void FOnlineIdentityJustice::TokenLogoutComplete(FHttpRequestPtr Request, FHttpR
 	}
 	else
 	{
-		switch (Response->GetResponseCode())
+		if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
 		{
-		case EHttpResponseCodes::Ok:
 			UE_LOG_ONLINE(Log, TEXT("Token logout receive success response "));
-			break;
-
-		default:
+		}
+		else
+		{
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
-			break;
 		}
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG_ONLINE(Warning, TEXT("Token logout. User=%s Error=%s %s %s ReqTime=%.3f"),
+		UE_LOG_ONLINE(Error, TEXT("Token logout. User=%s Error=%s %s %s ReqTime=%.3f"),
 			*UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 		UserAccountPtr->Token = FOAuthTokenJustice();
 		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
 		return;
 	}
 
-	// remove cached user account
 	UserAccounts.Remove(FUniqueNetIdString(*UserAccountPtr->GetUserIdStr()));
-	// remove cached user id
 	UserIds.Remove(LocalUserNum);
-	// not async but should call completion delegate anyway
 	TriggerOnLogoutCompleteDelegates(LocalUserNum, true);
 }
 
