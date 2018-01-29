@@ -198,6 +198,12 @@ private:
 								   TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
 								   TSharedRef<FAWSXRayJustice> RequestTrace);
 
+	void TokenLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful,
+							 TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum,
+							 TSharedRef<FAWSXRayJustice> RequestTrace);
+
+
+
 	void ScheduleNextTokenRefresh(FOAuthTokenJustice& OutToken);
 
 	/**

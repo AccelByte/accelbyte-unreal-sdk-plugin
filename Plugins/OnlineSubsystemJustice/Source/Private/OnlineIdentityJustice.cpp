@@ -364,6 +364,45 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	
 }
 
+void FOnlineIdentityJustice::TokenLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FAWSXRayJustice> RequestTrace)
+{
+	FString ErrorStr;
+
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::Ok:
+			UE_LOG_ONLINE(Log, TEXT("Token logout receive success response "));
+			break;
+
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			break;
+		}
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG_ONLINE(Warning, TEXT("Token logout. User=%s Error=%s %s %s ReqTime=%.3f"),
+			*UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+		UserAccountPtr->Token = FOAuthTokenJustice();
+		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
+		return;
+	}
+
+	// remove cached user account
+	UserAccounts.Remove(FUniqueNetIdString(*UserAccountPtr->GetUserIdStr()));
+	// remove cached user id
+	UserIds.Remove(LocalUserNum);
+	// not async but should call completion delegate anyway
+	TriggerOnLogoutCompleteDelegates(LocalUserNum, true);
+}
+
 void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr, int32 LocalUserNum, TSharedRef<FAWSXRayJustice> RequestTrace)
 {
 	FString ErrorStr;
@@ -436,16 +475,34 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 
 bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 {
+	FString ErrorStr;
+	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 	TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(LocalUserNum);
 	if (UserId.IsValid())
 	{
-		// remove cached user account
-		UserAccounts.Remove(FUniqueNetIdString(*UserId));
-		// remove cached user id
-		UserIds.Remove(LocalUserNum);
-		// not async but should call completion delegate anyway
-		TriggerOnLogoutCompleteDelegates(LocalUserNum, true);
 
+		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+		TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+
+		UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(UserId->ToString()));
+
+
+		Request->SetURL(BaseURL + TEXT("/oauth/revoke"));
+		Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
+		Request->SetVerb(TEXT("POST"));
+		Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+		Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+
+		Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+
+		FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.AccessToken));
+		Request->SetContentAsString(Grant);
+		Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenLogoutComplete, UserAccountPtr, LocalUserNum, RequestTrace);
+		if (!Request->ProcessRequest())
+		{
+			ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+		}
+		UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Logout() Token=%s"), *UserAccountPtr->Token.AccessToken);
 		return true;
 	}
 	else

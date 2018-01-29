@@ -19,15 +19,18 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	void BeginPlay();
+	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 private:
 
 	void OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr);
+	void OnLogoutCompleteDelegate(int32 LocalUserNum, bool bSuccessful);
 
 	const IOnlineSubsystem* OnlineSub;
 	IOnlineIdentityPtr Identity;
 	
 	FDelegateHandle LoginCompleteHandle;
+	FDelegateHandle LogoutCompleteHandle;
 
 	// Default to first local user 0
 	const int32 DefaultLocalUserNum = 0;
