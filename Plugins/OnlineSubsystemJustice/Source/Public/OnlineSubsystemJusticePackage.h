@@ -1,10 +1,6 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
-// Copyright (c) 2017 AccelByte Inc. All Rights Reserved.
-
-// Can't be #pragma once because other modules may define PACKAGE_SCOPE
-
-// Intended to be the last include in an exported class definition
-// Properly defines some members as "public to the module" vs "private to the consumer/user"
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #undef PACKAGE_SCOPE
 #ifdef ONLINESUBSYSTEMJUSTICE_PACKAGE
