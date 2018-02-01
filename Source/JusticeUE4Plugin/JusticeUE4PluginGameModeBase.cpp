@@ -9,6 +9,8 @@
 
 AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
 {
+	JusticeComponent = CreateDefaultSubobject<UFJusticeComponent>(TEXT("JusticeComponent"));
+	UFJusticeComponent::Instance = JusticeComponent;
 }
 
 void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -31,19 +33,21 @@ void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FStri
 	LogoutCompleteHandle = Identity->AddOnLogoutCompleteDelegate_Handle(
 		DefaultLocalUserNum,
 		FOnLogoutCompleteDelegate::CreateUObject(this, &AJusticeUE4PluginGameModeBase::OnLogoutCompleteDelegate));
-
 }
 
 void AJusticeUE4PluginGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// User login credentials
-	FOnlineAccountCredentials user;
-	user.Id = TEXT("test@example.com");
-	user.Token = TEXT("123456");
-	user.Type = TEXT("PasswordGrant");
-	Identity->Login(DefaultLocalUserNum, user);
+	//// User login credentials
+	//FOnlineAccountCredentials user;
+	//user.Id = TEXT("test@example.com");
+	//user.Token = TEXT("123456");
+	//user.Type = TEXT("PasswordGrant");
+	//Identity->Login(DefaultLocalUserNum, user);
+
+	JusticeComponent->ClientCredentialLogin();
+
 }
 
 void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -9,10 +9,25 @@ public class OnlineSubsystemJustice : ModuleRules
 {
 	public OnlineSubsystemJustice(ReadOnlyTargetRules Target) : base(Target)
     {
-		Definitions.Add("ONLINESUBSYSTEMJUSTICE_PACKAGE=1");
+        Definitions.Add("JUSTICEUTILITY_PACKAGE=1");
+        Definitions.Add("ONLINESUBSYSTEMJUSTICE_PACKAGE=1");
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PrivateDependencyModuleNames.AddRange(
+
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                 "Core",
+                 "CoreUObject",
+                 "Engine",
+                 "OnlineSubsystem",
+                 "OnlineSubsystemUtils",
+                 "Json",
+                 "JsonUtilities",
+            }
+        );
+
+        PrivateDependencyModuleNames.AddRange(
 			new string[] {
 				"Core", 
 				"CoreUObject", 

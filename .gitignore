@@ -76,3 +76,4 @@ DerivedDataCache/*
 Content/StarterContent/
 Plugins/OnlineSubsystemJustice/Binaries/
 Plugins/OnlineSubsystemJustice/Intermediate/
+*.bak

@@ -6,10 +6,12 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Guid.h"
 #include "Misc/OutputDeviceRedirector.h"
+#include "Misc/ConfigCacheIni.h"
 #include "OnlineSubsystem.h"
 #include "IPAddress.h"
 #include "SocketSubsystem.h"
 #include "AWSXRayJustice.h"
+#include "OnlineSubsystemJustice.h"
 
 FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* InSubsystem)
 {
@@ -130,7 +132,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 			}
 
 			//if nothing match check the string trails
-			CheckedTrails = Query[i];
+			FString CheckedTrails = Query[i];
 			if (!(
 				(CheckedTrails.Len() > 1)
 				&& CheckedTrails.RemoveFromEnd(TEXT("*"), ESearchCase::CaseSensitive)
@@ -209,7 +211,7 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	{
 		ErrorStr = FString::Printf(TEXT("Invalid LocalUserNum=%d"), LocalUserNum);
 	}
-	else if (AccountCredentials.Id.IsEmpty())
+	else if (AccountCredentials.Id.IsEmpty() && AccountCredentials.Type == "PasswordGrant")
 	{
 		ErrorStr = TEXT("Invalid account id, string empty");
 	}
@@ -249,11 +251,20 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 			}
 			UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Login(): refresh grant User=%s %s"), *AccountCredentials.Id, *RequestTrace->ToString());
 		}
-		// Password grant
-		else if (!AccountCredentials.Token.IsEmpty())
+		// Password or client_credentials
+		else  
 		{
-			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
-				*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+			FString Grant = "";
+			if ( AccountCredentials.Type == "PasswordGrant" && !AccountCredentials.Token.IsEmpty() )
+			{
+				Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
+					*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+
+			}
+			else if (AccountCredentials.Type == "ClientCredentials")
+			{
+				Grant = FString::Printf(TEXT("grant_type=client_credentials"));
+			}
 
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);						
