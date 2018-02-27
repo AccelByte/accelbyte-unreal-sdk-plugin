@@ -17,7 +17,6 @@ FOnlineIdentityJustice::FOnlineIdentityJustice(class FOnlineSubsystemJustice* In
 	{
 		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
 	}
-	BaseURL += TEXT("/iam");
 	
 	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), Client.Id, GEngineIni))
 	{
@@ -219,29 +218,28 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 	}
 	else
 	{
-		TSharedPtr<const FUniqueNetId>* UserId = UserIds.Find(LocalUserNum);
-		if (UserId == nullptr)
+		TSharedPtr<FUserOnlineAccountJustice>* UserAccountSearchPtr = UserAccounts.Find(LocalUserNum);
+		if (UserAccountSearchPtr == nullptr)
 		{
 			FUniqueNetIdString NewUserId(AccountCredentials.Id);
-			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id));
-			UserAccountPtr->UserAttributes.Add(TEXT("id"), AccountCredentials.Id);
+			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id)); //this should be email
+			
+			UserAccountPtr->SetUserAttribute(TEXT("id"), AccountCredentials.Id);
 			
 			// FIXME: need the LocalUserNum to call Login() on refresh, this a little annoying to convert to str and back to int
 			UserAccountPtr->AdditionalAuthData.Add(TEXT("LocalUserNum"), FString::Printf(TEXT("%d"), LocalUserNum));
 
 			// update/add cached entry for user
-			UserAccounts.Add(NewUserId, UserAccountPtr.ToSharedRef());
+			UserAccounts.Add(LocalUserNum, UserAccountPtr);
 			
-			// keep track of user ids for local users
-			UserIds.Add(LocalUserNum, UserAccountPtr->GetUserId());
 		}
 		else
 		{
-			UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(AccountCredentials.Id));
+			UserAccountPtr = *UserAccountSearchPtr;
 		}
 
 
-		Request->SetURL(BaseURL + TEXT("/oauth/token"));
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
 		Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 		Request->SetVerb(TEXT("POST"));
 		Request->SetHeader(TEXT("Content-Type"),  TEXT("application/x-www-form-urlencoded; charset=utf-8"));
@@ -265,7 +263,8 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		else if (!AccountCredentials.Token.IsEmpty())
 		{
 			FString Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"),
-											*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+				*FGenericPlatformHttp::UrlEncode(AccountCredentials.Id), *FGenericPlatformHttp::UrlEncode(AccountCredentials.Token));
+
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenPasswordGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);						
 			if (!Request->ProcessRequest())
@@ -296,7 +295,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	if (!bSuccessful || !Response.IsValid())
 	{
 		ErrorStr = TEXT("request failed");
-		UserAccountPtr->Token.ScheduelBackoffRefresh();
+		UserAccountPtr->Token.ScheduleBackoffRefresh();
 	}
 	else
 	{
@@ -313,6 +312,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 					{
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
+						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId); // update FUniqueNetId with Token's UserID
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
 						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
@@ -332,7 +332,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 				
 				if (!ErrorStr.IsEmpty())
 				{
-					UserAccountPtr->Token.ScheduelBackoffRefresh();
+					UserAccountPtr->Token.ScheduleBackoffRefresh();
 				}
 			}
 			break;
@@ -346,7 +346,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 			break;
 
 		default:
-			UserAccountPtr->Token.ScheduelBackoffRefresh();
+			UserAccountPtr->Token.ScheduleBackoffRefresh();
 			ErrorStr = FString::Printf(TEXT("unexpected reponse Code=%d"), Response->GetResponseCode());
 			break;
 		}
@@ -394,8 +394,7 @@ void FOnlineIdentityJustice::TokenLogoutComplete(FHttpRequestPtr Request, FHttpR
 		return;
 	}
 
-	UserAccounts.Remove(FUniqueNetIdString(*UserAccountPtr->GetUserIdStr()));
-	UserIds.Remove(LocalUserNum);
+	UserAccounts.Remove(LocalUserNum);
 	TriggerOnLogoutCompleteDelegates(LocalUserNum, true);
 }
 
@@ -432,7 +431,14 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 							UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
-						UserAccountPtr->Token.ScheduleNormalRefresh();
+						UserAccountPtr->Token.ScheduleNormalRefresh();		
+						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId); // update FUniqueNetId with Token's UserID
+
+						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
+						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
+							FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) / 2),
+							UserAccountPtr->Token.NextTokenRefreshUtc,
+							OnRefreshTokenLogDelegate);
 
 					}
 					else
@@ -473,17 +479,14 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 {
 	FString ErrorStr;
 	TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
-	TSharedPtr<const FUniqueNetId> UserId = GetUniquePlayerId(LocalUserNum);
-	if (UserId.IsValid())
+	TSharedPtr<FUserOnlineAccountJustice>* UserAccountSearch = UserAccounts.Find(LocalUserNum);
+	if (UserAccountSearch != nullptr)
 	{
-
+		UserAccountPtr = *UserAccountSearch;
 		TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 		TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 
-		UserAccountPtr = *UserAccounts.Find(FUniqueNetIdString(UserId->ToString()));
-
-
-		Request->SetURL(BaseURL + TEXT("/oauth/revoke"));
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke"));
 		Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(Client.Id, Client.Token));
 		Request->SetVerb(TEXT("POST"));
 		Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
@@ -547,23 +550,21 @@ bool FOnlineIdentityJustice::AutoLogin(int32 LocalUserNum)
 
 TSharedPtr<FUserOnlineAccount> FOnlineIdentityJustice::GetUserAccount(const FUniqueNetId& UserId) const
 {
-	TSharedPtr<FUserOnlineAccount> Result;
-
-	FUniqueNetIdString StringUserId(UserId);
-	const TSharedRef<FUserOnlineAccountJustice>* FoundUserAccount = UserAccounts.Find(StringUserId);
-	if (FoundUserAccount != NULL)
+	for (TMap<int32, TSharedPtr<FUserOnlineAccountJustice>>::TConstIterator It(UserAccounts); It; ++It)
 	{
-		Result = *FoundUserAccount;
+		if (It.Value()->GetUserId().Get() == UserId) 
+		{
+			return It.Value();
+		}
 	}
-
-	return Result;
+	return NULL;
 }
 
 TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityJustice::GetAllUserAccounts() const
 {
 	TArray<TSharedPtr<FUserOnlineAccount> > Result;
 	
-	for (TMap<FUniqueNetIdString, TSharedRef<FUserOnlineAccountJustice>>::TConstIterator It(UserAccounts); It; ++It)
+	for (TMap<int32, TSharedPtr<FUserOnlineAccountJustice>>::TConstIterator It(UserAccounts); It; ++It)
 	{
 		Result.Add(It.Value());
 	}
@@ -573,10 +574,11 @@ TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityJustice::GetAllUserAccoun
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityJustice::GetUniquePlayerId(int32 LocalUserNum) const
 {
-	const TSharedPtr<const FUniqueNetId>* FoundId = UserIds.Find(LocalUserNum);
+	// this should return playerid
+	const TSharedPtr<FUserOnlineAccountJustice>* FoundId = UserAccounts.Find(LocalUserNum);
 	if (FoundId != NULL)
 	{
-		return *FoundId;
+		return FoundId->Get()->GetUserId();
 	}
 	return NULL;
 }

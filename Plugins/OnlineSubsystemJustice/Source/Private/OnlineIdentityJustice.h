@@ -48,7 +48,7 @@ public:
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
-	void ScheduelBackoffRefresh()
+	void ScheduleBackoffRefresh()
 	{
 		if (TokenRefreshBackoff.IsZero())
 		{
@@ -127,15 +127,19 @@ public:
 	virtual bool GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const override;
 
 	// FUserOnlineAccountJustice
-
-	FUserOnlineAccountJustice(const FString& InUserId=TEXT(""))
-		:
-		UserIdPtr(new FUniqueNetIdString(InUserId))
-	{ }
+	FUserOnlineAccountJustice(const FString& LoginId = TEXT("")) // supposed to be email			
+		:LoginId(LoginId), UserIdPtr(new FUniqueNetIdString(TEXT("")))
+	{
+	}
 
 	virtual ~FUserOnlineAccountJustice()
 	{
 	}
+
+	void SetUserId(FString InUserId) { UserIdPtr = TSharedRef<const FUniqueNetIdString>(new FUniqueNetIdString(InUserId)); }
+	FString GetLoginId() { return LoginId; }
+
+	FString LoginId;
 
 	/** User Id represented as a FUniqueNetId */
 	TSharedRef<const FUniqueNetId> UserIdPtr;
@@ -212,11 +216,8 @@ private:
 	 */
 	FOnlineIdentityJustice();
 
-	/** Ids mapped to locally registered users */
-	TMap<int32, TSharedPtr<const FUniqueNetId>> UserIds;
-
-	/** Ids mapped to locally registered users */
-	TMap<FUniqueNetIdString, TSharedRef<FUserOnlineAccountJustice>> UserAccounts;
+	/** LocalUserNum mapped to locally registered UserAccounts */
+	TMap<int32, TSharedPtr<FUserOnlineAccountJustice>> UserAccounts;
 
 	/** IAM Base URL Route */
 	FString BaseURL;
