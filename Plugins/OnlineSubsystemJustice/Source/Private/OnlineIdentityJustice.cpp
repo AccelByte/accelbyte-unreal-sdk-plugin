@@ -37,14 +37,11 @@ FOnlineIdentityJustice::FOnlineIdentityJustice()
 void FOnlineIdentityJustice::OnRefreshToken(FDateTime time, int32 nextTick, FOnlineSubsystemJustice * onlineSubsytemJustice)
 {
 	for (TSharedPtr<FUserOnlineAccount> UserAccountPtr : GetAllUserAccounts())
-	{
-		FString LocalUserNum;
-		UserAccountPtr->GetAuthAttribute(FString("LocalUserNum"), LocalUserNum);
-				
+	{				
 		FOnlineAccountCredentials Credentials;
 		Credentials.Id = UserAccountPtr->GetUserId()->ToString();
-
-		if (!Login(FCString::Atoi(*LocalUserNum), Credentials))
+		int32 LocalUserNum = ((FUserOnlineAccountJustice*)UserAccountPtr.Get())->LocalUserNum;
+		if (!Login(LocalUserNum, Credentials))
 		{
 			UE_LOG_ONLINE(Warning, TEXT("Failed to refresh token. User=%s"), *UserAccountPtr->GetUserId()->ToString());
 		}
@@ -222,16 +219,9 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		if (UserAccountSearchPtr == nullptr)
 		{
 			FUniqueNetIdString NewUserId(AccountCredentials.Id);
-			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id)); //this should be email
-			
+			UserAccountPtr = MakeShareable(new FUserOnlineAccountJustice(AccountCredentials.Id, LocalUserNum));			
 			UserAccountPtr->SetUserAttribute(TEXT("id"), AccountCredentials.Id);
-			
-			// FIXME: need the LocalUserNum to call Login() on refresh, this a little annoying to convert to str and back to int
-			UserAccountPtr->AdditionalAuthData.Add(TEXT("LocalUserNum"), FString::Printf(TEXT("%d"), LocalUserNum));
-
-			// update/add cached entry for user
-			UserAccounts.Add(LocalUserNum, UserAccountPtr);
-			
+			UserAccounts.Add(LocalUserNum, UserAccountPtr);		
 		}
 		else
 		{
@@ -312,11 +302,11 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 					{
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();
-						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId); // update FUniqueNetId with Token's UserID
+						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId);
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
 						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
-																			  FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) / 2),
+																			  FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) * 0.8),
 																		      UserAccountPtr->Token.NextTokenRefreshUtc, 
 																			  OnRefreshTokenLogDelegate);
 					}
@@ -432,11 +422,11 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 						}
 						UserAccountPtr->Token.SetLastRefreshTimeToNow();
 						UserAccountPtr->Token.ScheduleNormalRefresh();		
-						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId); // update FUniqueNetId with Token's UserID
+						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId);
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
 						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
-							FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) / 2),
+							FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) * 0.8),
 							UserAccountPtr->Token.NextTokenRefreshUtc,
 							OnRefreshTokenLogDelegate);
 
@@ -574,7 +564,6 @@ TArray<TSharedPtr<FUserOnlineAccount> > FOnlineIdentityJustice::GetAllUserAccoun
 
 TSharedPtr<const FUniqueNetId> FOnlineIdentityJustice::GetUniquePlayerId(int32 LocalUserNum) const
 {
-	// this should return playerid
 	const TSharedPtr<FUserOnlineAccountJustice>* FoundId = UserAccounts.Find(LocalUserNum);
 	if (FoundId != NULL)
 	{

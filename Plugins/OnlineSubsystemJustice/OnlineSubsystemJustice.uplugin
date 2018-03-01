@@ -10,6 +10,16 @@
 	"CreatedByURL" : "https://accelbyte.net",
 	"EnabledByDefault" : true,
 
+	"Plugins": [
+		{
+		  "Name": "OnlineSubsystem",
+		  "Enabled": true
+		},
+		{
+		  "Name": "OnlineSubsystemUtils",
+		  "Enabled": true
+		}
+	],
     "Modules": [
         {
             "Name": "OnlineSubsystemJustice",

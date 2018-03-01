@@ -127,8 +127,8 @@ public:
 	virtual bool GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const override;
 
 	// FUserOnlineAccountJustice
-	FUserOnlineAccountJustice(const FString& LoginId = TEXT("")) // supposed to be email			
-		:LoginId(LoginId), UserIdPtr(new FUniqueNetIdString(TEXT("")))
+	FUserOnlineAccountJustice(const FString& LoginId = TEXT(""), int32 LocalUserNumber = 0)
+		:LocalUserNum(LocalUserNumber), LoginId(LoginId), UserIdPtr(new FUniqueNetIdString(TEXT("")))
 	{
 	}
 
@@ -148,6 +148,9 @@ public:
 	TMap<FString, FString> AdditionalAuthData;
 	/** Additional key/value pair data related to user attribution */
 	TMap<FString, FString> UserAttributes;
+
+	// save local user num
+	int32 LocalUserNum;
 
 	/** Credentials */
 	FOAuthTokenJustice Token;

@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "AutomationTest.h"
-#include "OnlineIdentityJustice.h"
+#include "../OnlineIdentityJustice.h"
 
 const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
 // Context: EditorContext (run via editor cli) ClientContext (run via external cli)
