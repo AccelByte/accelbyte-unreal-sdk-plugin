@@ -56,7 +56,7 @@ void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayRe
 void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr)
 {
 	Identity->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, LoginCompleteHandle);
-	UE_LOG(LogOnline, Log, TEXT("Game received login %s. %s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
+	UE_LOG(LogOnline, Log, TEXT("Game received login, Status:%s. UserId:%s"), bSuccessful ? TEXT("successful") : TEXT("failed"), *UserId.ToString());
 }
 
 void AJusticeUE4PluginGameModeBase::OnLogoutCompleteDelegate(int32 LocalUserNum, bool bSuccessful)

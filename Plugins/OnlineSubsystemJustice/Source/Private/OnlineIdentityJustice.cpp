@@ -459,7 +459,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 		return;
 	}
 	
-	UE_LOG_ONLINE(Log, TEXT("Token password grant successful. User=%s %s %s ReqTime=%.3f"),
+	UE_LOG_ONLINE(Log, TEXT("Token password grant successful. UserId=%s %s %s ReqTime=%.3f"),
 				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
 	TriggerOnLoginChangedDelegates(LocalUserNum);
@@ -491,7 +491,7 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 		{
 			ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 		}
-		UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Logout() Token=%s"), *UserAccountPtr->Token.AccessToken);
+		UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Logout() UserId=%s"), *UserAccountPtr->Token.UserId);
 		return true;
 	}
 	else
