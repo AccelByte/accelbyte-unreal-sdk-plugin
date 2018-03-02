@@ -73,3 +73,6 @@ Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/StarterContent/
+Plugins/OnlineSubsystemJustice/Binaries/
+Plugins/OnlineSubsystemJustice/Intermediate/
