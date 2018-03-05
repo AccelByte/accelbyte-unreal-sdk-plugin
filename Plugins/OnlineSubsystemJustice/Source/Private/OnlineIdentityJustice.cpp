@@ -130,7 +130,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 			}
 
 			//if nothing match check the string trails
-			FString CheckedTrails = Query[i];
+			CheckedTrails = Query[i];
 			if (!(
 				(CheckedTrails.Len() > 1)
 				&& CheckedTrails.RemoveFromEnd(TEXT("*"), ESearchCase::CaseSensitive)
