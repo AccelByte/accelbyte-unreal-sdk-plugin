@@ -18,6 +18,7 @@ class FOnlineIdentityJustice;
 class FOnlineLeaderboardsJustice;
 class FOnlineSessionJustice;
 class FOnlineVoiceImpl;
+class FOnlineAsyncTaskManagerJustice;
 
 /** Forward declarations of all interface classes */
 typedef TSharedPtr<class FOnlineSessionJustice, ESPMode::ThreadSafe> FOnlineSessionJusticePtr;

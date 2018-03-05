@@ -31,7 +31,6 @@ void FOnlineAsyncTaskManagerJustice::UpdateDelegateSchedule(int name, FTimespan 
 	UpdateSchedule.Schedule = schedule;
 	UpdateSchedule.NextUpdate = NextTick;
 	UpdateSchedule.Delegate = delegate;
-	UE_LOG(LogOnline, Log, TEXT("Hashing parameter into a table with updating delegate concepts"));
 	RegisteredUpdatedDelegate.Add(name, UpdateSchedule);
 }
 void FOnlineAsyncTaskManagerJustice::UnregisterDelegate(int name) 
