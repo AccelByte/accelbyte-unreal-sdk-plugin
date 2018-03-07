@@ -4,9 +4,13 @@
 
 #include "HTTPJustice.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
-#include "OnlineSubsystemJusticeModule.h"
 
 FString FHTTPJustice::BasicAuth(const FString& Username, const FString& Password)
 {
 	return TEXT("Basic " + FBase64::Encode(Username + ":" + Password));
+}
+
+FString FHTTPJustice::BearerAuth(const FString& Token)
+{
+	return TEXT("Bearer " + Token);
 }
