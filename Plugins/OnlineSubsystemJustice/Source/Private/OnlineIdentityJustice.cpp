@@ -132,7 +132,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString& AttrName, FStrin
 			}
 
 			//if nothing match check the string trails
-			FString CheckedTrails = Query[i];
+			CheckedTrails = Query[i];
 			if (!(
 				(CheckedTrails.Len() > 1)
 				&& CheckedTrails.RemoveFromEnd(TEXT("*"), ESearchCase::CaseSensitive)
@@ -240,9 +240,9 @@ bool FOnlineIdentityJustice::Login(int32 LocalUserNum, const FOnlineAccountCrede
 		Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
 		// Refresh grant
-		if (UserAccountPtr->Token.ShouldRefresh())
+		if (UserAccountPtr->Token->ShouldRefresh())
 		{
-			FString Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"), *FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.RefreshToken));
+			FString Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"), *FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token->RefreshToken));
 			Request->SetContentAsString(Grant);
 			Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenRefreshGrantComplete, UserAccountPtr, LocalUserNum, RequestTrace);
 			if (!Request->ProcessRequest())
@@ -296,7 +296,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	if (!bSuccessful || !Response.IsValid())
 	{
 		ErrorStr = TEXT("request failed");
-		UserAccountPtr->Token.ScheduleBackoffRefresh();
+		UserAccountPtr->Token->ScheduleBackoffRefresh();
 	}
 	else
 	{
@@ -309,16 +309,16 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 				{
-					if (UserAccountPtr->Token.FromJson(JsonObject))
+					if (UserAccountPtr->Token->FromJson(JsonObject))
 					{
-						UserAccountPtr->Token.SetLastRefreshTimeToNow();
-						UserAccountPtr->Token.ScheduleNormalRefresh();
-						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId);
+						UserAccountPtr->Token->SetLastRefreshTimeToNow();
+						UserAccountPtr->Token->ScheduleNormalRefresh();
+						UserAccountPtr->SetUserId(UserAccountPtr->Token->UserId);
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
 						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
-																			  FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) * 0.8),
-																		      UserAccountPtr->Token.NextTokenRefreshUtc, 
+																			  FTimespan::FromSeconds((UserAccountPtr->Token->ExpiresIn + 1) * 0.8),
+																		      UserAccountPtr->Token->NextTokenRefreshUtc,
 																			  OnRefreshTokenLogDelegate);
 					}
 					else
@@ -333,7 +333,7 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 				
 				if (!ErrorStr.IsEmpty())
 				{
-					UserAccountPtr->Token.ScheduleBackoffRefresh();
+					UserAccountPtr->Token->ScheduleBackoffRefresh();
 				}
 			}
 			break;
@@ -341,13 +341,13 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 		case EHttpResponseCodes::Forbidden:
 		case EHttpResponseCodes::Denied:
 			ErrorStr = FString::Printf(TEXT("request denied Code=%d"), Response->GetResponseCode());
-			UserAccountPtr->Token = FOAuthTokenJustice();
+			UserAccountPtr->Token = nullptr;//CreateDefaultSubobject<UOAuthTokenJustice>(TEXT("Token"));
 			TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
 			TriggerOnLoginChangedDelegates(LocalUserNum);
 			break;
 
 		default:
-			UserAccountPtr->Token.ScheduleBackoffRefresh();
+			UserAccountPtr->Token->ScheduleBackoffRefresh();
 			ErrorStr = FString::Printf(TEXT("unexpected reponse Code=%d"), Response->GetResponseCode());
 			break;
 		}
@@ -356,13 +356,13 @@ void FOnlineIdentityJustice::TokenRefreshGrantComplete(FHttpRequestPtr Request, 
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Token refresh failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
-		UserAccountPtr->Token = FOAuthTokenJustice();
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+		UserAccountPtr->Token = nullptr;// CreateDefaultSubobject<UOAuthTokenJustice>(TEXT("Token"));
 		return;
 	}
 
 	UE_LOG_ONLINE(Log, TEXT("Token refresh successful. User=%s %s %s ReqTime=%.3f"),
-				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 	
 }
 
@@ -389,8 +389,8 @@ void FOnlineIdentityJustice::TokenLogoutComplete(FHttpRequestPtr Request, FHttpR
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Error, TEXT("Token logout. User=%s Error=%s %s %s ReqTime=%.3f"),
-			*UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
-		UserAccountPtr->Token = FOAuthTokenJustice();
+			*UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+		UserAccountPtr->Token = nullptr;//CreateDefaultSubobject<UOAuthTokenJustice>(TEXT("Token"));
 		TriggerOnLogoutCompleteDelegates(LocalUserNum, false);
 		return;
 	}
@@ -419,7 +419,7 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 				{
-					if (UserAccountPtr->Token.FromJson(JsonObject))
+					if (UserAccountPtr->Token->FromJson(JsonObject))
 					{
 						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));						
 						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
@@ -428,17 +428,17 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 							FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
 							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
 							FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-							UserAccountPtr->Token.Permissions.Add(PermissionObject);
+							UserAccountPtr->Token->Permissions.Add(PermissionObject);
 							UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
-						UserAccountPtr->Token.SetLastRefreshTimeToNow();
-						UserAccountPtr->Token.ScheduleNormalRefresh();		
-						UserAccountPtr->SetUserId(UserAccountPtr->Token.UserId);
+						UserAccountPtr->Token->SetLastRefreshTimeToNow();
+						UserAccountPtr->Token->ScheduleNormalRefresh();
+						UserAccountPtr->SetUserId(UserAccountPtr->Token->UserId);
 
 						OnRefreshTokenLogDelegate.BindRaw(this, &FOnlineIdentityJustice::OnRefreshToken);
 						OnlineAsyncTaskManagerJustice->UpdateDelegateSchedule(FTaskTypeJustice::IdentityRefresh,
-							FTimespan::FromSeconds((UserAccountPtr->Token.ExpiresIn + 1) * 0.8),
-							UserAccountPtr->Token.NextTokenRefreshUtc,
+							FTimespan::FromSeconds((UserAccountPtr->Token->ExpiresIn + 1) * 0.8),
+							UserAccountPtr->Token->NextTokenRefreshUtc,
 							OnRefreshTokenLogDelegate);
 
 					}
@@ -463,15 +463,15 @@ void FOnlineIdentityJustice::TokenPasswordGrantComplete(FHttpRequestPtr Request,
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG_ONLINE(Warning, TEXT("Token password grant failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
-		UserAccountPtr->Token = FOAuthTokenJustice();
+					  *UserAccountPtr->GetUserIdStr(), *ErrorStr, *UserAccountPtr->Token->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+		UserAccountPtr->Token = nullptr;//CreateDefaultSubobject<UOAuthTokenJustice>(TEXT("Token"));
 		TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
 		TriggerOnLoginChangedDelegates(LocalUserNum);
 		return;
 	}
 	
 	UE_LOG_ONLINE(Log, TEXT("Token password grant successful. UserId=%s %s %s ReqTime=%.3f"),
-				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token.GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+				  *UserAccountPtr->GetUserIdStr(), *UserAccountPtr->Token->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 	TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
 	TriggerOnLoginChangedDelegates(LocalUserNum);
 }
@@ -495,14 +495,14 @@ bool FOnlineIdentityJustice::Logout(int32 LocalUserNum)
 
 		Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-		FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token.AccessToken));
+		FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(UserAccountPtr->Token->AccessToken));
 		Request->SetContentAsString(Grant);
 		Request->OnProcessRequestComplete().BindRaw(this, &FOnlineIdentityJustice::TokenLogoutComplete, UserAccountPtr, LocalUserNum, RequestTrace);
 		if (!Request->ProcessRequest())
 		{
 			ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 		}
-		UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Logout() UserId=%s"), *UserAccountPtr->Token.UserId);
+		UE_LOG_ONLINE(VeryVerbose, TEXT("FOnlineIdentityJustice::Logout() UserId=%s"), *UserAccountPtr->Token->UserId);
 		return true;
 	}
 	else

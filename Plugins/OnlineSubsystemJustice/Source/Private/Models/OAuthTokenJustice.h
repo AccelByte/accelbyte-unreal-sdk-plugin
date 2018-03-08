@@ -4,16 +4,21 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
 #include "OnlineJsonSerializer.h"
-#include "OnlineSubsystem.h"
+#include "OnlineSubsystem.h" // for logging
 #include "PermissionJustice.h"
+#include "OAuthTokenJustice.generated.h"
 
-class FOAuthTokenJustice : public FOnlineJsonSerializable
+UCLASS()
+class UOAuthTokenJustice : public UObject, public FOnlineJsonSerializable
 {
-
+	GENERATED_BODY()
 public:
 
-	FOAuthTokenJustice() :
+	UOAuthTokenJustice(const class FObjectInitializer& ObjectInitializer):
+		Super(ObjectInitializer),
 		ExpiresIn(0),
 		LastTokenRefreshUtc(FDateTime::MinValue()),
 		NextTokenRefreshUtc(FDateTime::MinValue()),
@@ -31,7 +36,7 @@ public:
 	};
 	void ScheduleNormalRefresh()
 	{
-		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) / 2);
+		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG_ONLINE(VeryVerbose, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
@@ -51,16 +56,56 @@ public:
 	FString GetRefreshStr() { return FString::Printf(TEXT("Expire=%s Refresh=%s Backoff=%.0f"), *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
 	void SetLastRefreshTimeToNow() { LastTokenRefreshUtc = FDateTime::UtcNow(); };
 
+	// Properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString AccessToken;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString RefreshToken;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString TokenType;
+	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	double  ExpiresIn;
+
 	TArray<FPermissionJustice> Permissions;
 	TArray<FString> Roles;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString UserId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString DisplayName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OAuthTokenJustice")
 	FString Namespace;
+
+	// Function Getter
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetAccessToken() { return AccessToken; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetRefreshToken() { return RefreshToken; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetTokenType() { return TokenType; };
+
+	//UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+	//	double GetExpiresIn() { return ExpiresIn; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetUserId() { return UserId; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetDisplayName() { return DisplayName; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetNamespace() { return Namespace; };
+
+	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
+		FString GetRoles(int Index) { return Roles[Index]; };
+
 
 	BEGIN_ONLINE_JSON_SERIALIZER
 		ONLINE_JSON_SERIALIZE("access_token", AccessToken);

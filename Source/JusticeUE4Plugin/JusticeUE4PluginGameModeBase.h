@@ -25,16 +25,13 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 private:
-	void OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr);
+	void OnLoginCompleteDelegate(bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token);
 	void OnLogoutCompleteDelegate(int32 LocalUserNum, bool bSuccessful);
 
 	UFJusticeComponent* JusticeComponent;
 
 	const IOnlineSubsystem* OnlineSub;
 	IOnlineIdentityPtr Identity;
-
-	FDelegateHandle LoginCompleteHandle;
-	FDelegateHandle LogoutCompleteHandle;
 
 	const int32 DefaultLocalUserNum = 0;
 };

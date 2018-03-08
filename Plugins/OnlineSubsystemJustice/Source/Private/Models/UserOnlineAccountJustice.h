@@ -56,5 +56,5 @@ public:
 	int32 LocalUserNum;
 
 	/** Credentials */
-	FOAuthTokenJustice Token;
+	UOAuthTokenJustice* Token;
 };

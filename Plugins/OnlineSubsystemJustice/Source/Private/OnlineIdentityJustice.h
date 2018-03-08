@@ -215,7 +215,7 @@ private:
 
 
 
-	void ScheduleNextTokenRefresh(FOAuthTokenJustice& OutToken);
+	void ScheduleNextTokenRefresh(UOAuthTokenJustice* OutToken);
 
 	/**
 	 * Should use the initialization constructor instead
@@ -232,7 +232,7 @@ private:
 	FOnlineAccountCredentials Client;
 	
 	/** Client OAuth Token */
-	FOAuthTokenJustice Token;
+	UOAuthTokenJustice* Token;
 
 	FOnlineAsyncTaskManagerJustice*  OnlineAsyncTaskManagerJustice;
 	void OnRefreshToken(struct FDateTime time , int32 nextTick, class FOnlineSubsystemJustice* onlineSubsytemJustice);
