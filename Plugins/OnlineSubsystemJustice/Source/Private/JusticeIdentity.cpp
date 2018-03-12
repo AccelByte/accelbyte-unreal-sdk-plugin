@@ -1,43 +1,23 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #include "JusticeIdentity.h"
 #include "AWSXRayJustice.h"
 #include "HTTPJustice.h"
-#include "FJusticeComponent.h"
 #include "Misc/ConfigCacheIni.h"
+#include "JusticeSingleton.h"
 
 void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	FString BaseURL;
-	FString Namespace;
-	FString ClientID;
-	FString ClientSecret;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	JusticeComponent->UserToken = NewObject<UOAuthTokenJustice>();
-
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
+	FString ClientID = UJusticeSingleton::Instance()->ClientID;
+	FString ClientSecret = UJusticeSingleton::Instance()->ClientSecret;
 
 	Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
@@ -50,7 +30,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 		*FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));
 
 	Request->SetContentAsString(Grant);
-	Request->OnProcessRequestComplete().BindLambda([OnComplete, JusticeComponent](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace) {
+	Request->OnProcessRequestComplete().BindLambda([OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace) {
 		FString ErrorStr;
 		if (!bSuccessful || !Response.IsValid())
 		{
@@ -68,7 +48,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 				{
-					if (JusticeComponent->UserToken->FromJson(JsonObject))
+					if (UJusticeSingleton::Instance()->UserToken->FromJson(JsonObject))
 					{
 						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
 						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
@@ -77,11 +57,11 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 							FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
 							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
 							FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-							JusticeComponent->UserToken->Permissions.Add(PermissionObject);
+							UJusticeSingleton::Instance()->UserToken->Permissions.Add(PermissionObject);
 							//UserAccountPtr->SetUserAttribute(Resource, FString::FromInt(Action));
 						}
-						JusticeComponent->UserToken->SetLastRefreshTimeToNow();
-						JusticeComponent->UserToken->ScheduleNormalRefresh();
+						UJusticeSingleton::Instance()->UserToken->SetLastRefreshTimeToNow();
+						UJusticeSingleton::Instance()->UserToken->ScheduleNormalRefresh();
 						//UserAccountPtr->SetUserId(UserAccountPtr->Token->UserId);
 
 
@@ -90,7 +70,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 						//	UserAccountPtr->Token->NextTokenRefreshUtc,
 						//	OnRefreshTokenLogDelegate);
 
-						OnComplete.Execute(true, TEXT(""), JusticeComponent->UserToken);
+						OnComplete.Execute(true, TEXT(""), UJusticeSingleton::Instance()->UserToken);
 
 					}
 					else
@@ -117,7 +97,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 		if (!ErrorStr.IsEmpty())
 		{
 			UE_LOG_ONLINE(Warning, TEXT("Token password grant failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-				*JusticeComponent->UserToken->UserId, *ErrorStr, *JusticeComponent->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+				*UJusticeSingleton::Instance()->UserToken->UserId, *ErrorStr, *UJusticeSingleton::Instance()->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 			//UserAccountPtr->Token = nullptr;//CreateDefaultSubobject<UOAuthTokenJustice>(TEXT("Token"));
 			//TriggerOnLoginCompleteDelegates(LocalUserNum, false, *UserAccountPtr->GetUserId(), *ErrorStr);
 			//TriggerOnLoginChangedDelegates(LocalUserNum);
@@ -125,7 +105,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 		}
 
 		UE_LOG_ONLINE(Log, TEXT("Token password grant successful. UserId=%s %s %s ReqTime=%.3f"),
-			*JusticeComponent->UserToken->UserId, *JusticeComponent->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+			*UJusticeSingleton::Instance()->UserToken->UserId, *UJusticeSingleton::Instance()->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 		//TriggerOnLoginCompleteDelegates(LocalUserNum, true, *UserAccountPtr->GetUserId(), *ErrorStr);
 		//TriggerOnLoginChangedDelegates(LocalUserNum);
 
@@ -145,33 +125,13 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	FString BaseURL;
-	FString Namespace;
-	FString ClientID;
-	FString ClientSecret;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	JusticeComponent->UserToken = NewObject<UOAuthTokenJustice>();
+	
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
+	FString ClientID = UJusticeSingleton::Instance()->ClientID;
+	FString ClientSecret = UJusticeSingleton::Instance()->ClientSecret;
 
 
 	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke"));
@@ -181,10 +141,10 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(JusticeComponent->UserToken->AccessToken));
+	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(UJusticeSingleton::Instance()->UserToken->AccessToken));
 
 	Request->SetContentAsString(Grant);
-	Request->OnProcessRequestComplete().BindLambda([OnComplete, JusticeComponent](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace) {
+	Request->OnProcessRequestComplete().BindLambda([OnComplete](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace) {
 		FString ErrorStr;
 		if (!bSuccessful || !Response.IsValid())
 		{
@@ -205,7 +165,7 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 		if (!ErrorStr.IsEmpty())
 		{
 			UE_LOG_ONLINE(Error, TEXT("Token logout failed. User=%s Error=%s %s %s ReqTime=%.3f"),
-				*JusticeComponent->UserToken->UserId, *ErrorStr, *JusticeComponent->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+				*UJusticeSingleton::Instance()->UserToken->UserId, *ErrorStr, *UJusticeSingleton::Instance()->UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 
 			return;
 		}
@@ -228,23 +188,13 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	FString BaseURL;
-	FString Namespace;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
 
 	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users"));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(JusticeComponent->GameClientToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UJusticeSingleton::Instance()->GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -329,23 +279,13 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	FString BaseURL;
-	FString Namespace;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
 
 	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/") + UserId + TEXT("/verification"));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(JusticeComponent->GameClientToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UJusticeSingleton::Instance()->GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -408,7 +348,7 @@ void JusticeIdentity::ForgotPasswordStep1(FString LoginId)
 	FString Namespace;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
+	
 
 	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
 	{
@@ -429,7 +369,7 @@ void JusticeIdentity::ForgotPasswordStep1(FString LoginId)
 	}
 
 	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/forgotpasswordstub"));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(JusticeComponent->GameClientToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UJusticeSingleton::Instance()->GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -453,35 +393,16 @@ void JusticeIdentity::ForgotPasswordStep1(FString LoginId)
 void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword)
 {
 	FString ErrorStr;
-	FString ClientID;
-	FString ClientSecret;
-	FString BaseURL;
-	FString Namespace;
-	//TSharedPtr<FUserOnlineAccountJustice> UserAccountPtr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	UFJusticeComponent* JusticeComponent = UFJusticeComponent::GetInstance();
 
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG_ONLINE(Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
+	FString ClientID = UJusticeSingleton::Instance()->ClientID;
+	FString ClientSecret = UJusticeSingleton::Instance()->ClientSecret;
 
 	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/resetpasswordstub"));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(JusticeComponent->GameClientToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UJusticeSingleton::Instance()->GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -502,8 +423,119 @@ void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCo
 	}
 }
 
-void JusticeIdentity::UserLoginWithSteam(FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::LinkSteam(FUserLoginCompleteDelegate OnComplete)
 {
+}
+
+void JusticeIdentity::ClientLogin()
+{
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+
+	UJusticeSingleton* test = UJusticeSingleton::Instance();
+
+	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
+	FString Namespace = UJusticeSingleton::Instance()->Namespace;
+	FString ClientID = UJusticeSingleton::Instance()->ClientID;
+	FString ClientSecret = UJusticeSingleton::Instance()->ClientSecret;
+
+	Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+
+	FString Grant = FString::Printf(TEXT("grant_type=client_credentials"));
+	Request->SetContentAsString(Grant);
+	//Request->OnProcessRequestComplete().BindUObject(this, &UFJusticeComponent::TokenGameClientCredentialComplete, RequestTrace);
+	Request->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace) {
+		FString ErrorStr;
+
+		if (!bSuccessful || !Response.IsValid())
+		{
+			ErrorStr = TEXT("request failed");
+		}
+		else
+		{
+			switch (Response->GetResponseCode())
+			{
+			case EHttpResponseCodes::Ok:
+			{
+				FString ResponseStr = Response->GetContentAsString();
+
+				TSharedPtr<FJsonObject> JsonObject;
+				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+				if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+				{
+					if (UJusticeSingleton::Instance()->GameClientToken->FromJson(JsonObject))
+					{
+						TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
+						for (TSharedPtr<FJsonValue> Permission : PermissionArray)
+						{
+							TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
+							FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
+							int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
+							FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
+							UJusticeSingleton::Instance()->GameClientToken->Permissions.Add(PermissionObject);
+
+						}
+						UJusticeSingleton::Instance()->GameClientToken->SetLastRefreshTimeToNow();
+						UJusticeSingleton::Instance()->GameClientToken->ScheduleNormalRefresh();
+					}
+					else
+					{
+						ErrorStr = TEXT("unable to deserlize response from json object");
+					}
+				}
+				else
+				{
+					ErrorStr = TEXT("unable to deserlize response from server");
+				}
+			}
+			break;
+
+			default:
+				ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+				break;
+			}
+		}
+		if (!ErrorStr.IsEmpty())
+		{
+			UE_LOG_ONLINE(Warning, TEXT("Game Client Credential failed. Error=%s XRay=%s ReqTime=%.3f"),
+				*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+			return;
+		}
+		UE_LOG_ONLINE(Log, TEXT("Game Client Credential successful. ReqTime=%.3f"), Request->GetElapsedTime());
+	}, RequestTrace);
+
+
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	UE_LOG_ONLINE(VeryVerbose, TEXT("UFJusticeComponent::ClientLogin Sucessful, XRayID= %s"), *RequestTrace->ToString());
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG_ONLINE(Warning, TEXT("UFJusticeComponent::ClientLogin failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+	}
+}
+
+UOAuthTokenJustice * JusticeIdentity::GetUserToken()
+{
+	return UJusticeSingleton::Instance()->UserToken;
+}
+
+UOAuthTokenJustice * JusticeIdentity::GetClientToken()
+{
+	return UJusticeSingleton::Instance()->GameClientToken;
+}
+
+FString JusticeIdentity::GetUserId()
+{
+	return UJusticeSingleton::Instance()->UserToken->UserId;
 }
 
 

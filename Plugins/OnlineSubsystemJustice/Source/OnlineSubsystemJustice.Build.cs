@@ -8,8 +8,7 @@ using System.IO;
 public class OnlineSubsystemJustice : ModuleRules
 {
 	public OnlineSubsystemJustice(ReadOnlyTargetRules Target) : base(Target)
-    {
-        Definitions.Add("JUSTICEUTILITY_PACKAGE=1");
+    {        
         Definitions.Add("ONLINESUBSYSTEMJUSTICE_PACKAGE=1");
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 

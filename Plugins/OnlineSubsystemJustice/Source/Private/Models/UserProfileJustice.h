@@ -18,37 +18,39 @@ class UUserProfileJustice : public UObject, public FJsonSerializable
 	GENERATED_BODY()
 	
 private:
-	FString PlayerId;
+	FString UserId;
+	FString Namespace;
 	FString DisplayName;
 	FString FirstName;
 	FString LastName;
+	FString Country;
 	FString AvatarSmallUrl;
-	FString AvatarLargeUrl;
 	FString AvatarUrl;
+	FString AvatarLargeUrl;
 	FString Email;
 	FString Status;
-	FString Namespace;
 	TMap<FString, FString> CustomAttributes;
 
 public:
 	BEGIN_ONLINE_JSON_SERIALIZER
-		ONLINE_JSON_SERIALIZE("playerId", PlayerId);
+		ONLINE_JSON_SERIALIZE("userId", UserId);
+		ONLINE_JSON_SERIALIZE("namespace", Namespace);
 		ONLINE_JSON_SERIALIZE("displayName", DisplayName);
 		ONLINE_JSON_SERIALIZE("firstName", FirstName);
 		ONLINE_JSON_SERIALIZE("lastName", LastName);
+		ONLINE_JSON_SERIALIZE("country", Country);		
 		ONLINE_JSON_SERIALIZE("avatarSmallUrl", AvatarSmallUrl);
 		ONLINE_JSON_SERIALIZE("avatarUrl", AvatarUrl);
 		ONLINE_JSON_SERIALIZE("avatarLargeUrl", AvatarLargeUrl);
 		ONLINE_JSON_SERIALIZE("email", Email);
 		ONLINE_JSON_SERIALIZE("status", Status);
 		ONLINE_JSON_SERIALIZE_MAP("customAttributes", CustomAttributes);
-		ONLINE_JSON_SERIALIZE("namespace", Namespace);
 	END_ONLINE_JSON_SERIALIZER
 
 	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
-	FString GetPlayerId()
+	FString GetUserId()
 	{
-		return PlayerId;
+		return UserId;
 	};
 
 	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")

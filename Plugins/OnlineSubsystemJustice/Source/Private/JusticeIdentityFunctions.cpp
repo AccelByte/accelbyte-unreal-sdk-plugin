@@ -1,4 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #include "JusticeIdentityFunctions.h"
 
@@ -46,6 +48,21 @@ void UJusticeIdentityFunctions::ForgotPasswordStep2(FString UserId, FString Veri
 {
 }
 
-void UJusticeIdentityFunctions::UserLoginWithSteam(FUserLoginCompleteDynamicDelegate OnComplete)
+UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
+{
+	return JusticeIdentity::GetUserToken();
+}
+
+UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
+{
+	return JusticeIdentity::GetClientToken();
+}
+
+FString UJusticeIdentityFunctions::GetUserId()
+{
+	return JusticeIdentity::GetUserId();
+}
+
+void UJusticeIdentityFunctions::LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete)
 {
 }

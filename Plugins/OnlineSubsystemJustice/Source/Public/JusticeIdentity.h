@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "Private/Models/OAuthTokenJustice.h"
 #include "Private/Models/UserCreateResponse.h"
+#include "Private/Models/UserCreateRequest.h"
+
 
 
 DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, UOAuthTokenJustice*);
@@ -25,7 +27,15 @@ public:
 	static void ForgotPasswordStep1(FString LoginId/*, FForgotPasswordStep1CompleteDelegate onComplete*/);
 	static void ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword /*, FForgotPasswordStep2CompleteDelegate onComplete*/);
 
-// Platform specific
-	static void UserLoginWithSteam(FUserLoginCompleteDelegate OnComplete);
+	// Platform specific
+	static void LinkSteam(FUserLoginCompleteDelegate OnComplete);
 	
+	// Client specific
+	static void ClientLogin();
+
+	static UOAuthTokenJustice* GetUserToken();
+	static UOAuthTokenJustice* GetClientToken();
+	static FString GetUserId();
+
+
 };

@@ -4,11 +4,11 @@
 
 #include "JusticeUE4PluginGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
-#include "JusticeIdentity.h"
+#include "JusticeSingleton.h"
+
 
 AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
 {
-	JusticeComponent = CreateDefaultSubobject<UFJusticeComponent>(TEXT("JusticeComponent"));
 }
 
 void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -19,8 +19,7 @@ void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FStri
 void AJusticeUE4PluginGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-	JusticeComponent->ClientCredentialLogin();
-	JusticeIdentity::UserLogin("test@example.com", "123456", FUserLoginCompleteDelegate::CreateUObject(this, &AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate));
+	JusticeIdentity::ClientLogin();
 }
 
 void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -28,8 +27,4 @@ void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayRe
 	Super::EndPlay(EndPlayReason);
 }
 
-void AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate(bool IsSuccess, FString ErrorStr, UOAuthTokenJustice * Token)
-{
-	UE_LOG(LogOnline, Log, TEXT("AJusticeUE4PluginGameModeBase::OnLoginCompleteDelegate Status:%s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
-}
 

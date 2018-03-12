@@ -8,11 +8,9 @@
 #include "Misc/AssertionMacros.h"
 #include "GameFramework/GameModeBase.h"
 #include "Online.h"
-#include "FJusticeComponent.h"
+#include "JusticeIdentity.h"
 #include "JusticeUE4PluginGameModeBase.generated.h"
-/**
- * 
- */
+
 UCLASS()
 class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 {
@@ -23,16 +21,5 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	void BeginPlay();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
-
-private:
-	void OnLoginCompleteDelegate(bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token);
-	void OnLogoutCompleteDelegate(int32 LocalUserNum, bool bSuccessful);
-
-	UFJusticeComponent* JusticeComponent;
-
-	const IOnlineSubsystem* OnlineSub;
-	IOnlineIdentityPtr Identity;
-
-	const int32 DefaultLocalUserNum = 0;
 };
 
