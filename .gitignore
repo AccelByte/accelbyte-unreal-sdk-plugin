@@ -77,3 +77,5 @@ Content/StarterContent/
 Plugins/OnlineSubsystemJustice/Binaries/
 Plugins/OnlineSubsystemJustice/Intermediate/
 *.bak
+Plugins/JusticeSDK/Binaries/
+Plugins/JusticeSDK/Intermediate/Build/

@@ -10,7 +10,7 @@ public class JusticeUE4Plugin : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OnlineSubsystemJustice" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "JusticeSDK" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem" });
 
