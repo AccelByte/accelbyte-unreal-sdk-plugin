@@ -4,7 +4,6 @@
 
 #include "JusticeUE4PluginGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
-#include "JusticeSingleton.h"
 
 
 AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
@@ -25,6 +24,11 @@ void AJusticeUE4PluginGameModeBase::BeginPlay()
 void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	JusticeIdentity::ClientLogout();
+}
+
+void AJusticeUE4PluginGameModeBase::Tick(float DeltaSeconds)
+{
 }
 
 

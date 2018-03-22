@@ -6,7 +6,7 @@
 #include "AWSXRayJustice.h"
 #include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
-#include "JusticeSingleton.h"
+#include "JusticeSDK.h"
 #include "JusticeLog.h"
 
 
@@ -16,12 +16,12 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 
-	FString BaseURL = UJusticeSingleton::Instance()->BaseURL;
-	FString Namespace = UJusticeSingleton::Instance()->Namespace;
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
 	//string loginUrl = baseUrl + "/platform/public/profiles/namespaces/" + UserAccount.Token.Namespace + "/users/" + UserAccount.Token.UserId;
-	Request->SetURL(BaseURL + TEXT("/platform/public/profiles/namespaces/") + UJusticeSingleton::Instance()->UserToken->Namespace + TEXT("/users/") + UJusticeSingleton::Instance()->UserToken->UserId);
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UJusticeSingleton::Instance()->UserToken->AccessToken));
+	Request->SetURL(BaseURL + TEXT("/platform/public/profiles/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId);
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -72,7 +72,7 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 			return;
 		}
 
-	}, UJusticeSingleton::Instance()->UserToken->UserId, RequestTrace);
+	}, FJusticeSDKModule::Get().UserToken->UserId, RequestTrace);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());

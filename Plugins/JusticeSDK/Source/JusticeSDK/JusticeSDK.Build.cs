@@ -5,8 +5,7 @@ using UnrealBuildTool;
 public class JusticeSDK : ModuleRules
 {
 	public JusticeSDK(ReadOnlyTargetRules Target) : base(Target)
-	{
-        Definitions.Add("ONLINESUBSYSTEMJUSTICE_PACKAGE=1");
+	{        
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		PublicIncludePaths.AddRange(

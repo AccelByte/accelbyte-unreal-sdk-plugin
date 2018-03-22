@@ -6,11 +6,9 @@
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	FUserLoginCompleteDelegate LoginCompleteDelegate;
-	LoginCompleteDelegate.BindLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
-		OnComplete.Execute(IsSuccess, ErrorStr, Token);
-	});
-	JusticeIdentity::UserLogin(LoginId, Password, LoginCompleteDelegate);
+	JusticeIdentity::Login(LoginId, Password, FGrantTypeJustice::PasswordGrant, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+			OnComplete.Execute(IsSuccess, ErrorStr, Token);
+	}));
 }
 
 void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete)
@@ -50,12 +48,14 @@ void UJusticeIdentityFunctions::ForgotPasswordStep2(FString UserId, FString Veri
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
 {
-	return JusticeIdentity::GetUserToken();
+	//return JusticeIdentity::GetUserToken();
+	return NewObject<UOAuthTokenJustice>(); // TODO
 }
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
 {
-	return JusticeIdentity::GetClientToken();
+	//return JusticeIdentity::GetClientToken();
+	return NewObject<UOAuthTokenJustice>(); // TODO
 }
 
 FString UJusticeIdentityFunctions::GetUserId()

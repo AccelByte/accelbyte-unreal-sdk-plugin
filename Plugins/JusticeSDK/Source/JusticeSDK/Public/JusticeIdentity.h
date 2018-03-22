@@ -1,4 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #pragma once
 
@@ -7,20 +9,32 @@
 #include "Private/Models/OAuthTokenJustice.h"
 #include "Private/Models/UserCreateResponse.h"
 #include "Private/Models/UserCreateRequest.h"
-
-
+#include "Private/AWSXRayJustice.h"
+#include "Private/HTTPJustice.h"
 
 DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, UOAuthTokenJustice*);
 DECLARE_DELEGATE_TwoParams(FUserLogoutCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UUserCreateResponse*);
 DECLARE_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDelegate, bool, FString);
 
+enum FTaskTypeJustice
+{
+	IdentityRefresh = 1
+};
+
+enum FGrantTypeJustice
+{
+	PasswordGrant = 1,
+	RefreshGrant = 2,
+	ClientCredentialGrant = 3,
+};
 
 class JUSTICESDK_API JusticeIdentity 
 {
 	
 public:
-	static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete);
+	static void Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete);
+	
 	static void UserLogout(FUserLogoutCompleteDelegate OnComplete);
 	static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete);
 	static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete);
@@ -32,10 +46,19 @@ public:
 	
 	// Client specific
 	static void ClientLogin();
+	static void ClientLogout();
 
-	static UOAuthTokenJustice* GetUserToken();
-	static UOAuthTokenJustice* GetClientToken();
+	static OAuthTokenJustice* GetUserToken();
+	static OAuthTokenJustice* GetClientToken();
 	static FString GetUserId();
 
-
+private:
+	static void OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
+	static void OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
+	static void OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
+	static void OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete);	
+	static void OnClientLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
+	static void OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete);
+	static void OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);
+	static void OnRefreshToken(FDateTime time, int32 nextTick);
 };

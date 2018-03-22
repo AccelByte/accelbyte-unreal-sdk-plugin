@@ -21,5 +21,6 @@ class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	void BeginPlay();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
+	virtual void Tick(float DeltaSeconds) override;
 };
 

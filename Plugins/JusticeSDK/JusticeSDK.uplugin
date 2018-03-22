@@ -13,11 +13,11 @@
 	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"Installed": false,
-	"Modules": [
-		{
-			"Name": "JusticeSDK",
-			"Type": "Developer",
-			"LoadingPhase": "Default"
-		}
-	]
+  "Modules": [
+    {
+      "Name": "JusticeSDK",
+      "Type": "Developer",
+      "LoadingPhase": "Default"
+    }
+  ]
 }
