@@ -5,8 +5,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-//#include "OnlineSubsystemImpl.h"
-//#include "OnlineSubsystemJusticePackage.h"
 #include "HAL/ThreadSafeCounter.h"
 
 #include "UObject/CoreOnline.h"

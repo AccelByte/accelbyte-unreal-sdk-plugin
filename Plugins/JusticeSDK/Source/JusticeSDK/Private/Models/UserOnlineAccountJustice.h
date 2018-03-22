@@ -13,8 +13,8 @@ class FUserOnlineAccountJustice
 
 public:
 	FUserOnlineAccountJustice(const FString& LoginId = TEXT(""), int32 LocalUserNumber = 0)
-		:LocalUserNum(LocalUserNumber), LoginId(LoginId){}
-	virtual ~FUserOnlineAccountJustice(){}
+		:LocalUserNum(LocalUserNumber), LoginId(LoginId), Token(NewObject<UOAuthTokenJustice>()) {}
+	virtual ~FUserOnlineAccountJustice(){ }
 
 	FString GetUserId() { return Token->UserId; }
 	FString GetDisplayName(const FString& Platform = FString()) { return Token->DisplayName; }
@@ -22,7 +22,7 @@ public:
 	bool SetUserAttribute(const FString& AttrName, const FString& AttrValue);
 	FString GetAccessToken() { return Token->AccessToken; }
 	bool GetAuthAttribute(const FString& AttrName, FString& OutAttrValue) const;
-	FString GetLoginId() { return LoginId; }
+	FString GetLoginId() { return LoginId; } 
 
 	FString LoginId;
 	//TSharedRef<const FUniqueNetId> UserIdPtr;
