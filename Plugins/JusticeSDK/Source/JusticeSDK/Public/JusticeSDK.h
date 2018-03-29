@@ -33,6 +33,7 @@ public:
 	FString ClientSecret;
 	class FRunnableThread* OnlineAsyncTaskThread;
 	OAuthTokenJustice*	GameClientToken;
+
 	OAuthTokenJustice* UserToken;
 	FAsyncTaskManagerJustice* AsyncTaskManager;
 

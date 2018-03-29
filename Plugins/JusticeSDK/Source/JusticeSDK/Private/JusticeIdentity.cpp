@@ -373,8 +373,7 @@ void JusticeIdentity::OnClientLogoutComplete(FHttpRequestPtr Request, FHttpRespo
 		{
 			UE_LOG(LogJustice, Log, TEXT("Client logout receive success response "));
 			FJusticeSDKModule::Get().GameClientToken = new OAuthTokenJustice;
-			FJusticeSDKModule::Get().AsyncTaskManager->ClearRefreshQueue();
-			FJusticeSDKModule::Get().AsyncTaskManager->Stop();
+			FJusticeSDKModule::Get().AsyncTaskManager->ClearRefreshQueue();		
 		}
 		else
 		{

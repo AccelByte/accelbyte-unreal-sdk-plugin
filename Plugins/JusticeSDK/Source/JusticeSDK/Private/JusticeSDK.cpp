@@ -57,6 +57,7 @@ bool FJusticeSDKModule::GameClientParseJson(TSharedPtr<FJsonObject> jsonObject)
 			FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
 			GameClientToken->Permissions.Add(PermissionObject);
 
+
 		}
 		return true;
 	}
