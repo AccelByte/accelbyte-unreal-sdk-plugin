@@ -8,19 +8,23 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Private/Models/UserProfileJustice.h"
 #include "Private/Models/Category.h"
-
+#include "Private/Models/ItemInfo.h"
 #include "JusticeCatalogFunctions.generated.h"
 
 //DECLARE_DYNAMIC_DELEGATE_ThreeParams(FGetRootCategoryCompleteDelegate, bool, IsSuccess, FString, ErrorStr, UCategory*, Categories);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
+
 
 UCLASS()
 class JUSTICESDK_API UJusticeCatalogFunctions : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 		
-	//UFUNCTION(BlueprintCallable, Category = "JusticeCatalogFunctions")
+	
 	//static void GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete);
 
-		
+	UFUNCTION(BlueprintCallable, Category = "JusticeCatalogFunctions")
+	static void GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete);
+
 	
 };

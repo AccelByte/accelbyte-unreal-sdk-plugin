@@ -9,14 +9,12 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "JusticeImage.h"
 #include "Price.h"
-#include "JusticeItem.generated.h"
+#include "ItemInfo.generated.h"
 
 
-class JusticeItem : public FJsonSerializable
+class ItemInfo : public FJsonSerializable
 {
-
 public:
-
 	FString ItemId;
 	FString AppId;
 	FString Namespace;
@@ -35,7 +33,6 @@ public:
 	FString UpdatedAt;
 	int FavoritCnt;
 
-
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("itemId", ItemId);
 		JSON_SERIALIZE("appId", AppId);
@@ -46,22 +43,30 @@ public:
 		JSON_SERIALIZE("categoryPath", CategoryPath);
 		JSON_SERIALIZE("title", Title);
 		JSON_SERIALIZE("details", Details);		
-		JSON_SERIALIZE_SERIALIZABLE("thumbnailImage", thumbnailImage, JusticeImage);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", images, JusticeImage);
-		JSON_SERIALIZE_SERIALIZABLE("price", price, Price);
+		JSON_SERIALIZE_SERIALIZABLE("thumbnailImage", ThumbnailImage);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);
+		JSON_SERIALIZE_SERIALIZABLE("price", Price);
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("itemType", ItemType);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
 		JSON_SERIALIZE("favoritCnt", FavoritCnt);
 	END_JSON_SERIALIZER
-
 };
 
 
 UCLASS()
-class UJusticeItem : public UObject, public JusticeItem
+class UItemInfo : public UObject, public ItemInfo
 {
 	GENERATED_BODY()
+
+	UFUNCTION(BlueprintCallable, Category = "ItemInfo")
+		FString GetItemId() { return ItemId; };
+
+	UFUNCTION(BlueprintCallable, Category = "ItemInfo")
+		FString GetTitle() { return Title; };
+
+public:
+		void FromItemInfo(ItemInfo item);
 		
 };

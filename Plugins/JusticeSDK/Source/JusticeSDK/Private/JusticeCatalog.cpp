@@ -74,9 +74,92 @@ void JusticeCatalog::GetSubCategory(FString ParentPath, FGetRootCategoryComplete
 	}
 }
 
-void JusticeCatalog::GetItemByCategory(FString CategoryPath, FItemCompleteDelegate OnComplete)
+void JusticeCatalog::GetItemByCriteria(FString CategoryPath, FItemCompleteDelegate OnComplete)
 {
+	
+
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+
+	//{{justice_url}}/platform/public/namespaces/{{namespace}}/items/byCriteria?categoryPath=/in-game-purchase/coin
+	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/items/byCriteria?categoryPath=") + CategoryPath);
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	UE_LOG(LogJustice, VeryVerbose, TEXT("Attemp to call GetRootCategory: %s"), *Request->GetURL());
+
+	Request->OnProcessRequestComplete().BindStatic(JusticeCatalog::OnGetItemByCriteriaComplete, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr, TArray<ItemInfo>());
+	}
 }
+
+void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FItemCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::Ok:
+		{
+			FString ResponseStr = Response->GetContentAsString();
+			UE_LOG(LogJustice, Error, TEXT("OnGetItemByCriteriaComplete : %s"), *ResponseStr);
+
+			TSharedPtr<FJsonObject> JsonObject;
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+			TArray<ItemInfo> ArrayResult;
+			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+			{
+				ItemPagingSlicedResult Result;
+				if (Result.FromJson(JsonObject))
+				{
+					for (int i = 0; i < Result.Data.Num(); i++)
+					{
+						ArrayResult.Add(Result.Data[i]);						
+					}
+					OnComplete.Execute(true, TEXT(""), ArrayResult);
+				}
+				else 
+				{
+					ErrorStr = TEXT("unable to deserlize response from server");
+				}
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserlize response from server");
+			}
+		}
+		break;
+
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+		}
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
+		OnComplete.Execute(false, ErrorStr, TArray<ItemInfo>());
+		return;
+	}
+}
+
 
 void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete)
 {
@@ -134,3 +217,4 @@ void JusticeCatalog::OnGetSubCategoryComplete(FHttpRequestPtr Request, FHttpResp
 {
 
 }
+
