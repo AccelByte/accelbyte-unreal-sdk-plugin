@@ -7,18 +7,19 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
-#include "ItemInfo.h"
-#include "Paging.h"
 
-class ItemPagingSlicedResult : public FJsonSerializable
+
+class PaymentUrl : public FJsonSerializable
 {
 public:
-	TArray<ItemInfo> Data;
-	Paging PagingInfo;
+    FString paymentProvider ;
+    FString paymentUrl ;
+    FString paymentToken  ;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("data", Data, ItemInfo);
-		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paging", PagingInfo);
+		JSON_SERIALIZE("paymentProvider", paymentProvider );
+		JSON_SERIALIZE("paymentUrl", paymentUrl );
+        JSON_SERIALIZE("paymentToken", paymentToken );
 	END_JSON_SERIALIZER
 };
 

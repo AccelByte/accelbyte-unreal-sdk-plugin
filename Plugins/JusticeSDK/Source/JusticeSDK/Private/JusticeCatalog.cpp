@@ -76,8 +76,6 @@ void JusticeCatalog::GetSubCategory(FString ParentPath, FGetRootCategoryComplete
 
 void JusticeCatalog::GetItemByCriteria(FString CategoryPath, FItemCompleteDelegate OnComplete)
 {
-	
-
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
@@ -120,7 +118,7 @@ void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpR
 		case EHttpResponseCodes::Ok:
 		{
 			FString ResponseStr = Response->GetContentAsString();
-			UE_LOG(LogJustice, Error, TEXT("OnGetItemByCriteriaComplete : %s"), *ResponseStr);
+			UE_LOG(LogJustice, Log, TEXT("OnGetItemByCriteriaComplete : %s"), *ResponseStr);
 
 			TSharedPtr<FJsonObject> JsonObject;
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
@@ -133,6 +131,8 @@ void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpR
 					for (int i = 0; i < Result.Data.Num(); i++)
 					{
 						ArrayResult.Add(Result.Data[i]);						
+
+						UE_LOG(LogJustice, Log, TEXT("Item Currency And Value:%d %s  "), Result.Data[i].PriceInfo.Value, *Result.Data[i].PriceInfo.CurrencyCode);
 					}
 					OnComplete.Execute(true, TEXT(""), ArrayResult);
 				}

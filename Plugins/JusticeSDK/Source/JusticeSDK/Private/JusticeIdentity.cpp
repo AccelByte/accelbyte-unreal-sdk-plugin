@@ -43,7 +43,8 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 
 
-	Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
+	///iam/oauth/namespaces/{namespace}/token
+	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
@@ -53,20 +54,30 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	FString Grant = "";
 	if (GrantType == FGrantTypeJustice::PasswordGrant)
 	{
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/namespaces/") + Namespace + TEXT("/token"));
 		Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));		
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
 	}
 	else if (GrantType == FGrantTypeJustice::RefreshGrant)
 	{
-		FString AccessToken = FJusticeSDKModule::Get().UserToken->AccessToken;
-		Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),*FGenericPlatformHttp::UrlEncode(AccessToken));
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/namespaces/") + Namespace + TEXT("/token"));
+		FString RefreshToken = FJusticeSDKModule::Get().UserToken->RefreshToken;
+		Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),*FGenericPlatformHttp::UrlEncode(RefreshToken));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnRefreshComplete, RequestTrace);		
 	}
 	else if (GrantType == FGrantTypeJustice::ClientCredentialGrant)
 	{
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
 		Grant = FString::Printf(TEXT("grant_type=client_credentials"));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);			
 	}
+	else if (GrantType == FGrantTypeJustice::Anonymous)
+	{
+		Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
+		Grant = FString::Printf(TEXT("grant_type=anonymous"));
+		//Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);
+	}
+
 	Request->SetContentAsString(Grant);
 	if (!Request->ProcessRequest())
 	{
@@ -276,7 +287,7 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 
 
-	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke"));
+	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke/token"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
@@ -338,7 +349,7 @@ void JusticeIdentity::ClientLogout()
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 
-	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke"));
+	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke/token"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));

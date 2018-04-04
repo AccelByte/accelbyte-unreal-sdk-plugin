@@ -27,6 +27,7 @@ enum FGrantTypeJustice
 	PasswordGrant = 1,
 	RefreshGrant = 2,
 	ClientCredentialGrant = 3,
+	Anonymous = 4,
 };
 
 class JUSTICESDK_API JusticeIdentity 

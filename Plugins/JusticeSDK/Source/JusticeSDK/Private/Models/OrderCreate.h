@@ -5,21 +5,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
-#include "ItemInfo.h"
-#include "Paging.h"
+#include "Runtime/Core/Public/Misc/Guid.h"
 
-class ItemPagingSlicedResult : public FJsonSerializable
+class OrderCreate : public FJsonSerializable
 {
+
 public:
-	TArray<ItemInfo> Data;
-	Paging PagingInfo;
+
+    FString itemId;
+    int price;
+    FString currencyCode;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("data", Data, ItemInfo);
-		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paging", PagingInfo);
+		JSON_SERIALIZE("itemId", itemId);
+		JSON_SERIALIZE("price", price);
+		JSON_SERIALIZE("currencyCode", currencyCode);
 	END_JSON_SERIALIZER
-};
 
+};
 

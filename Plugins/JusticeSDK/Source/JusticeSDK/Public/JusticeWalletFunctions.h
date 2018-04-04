@@ -6,7 +6,6 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/UserProfileJustice.h"
 #include "JusticeWalletFunctions.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FGetWalletCompleteDelegate, bool, IsSuccess, int, Balance);

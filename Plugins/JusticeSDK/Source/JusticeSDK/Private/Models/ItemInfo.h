@@ -26,7 +26,7 @@ public:
 	FString Details;
 	JusticeImage ThumbnailImage;
 	TArray<JusticeImage> Images;
-	Price Price;
+	Price PriceInfo;
 	FString Status;
 	FString ItemType;
 	FString CreatedAt;
@@ -43,9 +43,10 @@ public:
 		JSON_SERIALIZE("categoryPath", CategoryPath);
 		JSON_SERIALIZE("title", Title);
 		JSON_SERIALIZE("details", Details);		
-		JSON_SERIALIZE_SERIALIZABLE("thumbnailImage", ThumbnailImage);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);
-		JSON_SERIALIZE_SERIALIZABLE("price", Price);
+		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);		
+		JSON_SERIALIZE_OBJECT_SERIALIZABLE("price", PriceInfo);
+
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("itemType", ItemType);
 		JSON_SERIALIZE("createdAt", CreatedAt);
@@ -60,13 +61,26 @@ class UItemInfo : public UObject, public ItemInfo
 {
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintCallable, Category = "ItemInfo")
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetItemId() { return ItemId; };
 
-	UFUNCTION(BlueprintCallable, Category = "ItemInfo")
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetTitle() { return Title; };
+
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		FString GetDetail() { return Details; };
+
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		UPrice* GetPrice() 
+		{
+			UPrice* result = NewObject<UPrice>(); 
+			result->FromPrice(PriceInfo);
+			return result;			
+		};
+
 
 public:
 		void FromItemInfo(ItemInfo item);
+		//void operator=(const ItemInfo item);
 		
 };

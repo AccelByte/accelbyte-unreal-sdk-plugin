@@ -32,6 +32,7 @@ void FJusticeSDKModule::StartupModule()
 	
 	GameClientToken = new OAuthTokenJustice;
 	UserToken = new OAuthTokenJustice;
+	UserProfile = new UserProfileInfo;
 
 	AsyncTaskManager = new FAsyncTaskManagerJustice();
 	OnlineAsyncTaskThread = FRunnableThread::Create(AsyncTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
