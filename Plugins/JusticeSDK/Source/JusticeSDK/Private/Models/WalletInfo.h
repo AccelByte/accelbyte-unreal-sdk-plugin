@@ -34,12 +34,9 @@ public:
 	END_JSON_SERIALIZER
 };
 
-
 UCLASS()
 class UWalletInfo : public UObject, public WalletInfo
 {
 	GENERATED_BODY()
 public:
-
-		
 };

@@ -11,7 +11,6 @@
 //static FOnScheduleTickDelegate onRefreshDelegate;
 FCriticalSection Mutex;
 
-
 class FRefreshTokenAsyncTask : public FJusticeAsyncTask
 {
 public:
@@ -110,31 +109,6 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 			{
-				//if (FJusticeSDKModule::Get().UserToken->FromJson(JsonObject))
-				//{
-				//	TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
-				//	for (TSharedPtr<FJsonValue> Permission : PermissionArray)
-				//	{
-				//		TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
-				//		FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
-				//		int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-				//		FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-				//		FJusticeSDKModule::Get().UserToken->Permissions.Add(PermissionObject);
-				//		//FJusticeSDKModule::Get().UserAccount->SetUserAttribute(Resource, FString::FromInt(Action));
-				//	}
-				//	FJusticeSDKModule::Get().UserToken->SetLastRefreshTimeToNow();
-				//	FJusticeSDKModule::Get().UserToken->ScheduleNormalRefresh();
-
-				//	FRefreshTokenAsyncTask* NewTask = new FRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
-				//	FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
-
-				//	UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
-				//	newToken->FromParent(FJusticeSDKModule::Get().UserToken);
-
-				//	OnComplete.Execute(true, TEXT(""), newToken);
-
-
-				//}
 				if (FJusticeSDKModule::Get().UserParseJson(JsonObject))
 				{
 						FRefreshTokenAsyncTask* NewTask = new FRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
@@ -664,7 +638,3 @@ FString JusticeIdentity::GetUserId()
 {
 	return FJusticeSDKModule::Get().UserToken->UserId;
 }
-
-
-
-

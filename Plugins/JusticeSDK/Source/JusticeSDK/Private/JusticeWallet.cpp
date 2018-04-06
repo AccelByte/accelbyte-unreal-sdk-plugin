@@ -11,13 +11,11 @@
 #include "JusticeLog.h"
 #include "Private/Models/WalletInfo.h"
 
-
 void JusticeWallet::GetWalletBalance(FGetWalletBalanceCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
@@ -25,7 +23,6 @@ void JusticeWallet::GetWalletBalance(FGetWalletBalanceCompleteDelegate OnComplet
 	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/wallets/DOGECOIN"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
-	//Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call GetWalletBalance: %s"), *Request->GetURL());
@@ -87,5 +84,4 @@ void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpRes
 		OnComplete.Execute(false, 0);
 		return;
 	}
-
 }

@@ -10,7 +10,6 @@
 
 class OrderCreate : public FJsonSerializable
 {
-
 public:
 
     FString itemId;
@@ -22,6 +21,5 @@ public:
 		JSON_SERIALIZE("price", price);
 		JSON_SERIALIZE("currencyCode", currencyCode);
 	END_JSON_SERIALIZER
-
 };
 

@@ -11,20 +11,15 @@
 #include "Private/Models/ItemInfo.h"
 #include "JusticeCatalogFunctions.generated.h"
 
-//DECLARE_DYNAMIC_DELEGATE_ThreeParams(FGetRootCategoryCompleteDelegate, bool, IsSuccess, FString, ErrorStr, UCategory*, Categories);
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
 
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
 
 UCLASS()
 class JUSTICESDK_API UJusticeCatalogFunctions : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-		
-	
-	//static void GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeCatalogFunctions")
 	static void GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete);
-
 	
 };

@@ -10,7 +10,6 @@
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
 
-
 void UJusticeWalletFunctions::GetWalletBalance(FGetWalletCompleteDelegate OnComplete)
 {
 	JusticeWallet::GetWalletBalance(FGetWalletBalanceCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, int balance) {

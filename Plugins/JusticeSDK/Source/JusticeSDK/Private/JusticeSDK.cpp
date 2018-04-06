@@ -7,8 +7,6 @@
 #include "JusticeLog.h"
 #include "Private/AsyncTaskManagerJustice.h"
 
-
-
 #define LOCTEXT_NAMESPACE "FJusticeSDKModule"
 
 void FJusticeSDKModule::StartupModule()
@@ -57,8 +55,6 @@ bool FJusticeSDKModule::GameClientParseJson(TSharedPtr<FJsonObject> jsonObject)
 			int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
 			FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
 			GameClientToken->Permissions.Add(PermissionObject);
-
-
 		}
 		return true;
 	}
@@ -85,8 +81,6 @@ bool FJusticeSDKModule::UserParseJson(TSharedPtr<FJsonObject> jsonObject)
 	}
 	return false;
 }
-
-
 
 #undef LOCTEXT_NAMESPACE
 	

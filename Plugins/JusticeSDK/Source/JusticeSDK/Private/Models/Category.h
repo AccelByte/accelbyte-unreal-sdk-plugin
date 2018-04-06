@@ -9,8 +9,6 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "Category.generated.h"
 
-
-
 class Category : public FJsonSerializable
 {
 	FString ID;

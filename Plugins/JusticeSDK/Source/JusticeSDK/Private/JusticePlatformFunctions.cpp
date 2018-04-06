@@ -10,7 +10,6 @@
 #include "JusticeLog.h"
 #include "JusticePlatform.h"
 
-
 void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete)
 {
 	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, UserProfileInfo userInfo) {
@@ -22,8 +21,6 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 
 void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
 {
-
-
 	UserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
 	UserProfileInfo NewUserProfile;
 
@@ -37,8 +34,6 @@ void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString
 	NewUserProfile.Namespace = OldUserProfile->Namespace;
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Status = OldUserProfile->Status;
-
-
 
 	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
 		OnComplete.Execute(IsSuccess, ErrorString);

@@ -1,4 +1,6 @@
-// Copyright (c) 2018 inXile entertainment, Inc. All rights reserved.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #include "AsyncCreateNewOrder.h"
 #include "Misc/ConfigCacheIni.h"
@@ -8,12 +10,6 @@
 #include "Private/Models/OrderCreate.h"
 #include "JusticeSDK.h"
 
-
-//UAsyncServerBrowser* UAsyncCreateNewOrder::GetServerList(FString Region) {
-//	UAsyncServerBrowser* Node = NewObject<UAsyncServerBrowser>();
-//	Node->Region = Region;
-//	return Node;
-//}
 UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(FString itemId, int Price, FString Currency)
 {
 	UAsyncCreateNewOrder* Node = NewObject<UAsyncCreateNewOrder>();
@@ -23,38 +19,7 @@ UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(FString itemId, int 
 	return Node;
 }
 
-
 void UAsyncCreateNewOrder::Activate() {
-	//TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	//TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	//FString ErrorStr;
-
-	//FString BaseURL;
-	//if (!GConfig->GetString(TEXT("InxileServerBrowser"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	//{
-	//	UE_LOG(LogJustice, Error, TEXT("Missing BaseURL= in [InxileServerBrowser] of DefaultEngine.ini"));
-	//}
-
-	//FString UserToken = FJusticeSDKModule::Get().UserToken->AccessToken;
-	//Request->SetURL(BaseURL + TEXT("/serverbrowser/public/servers/region/" + Region));
-	//Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(UserToken));
-	//Request->SetVerb(TEXT("GET"));
-	//Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-
-	//UE_LOG(LogServerBrowser, VeryVerbose, TEXT("Attemp to call Player Profile: %s"), *Request->GetURL());
-
-	//Request->OnProcessRequestComplete().BindUObject(this, &UAsyncServerBrowser::OnRequestComplete, FJusticeSDKModule::Get().UserToken->UserId, RequestTrace);
-	//if (!Request->ProcessRequest())
-	//{
-	//	ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	//}
-	//if (!ErrorStr.IsEmpty())
-	//{
-	//	UE_LOG(LogServerBrowser, Warning, TEXT("UFJusticeComponent::RequestCurrentPlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-	//	ExecuteOnFailed();
-	//}
-
-
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
@@ -69,18 +34,13 @@ void UAsyncCreateNewOrder::Activate() {
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-
 	UE_LOG(LogJustice, Log, TEXT("Attemp to Create new order: %s"), *Request->GetURL());
-	UE_LOG(LogJustice, Log, TEXT("item: %s  Price: %d   Currency:%s"), *ItemId, Price, *Currency);
 
 	OrderCreate newOrder;
 	newOrder.itemId = ItemId;
 	newOrder.currencyCode = Currency;
 	newOrder.price = Price;
 	FString Payload = newOrder.ToJson(false);
-
-	UE_LOG(LogJustice, Log, TEXT("Payload: %s"), *Payload);
-
 	Request->SetContentAsString(Payload);
 	Request->OnProcessRequestComplete().BindUObject(this, &UAsyncCreateNewOrder::OnRequestComplete, RequestTrace);
 	if (!Request->ProcessRequest())
@@ -89,8 +49,7 @@ void UAsyncCreateNewOrder::Activate() {
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		//OnComplete.Execute(false, ErrorStr, OrderInfo());
+		UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());		
 		ExecuteOnFailed();
 	}
 
@@ -108,39 +67,6 @@ void UAsyncCreateNewOrder::ExecuteOnFailed()
 
 void UAsyncCreateNewOrder::OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace)
 {
-	//FString ErrorStr;
-	//if (!bSuccessful || !Response.IsValid())
-	//{
-	//	ErrorStr = TEXT("request failed");
-	//}
-
-	//if (!ErrorStr.IsEmpty())
-	//{
-	//	UE_LOG(LogServerBrowser, Error, TEXT("Get Server List Error : %s"), *ErrorStr);
-	//	ExecuteOnFailed();
-	//	return;
-	//}
-
-	//if (Response->GetResponseCode() == EHttpResponseCodes::Ok) {
-
-	//	FString ResponseStr = Response->GetContentAsString();
-	//	TArray< TSharedPtr<FJsonValue> > JsonArray;
-	//	TSharedPtr<FJsonObject> JsonObject;
-	//	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-	//	TArray<FServerItemHelper> ServerStructList;
-
-	//	FJsonObjectConverter::JsonArrayStringToUStruct(ResponseStr, &ServerStructList, 0, 0);
-	//	for (int i = 0; i < ServerStructList.Num(); i++)
-	//	{
-	//		FServerItemHelper item = ServerStructList[i];
-
-	//		UServerItem* newItem = NewObject<UServerItem>();
-	//		newItem->LoadFromStruct(item);
-	//		ServerList.Add(newItem);
-	//	}
-
-	//	ExecuteOnSuccess();
-	//}
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -166,7 +92,6 @@ void UAsyncCreateNewOrder::OnRequestComplete(FHttpRequestPtr Request, FHttpRespo
 					OrderInformation = NewObject<UOrderInfo>();
 					OrderInformation->FromOrderInfo(info);
 					ExecuteOnSuccess();
-					//OnComplete.Execute(false, ErrorStr, info);
 				}
 				else
 				{
@@ -187,11 +112,9 @@ void UAsyncCreateNewOrder::OnRequestComplete(FHttpRequestPtr Request, FHttpRespo
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnCreateNewOrderComplete Error : %s"), *ErrorStr);
-		//OnComplete.Execute(false, ErrorStr, OrderInfo());
 		ExecuteOnFailed();
 		return;
 	}
-
 
 }
 

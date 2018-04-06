@@ -10,11 +10,6 @@
 #include "JusticeLog.h"
 #include "JusticeCatalog.h"
 
-
-//void UJusticeCatalogFunctions::GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete)
-//{
-//}
-
 void UJusticeCatalogFunctions::GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete)
 {
 	JusticeCatalog::GetItemByCriteria(CategoryPath, FItemCompleteDelegate::CreateLambda([OnComplete](bool isSuccess, FString errorString, TArray<ItemInfo> result) {
@@ -29,7 +24,5 @@ void UJusticeCatalogFunctions::GetItemByCriteria(FString CategoryPath, FItemComp
 			}
 		}
 		OnComplete.Execute(isSuccess, errorString, Result);
-
-
 	}));
 }

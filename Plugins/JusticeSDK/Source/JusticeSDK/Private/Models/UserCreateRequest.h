@@ -10,7 +10,6 @@
 
 class FUserCreateRequest : public FJsonSerializable
 {
-
 public:
 	FUserCreateRequest()
 	{

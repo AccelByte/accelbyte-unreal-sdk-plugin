@@ -8,5 +8,4 @@ void UJusticePurchaseFunctions::CreateNewOrder(FString itemId, int Price, FStrin
 		result->FromOrderInfo(order);
 		OnComplete.Execute(isSuccess, errorString, result);
 	}));
-
 }

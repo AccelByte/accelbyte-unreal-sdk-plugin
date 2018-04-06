@@ -3,9 +3,6 @@
 // and restrictions contact your company contract manager.
 #include "ItemInfo.h"
 
-
-
-
 void UItemInfo::FromItemInfo(ItemInfo item)
 {	
 	this->ItemId			= item.ItemId;

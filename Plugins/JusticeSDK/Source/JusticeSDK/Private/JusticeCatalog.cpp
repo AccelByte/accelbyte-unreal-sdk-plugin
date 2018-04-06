@@ -10,15 +10,12 @@
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
 
-
-
 void JusticeCatalog::GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete)
 {
 
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 

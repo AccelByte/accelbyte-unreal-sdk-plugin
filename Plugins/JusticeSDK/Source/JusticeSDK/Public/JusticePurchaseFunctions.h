@@ -9,11 +9,7 @@
 #include "Private/Models/OrderInfo.h"
 #include "JusticePurchaseFunctions.generated.h"
 
-
-
-//DECLARE_DYNAMIC_DELEGATE_TwoParams(FGetWalletCompleteDelegate, bool, IsSuccess, int, Balance);
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FCreateNewOrderCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, UOrderInfo*, OrderInformation);
-
 
 UCLASS()
 class JUSTICESDK_API UJusticePurchaseFunctions : public UBlueprintFunctionLibrary

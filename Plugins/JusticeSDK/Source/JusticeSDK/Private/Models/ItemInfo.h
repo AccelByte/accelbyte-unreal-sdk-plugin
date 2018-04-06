@@ -11,7 +11,6 @@
 #include "Price.h"
 #include "ItemInfo.generated.h"
 
-
 class ItemInfo : public FJsonSerializable
 {
 public:
@@ -46,7 +45,6 @@ public:
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);		
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("price", PriceInfo);
-
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("itemType", ItemType);
 		JSON_SERIALIZE("createdAt", CreatedAt);
@@ -54,7 +52,6 @@ public:
 		JSON_SERIALIZE("favoritCnt", FavoritCnt);
 	END_JSON_SERIALIZER
 };
-
 
 UCLASS()
 class UItemInfo : public UObject, public ItemInfo
@@ -77,10 +74,6 @@ class UItemInfo : public UObject, public ItemInfo
 			result->FromPrice(PriceInfo);
 			return result;			
 		};
-
-
 public:
-		void FromItemInfo(ItemInfo item);
-		//void operator=(const ItemInfo item);
-		
+		void FromItemInfo(ItemInfo item);	
 };

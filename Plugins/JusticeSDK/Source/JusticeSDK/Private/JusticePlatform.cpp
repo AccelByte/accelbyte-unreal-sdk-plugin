@@ -5,11 +5,9 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	//string loginUrl = baseUrl + "/platform/public/profiles/namespaces/" + UserAccount.Token.Namespace + "/users/" + UserAccount.Token.UserId;
 	Request->SetURL(BaseURL + TEXT("/platform/public/profiles/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId);
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
@@ -17,9 +15,8 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-	UE_LOG(LogJustice, VeryVerbose, TEXT("Attemp to call Player Profile: %s"), *Request->GetURL());
+	UE_LOG(LogJustice, Log, TEXT("Attemp to call Player Profile: %s"), *Request->GetURL());
 
-	//Request->OnProcessRequestComplete().BindUObject(this, &UFJusticeComponent::TokenPlayerProfileComplete, JusticeUserId, RequestTrace);
 	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnRequestCurrentPlayerProfileComplete, RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{
@@ -30,8 +27,6 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::RequestCurrentPlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.Execute(false, ErrorStr, UserProfileInfo());
 	}
-
-
 }
 
 void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete)
@@ -39,11 +34,9 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	//string loginUrl = baseUrl + "/platform/public/profiles/namespaces/" + UserAccount.Token.Namespace + "/users/" + UserAccount.Token.UserId;
 	Request->SetURL(BaseURL + TEXT("/platform/public/profiles/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId);
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("PUT"));
@@ -56,7 +49,6 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	Request->SetContentAsString(Payload);
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call UpdatePlayerProfile: %s"), *Request->GetURL());
 
-	//Request->OnProcessRequestComplete().BindUObject(this, &UFJusticeComponent::TokenPlayerProfileComplete, JusticeUserId, RequestTrace);
 	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnUpdatePlayerProfileComplete, RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{
@@ -67,7 +59,6 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 		UE_LOG(LogJustice, Warning, TEXT("JusticePlatform::UpdatePlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.Execute(false, ErrorStr);
 	}
-
 }
 
 UserProfileInfo * JusticePlatform::GetUserProfileInfo()
@@ -119,7 +110,6 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 		OnComplete.Execute(false, ErrorStr, UserProfileInfo());
 		return;
 	}
-
 }
 
 void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete)

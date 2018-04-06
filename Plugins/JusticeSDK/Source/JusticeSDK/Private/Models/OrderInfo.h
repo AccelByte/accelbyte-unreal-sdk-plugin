@@ -7,18 +7,14 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
-
 #include "Transaction.h"
 #include "PaymentUrl.h"
 #include "CurrencySummary.h"
 #include "OrderInfo.generated.h"
 
-
-
 class OrderInfo : public FJsonSerializable
 {
 public:
-
 	OrderInfo() {}
 
 	FString OrderNo;
@@ -54,8 +50,6 @@ public:
 };
 
 
-
-
 UCLASS()
 class UOrderInfo : public UObject, public OrderInfo
 {
@@ -69,9 +63,6 @@ class UOrderInfo : public UObject, public OrderInfo
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
 		FString GetPaymenUrl() { return PaymentUrl.paymentUrl; };
-
-
-
 public:
 		void FromOrderInfo(OrderInfo order);
 		

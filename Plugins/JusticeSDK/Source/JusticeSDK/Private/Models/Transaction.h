@@ -9,7 +9,6 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "CurrencySummary.h"
 
-
 class Transaction : public FJsonSerializable
 {
 public:

@@ -9,9 +9,6 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "UserProfileInfo.generated.h"
 
-
-
-
 class UserProfileInfo : public FJsonSerializable
 {
 public:
@@ -48,15 +45,12 @@ public:
 };
 
 
-
 UCLASS(Blueprintable, BlueprintType)
 class UUserProfileJustice : public UObject, public UserProfileInfo
 {
 	GENERATED_BODY()
 public:
-
 	void FromUserProfileInfo(UserProfileInfo info);
-
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetUserId()
@@ -87,7 +81,6 @@ public:
 	{
 		return Country;
 	}
-
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetAvatarSmallUrl()

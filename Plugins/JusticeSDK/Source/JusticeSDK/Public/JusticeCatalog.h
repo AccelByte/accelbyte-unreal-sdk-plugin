@@ -16,7 +16,6 @@
 DECLARE_DELEGATE_ThreeParams(FGetRootCategoryCompleteDelegate, bool, FString, TArray<Category>);
 DECLARE_DELEGATE_ThreeParams(FItemCompleteDelegate, bool, FString, TArray<ItemInfo>);
 
-
 class JUSTICESDK_API JusticeCatalog
 {
 
