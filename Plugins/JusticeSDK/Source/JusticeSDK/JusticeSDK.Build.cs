@@ -32,6 +32,7 @@ public class JusticeSDK : ModuleRules
                 "Engine",
                 "Json",
                 "JsonUtilities",
+                "Http"
             }
 			);
 			

@@ -1,0 +1,68 @@
+pipeline {
+  agent {
+      node {
+          label 'windows-ue4'
+      }
+  }
+  stages {
+		stage('label') {
+      steps {
+				bat '''			  				
+				"%GIT_PATH%\\git.exe" rev-parse HEAD > version.txt        
+				'''
+      }
+    }
+		stage('cleanup') {
+      steps {
+				bat '''
+        IF EXIST temp (
+          rd /s /q temp
+        )        
+        IF EXIST artifacts (
+          rd /s /q artifacts
+        )                
+        '''
+      }
+    }
+		stage('setup') {
+      steps {
+				bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeUE4Plugin.uproject" -game -rocket -progress'
+      }
+    }
+		stage('build') {
+      steps {
+				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeUE4Plugin.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
+      }
+    }
+		stage('package') {
+      steps {
+				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeUE4Plugin.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeUE4Plugin.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeUE4Plugin -utf8output'
+      }
+    }
+		stage('archive'){
+      steps {				
+        bat '''
+        set /p GIT_SHA=<version.txt
+        mkdir "%WORKSPACE%\\artifacts"
+        IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries" (
+          rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries"
+        )        
+        IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate" (
+          rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate"
+        )    
+        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\temp"            
+        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\JusticeSDK"
+        '''      
+      }
+    }
+    stage('upload'){
+      steps {
+        bat '''
+        set /p GIT_SHA=<version.txt
+        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
+        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
+        '''
+      }
+    }    
+  }
+}
