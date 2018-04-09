@@ -14,7 +14,7 @@ class FJusticeSDKModule : public IModuleInterface
 public:
 	static inline FJusticeSDKModule& Get()
 	{
-		return FModuleManager::GetModuleChecked< FJusticeSDKModule >("JusticeSDK"); 
+		return FModuleManager::LoadModuleChecked< FJusticeSDKModule >("JusticeSDK");
 	}
 	static inline bool IsAvailable()
 	{
