@@ -8,25 +8,18 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "Runtime/Core/Public/Misc/Guid.h"
 
-class FUserCreateRequest : public FJsonSerializable
+class OrderCreate : public FJsonSerializable
 {
 public:
-	FUserCreateRequest()
-	{
 
-	}
-
-	FString AuthType;
-	FString DisplayName;
-	FString LoginId;
-	FString Password;
+    FString itemId;
+    int price;
+    FString currencyCode;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("AuthType", AuthType);
-		JSON_SERIALIZE("DisplayName", DisplayName);
-		JSON_SERIALIZE("LoginId", LoginId);
-		JSON_SERIALIZE("Password", Password);
+		JSON_SERIALIZE("itemId", itemId);
+		JSON_SERIALIZE("price", price);
+		JSON_SERIALIZE("currencyCode", currencyCode);
 	END_JSON_SERIALIZER
-
 };
 

@@ -6,11 +6,14 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/UserProfileJustice.h"
+#include "Private/Models/UserProfileInfo.h"
 
 #include "JusticePlatformFunctions.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FProfileReqestCompleteDelegate, bool, IsSuccess, FString, ErrorStr, UUserProfileJustice*, PlayerProfile);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FUpdatePlayerProfileCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
+
+
 
 UCLASS()
 class JUSTICESDK_API UJusticePlatformFunctions : public UBlueprintFunctionLibrary
@@ -18,6 +21,11 @@ class JUSTICESDK_API UJusticePlatformFunctions : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 		
 	UFUNCTION(BlueprintCallable, Category = "JusticePlatformFunctions")
-	static void RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete);
-	
+		static void RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete);
+
+	UFUNCTION(BlueprintCallable, Category = "JusticePlatformFunctions")
+		static void UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete);
+
+
+
 };

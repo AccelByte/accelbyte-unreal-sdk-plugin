@@ -93,4 +93,3 @@ void FAsyncTaskManagerJustice::Exit()
 	InvocationCount--;
 	UE_LOG(LogJustice, Log, TEXT("FOnlineAsyncTaskManager::Exit() finished"));
 }
-

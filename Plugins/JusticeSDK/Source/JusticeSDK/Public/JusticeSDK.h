@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 #include "Private/Models/OAuthTokenJustice.h"
+#include "Private/Models/UserProfileInfo.h"
 #include "AsyncTaskManagerJustice.h"
 
 class FJusticeSDKModule : public IModuleInterface
@@ -34,6 +35,8 @@ public:
 	class FRunnableThread* OnlineAsyncTaskThread;
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
+	UserProfileInfo* UserProfile;
+
 	FAsyncTaskManagerJustice* AsyncTaskManager;
 
 private:

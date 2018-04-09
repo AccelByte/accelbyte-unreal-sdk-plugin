@@ -7,17 +7,13 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
-#include "UserProfileJustice.generated.h"
+#include "UserProfileInfo.generated.h"
 
-/**
- * 
- */
-UCLASS(Blueprintable, BlueprintType)
-class UUserProfileJustice : public UObject, public FJsonSerializable
+class UserProfileInfo : public FJsonSerializable
 {
-	GENERATED_BODY()
-	
-private:
+public:
+	UserProfileInfo() {};
+
 	FString UserId;
 	FString Namespace;
 	FString DisplayName;
@@ -46,62 +42,77 @@ public:
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE_MAP("customAttributes", CustomAttributes);
 	END_JSON_SERIALIZER
+};
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+
+UCLASS(Blueprintable, BlueprintType)
+class UUserProfileJustice : public UObject, public UserProfileInfo
+{
+	GENERATED_BODY()
+public:
+	void FromUserProfileInfo(UserProfileInfo info);
+
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetUserId()
 	{
 		return UserId;
 	};
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetDisplayName()
 	{
 		return DisplayName;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetFirstName()
 	{
 		return FirstName;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetLastName()
 	{
 		return LastName;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
+		FString GetCountry()
+	{
+		return Country;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetAvatarSmallUrl()
 	{
 		return AvatarSmallUrl;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetAvatarLargeUrl()
 	{
 		return AvatarLargeUrl;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetAvatarUrl()
 	{
 		return AvatarUrl;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetEmail()
 	{
 		return Email;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetStatus()
 	{
 		return Status;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "UserProfileJustice")
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetNamespace()
 	{
 		return Namespace;

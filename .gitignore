@@ -74,6 +74,8 @@ Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 Content/StarterContent/
+!Content/StarterContent/Maps
+!Content/StarterContent/Maps/*
 Plugins/OnlineSubsystemJustice/Binaries/
 Plugins/OnlineSubsystemJustice/Intermediate/
 *.bak
