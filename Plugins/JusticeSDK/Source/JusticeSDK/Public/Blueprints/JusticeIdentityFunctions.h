@@ -67,4 +67,19 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 
 	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
 		static FString GetPlatformRedirectURL(FString PlatformID);
+
+
+
+    // Steam Specific 
+    UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+        static void LoginWithSteam(FUserLoginCompleteDynamicDelegate OnComplete);
+    
+    UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+        static UTexture2D* GetSteamAvatar();
+
+    UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+        static FString GetSteamNickName();
+
+    
+
 };

@@ -33,6 +33,8 @@ public class JusticeSDK : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
+                "OnlineSubsystem",
+                "OnlineSubsystemUtils",
                 "WebBrowser",
             }
 			);
@@ -47,6 +49,7 @@ public class JusticeSDK : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
+                "OnlineSubsystem",
             }
 			);
 		
@@ -54,8 +57,8 @@ public class JusticeSDK : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				// ... add any modules that your module loads dynamically here ...
-			}
+                "OnlineSubsystemSteam",
+            }
 			);
 	}
 }

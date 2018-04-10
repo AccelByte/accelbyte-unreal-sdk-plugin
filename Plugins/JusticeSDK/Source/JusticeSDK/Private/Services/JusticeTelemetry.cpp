@@ -11,7 +11,7 @@
 void JusticeTelemetry::SendTelemetryEvent(FTelemetryEvent Telemetry, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = TEXT("");
-	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *FJusticeNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);
+	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *JusticeGameNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
 	FString Accept = TEXT("*/*");

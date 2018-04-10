@@ -9,7 +9,7 @@
 void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
 	FString Verb			= GET;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -137,7 +137,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
 	FString Verb			= PUT;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -240,7 +240,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	DefaultLocale.ParseIntoArray(RegionID, TEXT("_"), true);
 
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
 	FString Accept = TYPE_JSON;

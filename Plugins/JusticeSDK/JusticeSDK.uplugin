@@ -19,5 +19,11 @@
       "Type": "Developer",
       "LoadingPhase": "Default"
     }
-  ]
+  ],
+  "Plugins": [                       
+     {                                
+       "Name": "OnlineSubsystemSteam",    
+       "Enabled": true                
+     }                                
+   ]      
 }
