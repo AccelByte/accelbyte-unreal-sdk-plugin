@@ -9,14 +9,14 @@
 #include "GameFramework/GameModeBase.h"
 #include "Online.h"
 #include "JusticeIdentity.h"
-#include "JusticeUE4PluginGameModeBase.generated.h"
+#include "JusticeSDKDemoGameModeBase.generated.h"
 
 UCLASS()
-class JUSTICEUE4PLUGIN_API AJusticeUE4PluginGameModeBase : public AGameModeBase
+class JUSTICESDKDEMO_API AJusticeSDKDemoGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
-	AJusticeUE4PluginGameModeBase();
+	AJusticeSDKDemoGameModeBase();
 
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage);
 	void BeginPlay();

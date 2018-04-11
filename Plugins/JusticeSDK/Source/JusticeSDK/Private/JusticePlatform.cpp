@@ -61,6 +61,41 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	}
 }
 
+void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete)
+{
+
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+
+	//{{justice_url}}/platform/public/profiles/namespaces/{{namespace}}/users/{{user_id}}
+	Request->SetURL(BaseURL + TEXT("/platform/public/profiles/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId);
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+
+	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"email\" : \"%s\",\"country\" : \"CN\"}"), *DisplayName, *Email);
+
+	Request->SetContentAsString(Payload);
+	UE_LOG(LogJustice, Log, TEXT("Attemp to call CreateDefaultPlayerProfile: %s"), *Request->GetURL());
+
+	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnCreateDefaultPlayerProfile, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("JusticePlatform::UpdatePlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr);
+	}
+
+}
+
 UserProfileInfo * JusticePlatform::GetUserProfileInfo()
 {
 	return FJusticeSDKModule::Get().UserProfile;
@@ -97,8 +132,13 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 			{
 				ErrorStr = TEXT("unable to deserlize response from server");
 			}
+			break;
+		}	
+		case EHttpResponseCodes::NotFound:
+		{
+			//JusticePlatform::CreateDefaultPlayerProfile()
+			break;
 		}
-		break;
 
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
@@ -138,6 +178,52 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHt
 		UE_LOG(LogJustice, Error, TEXT("OnUpdatePlayerProfileComplete Error : %s"), *ErrorStr);
 		OnComplete.Execute(false, ErrorStr);
 		return;
+	}
+
+}
+
+void JusticePlatform::OnCreateDefaultPlayerProfile(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::Created:
+		{
+			UE_LOG(LogJustice, Log, TEXT("OnCreateDefaultPlayerProfile receive success response "));
+			OnComplete.Execute(true, TEXT(""));
+			break;
+		}
+		case EHttpResponseCodes::BadRequest:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Invalid Request. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::Forbidden:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::NotFound:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			break;
+		}
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnCreateDefaultPlayerProfile Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr);
 	}
 
 }

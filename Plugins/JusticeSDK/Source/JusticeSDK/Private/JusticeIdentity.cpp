@@ -249,6 +249,96 @@ void JusticeIdentity::OnRefreshToken(FDateTime time, int32 nextTick)
 	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, nullptr);
 }
 
+void JusticeIdentity::OnForgotPasswordStep1Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep1CompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::NoContent:
+		{
+			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordStep1Complete receive success response "));
+			OnComplete.Execute(true, TEXT(""));
+			break;
+		}
+		case EHttpResponseCodes::BadRequest:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Invalid Request. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::Forbidden:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::NotFound:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			break;
+		}				
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordStep1Complete Error=%s ReqTime=%.3f"),*ErrorStr, Request->GetElapsedTime());		
+		OnComplete.Execute(false, ErrorStr);
+	}
+}
+
+void JusticeIdentity::OnForgotPasswordStep2Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep2CompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::NoContent:
+		{
+			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordStep2Complete receive success response "));
+			OnComplete.Execute(true, TEXT(""));
+			break;
+		}
+		case EHttpResponseCodes::BadRequest:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Invalid Request. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::Forbidden:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::NotFound:
+		{
+			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			break;
+		}
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordStep2Complete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr);
+	}
+}
+
 void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
@@ -530,45 +620,29 @@ void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpRe
 		OnComplete.Execute(false, ErrorStr);
 	}
 }
-void JusticeIdentity::ForgotPasswordStep1(FString LoginId)
+void JusticeIdentity::ForgotPasswordStep1(FString LoginId, FForgotPasswordStep1CompleteDelegate onComplete)
 {
 	FString ErrorStr;
 	FString ClientID;
 	FString ClientSecret;
-	FString BaseURL;
-	FString Namespace;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	
 
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
-	{
-		UE_LOG(LogJustice, Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
-	{
-		UE_LOG(LogJustice, Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
-	{
-		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
-	{
-		UE_LOG(LogJustice, Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
-	}
-
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/forgotpasswordstub"));
+	//POST /iam/namespaces/{namespace}/users/forgotPassword
+	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/forgotPassword"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-	FString Grant = FString::Printf(TEXT("loginId=%s"), *LoginId);
+	FString Grant = FString::Printf(TEXT("{	\"LoginID\": \"%s\"}"), *LoginId);
+
 	Request->SetContentAsString(Grant);
-	//Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordStep1Complete,RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordStep1Complete,RequestTrace, onComplete);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -581,7 +655,7 @@ void JusticeIdentity::ForgotPasswordStep1(FString LoginId)
 	}
 }
 
-void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword)
+void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword, FForgotPasswordStep2CompleteDelegate onComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
@@ -592,15 +666,22 @@ void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCo
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/resetpasswordstub"));
+	//POST /iam/namespaces/{namespace}/users/resetPassword
+	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/resetPassword"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-	FString Grant = FString::Printf(TEXT("UserId=%s&Verification=%s&NewPassword=%s"), *UserId, *VerificationCode, *NewPassword);
-	Request->SetContentAsString(Grant);
+
+	ResetPasswordRequest reset;
+	reset.Code = VerificationCode;
+	reset.LoginID = UserId;
+	reset.NewPassword = NewPassword;
+
+	FString Payload = reset.ToJson();
+	Request->SetContentAsString(Payload);
 	//Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordStep2Complete,RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{

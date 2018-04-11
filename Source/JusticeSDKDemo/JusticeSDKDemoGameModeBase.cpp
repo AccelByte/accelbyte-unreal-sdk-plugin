@@ -2,32 +2,32 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "JusticeUE4PluginGameModeBase.h"
+#include "JusticeSDKDemoGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
 
 
-AJusticeUE4PluginGameModeBase::AJusticeUE4PluginGameModeBase()
+AJusticeSDKDemoGameModeBase::AJusticeSDKDemoGameModeBase()
 {
 }
 
-void AJusticeUE4PluginGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+void AJusticeSDKDemoGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 }
 
-void AJusticeUE4PluginGameModeBase::BeginPlay()
+void AJusticeSDKDemoGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	JusticeIdentity::ClientLogin();
 }
 
-void AJusticeUE4PluginGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AJusticeSDKDemoGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	JusticeIdentity::ClientLogout();
 }
 
-void AJusticeUE4PluginGameModeBase::Tick(float DeltaSeconds)
+void AJusticeSDKDemoGameModeBase::Tick(float DeltaSeconds)
 {
 }
 

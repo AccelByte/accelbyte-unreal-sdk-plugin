@@ -22,12 +22,15 @@ class JUSTICESDK_API JusticePlatform
 public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
     static void UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete);
+	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete);
 
 	static UserProfileInfo* GetUserProfileInfo();
 
 private:
 	static void OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static void OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
+	static void OnCreateDefaultPlayerProfile(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
+
 
 private:
 

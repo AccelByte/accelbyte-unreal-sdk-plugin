@@ -4,9 +4,9 @@
 
 using UnrealBuildTool;
 
-public class JusticeUE4Plugin : ModuleRules
+public class JusticeSDKDemo : ModuleRules
 {
-	public JusticeUE4Plugin(ReadOnlyTargetRules Target) : base(Target)
+	public JusticeSDKDemo(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
