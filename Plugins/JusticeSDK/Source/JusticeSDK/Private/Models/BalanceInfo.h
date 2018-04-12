@@ -7,17 +7,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
-
 #include "BalanceInfo.generated.h"
-
-
-
 
 class BalanceInfo: public FJsonSerializable
 {
-
 public:
-
 	FString ID;
 	FString walletId;
 	FString currencyCode;
@@ -35,15 +29,11 @@ public:
 		JSON_SERIALIZE("updatedAt", updatedAt);
 		JSON_SERIALIZE("status", status);
 	END_JSON_SERIALIZER
-
 };
-
 
 
 UCLASS()
 class UBalanceInfo : public UObject, public BalanceInfo
 {
 	GENERATED_BODY()
-	
-
 };

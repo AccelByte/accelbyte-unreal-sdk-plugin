@@ -22,4 +22,3 @@ public:
 		JSON_SERIALIZE("currencyCode", currencyCode);
 	END_JSON_SERIALIZER
 };
-

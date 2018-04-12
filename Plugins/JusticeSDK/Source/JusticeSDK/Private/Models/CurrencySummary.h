@@ -8,7 +8,6 @@
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
 
-
 class CurrencySummary : public FJsonSerializable
 {
 public:

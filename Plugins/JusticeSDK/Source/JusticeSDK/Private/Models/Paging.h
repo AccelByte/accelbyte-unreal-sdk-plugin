@@ -20,5 +20,3 @@ public:
 		JSON_SERIALIZE("next", Next);
 	END_JSON_SERIALIZER
 };
-
-

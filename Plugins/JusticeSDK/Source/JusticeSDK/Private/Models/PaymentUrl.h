@@ -21,5 +21,3 @@ public:
         JSON_SERIALIZE("paymentToken", paymentToken );
 	END_JSON_SERIALIZER
 };
-
-

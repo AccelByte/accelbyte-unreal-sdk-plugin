@@ -44,9 +44,6 @@ public:
 	static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void ForgotPasswordStep1(FString LoginId, FForgotPasswordStep1CompleteDelegate onComplete);
 	static void ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword, FForgotPasswordStep2CompleteDelegate onComplete);
-
-	// Platform specific
-	static void LinkSteam(FUserLoginCompleteDelegate OnComplete);
 	
 	// Client specific
 	static void ClientLogin();
@@ -63,8 +60,7 @@ private:
 	static void OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete);	
 	static void OnClientLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
 	static void OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete);
-	static void OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);
-	static void OnRefreshToken(FDateTime time, int32 nextTick);	
+	static void OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);	
 	static void OnForgotPasswordStep1Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep1CompleteDelegate OnComplete);
 	static void OnForgotPasswordStep2Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep2CompleteDelegate OnComplete);
 

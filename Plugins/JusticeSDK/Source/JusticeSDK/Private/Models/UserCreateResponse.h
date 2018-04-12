@@ -36,6 +36,5 @@ public:
 		JSON_SERIALIZE("AuthType", AuthType);
 		JSON_SERIALIZE("DisplayName", DisplayName);
 		JSON_SERIALIZE("LoginId", LoginId);
-	END_JSON_SERIALIZER
-		
+	END_JSON_SERIALIZER		
 };

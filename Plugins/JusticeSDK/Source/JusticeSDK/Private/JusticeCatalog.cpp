@@ -12,14 +12,12 @@
 
 void JusticeCatalog::GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete)
 {
-
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	//{{justice_url}}/platform/public/namespaces/{{namespace}}/categories
 	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/categories"));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
@@ -38,7 +36,6 @@ void JusticeCatalog::GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete
 		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.Execute(false, ErrorStr, TArray<Category>());
 	}
-
 }
 
 void JusticeCatalog::GetSubCategory(FString ParentPath, FGetRootCategoryCompleteDelegate OnComplete)
@@ -46,7 +43,6 @@ void JusticeCatalog::GetSubCategory(FString ParentPath, FGetRootCategoryComplete
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
@@ -209,9 +205,3 @@ void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpRes
 		return;
 	}
 }
-
-void JusticeCatalog::OnGetSubCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete)
-{
-
-}
-

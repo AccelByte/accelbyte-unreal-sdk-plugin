@@ -21,5 +21,3 @@ public:
 		JSON_SERIALIZE("NewPassword", NewPassword);
 	END_JSON_SERIALIZER
 };
-
-
