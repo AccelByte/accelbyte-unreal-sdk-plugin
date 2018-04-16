@@ -11,16 +11,16 @@
 #include "JusticeLog.h"
 #include "Private/Models/WalletInfo.h"
 
-void JusticeWallet::GetWalletBalance(FGetWalletBalanceCompleteDelegate OnComplete)
+void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
 
-	// {{justice_url}}/platform/public/namespaces/{{namespace}}/users/{{user_id}}/wallets/DOGECOIN
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/wallets/DOGECOIN"));
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *BaseURL, *Namespace, *UserID, *CurrencyCode));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));

@@ -11,14 +11,16 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/profiles"));
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+	
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnRequestCurrentPlayerProfileComplete, RequestTrace, OnComplete);
+
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call Player Profile: %s"), *Request->GetURL());
 	if (!Request->ProcessRequest())
 	{
@@ -71,10 +73,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 			UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
 			JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
 				UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
-
 				if (IsSuccess)
 				{
-					// call another GetCurrentProfileRequest
 					UE_LOG(LogJustice, Log, TEXT("Call another GetCurrentProfileRequest"));
 					JusticePlatform::RequestCurrentPlayerProfile(OnComplete);
 				}
@@ -105,8 +105,9 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/profiles"));
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+	
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("PUT"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
@@ -162,15 +163,15 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"email\": \"%s\",\"country\": \"CN\"}"), *DisplayName, *Email);
 
-	//{{justice_url}}/platform/public/profiles/namespaces/{{namespace}}/users/{{user_id}}
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/profiles"));
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"email\" : \"%s\",\"country\" : \"CN\"}"), *DisplayName, *Email);
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());	
 	Request->SetContentAsString(Payload);
 	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnCreateDefaultPlayerProfileComplete, RequestTrace, OnComplete);
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call CreateDefaultPlayerProfile: %s"), *Request->GetURL());

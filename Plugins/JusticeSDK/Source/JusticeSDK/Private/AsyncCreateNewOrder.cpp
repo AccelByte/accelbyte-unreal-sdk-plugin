@@ -25,9 +25,9 @@ void UAsyncCreateNewOrder::Activate() {
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-
-	//{{justice_url}}/platform/public/namespaces/{ {namespace}} / users / { {user_id}} / orders
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/orders"));
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+	
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
@@ -52,7 +52,6 @@ void UAsyncCreateNewOrder::Activate() {
 		UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());		
 		ExecuteOnFailed();
 	}
-
 }
 
 void UAsyncCreateNewOrder::ExecuteOnSuccess()
@@ -115,6 +114,4 @@ void UAsyncCreateNewOrder::OnRequestComplete(FHttpRequestPtr Request, FHttpRespo
 		ExecuteOnFailed();
 		return;
 	}
-
 }
-

@@ -40,8 +40,6 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 	FJusticeSDKModule::Get().LoginId = LoginId;
 
-
-	// /iam/oauth/namespaces/{namespace}/token
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
@@ -50,29 +48,29 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 
 	FString Grant = "";
 	if (GrantType == FGrantTypeJustice::PasswordGrant)
-	{
-		Request->SetURL(BaseURL + TEXT("/iam/oauth/namespaces/") + Namespace + TEXT("/token"));
+	{		
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/token"), *BaseURL, *Namespace));
 		Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));		
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
 	}
 	else if (GrantType == FGrantTypeJustice::RefreshGrant)
-	{
-		Request->SetURL(BaseURL + TEXT("/iam/oauth/namespaces/") + Namespace + TEXT("/token"));
+	{		
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/token"), *BaseURL, *Namespace));
 		FString RefreshToken = FJusticeSDKModule::Get().UserToken->RefreshToken;
 		Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),*FGenericPlatformHttp::UrlEncode(RefreshToken));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnRefreshComplete, RequestTrace);		
 	}
 	else if (GrantType == FGrantTypeJustice::ClientCredentialGrant)
 	{
-		Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));		
 		Grant = FString::Printf(TEXT("grant_type=client_credentials"));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);			
 	}
 	else if (GrantType == FGrantTypeJustice::Anonymous)
-	{
-		Request->SetURL(BaseURL + TEXT("/iam/oauth/token"));
+	{		
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
 		Grant = FString::Printf(TEXT("grant_type=anonymous"));
-		//Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);
+		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
 	}
 
 	Request->SetContentAsString(Grant);
@@ -241,42 +239,34 @@ void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpR
 	UE_LOG(LogJustice, Log, TEXT("Game Client Credential successful. ReqTime=%.3f"), Request->GetElapsedTime());
 }
 
-void JusticeIdentity::ForgotPasswordStep1(FString LoginId, FForgotPasswordStep1CompleteDelegate onComplete)
+void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	FString ClientID;
-	FString ClientSecret;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	//POST /iam/namespaces/{namespace}/users/forgotPassword
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/forgotPassword"));
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *BaseURL, *Namespace));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-
-	FString Grant = FString::Printf(TEXT("{	\"LoginID\": \"%s\"}"), *LoginId);
-
-	Request->SetContentAsString(Grant);
-	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordStep1Complete, RequestTrace, onComplete);
+	Request->SetContentAsString(FString::Printf(TEXT("{	\"LoginID\": \"%s\"}"), *LoginId));
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordComplete, RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 	}
-	UE_LOG(LogJustice, VeryVerbose, TEXT("UFJusticeComponent::ForgotPasswordStep1 Sucessful, XRayID= %s"), *RequestTrace->ToString());
-
+	UE_LOG(LogJustice, VeryVerbose, TEXT("UFJusticeComponent::ForgotPassword Sucessful, XRayID= %s"), *RequestTrace->ToString());
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::ForgotPasswordStep1 failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::ForgotPassword failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 	}
 }
 
-void JusticeIdentity::OnForgotPasswordStep1Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep1CompleteDelegate OnComplete)
+void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
@@ -289,7 +279,7 @@ void JusticeIdentity::OnForgotPasswordStep1Complete(FHttpRequestPtr Request, FHt
 		{
 		case EHttpResponseCodes::NoContent:
 		{
-			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordStep1Complete receive success response "));
+			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordComplete receive success response "));
 			OnComplete.Execute(true, TEXT(""));
 			break;
 		}
@@ -313,56 +303,49 @@ void JusticeIdentity::OnForgotPasswordStep1Complete(FHttpRequestPtr Request, FHt
 			break;
 		}				
 	}
-
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordStep1Complete Error=%s ReqTime=%.3f"),*ErrorStr, Request->GetElapsedTime());		
+		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordComplete Error=%s ReqTime=%.3f"),*ErrorStr, Request->GetElapsedTime());		
 		OnComplete.Execute(false, ErrorStr);
 	}
 }
 
-void JusticeIdentity::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword, FForgotPasswordStep2CompleteDelegate onComplete)
+void JusticeIdentity::ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	FString ClientID = FJusticeSDKModule::Get().ClientID;
-	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 
-	//POST /iam/namespaces/{namespace}/users/resetPassword
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/resetPassword"));
+	ResetPasswordRequest ResetPasswordRequest;
+	ResetPasswordRequest.Code = VerificationCode;
+	ResetPasswordRequest.LoginID = UserId;
+	ResetPasswordRequest.NewPassword = NewPassword;
+
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *BaseURL, *Namespace));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	Request->SetContentAsString(ResetPasswordRequest.ToJson());
+	UE_LOG(LogJustice, Log, TEXT("Attemp to call JusticeIdentity::ResetPassword: %s"), *Request->GetURL());
 
-	UE_LOG(LogJustice, Log, TEXT("Attemp to call JusticeIdentity::ForgotPasswordStep2: %s"), *Request->GetURL());
-
-	ResetPasswordRequest reset;
-	reset.Code = VerificationCode;
-	reset.LoginID = UserId;
-	reset.NewPassword = NewPassword;
-
-	FString Payload = reset.ToJson();
-	Request->SetContentAsString(Payload);
-	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordStep2Complete, RequestTrace, onComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnResetPasswordComplete, RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
 	}
-	UE_LOG(LogJustice, VeryVerbose, TEXT("UFJusticeComponent::ForgotPasswordStep2 Sucessful, XRayID= %s"), *RequestTrace->ToString());
+	UE_LOG(LogJustice, VeryVerbose, TEXT("UFJusticeComponent::ResetPassword Sucessful, XRayID= %s"), *RequestTrace->ToString());
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::ForgotPasswordStep2 failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::ResetPassword failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 	}
 }
 
-void JusticeIdentity::OnForgotPasswordStep2Complete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordStep2CompleteDelegate OnComplete)
+void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
@@ -375,7 +358,7 @@ void JusticeIdentity::OnForgotPasswordStep2Complete(FHttpRequestPtr Request, FHt
 		{
 		case EHttpResponseCodes::NoContent:
 		{
-			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordStep2Complete receive success response "));
+			UE_LOG(LogJustice, Log, TEXT("OnResetPasswordComplete receive success response "));
 			OnComplete.Execute(true, TEXT(""));
 			break;
 		}
@@ -401,7 +384,7 @@ void JusticeIdentity::OnForgotPasswordStep2Complete(FHttpRequestPtr Request, FHt
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordStep2Complete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
+		UE_LOG(LogJustice, Error, TEXT("OnResetPasswordComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
 		OnComplete.Execute(false, ErrorStr);
 	}
 }
@@ -410,23 +393,19 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());	
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
+	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().UserToken->AccessToken));
 
-
-	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke/token"));
+	Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *BaseURL));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-
-	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().UserToken->AccessToken));
-
 	Request->SetContentAsString(Grant);
 	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLogoutComplete, RequestTrace, OnComplete);
 
@@ -474,21 +453,18 @@ void JusticeIdentity::ClientLogout()
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
+	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 
-	Request->SetURL(BaseURL + TEXT("/iam/oauth/revoke/token"));
+	Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *BaseURL));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-
-	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().GameClientToken->AccessToken));
-
 	Request->SetContentAsString(Grant);
 	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientLogoutComplete, RequestTrace);
 
@@ -531,7 +507,6 @@ void JusticeIdentity::OnClientLogoutComplete(FHttpRequestPtr Request, FHttpRespo
 	}
 }
 
-
 void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
@@ -540,20 +515,20 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users"));
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *BaseURL, *Namespace));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 
-	FUserCreateRequest newUser;
-	newUser.DisplayName = DisplayName;
-	newUser.Password = Password;
-	newUser.LoginId = UserId;
-	newUser.AuthType = AuthType;// EMAILPASSWD or PHONEPASSWD
+	FUserCreateRequest NewUserRequest;
+	NewUserRequest.DisplayName = DisplayName;
+	NewUserRequest.Password = Password;
+	NewUserRequest.LoginId = UserId;
+	NewUserRequest.AuthType = AuthType;// EMAILPASSWD or PHONEPASSWD
 
-	Request->SetContentAsString(newUser.ToJson());
+	Request->SetContentAsString(NewUserRequest.ToJson());
 	Request->OnProcessRequestComplete().BindStatic(JusticeIdentity::OnRegisterNewPlayerComplete, RequestTrace, OnComplete);
 
 	if (!Request->ProcessRequest())
@@ -632,16 +607,15 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString Payload = FString::Printf(TEXT("{ \"Code\": \"%s\"}"), *VerificationCode);
 
-	Request->SetURL(BaseURL + TEXT("/iam/namespaces/") + Namespace + TEXT("/users/") + UserId + TEXT("/verification"));
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *BaseURL, *Namespace, *UserId));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-
-	FString Body = FString::Printf(TEXT("{ \"Code\": \"%s\"}"), *VerificationCode);
-	Request->SetContentAsString(Body);
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());	
+	Request->SetContentAsString(Payload);
 	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnVerifyNewPlayerComplete, RequestTrace, OnComplete);
 	if (!Request->ProcessRequest())
 	{

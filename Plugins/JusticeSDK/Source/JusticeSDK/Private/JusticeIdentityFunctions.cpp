@@ -38,18 +38,18 @@ void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserId, FString Verifica
 
 }
 
-void UJusticeIdentityFunctions::ForgotPasswordStep1(FString LoginId, FForgotPasswordStep1CompleteDynamicDelegate onComplete)
+void UJusticeIdentityFunctions::ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::ForgotPasswordStep1(LoginId,
-		FForgotPasswordStep1CompleteDelegate::CreateLambda([onComplete](bool IsSuccess, FString ErrorStr) {
-		onComplete.Execute(IsSuccess, ErrorStr);
+	JusticeIdentity::ForgotPassword(LoginId,
+		FForgotPasswordCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
+		OnComplete.Execute(IsSuccess, ErrorStr);
 	}));
 }
 
-void UJusticeIdentityFunctions::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword, FForgotPasswordStep2CompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::ForgotPasswordStep2(UserId, VerificationCode, NewPassword,
-		FForgotPasswordStep2CompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
+	JusticeIdentity::ResetPassword(UserId, VerificationCode, NewPassword,
+		FResetPasswordCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
 		OnComplete.Execute(IsSuccess, ErrorStr);
 	}));
 }

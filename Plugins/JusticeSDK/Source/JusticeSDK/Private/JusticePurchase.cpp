@@ -8,29 +8,23 @@ void JusticePurchase::CreateNewOrder(FString itemId, int Price, FString Currency
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
 
-	//{{justice_url}}/platform/public/namespaces/{ {namespace}} / users / { {user_id}} / orders
-	Request->SetURL(BaseURL + TEXT("/platform/public/namespaces/") + FJusticeSDKModule::Get().Namespace + TEXT("/users/") + FJusticeSDKModule::Get().UserToken->UserId + TEXT("/orders"));
+	OrderCreate NewOrderRequest;
+	NewOrderRequest.itemId = itemId;
+	NewOrderRequest.currencyCode = Currency;
+	NewOrderRequest.price = Price;
+
+	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *BaseURL, *Namespace, *UserID));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-
-
-	UE_LOG(LogJustice, Log, TEXT("Attemp to Create new order: %s"), *Request->GetURL());
-	UE_LOG(LogJustice, Log, TEXT("item: %s  Price: %d   Currency:%s"), *itemId, Price, *Currency);
-
-	OrderCreate newOrder;
-	newOrder.itemId = itemId;
-	newOrder.currencyCode = Currency;
-	newOrder.price = Price;
-	FString Payload = newOrder.ToJson(false);
-
-	UE_LOG(LogJustice, Log, TEXT("Payload: %s"), *Payload);
-
-	Request->SetContentAsString(Payload);
+	Request->SetContentAsString(NewOrderRequest.ToJson());
 	Request->OnProcessRequestComplete().BindStatic(JusticePurchase::OnCreateNewOrderComplete, RequestTrace, OnComplete);
+	UE_LOG(LogJustice, Log, TEXT("Attemp to Create new order: %s"), *Request->GetURL());
+
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -90,5 +84,4 @@ void JusticePurchase::OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpRes
 		OnComplete.Execute(false, ErrorStr, OrderInfo());
 		return;
 	}
-
 }
