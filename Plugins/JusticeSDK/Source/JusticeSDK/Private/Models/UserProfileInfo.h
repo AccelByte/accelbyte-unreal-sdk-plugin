@@ -44,7 +44,6 @@ public:
 	END_JSON_SERIALIZER
 };
 
-
 UCLASS(Blueprintable, BlueprintType)
 class UUserProfileJustice : public UObject, public UserProfileInfo
 {
@@ -117,6 +116,4 @@ public:
 	{
 		return Namespace;
 	}
-	
-	
 };

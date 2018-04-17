@@ -41,5 +41,3 @@ public:
         JSON_SERIALIZE("txEndTime", txEndTime);
 	END_JSON_SERIALIZER
 };
-
-

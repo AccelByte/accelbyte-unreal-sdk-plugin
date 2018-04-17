@@ -38,12 +38,20 @@ void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserId, FString Verifica
 
 }
 
-void UJusticeIdentityFunctions::ForgotPasswordStep1(FString LoginId)
+void UJusticeIdentityFunctions::ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete)
 {
+	JusticeIdentity::ForgotPassword(LoginId,
+		FForgotPasswordCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
+		OnComplete.Execute(IsSuccess, ErrorStr);
+	}));
 }
 
-void UJusticeIdentityFunctions::ForgotPasswordStep2(FString UserId, FString VerificationCode, FString NewPassword)
+void UJusticeIdentityFunctions::ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDynamicDelegate OnComplete)
 {
+	JusticeIdentity::ResetPassword(UserId, VerificationCode, NewPassword,
+		FResetPasswordCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
+		OnComplete.Execute(IsSuccess, ErrorStr);
+	}));
 }
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()

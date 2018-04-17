@@ -16,6 +16,6 @@ class JUSTICESDK_API UJusticeWalletFunctions : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 		
 	UFUNCTION(BlueprintCallable, Category = "JusticeWalletFunctions")
-	static void GetWalletBalance(FGetWalletCompleteDelegate OnComplete);
+	static void GetWalletBalance(FString CurrencyCode, FGetWalletCompleteDelegate OnComplete);
 	
 };

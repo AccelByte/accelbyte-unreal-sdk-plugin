@@ -10,9 +10,9 @@
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
 
-void UJusticeWalletFunctions::GetWalletBalance(FGetWalletCompleteDelegate OnComplete)
+void UJusticeWalletFunctions::GetWalletBalance(FString CurrencyCode, FGetWalletCompleteDelegate OnComplete)
 {
-	JusticeWallet::GetWalletBalance(FGetWalletBalanceCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, int balance) {
+	JusticeWallet::GetWalletBalance(CurrencyCode, FGetWalletBalanceCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, int balance) {
 		OnComplete.Execute(bSuccessful, balance);
 	}));
 }

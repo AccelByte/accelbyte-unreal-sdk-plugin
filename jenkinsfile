@@ -26,17 +26,17 @@ pipeline {
     }
 		stage('setup') {
       steps {
-				bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeUE4Plugin.uproject" -game -rocket -progress'
+				bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -game -rocket -progress'
       }
     }
 		stage('build') {
       steps {
-				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeUE4Plugin.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
+				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
       }
     }
 		stage('package') {
       steps {
-				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeUE4Plugin.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeUE4Plugin.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeUE4Plugin -utf8output'
+				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeSDKDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeSDKDemo -utf8output'
       }
     }
 		stage('archive'){

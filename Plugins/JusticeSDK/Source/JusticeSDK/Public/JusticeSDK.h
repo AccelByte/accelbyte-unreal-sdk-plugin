@@ -35,6 +35,7 @@ public:
 	class FRunnableThread* OnlineAsyncTaskThread;
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
+	FString LoginId;
 	UserProfileInfo* UserProfile;
 
 	FAsyncTaskManagerJustice* AsyncTaskManager;

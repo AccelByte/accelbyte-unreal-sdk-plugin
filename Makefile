@@ -1,6 +1,6 @@
 # Copyright (c) 2017 AccelByte Inc. All Rights Reserved.
 
-NAME=JusticeUE4Plugin
+NAME=JusticeSDKDemo
 UE_VER=UE_4.16
 
 ifndef UE_ROOT
@@ -15,7 +15,7 @@ GENERATE=/bin/sh $(BATCH_DIR)/GenerateProjectFiles.sh
 PIE=$(BIN_DIR)/Mac/UE4Editor.app/Contents/MacOS/UE4Editor
 
 build: generate
-	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeUE4Plugin.uproject -editorrecompile -progress -NoHotReloadFromIDE
+	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeSDKDemo.uproject -editorrecompile -progress -NoHotReloadFromIDE
 
 generate:
 	cd $(BATCH_DIR) && $(GENERATE) -project=$(PWD)/$(NAME).uproject -game
@@ -26,11 +26,11 @@ run:
 _rebuild:
 	$(MAKE) clean 
 	$(NAME) build
-#	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeUE4Plugin.uproject -editorrecompile -progress -NoHotReloadFromIDE
+#	$(UBT) $(NAME) Development Mac -project=$(PWD)/JusticeSDKDemo.uproject -editorrecompile -progress -NoHotReloadFromIDE
 #	$(MAKE) run
 
 autorebuild:
-	@watchman-make -p 'Plugins/OnlineSubsystemJustice/Source/**/*.cpp' 'Source/JusticeUE4Plugin/**/*.cpp' -t _rebuild --root . --settle 5
+	@watchman-make -p 'Plugins/OnlineSubsystemJustice/Source/**/*.cpp' 'Source/JusticeSDKDemo/**/*.cpp' -t _rebuild --root . --settle 5
 
 clean:
 	rm -fr Intermediate/ Binaries/

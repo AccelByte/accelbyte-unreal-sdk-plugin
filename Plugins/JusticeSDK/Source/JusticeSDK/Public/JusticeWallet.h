@@ -20,7 +20,7 @@ class JUSTICESDK_API JusticeWallet
 {
 
 public:
-	static void GetWalletBalance(FGetWalletBalanceCompleteDelegate OnComplete);
+	static void GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete);
 
 
 private:

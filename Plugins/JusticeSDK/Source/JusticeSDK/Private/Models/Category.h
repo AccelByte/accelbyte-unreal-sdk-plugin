@@ -33,13 +33,9 @@ class Category : public FJsonSerializable
 };
 
 
-
 UCLASS()
 class UCategory : public UObject, public Category
 {
 	GENERATED_BODY()
-	
 public:
-
-		
 };

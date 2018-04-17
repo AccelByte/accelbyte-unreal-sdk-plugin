@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "JusticeUE4Plugin",
+			"Name": "JusticeSDKDemo",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

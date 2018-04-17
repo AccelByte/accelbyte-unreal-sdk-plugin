@@ -3,7 +3,3 @@
 // and restrictions contact your company contract manager.
 
 #include "WalletInfo.h"
-
-
-
-

@@ -8,16 +8,16 @@
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
 
-class PaymentUrl : public FJsonSerializable
+class ResetPasswordRequest : public FJsonSerializable
 {
 public:
-    FString paymentProvider ;
-    FString paymentUrl ;
-    FString paymentToken  ;
+    FString Code;
+    FString LoginID;
+    FString NewPassword;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("paymentProvider", paymentProvider );
-		JSON_SERIALIZE("paymentUrl", paymentUrl );
-        JSON_SERIALIZE("paymentToken", paymentToken );
+		JSON_SERIALIZE("Code", Code);
+		JSON_SERIALIZE("LoginID", LoginID);
+		JSON_SERIALIZE("NewPassword", NewPassword);
 	END_JSON_SERIALIZER
 };

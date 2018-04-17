@@ -9,7 +9,6 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "JusticeImage.generated.h"
 
-
 class JusticeImage : public FJsonSerializable
 {
 public:
@@ -27,10 +26,8 @@ public:
 };
 
 
-
 UCLASS()
 class UJusticeImage : public UObject, public JusticeImage
 {
-	GENERATED_BODY()
-		
+	GENERATED_BODY()		
 };

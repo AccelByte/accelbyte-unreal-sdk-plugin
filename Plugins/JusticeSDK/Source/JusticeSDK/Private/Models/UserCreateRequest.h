@@ -11,10 +11,7 @@
 class FUserCreateRequest : public FJsonSerializable
 {
 public:
-	FUserCreateRequest()
-	{
-
-	}
+	FUserCreateRequest(){}
 
 	FString AuthType;
 	FString DisplayName;
@@ -27,6 +24,4 @@ public:
 		JSON_SERIALIZE("LoginId", LoginId);
 		JSON_SERIALIZE("Password", Password);
 	END_JSON_SERIALIZER
-
 };
-
