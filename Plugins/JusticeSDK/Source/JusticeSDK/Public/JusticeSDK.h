@@ -8,7 +8,7 @@
 #include "ModuleManager.h"
 #include "Private/Models/OAuthTokenJustice.h"
 #include "Private/Models/UserProfileInfo.h"
-#include "AsyncTaskManagerJustice.h"
+#include "Private/AsyncTaskManagerJustice.h"
 
 class FJusticeSDKModule : public IModuleInterface
 {
