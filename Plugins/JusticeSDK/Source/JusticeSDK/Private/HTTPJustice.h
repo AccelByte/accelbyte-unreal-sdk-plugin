@@ -10,7 +10,7 @@
 #include "UObject/CoreOnline.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
 
-class FHTTPJustice
+class JUSTICESDK_API FHTTPJustice
 {
 public:	
 	FHTTPJustice()	{}
