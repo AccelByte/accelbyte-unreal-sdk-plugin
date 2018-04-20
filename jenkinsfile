@@ -1,11 +1,11 @@
 pipeline {
   agent {
       node {
-          label 'windows2-ue4'
+          label 'windows-ue4'
       }
   }
   stages {
-		/*stage('label') {
+		stage('label') {
       steps {
 				bat '''			  				
 				"%GIT_PATH%\\git.exe" rev-parse HEAD > version.txt        
@@ -63,7 +63,7 @@ pipeline {
         aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
         '''
       }
-    }*/
+    }
     stage('forks'){
       steps {
         bat '''
