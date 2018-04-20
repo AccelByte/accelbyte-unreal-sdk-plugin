@@ -49,8 +49,8 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	FString Grant = "";
 	if (GrantType == FGrantTypeJustice::PasswordGrant)
 	{		
-		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/token"), *BaseURL, *Namespace));
-		Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));		
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
+ 		Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
 	}
 	else if (GrantType == FGrantTypeJustice::RefreshGrant)
@@ -555,7 +555,7 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 		{
 		case EHttpResponseCodes::Created:
 		{
-			UE_LOG(LogJustice, VeryVerbose, TEXT("TokenRegisterPlayerComplete : Entity Created"));
+			UE_LOG(LogJustice, Log, TEXT("OnRegisterNewPlayerComplete : Entity Created"));
 			//parse json
 			FString ResponseStr = Response->GetContentAsString();
 			UUserCreateResponse* pUserCreateResponse = NewObject<UUserCreateResponse>();
@@ -565,7 +565,16 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 			{
 				if (pUserCreateResponse->FromJson(JsonObject))
 				{
-					OnComplete.Execute(true, TEXT(""), pUserCreateResponse);
+					ReissueVerificationCode(pUserCreateResponse->UserId, pUserCreateResponse->LoginId, FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, pUserCreateResponse](bool IsSuccess, FString ErrorStr) {
+						if (IsSuccess)
+						{
+							OnComplete.Execute(true, TEXT(""), pUserCreateResponse);
+						}
+						else
+						{
+							OnComplete.Execute(false, ErrorStr, nullptr);
+						}					
+					}));
 				}
 				else
 				{
@@ -593,7 +602,7 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("TokenRegisterPlayerComplete. Error=%s XRay=%s ReqTime=%.3f"),
+		UE_LOG(LogJustice, Error, TEXT("OnRegisterNewPlayerComplete. Error Message: %s XRay: %s ReqTime: %.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 
 		OnComplete.Execute(false, ErrorStr, nullptr);
@@ -628,6 +637,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 	}
 }
 
+
 void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
@@ -657,7 +667,68 @@ void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpRe
 	{
 		UE_LOG(LogJustice, Error, TEXT("VerifyNewPlayerCompleteDelegate. Error=%s XRay=%s ReqTime=%.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr);
+	}
+}
 
+void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, FVerifyNewPlayerCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString Payload = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginId);
+
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *BaseURL, *Namespace, *UserId));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	Request->SetContentAsString(Payload);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnReissueVerificationCodeComplete, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("ReissueVerificationCode failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		OnComplete.Execute(false, ErrorStr);
+	}
+}
+
+
+void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::NoContent:
+			UE_LOG(LogJustice, VeryVerbose, TEXT("OnReissueVerificationCodeComplete : Operation succeeded"));
+			OnComplete.Execute(true, TEXT(""));
+			break;
+		case EHttpResponseCodes::BadRequest:
+			ErrorStr = TEXT("Invalid Request");
+			break;
+		case EHttpResponseCodes::Forbidden:
+			ErrorStr = TEXT("Forbidden");
+			break;
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+		}
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnReissueVerificationCodeComplete. Error:%s XRay: %s ReqTime: %.3f"),
+			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.Execute(false, ErrorStr);
 	}
 }
