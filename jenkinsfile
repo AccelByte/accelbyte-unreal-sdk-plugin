@@ -63,17 +63,6 @@ pipeline {
         aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
         '''
       }
-    }
-    stage('forks'){
-      steps {
-        bat '''
-        cd ..
-        git clone git@bitbucket.org:accelbyte/justice-customer-automerge.git
-        cd justice-customer-automerge
-        automerge.bat justice-ue4-sdk
-
-        '''
-      }
-    }   
+    }  
   }
 }
