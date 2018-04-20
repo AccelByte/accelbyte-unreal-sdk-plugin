@@ -12,10 +12,6 @@
 	],
 	"Plugins": [
 		{
-			"Name": "WebBrowserWidget",
-			"Enabled": true
-		},
-		{
 			"Name": "EditorTests",
 			"Enabled": true
 		},
@@ -33,6 +29,10 @@
 		},
 		{
 			"Name": "ScreenshotTools",
+			"Enabled": true
+		},
+		{
+			"Name": "JusticeWebBrowserWidget",
 			"Enabled": true
 		}
 	]
