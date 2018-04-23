@@ -1,4 +1,6 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #pragma once
 
@@ -63,6 +65,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Justice Web Browser|Event")
 	FOnUrlChanged OnUrlChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Justice Web Browser|Event")
+	FOnUrlChanged OnRedirectSuccess;
+
+	UPROPERTY(BlueprintAssignable, Category = "Justice Web Browser|Event")
+	FOnUrlChanged OnJusticeWebLoggedIn;
+
+
+
+
 public:
 
 	//~ Begin UWidget interface
@@ -79,6 +90,11 @@ protected:
 	/** URL that the browser will initially navigate to. The URL should include the protocol, eg http:// */
 	UPROPERTY(EditAnywhere, Category=Appearance)
 	FString InitialURL;
+
+
+	UPROPERTY(EditAnywhere, Category = Appearance)
+	FString RedirectSuccessUrl;
+
 
 	/** Should the browser window support transparency. */
 	UPROPERTY(EditAnywhere, Category=Appearance)

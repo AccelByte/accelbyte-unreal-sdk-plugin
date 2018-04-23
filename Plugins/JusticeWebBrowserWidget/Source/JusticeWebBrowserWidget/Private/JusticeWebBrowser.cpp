@@ -1,14 +1,63 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
 
 #include "JusticeWebBrowser.h"
 #include "SWebBrowser.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Serialization/JsonSerializerMacros.h"
+#include "Engine.h"
 
 #define LOCTEXT_NAMESPACE "JusticeWebBrowser"
 
 /////////////////////////////////////////////////////
 // UJusticeWebBrowser
+
+class CefData : public FJsonSerializable
+{
+public:
+	FString RefreshToken;
+
+	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("refresh_token", RefreshToken);
+	END_JSON_SERIALIZER
+};
+
+class CefRequest : public FJsonSerializable
+{
+public:
+	FString Action;
+	CefData Data;
+
+	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("action", Action);
+		JSON_SERIALIZE_OBJECT_SERIALIZABLE("data", Data);
+	END_JSON_SERIALIZER
+};
+
+
+class CefResponse : public FJsonSerializable
+{
+public:
+	FString ClientId;
+	FString ClientAuthorizationHeader;
+	FString GlobalNamespace;
+	FString JusticeApiUrl;
+	FString ReturnTo;
+
+	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("clientId", ClientId);
+		JSON_SERIALIZE("clientAuthorizationHeader", ClientAuthorizationHeader);
+		JSON_SERIALIZE("globalNamespace", GlobalNamespace);
+		JSON_SERIALIZE("justiceApiUrl", JusticeApiUrl);
+		JSON_SERIALIZE("returnTo", ReturnTo);
+	END_JSON_SERIALIZER
+};
+
+
+
+
 
 UJusticeWebBrowser::UJusticeWebBrowser(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -20,9 +69,6 @@ void UJusticeWebBrowser::LoadURL(FString NewURL)
 {
 	if ( WebBrowserWidget.IsValid() )
 	{
-
-		
-
 		return WebBrowserWidget->LoadURL(NewURL);
 	}
 }
@@ -109,19 +155,57 @@ void UJusticeWebBrowser::SynchronizeProperties()
 void UJusticeWebBrowser::HandleOnUrlChanged(const FText& InText)
 {
 	OnUrlChanged.Broadcast(InText);
+	if (InText.ToString().Contains(RedirectSuccessUrl))
+	{
+		OnRedirectSuccess.Broadcast(InText);
+	}
 }
 
 FString UJusticeWebBrowser::CefQuery(FString value)
 {
 	UE_LOG(LogTemp, Log, TEXT("JusticeWebBrowser::CefQuery Response: %s"), *value);
-	if (value.Compare("{\"action\":\"request-initial-data-injections\"}") == 0)
+	TSharedPtr<FJsonObject> JsonObject;
+	CefRequest request;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(value);
+	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 	{
-		return TEXT("{\"clientId\":\"string/optional\",\"clientAuthorizationHeader\" : \"string/optional\",\"globalNamespace\" : \"string/optional\",\"justiceApiUrl\" : \"string/optional\",\"returnTo\" : \"string/optional\"}");
+		if (request.FromJson(JsonObject))
+		{
+			if (request.Action.Contains(TEXT("request-initial-data-injections")))
+			{
+				CefResponse response;
+				FString Namespace;
+				FString ClientID;
+				FString ClientSecret;
+
+				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
+				{
+					UE_LOG(LogTemp, Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+				}
+				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
+				{
+					UE_LOG(LogTemp, Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+				}
+				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
+				{
+					UE_LOG(LogTemp, Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+				}
+
+				response.ClientId = ClientID;
+				response.GlobalNamespace = Namespace;
+
+				return response.ToJson();
+			}
+			else if (request.Action.Contains(TEXT("success")))
+			{
+				UE_LOG(LogTemp, Log, TEXT("JusticeWebBrowser::CefQuery WE GOT REFRESH TOKEN: %s"), *request.Data.RefreshToken);
+				OnJusticeWebLoggedIn.Broadcast(FText::FromString(request.Data.RefreshToken));
+				return TEXT("");
+			}
+		}
 	}
-	else
-	{
-		return TEXT("Empty");
-	}
+
+	return TEXT("Empty");
 }
 
 
