@@ -11,6 +11,18 @@ void UJusticeIdentityFunctions::UserLogin(FString LoginId, FString Password, FUs
 	}));
 }
 
+
+void UJusticeIdentityFunctions::WebLoginRefresh(FString RefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
+{
+	JusticeIdentity::SetRefreshToken(RefreshToken);
+	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+		OnComplete.Execute(IsSuccess, ErrorStr, Token);
+	}));
+
+
+
+}
+
 void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete)
 {
 	FUserLogoutCompleteDelegate LogoutCompleteDelegate;

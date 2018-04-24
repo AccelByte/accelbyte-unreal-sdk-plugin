@@ -28,9 +28,13 @@
     }
   ],
   "Plugins": [
-		{
-			"Name": "EditorTests",
-			"Enabled": true
-		}
-	]
+    {
+      "Name": "EditorTests",
+      "Enabled": true
+    },
+    {
+      "Name": "JusticeSDK",
+      "Enabled": true
+    }
+  ]
 }

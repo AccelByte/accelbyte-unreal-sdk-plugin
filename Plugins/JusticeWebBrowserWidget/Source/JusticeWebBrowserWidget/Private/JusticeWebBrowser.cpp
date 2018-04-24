@@ -7,6 +7,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Serialization/JsonSerializerMacros.h"
+#include "JusticeSDK/Private/HTTPJustice.h"
 #include "Engine.h"
 
 #define LOCTEXT_NAMESPACE "JusticeWebBrowser"
@@ -193,6 +194,8 @@ FString UJusticeWebBrowser::CefQuery(FString value)
 
 				response.ClientId = ClientID;
 				response.GlobalNamespace = Namespace;
+				response.ClientAuthorizationHeader = FHTTPJustice::BasicAuth(ClientID, ClientSecret);
+
 
 				return response.ToJson();
 			}

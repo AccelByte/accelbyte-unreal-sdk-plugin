@@ -19,6 +19,7 @@ namespace UnrealBuildTool.Rules
 					"UMG",
                     "Json",
                     "JsonUtilities",
+                    "JusticeSDK",
                 }
 			);
 		}
