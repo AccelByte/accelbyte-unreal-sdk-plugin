@@ -169,7 +169,6 @@ void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePt
 					UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
 					newToken->FromParent(FJusticeSDKModule::Get().UserToken);
 					OnComplete.Execute(true, TEXT(""), newToken);
-					//
 				}
 				else
 				{
