@@ -81,3 +81,6 @@ Plugins/OnlineSubsystemJustice/Intermediate/
 *.bak
 Plugins/JusticeSDK/Binaries/
 Plugins/JusticeSDK/Intermediate/Build/
+Plugins/JusticeWebBrowserWidget/Binaries/
+Plugins/JusticeWebBrowserWidget/Content/WebTexture_M.uasset
+Plugins/JusticeWebBrowserWidget/Intermediate/Build/

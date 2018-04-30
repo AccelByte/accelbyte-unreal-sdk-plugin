@@ -164,7 +164,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
-	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"email\": \"%s\",\"country\": \"CN\"}"), *DisplayName, *Email);
+	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"country\": \"CN\"}"), *DisplayName, *Email);
 
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));

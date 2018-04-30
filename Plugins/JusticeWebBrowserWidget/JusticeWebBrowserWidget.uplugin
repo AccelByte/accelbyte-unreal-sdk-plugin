@@ -1,0 +1,40 @@
+{
+	"FileVersion" : 3,
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"FriendlyName" : "Justice Web Browser",
+	"Description" : "Allows the user to create a Web Browser Widget",
+	"Category" : "Widgets",
+	"CreatedBy" : "Accelbyte",
+	"CreatedByURL" : "https://accelbyte.net",
+	"DocsURL" : "",
+	"MarketplaceURL" : "",
+	"SupportURL" : "",
+	"EnabledByDefault" : false,
+	"CanContainContent" : false,
+	"IsBetaVersion" : false,
+	"Installed" : false,
+  "Modules": 
+  [
+    {
+      "Name": "JusticeWebBrowserWidget",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64",
+        "Win32",
+        "Mac"
+      ]
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "EditorTests",
+      "Enabled": true
+    },
+    {
+      "Name": "JusticeSDK",
+      "Enabled": true
+    }
+  ]
+}

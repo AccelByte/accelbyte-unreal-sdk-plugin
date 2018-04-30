@@ -29,6 +29,9 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 		static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+		static void WebLoginRefresh(FString RefreshToken, FUserLoginCompleteDynamicDelegate OnComplete);
+
+	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete) ;
 	
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
