@@ -29,11 +29,11 @@
   ],
   "Plugins": [
     {
-      "Name": "EditorTests",
+      "Name": "JusticeSDK",
       "Enabled": true
     },
     {
-      "Name": "JusticeSDK",
+      "Name": "EditorTests",
       "Enabled": true
     }
   ]

@@ -8,7 +8,9 @@ namespace UnrealBuildTool.Rules
 	{
 		public JusticeWebBrowserWidget(ReadOnlyTargetRules Target) : base(Target)
 		{
-			PublicDependencyModuleNames.AddRange(
+            PrivateDependencyModuleNames.AddRange(new string[] { "JusticeSDK" });
+
+            PublicDependencyModuleNames.AddRange(
 				new string[]
 				{
 					"Core",

@@ -179,17 +179,17 @@ FString UJusticeWebBrowser::CefQuery(FString value)
 				FString ClientID;
 				FString ClientSecret;
 
-				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
+				if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("Namespace"), Namespace, GEngineIni))
 				{
-					UE_LOG(LogTemp, Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+					UE_LOG(LogTemp, Error, TEXT("Missing Namespace= in [JusticeSDK] of DefaultEngine.ini"));
 				}
-				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
+				if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientId"), ClientID, GEngineIni))
 				{
-					UE_LOG(LogTemp, Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+					UE_LOG(LogTemp, Error, TEXT("Missing ClientId= in [JusticeSDK] of DefaultEngine.ini"));
 				}
-				if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
+				if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
 				{
-					UE_LOG(LogTemp, Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+					UE_LOG(LogTemp, Error, TEXT("Missing ClientSecret= in [JusticeSDK] of DefaultEngine.ini"));
 				}
 
 				response.ClientId = ClientID;

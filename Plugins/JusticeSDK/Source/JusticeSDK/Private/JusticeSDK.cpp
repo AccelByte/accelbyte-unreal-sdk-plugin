@@ -11,21 +11,21 @@
 
 void FJusticeSDKModule::StartupModule()
 {
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("BaseURL"), BaseURL, GEngineIni))
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("BaseURL"), BaseURL, GEngineIni))
 	{
-		UE_LOG(LogJustice, Error, TEXT("Missing BaseURL= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+		UE_LOG(LogJustice, Error, TEXT("Missing BaseURL= in [JusticeSDK] of DefaultEngine.ini"));
 	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("Namespace"), Namespace, GEngineIni))
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("Namespace"), Namespace, GEngineIni))
 	{
-		UE_LOG(LogJustice, Error, TEXT("Missing Namespace= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+		UE_LOG(LogJustice, Error, TEXT("Missing Namespace= in [JusticeSDK] of DefaultEngine.ini"));
 	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientId"), ClientID, GEngineIni))
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientId"), ClientID, GEngineIni))
 	{
-		UE_LOG(LogJustice, Error, TEXT("Missing ClientId= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+		UE_LOG(LogJustice, Error, TEXT("Missing ClientId= in [JusticeSDK] of DefaultEngine.ini"));
 	}
-	if (!GConfig->GetString(TEXT("OnlineSubsystemJustice"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
 	{
-		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [OnlineSubsystemJustice] of DefaultEngine.ini"));
+		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [JusticeSDK] of DefaultEngine.ini"));
 	}
 	
 	GameClientToken = new OAuthTokenJustice;
