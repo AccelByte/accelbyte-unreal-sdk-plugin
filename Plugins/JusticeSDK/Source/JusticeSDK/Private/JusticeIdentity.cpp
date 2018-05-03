@@ -81,7 +81,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogin failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, nullptr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 	}
 	Mutex.Unlock();
 }
@@ -111,7 +111,7 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 						FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
 						UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
 						newToken->FromParent(FJusticeSDKModule::Get().UserToken);
-						OnComplete.Execute(true, TEXT(""), newToken);
+						OnComplete.ExecuteIfBound(true, TEXT(""), newToken);
 				}
 				else
 				{
@@ -134,7 +134,7 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 	{
 		UE_LOG(LogJustice, Log, TEXT("Token password grant failed. User=%s Error=%s %s %s ReqTime=%.3f"),
 			*FJusticeSDKModule::Get().UserToken->UserId, *ErrorStr, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, nullptr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 
@@ -168,7 +168,7 @@ void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePt
 
 					UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
 					newToken->FromParent(FJusticeSDKModule::Get().UserToken);
-					OnComplete.Execute(true, TEXT(""), newToken);
+					OnComplete.ExecuteIfBound(true, TEXT(""), newToken);
 				}
 				else
 				{
@@ -191,7 +191,7 @@ void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePt
 	{
 		UE_LOG(LogJustice, Log, TEXT("Refresh grant failed. User=%s Error=%s %s %s ReqTime=%.3f"),
 			*FJusticeSDKModule::Get().UserToken->UserId, *ErrorStr, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, nullptr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 
@@ -285,7 +285,7 @@ void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpRes
 		case EHttpResponseCodes::NoContent:
 		{
 			UE_LOG(LogJustice, Log, TEXT("OnForgotPasswordComplete receive success response "));
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 			break;
 		}
 		case EHttpResponseCodes::BadRequest:
@@ -311,7 +311,7 @@ void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpRes
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnForgotPasswordComplete Error=%s ReqTime=%.3f"),*ErrorStr, Request->GetElapsedTime());		
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -364,7 +364,7 @@ void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResp
 		case EHttpResponseCodes::NoContent:
 		{
 			UE_LOG(LogJustice, Log, TEXT("OnResetPasswordComplete receive success response "));
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 			break;
 		}
 		case EHttpResponseCodes::BadRequest:
@@ -390,7 +390,7 @@ void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResp
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnResetPasswordComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -421,7 +421,7 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogout failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr); 
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -450,7 +450,7 @@ void JusticeIdentity::OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr
 			*FJusticeSDKModule::Get().UserToken->UserId, *ErrorStr, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 		return;
 	}
-	OnComplete.Execute(true, TEXT(""));
+	OnComplete.ExecuteIfBound(true, TEXT(""));
 }
 
 void JusticeIdentity::ClientLogout()
@@ -549,7 +549,7 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::RegisterNewPlayer failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, nullptr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 	}
 }
 
@@ -579,22 +579,22 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 					ReissueVerificationCode(pUserCreateResponse->UserId, pUserCreateResponse->LoginId, FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, pUserCreateResponse](bool IsSuccess, FString ErrorStr) {
 						if (IsSuccess)
 						{
-							OnComplete.Execute(true, TEXT(""), pUserCreateResponse);
+							OnComplete.ExecuteIfBound(true, TEXT(""), pUserCreateResponse);
 						}
 						else
 						{
-							OnComplete.Execute(false, ErrorStr, nullptr);
+							OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 						}					
 					}));
 				}
 				else
 				{
-					OnComplete.Execute(false, TEXT("Cannot serialize to UserCreateResponse"), nullptr);
+					OnComplete.ExecuteIfBound(false, TEXT("Cannot serialize to UserCreateResponse"), nullptr);
 				}
 			}
 			else
 			{
-				OnComplete.Execute(false, TEXT("Invalid json response"), nullptr);
+				OnComplete.ExecuteIfBound(false, TEXT("Invalid json response"), nullptr);
 			}
 			break;
 		}
@@ -616,7 +616,7 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 		UE_LOG(LogJustice, Error, TEXT("OnRegisterNewPlayerComplete. Error Message: %s XRay: %s ReqTime: %.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 
-		OnComplete.Execute(false, ErrorStr, nullptr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 	}
 }
 
@@ -644,7 +644,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("VerifyNewPlayer failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -662,7 +662,7 @@ void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpRe
 		{
 		case EHttpResponseCodes::NoContent:
 			UE_LOG(LogJustice, VeryVerbose, TEXT("TokenVerifyNewPlayerComplete : Player Activated"));
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 			break;
 		case EHttpResponseCodes::BadRequest:
 			ErrorStr = TEXT("Invalid Request");
@@ -678,7 +678,7 @@ void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpRe
 	{
 		UE_LOG(LogJustice, Error, TEXT("VerifyNewPlayerCompleteDelegate. Error=%s XRay=%s ReqTime=%.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -706,7 +706,7 @@ void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, F
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("ReissueVerificationCode failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -724,7 +724,7 @@ void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request,
 		{
 		case EHttpResponseCodes::NoContent:
 			UE_LOG(LogJustice, VeryVerbose, TEXT("OnReissueVerificationCodeComplete : Operation succeeded"));
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 			break;
 		case EHttpResponseCodes::BadRequest:
 			ErrorStr = TEXT("Invalid Request");
@@ -740,7 +740,7 @@ void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request,
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnReissueVerificationCodeComplete. Error:%s XRay: %s ReqTime: %.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 

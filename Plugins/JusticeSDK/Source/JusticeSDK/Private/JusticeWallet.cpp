@@ -35,7 +35,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeWallet::GetWalletBalance failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, 0);
+		OnComplete.ExecuteIfBound(false, 0);
 	}
 }
 
@@ -60,7 +60,7 @@ void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpRes
 				WalletInfo* wallet = new WalletInfo();				
 				if (wallet->FromJson(JsonObject))
 				{
-					OnComplete.Execute(true, wallet->balances[0].balance);					
+					OnComplete.ExecuteIfBound(true, wallet->balances[0].balance);					
 				}
 				else
 				{
@@ -81,7 +81,7 @@ void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpRes
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("GetJusticeWallet::GetWalletBalance Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, 0);
+		OnComplete.ExecuteIfBound(false, 0);
 		return;
 	}
 }

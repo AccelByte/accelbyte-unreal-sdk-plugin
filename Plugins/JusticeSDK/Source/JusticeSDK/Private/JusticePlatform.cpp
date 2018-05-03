@@ -29,7 +29,7 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("UFJusticeComponent::RequestCurrentPlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, UserProfileInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 	}
 }
 
@@ -53,7 +53,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 			{
 				if (FJusticeSDKModule::Get().UserProfile->FromJson(JsonObject))
 				{
-					OnComplete.Execute(true, TEXT(""), *FJusticeSDKModule::Get().UserProfile);
+					OnComplete.ExecuteIfBound(true, TEXT(""), *FJusticeSDKModule::Get().UserProfile);
 				}
 				else
 				{
@@ -81,7 +81,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 				else
 				{
 					UE_LOG(LogJustice, Error, TEXT("Create Default User Profile Error:  %s"), *ErrorStr);
-					OnComplete.Execute(false, TEXT("Cannot create default user profile"), UserProfileInfo());
+					OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), UserProfileInfo());
 				}
 			}));
 			break;
@@ -93,7 +93,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, ErrorStr, UserProfileInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 		return;
 	}
 }
@@ -123,7 +123,7 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticePlatform::UpdatePlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -140,7 +140,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHt
 		{
 		case EHttpResponseCodes::Ok:
 		{
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 		}
 		break;
 
@@ -151,7 +151,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHt
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnUpdatePlayerProfileComplete Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 		return;
 	}
 }
@@ -182,7 +182,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticePlatform::UpdatePlayerProfile failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 
@@ -200,7 +200,7 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Reque
 		case EHttpResponseCodes::Created:
 		{
 			UE_LOG(LogJustice, Log, TEXT("OnCreateDefaultPlayerProfileComplete receive success response "));
-			OnComplete.Execute(true, TEXT(""));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
 			break;
 		}
 		case EHttpResponseCodes::BadRequest:
@@ -226,7 +226,7 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Reque
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnCreateDefaultPlayerProfileComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
 

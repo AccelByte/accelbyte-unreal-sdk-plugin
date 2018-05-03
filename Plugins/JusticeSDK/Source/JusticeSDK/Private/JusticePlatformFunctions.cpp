@@ -15,7 +15,7 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, UserProfileInfo userInfo) {
 		UUserProfileJustice* UserProfile = NewObject<UUserProfileJustice>();
 		UserProfile->FromUserProfileInfo(userInfo);
-		OnComplete.Execute(IsSuccess, ErrorString, UserProfile);
+		OnComplete.ExecuteIfBound(IsSuccess, ErrorString, UserProfile);
 	}));
 }
 
@@ -36,7 +36,7 @@ void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString
 	NewUserProfile.Status = OldUserProfile->Status;
 
 	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
-		OnComplete.Execute(IsSuccess, ErrorString);
+		OnComplete.ExecuteIfBound(IsSuccess, ErrorString);
 	}));
 
 }
