@@ -55,13 +55,20 @@ void UAsyncCreateNewOrder::Activate() {
 }
 
 void UAsyncCreateNewOrder::ExecuteOnSuccess()
-{
-	OnSuccess.Broadcast(OrderInformation);
+{	
+	if (OnSuccess.IsBound())
+	{
+		OnSuccess.Broadcast(OrderInformation);
+	}
+	
 }
 
 void UAsyncCreateNewOrder::ExecuteOnFailed()
 {
-	OnFailed.Broadcast(NewObject<UOrderInfo>());
+	if (OnFailed.IsBound())
+	{
+		OnFailed.Broadcast(NewObject<UOrderInfo>());
+	}
 }
 
 void UAsyncCreateNewOrder::OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace)

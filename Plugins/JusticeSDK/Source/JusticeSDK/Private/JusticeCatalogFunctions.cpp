@@ -23,6 +23,6 @@ void UJusticeCatalogFunctions::GetItemByCriteria(FString CategoryPath, FItemComp
 				Result.Add(item);
 			}
 		}
-		OnComplete.Execute(isSuccess, errorString, Result);
+		OnComplete.ExecuteIfBound(isSuccess, errorString, Result);
 	}));
 }

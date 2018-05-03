@@ -32,7 +32,7 @@ void JusticePurchase::CreateNewOrder(FString itemId, int Price, FString Currency
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, OrderInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
 	}
 }
 
@@ -60,7 +60,7 @@ void JusticePurchase::OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpRes
 				OrderInfo info;
 				if (info.FromJson(JsonObject))
 				{
-					OnComplete.Execute(true, TEXT(""), info);
+					OnComplete.ExecuteIfBound(true, TEXT(""), info);
 				}
 				else
 				{
@@ -81,7 +81,7 @@ void JusticePurchase::OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpRes
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnCreateNewOrderComplete Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, ErrorStr, OrderInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
 		return;
 	}
 }

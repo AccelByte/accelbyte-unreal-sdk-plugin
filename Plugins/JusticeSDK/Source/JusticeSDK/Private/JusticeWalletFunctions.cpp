@@ -13,6 +13,6 @@
 void UJusticeWalletFunctions::GetWalletBalance(FString CurrencyCode, FGetWalletCompleteDelegate OnComplete)
 {
 	JusticeWallet::GetWalletBalance(CurrencyCode, FGetWalletBalanceCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, int balance) {
-		OnComplete.Execute(bSuccessful, balance);
+		OnComplete.ExecuteIfBound(bSuccessful, balance);
 	}));
 }

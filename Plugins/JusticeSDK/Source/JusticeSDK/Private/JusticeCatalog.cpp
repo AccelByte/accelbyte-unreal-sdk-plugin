@@ -34,7 +34,7 @@ void JusticeCatalog::GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 	}
 }
 
@@ -61,7 +61,7 @@ void JusticeCatalog::GetSubCategory(FString ParentPath, FGetRootCategoryComplete
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 	}
 }
 
@@ -88,7 +88,7 @@ void JusticeCatalog::GetItemByCriteria(FString CategoryPath, FItemCompleteDelega
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.Execute(false, ErrorStr, TArray<ItemInfo>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
 	}
 }
 
@@ -122,7 +122,7 @@ void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpR
 
 						UE_LOG(LogJustice, Log, TEXT("Item Currency And Value:%d %s  "), Result.Data[i].PriceInfo.Value, *Result.Data[i].PriceInfo.CurrencyCode);
 					}
-					OnComplete.Execute(true, TEXT(""), ArrayResult);
+					OnComplete.ExecuteIfBound(true, TEXT(""), ArrayResult);
 				}
 				else 
 				{
@@ -143,7 +143,7 @@ void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpR
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, ErrorStr, TArray<ItemInfo>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
 		return;
 	}
 }
@@ -179,7 +179,7 @@ void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpRes
 						Result.Add(categoryObj);
 					}
 				}
-				OnComplete.Execute(true, ErrorStr, Result);
+				OnComplete.ExecuteIfBound(true, ErrorStr, Result);
 			}
 			else
 			{
@@ -195,7 +195,7 @@ void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpRes
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.Execute(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 		return;
 	}
 }
