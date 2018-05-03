@@ -33,7 +33,6 @@ public class JusticeSDK : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
-				"JusticeWebBrowserWidget"
             }
 			);
 			
@@ -47,7 +46,6 @@ public class JusticeSDK : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
-				"JusticeWebBrowserWidget"
             }
 			);
 		
