@@ -23,4 +23,4 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_MODULE(FJusticeWebBrowserWidgetModule, WebBrowserWidget);
+IMPLEMENT_MODULE(FJusticeWebBrowserWidgetModule, JusticeWebBrowserWidget);
