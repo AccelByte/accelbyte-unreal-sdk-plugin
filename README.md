@@ -5,6 +5,7 @@ The Justice SDK is a plugin for Unreal Engine 4 (4.18.).
 This plugin use to interact with Justice Online Service
 
 The Justice SDK includes:
+
 * Justice Plugin Source Code (located at `/Plugin/JusticeSDK` folder)
 * Justice Custom Web Browser (located at `/Plugin/JusticeWebBrowserWidget` folder)
 * Justice Sample Game (Generate VS .sln from  `/JusticeSDKDemo.uproject` file)
@@ -68,6 +69,26 @@ Namespace=<your game namespace>
 
 ```
 
+Open your game build.cs file `YourAwesomeGame.Build.cs` and `JusticeSDK` to PublicDependencyModuleNames
+
+```csharp
+public class JusticeSDKDemo : ModuleRules
+{
+    public JusticeSDKDemo(ReadOnlyTargetRules Target) : base(Target)
+    {
+    	PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+    	PublicDependencyModuleNames.AddRange(new string[] 
+        { 
+          ...
+          "JusticeSDK",          
+        });
+      PrivateDependencyModuleNames.AddRange(new string[] {...});
+      DynamicallyLoadedModuleNames.AddRange(new string[] {...});
+
+    }
+}
+```
+
 ## 4. Using The SDK:
 
 #### C++
@@ -107,9 +128,9 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 
 #### Blueprint
 We can call all of Justice SDK function from blueprint. We have 2 different kind of blueprint function:
-1.  Blueprint function with delegates parameter 
-2.  Blurprint async function with multiple output pins
 
+1.  Blueprint function with delegates parameter 
+1.  Blueprint async function with multiple output pins
 
 
 ## 5. Changes:
@@ -118,7 +139,3 @@ We can call all of Justice SDK function from blueprint. We have 2 different kind
 Starting from March 13, 2018 at commit `48b28dd`, we stop using OnlineSubsystem (OSS). Now we use singleton class based on FModuleManager.
 If you still have `OnlineSubsystemJustice` folder on Plugins folder, please remove it, since it will break your game.
  
-
-
-
-
