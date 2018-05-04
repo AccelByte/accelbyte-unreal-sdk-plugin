@@ -21,7 +21,7 @@ public:
 	virtual void Tick()
 	{
 		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
-		JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, nullptr);
+		JusticeIdentity::RefreshToken(nullptr);
 		SetAsDone();
 	}
 };
@@ -394,6 +394,11 @@ void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResp
 	}
 }
 
+void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete)
+{
+	JusticeIdentity::Login(LoginId, Password, FGrantTypeJustice::PasswordGrant, OnComplete);
+}
+
 void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
@@ -423,6 +428,16 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogout failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
+}
+
+void JusticeIdentity::AnonymousLogin(FUserLoginCompleteDelegate OnComplete)
+{
+	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::Anonymous, OnComplete);
+}
+
+void JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate OnComplete)
+{
+	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, OnComplete);
 }
 
 void JusticeIdentity::OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete)

@@ -37,8 +37,11 @@ class JUSTICESDK_API JusticeIdentity
 {
 	
 public:
-	static void Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete);	
+	
+	static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete);
 	static void UserLogout(FUserLogoutCompleteDelegate OnComplete);
+	static void AnonymousLogin(FUserLoginCompleteDelegate OnComplete);
+	static void RefreshToken(FUserLoginCompleteDelegate OnComplete);
 	static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete);
 	static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void ReissueVerificationCode(FString UserId, FString LoginId, FVerifyNewPlayerCompleteDelegate OnComplete);
@@ -49,12 +52,15 @@ public:
 	static void ClientLogin();
 	static void ClientLogout();
 
-
 	static void SetRefreshToken(FString RefreshToken);
 
 	static OAuthTokenJustice* GetUserToken();
 	static OAuthTokenJustice* GetClientToken();
 	static FString GetUserId();
+
+private:
+	static void Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete);
+
 
 private:
 	static void OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);

@@ -28,7 +28,7 @@ bool FLoginSuccessTest::RunTest(const FString & Parameters)
 		isDone = true;
 		isLoginSuccess = IsSuccess;
 	});
-	JusticeIdentity::Login(LoginID, Password, FGrantTypeJustice::PasswordGrant, OnComplete);
+	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
 
 	double LastTime = FPlatformTime::Seconds();
 	while (!isDone)
@@ -62,7 +62,7 @@ bool FLoginFailedTest::RunTest(const FString & Parameters)
 		isDone = true;
 		isLoginSuccess = IsSuccess;
 	});
-	JusticeIdentity::Login(LoginID, Password, FGrantTypeJustice::PasswordGrant, OnComplete);
+	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
 
 	double LastTime = FPlatformTime::Seconds();
 	while (!isDone)

@@ -6,21 +6,17 @@
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::Login(LoginId, Password, FGrantTypeJustice::PasswordGrant, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+	JusticeIdentity::UserLogin(LoginId, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
 			OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Token);
 	}));
 }
 
-
 void UJusticeIdentityFunctions::WebLoginRefresh(FString RefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::SetRefreshToken(RefreshToken);
-	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+	JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Token);
 	}));
-
-
-
 }
 
 void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete)

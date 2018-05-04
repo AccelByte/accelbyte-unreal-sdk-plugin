@@ -56,7 +56,7 @@ Make sure you add dependency to your .uproject file
 }
 ```
 
-Edit your `DefaultEngine.ini` file, make sure you add this configuration
+Edit your DefaultEngine.inifile, make sure you add this configuration
 
 ```ini
 [JusticeSDK]
@@ -69,7 +69,7 @@ Namespace=<your game namespace>
 
 ```
 
-Open your game build.cs file `YourAwesomeGame.Build.cs` and `JusticeSDK` to PublicDependencyModuleNames
+Open your game build.cs file `YourAwesomeGame.Build.cs` add `JusticeSDK` to PublicDependencyModuleNames
 
 ```csharp
 public class JusticeSDKDemo : ModuleRules
@@ -92,6 +92,14 @@ public class JusticeSDKDemo : ModuleRules
 ## 4. Using The SDK:
 
 #### C++
+
+##### a. OAuth2 Login
+Before you want to use other service, you must call `ClientLogin()` function first.
+`ClientLogin()` function is actually OAuth2 Login to our service. It will login against **ClientID** and **ClientSecret** from `DefaultEngine.ini` file under `JusticeSDK` section.
+If you build Game Client and Dedicated Server, you should call this function. There is **no** `ServerLogin` Function.
+
+For more information about OAuth2 you can follow [this link](https://oauth.net/2/) and [this link](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-oauth-code).
+
 On your start up game class, usually named `YourAwesomeGameModeBase.cpp` with class named `AYourAwesomeGameModeBase`. Add this code on `BeginPlay` Function or whatever function that will call on startup
 
 
@@ -109,15 +117,16 @@ void AYourAwesomeGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 ```
 
+
+##### b. User Login
 To call login with email and password you do like this
 
 ```c++
 void AJusticeSDKDemoGameModeBase::BeginPlay()
 {
 	...
-    JusticeIdentity::Login(TEXT("user@example.com"), 
-      TEXT("password"), 
-      FGrantTypeJustice::PasswordGrant, 
+    JusticeIdentity::UserLogin(TEXT("user@example.com"), 
+      TEXT("userpassword"),       
       FUserLoginCompleteDelegate::CreateLambda([](bool IsSuccess, FString ErrorString, UOAuthTokenJustice* token) {
   		// this will be called when login request receive a response 
     }));
@@ -125,9 +134,23 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 }
 ```
 
+##### c. Anonymous Login
+If you want to login without using user and password, you can use Anonymous Login. The example case would be player want to try our game without doing any registration. 
+
+```c++
+void AJusticeSDKDemoGameModeBase::BeginPlay()
+{
+	...
+    JusticeIdentity::AnonymousLogin(
+      FUserLoginCompleteDelegate::CreateLambda([](bool IsSuccess, FString ErrorString, UOAuthTokenJustice* token) {
+  		// this will be called when login request receive a response 
+    }));
+    ...
+}
+```
 
 #### Blueprint
-We can call all of Justice SDK function from blueprint. We have 2 different kind of blueprint function:
+We can call all of The Justice SDK function from blueprint. We have 2 different kind of blueprint function:
 
 1.  Blueprint function with delegates parameter 
 1.  Blueprint async function with multiple output pins
@@ -135,7 +158,7 @@ We can call all of Justice SDK function from blueprint. We have 2 different kind
 
 ## 5. Changes:
 
-### Stop Suporting OSS
+### Stop Using OSS
 Starting from March 13, 2018 at commit `48b28dd`, we stop using OnlineSubsystem (OSS). Now we use singleton class based on FModuleManager.
 If you still have `OnlineSubsystemJustice` folder on Plugins folder, please remove it, since it will break your game.
  
