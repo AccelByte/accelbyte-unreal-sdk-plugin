@@ -40,8 +40,8 @@ public:
 	void SetAsDone() { Done = true; }
 
 private:
-	FDateTime NextUpdate;
 	bool Done;
+	FDateTime NextUpdate;
 };
 
 
@@ -52,11 +52,11 @@ class FAsyncTaskManagerJustice : public FRunnable, FSingleThreadRunnable
 {
 public:
 
-	FAsyncTaskManagerJustice():		
+	FAsyncTaskManagerJustice():
+		OnlineThreadId(0),
 		WorkEvent(nullptr),
 		PollingInterval(POLLING_INTERVAL_MS),
-		bRequestingExit(false),
-		OnlineThreadId(0) {}
+		bRequestingExit(false) {}
 
 	~FAsyncTaskManagerJustice()	{}
 

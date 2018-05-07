@@ -8,6 +8,7 @@
 #include "JusticeLog.h"
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
+#include "Private/Models/FUserCreateResponse.h"
 //static FOnScheduleTickDelegate onRefreshDelegate;
 FCriticalSection Mutex;
 
@@ -584,13 +585,15 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 			UE_LOG(LogJustice, Log, TEXT("OnRegisterNewPlayerComplete : Entity Created"));
 			//parse json
 			FString ResponseStr = Response->GetContentAsString();
-			UUserCreateResponse* pUserCreateResponse = NewObject<UUserCreateResponse>();
+			FUserCreateResponse UserCreateResponse;
 			TSharedPtr<FJsonObject> JsonObject;
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 			{
-				if (pUserCreateResponse->FromJson(JsonObject))
+				if (UserCreateResponse.FromJson(JsonObject))
 				{
+					UUserCreateResponse* pUserCreateResponse = NewObject<UUserCreateResponse>();
+					pUserCreateResponse->LoadFromStruct(UserCreateResponse);
 					ReissueVerificationCode(pUserCreateResponse->UserId, pUserCreateResponse->LoginId, FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, pUserCreateResponse](bool IsSuccess, FString ErrorStr) {
 						if (IsSuccess)
 						{

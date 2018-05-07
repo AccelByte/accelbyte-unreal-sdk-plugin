@@ -13,7 +13,7 @@ class FUserOnlineAccountJustice
 
 public:
 	FUserOnlineAccountJustice(const FString& LoginId = TEXT(""), int32 LocalUserNumber = 0)
-		:LocalUserNum(LocalUserNumber), LoginId(LoginId), Token(NewObject<UOAuthTokenJustice>()) {}
+		:LoginId(LoginId), LocalUserNum(LocalUserNumber), Token(NewObject<UOAuthTokenJustice>()) {}
 	virtual ~FUserOnlineAccountJustice(){ }
 
 	FString GetUserId() { return Token->UserId; }
