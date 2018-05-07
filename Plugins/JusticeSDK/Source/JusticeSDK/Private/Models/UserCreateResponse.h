@@ -6,11 +6,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Serialization/JsonSerializerMacros.h"
+#include "FUserCreateResponse.h"
 #include "UserCreateResponse.generated.h"
 
 UCLASS()
-class UUserCreateResponse : public UObject, public FJsonSerializable
+class UUserCreateResponse : public UObject
 {
 	GENERATED_BODY()
 	
@@ -30,11 +30,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
 		FString LoginId;
 
-	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("Namespace", Namespace);
-		JSON_SERIALIZE("UserId", UserId);
-		JSON_SERIALIZE("AuthType", AuthType);
-		JSON_SERIALIZE("DisplayName", DisplayName);
-		JSON_SERIALIZE("LoginId", LoginId);
-	END_JSON_SERIALIZER		
+	void LoadFromStruct(FUserCreateResponse item) 
+	{
+		Namespace = item.Namespace;
+		UserId = item.UserId;
+		AuthType = item.AuthType;
+		DisplayName = item.DisplayName;
+		LoginId = item.LoginId;
+	}
+
 };
