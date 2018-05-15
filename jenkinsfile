@@ -1,18 +1,24 @@
 pipeline {
   agent {
-      node {
-          label 'windows-ue4'
-      }
+    node {
+      label 'master'
+    }
   }
   stages {
-		stage('label') {
+    stage('turn on EC2') {
+      agent {
+          label "master"
+      }
       steps {
-				bat '''			  				
-				"%GIT_PATH%\\git.exe" rev-parse HEAD > version.txt        
-				'''
+          sh '''
+          aws ec2 start-instances --instance-ids i-0a0a74363d53b45df
+          ''' 
       }
     }
 		stage('cleanup') {
+      agent {
+          label "windows-sdk"
+      }
       steps {
 				bat '''
         IF EXIST temp (
@@ -20,29 +26,41 @@ pipeline {
         )        
         IF EXIST artifacts (
           rd /s /q artifacts
-        )                
+        )
         '''
       }
     }
+    
 		stage('setup') {
+      agent {
+          label "windows-sdk"
+      }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -game -rocket -progress'
       }
     }
 		stage('build') {
+      agent {
+          label "windows-sdk"
+      }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
       }
     }
 		stage('package') {
+      agent {
+          label "windows-sdk"
+      }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeSDKDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeSDKDemo -utf8output'
       }
     }
 		stage('archive'){
+      agent {
+          label "windows-sdk"
+      }      
       steps {				
-        bat '''
-        set /p GIT_SHA=<version.txt
+        bat '''        
         mkdir "%WORKSPACE%\\artifacts"
         IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries" (
           rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries"
@@ -50,30 +68,72 @@ pipeline {
         IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate" (
           rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate"
         )    
-        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\temp"            
-        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\JusticeSDK"
+        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\temp"            
+        "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\JusticeSDK"
         '''      
       }
     }
     stage('upload'){
+      agent {
+          label "windows-sdk"
+      }      
       steps {
         bat '''
-        set /p GIT_SHA=<version.txt
-        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDKSampleGameDemo-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
-        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_SHA%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_SHA%,BuildNo=%BUILD_NUMBER%
+        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
+        aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
         '''
       }
     }
-    stage('forks'){
+    stage('automerge'){
+      agent {
+          label "windows-sdk"
+      }      
       steps {
         bat '''
         cd ..
         git clone git@bitbucket.org:accelbyte/justice-customer-automerge.git
         cd justice-customer-automerge
         automerge.bat justice-ue4-sdk
-
         '''
       }
-    }   
+    }
   }
+  post {
+    success {
+      slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` @ `${env.GIT_COMMIT}`")
+      script{
+        def turnOff = true
+        Jenkins.instance.getItems().each { job->
+          if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){
+              turnOff = false
+          }
+        }
+        if (turnOff){
+          node('master'){
+            sh '''
+            aws ec2 stop-instances --instance-ids i-0a0a74363d53b45df
+            '''
+          }
+        }
+      }
+    }
+    failure {
+      slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` @ `${env.GIT_COMMIT}`")
+      script{
+        def turnOff = true
+        Jenkins.instance.getItems().each { job->
+          if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){
+              turnOff = false
+          }
+        }
+        if (turnOff){
+          node('master'){
+            sh '''
+            aws ec2 stop-instances --instance-ids i-0a0a74363d53b45df
+            '''
+          }
+        }
+      }
+    }    
+  } 
 }
