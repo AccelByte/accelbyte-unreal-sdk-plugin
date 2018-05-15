@@ -7,7 +7,7 @@
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMisc.h"
 #include "JusticeLog.h"
 #include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
-#include "Private/Models/OrderCreate.h"
+#include "Models/OrderCreate.h"
 #include "JusticeSDK.h"
 
 UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(FString itemId, int Price, FString Currency)

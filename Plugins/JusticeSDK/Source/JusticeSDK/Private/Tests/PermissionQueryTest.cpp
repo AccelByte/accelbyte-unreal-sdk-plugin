@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "AutomationTest.h"
-#include "../Models/UserOnlineAccountJustice.h"
+#include "Public/Models/UserOnlineAccountJustice.h"
 
 const int AutomationPermissionFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
 // Context: EditorContext (run via editor cli) ClientContext (run via external cli)

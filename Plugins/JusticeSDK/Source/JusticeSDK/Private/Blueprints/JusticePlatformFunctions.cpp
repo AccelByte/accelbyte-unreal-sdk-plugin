@@ -3,9 +3,9 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticePlatformFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
 #include "JusticePlatform.h"
@@ -38,5 +38,4 @@ void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString
 	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString);
 	}));
-
 }

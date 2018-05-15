@@ -5,7 +5,7 @@
 #include "JusticeSDK.h"
 #include "Engine.h"
 #include "JusticeLog.h"
-#include "Private/AsyncTaskManagerJustice.h"
+#include "Utilities/AsyncTaskManagerJustice.h"
 
 #define LOCTEXT_NAMESPACE "FJusticeSDKModule"
 

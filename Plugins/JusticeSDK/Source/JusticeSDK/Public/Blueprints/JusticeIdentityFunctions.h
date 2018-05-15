@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/OAuthTokenJustice.h"
+#include "Models/OAuthTokenJustice.h"
 #include "JusticeIdentity.h"
 #include "JusticeIdentityFunctions.generated.h"
 

@@ -6,23 +6,21 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "JusticePlatformFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
-#include "JusticeLog.h"
-#include "Private/Models/Category.h"
+#include "JusticePlatformFunctions.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
+#include "Utilities/JusticeLog.h"
+#include "Models/Category.h"
 
 DECLARE_DELEGATE_TwoParams(FGetWalletBalanceCompleteDelegate, bool, int);
 
 class JUSTICESDK_API JusticeWallet
 {
-
 public:
 	static void GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete);
-
-
+	
 private:
 	static void OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete);
 };

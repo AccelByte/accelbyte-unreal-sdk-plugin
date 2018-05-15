@@ -3,11 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticeCatalogFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
-#include "Misc/ConfigCacheIni.h"
-#include "JusticeSDK.h"
-#include "JusticeLog.h"
 #include "JusticeCatalog.h"
 
 void UJusticeCatalogFunctions::GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete)

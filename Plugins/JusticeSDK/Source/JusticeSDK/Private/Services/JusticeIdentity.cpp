@@ -8,17 +8,13 @@
 #include "JusticeLog.h"
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
-#include "Private/Models/FUserCreateResponse.h"
-//static FOnScheduleTickDelegate onRefreshDelegate;
+#include "Models/FUserCreateResponse.h"
 FCriticalSection Mutex;
 
-class FRefreshTokenAsyncTask : public FJusticeAsyncTask
+class FUserRefreshTokenAsyncTask : public FJusticeAsyncTask
 {
 public:
-	FRefreshTokenAsyncTask(FDateTime nextUpdate)
-		:FJusticeAsyncTask(nextUpdate)
-	{}
-
+	FUserRefreshTokenAsyncTask(FDateTime nextUpdate) :FJusticeAsyncTask(nextUpdate)	{}
 	virtual void Tick()
 	{
 		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
@@ -27,6 +23,17 @@ public:
 	}
 };
 
+class FClientRefreshTokenAsyncTask : public FJusticeAsyncTask
+{
+public:
+	FClientRefreshTokenAsyncTask(FDateTime nextUpdate) :FJusticeAsyncTask(nextUpdate) {}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		JusticeIdentity::ClientRefreshToken();
+		SetAsDone();
+	}
+};
 
 void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete)
 {
@@ -59,7 +66,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
 		FString RefreshToken = FJusticeSDKModule::Get().UserToken->RefreshToken;
 		Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"),*FGenericPlatformHttp::UrlEncode(RefreshToken));
-		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnRefreshComplete, RequestTrace, OnComplete);
+		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnUserRefreshComplete, RequestTrace, OnComplete);
 	}
 	else if (GrantType == FGrantTypeJustice::ClientCredentialGrant)
 	{
@@ -67,10 +74,12 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 		Grant = FString::Printf(TEXT("grant_type=client_credentials"));
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);			
 	}
-	else if (GrantType == FGrantTypeJustice::Anonymous)
+	else if (GrantType == FGrantTypeJustice::Device)
 	{		
-		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
-		Grant = FString::Printf(TEXT("grant_type=anonymous"));
+		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/platforms/device/token"), *BaseURL, *Namespace));
+		FString deviceID = FGenericPlatformMisc::GetDeviceId();
+		check(!deviceID.IsEmpty() && "Cannot get Device ID");
+		Grant = FString::Printf(TEXT("device_id=%s"), *deviceID);
 		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
 	}
 
@@ -108,7 +117,7 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 			{
 				if (FJusticeSDKModule::Get().UserParseJson(JsonObject))
 				{
-						FRefreshTokenAsyncTask* NewTask = new FRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
+						FUserRefreshTokenAsyncTask* NewTask = new FUserRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
 						FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
 						UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
 						newToken->FromParent(FJusticeSDKModule::Get().UserToken);
@@ -143,7 +152,7 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 		*FJusticeSDKModule::Get().UserToken->UserId, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 }
 
-void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::OnUserRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
@@ -164,7 +173,7 @@ void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePt
 			{
 				if (FJusticeSDKModule::Get().UserParseJson(JsonObject))
 				{
-					FRefreshTokenAsyncTask* NewTask = new FRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
+					FUserRefreshTokenAsyncTask* NewTask = new FUserRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
 					FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
 
 					UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
@@ -199,6 +208,62 @@ void JusticeIdentity::OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePt
 	UE_LOG(LogJustice, Log, TEXT("Refresh grant successful. UserId=%s %s %s ReqTime=%.3f"),
 		*FJusticeSDKModule::Get().UserToken->UserId, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
 }
+
+
+void JusticeIdentity::OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace)
+{
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::Ok:
+		{
+			FString ResponseStr = Response->GetContentAsString();
+
+			TSharedPtr<FJsonObject> JsonObject;
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+			{
+				if (FJusticeSDKModule::Get().GameClientParseJson(JsonObject))
+				{
+					FClientRefreshTokenAsyncTask* NewTask = new FClientRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
+					FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
+					UE_LOG(LogJustice, Log, TEXT("OnClientRefreshComplete Succees, New token received !"));
+				}
+				else
+				{
+					ErrorStr = TEXT("unable to deserlize response from json object");
+				}
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserlize response from server");
+			}
+		}
+		break;
+
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d  Response=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
+		}
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Log, TEXT("OnClientRefreshComplete failed. User=%s Error=%s %s %s ReqTime=%.3f"),
+			*FJusticeSDKModule::Get().UserToken->UserId, *ErrorStr, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());		
+		return;
+	}
+
+	UE_LOG(LogJustice, Log, TEXT("OnClientRefreshComplete successful. UserId=%s %s %s ReqTime=%.3f"),
+		*FJusticeSDKModule::Get().UserToken->UserId, *FJusticeSDKModule::Get().UserToken->GetRefreshStr(), *RequestTrace->ToString(), Request->GetElapsedTime());
+}
+
+
 
 void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace)
 {
@@ -431,9 +496,9 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 	}
 }
 
-void JusticeIdentity::AnonymousLogin(FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
 {
-	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::Anonymous, OnComplete);
+	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::Device, OnComplete);
 }
 
 void JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate OnComplete)
@@ -497,6 +562,40 @@ void JusticeIdentity::ClientLogout()
 	{
 		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::ClientLogout failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 	}
+}
+
+void JusticeIdentity::ClientRefreshToken()
+{
+	Mutex.Lock();
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString ClientID = FJusticeSDKModule::Get().ClientID;
+	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
+	
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+
+	Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
+	FString RefreshToken = FJusticeSDKModule::Get().GameClientToken->RefreshToken;
+	FString Grant = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"), *FGenericPlatformHttp::UrlEncode(RefreshToken));
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientRefreshComplete, RequestTrace);
+	Request->SetContentAsString(Grant);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::ClientRefreshToken failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());		
+	}
+	Mutex.Unlock();
 }
 
 

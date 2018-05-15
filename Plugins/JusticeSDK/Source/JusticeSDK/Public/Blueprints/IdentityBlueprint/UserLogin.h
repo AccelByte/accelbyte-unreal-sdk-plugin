@@ -6,17 +6,13 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "Runtime/Online/HTTP/Public/Http.h"
-#include "Private/HTTPJustice.h"
-#include "Private/AWSXRayJustice.h"
-#include "Private/Models/OrderInfo.h"
-#include "Private/Models/OAuthTokenJustice.h"
-#include "AsyncLogin.generated.h"
+#include "Models/OAuthTokenJustice.h"
+#include "UserLogin.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLoginOutputPin, const UOAuthTokenJustice*, Token);
 
 UCLASS()
-class JUSTICESDK_API UAsyncLogin : public UBlueprintAsyncActionBase
+class JUSTICESDK_API UAsyncUserLogin : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
@@ -28,24 +24,11 @@ public:
 		FLoginOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncLogin* Login(FString UserId, FString Password);
+		static UAsyncUserLogin* UserLogin(FString UserId, FString Password);
 
 	virtual void Activate() override;
 
 private:
-	//UFUNCTION()
-	//	void ExecuteOnSuccess();
-
-	//UFUNCTION()
-	//	void ExecuteOnFailed();
-
-	void OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
-
-private:
 	FString UserId;
-	FString Password;
-	UOAuthTokenJustice* Token;
+	FString Password;	
 };
-	
-	
-	

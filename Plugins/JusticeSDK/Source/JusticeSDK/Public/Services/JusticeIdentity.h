@@ -6,12 +6,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Private/Models/OAuthTokenJustice.h"
-#include "Private/Models/UserCreateResponse.h"
-#include "Private/Models/UserCreateRequest.h"
-#include "Private/Models/ResetPasswordRequest.h"
-#include "Private/AWSXRayJustice.h"
-#include "Private/HTTPJustice.h"
+#include "Models/OAuthTokenJustice.h"
+#include "Models/UserCreateResponse.h"
+#include "Models/UserCreateRequest.h"
+#include "Models/ResetPasswordRequest.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
 
 DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, UOAuthTokenJustice*);
 DECLARE_DELEGATE_TwoParams(FUserLogoutCompleteDelegate, bool, FString);
@@ -30,17 +30,15 @@ enum FGrantTypeJustice
 	PasswordGrant = 1,
 	RefreshGrant = 2,
 	ClientCredentialGrant = 3,
-	Anonymous = 4,
+	Device = 4,
 };
 
 class JUSTICESDK_API JusticeIdentity 
 {
-	
 public:
-	
 	static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete);
 	static void UserLogout(FUserLogoutCompleteDelegate OnComplete);
-	static void AnonymousLogin(FUserLoginCompleteDelegate OnComplete);
+	static void DeviceLogin(FUserLoginCompleteDelegate OnComplete);
 	static void RefreshToken(FUserLoginCompleteDelegate OnComplete);
 	static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete);
 	static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete);
@@ -51,6 +49,7 @@ public:
 	// Client specific
 	static void ClientLogin();
 	static void ClientLogout();
+	static void ClientRefreshToken();
 
 	static void SetRefreshToken(FString RefreshToken);
 
@@ -61,10 +60,10 @@ public:
 private:
 	static void Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete);
 
-
 private:
 	static void OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
-	static void OnRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
+	static void OnUserRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
+	static void OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
 	static void OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
 	static void OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete);	
 	static void OnClientLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
@@ -73,6 +72,4 @@ private:
 	static void OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete);
 	static void OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete);
-
-
 };

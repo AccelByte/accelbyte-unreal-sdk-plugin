@@ -6,13 +6,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "JusticePlatformFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
-#include "JusticeLog.h"
-#include "Private/Models/UserProfileInfo.h"
+#include "JusticePlatformFunctions.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
+#include "Utilities/JusticeLog.h"
+#include "Models/UserProfileInfo.h"
 
 DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, UserProfileInfo);
 DECLARE_DELEGATE_TwoParams(FUpdatePlayerProfileCompleteDelegate, bool, FString);
@@ -23,11 +23,9 @@ public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
     static void UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete);
 	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete);
-
 	static UserProfileInfo* GetUserProfileInfo();
 private:
 	static void OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static void OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
 	static void OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
 };
-

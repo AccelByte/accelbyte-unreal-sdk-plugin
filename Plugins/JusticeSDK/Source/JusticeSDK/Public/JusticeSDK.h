@@ -6,9 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
-#include "Private/Models/OAuthTokenJustice.h"
-#include "Private/Models/UserProfileInfo.h"
-#include "Private/AsyncTaskManagerJustice.h"
+#include "Utilities/AsyncTaskManagerJustice.h"
+#include "Models/OAuthTokenJustice.h"
+#include "Models/UserProfileInfo.h"
 
 class FJusticeSDKModule : public IModuleInterface
 {

@@ -3,10 +3,9 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticeCatalog.h"
-#include "JusticePlatformFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
 

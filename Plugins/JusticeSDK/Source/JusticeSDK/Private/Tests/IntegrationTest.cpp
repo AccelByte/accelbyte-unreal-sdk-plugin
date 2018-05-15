@@ -5,8 +5,8 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "../Models/UserOnlineAccountJustice.h"
-#include "Public/JusticeIdentity.h"
+#include "Public/Models/UserOnlineAccountJustice.h"
+#include "Public/Services/JusticeIdentity.h"
 
 
 const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 

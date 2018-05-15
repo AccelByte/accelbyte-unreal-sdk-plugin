@@ -7,9 +7,9 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
-#include "Private/HTTPJustice.h"
-#include "Private/AWSXRayJustice.h"
-#include "Private/Models/OrderInfo.h"
+#include "Utilities/HTTPJustice.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Models/OrderInfo.h"
 #include "AsyncCreateNewOrder.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCreateNewOrderOutputPin, const UOrderInfo*, OrderInformation);

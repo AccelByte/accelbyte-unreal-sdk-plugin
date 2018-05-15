@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/UserProfileInfo.h"
+#include "Models/UserProfileInfo.h"
 
 #include "JusticePlatformFunctions.generated.h"
 

@@ -6,11 +6,10 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/UserProfileInfo.h"
-#include "Private/Models/Category.h"
-#include "Private/Models/ItemInfo.h"
+#include "Models/UserProfileInfo.h"
+#include "Models/Category.h"
+#include "Models/ItemInfo.h"
 #include "JusticeCatalogFunctions.generated.h"
-
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
 

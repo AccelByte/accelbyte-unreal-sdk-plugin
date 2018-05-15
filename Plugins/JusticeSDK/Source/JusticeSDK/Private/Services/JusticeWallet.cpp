@@ -3,13 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticeWallet.h"
-#include "JusticePlatformFunctions.h"
-#include "AWSXRayJustice.h"
-#include "HTTPJustice.h"
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
-#include "Private/Models/WalletInfo.h"
+#include "Utilities/AWSXRayJustice.h"
+#include "Utilities/HTTPJustice.h"
+#include "Models/WalletInfo.h"
 
 void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete)
 {

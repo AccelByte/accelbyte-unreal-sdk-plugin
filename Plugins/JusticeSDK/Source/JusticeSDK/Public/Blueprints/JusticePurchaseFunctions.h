@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Private/Models/OrderInfo.h"
+#include "Models/OrderInfo.h"
 #include "JusticePurchaseFunctions.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FCreateNewOrderCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, UOrderInfo*, OrderInformation);

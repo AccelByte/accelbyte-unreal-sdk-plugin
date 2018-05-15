@@ -43,7 +43,6 @@ void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserId, FString Verifica
 		FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr);
 	}));
-
 }
 
 void UJusticeIdentityFunctions::ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete)

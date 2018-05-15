@@ -1,5 +1,5 @@
 #include "JusticePurchase.h"
-#include "Private/Models/OrderCreate.h"
+#include "Models/OrderCreate.h"
 
 void JusticePurchase::CreateNewOrder(FString itemId, int Price, FString Currency, FCreateNewOrderCompleteDelegate OnComplete)
 {
