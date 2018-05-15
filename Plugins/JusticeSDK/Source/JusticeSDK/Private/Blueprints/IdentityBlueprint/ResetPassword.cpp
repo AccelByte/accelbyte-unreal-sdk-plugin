@@ -19,11 +19,17 @@ void UAsyncResetPassword::Activate()
 	JusticeIdentity::ResetPassword(this->UserId, this->VerificationCode, this->NewPassword, FResetPasswordCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
 		if (IsSuccess)
 		{
-			OnSuccess.Broadcast();
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast();
+			}
 		}
 		else
 		{
-			OnFailed.Broadcast();
+			if (OnSuccess.IsBound())
+			{
+				OnFailed.Broadcast();
+			}
 		}
 	}));
 }

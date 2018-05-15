@@ -18,11 +18,17 @@ void UAsyncUserLogin::Activate()
 	JusticeIdentity::UserLogin(this->UserId, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
 		if (IsSuccess)
 		{
-			OnSuccess.Broadcast(Token);
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast(Token);
+			}
 		}
 		else
 		{
-			OnFailed.Broadcast(NewObject<UOAuthTokenJustice>());
+			if (OnFailed.IsBound())
+			{
+				OnFailed.Broadcast(NewObject<UOAuthTokenJustice>());
+			}
 		}		
 	}));
 }

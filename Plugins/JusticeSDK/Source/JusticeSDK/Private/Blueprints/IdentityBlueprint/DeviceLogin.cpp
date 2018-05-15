@@ -16,11 +16,17 @@ void UAsyncDeviceLogin::Activate()
 	JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
 		if (IsSuccess)
 		{
-			OnSuccess.Broadcast(Token);
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast(Token);
+			}
 		}
 		else
 		{
-			OnFailed.Broadcast(NewObject<UOAuthTokenJustice>());
+			if (OnFailed.IsBound())
+			{
+				OnFailed.Broadcast(NewObject<UOAuthTokenJustice>());
+			}
 		}
 	}));
 }

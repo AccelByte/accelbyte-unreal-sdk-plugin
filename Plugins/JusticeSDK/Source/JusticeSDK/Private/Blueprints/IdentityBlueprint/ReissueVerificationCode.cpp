@@ -18,11 +18,17 @@ void UAsyncReissueVerificationCode::Activate()
 	JusticeIdentity::ReissueVerificationCode(this->UserId, this->LoginId, FVerifyNewPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr) {
 		if (IsSuccess)
 		{
-			OnSuccess.Broadcast();
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast();
+			}
 		}
 		else
 		{
-			OnFailed.Broadcast();
+			if (OnFailed.IsBound())
+			{
+				OnFailed.Broadcast();
+			}
 		}
 	}));
 }

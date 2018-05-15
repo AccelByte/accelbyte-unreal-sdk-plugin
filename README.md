@@ -10,6 +10,35 @@ The Justice SDK includes:
 * Justice Custom Web Browser (located at `/Plugin/JusticeWebBrowserWidget` folder)
 * Justice Sample Game (Generate VS .sln from  `/JusticeSDKDemo.uproject` file)
 
+Folder Structure:
+```
+ .
+ +-- Config                            // Configuration files goes here 
+ +-- Content
+ +-- Plugins
+ |   +-- JusticeSDK                    // Justice SDK Plugin
+ |       +-- Source
+ |            +-- JusticeSDK           
+ |                +-- Private
+ |                    +-- Blueprints   // contain source(.cpp) of blueprint version of API
+ |                    +-- Models       // contain source(.cpp) of Structure used in API
+ |                    +-- Services     // contain service class (purchase, identity, etc..)
+ |                    +-- Tests        // contain unity test file
+ |                    +-- Utilities    // contain source(.cpp) helper function class  
+ |                    +-- JusticeSDK.cpp
+ |                +-- Public
+ |                    +-- Blueprints   // contain header(.h) of blueprint version of API
+ |                    +-- Models       // contain header(.h) of Structure used in API
+ |                    +-- Services     // contain header(.h) service class 
+ |                    +-- Utilities    // contain header(.h) helper function class  
+ |                    +-- JusticeSDK.h
+ |   +-- JusticeWebBrowserWidget       // Custom In-Game-Browser Plugin    
+ +-- Source
+ |   +-- JusticeSDKDemo                // Sample Demo Game
+ +-- JusticeSDKDemo.uproject           // Unreal Engine Project
+ +-- README.md                         // This file
+ 
+```
 
 ## 2. High Level Features:
 * C++ Interface to access SDK from C++ code
@@ -134,14 +163,14 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 }
 ```
 
-##### c. Anonymous Login
-If you want to login without using user and password, you can use Anonymous Login. The example case would be player want to try our game without doing any registration. 
+##### c. Device Login
+If you want to login without using user and password, you can use Device Login. Device Id `FGenericPlatformMisc::GetDeviceId()` will act as identifier of the player. The example case would be player want to try our game without doing any registration.
 
 ```c++
 void AJusticeSDKDemoGameModeBase::BeginPlay()
 {
 	...
-    JusticeIdentity::AnonymousLogin(
+    JusticeIdentity::DeviceLogin(
       FUserLoginCompleteDelegate::CreateLambda([](bool IsSuccess, FString ErrorString, UOAuthTokenJustice* token) {
   		// this will be called when login request receive a response 
     }));

@@ -10,7 +10,7 @@
 #include "Utilities/HTTPJustice.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Models/OrderInfo.h"
-#include "AsyncCreateNewOrder.generated.h"
+#include "CreateNewOrder.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCreateNewOrderOutputPin, const UOrderInfo*, OrderInformation);
 
@@ -26,25 +26,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FCreateNewOrderOutputPin OnFailed;
 
-	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "ServerList"))
+	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Purchase"))
 		static UAsyncCreateNewOrder* CreateNewOrder(FString itemId, int Price, FString Currency);
 
 	virtual void Activate() override;
-
-private:
-	UFUNCTION()
-		void ExecuteOnSuccess();
-
-	UFUNCTION()
-		void ExecuteOnFailed();
-
-	void OnRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
-
 private:
 	FString ItemId;
 	int Price;
 	FString Currency;
-	UOrderInfo* OrderInformation;
 };
 	
 	

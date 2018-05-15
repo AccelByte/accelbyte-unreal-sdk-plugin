@@ -20,11 +20,17 @@ void UAsyncRegisterNewPlayer::Activate()
 	JusticeIdentity::RegisterNewPlayer(this->UserId, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr, UUserCreateResponse* Response) {
 		if (IsSuccess)
 		{
-			OnSuccess.Broadcast(Response);
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast(Response);
+			}
 		}
 		else
 		{
-			OnFailed.Broadcast(NewObject<UUserCreateResponse>());
+			if (OnFailed.IsBound())
+			{
+				OnFailed.Broadcast(NewObject<UUserCreateResponse>());
+			}
 		}
 	}));
 }

@@ -63,14 +63,16 @@ void UJusticeIdentityFunctions::ResetPassword(FString UserId, FString Verificati
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
 {
-	//return JusticeIdentity::GetUserToken();
-	return NewObject<UOAuthTokenJustice>(); // TODO
+	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
+	NewOAuthTokenJustice->FromParent(JusticeIdentity::GetUserToken());
+	return NewOAuthTokenJustice; 
 }
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
 {
-	//return JusticeIdentity::GetClientToken();
-	return NewObject<UOAuthTokenJustice>(); // TODO
+	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
+	NewOAuthTokenJustice->FromParent(JusticeIdentity::GetClientToken());
+	return NewOAuthTokenJustice; 
 }
 
 FString UJusticeIdentityFunctions::GetUserId()
