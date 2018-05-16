@@ -3,12 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticeWebBrowser.h"
+#include "Engine.h"
 #include "SWebBrowser.h"
+#include "Serialization/JsonSerializerMacros.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
-#include "Serialization/JsonSerializerMacros.h"
-#include "JusticeSDK/Private/HTTPJustice.h"
-#include "Engine.h"
+#include "JusticeSDK/Public/Utilities/HTTPJustice.h"
 
 #define LOCTEXT_NAMESPACE "JusticeWebBrowser"
 
