@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 #include "Utilities/AsyncTaskManagerJustice.h"
+#include "Utilities/RetryTaskManagerJustice.h"
 #include "Models/OAuthTokenJustice.h"
 #include "Models/UserProfileInfo.h"
 
@@ -36,12 +37,16 @@ public:
 	FString ClientID;
 	FString ClientSecret;
 	class FRunnableThread* OnlineAsyncTaskThread;
+	class FRunnableThread* RetryAsyncTaskThread;
+
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
 	FString LoginId;
+	FString Password;
 	UserProfileInfo* UserProfile;
 
 	FAsyncTaskManagerJustice* AsyncTaskManager;
+	FRetryTaskManagerJustice* RetryTaskManager;
 
 private:
 	FCriticalSection GameClientCritical;

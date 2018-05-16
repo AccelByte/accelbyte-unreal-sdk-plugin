@@ -54,7 +54,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -144,7 +144,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -234,7 +234,7 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -355,7 +355,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isForgotPasswdDone = false;
@@ -477,7 +477,7 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -548,7 +548,7 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isRegisterPlayerDone = false;
@@ -639,7 +639,7 @@ bool FRegisterNewPlayerInvalidEmailTest::RunTest(const FString & Parameters)
 	FString LoginID = "test";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	double LastTime;
@@ -672,7 +672,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -762,7 +762,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -888,7 +888,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -998,7 +998,7 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -1088,7 +1088,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	FString UpdatedDisplayName = "IntegrationTestSDK";
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;

@@ -3,6 +3,61 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticePlatform.h"
+#include "JusticeSDK.h"
+#include "Services/JusticeIdentity.h"
+
+
+// Get Item By Query Retry Task
+class FRequestCurrentPlayerProfileRetryTask : public FJusticeRetryTask
+{
+public:
+	FRequestCurrentPlayerProfileRetryTask(
+		FReqestCurrentPlayerProfileCompleteDelegate onComplete,
+		int nextRetry = 1,
+		int totalElapsedWait = 0) : FJusticeRetryTask(nextRetry, totalElapsedWait),
+		OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticePlatform::RequestCurrentPlayerProfile(
+			FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool IsSucessful, FString ErrorString, UserProfileInfo UserInfo) {
+			if (IsSucessful)
+			{
+				OnComplete.ExecuteIfBound(IsSucessful, ErrorString, UserInfo);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), UserProfileInfo());
+				}
+				else
+				{
+					FRequestCurrentPlayerProfileRetryTask* RetryTask = new FRequestCurrentPlayerProfileRetryTask(OnComplete,
+						GetLastWait() * 2, // wait more longer for next retry
+						GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));
+	}
+private:
+	FString Language;
+	FString Region;
+	FString CategoryPath;
+	FString ItemType;
+	FString Status;
+	int Page;
+	int Size;
+	FReqestCurrentPlayerProfileCompleteDelegate OnComplete;
+};
+
+
 
 void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete)
 {
@@ -16,7 +71,7 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnRequestCurrentPlayerProfileComplete, RequestTrace, OnComplete);
@@ -35,7 +90,6 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 
 void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FReqestCurrentPlayerProfileCompleteDelegate OnComplete)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -87,6 +141,45 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Requ
 			}));
 			break;
 		}
+		case EHttpResponseCodes::Denied:
+			JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete, &ErrorStr](bool IsSuccess,
+				FString ErrorStr,
+				UOAuthTokenJustice* Token) {
+				if (IsSuccess)
+				{
+					if (Token->Bans.Num() > 0)
+					{
+						FString bansList = FString::Join(Token->Bans, TEXT(","));
+						ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					}
+					else
+					{
+						FRequestCurrentPlayerProfileRetryTask* RetryTask = new FRequestCurrentPlayerProfileRetryTask(OnComplete);
+						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+						return;
+					}
+				}
+				else
+				{
+					//add to queue: refresh token, if success then retry (register new player)
+					FRequestCurrentPlayerProfileRetryTask* RetryTask = new FRequestCurrentPlayerProfileRetryTask(OnComplete);
+					FRefreshTokenRetryTask* RefreshTokenTask = new FRefreshTokenRetryTask(RetryTask);
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RefreshTokenTask);
+					return;
+				}
+			}));
+			break;
+
+			break;
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			FRequestCurrentPlayerProfileRetryTask* RetryTask = new FRequestCurrentPlayerProfileRetryTask(OnComplete);
+			FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+			return;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
@@ -107,7 +200,6 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
-
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("PUT"));
@@ -115,7 +207,7 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	Request->SetContentAsString(newUserProfile.ToJson());
-	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnUpdatePlayerProfileComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnUpdatePlayerProfileComplete, RequestTrace, OnComplete, newUserProfile);
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call UpdatePlayerProfile: %s"), *Request->GetURL());
 	if (!Request->ProcessRequest())
 	{
@@ -128,9 +220,8 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	}
 }
 
-void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete, UserProfileInfo newUserProfile)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -143,9 +234,18 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHt
 		case EHttpResponseCodes::Ok:
 		{
 			OnComplete.ExecuteIfBound(true, TEXT(""));
-		}
-		break;
+			break;
 
+		}
+		case EHttpResponseCodes::Denied:
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			JusticePlatform::UpdatePlayerProfile(newUserProfile, OnComplete);
+			return;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
@@ -185,7 +285,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());	
 	Request->SetContentAsString(Payload);
-	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnCreateDefaultPlayerProfileComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticePlatform::OnCreateDefaultPlayerProfileComplete, RequestTrace, OnComplete, Email, DisplayName);
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call CreateDefaultPlayerProfile: %s"), *Request->GetURL());
 	if (!Request->ProcessRequest())
 	{
@@ -198,9 +298,8 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	}
 }
 
-void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete, FString Email, FString DisplayName)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -230,6 +329,14 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Reque
 		{
 			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
 			break;
+		}
+		case EHttpResponseCodes::Denied:
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, OnComplete);
 		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());

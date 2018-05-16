@@ -10,33 +10,28 @@
 #include "Utilities/HTTPJustice.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Models/OrderInfo.h"
-#include "CreateNewOrder.generated.h"
+#include "GetWalletBalance.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCreateNewOrderOutputPin, const UOrderInfo*, OrderInformation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetWalletBalanceOutputPin, const int, WalletBalance);
 
 UCLASS()
-class JUSTICESDK_API UAsyncCreateNewOrder : public UBlueprintAsyncActionBase
+class JUSTICESDK_API UAsyncGetWalletBalance : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable)
-		FCreateNewOrderOutputPin OnSuccess;
+		FGetWalletBalanceOutputPin OnSuccess;
 
 	UPROPERTY(BlueprintAssignable)
-		FCreateNewOrderOutputPin OnFailed;
+		FGetWalletBalanceOutputPin OnFailed;
 
-	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Purchase"))
-		static UAsyncCreateNewOrder* CreateNewOrder(FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId);
+	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Wallet"))
+		static UAsyncGetWalletBalance* GetWalletBalance(FString Currency);
 
 	virtual void Activate() override;
 private:
-	FString ItemId;
-	int Price;
-	int DiscountedPrice;
 	FString Currency;
-	FString StoreId;
-
 };
 	
 	

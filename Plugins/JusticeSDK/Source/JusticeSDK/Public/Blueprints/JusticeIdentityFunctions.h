@@ -35,10 +35,10 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 		static void UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete) ;
 	
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
+		static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
+		static void VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete);

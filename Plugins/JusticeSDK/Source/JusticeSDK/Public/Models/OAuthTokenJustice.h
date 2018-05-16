@@ -21,12 +21,14 @@ public:
 	double  ExpiresIn;
 	TArray<FPermissionJustice> Permissions;
 	TArray<FString> Roles;
+	TArray<FString> Bans;
 	FString UserId;
 	FString DisplayName;
 	FString Namespace;
 	FDateTime LastTokenRefreshUtc;
 	FDateTime NextTokenRefreshUtc;
 	FTimespan TokenRefreshBackoff;
+	int JFlags;
 public:
 	OAuthTokenJustice():
 		ExpiresIn(0),
@@ -72,15 +74,33 @@ public:
 	FString GetNamespace() { return Namespace; };
 	FString GetRoles(int Index) { return Roles[Index]; };
 
+
+	//access_token(string),
+	//	refresh_token(string),
+	//	expires_in(integer),
+	//	token_type(string),
+	//	roles(array[string]),
+	//	permissions(array[accountcommon.Permission]),
+	//	bans(array[string]),
+	//	user_id(string),
+	//	platform_id(string, optional),
+	//	platform_user_id(string, optional),
+	//	jflgs(integer, optional),
+	//	display_name(string),
+	//	namespace (string)
+
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("access_token", AccessToken);
 		JSON_SERIALIZE("refresh_token", RefreshToken);
-		JSON_SERIALIZE("token_type", TokenType);
 		JSON_SERIALIZE("expires_in", ExpiresIn);
+		JSON_SERIALIZE("token_type", TokenType);
+		JSON_SERIALIZE_ARRAY("roles", Roles);
+		//JSON_SERIALIZE_ARRAY("permissions", Roles);
+		JSON_SERIALIZE_ARRAY("bans", Bans);
 		JSON_SERIALIZE("user_id", UserId);
 		JSON_SERIALIZE("display_name", DisplayName);
 		JSON_SERIALIZE("namespace", Namespace);
-		JSON_SERIALIZE_ARRAY("roles", Roles);
+		
 	END_JSON_SERIALIZER
 };
 

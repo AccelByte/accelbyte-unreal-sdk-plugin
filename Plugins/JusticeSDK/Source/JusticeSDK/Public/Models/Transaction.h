@@ -14,11 +14,15 @@ class Transaction : public FJsonSerializable
 public:
     FString txId ;
     int amount ;
+	int vat;
+	int salesTax;
     CurrencySummary currency ;
-    FString type ;
-    FString status ;
-    FString provider ;
+    FString type ; //['CHARGE', 'REFUND'],
+    FString status ; // ['INIT', 'FINISHED', 'FAILED'],
+    FString provider ; //['XSOLLA', 'WALLET'],
+	int paymentProviderFee;
     FString paymentMethod ;
+	int paymentMethodFee;
     FString merchantId ;
     FString extTxId ;
     FString extStatusCode ;
@@ -29,10 +33,14 @@ public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("txId", txId);
 		JSON_SERIALIZE("amount", amount);
+		JSON_SERIALIZE("vat", vat);
+		JSON_SERIALIZE("salesTax", salesTax);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("currency", currency);
         JSON_SERIALIZE("status", status);
         JSON_SERIALIZE("provider", provider);
+		JSON_SERIALIZE("paymentProviderFee", paymentProviderFee);
         JSON_SERIALIZE("paymentMethod", paymentMethod);
+		JSON_SERIALIZE("paymentMethodFee", paymentMethodFee);
         JSON_SERIALIZE("merchantId", merchantId);
         JSON_SERIALIZE("extTxId", extTxId);
         JSON_SERIALIZE("extStatusCode", extStatusCode);

@@ -38,7 +38,16 @@ void FJusticeSDKModule::StartupModule()
 	UserProfile = new UserProfileInfo;
 
 	AsyncTaskManager = new FAsyncTaskManagerJustice();
+	RetryTaskManager = new FRetryTaskManagerJustice();
+
 	OnlineAsyncTaskThread = FRunnableThread::Create(AsyncTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
+	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
+
+
+	RetryAsyncTaskThread = FRunnableThread::Create(RetryTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
+	UE_LOG(LogJustice, Log, TEXT("Justice RetryAsyncTaskThread thread (ID:%d)."), RetryAsyncTaskThread->GetThreadID());
+
+
 	check(OnlineAsyncTaskThread != nullptr)
 	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID())
 }

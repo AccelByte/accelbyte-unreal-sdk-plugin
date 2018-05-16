@@ -26,7 +26,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call GetWalletBalance: %s"), *Request->GetURL());
 
-	Request->OnProcessRequestComplete().BindStatic(JusticeWallet::OnGetWalletBalanceComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(JusticeWallet::OnGetWalletBalanceComplete, RequestTrace, OnComplete, CurrencyCode);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -37,10 +37,8 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 		OnComplete.ExecuteIfBound(false, 0);
 	}
 }
-
-void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete)
+void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete, FString CurrencyCode)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -60,7 +58,7 @@ void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpRes
 				WalletInfo* wallet = new WalletInfo();				
 				if (wallet->FromJson(JsonObject))
 				{
-					OnComplete.ExecuteIfBound(true, wallet->balances[0].balance);					
+					OnComplete.ExecuteIfBound(true, wallet->balance);					
 				}
 				else
 				{
@@ -71,11 +69,19 @@ void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpRes
 			{
 				ErrorStr = TEXT("unable to deserlize response from server");
 			}
+			break;
 		}
-		break;
-
+		case EHttpResponseCodes::Denied:
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			JusticeWallet::GetWalletBalance(CurrencyCode, OnComplete);
+			return;
+		}
 		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d, response content=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
 		}
 	}
 	if (!ErrorStr.IsEmpty())

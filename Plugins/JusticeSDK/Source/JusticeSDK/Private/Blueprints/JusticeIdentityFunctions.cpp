@@ -28,18 +28,18 @@ void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate On
 	JusticeIdentity::UserLogout(LogoutCompleteDelegate);
 }
 
-void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::RegisterNewPlayer(UserId, Password, DisplayName, AuthType, 
+	JusticeIdentity::RegisterNewPlayer(UserId, Password, DisplayName, (FUserAuthTypeJustice)AuthType,
 		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UUserCreateResponse* Response) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Response);
 	}));
 
 }
 
-void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::VerifyNewPlayer(UserId, VerificationCode,
+	JusticeIdentity::VerifyNewPlayer(UserId, VerificationCode, (FUserAuthTypeJustice)AuthType,
 		FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr);
 	}));

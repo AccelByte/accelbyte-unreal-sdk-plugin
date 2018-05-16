@@ -8,7 +8,7 @@
 const int AutomationPermissionFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
 // Context: EditorContext (run via editor cli) ClientContext (run via external cli)
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryCW, "PermissionTest.WildcardMatch.OnQuery.ConsecutiveWildcard", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryCW, "JusticeTest.Permission.WildcardMatch.OnQuery.ConsecutiveWildcard", AutomationPermissionFlagMask);
 bool FWildcardMatchOnQueryCW::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -24,7 +24,7 @@ bool FWildcardMatchOnQueryCW::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryPR, "PermissionTest.WildcardMatch.OnQuery.PreceedingResourceNotMatch", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryPR, "JusticeTest.Permission.WildcardMatch.OnQuery.PreceedingResourceNotMatch", AutomationPermissionFlagMask);
 bool FWildcardMatchOnQueryPR::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -40,7 +40,7 @@ bool FWildcardMatchOnQueryPR::RunTest(const FString & Parameters)
 	return bAssertionResult;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionAQ, "PermissionTest.WildcardMatch.OnPermission.AnyQuery", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionAQ, "JusticeTest.Permission.WildcardMatch.OnPermission.AnyQuery", AutomationPermissionFlagMask);
 bool FWildcardMatchOnPermissionAQ::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -56,7 +56,7 @@ bool FWildcardMatchOnPermissionAQ::RunTest(const FString & Parameters)
 	return bAssertionResult;;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionMR, "PermissionTest.WildcardMatch.OnPermission.MissmatchResult", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnPermissionMR, "JusticeTest.Permission.WildcardMatch.OnPermission.MissmatchResult", AutomationPermissionFlagMask);
 bool FWildcardMatchOnPermissionMR::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -72,7 +72,7 @@ bool FWildcardMatchOnPermissionMR::RunTest(const FString & Parameters)
 	return bAssertionResult;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionCA, "PermissionTest.WildcardMatch.OnAction.CompleteAction", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionCA, "JusticeTest.Permission.WildcardMatch.OnAction.CompleteAction", AutomationPermissionFlagMask);
 bool FWildcardMatchOnActionCA::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -88,7 +88,7 @@ bool FWildcardMatchOnActionCA::RunTest(const FString & Parameters)
 	return bAssertionResult;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionMA, "PermissionTest.WildcardMatch.OnAction.MissingAction", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnActionMA, "JusticeTest.Permission.WildcardMatch.OnAction.MissingAction", AutomationPermissionFlagMask);
 bool FWildcardMatchOnActionMA::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -104,7 +104,7 @@ bool FWildcardMatchOnActionMA::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchPM, "PermissionTest.LengthMatch.PerfectMatch", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchPM, "JusticeTest.Permission.LengthMatch.PerfectMatch", AutomationPermissionFlagMask);
 bool FLengthMatchPM::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -120,7 +120,7 @@ bool FLengthMatchPM::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchMM, "PermissionTest.LengthMatch.MissMatch", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLengthMatchMM, "JusticeTest.Permission.LengthMatch.MissMatch", AutomationPermissionFlagMask);
 bool FLengthMatchMM::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -136,7 +136,7 @@ bool FLengthMatchMM::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchIA, "PermissionTest.BitmaskMatch.InsufficientAction", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchIA, "JusticeTest.Permission.BitmaskMatch.InsufficientAction", AutomationPermissionFlagMask);
 bool FBitmaskMatchIA::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -152,7 +152,7 @@ bool FBitmaskMatchIA::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchSA, "PermissionTest.BitmaskMatch.SufficientAction", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBitmaskMatchSA, "JusticeTest.Permission.BitmaskMatch.SufficientAction", AutomationPermissionFlagMask);
 bool FBitmaskMatchSA::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -168,7 +168,7 @@ bool FBitmaskMatchSA::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMatchRE, "PermissionTest.RoleMatch.RoleExist", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMatchRE, "JusticeTest.Permission.RoleMatch.RoleExist", AutomationPermissionFlagMask);
 bool FRoleMatchRE::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -184,7 +184,7 @@ bool FRoleMatchRE::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMatchNR, "PermissionTest.RoleMatch.NoRole", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoleMatchNR, "JusticeTest.Permission.RoleMatch.NoRole", AutomationPermissionFlagMask);
 bool FRoleMatchNR::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -200,7 +200,7 @@ bool FRoleMatchNR::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchAS, "PermissionTest.TrailMatch.AcceptString", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchAS, "JusticeTest.Permission.TrailMatch.AcceptString", AutomationPermissionFlagMask);
 bool FTrailMatchAS::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");
@@ -216,7 +216,7 @@ bool FTrailMatchAS::RunTest(const FString & Parameters)
 	return bAssertionResult;	
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchRS, "PermissionTest.TrailMatch.RejectString", AutomationPermissionFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTrailMatchRS, "JusticeTest.Permission.TrailMatch.RejectString", AutomationPermissionFlagMask);
 bool FTrailMatchRS::RunTest(const FString & Parameters)
 {
 	FUserOnlineAccountJustice* AccountMock = new FUserOnlineAccountJustice("test@accelbyte.com");

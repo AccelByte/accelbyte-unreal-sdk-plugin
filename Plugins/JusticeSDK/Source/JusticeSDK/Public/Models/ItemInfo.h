@@ -9,47 +9,56 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "JusticeImage.h"
 #include "Price.h"
+#include "RegionData.h"
 #include "ItemInfo.generated.h"
 
 class ItemInfo : public FJsonSerializable
 {
 public:
+	FString Title;
+	FString Description;
+	FString LongDescription;
+	TArray<JusticeImage> Images;
+	JusticeImage ThumbnailImage;
 	FString ItemId;
 	FString AppId;
 	FString Namespace;
+	FString StoreId;
 	FString EntitlementName;
 	FString EntitlementType;
 	int UseCount;
 	FString CategoryPath;
-	FString Title;
-	FString Details;
-	JusticeImage ThumbnailImage;
-	TArray<JusticeImage> Images;
-	Price PriceInfo;
 	FString Status;
 	FString ItemType;
 	FString CreatedAt;
 	FString UpdatedAt;
-	int FavoritCnt;
+	TArray<RegionData> RegionDatas;
+	TArray<FString> ItemIds;
+	TArray<FString> Tags;
+
 
 	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("title", Title);
+		JSON_SERIALIZE("description", Description);
+		JSON_SERIALIZE("longDescription", LongDescription);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);
+		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
 		JSON_SERIALIZE("itemId", ItemId);
 		JSON_SERIALIZE("appId", AppId);
 		JSON_SERIALIZE("namespace", Namespace);
+		JSON_SERIALIZE("storeId", StoreId);
 		JSON_SERIALIZE("entitlementName", EntitlementName);
 		JSON_SERIALIZE("entitlementType", EntitlementType);
 		JSON_SERIALIZE("useCount", UseCount);
 		JSON_SERIALIZE("categoryPath", CategoryPath);
-		JSON_SERIALIZE("title", Title);
-		JSON_SERIALIZE("details", Details);		
-		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);		
-		JSON_SERIALIZE_OBJECT_SERIALIZABLE("price", PriceInfo);
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("itemType", ItemType);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
-		JSON_SERIALIZE("favoritCnt", FavoritCnt);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("regionData", RegionDatas, RegionData);		
+		JSON_SERIALIZE_ARRAY("itemIds", ItemIds);
+		JSON_SERIALIZE_ARRAY("tags", Tags);
+		
 	END_JSON_SERIALIZER
 };
 
@@ -65,15 +74,21 @@ class UItemInfo : public UObject, public ItemInfo
 		FString GetTitle() { return Title; };
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		FString GetDetail() { return Details; };
+		FString GetDescription() { return Description; };
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		UPrice* GetPrice() 
-		{
-			UPrice* result = NewObject<UPrice>(); 
-			result->FromPrice(PriceInfo);
-			return result;			
-		};
+		FString GetCurrencyCode() { return RegionDatas[0].CurrencyCode; };
+
+
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		int GetPrice() { return RegionDatas[0].Price; };
+
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		int GetDiscountedPrice() { return RegionDatas[0].DiscountedPrice; };
+
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		FString GetStoreID() { return StoreId; };
+
 public:
 		void FromItemInfo(ItemInfo item);	
 };

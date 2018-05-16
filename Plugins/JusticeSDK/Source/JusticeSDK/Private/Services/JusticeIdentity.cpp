@@ -4,7 +4,6 @@
 
 #include "JusticeIdentity.h"
 #include "Misc/ConfigCacheIni.h"
-#include "JusticeSDK.h"
 #include "JusticeLog.h"
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
@@ -12,6 +11,7 @@
 #include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
 FCriticalSection Mutex;
 
+// Refresh Task
 class FUserRefreshTokenAsyncTask : public FJusticeAsyncTask
 {
 public:
@@ -36,6 +36,270 @@ public:
 	}
 };
 
+
+// Client Login Retry Task
+class FClientLoginRetryTask : public FJusticeRetryTask
+{
+public:
+	FClientLoginRetryTask(FUserLoginCompleteDelegate onComplete,
+		int nextRetry = 1,
+		int totalElapsedWait = 0) : FJusticeRetryTask(nextRetry, totalElapsedWait),
+		OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticeIdentity::ClientLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSucessfull, FString ErrorStr, UOAuthTokenJustice* Token) {
+			if (IsSucessfull)
+			{
+				OnComplete.ExecuteIfBound(IsSucessfull, ErrorStr, Token);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), nullptr);
+				}
+				else
+				{
+					FClientLoginRetryTask* RetryTask = new FClientLoginRetryTask(OnComplete,
+						GetLastWait() * 2, // wait more longer for next retry
+						GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));
+	}
+private:
+	FUserLoginCompleteDelegate OnComplete;
+};
+
+// User Login Retry Task
+class FUserLoginRetryTask : public FJusticeRetryTask
+{
+public:
+	FUserLoginRetryTask(FString userId,
+						FString password,
+						FUserLoginCompleteDelegate onComplete,
+						int nextRetry = 1,
+						int totalElapsedWait = 0) : FJusticeRetryTask(nextRetry, totalElapsedWait),
+													UserId(userId),
+													Password(password),		
+													OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticeIdentity::UserLogin(UserId,
+			Password,
+			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSucessfull, FString ErrorStr, UOAuthTokenJustice* Token) {
+			if (IsSucessfull)
+			{
+				OnComplete.ExecuteIfBound(IsSucessfull, ErrorStr, Token);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), nullptr);
+				}
+				else
+				{
+					FUserLoginRetryTask* RetryTask = new FUserLoginRetryTask(UserId,
+						Password,						
+						OnComplete,
+						GetLastWait() * 2, // wait more longer for next retry
+						GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));
+	}
+private:
+	FString UserId;
+	FString Password;
+	FUserLoginCompleteDelegate OnComplete;
+};
+
+
+
+// Register New Player Retry Task
+class FRegisterNewPlayerRetryTask : public FJusticeRetryTask
+{
+public:
+	FRegisterNewPlayerRetryTask(FString userId, 
+		FString password, 
+		FString displayName, 
+		FUserAuthTypeJustice authType, 
+		FRegisterPlayerCompleteDelegate onComplete, 
+		int nextRetry = 1,
+		int totalElapsedWait = 0) 
+			:FJusticeRetryTask(nextRetry, totalElapsedWait), 
+			 UserId(userId), 
+			 Password(password), 
+			 DisplayName(displayName), 
+			 AuthType(authType), 
+			 OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());		
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticeIdentity::RegisterNewPlayer(UserId, 
+										   Password, 
+										   DisplayName, 
+										   AuthType, 
+										   FRegisterPlayerCompleteDelegate::CreateLambda([&](bool IsSuccess, 
+																							 FString ErrorStr, 
+																							 UUserCreateResponse* Response) {
+			if (IsSuccess)
+			{
+				OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Response);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), nullptr);
+				}
+				else
+				{					
+					FRegisterNewPlayerRetryTask* RetryTask = new FRegisterNewPlayerRetryTask(UserId, 
+																							 Password, 
+																							 DisplayName, 
+																							 AuthType, 
+																						     OnComplete, 
+																						     GetLastWait() * 2, // wait more longer for next retry
+																							 GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));	
+	}
+private:
+	FString UserId;
+	FString Password;
+	FString DisplayName;
+	FUserAuthTypeJustice AuthType;
+	FRegisterPlayerCompleteDelegate OnComplete;
+};
+
+
+// Forgot Password Retry Task
+class FForgotPasswordRetryTask : public FJusticeRetryTask
+{
+public:
+	FForgotPasswordRetryTask(FString loginId,
+		FForgotPasswordCompleteDelegate onComplete,
+		int nextRetry = 1,
+		int totalElapsedWait = 0)
+		:FJusticeRetryTask(nextRetry, totalElapsedWait),		
+		LoginId(loginId),
+		OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticeIdentity::ForgotPassword(LoginId,
+			FForgotPasswordCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
+			if (IsSuccess)
+			{
+				OnComplete.ExecuteIfBound(IsSuccess, ErrorStr);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"));
+				}
+				else
+				{
+					FForgotPasswordRetryTask* RetryTask = new FForgotPasswordRetryTask(LoginId,
+						OnComplete,
+						GetLastWait() * 2, // wait more longer for next retry
+						GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));
+	}
+private:
+	FString LoginId;
+	FForgotPasswordCompleteDelegate OnComplete;
+};
+
+
+
+// VerifyNewPlayer retry task
+
+class FVerifyNewPlayerRetryTask : public FJusticeRetryTask
+{
+public:
+	FVerifyNewPlayerRetryTask(FString userId,
+		FString verificationCode,
+		FUserAuthTypeJustice authType,
+		FVerifyNewPlayerCompleteDelegate onComplete,
+		int nextRetry = 1,
+		int totalElapsedWait = 0)
+		:FJusticeRetryTask(nextRetry, totalElapsedWait),
+		UserId(userId),
+		VerificationCode(verificationCode),
+		AuthType(authType),
+		OnComplete(onComplete)
+	{}
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
+		JusticeIdentity::VerifyNewPlayer(UserId, VerificationCode, AuthType,
+			FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
+			if (IsSuccess)
+			{
+				OnComplete.ExecuteIfBound(IsSuccess, ErrorStr);
+				SetAsDone();
+			}
+			else
+			{
+				if (GetTotalElapsedWait() > 60)
+				{
+					// take more than 1 minutes after many retries, return failure
+					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"));
+				}
+				else
+				{
+					FVerifyNewPlayerRetryTask* RetryTask = new FVerifyNewPlayerRetryTask(UserId, VerificationCode, AuthType,
+						OnComplete,
+						GetLastWait() * 2, // wait more longer for next retry
+						GetTotalElapsedWait() + GetLastWait());
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+				}
+
+			}
+		}));
+	}
+private:
+	FString UserId;
+	FString VerificationCode;
+	FUserAuthTypeJustice AuthType;
+	FVerifyNewPlayerCompleteDelegate OnComplete;
+};
+
+
 void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete)
 {
 	Mutex.Lock();
@@ -48,6 +312,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
 	FJusticeSDKModule::Get().LoginId = LoginId;
+	FJusticeSDKModule::Get().Password = Password;
 
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
 	Request->SetVerb(TEXT("POST"));
@@ -60,7 +325,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	{		
 		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));
  		Grant = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));
-		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
+		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete, LoginId, Password);
 	}
 	else if (GrantType == FGrantTypeJustice::RefreshGrant)
 	{		
@@ -73,7 +338,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 	{
 		Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/token"), *BaseURL));		
 		Grant = FString::Printf(TEXT("grant_type=client_credentials"));
-		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace);			
+		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnClientCredentialComplete, RequestTrace, OnComplete);			
 	}
 	else if (GrantType == FGrantTypeJustice::Device)
 	{		
@@ -81,25 +346,24 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 		FString deviceID = FGenericPlatformMisc::GetDeviceId();
 		check(!deviceID.IsEmpty() && "Cannot get Device ID");
 		Grant = FString::Printf(TEXT("device_id=%s"), *deviceID);
-		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete);
+		Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLoginComplete, RequestTrace, OnComplete, LoginId, Password);
 	}
 
 	Request->SetContentAsString(Grant);
 	if (!Request->ProcessRequest())
 	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+		ErrorStr = FString::Printf(TEXT("Request Failed. URL=%s"), *Request->GetURL());
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogin failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogin failed. ErrorString=%s, XrayID=%s, ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 	}
 	Mutex.Unlock();
 }
 
-void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete, FString UserId, FString Password)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -134,8 +398,21 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 			{
 				ErrorStr = TEXT("unable to deserlize response from server");
 			}
+			break;
 		}
-		break;
+		
+		case EHttpResponseCodes::Denied:
+			ErrorStr = FString::Printf(TEXT("Client authentication failed, Response=%s"), *Response->GetContentAsString());
+			break;
+		case EHttpResponseCodes::RequestTimeout:		
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			FUserLoginRetryTask* RetryTask = new FUserLoginRetryTask(UserId,Password,OnComplete);
+			FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+			return;
+		}
 
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d  Response=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
@@ -156,7 +433,6 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 
 void JusticeIdentity::OnUserRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -169,7 +445,6 @@ void JusticeIdentity::OnUserRefreshComplete(FHttpRequestPtr Request, FHttpRespon
 		case EHttpResponseCodes::Ok:
 		{
 			FString ResponseStr = Response->GetContentAsString();
-
 			TSharedPtr<FJsonObject> JsonObject;
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
@@ -192,11 +467,16 @@ void JusticeIdentity::OnUserRefreshComplete(FHttpRequestPtr Request, FHttpRespon
 			{
 				ErrorStr = TEXT("unable to deserlize response from server");
 			}
-		}
-		break;
-
+			break;
+		}		
 		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d  Response=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
+		{
+			FJusticeSDKModule::Get().UserToken->ScheduleBackoffRefresh();
+			FUserRefreshTokenAsyncTask* NewTask = new FUserRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
+			FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
+			ErrorStr = FString::Printf(TEXT("Unexpected Response Code=%d,  Response=%s, Start Backoff refresh !"), Response->GetResponseCode(), *Response->GetContentAsString());
+		}
+			
 		}
 	}
 
@@ -234,7 +514,7 @@ void JusticeIdentity::OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResp
 			{
 				if (FJusticeSDKModule::Get().GameClientParseJson(JsonObject))
 				{
-					FClientRefreshTokenAsyncTask* NewTask = new FClientRefreshTokenAsyncTask(FJusticeSDKModule::Get().UserToken->NextTokenRefreshUtc);
+					FClientRefreshTokenAsyncTask* NewTask = new FClientRefreshTokenAsyncTask(FJusticeSDKModule::Get().GameClientToken->NextTokenRefreshUtc);
 					FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
 					UE_LOG(LogJustice, Log, TEXT("OnClientRefreshComplete Succees, New token received !"));
 				}
@@ -249,9 +529,13 @@ void JusticeIdentity::OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResp
 			}
 		}
 		break;
-
 		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d  Response=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
+		{
+			FJusticeSDKModule::Get().GameClientToken->ScheduleBackoffRefresh();
+			FUserRefreshTokenAsyncTask* NewTask = new FUserRefreshTokenAsyncTask(FJusticeSDKModule::Get().GameClientToken->NextTokenRefreshUtc);
+			FJusticeSDKModule::Get().AsyncTaskManager->AddToRefreshQueue(NewTask);
+			ErrorStr = FString::Printf(TEXT("Unexpcted Response Code=%d,  Response=%s, Start Backoff refresh !"), Response->GetResponseCode(), *Response->GetContentAsString());
+		}
 		}
 	}
 
@@ -268,7 +552,7 @@ void JusticeIdentity::OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResp
 
 
 
-void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace)
+void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
@@ -287,7 +571,13 @@ void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpR
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 			{
-				if(!FJusticeSDKModule::Get().GameClientParseJson(JsonObject))
+				if(FJusticeSDKModule::Get().GameClientParseJson(JsonObject))
+				{
+					UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
+					newToken->FromParent(FJusticeSDKModule::Get().GameClientToken);
+					OnComplete.ExecuteIfBound(true, TEXT(""), newToken);
+				}
+				else
 				{
 					ErrorStr = TEXT("unable to deserlize response from json object");
 				}
@@ -296,9 +586,23 @@ void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpR
 			{
 				ErrorStr = TEXT("unable to deserlize response from server");
 			}
+			break;
 		}
-		break;
+		case EHttpResponseCodes::Denied:
+			ErrorStr = FString::Printf(TEXT("Client authentication failed, Response=%s"), *Response->GetContentAsString());
+			break;
 
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			FClientLoginRetryTask* RetryTask = new FClientLoginRetryTask(OnComplete);
+			FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+			return;
+
+			return;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 			break;
@@ -308,9 +612,9 @@ void JusticeIdentity::OnClientCredentialComplete(FHttpRequestPtr Request, FHttpR
 	{
 		UE_LOG(LogJustice, Warning, TEXT("Game Client Credential failed. Error=%s XRay=%s ReqTime=%.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		return;
-	}
-	UE_LOG(LogJustice, Log, TEXT("Game Client Credential successful. ReqTime=%.3f"), Request->GetElapsedTime());
+
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);		
+	}	
 }
 
 void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDelegate OnComplete)
@@ -328,7 +632,7 @@ void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDel
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
 	Request->SetContentAsString(FString::Printf(TEXT("{	\"LoginID\": \"%s\"}"), *LoginId));
-	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnForgotPasswordComplete, RequestTrace, OnComplete, LoginId);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -340,9 +644,8 @@ void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDel
 	}
 }
 
-void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete, FString LoginId)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -372,6 +675,43 @@ void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpRes
 		{
 			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
 			break;
+		}
+		case EHttpResponseCodes::Denied:
+			JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete, LoginId, &ErrorStr](bool IsSuccess,
+				FString ErrorStr,
+				UOAuthTokenJustice* Token) {
+				if (IsSuccess)
+				{
+					if (Token->Bans.Num() > 0)
+					{
+						FString bansList = FString::Join(Token->Bans, TEXT(","));
+						ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					}
+					else
+					{
+						FForgotPasswordRetryTask* RetryTask = new FForgotPasswordRetryTask(LoginId, OnComplete);
+						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+						return;
+					}
+				}
+				else
+				{
+					//add to queue: refresh token, if success then retry (register new player)
+					FForgotPasswordRetryTask* RetryTask = new FForgotPasswordRetryTask(LoginId, OnComplete);
+					FRefreshTokenRetryTask* RefreshTokenTask = new FRefreshTokenRetryTask(RetryTask);
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RefreshTokenTask);
+					return;
+				}
+			}));
+			break;
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			//retry
+			JusticeIdentity::ForgotPassword(LoginId, OnComplete);
+			return;
 		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
@@ -407,7 +747,7 @@ void JusticeIdentity::ResetPassword(FString UserId, FString VerificationCode, FS
 	Request->SetContentAsString(ResetPasswordRequest.ToJson());
 	UE_LOG(LogJustice, Log, TEXT("Attemp to call JusticeIdentity::ResetPassword: %s"), *Request->GetURL());
 
-	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnResetPasswordComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnResetPasswordComplete, RequestTrace, OnComplete, UserId, VerificationCode, NewPassword);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -420,9 +760,8 @@ void JusticeIdentity::ResetPassword(FString UserId, FString VerificationCode, FS
 	}
 }
 
-void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete, FString UserId, FString VerificationCode, FString NewPassword)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -451,6 +790,18 @@ void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResp
 		case EHttpResponseCodes::NotFound:
 		{
 			ErrorStr = FString::Printf(TEXT("Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
+			break;
+		}
+		case EHttpResponseCodes::Denied:
+
+
+
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			ErrorStr = FString::Printf(TEXT("You have to wait 15 minutes before request another Reset Password. Response Code=%d"), Response->GetResponseCode());
 			break;
 		}
 		default:
@@ -499,6 +850,35 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 		UE_LOG(LogJustice, Warning, TEXT("JusticeIdentity::UserLogout failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
+
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	FString ThePath = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir());
+
+	
+	FString LocalStorageDir = FString::Printf(TEXT("%swebcache/Local Storage/"), *ThePath);
+	FString CookiesFilePath = FString::Printf(TEXT("%swebcache/Cookies"), *ThePath);
+	FString CookieJournalFilePath = FString::Printf(TEXT("%swebcache/Cookies-journal"), *ThePath);
+
+	bool result = PlatformFile.DeleteFile(*CookiesFilePath);
+	UE_LOG(LogJustice, Log, TEXT("delete cookies result : %d"), result);
+
+	result = PlatformFile.DeleteFile(*CookieJournalFilePath);
+	UE_LOG(LogJustice, Log, TEXT("delete cookies journal result : %d"), result);
+
+
+	FJsonSerializableArray LocalStorageFiles;
+	PlatformFile.FindFiles(LocalStorageFiles, *LocalStorageDir, TEXT(""));
+	for (int i = 0; i < LocalStorageFiles.Num(); i++)
+	{
+		UE_LOG(LogJustice, Log, TEXT("Attemp to delete File: %s"), *LocalStorageFiles[i]);
+		result = PlatformFile.DeleteFile(*LocalStorageFiles[i]);
+		UE_LOG(LogJustice, Log, TEXT("delete result : %d"), result);
+	}
+
+	UE_LOG(LogJustice, Log, TEXT("Attemp to delete Folder and entire content: %s"), *ThePath);
+	result = PlatformFile.DeleteDirectory(*ThePath);
+	UE_LOG(LogJustice, Log, TEXT("delete Folder result : %d"), result);
 }
 
 void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
@@ -511,9 +891,15 @@ void JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate OnComplete)
 	JusticeIdentity::Login(TEXT(""), TEXT(""), FGrantTypeJustice::RefreshGrant, OnComplete);
 }
 
+void JusticeIdentity::Relogin(FUserLoginCompleteDelegate OnComplete)
+{
+	JusticeIdentity::UserLogin(	FJusticeSDKModule::Get().LoginId,
+								FJusticeSDKModule::Get().Password,							
+								OnComplete);
+}
+
 void JusticeIdentity::OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -521,13 +907,18 @@ void JusticeIdentity::OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr
 	}
 	else
 	{
-		if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+		switch (Response->GetResponseCode())
 		{
-			UE_LOG(LogJustice, Log, TEXT("Token logout receive success response "));
-		}
-		else
-		{
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			case EHttpResponseCodes::Ok:
+			{
+				UE_LOG(LogJustice, Log, TEXT("Token logout receive success response "));
+				break;
+			}
+			default:
+			{
+				// we don't retry logout
+				ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+			}
 		}
 	}
 
@@ -619,14 +1010,14 @@ void JusticeIdentity::OnClientLogoutComplete(FHttpRequestPtr Request, FHttpRespo
 	}
 	else
 	{
-		if (Response->GetResponseCode() == EHttpResponseCodes::Ok)
+		switch (Response->GetResponseCode())
 		{
+		case EHttpResponseCodes::Ok: 
 			UE_LOG(LogJustice, Log, TEXT("Client logout receive success response "));
 			FJusticeSDKModule::Get().GameClientToken = new OAuthTokenJustice;
 			FJusticeSDKModule::Get().AsyncTaskManager->ClearRefreshQueue();		
-		}
-		else
-		{
+			break;
+		default:		
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
 	}
@@ -639,7 +1030,7 @@ void JusticeIdentity::OnClientLogoutComplete(FHttpRequestPtr Request, FHttpRespo
 	}
 }
 
-void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
@@ -658,10 +1049,17 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 	NewUserRequest.DisplayName = DisplayName;
 	NewUserRequest.Password = Password;
 	NewUserRequest.LoginId = UserId;
-	NewUserRequest.AuthType = AuthType;// EMAILPASSWD or PHONEPASSWD
-
+	if (AuthType == Email)
+	{
+		NewUserRequest.AuthType = TEXT("EMAILPASSWD");
+	}
+	else
+	{
+		NewUserRequest.AuthType = TEXT("PHONEPASSWD");
+	}
+	
 	Request->SetContentAsString(NewUserRequest.ToJson());
-	Request->OnProcessRequestComplete().BindStatic(JusticeIdentity::OnRegisterNewPlayerComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(JusticeIdentity::OnRegisterNewPlayerComplete, RequestTrace, OnComplete, UserId, Password, DisplayName, AuthType);
 
 	if (!Request->ProcessRequest())
 	{
@@ -674,9 +1072,8 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 	}
 }
 
-void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete, FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -731,6 +1128,43 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 		case EHttpResponseCodes::Conflict:
 			ErrorStr = TEXT("Conflict");
 			break;
+		case EHttpResponseCodes::Denied:
+			JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete, UserId, Password, DisplayName, AuthType, &ErrorStr](bool IsSuccess,
+																						  FString ErrorStr, 
+																						  UOAuthTokenJustice* Token) {
+				if (IsSuccess)
+				{
+					if (Token->Bans.Num() > 0)
+					{
+						FString bansList = FString::Join(Token->Bans, TEXT(","));
+						ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					}
+					else
+					{
+						FRegisterNewPlayerRetryTask* RetryTask = new FRegisterNewPlayerRetryTask(UserId, Password, DisplayName, AuthType, OnComplete);
+						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+						return;
+					}
+				}
+				else
+				{
+					//add to queue: refresh token, if success then retry (register new player)
+					FRegisterNewPlayerRetryTask* RetryTask = new FRegisterNewPlayerRetryTask(UserId, Password, DisplayName, AuthType, OnComplete);
+					FRefreshTokenRetryTask* RefreshTokenTask = new FRefreshTokenRetryTask(RetryTask);
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RefreshTokenTask);
+					return;					
+				}
+			}));
+			break;
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			FRegisterNewPlayerRetryTask* RetryTask = new FRegisterNewPlayerRetryTask(UserId, Password, DisplayName, AuthType, OnComplete);
+			FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+			return;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
@@ -744,15 +1178,23 @@ void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttp
 	}
 }
 
-void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, FUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	FString Payload = FString::Printf(TEXT("{ \"Code\": \"%s\"}"), *VerificationCode);	
-
+	FString ContactType;
+	if (AuthType == Email)
+	{
+		ContactType = TEXT("email");
+	}
+	else if (AuthType == Phone)
+	{
+		ContactType = TEXT("phone");
+	}	
+	FString Payload = FString::Printf(TEXT("{ \"Code\": \"%s\",\"ContactType\":\"%s\"}"), *VerificationCode, *ContactType);
 	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *BaseURL, *Namespace, *UserId));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
@@ -760,7 +1202,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());	
 	Request->SetContentAsString(Payload);
-	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnVerifyNewPlayerComplete, RequestTrace, OnComplete);
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnVerifyNewPlayerComplete, RequestTrace, OnComplete, UserId, VerificationCode, AuthType);
 	if (!Request->ProcessRequest())
 	{
 		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
@@ -773,9 +1215,8 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 }
 
 
-void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete, FString UserId, FString VerificationCode, FUserAuthTypeJustice AuthType)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -795,6 +1236,43 @@ void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpRe
 		case EHttpResponseCodes::Forbidden:
 			ErrorStr = TEXT("Forbidden");
 			break;
+		case EHttpResponseCodes::Denied:
+			JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete, UserId, VerificationCode, AuthType, &ErrorStr](bool IsSuccess,
+				FString ErrorStr,
+				UOAuthTokenJustice* Token) {
+				if (IsSuccess)
+				{
+					if (Token->Bans.Num() > 0)
+					{
+						FString bansList = FString::Join(Token->Bans, TEXT(","));
+						ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					}
+					else
+					{
+						FVerifyNewPlayerRetryTask* RetryTask = new FVerifyNewPlayerRetryTask(UserId, VerificationCode, AuthType, OnComplete);
+						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+						return;
+					}
+				}
+				else
+				{
+					//add to queue: refresh token, if success then retry (register new player)
+					FVerifyNewPlayerRetryTask* RetryTask = new FVerifyNewPlayerRetryTask(UserId, VerificationCode, AuthType, OnComplete);
+					FRefreshTokenRetryTask* RefreshTokenTask = new FRefreshTokenRetryTask(RetryTask);
+					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RefreshTokenTask);
+					return;
+				}
+			}));
+
+			break;
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			JusticeIdentity::VerifyNewPlayer(UserId, VerificationCode, AuthType, OnComplete);
+			return;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
@@ -838,7 +1316,6 @@ void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, F
 
 void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
-	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -858,6 +1335,17 @@ void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request,
 		case EHttpResponseCodes::Forbidden:
 			ErrorStr = TEXT("Forbidden");
 			break;
+		case EHttpResponseCodes::Denied:
+
+
+		case EHttpResponseCodes::RequestTimeout:
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+		{
+			ErrorStr = FString::Printf(TEXT("You have to wait 15 minutes before request another ReissueVerificationCode. Response Code=%d"), Response->GetResponseCode());
+			break;
+		}
 		default:
 			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
 		}
@@ -1085,7 +1573,7 @@ void JusticeIdentity::OnUnlinkPlatformComplete(FHttpRequestPtr Request, FHttpRes
 
 void JusticeIdentity::ClientLogin()
 {
-	Login(TEXT(""), TEXT(""), FGrantTypeJustice::ClientCredentialGrant, nullptr);
+	Login(TEXT(""), TEXT(""), FGrantTypeJustice::ClientCredentialGrant, OnComplete);
 }
 
 OAuthTokenJustice * JusticeIdentity::GetUserToken()
