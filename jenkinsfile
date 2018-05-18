@@ -91,6 +91,7 @@ pipeline {
       steps {
         bat '''
         cd ..
+        rmdir /S /Q justice-customer-automerge
         git clone git@bitbucket.org:accelbyte/justice-customer-automerge.git
         cd justice-customer-automerge
         automerge.bat justice-ue4-sdk
