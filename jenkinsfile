@@ -1,3 +1,4 @@
+def FAILED_STAGE = "";
 pipeline {
   agent {
     node {
@@ -5,7 +6,7 @@ pipeline {
     }
   }
   stages {
-    stage('turn on EC2') {
+    stage('Turn on EC2') {
       agent {
           label "master"
       }
@@ -14,8 +15,15 @@ pipeline {
           aws ec2 start-instances --instance-ids i-0a0a74363d53b45df
           ''' 
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Turn on EC2";
+          }
+        }
+      }        
     }
-		stage('cleanup') {
+		stage('Cleanup') {
       agent {
           label "windows-sdk"
       }
@@ -29,33 +37,90 @@ pipeline {
         )
         '''
       }
-    }
-    
-		stage('setup') {
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Cleanup";
+          }
+        }
+      }       
+    }    
+		stage('Setup') {
       agent {
           label "windows-sdk"
       }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -game -rocket -progress'
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Setup";
+          }
+        }
+      }       
     }
-		stage('build') {
+		stage('Build Windows') {
       agent {
           label "windows-sdk"
       }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Build Windows";
+          }
+        }
+      }       
     }
-		stage('package') {
+		stage('Build Linux') {
+      agent {
+          label "windows-sdk"
+      }      
+      steps {
+				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
+      }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Build Linux";
+          }
+        }
+      }       
+    }
+		stage('Automation Test') {
+      agent {
+          label "windows-sdk"
+      }      
+      steps {
+				bat '"%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\JusticeSDKDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests JusticeTest;Quit" -log'
+      }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Automation Test";
+          }
+        }
+      }      
+    }    
+		stage('Package') {
       agent {
           label "windows-sdk"
       }      
       steps {
 				bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeSDKDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeSDKDemo -utf8output'
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Package";
+          }
+        }
+      }       
     }
-		stage('archive'){
+		stage('Archive'){
       agent {
           label "windows-sdk"
       }      
@@ -72,6 +137,13 @@ pipeline {
         "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\JusticeSDK"
         '''      
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "Archive";
+          }
+        }
+      }      
     }
     stage('upload'){
       agent {
@@ -83,6 +155,13 @@ pipeline {
         aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
         '''
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "upload";
+          }
+        }
+      }         
     }
     stage('automerge'){
       agent {
@@ -91,19 +170,28 @@ pipeline {
       steps {
         bat '''
         cd ..
-        rmdir /S /Q justice-customer-automerge
         git clone git@bitbucket.org:accelbyte/justice-customer-automerge.git
         cd justice-customer-automerge
         automerge.bat justice-ue4-sdk
         '''
       }
+      post {
+        failure {
+          script{ 
+            FAILED_STAGE = "automerge";
+          }
+        }
+      }      
     }
   }
   post {
-    success {
-      slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` @ `${env.GIT_COMMIT}`")
+    success {      
       script{
-        def turnOff = true
+        def message = ""
+        message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+        slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
+
+        def turnOff = true       
         Jenkins.instance.getItems().each { job->
           if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){
               turnOff = false
@@ -119,8 +207,20 @@ pipeline {
       }
     }
     failure {
-      slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` @ `${env.GIT_COMMIT}`")
-      script{
+      script{        
+        def jobName = "${JOB_NAME}"
+        def buildNumber = "${BUILD_NUMBER}"
+        def gitBranch = "${GIT_BRANCH}"
+        def buildURL = "${BUILD_URL}"
+        def message = ""
+        message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()        
+
+        echo "jobName: ${JOB_NAME}"
+        echo "buildNumber: ${BUILD_NUMBER}"
+        echo "gitBranch: ${GIT_BRANCH}"
+        echo "buildURL: ${BUILD_URL}"
+
+        slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
         def turnOff = true
         Jenkins.instance.getItems().each { job->
           if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){

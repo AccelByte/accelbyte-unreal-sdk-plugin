@@ -107,7 +107,7 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdat
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
-	
+
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("PUT"));
@@ -166,7 +166,17 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
-	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"country\": \"CN\"}"), *DisplayName, *Email);
+	FString DefaultLocale;
+	#if PLATFORM_IOS
+	DefaultLocale =  FIOSPlatformMisc::GetDefaultLocale();
+	#elif PLATFORM_ANDROID
+	DefaultLocale =  FAndroidMisc::GetDefaultLocale();
+	#else
+	DefaultLocale = FGenericPlatformMisc::GetDefaultLocale();
+	#endif
+	TArray<FString> RegionID;
+	DefaultLocale.ParseIntoArray(RegionID, TEXT("_"), true);
+	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"country\": \"%s\", \"email\": \"%s\"}"), *DisplayName, *RegionID[1], *Email);
 
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *BaseURL, *Namespace, *UserID));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));

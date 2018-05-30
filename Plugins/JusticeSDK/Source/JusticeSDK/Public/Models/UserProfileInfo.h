@@ -25,6 +25,9 @@ public:
 	FString AvatarLargeUrl;
 	FString Email;
 	FString Status;
+	FString Language;
+	FString Timezone;
+	FString DateOfBirth;
 	TMap<FString, FString> CustomAttributes;
 
 public:
@@ -40,6 +43,9 @@ public:
 		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeUrl);
 		JSON_SERIALIZE("email", Email);
 		JSON_SERIALIZE("status", Status);
+		JSON_SERIALIZE("language", Language);
+		JSON_SERIALIZE("timeZone", Timezone);
+		JSON_SERIALIZE("dateOfBirth", DateOfBirth);
 		JSON_SERIALIZE_MAP("customAttributes", CustomAttributes);
 	END_JSON_SERIALIZER
 };
