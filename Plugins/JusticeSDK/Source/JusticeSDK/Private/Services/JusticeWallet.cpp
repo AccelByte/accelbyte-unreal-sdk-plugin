@@ -40,6 +40,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 
 void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{

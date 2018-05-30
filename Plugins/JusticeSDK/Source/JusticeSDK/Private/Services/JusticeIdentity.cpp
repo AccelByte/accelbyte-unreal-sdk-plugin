@@ -98,6 +98,7 @@ void JusticeIdentity::Login(FString LoginId, FString Password, FGrantTypeJustice
 
 void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -154,6 +155,7 @@ void JusticeIdentity::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr 
 
 void JusticeIdentity::OnUserRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -339,6 +341,7 @@ void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDel
 
 void JusticeIdentity::OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -418,6 +421,7 @@ void JusticeIdentity::ResetPassword(FString UserId, FString VerificationCode, FS
 
 void JusticeIdentity::OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -474,7 +478,7 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
-	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().UserToken->AccessToken));
+	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().UserToken->AccessToken));	
 
 	Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *BaseURL));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
@@ -508,6 +512,7 @@ void JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate OnComplete)
 
 void JusticeIdentity::OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -543,7 +548,7 @@ void JusticeIdentity::ClientLogout()
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
 	FString ClientID = FJusticeSDKModule::Get().ClientID;
 	FString ClientSecret = FJusticeSDKModule::Get().ClientSecret;
-	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	FString Grant = FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(FJusticeSDKModule::Get().GameClientToken->AccessToken));	
 
 	Request->SetURL(FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *BaseURL));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BasicAuth(ClientID, ClientSecret));
@@ -639,7 +644,7 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;	
 
 	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *BaseURL, *Namespace));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
@@ -670,6 +675,7 @@ void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FStrin
 
 void JusticeIdentity::OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -744,7 +750,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	FString Payload = FString::Printf(TEXT("{ \"Code\": \"%s\"}"), *VerificationCode);
+	FString Payload = FString::Printf(TEXT("{ \"Code\": \"%s\"}"), *VerificationCode);	
 
 	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *BaseURL, *Namespace, *UserId));	
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
@@ -768,6 +774,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, 
 
 void JusticeIdentity::OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -806,7 +813,7 @@ void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, F
 	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
 	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	FString Payload = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginId);
+	FString Payload = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginId);	
 
 	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *BaseURL, *Namespace, *UserId));
 	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
@@ -830,6 +837,7 @@ void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, F
 
 void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{

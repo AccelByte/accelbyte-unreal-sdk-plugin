@@ -11,21 +11,26 @@
 
 void FJusticeSDKModule::StartupModule()
 {
+	IsInitialized = true;
 	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("BaseURL"), BaseURL, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing BaseURL= in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
 	}
 	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("Namespace"), Namespace, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing Namespace= in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
 	}
 	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientId"), ClientID, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing ClientId= in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
 	}
 	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("ClientSecret"), ClientSecret, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
 	}
 	
 	GameClientToken = new OAuthTokenJustice;
@@ -34,6 +39,7 @@ void FJusticeSDKModule::StartupModule()
 
 	AsyncTaskManager = new FAsyncTaskManagerJustice();
 	OnlineAsyncTaskThread = FRunnableThread::Create(AsyncTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
+	check(OnlineAsyncTaskThread != nullptr)
 	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID())
 }
 

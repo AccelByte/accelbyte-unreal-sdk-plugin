@@ -13,9 +13,12 @@
 class FJusticeSDKModule : public IModuleInterface
 {
 public:
+	bool IsInitialized;
 	static inline FJusticeSDKModule& Get()
 	{
-		return FModuleManager::LoadModuleChecked< FJusticeSDKModule >("JusticeSDK");
+		FJusticeSDKModule& module = FModuleManager::LoadModuleChecked< FJusticeSDKModule >("JusticeSDK");
+		check(module.IsInitialized);
+		return module;
 	}
 	static inline bool IsAvailable()
 	{

@@ -93,6 +93,7 @@ void JusticeCatalog::GetItemByCriteria(FString CategoryPath, FItemCompleteDelega
 
 void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FItemCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
@@ -149,6 +150,7 @@ void JusticeCatalog::OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpR
 
 void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{

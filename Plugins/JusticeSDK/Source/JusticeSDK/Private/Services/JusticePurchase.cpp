@@ -38,6 +38,7 @@ void JusticePurchase::CreateNewOrder(FString itemId, int Price, FString Currency
 
 void JusticePurchase::OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FCreateNewOrderCompleteDelegate OnComplete)
 {
+	check(&OnComplete != nullptr);
 	FString ErrorStr;
 	if (!bSuccessful || !Response.IsValid())
 	{
