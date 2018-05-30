@@ -15,7 +15,7 @@
 const int AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext); 
 // Context: EditorContext (run via editor cli) ClientContext (run via external cli)
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginSuccessTest, "IntegrationTest.User.LoginSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginSuccessTest, "JusticeTest.User.LoginSuccess", AutomationFlagMask);
 bool FLoginSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "hendra@accelbyte.net";
@@ -48,7 +48,7 @@ bool FLoginSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginFailedWrongPasswordTest, "IntegrationTest.User.LoginFailedWrongPassword", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginFailedWrongPasswordTest, "JusticeTest.User.LoginFailedWrongPassword", AutomationFlagMask);
 bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -138,7 +138,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginFailedUnregisteredEmailTest, "IntegrationTest.User.LoginFailedUnregisteredEmail", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginFailedUnregisteredEmailTest, "JusticeTest.User.LoginFailedUnregisteredEmail", AutomationFlagMask);
 bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -228,7 +228,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLogoutSuccessTest, "IntegrationTest.User.LogoutSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLogoutSuccessTest, "JusticeTest.User.LogoutSuccess", AutomationFlagMask);
 bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -318,7 +318,7 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordSuccessTest, "IntegrationTest.User.ForgotPasswordSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordSuccessTest, "JusticeTest.User.ForgotPasswordSuccess", AutomationFlagMask);
 bool FForgotPasswordSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "hendra@accelbyte.net";
@@ -349,7 +349,7 @@ bool FForgotPasswordSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordFailedEmailNotVerifiedTest, "IntegrationTest.User.ForgotPasswordFailedEmailNotVerified", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordFailedEmailNotVerifiedTest, "JusticeTestJusticeTest.User.ForgotPasswordFailedEmailNotVerified", AutomationFlagMask);
 bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -440,7 +440,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordFailedInvalidUserTest, "IntegrationTest.User.ForgotPasswordFailedInvalidUser", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FForgotPasswordFailedInvalidUserTest, "JusticeTest.User.ForgotPasswordFailedInvalidUser", AutomationFlagMask);
 bool FForgotPasswordFailedInvalidUserTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -471,7 +471,7 @@ bool FForgotPasswordFailedInvalidUserTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerSuccessTest, "IntegrationTest.User.RegisterNewPlayerSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerSuccessTest, "JusticeTest.User.RegisterNewPlayerSuccess", AutomationFlagMask);
 bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -542,7 +542,7 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerFailedUserExistTest, "IntegrationTest.User.RegisterNewPlayerFailedUserExist", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerFailedUserExistTest, "JusticeTest.User.RegisterNewPlayerFailedUserExist", AutomationFlagMask);
 bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -633,7 +633,7 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerInvalidEmailTest, "IntegrationTest.User.RegisterNewPlayerFailedInvalidEmail", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterNewPlayerInvalidEmailTest, "JusticeTest.User.RegisterNewPlayerFailedInvalidEmail", AutomationFlagMask);
 bool FRegisterNewPlayerInvalidEmailTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "test";
@@ -666,7 +666,7 @@ bool FRegisterNewPlayerInvalidEmailTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileSuccessTest, "IntegrationTest.User.CreateDefaultPlayerProfileSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileSuccessTest, "JusticeTest.User.CreateDefaultPlayerProfileSuccess", AutomationFlagMask);
 bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -756,7 +756,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest, "IntegrationTest.CreateDefaultPlayerProfileFailedEmptyDisplayname", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest, "JusticeTest.CreateDefaultPlayerProfileFailedEmptyDisplayname", AutomationFlagMask);
 bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -847,7 +847,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileFailedUnregisteredUserTest, "IntegrationTest.User.CreateDefaultPlayerProfileFailedUnregisteredUser", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateDefaultPlayerProfileFailedUnregisteredUserTest, "JusticeTest.User.CreateDefaultPlayerProfileFailedUnregisteredUser", AutomationFlagMask);
 bool FCreateDefaultPlayerProfileFailedUnregisteredUserTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -882,7 +882,7 @@ bool FCreateDefaultPlayerProfileFailedUnregisteredUserTest::RunTest(const FStrin
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetPlayerProfileSuccessTest, "IntegrationTest.User.GetPlayerProfileSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetPlayerProfileSuccessTest, "JusticeTest.User.GetPlayerProfileSuccess", AutomationFlagMask);
 bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -992,7 +992,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetPlayerProfileSuccessUnregisteredUserTest, "IntegrationTest.User.GetPlayerProfileSuccessUnregisteredUser", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetPlayerProfileSuccessUnregisteredUserTest, "JusticeTest.User.GetPlayerProfileSuccessUnregisteredUser", AutomationFlagMask);
 bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -1082,7 +1082,7 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdatePlayerProfileSuccessTest, "IntegrationTest.User.UpdatePlayerProfileSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdatePlayerProfileSuccessTest, "JusticeTest.User.UpdatePlayerProfileSuccess", AutomationFlagMask);
 bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
@@ -1230,7 +1230,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdatePlayerProfileFailedInvalidRequestTest, "IntegrationTest.User.UpdatePlayerProfileFailedInvalidRequest", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdatePlayerProfileFailedInvalidRequestTest, "JusticeTest.User.UpdatePlayerProfileFailedInvalidRequest", AutomationFlagMask);
 bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Parameters)
 {
 	FString LoginID = "testSDK@example.com";
