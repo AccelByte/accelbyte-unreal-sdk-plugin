@@ -1308,6 +1308,370 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserLinkedPlatformTest, "JusticeTest.User.GetUserLinkedPlatform", AutomationFlagMask);
+bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
+{
+	FString LoginID = "testSDK@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FString AuthType = "EMAILPASSWD";
+	bool isRegisterNewPlayerDone = false;
+	bool isRegisterNewPlayerSuccess = false;
+	bool isLoginDone = false;
+	bool isLoginSuccess = false;
+	bool isGetUserLinkedPlatformDone = false;
+	bool isGetUserLinkedPlatformSuccess = false;
+	bool isDeleteDone = false;
+	bool isDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isRegisterNewPlayerDone = true;
+		isRegisterNewPlayerSuccess = IsSuccess;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isLoginDone = true;
+		isLoginSuccess = IsSuccess;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+
+	FGetLinkedPlatformCompleteDelegate OnGetLinkedPlatformComplete = FGetLinkedPlatformCompleteDelegate::CreateLambda([&isGetUserLinkedPlatformDone, &isGetUserLinkedPlatformSuccess](bool IsSuccess, FString ErrorStr, TArray<LinkedPlatform> Response)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get linked platform: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isGetUserLinkedPlatformDone = true;
+		isGetUserLinkedPlatformSuccess = IsSuccess;
+	});
+	JusticeIdentity::GetLinkedPlatform(OnGetLinkedPlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isGetUserLinkedPlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&isDeleteDone, &isDeleteSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isDeleteDone = true;
+		isDeleteSuccess = IsSuccess;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(isGetUserLinkedPlatformSuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLinkDevicePlatformSuccessTest, "JusticeTest.User.LinkDevicePlatform", AutomationFlagMask);
+bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
+{
+	FString LoginID = "testSDK@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FString AuthType = "EMAILPASSWD";
+	FString PlatformId = "device";
+	FString DeviceId = "deviceIdTest";
+	bool isRegisterNewPlayerDone = false;
+	bool isRegisterNewPlayerSuccess = false;
+	bool isLoginDone = false;
+	bool isLoginSuccess = false;
+	bool isLinkDevicePlatformDone = false;
+	bool isLinkDevicePlatformSuccess = false;
+	bool isGetUserLinkedPlatformDone = false;
+	bool isGetUserLinkedPlatformSuccess = false;
+	bool isDeviceLinkedSuccessfully = false;
+	bool isUnlinkDevicePlatformDone = false;
+	bool isUnlinkDevicePlatformSuccess = false;
+	bool isDeleteDone = false;
+	bool isDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isRegisterNewPlayerDone = true;
+		isRegisterNewPlayerSuccess = IsSuccess;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isLoginDone = true;
+		isLoginSuccess = IsSuccess;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+
+	FLinkPlatformCompleteDelegate OnLinkDevicePlatformComplete = FLinkPlatformCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool IsSuccess, FString ErrorStr) 
+	{
+		UE_LOG(LogTemp, Log, TEXT("Link device platform: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isLinkDevicePlatformDone = true;
+		isLinkDevicePlatformSuccess = IsSuccess;
+	});
+	JusticeIdentity::LinkPlatform(PlatformId, DeviceId, OnLinkDevicePlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isLinkDevicePlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetLinkedPlatformCompleteDelegate OnGetLinkedPlatformComplete = FGetLinkedPlatformCompleteDelegate::CreateLambda([&isGetUserLinkedPlatformDone, &isGetUserLinkedPlatformSuccess, &isDeviceLinkedSuccessfully](bool IsSuccess, FString ErrorStr, TArray<LinkedPlatform> Response)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get linked platform: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isGetUserLinkedPlatformDone = true;
+		isGetUserLinkedPlatformSuccess = IsSuccess;
+		if (Response[0].PlatformId.Contains("device"))
+		{
+			isDeviceLinkedSuccessfully = true;
+		}
+	});
+	JusticeIdentity::GetLinkedPlatform(OnGetLinkedPlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isGetUserLinkedPlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUnlinkPlatformCompleteDelegate OnUnlinkDevicePlatformComplete = FUnlinkPlatformCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Unlink device platform: %s"), isUnlinkDevicePlatformDone ? TEXT("Success") : TEXT("Failed"));
+		isUnlinkDevicePlatformDone = true;
+		isUnlinkDevicePlatformSuccess = IsSuccess;
+	});
+	JusticeIdentity::UnlinkPlatform("device", OnUnlinkDevicePlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isUnlinkDevicePlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&isDeleteDone, &isDeleteSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isDeleteDone = true;
+		isDeleteSuccess = IsSuccess;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(isLinkDevicePlatformSuccess)
+		return true;
+	check(isDeviceLinkedSuccessfully)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUnlinkDevicePlatformSuccessTest, "JusticeTest.User.UnlinkDevicePlatform", AutomationFlagMask);
+bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
+{
+	FString LoginID = "testSDK@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FString AuthType = "EMAILPASSWD";
+	FString PlatformId = "device";
+	FString DeviceId = "deviceIdTest";
+	bool isRegisterNewPlayerDone = false;
+	bool isRegisterNewPlayerSuccess = false;
+	bool isLoginDone = false;
+	bool isLoginSuccess = false;
+	bool isGetUserLinkedPlatformDone = false;
+	bool isGetUserLinkedPlatformSuccess = false;
+	bool isLinkDevicePlatformDone = false;
+	bool isLinkDevicePlatformSuccess = false;
+	bool isUnlinkDevicePlatformDone = false;
+	bool isUnlinkDevicePlatformSuccess = false;
+	bool isDeviceUnlinkedSuccesfully = false;
+	bool isDeleteDone = false;
+	bool isDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isRegisterNewPlayerDone = true;
+		isRegisterNewPlayerSuccess = IsSuccess;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isLoginDone = true;
+		isLoginSuccess = IsSuccess;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+
+	FLinkPlatformCompleteDelegate OnLinkDevicePlatformComplete = FLinkPlatformCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Link device platform: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isLinkDevicePlatformDone = true;
+		isLinkDevicePlatformSuccess = IsSuccess;
+	});
+	JusticeIdentity::LinkPlatform(PlatformId, DeviceId, OnLinkDevicePlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isLinkDevicePlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUnlinkPlatformCompleteDelegate OnUnlinkDevicePlatformComplete = FUnlinkPlatformCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Unlink device platform: %s"), isUnlinkDevicePlatformDone ? TEXT("Success") : TEXT("Failed"));
+		isUnlinkDevicePlatformDone = true;
+		isUnlinkDevicePlatformSuccess = IsSuccess;
+	});
+	JusticeIdentity::UnlinkPlatform("device", OnUnlinkDevicePlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isUnlinkDevicePlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetLinkedPlatformCompleteDelegate OnGetLinkedPlatformComplete = FGetLinkedPlatformCompleteDelegate::CreateLambda([&isGetUserLinkedPlatformDone, &isGetUserLinkedPlatformSuccess, &isDeviceUnlinkedSuccesfully](bool IsSuccess, FString ErrorStr, TArray<LinkedPlatform> Response)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get linked platform: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isGetUserLinkedPlatformDone = true;
+		isGetUserLinkedPlatformSuccess = IsSuccess;
+		if (Response.Num() == 0)
+		{
+			isDeviceUnlinkedSuccesfully = true;
+		}
+	});
+	JusticeIdentity::GetLinkedPlatform(OnGetLinkedPlatformComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isGetUserLinkedPlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&isDeleteDone, &isDeleteSuccess](bool IsSuccess, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
+		isDeleteDone = true;
+		isDeleteSuccess = IsSuccess;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!isDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(isUnlinkDevicePlatformSuccess)
+		return true;
+	check(isDeviceUnlinkedSuccesfully)
+		return true;
+}
+
 void FIntegrationTestModule::DeleteUser(FString UserID, FDeleteUserDelegate OnComplete)
 {
 	FString ErrorStr;

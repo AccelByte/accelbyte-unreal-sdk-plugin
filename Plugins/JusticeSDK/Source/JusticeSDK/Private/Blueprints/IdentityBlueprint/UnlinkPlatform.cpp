@@ -1,0 +1,33 @@
+// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
+
+#include "Blueprints/IdentityBlueprint/UnlinkPlatform.h"
+#include "Services/JusticeIdentity.h"
+
+UAsyncUnlinkPlatform * UAsyncUnlinkPlatform::UnlinkPlatform(FString PlatformId)
+{
+	UAsyncUnlinkPlatform* Node = NewObject<UAsyncUnlinkPlatform>();
+	Node->PlatformId = PlatformId;
+	return Node;
+}
+
+void UAsyncUnlinkPlatform::Activate()
+{
+	JusticeIdentity::UnlinkPlatform(this->PlatformId, FUnlinkPlatformCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
+		if (IsSuccess)
+		{
+			if (OnSuccess.IsBound())
+			{
+				OnSuccess.Broadcast();
+			}
+		}
+		else
+		{
+			if (OnFailed.IsBound())
+			{
+				OnFailed.Broadcast();
+			}
+		}
+	}));
+}

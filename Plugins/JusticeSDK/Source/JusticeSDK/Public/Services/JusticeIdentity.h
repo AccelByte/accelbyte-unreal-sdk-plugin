@@ -10,6 +10,7 @@
 #include "Models/UserCreateResponse.h"
 #include "Models/UserCreateRequest.h"
 #include "Models/ResetPasswordRequest.h"
+#include "Models/LinkedPlatform.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Utilities/HTTPJustice.h"
 
@@ -19,6 +20,9 @@ DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UUs
 DECLARE_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FForgotPasswordCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FResetPasswordCompleteDelegate, bool, FString);
+DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<LinkedPlatform>);
+DECLARE_DELEGATE_TwoParams(FLinkPlatformCompleteDelegate, bool, FString);
+DECLARE_DELEGATE_TwoParams(FUnlinkPlatformCompleteDelegate, bool, FString);
 
 enum FTaskTypeJustice
 {
@@ -45,6 +49,9 @@ public:
 	static void ReissueVerificationCode(FString UserId, FString LoginId, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void ForgotPassword(FString LoginId, FForgotPasswordCompleteDelegate OnComplete);
 	static void ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDelegate OnComplete);
+	static void GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete);
+	static void LinkPlatform(FString PlatformId, FString Ticket, FLinkPlatformCompleteDelegate OnComplete);
+	static void UnlinkPlatform(FString PlatformId, FUnlinkPlatformCompleteDelegate OnComplete);
 	
 	// Client specific
 	static void ClientLogin();
@@ -72,4 +79,7 @@ private:
 	static void OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete);
 	static void OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete);
+	static void OnGetLinkedPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetLinkedPlatformCompleteDelegate OnComplete);
+	static void OnLinkPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FLinkPlatformCompleteDelegate OnComplete);
+	static void OnUnlinkPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUnlinkPlatformCompleteDelegate OnComplete);
 };
