@@ -57,43 +57,52 @@ void FJusticeSDKModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 }
-bool FJusticeSDKModule::GameClientParseJson(TSharedPtr<FJsonObject> jsonObject)
+bool FJusticeSDKModule::GameClientParseJson(FString json)
 {
 	FScopeLock lock(&GameClientCritical);
-	if (GameClientToken->FromJson(jsonObject))
+	TSharedPtr<FJsonObject> JsonObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(json);		
+	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 	{
-		TArray<TSharedPtr<FJsonValue>> PermissionArray = jsonObject->GetArrayField(TEXT("permissions"));
-		for (TSharedPtr<FJsonValue> Permission : PermissionArray)
+		if (GameClientToken->FromJson(JsonObject))
 		{
-			TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
-			FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
-			int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-			FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-			GameClientToken->Permissions.Add(PermissionObject);
+			TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
+			for (TSharedPtr<FJsonValue> Permission : PermissionArray)
+			{
+				TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
+				FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
+				int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
+				FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
+				GameClientToken->Permissions.Add(PermissionObject);
+			}
+			return true;
 		}
-		return true;
 	}
 	return false;
 }
 
-bool FJusticeSDKModule::UserParseJson(TSharedPtr<FJsonObject> jsonObject)
+bool FJusticeSDKModule::UserParseJson(FString json)
 {
-	if (FJusticeSDKModule::Get().UserToken->FromJson(jsonObject))
+	TSharedPtr<FJsonObject> jsonObject;
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(json);
+	if (FJsonSerializer::Deserialize(Reader, jsonObject) && jsonObject.IsValid())
 	{
-		TArray<TSharedPtr<FJsonValue>> PermissionArray = jsonObject->GetArrayField(TEXT("permissions"));
-		for (TSharedPtr<FJsonValue> Permission : PermissionArray)
+		if (FJusticeSDKModule::Get().UserToken->FromJson(jsonObject))
 		{
-			TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
-			FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
-			int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-			FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-			FJusticeSDKModule::Get().UserToken->Permissions.Add(PermissionObject);
-			//FJusticeSDKModule::Get().UserAccount->SetUserAttribute(Resource, FString::FromInt(Action));
+			TArray<TSharedPtr<FJsonValue>> PermissionArray = jsonObject->GetArrayField(TEXT("permissions"));
+			for (TSharedPtr<FJsonValue> Permission : PermissionArray)
+			{
+				TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
+				FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
+				int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
+				FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
+				FJusticeSDKModule::Get().UserToken->Permissions.Add(PermissionObject);
+				//FJusticeSDKModule::Get().UserAccount->SetUserAttribute(Resource, FString::FromInt(Action));
+			}
+			return true;
 		}
-		FJusticeSDKModule::Get().UserToken->SetLastRefreshTimeToNow();
-		FJusticeSDKModule::Get().UserToken->ScheduleNormalRefresh();
-		return true;
 	}
+
 	return false;
 }
 

@@ -16,8 +16,6 @@
 #include "RetryTaskManagerJustice.h"
 #include "JusticeSDK.h"
 
-
-
 DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, UOAuthTokenJustice*);
 DECLARE_DELEGATE_TwoParams(FUserLogoutCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UUserCreateResponse*);
@@ -59,10 +57,9 @@ class JUSTICESDK_API JusticeIdentity
 {
 public:
 	static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete);
+	static void UserRefreshToken(FUserLoginCompleteDelegate OnComplete);
 	static void UserLogout(FUserLogoutCompleteDelegate OnComplete);
 	static void DeviceLogin(FUserLoginCompleteDelegate OnComplete);
-	static void RefreshToken(FUserLoginCompleteDelegate OnComplete);
-	static void Relogin(FUserLoginCompleteDelegate OnComplete);
 	static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete);
 	static void VerifyNewPlayer(FString UserId, FString VerificationCode, FUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void ReissueVerificationCode(FString UserId, FString LoginId, FVerifyNewPlayerCompleteDelegate OnComplete);
@@ -72,105 +69,28 @@ public:
 	static void LinkPlatform(FString PlatformId, FString Ticket, FLinkPlatformCompleteDelegate OnComplete);
 	static void UnlinkPlatform(FString PlatformId, FUnlinkPlatformCompleteDelegate OnComplete);
 	
-	// Client specific
 	static void ClientLogin(FUserLoginCompleteDelegate OnComplete = nullptr);
 	static void ClientLogout();
 	static void ClientRefreshToken();
 
-	static void SetRefreshToken(FString RefreshToken);
+	static void SetRefreshToken(FString UserRefreshToken);
 
-	static OAuthTokenJustice* GetUserToken();
-	static OAuthTokenJustice* GetClientToken();
-	static FString GetUserId();
-
-private:
-	static void Login(FString LoginId, FString Password, FGrantTypeJustice GrantType, FUserLoginCompleteDelegate OnComplete);
+	//static OAuthTokenJustice* GetUserToken();
+	//static OAuthTokenJustice* GetClientToken();
+	//static FString GetUserId();
 
 private:
-	static void OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete, FString UserId, FString Password);
-	static void OnUserRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
-	static void OnClientRefreshComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
-	static void OnClientCredentialComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLoginCompleteDelegate OnComplete);
-	static void OnLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUserLogoutCompleteDelegate OnComplete);	
-	static void OnClientLogoutComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace);
-	static void OnRegisterNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FRegisterPlayerCompleteDelegate OnComplete, FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType);
-	static void OnVerifyNewPlayerComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete, FString UserId, FString VerificationCode, FUserAuthTypeJustice AuthType);
-	static void OnReissueVerificationCodeComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FVerifyNewPlayerCompleteDelegate OnComplete);
-	static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete, FString LoginId);
-	static void OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete, FString UserId, FString VerificationCode, FString NewPassword);
-};
-
-
-
-
-
-// Refresh Token Retry Task
-class FRefreshTokenRetryTask : public FJusticeRetryTask
-{
-public:
-	FRefreshTokenRetryTask(FUserLoginCompleteDelegate onComplete,
-		int nextRetry = 1,
-		int totalElapsedWait = 0)
-		:FJusticeRetryTask(nextRetry, totalElapsedWait),
-		OnComplete(onComplete),
-		NextTask(nullptr)
-	{}
-
-	FRefreshTokenRetryTask(FJusticeRetryTask* Next,
-		int nextRetry = 1,
-		int totalElapsedWait = 0)
-		:FJusticeRetryTask(nextRetry, totalElapsedWait),
-		NextTask(Next)
-	{}
-
-	virtual void Tick()
-	{
-		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
-		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
-		JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSucessfull, FString ErrorStr, UOAuthTokenJustice* Token) {
-			if (IsSucessfull)
-			{
-				if (NextTask != nullptr)
-				{
-					NextTask->Tick();
-				}
-				else
-				{
-					OnComplete.ExecuteIfBound(IsSucessfull, ErrorStr, Token);
-					SetAsDone();
-				}
-			}
-			else
-			{
-				if (GetTotalElapsedWait() > 60)
-				{
-					// take more than 1 minutes after many retries, return failure
-					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), nullptr);
-				}
-				else
-				{
-					if (NextTask != nullptr)
-					{
-						FRefreshTokenRetryTask* RetryTask = new FRefreshTokenRetryTask(NextTask,
-							GetLastWait() * 2, // wait more longer for next retry
-							GetTotalElapsedWait() + GetLastWait());
-						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
-					}
-					else
-					{
-						FRefreshTokenRetryTask* RetryTask = new FRefreshTokenRetryTask(OnComplete,
-							GetLastWait() * 2, // wait more longer for next retry
-							GetTotalElapsedWait() + GetLastWait());
-						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
-					}
-				}
-
-			}
-		}));
-	}
-private:
-	FUserLoginCompleteDelegate OnComplete;
-	FJusticeRetryTask* NextTask;
+	static void OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
+	static void OnUserRefreshResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
+	static void OnUserLogoutResponse(FJusticeHttpResponsePtr Response, FUserLogoutCompleteDelegate OnComplete);
+	static void OnClientLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
+	static void OnClientRefreshResponse(FJusticeHttpResponsePtr Response);
+	static void OnClientLogoutResponse(FJusticeHttpResponsePtr Response);
+	static void OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Response, FRegisterPlayerCompleteDelegate OnComplete);
+	static void OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete);
+	static void OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete);
+	static void OnForgotPasswordResponse(FJusticeHttpResponsePtr Response, FForgotPasswordCompleteDelegate OnComplete);
+	static void OnResetPasswordResponse(FJusticeHttpResponsePtr Response, FResetPasswordCompleteDelegate OnComplete);
 };
 
 	static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete);

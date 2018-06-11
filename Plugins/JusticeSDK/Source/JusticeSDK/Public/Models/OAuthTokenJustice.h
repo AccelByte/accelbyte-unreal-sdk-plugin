@@ -16,7 +16,7 @@ class OAuthTokenJustice: public FJsonSerializable
 {
 public:
 	FString AccessToken;
-	FString RefreshToken;
+	FString UserRefreshToken;
 	FString TokenType;
 	double  ExpiresIn;
 	TArray<FPermissionJustice> Permissions;
@@ -39,7 +39,7 @@ public:
 
 	bool ShouldRefresh()
 	{
-		if (NextTokenRefreshUtc > FDateTime::MinValue() && !RefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
+		if (NextTokenRefreshUtc > FDateTime::MinValue() && !UserRefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
 		{
 			return NextTokenRefreshUtc <= FDateTime::UtcNow();
 		}
@@ -48,6 +48,8 @@ public:
 	void ScheduleNormalRefresh()
 	{
 		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
+		//DEBUG
+		//NextTokenRefreshUtc = FDateTime::UtcNow() + FTimespan::FromSeconds(30);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG(LogJustice, Log, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
@@ -67,31 +69,16 @@ public:
 	FString GetRefreshStr() { return FString::Printf(TEXT("Expire=%s Refresh=%s Backoff=%.0f"), *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
 	void SetLastRefreshTimeToNow() { LastTokenRefreshUtc = FDateTime::UtcNow(); };
 	FString GetAccessToken() { return AccessToken; };
-	FString GetRefreshToken() { return RefreshToken; };
+	FString GetRefreshToken() { return UserRefreshToken; };
 	FString GetTokenType() { return TokenType; };
 	FString GetUserId() { return UserId; };
 	FString GetDisplayName() { return DisplayName; };
 	FString GetNamespace() { return Namespace; };
 	FString GetRoles(int Index) { return Roles[Index]; };
 
-
-	//access_token(string),
-	//	refresh_token(string),
-	//	expires_in(integer),
-	//	token_type(string),
-	//	roles(array[string]),
-	//	permissions(array[accountcommon.Permission]),
-	//	bans(array[string]),
-	//	user_id(string),
-	//	platform_id(string, optional),
-	//	platform_user_id(string, optional),
-	//	jflgs(integer, optional),
-	//	display_name(string),
-	//	namespace (string)
-
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("access_token", AccessToken);
-		JSON_SERIALIZE("refresh_token", RefreshToken);
+		JSON_SERIALIZE("refresh_token", UserRefreshToken);
 		JSON_SERIALIZE("expires_in", ExpiresIn);
 		JSON_SERIALIZE("token_type", TokenType);
 		JSON_SERIALIZE_ARRAY("roles", Roles);
@@ -118,7 +105,7 @@ public:
 	void FromParent(OAuthTokenJustice* parent)
 	{
 		AccessToken = parent->AccessToken;
-		RefreshToken = parent->RefreshToken;
+		UserRefreshToken = parent->UserRefreshToken;
 		TokenType = parent->TokenType;
 		ExpiresIn = parent->ExpiresIn;
 		Permissions = parent->Permissions;
@@ -130,13 +117,25 @@ public:
 		NextTokenRefreshUtc = parent->NextTokenRefreshUtc;		
 	}
 
+	static UOAuthTokenJustice* Deserialize(FString json)
+	{
+		UOAuthTokenJustice* newToken = NewObject<UOAuthTokenJustice>();
+		if (newToken->FromJson(json))
+		{
+			return newToken;
+		}
+		return nullptr;
+
+	}
+
+
 
 	// Function Getter
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
 		FString GetAccessToken() { return AccessToken; };
 
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetRefreshToken() { return RefreshToken; };
+		FString GetRefreshToken() { return UserRefreshToken; };
 
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
 		FString GetTokenType() { return TokenType; };

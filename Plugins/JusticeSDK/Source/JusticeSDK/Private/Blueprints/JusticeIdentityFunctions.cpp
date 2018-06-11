@@ -11,10 +11,10 @@ void UJusticeIdentityFunctions::UserLogin(FString LoginId, FString Password, FUs
 	}));
 }
 
-void UJusticeIdentityFunctions::WebLoginRefresh(FString RefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::WebLoginRefresh(FString UserRefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::SetRefreshToken(RefreshToken);
-	JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+	JusticeIdentity::SetRefreshToken(UserRefreshToken);
+	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Token);
 	}));
 }
@@ -64,20 +64,20 @@ void UJusticeIdentityFunctions::ResetPassword(FString UserId, FString Verificati
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
 {
 	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
-	NewOAuthTokenJustice->FromParent(JusticeIdentity::GetUserToken());
+	NewOAuthTokenJustice->FromParent(FJusticeUserToken);
 	return NewOAuthTokenJustice; 
 }
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
 {
 	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
-	NewOAuthTokenJustice->FromParent(JusticeIdentity::GetClientToken());
+	NewOAuthTokenJustice->FromParent(FJusticeGameClientToken);
 	return NewOAuthTokenJustice; 
 }
 
 FString UJusticeIdentityFunctions::GetUserId()
 {
-	return JusticeIdentity::GetUserId();
+	return FJusticeUserID;
 }
 
 void UJusticeIdentityFunctions::LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete)

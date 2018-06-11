@@ -21,7 +21,7 @@ void JusticePurchase::CreateNewOrder(FString itemId, int Price, int DiscountedPr
 	NewOrderRequest.returnUrl = TEXT("https://api.justice.accelbyte.net/");
 
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *BaseURL, *Namespace, *UserID));	
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("POST"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
@@ -36,7 +36,7 @@ void JusticePurchase::CreateNewOrder(FString itemId, int Price, int DiscountedPr
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		//UE_LOG(LogJustice, Warning, TEXT("JusticePurchase::CreateNewOrder failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
 	}
 }

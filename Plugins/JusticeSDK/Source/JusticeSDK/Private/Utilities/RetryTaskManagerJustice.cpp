@@ -47,7 +47,7 @@ void FRetryTaskManagerJustice::OnlineTick()
 	}
 }
 
-void FRetryTaskManagerJustice::AddToRetryQueue(FJusticeRetryTask * NewTask)
+void FRetryTaskManagerJustice::AddQueue(FJusticeRetryTask * NewTask)
 {
 	FScopeLock Lock(&InJusticeQueueLock);
 	InJusticeQueue.Add(NewTask);

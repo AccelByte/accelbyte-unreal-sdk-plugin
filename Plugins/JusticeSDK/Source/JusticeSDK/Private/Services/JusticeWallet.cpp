@@ -20,7 +20,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
 
 	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *BaseURL, *Namespace, *UserID, *CurrencyCode));	
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
+	Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
@@ -33,7 +33,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 	}
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticeWallet::GetWalletBalance failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
+		//UE_LOG(LogJustice, Warning, TEXT("JusticeWallet::GetWalletBalance failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, 0);
 	}
 }

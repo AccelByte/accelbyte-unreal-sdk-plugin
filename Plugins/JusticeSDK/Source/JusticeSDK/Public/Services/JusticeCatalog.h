@@ -24,7 +24,7 @@ public:
 	static void GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDelegate OnComplete);
 
 private:
-	static void OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete, FString Language);
-	static void OnGetCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete, FString ParentPath, FString Language);
-	static void OnGetItemByQueryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FItemCompleteDelegate OnComplete, FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size);
+	static void OnGetRootCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetItemByQueryComplete(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete);
 };

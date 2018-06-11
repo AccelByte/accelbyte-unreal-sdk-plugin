@@ -11,20 +11,19 @@
 #include "HAL/Runnable.h"
 #include "HAL/ThreadSafeBool.h"
 #include "Misc/SingleThreadRunnable.h"
+#include "HttpJustice.h"
 
 #define POLLING_INTERVAL_MS 1000
-
-//DECLARE_DELEGATE_TwoParams(FOnScheduleTickDelegate, struct FDateTime, int32);
 
 class FJusticeRetryTask 
 {
 public:
-	FJusticeRetryTask(int wait, int totalElapsedWait):
+	FJusticeRetryTask(int wait, int elapsedWait):
 		Done(false), 
 		LastWait(wait),
-		TotalElapsedWait(TotalElapsedWait)
+		ElapsedWait(elapsedWait)
 	{
-		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(wait);
+		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(wait) + FTimespan::FromSeconds(FMath::RandRange(1, 60));
 	}
 
 	virtual ~FJusticeRetryTask() {}
@@ -43,17 +42,42 @@ public:
 
 	virtual void Tick() = 0;
 	FDateTime GetNextRetry() { return NextRetry; };
-	int GetTotalElapsedWait() { return TotalElapsedWait; }
+	int GetTotalElapsedWait() { return ElapsedWait + LastWait; }
+	int GetElapsedWait() { return ElapsedWait; }
+
 	void SetAsDone() { Done = true; }
-	int GetLastWait() {return LastWait;	}
+	int GetNextWait() {return LastWait * 2;	}
 
 private:
 	bool Done;
 	FDateTime NextRetry;
 	int LastWait;
-	int TotalElapsedWait;
+	int ElapsedWait;
 
 };
+
+class FWebRequestTask : public FJusticeRetryTask
+{
+public:
+	FWebRequestTask(FJusticeHttpRequestPtr request, int waitTime, FWebRequestResponseDelegate reponseDelegate)
+		: FJusticeRetryTask(waitTime, 0),
+		  Request(request),
+		  OnReponseDelegate(reponseDelegate)
+	{}
+
+	FString GetTaskName() { return TEXT("ClientLogin"); }
+
+
+	virtual void Tick()
+	{
+		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
+		FJusticeHTTP::CreateRequest(Request, OnReponseDelegate);
+	}
+private:
+	FJusticeHttpRequestPtr Request;
+	FWebRequestResponseDelegate OnReponseDelegate;
+};
+
 
 
 /**
@@ -77,7 +101,15 @@ public:
 	virtual void Exit();
 	virtual void Tick() {};
 	virtual void OnlineTick() ;
-	void AddToRetryQueue(FJusticeRetryTask* NewTask);
+	void AddQueue(FJusticeRetryTask* NewTask);
+
+	void AddQueue(FJusticeHttpRequestPtr Request, int WaitTime, FWebRequestResponseDelegate reponseDelegate)
+	{
+		FWebRequestTask* newTask = new FWebRequestTask(Request, WaitTime, reponseDelegate);
+		check(newTask);
+		AddQueue(newTask);
+	}
+
 	void ClearRetryQueue();
 
 private:	

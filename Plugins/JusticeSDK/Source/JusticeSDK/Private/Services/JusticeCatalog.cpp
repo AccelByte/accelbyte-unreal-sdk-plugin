@@ -10,156 +10,80 @@
 #include "Services/JusticeIdentity.h"
 #include "JusticeLog.h"
 
-
-// Get Item By Query Retry Task
-class FGetItemByQueryRetryTask : public FJusticeRetryTask
-{
-public:
-	FGetItemByQueryRetryTask(FString language, 
-		FString region, 
-		FString CategoryPath, 
-		FString itemType, 
-		FString status, 
-		int page, 
-		int size, 
-		FItemCompleteDelegate onComplete,
-		int nextRetry = 1,
-		int totalElapsedWait = 0) : FJusticeRetryTask(nextRetry, totalElapsedWait),
-		OnComplete(onComplete)
-	{}
-	virtual void Tick()
-	{
-		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
-		UE_LOG(LogJustice, Log, TEXT("Retry Call JusticeIdentity::RegisterNewPlayer after wait for %d second"), GetLastWait());
-		JusticeCatalog::GetItemByQuery(Language,
-			Region,
-			CategoryPath,
-			ItemType,
-			Status,
-			Page,
-			Size, 
-			FItemCompleteDelegate::CreateLambda([&](bool IsSucessful, FString ErrorString, TArray<ItemInfo> Result) {
-			if (IsSucessful)
-			{
-				OnComplete.ExecuteIfBound(IsSucessful, ErrorString, Result);
-				SetAsDone();
-			}
-			else
-			{
-				if (GetTotalElapsedWait() > 60)
-				{
-					// take more than 1 minutes after many retries, return failure
-					OnComplete.ExecuteIfBound(false, TEXT("Request Timeout"), TArray<ItemInfo>());
-				}
-				else
-				{
-					FGetItemByQueryRetryTask* RetryTask = new FGetItemByQueryRetryTask(Language,
-						Region,
-						CategoryPath,
-						ItemType,
-						Status,
-						Page,
-						Size, 
-						OnComplete,
-						GetLastWait() * 2, // wait more longer for next retry
-						GetTotalElapsedWait() + GetLastWait());
-					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
-				}
-
-			}
-		}));
-	}
-private:
-	FString Language;
-	FString Region;
-	FString CategoryPath;
-	FString ItemType;
-	FString Status;
-	int Page;
-	int Size;
-	FItemCompleteDelegate OnComplete;
-};
-
-
 void JusticeCatalog::GetRootCategory(FString Language, FGetRootCategoryCompleteDelegate OnComplete)
 {
-	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *FJusticeBaseURL, *FJusticeNamespace, *Language);
+	FString Verb			= GET;
+	FString ContentType		= TYPE_JSON;
+	FString Accept			= TYPE_JSON;
+	FString Payload			= TEXT("");
 
-	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *BaseURL, *Namespace, *Language));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-	UE_LOG(LogJustice, VeryVerbose, TEXT("Attemp to call GetRootCategory: %s"), *Request->GetURL());
-
-	Request->OnProcessRequestComplete().BindStatic(JusticeCatalog::OnGetRootCategoryComplete, RequestTrace, OnComplete, Language);
-	if (!Request->ProcessRequest())
-	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	}
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-	}
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryComplete, OnComplete));
 }
 
-void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete, FString Language)
+void JusticeCatalog::OnGetRootCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	if (!bSuccessful || !Response.IsValid())
+	if (!Response->ErrorString.IsEmpty())
 	{
-		ErrorStr = TEXT("request failed");
+		UE_LOG(LogJustice, Error, TEXT("Get Root Category Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		return;
 	}
-	else
+	switch (Response->Code)
 	{
-		switch (Response->GetResponseCode())
+	case EHttpResponseCodes::Ok:
+	{
+		FString ResponseStr = Response->Content;
+		TSharedPtr<FJsonValue> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		TArray<Category> Result;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-		case EHttpResponseCodes::Ok:
-		{
-			FString ResponseStr = Response->GetContentAsString();
-			UE_LOG(LogJustice, Error, TEXT("OnGetRootCategoryComplete : %s"), *ResponseStr);
-
-			//UUserProfileJustice* pUserProfileJustice = NewObject<UUserProfileJustice>();
-			TSharedPtr<FJsonValue> JsonObject;
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-			TArray<Category> Result;
-			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
+			for (int itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
 			{
-				TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
-				for (int itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
+				Category categoryObj;
+				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
 				{
-					Category categoryObj;
-					if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
-					{
-						Result.Add(categoryObj);
-					}
+					Result.Add(categoryObj);
 				}
-				OnComplete.ExecuteIfBound(true, ErrorStr, Result);
 			}
-			else
-			{
-				ErrorStr = TEXT("unable to deserlize response from server");
-			}
-			break;
+			OnComplete.ExecuteIfBound(true, ErrorStr, Result);
 		}
-		case EHttpResponseCodes::Denied:
-		case EHttpResponseCodes::RequestTimeout:
-		case EHttpResponseCodes::ServerError:
-		case EHttpResponseCodes::ServiceUnavail:
-		case EHttpResponseCodes::GatewayTimeout:
+		else
 		{
-			JusticeCatalog::GetRootCategory(Language, OnComplete);
+			ErrorStr = TEXT("unable to deserlize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+	case EHttpResponseCodes::RequestTimeout:
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
 			return;
 		}
-		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
-		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryComplete, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
 	}
 	if (!ErrorStr.IsEmpty())
 	{
@@ -173,83 +97,82 @@ void JusticeCatalog::OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpRes
 
 void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete)
 {
-	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *FJusticeBaseURL, *FJusticeNamespace, *ParentPath, *Language);
+	FString Verb			= GET;
+	FString ContentType		= TYPE_JSON;
+	FString Accept			= TYPE_JSON;
+	FString Payload			= TEXT("");
 
-	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *BaseURL, *Namespace, *ParentPath, *Language));
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-	Request->OnProcessRequestComplete().BindStatic(JusticeCatalog::OnGetCategoryComplete, RequestTrace, OnComplete, ParentPath, Language);
-	UE_LOG(LogJustice, VeryVerbose, TEXT("Attemp to call GetRootCategory: %s"), *Request->GetURL());
-	if (!Request->ProcessRequest())
-	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	}
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Warning, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-	}
+	FJusticeHTTP::CreateRequest(Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryComplete, OnComplete));
 }
 
-void JusticeCatalog::OnGetCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete, FString ParentPath, FString Language)
+void JusticeCatalog::OnGetCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete)
 {	
 	FString ErrorStr;
-	if (!bSuccessful || !Response.IsValid())
+	if (!Response->ErrorString.IsEmpty())
 	{
-		ErrorStr = TEXT("request failed");
+		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		return;
 	}
-	else
-	{
-		switch (Response->GetResponseCode())
-		{
-		case EHttpResponseCodes::Ok:
-		{
-			FString ResponseStr = Response->GetContentAsString();
-			UE_LOG(LogJustice, Error, TEXT("OnGetRootCategoryComplete : %s"), *ResponseStr);
 
-			//UUserProfileJustice* pUserProfileJustice = NewObject<UUserProfileJustice>();
-			TSharedPtr<FJsonValue> JsonObject;
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-			TArray<Category> Result;
-			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-			{
-				TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
-				for (int itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
-				{
-					Category categoryObj;
-					if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
-					{
-						Result.Add(categoryObj);
-					}
-				}
-				OnComplete.ExecuteIfBound(true, ErrorStr, Result);
-			}
-			else
-			{
-				ErrorStr = TEXT("unable to deserlize response from server");
-			}
-			break;
-		}
-		case EHttpResponseCodes::Denied:
-		case EHttpResponseCodes::RequestTimeout:
-		case EHttpResponseCodes::ServerError:
-		case EHttpResponseCodes::ServiceUnavail:
-		case EHttpResponseCodes::GatewayTimeout:
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		FString ResponseStr = Response->Content;
+		UE_LOG(LogJustice, Error, TEXT("OnGetRootCategoryComplete : %s"), *ResponseStr);
+
+		TSharedPtr<FJsonValue> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		TArray<Category> Result;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			JusticeCatalog::GetCategory(ParentPath, Language, OnComplete);
+			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
+			for (int itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
+			{
+				Category categoryObj;
+				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
+				{
+					Result.Add(categoryObj);
+				}
+			}
+			OnComplete.ExecuteIfBound(true, ErrorStr, Result);
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserlize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+	case EHttpResponseCodes::RequestTimeout:
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:	
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
 			return;
 		}
-		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
-		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryComplete, OnComplete));
+		return;
 	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+	}
+	
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
@@ -260,14 +183,8 @@ void JusticeCatalog::OnGetCategoryComplete(FHttpRequestPtr Request, FHttpRespons
 
 void JusticeCatalog::GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDelegate OnComplete)
 {
-	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
-
-
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *BaseURL, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *language, *region);
+	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *FJusticeBaseURL, *FJusticeNamespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *language, *region);
 	if (!itemType.IsEmpty())
 	{
 		URL.Append(FString::Printf(TEXT("&itemType=%s"), *itemType));
@@ -281,109 +198,115 @@ void JusticeCatalog::GetItemByQuery(FString language, FString region, FString Ca
 	{
 		URL.Append(FString::Printf(TEXT("&size=%d"), size));
 	}
-	Request->SetURL(URL);
-	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());	
-	Request->OnProcessRequestComplete().BindStatic(JusticeCatalog::OnGetItemByQueryComplete, RequestTrace, OnComplete, language, region, CategoryPath, itemType, status, page, size);
-	UE_LOG(LogJustice, VeryVerbose, TEXT("Attemp to call GetRootCategory: %s"), *Request->GetURL());
-	if (!Request->ProcessRequest())
-	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	}
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Log, TEXT("JusticeCatalog::GetRootCategory failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
-	}
+	
+	FString Verb		= GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept		= TYPE_JSON;
+	FString Payload		= TEXT("");
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryComplete, OnComplete));
 }
 
-void JusticeCatalog::OnGetItemByQueryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FItemCompleteDelegate OnComplete, FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size)
+void JusticeCatalog::OnGetItemByQueryComplete(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	if (!bSuccessful || !Response.IsValid())
+	if (!Response->ErrorString.IsEmpty())
 	{
-		ErrorStr = TEXT("request failed");
+		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<ItemInfo>());
+		return;
 	}
-	else
+	switch (Response->Code)
 	{
-		switch (Response->GetResponseCode())
+	case EHttpResponseCodes::Ok:
+	{
+		FString ResponseStr = Response->Content;
+		UE_LOG(LogJustice, Log, TEXT("OnGetItemByCriteriaComplete : %s"), *ResponseStr);
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		TArray<ItemInfo> ArrayResult;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-		case EHttpResponseCodes::Ok:
-		{
-			FString ResponseStr = Response->GetContentAsString();
-			UE_LOG(LogJustice, Log, TEXT("OnGetItemByCriteriaComplete : %s"), *ResponseStr);
-
-			TSharedPtr<FJsonObject> JsonObject;
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-			TArray<ItemInfo> ArrayResult;
-			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+			ItemPagingSlicedResult Result;
+			if (Result.FromJson(JsonObject))
 			{
-				ItemPagingSlicedResult Result;
-				if (Result.FromJson(JsonObject))
+				for (int i = 0; i < Result.Data.Num(); i++)
 				{
-					for (int i = 0; i < Result.Data.Num(); i++)
-					{
-						ArrayResult.Add(Result.Data[i]);						
-
-						//UE_LOG(LogJustice, Log, TEXT("Item Currency And Value:%d %s  "), Result.Data[i].PriceInfo.Value, *Result.Data[i].PriceInfo.CurrencyCode);
-					}
-					OnComplete.ExecuteIfBound(true, TEXT(""), ArrayResult);
+					ArrayResult.Add(Result.Data[i]);						
 				}
-				else 
+				OnComplete.ExecuteIfBound(true, TEXT(""), ArrayResult);
+			}
+			else 
+			{
+				ErrorStr = TEXT("unable to deserlize response from server");
+			}
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserlize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, UOAuthTokenJustice* Token) {
+			if (IsSuccess)
+			{
+				if (Token->Bans.Num() > 0)
 				{
-					ErrorStr = TEXT("unable to deserlize response from server");
+					FString bansList = FString::Join(Token->Bans, TEXT(","));
+					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+				}
+				else
+				{
+					if (Response->TooManyRetries() || Response->TakesTooLong())
+					{
+						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<ItemInfo>());
+						return;
+					}
+					//retry 
+					Response->UpdateRequestForNextRetry();
+					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+						Response->NextWait,
+						FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryComplete, OnComplete));
+					return;
 				}
 			}
 			else
 			{
-				ErrorStr = TEXT("unable to deserlize response from server");
+				ErrorStr = FString::Printf(TEXT("You token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
+				return;
 			}
-			break;
-		}
-		case EHttpResponseCodes::Denied:
-			JusticeIdentity::RefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete, language, region, CategoryPath, itemType, status, page, size, &ErrorStr](bool IsSuccess,
-				FString ErrorStr,
-				UOAuthTokenJustice* Token) {
-				if (IsSuccess)
-				{
-					if (Token->Bans.Num() > 0)
-					{
-						FString bansList = FString::Join(Token->Bans, TEXT(","));
-						ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-					}
-					else
-					{
-						FGetItemByQueryRetryTask* RetryTask = new FGetItemByQueryRetryTask(language, region, CategoryPath, itemType, status, page, size, OnComplete);
-						FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
-						return;
-					}
-				}
-				else
-				{
-					//add to queue: refresh token, if success then retry (register new player)
-					FGetItemByQueryRetryTask* RetryTask = new FGetItemByQueryRetryTask(language, region, CategoryPath, itemType, status, page, size, OnComplete);
-					FRefreshTokenRetryTask* RefreshTokenTask = new FRefreshTokenRetryTask(RetryTask);
-					FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RefreshTokenTask);
-					return;
-				}
-			}));
-			break;
-		case EHttpResponseCodes::RequestTimeout:
-		case EHttpResponseCodes::ServerError:
-		case EHttpResponseCodes::ServiceUnavail:
-		case EHttpResponseCodes::GatewayTimeout:
+		}));
+		break;
+	case EHttpResponseCodes::RequestTimeout:
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			FGetItemByQueryRetryTask* RetryTask = new FGetItemByQueryRetryTask(language, region, CategoryPath, itemType, status, page, size, OnComplete);
-			FJusticeSDKModule::Get().RetryTaskManager->AddToRetryQueue(RetryTask);
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<ItemInfo>());
 			return;
 		}
-		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
-		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryComplete, OnComplete));
+		return;
 	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+	}
+	
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryComplete Error : %s"), *ErrorStr);
