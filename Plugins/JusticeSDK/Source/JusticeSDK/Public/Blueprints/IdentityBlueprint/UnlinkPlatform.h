@@ -23,10 +23,10 @@ public:
 		FUnlinkPlatformOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncUnlinkPlatform* UnlinkPlatform(FString PlatformId);
+		static UAsyncUnlinkPlatform* UnlinkPlatform(FString PlatformID);
 
 	virtual void Activate() override;
 
 private:
-	FString PlatformId;
+	FString PlatformID;
 };

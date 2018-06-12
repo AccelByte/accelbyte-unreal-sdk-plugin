@@ -23,13 +23,13 @@ public:
 	TArray<PermissionJustice> Permissions;
 	TArray<FString> Roles;
 	TArray<FString> Bans;
-	FString UserId;
+	FString UserID;
 	FString DisplayName;
 	FString Namespace;
 	FDateTime LastTokenRefreshUtc;
 	FDateTime NextTokenRefreshUtc;
 	FTimespan TokenRefreshBackoff;
-	int JFlags;
+	int32 JFlags;
 public:
 	OAuthTokenJustice():
 		ExpiresIn(0),
@@ -49,8 +49,6 @@ public:
 	void ScheduleNormalRefresh()
 	{
 		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
-		//DEBUG
-		//NextTokenRefreshUtc = FDateTime::UtcNow() + FTimespan::FromSeconds(10);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG(LogJustice, Log, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
@@ -72,10 +70,10 @@ public:
 	FString GetAccessToken() { return AccessToken; };
 	FString GetRefreshToken() { return UserRefreshToken; };
 	FString GetTokenType() { return TokenType; };
-	FString GetUserId() { return UserId; };
+	FString GetUserId() { return UserID; };
 	FString GetDisplayName() { return DisplayName; };
 	FString GetNamespace() { return Namespace; };
-	FString GetRoles(int Index) { return Roles[Index]; };
+	FString GetRoles(int32 Index) { return Roles[Index]; };
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("access_token", AccessToken);
@@ -85,7 +83,7 @@ public:
 		JSON_SERIALIZE_ARRAY("roles", Roles);		
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("permissions", Permissions, PermissionJustice);
 		JSON_SERIALIZE_ARRAY("bans", Bans);
-		JSON_SERIALIZE("user_id", UserId);
+		JSON_SERIALIZE("user_id", UserID);
 		JSON_SERIALIZE("display_name", DisplayName);
 		JSON_SERIALIZE("namespace", Namespace);
 	END_JSON_SERIALIZER
@@ -106,7 +104,7 @@ public:
 		FString GetTokenType() { return TokenType; };
 
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetUserId() { return UserId; };
+		FString GetUserId() { return UserID; };
 
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
 		FString GetDisplayName() { return DisplayName; };
@@ -115,5 +113,5 @@ public:
 		FString GetNamespace() { return Namespace; };
 
 	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetRoles(int Index) { return Roles[Index]; };
+		FString GetRoles(int32 Index) { return Roles[Index]; };
 };

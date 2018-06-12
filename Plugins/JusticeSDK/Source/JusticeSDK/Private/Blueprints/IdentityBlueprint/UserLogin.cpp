@@ -5,29 +5,29 @@
 #include "Blueprints/IdentityBlueprint/UserLogin.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncUserLogin * UAsyncUserLogin::UserLogin(FString UserId, FString Password)
+UAsyncUserLogin * UAsyncUserLogin::UserLogin(FString UserID, FString Password)
 {
 	UAsyncUserLogin* Node = NewObject<UAsyncUserLogin>();
-	Node->UserId = UserId;
+	Node->UserID = UserID;
 	Node->Password = Password;
 	return Node;
 }
 
 void UAsyncUserLogin::Activate()
 {
-	JusticeIdentity::UserLogin(this->UserId, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* Token) {
-		if (IsSuccess)
+	JusticeIdentity::UserLogin(this->UserID, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token));
+				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token), TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(nullptr);
+				OnFailed.Broadcast(nullptr, ErrorStr);
 			}
 		}		
 	}));

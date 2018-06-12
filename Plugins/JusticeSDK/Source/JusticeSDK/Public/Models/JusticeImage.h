@@ -12,8 +12,8 @@
 class JusticeImage : public FJsonSerializable
 {
 public:
-	int Height;
-	int Width;
+	int32 Height;
+	int32 Width;
 	FString ImageUrl;
 	FString SmallImageUrl;
 

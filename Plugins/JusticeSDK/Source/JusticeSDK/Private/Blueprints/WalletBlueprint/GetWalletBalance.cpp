@@ -17,12 +17,12 @@ UAsyncGetWalletBalance * UAsyncGetWalletBalance::GetWalletBalance(FString Curren
 
 void UAsyncGetWalletBalance::Activate() 
 {
-	JusticeWallet::GetWalletBalance(this->Currency, FGetWalletBalanceCompleteDelegate::CreateLambda([&](bool isSuccess, int balance) {
-		if (isSuccess)
+	JusticeWallet::GetWalletBalance(this->Currency, FGetWalletBalanceCompleteDelegate::CreateLambda([&](bool bSuccessful, int32 Balance) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(balance);
+				OnSuccess.Broadcast(Balance);
 			}
 		}
 		else

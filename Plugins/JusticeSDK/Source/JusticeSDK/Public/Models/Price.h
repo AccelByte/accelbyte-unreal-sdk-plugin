@@ -7,12 +7,13 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
+#include "JusticeBaseModel.h"
 #include "Price.generated.h"
 
 class Price : public FJsonSerializable
 {
 public:
-	int Value;
+	int32 Value;
 	FString CurrencyCode;
 	FString CurrencyType;
 	FString Namespace;
@@ -27,7 +28,7 @@ public:
 
 
 UCLASS()
-class UPrice : public UObject, public Price
+class UPrice : public UObject, public Price, public JusticeBaseModel<UPrice, Price>
 {
 	GENERATED_BODY()	
 
@@ -35,9 +36,5 @@ class UPrice : public UObject, public Price
 		FString GetCurrency() { return CurrencyCode; };
 
 	UFUNCTION(BlueprintPure, Category = "Price")
-		int GetValue() { return Value; };
-
-public:
-	void FromPrice(Price price);
-
+		int32 GetValue() { return Value; };
 };

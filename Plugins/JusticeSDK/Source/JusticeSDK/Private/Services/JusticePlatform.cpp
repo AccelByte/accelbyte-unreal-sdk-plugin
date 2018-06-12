@@ -61,11 +61,11 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	case EHttpResponseCodes::NotFound:
 	{			
 		FString DisplayName = FJusticeSDKModule::Get().UserToken->DisplayName;
-		FString Email = FJusticeSDKModule::Get().LoginId;
+		FString Email = FJusticeSDKModule::Get().LoginID;
 		UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
-		JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr) {
-			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
-			if (IsSuccess)
+		JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+			if (bSuccessful)
 			{
 				UE_LOG(LogJustice, Log, TEXT("Call another GetCurrentProfileRequest"));
 				JusticePlatform::RequestCurrentPlayerProfile(OnComplete);
@@ -79,8 +79,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		break;
 	}
 	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
-			if (IsSuccess)
+		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
 			{
 				if (Token->Bans.Num() > 0)
 				{
@@ -103,7 +103,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 			}
 			else
 			{
-				ErrorStr = FString::Printf(TEXT("You token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
 				OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 				return;
 			}
@@ -112,6 +112,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 
 		break;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -176,7 +178,41 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 
 	}
 	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Token->Bans.Num() > 0)
+				{
+					FString bansList = FString::Join(Token->Bans, TEXT(","));
+					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					OnComplete.ExecuteIfBound(false, ErrorStr);
+				}
+				else
+				{
+					if (Response->TooManyRetries() || Response->TakesTooLong())
+					{
+						OnComplete.ExecuteIfBound(false, ErrorStr);
+						return;
+					}
+					Response->UpdateRequestForNextRetry();
+					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+						Response->NextWait,
+						FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnUpdatePlayerProfileComplete, OnComplete));
+					return;
+				}
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr);
+				return;
+			}
+		}));
+		return;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -268,7 +304,41 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 		break;
 	}
 	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Token->Bans.Num() > 0)
+				{
+					FString bansList = FString::Join(Token->Bans, TEXT(","));
+					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					OnComplete.ExecuteIfBound(false, ErrorStr);
+				}
+				else
+				{
+					if (Response->TooManyRetries() || Response->TakesTooLong())
+					{
+						OnComplete.ExecuteIfBound(false, ErrorStr);
+						return;
+					}
+					Response->UpdateRequestForNextRetry();
+					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+						Response->NextWait,
+						FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateDefaultPlayerProfileComplete, OnComplete));
+					return;
+				}
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr);
+				return;
+			}
+		}));
+		return;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:

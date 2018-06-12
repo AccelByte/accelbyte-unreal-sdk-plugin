@@ -16,8 +16,8 @@ public:
 	FString ID;
 	FString Namespace;
 	FString userId;
-	FString currencyCode;
-	int balance;
+	FString CurrencyCode;
+	int32 balance;
 	FString  createdAt;
 	FString  updatedAt;
 	FString status;
@@ -26,7 +26,7 @@ public:
 		JSON_SERIALIZE("id", ID);
 		JSON_SERIALIZE("namespace", Namespace);
 		JSON_SERIALIZE("userId", userId);
-		JSON_SERIALIZE("currencyCode", currencyCode);
+		JSON_SERIALIZE("currencyCode", CurrencyCode);
 		JSON_SERIALIZE("balance", balance);
 		JSON_SERIALIZE("createdAt", createdAt);
 		JSON_SERIALIZE("updatedAt", updatedAt);

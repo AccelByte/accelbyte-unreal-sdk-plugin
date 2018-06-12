@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
+#include "JusticeBaseModel.h"
 #include "UserProfileInfo.generated.h"
 
 class UserProfileInfo : public FJsonSerializable
@@ -14,7 +15,7 @@ class UserProfileInfo : public FJsonSerializable
 public:
 	UserProfileInfo() {};
 
-	FString UserId;
+	FString UserID;
 	FString Namespace;
 	FString DisplayName;
 	FString FirstName;
@@ -32,7 +33,7 @@ public:
 
 public:
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("userId", UserId);
+		JSON_SERIALIZE("userId", UserID);
 		JSON_SERIALIZE("namespace", Namespace);
 		JSON_SERIALIZE("displayName", DisplayName);
 		JSON_SERIALIZE("firstName", FirstName);
@@ -51,16 +52,15 @@ public:
 };
 
 UCLASS(Blueprintable, BlueprintType)
-class UUserProfileJustice : public UObject, public UserProfileInfo
+class UUserProfileJustice : public UObject, public UserProfileInfo, public JusticeBaseModel<UUserProfileJustice, UserProfileInfo>
 {
 	GENERATED_BODY()
 public:
-	void FromUserProfileInfo(UserProfileInfo info);
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
 	FString GetUserId()
 	{
-		return UserId;
+		return UserID;
 	};
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")

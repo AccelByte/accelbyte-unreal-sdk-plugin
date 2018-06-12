@@ -14,8 +14,8 @@ class BalanceInfo: public FJsonSerializable
 public:
 	FString ID;
 	FString walletId;
-	FString currencyCode;
-	int balance;
+	FString CurrencyCode;
+	int32 balance;
 	FString  balanceSource;
 	FString  updatedAt;
 	FString status;
@@ -23,7 +23,7 @@ public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("id", ID);
 		JSON_SERIALIZE("walletId", walletId);
-		JSON_SERIALIZE("currencyCode", currencyCode);
+		JSON_SERIALIZE("currencyCode", CurrencyCode);
 		JSON_SERIALIZE("balance", balance);
 		JSON_SERIALIZE("balanceSource", balanceSource);
 		JSON_SERIALIZE("updatedAt", updatedAt);

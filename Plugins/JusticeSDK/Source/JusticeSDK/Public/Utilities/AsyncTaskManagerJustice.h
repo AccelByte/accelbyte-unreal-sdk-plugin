@@ -22,19 +22,19 @@ class FJusticeAsyncTask
 {
 public:
 	FJusticeAsyncTask(FOnJusticeTickDelegate tick, FDateTime nextUpdate):
-		Done(false), 
+		bDone(false), 
 		NextUpdate(nextUpdate),
 		OnTick(tick){}
 	virtual ~FJusticeAsyncTask() {}
 
 	virtual bool IsDone()
 	{
-		return Done;
+		return bDone;
 	}
 
 	virtual bool WasSuccessful()
 	{
-		return Done;
+		return bDone;
 	}
 
 	virtual FString ToString() const { return TEXT("FJusticeAsyncTask"); }
@@ -43,10 +43,10 @@ public:
 		OnTick.ExecuteIfBound();
 	}
 	FDateTime GetNextUpdate() { return NextUpdate; };
-	void SetAsDone() { Done = true; }
+	void SetAsDone() { bDone = true; }
 
 private:
-	bool Done;
+	bool bDone;
 	FDateTime NextUpdate;
 	FOnJusticeTickDelegate OnTick;
 };

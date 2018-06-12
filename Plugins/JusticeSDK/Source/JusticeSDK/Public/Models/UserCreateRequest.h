@@ -15,13 +15,13 @@ public:
 
 	FString AuthType;
 	FString DisplayName;
-	FString LoginId;
+	FString LoginID;
 	FString Password;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("AuthType", AuthType);
 		JSON_SERIALIZE("DisplayName", DisplayName);
-		JSON_SERIALIZE("LoginId", LoginId);
+		JSON_SERIALIZE("LoginId", LoginID);
 		JSON_SERIALIZE("Password", Password);
 	END_JSON_SERIALIZER
 };

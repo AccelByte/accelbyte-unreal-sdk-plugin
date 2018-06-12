@@ -24,11 +24,11 @@ public:
 		FReissueVerificationCodeOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncReissueVerificationCode* ReissueVerificationCode(FString UserId, FString LoginId);
+		static UAsyncReissueVerificationCode* ReissueVerificationCode(FString UserID, FString LoginID);
 
 	virtual void Activate() override;
 
 private:
-    FString UserId;
-    FString LoginId;
+    FString UserID;
+    FString LoginID;
 };

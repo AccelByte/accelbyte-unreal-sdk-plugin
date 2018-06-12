@@ -13,11 +13,11 @@ UAsyncRequestCurrentPlayerProfile * UAsyncRequestCurrentPlayerProfile::RequestCu
 
 void UAsyncRequestCurrentPlayerProfile::Activate()
 {
-	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, UserProfileInfo UserProfile) {
-		if (IsSuccess)
+	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, UserProfileInfo UserProfile) {
+		if (bSuccessful)
 		{
-			UUserProfileJustice* ResultUserProfile = NewObject<UUserProfileJustice>();
-			ResultUserProfile->FromUserProfileInfo(UserProfile);
+			UUserProfileJustice* ResultUserProfile = UUserProfileJustice::Deserialize(UserProfile);
+			check(ResultUserProfile);
 			if (OnSuccess.IsBound())
 			{
 				OnSuccess.Broadcast(ResultUserProfile);
@@ -27,7 +27,7 @@ void UAsyncRequestCurrentPlayerProfile::Activate()
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(NewObject<UUserProfileJustice>());
+				OnFailed.Broadcast(nullptr);
 			}
 		}
 	}));

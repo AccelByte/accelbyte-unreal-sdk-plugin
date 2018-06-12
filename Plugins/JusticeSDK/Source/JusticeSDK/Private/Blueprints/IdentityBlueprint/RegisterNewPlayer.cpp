@@ -5,10 +5,10 @@
 #include "Blueprints/IdentityBlueprint/RegisterNewPlayer.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncRegisterNewPlayer * UAsyncRegisterNewPlayer::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType)
+UAsyncRegisterNewPlayer * UAsyncRegisterNewPlayer::RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType)
 {
 	UAsyncRegisterNewPlayer* Node = NewObject<UAsyncRegisterNewPlayer>();
-	Node->UserId = UserId;
+	Node->UserID = UserID;
 	Node->Password = Password;
 	Node->DisplayName = DisplayName;
 	Node->AuthType = (FUserAuthTypeJustice)AuthType;
@@ -17,19 +17,19 @@ UAsyncRegisterNewPlayer * UAsyncRegisterNewPlayer::RegisterNewPlayer(FString Use
 
 void UAsyncRegisterNewPlayer::Activate()
 {
-	JusticeIdentity::RegisterNewPlayer(this->UserId, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr, UserCreateResponse* Response) {
-		if (IsSuccess)
+	JusticeIdentity::RegisterNewPlayer(this->UserID, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr, UserCreateResponse* Response) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(UUserCreateResponse::Deserialize(Response));
+				OnSuccess.Broadcast(UUserCreateResponse::Deserialize(Response), TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(nullptr);
+				OnFailed.Broadcast(nullptr, ErrorStr);
 			}
 		}
 	}));

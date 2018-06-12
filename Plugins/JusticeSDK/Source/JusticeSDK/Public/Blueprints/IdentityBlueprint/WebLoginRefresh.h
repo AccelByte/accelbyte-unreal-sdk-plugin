@@ -7,29 +7,27 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Models/OAuthTokenJustice.h"
-#include "ResetPassword.generated.h"
+#include "WebLoginRefresh.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FResetPasswordCodeOutputPin, FString, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWebLoginRefreshOutputPin, const UOAuthTokenJustice*, Token, FString, ErrorMessage);
 
 UCLASS()
-class JUSTICESDK_API UAsyncResetPassword : public UBlueprintAsyncActionBase
+class JUSTICESDK_API UWebLoginRefresh : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable)
-		FResetPasswordCodeOutputPin OnSuccess;
+		FWebLoginRefreshOutputPin OnSuccess;
 
 	UPROPERTY(BlueprintAssignable)
-		FResetPasswordCodeOutputPin OnFailed;
+		FWebLoginRefreshOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncResetPassword* ResetPassword(FString UserID, FString VerificationCode, FString NewPassword);
+		static UWebLoginRefresh* WebLoginRefresh(FString UserRefreshToken);
 
 	virtual void Activate() override;
 
 private:
-	FString UserID;
-	FString VerificationCode;
-	FString NewPassword;
+	FString UserRefreshToken;
 };

@@ -23,11 +23,11 @@ public:
 		FLinkPlatformOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncLinkPlatform* LinkPlatform(FString PlatformId, FString Ticket);
+		static UAsyncLinkPlatform* LinkPlatform(FString PlatformID, FString Ticket);
 
 	virtual void Activate() override;
 
 private:
-	FString PlatformId;
+	FString PlatformID;
 	FString Ticket;
 };

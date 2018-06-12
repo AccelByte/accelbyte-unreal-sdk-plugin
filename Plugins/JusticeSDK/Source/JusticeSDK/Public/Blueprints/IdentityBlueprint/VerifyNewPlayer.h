@@ -10,7 +10,7 @@
 #include "Services/JusticeIdentity.h"
 #include "VerifyNewPlayer.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FVerifyNewPlayerOutputPin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVerifyNewPlayerOutputPin, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncVerifyNewPlayer : public UBlueprintAsyncActionBase
@@ -25,12 +25,12 @@ public:
 		FVerifyNewPlayerOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncVerifyNewPlayer* VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType);
+		static UAsyncVerifyNewPlayer* VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType);
 
 	virtual void Activate() override;
 
 private:
-    FString UserId;
+    FString UserID;
     FString VerificationCode;
 	FUserAuthTypeJustice AuthType;
 };

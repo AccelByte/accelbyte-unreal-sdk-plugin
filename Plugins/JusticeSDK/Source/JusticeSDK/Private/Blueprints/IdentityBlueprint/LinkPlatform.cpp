@@ -5,18 +5,18 @@
 #include "Blueprints/IdentityBlueprint/LinkPlatform.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncLinkPlatform * UAsyncLinkPlatform::LinkPlatform(FString PlatformId, FString Ticket)
+UAsyncLinkPlatform * UAsyncLinkPlatform::LinkPlatform(FString PlatformID, FString Ticket)
 {
 	UAsyncLinkPlatform* Node = NewObject<UAsyncLinkPlatform>();
-	Node->PlatformId = PlatformId;
+	Node->PlatformID = PlatformID;
 	Node->Ticket = Ticket;
 	return Node;
 }
 
 void UAsyncLinkPlatform::Activate()
 {
-	JusticeIdentity::LinkPlatform(this->PlatformId, this->Ticket, FLinkPlatformCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::LinkPlatform(this->PlatformID, this->Ticket, FLinkPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{

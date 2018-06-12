@@ -9,14 +9,14 @@
 #include "AsyncTaskManagerJustice.h"
 FCriticalSection Mutex;
 
-void JusticeIdentity::ForgotPassword(FString LoginId, FForgotPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::ForgotPassword(FString LoginID, FForgotPasswordCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *FJusticeBaseURL, *FJusticeNamespace);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_FORM;
 	FString Accept			= TYPE_JSON;
-	FString Payload			= FString::Printf(TEXT("{\"LoginID\": \"%s\"}"), *LoginId);
+	FString Payload			= FString::Printf(TEXT("{\"LoginID\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -63,8 +63,8 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
-			if (IsSuccess)
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
 			{
 				if (Token->Bans.Num() > 0)
 				{
@@ -93,6 +93,8 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 		}));
 		break;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -119,11 +121,11 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticeIdentity::ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDelegate OnComplete)
 {
 	ResetPasswordRequest resetPasswordRequest;
 	resetPasswordRequest.Code = VerificationCode;
-	resetPasswordRequest.LoginID = UserId;
+	resetPasswordRequest.LoginID = UserID;
 	resetPasswordRequest.NewPassword = NewPassword;
 
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
@@ -177,8 +179,8 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 		break;
 	}
 	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
-			if (IsSuccess)
+		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
 			{
 				if (Token->Bans.Num() > 0)
 				{
@@ -207,9 +209,25 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 		}));
 
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnResetPasswordResponse, OnComplete));
+		return;
+		break;
+	}
+	case EHttpResponseCodes::TooManyRequests:
 	{
 		ErrorStr = FString::Printf(TEXT("You have to wait 15 minutes before request another Reset Password. Response Code=%d"), Response->Code);
 		break;
@@ -226,7 +244,7 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 	}
 }
 
-void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDelegate OnComplete)
 {
 	FScopeLock Lock(&Mutex);
 
@@ -235,7 +253,7 @@ void JusticeIdentity::UserLogin(FString LoginId, FString Password, FUserLoginCom
 	FString Verb			= POST;
 	FString ContentType		= TYPE_FORM;
 	FString Accept			= TYPE_JSON;
-	FString Payload			= FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginId), *FGenericPlatformHttp::UrlEncode(Password));;
+	FString Payload			= FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(LoginID), *FGenericPlatformHttp::UrlEncode(Password));;
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -260,7 +278,7 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		bool result = FJusticeSDKModule::Get().UserParseJson(Response->Content);
+		bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();		
@@ -273,6 +291,8 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 		ErrorStr = FString::Printf(TEXT("User Login Failed, Response: %s. XRay: %s"), *Response->Content, *Response->AmazonTraceID);
 		break;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -413,7 +433,7 @@ void JusticeIdentity::OnUserRefreshResponse(FJusticeHttpResponsePtr Response, FU
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		bool result = FJusticeSDKModule::Get().UserParseJson(Response->Content);
+		bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();
@@ -468,7 +488,7 @@ void JusticeIdentity::OnClientRefreshResponse(FJusticeHttpResponsePtr Response)
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		FJusticeSDKModule::GetModule().GameClientParseJson(Response->Content);
+		FJusticeSDKModule::GetModule().ParseClientToken(Response->Content);
 		FJusticeGameClientToken->SetLastRefreshTimeToNow();
 		FJusticeGameClientToken->ScheduleNormalRefresh();
 		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);
@@ -533,12 +553,12 @@ void JusticeIdentity::OnClientLogoutResponse(FJusticeHttpResponsePtr Response)
 	}
 }
 
-void JusticeIdentity::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete)
 {
 	FUserCreateRequest NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
 	NewUserRequest.Password = Password;
-	NewUserRequest.LoginId = UserId;
+	NewUserRequest.LoginID = UserID;
 	NewUserRequest.AuthType = (AuthType == Email) ? TEXT("EMAILPASSWD"): TEXT("PHONEPASSWD");
 
 	FString Authorization	= FJusticeHTTP::BasicAuth();
@@ -576,10 +596,10 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 		userCreate->FromJson(Response->Content);
 		check(userCreate);
 
-		ReissueVerificationCode(userCreate->UserId, 
-			userCreate->LoginId, 
-			FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, userCreate](bool IsSuccess, FString ErrorStr) {
-			if (IsSuccess)
+		ReissueVerificationCode(userCreate->UserID, 
+			userCreate->LoginID, 
+			FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, userCreate](bool bSuccessful, FString ErrorStr) {
+			if (bSuccessful)
 			{
 				OnComplete.ExecuteIfBound(true, TEXT(""), userCreate);
 			}
@@ -601,8 +621,8 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 		break;
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
-			if (IsSuccess)
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
 			{
 				if (Token->Bans.Num() > 0)
 				{
@@ -631,6 +651,8 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 		}));
 		return;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -659,7 +681,7 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 	}
 }
 
-void JusticeIdentity::VerifyNewPlayer(FString UserId, FString VerificationCode, FUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, FUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
 	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
 
@@ -704,8 +726,8 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 		break;
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
-			if (IsSuccess)
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
 			{
 				if (Token->Bans.Num() > 0)
 				{
@@ -729,13 +751,15 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 			}
 			else
 			{
-				ErrorStr = FString::Printf(TEXT("You token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
 				OnComplete.ExecuteIfBound(false, ErrorStr);
 				return;
 			}
 		}));
 		return;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -762,14 +786,14 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 	}
 }
 
-void JusticeIdentity::ReissueVerificationCode(FString UserId, FString LoginId, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, FVerifyNewPlayerCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *FJusticeNamespace, *UserId);
+	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_FORM;
 	FString Accept			= TYPE_JSON;
-	FString Payload			= FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginId);
+	FString Payload			= FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -803,10 +827,60 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::Denied:
+	{
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Token->Bans.Num() > 0)
+				{
+					FString bansList = FString::Join(Token->Bans, TEXT(","));
+					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					OnComplete.ExecuteIfBound(false, ErrorStr);
+				}
+				else
+				{
+					if (Response->TooManyRetries() || Response->TakesTooLong())
+					{
+						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+						return;
+					}
+					Response->UpdateRequestForNextRetry();
+					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+						Response->NextWait,
+						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
+					return;
+				}
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr);
+				return;
+			}
+		}));
+		return;
+	}
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
+		return;
+		break;
+	}
+	case EHttpResponseCodes::TooManyRequests:
 	{
 		ErrorStr = FString::Printf(TEXT("You have to wait 15 minutes before request another ReissueVerificationCode. Response Code=%d"), Response->Code);
 		break;
@@ -857,7 +931,7 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		bool result = FJusticeSDKModule::Get().GameClientParseJson(Response->Content);
+		bool result = FJusticeSDKModule::Get().ParseClientToken(Response->Content);
 		check(result);
 		FJusticeGameClientToken->SetLastRefreshTimeToNow();
 		FJusticeGameClientToken->ScheduleNormalRefresh();
@@ -870,6 +944,8 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 		ErrorStr = FString::Printf(TEXT("Client authentication failed, Response: %s"), *Response->Content);
 		break;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -938,7 +1014,7 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 			if (JsonObject.IsValid()) 
 			{
 				TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
-				for (int platform = 0; platform != JsonArray.Num(); platform++)
+				for (int32 platform = 0; platform != JsonArray.Num(); platform++)
 				{
 					LinkedPlatform linkedPlatform;
 					if (linkedPlatform.FromJson(JsonArray[platform]->AsObject()))
@@ -956,6 +1032,8 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 		break;
 	}
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -985,10 +1063,10 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 	}
 }
 
-void JusticeIdentity::LinkPlatform(FString PlatformId, FString Ticket, FLinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FLinkPlatformCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformId);
+	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
 	FString Verb = POST;
 	FString ContentType = TYPE_FORM;
 	FString Accept = TYPE_JSON;
@@ -1023,6 +1101,8 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 		break;
 	}
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1050,10 +1130,10 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 	}
 }
 
-void JusticeIdentity::UnlinkPlatform(FString PlatformId, FUnlinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::UnlinkPlatform(FString PlatformID, FUnlinkPlatformCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformId);
+	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
 	FString Verb = POST;
 	FString ContentType = TYPE_PLAIN;//TextPlain
 	FString Accept = TYPE_JSON;
@@ -1087,6 +1167,8 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 		break;
 	}
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:

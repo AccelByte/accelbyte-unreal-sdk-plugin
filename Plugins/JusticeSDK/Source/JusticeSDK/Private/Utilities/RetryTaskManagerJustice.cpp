@@ -53,6 +53,14 @@ void FRetryTaskManagerJustice::AddQueue(FJusticeRetryTask * NewTask)
 	InJusticeQueue.Add(NewTask);
 }
 
+void FRetryTaskManagerJustice::AddQueue(FJusticeHttpRequestPtr Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
+{
+	FWebRequestTask* newTask = new FWebRequestTask(Request, WaitTime, ReponseDelegate);
+	check(newTask);
+	AddQueue(newTask);
+}
+
+
 void FRetryTaskManagerJustice::ClearRetryQueue()
 {
 	FScopeLock Lock(&InJusticeQueueLock);

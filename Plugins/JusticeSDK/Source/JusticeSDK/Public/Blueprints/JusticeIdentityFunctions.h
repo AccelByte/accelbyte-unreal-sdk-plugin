@@ -10,12 +10,12 @@
 #include "JusticeIdentity.h"
 #include "JusticeIdentityFunctions.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FUserLoginCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, UOAuthTokenJustice*, Token);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FUserLogoutCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRegisterPlayerCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, UUserCreateResponse*, Response);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FForgotPasswordCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FResetPasswordCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FUserLoginCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr, UOAuthTokenJustice*, Token);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FUserLogoutCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRegisterPlayerCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr, UUserCreateResponse*, Response);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FForgotPasswordCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FResetPasswordCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
 
 UCLASS()
 class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrary
@@ -24,7 +24,7 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 
 	// Identity Functions
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete);
+		static void UserLogin(FString LoginID, FString Password, FUserLoginCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void WebLoginRefresh(FString UserRefreshToken, FUserLoginCompleteDynamicDelegate OnComplete);
@@ -33,16 +33,16 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 		static void UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete) ;
 	
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
+		static void RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
+		static void VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete);
+		static void ForgotPassword(FString LoginID, FForgotPasswordCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void ResetPassword(FString UserId, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDynamicDelegate OnComplete);
+		static void ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDynamicDelegate OnComplete);
 
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")

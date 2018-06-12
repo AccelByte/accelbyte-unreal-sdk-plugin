@@ -4,10 +4,10 @@
 
 #include "Blueprints/IdentityBlueprint/VerifyNewPlayer.h"
 
-UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType)
+UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType)
 {
 	UAsyncVerifyNewPlayer* Node = NewObject<UAsyncVerifyNewPlayer>();
-	Node->UserId = UserId;
+	Node->UserID = UserID;
 	Node->VerificationCode = VerificationCode;	
 	Node->AuthType = (FUserAuthTypeJustice)AuthType;
 	return Node;
@@ -15,21 +15,20 @@ UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserId, F
 
 void UAsyncVerifyNewPlayer::Activate()
 {
-	JusticeIdentity::VerifyNewPlayer(this->UserId, this->VerificationCode, this->AuthType, FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::VerifyNewPlayer(this->UserID, this->VerificationCode, this->AuthType, FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast();
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast();
-			}
-			
+				OnFailed.Broadcast(ErrorStr);
+			}			
 		}
 	}));
 }

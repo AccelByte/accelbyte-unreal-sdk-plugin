@@ -5,10 +5,10 @@
 #include "Blueprints/IdentityBlueprint/ResetPassword.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncResetPassword * UAsyncResetPassword::ResetPassword(FString UserId, FString VerificationCode, FString NewPassword)
+UAsyncResetPassword * UAsyncResetPassword::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword)
 {
 	UAsyncResetPassword* Node = NewObject<UAsyncResetPassword>();
-	Node->UserId = UserId;
+	Node->UserID = UserID;
 	Node->VerificationCode = VerificationCode;
 	Node->NewPassword = NewPassword;
 	return Node;
@@ -16,19 +16,19 @@ UAsyncResetPassword * UAsyncResetPassword::ResetPassword(FString UserId, FString
 
 void UAsyncResetPassword::Activate()
 {
-	JusticeIdentity::ResetPassword(this->UserId, this->VerificationCode, this->NewPassword, FResetPasswordCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::ResetPassword(this->UserID, this->VerificationCode, this->NewPassword, FResetPasswordCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast();
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnFailed.Broadcast();
+				OnFailed.Broadcast(ErrorStr);
 			}
 		}
 	}));

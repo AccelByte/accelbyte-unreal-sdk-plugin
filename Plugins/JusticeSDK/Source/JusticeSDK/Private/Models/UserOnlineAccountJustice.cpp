@@ -61,7 +61,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString & AttrName, FStri
 
 		//check the element of each query and permission position
 		bMatchFound = true;
-		for (int i = 0; i < Permission.Num(); i++)
+		for (int32 i = 0; i < Permission.Num(); i++)
 		{
 			//check if any match or wild card
 			if (Permission[i].Equals(Query[i], ESearchCase::CaseSensitive)
@@ -91,7 +91,7 @@ bool FUserOnlineAccountJustice::GetUserAttribute(const FString & AttrName, FStri
 			if (FoundAttr != NULL)
 			{
 				OutAttrValue = *FoundAttr;
-				int Verify = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
+				int32 Verify = (CheckedActionBit & ~FCString::Atoi(**UserAttributes.Find(Key)));
 				if (CheckedActionBit == -1 || Verify == 0)
 				{
 					OutAttrValue = Key + ":action:" + *FoundAttr;

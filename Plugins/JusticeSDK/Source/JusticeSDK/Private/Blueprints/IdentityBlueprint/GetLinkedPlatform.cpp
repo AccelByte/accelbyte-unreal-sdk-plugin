@@ -13,16 +13,16 @@ UAsyncGetLinkedPlatform * UAsyncGetLinkedPlatform::GetLinkedPlatform()
 
 void UAsyncGetLinkedPlatform::Activate()
 {
-	JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, TArray<LinkedPlatform> result) {
+	JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<LinkedPlatform> result) {
 		TArray<ULinkedPlatform*> Result;
-		if (IsSuccess)
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				for (int i = 0; i < result.Num(); i++)
+				for (int32 i = 0; i < result.Num(); i++)
 				{
-					ULinkedPlatform* platform = NewObject<ULinkedPlatform>();
-					platform->FromLinkedPlatform(result[i]);
+					ULinkedPlatform* platform = ULinkedPlatform::Deserialize(result[i]);
+					check(platform);
 					Result.Add(platform);
 				}
 				OnSuccess.Broadcast(Result);

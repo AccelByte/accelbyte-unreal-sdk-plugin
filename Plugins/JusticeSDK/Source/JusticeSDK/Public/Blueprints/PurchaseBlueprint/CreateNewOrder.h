@@ -27,13 +27,13 @@ public:
 		FCreateNewOrderOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Purchase"))
-		static UAsyncCreateNewOrder* CreateNewOrder(FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId);
+		static UAsyncCreateNewOrder* CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FString StoreId);
 
 	virtual void Activate() override;
 private:
-	FString ItemId;
-	int Price;
-	int DiscountedPrice;
+	FString ItemID;
+	int32 Price;
+	int32 DiscountedPrice;
 	FString Currency;
 	FString StoreId;
 
