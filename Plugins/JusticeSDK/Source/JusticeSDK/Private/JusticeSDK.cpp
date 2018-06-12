@@ -43,10 +43,8 @@ void FJusticeSDKModule::StartupModule()
 	OnlineAsyncTaskThread = FRunnableThread::Create(AsyncTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
 	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
 
-
 	RetryAsyncTaskThread = FRunnableThread::Create(RetryTaskManager, *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
 	UE_LOG(LogJustice, Log, TEXT("Justice RetryAsyncTaskThread thread (ID:%d)."), RetryAsyncTaskThread->GetThreadID());
-
 
 	check(OnlineAsyncTaskThread != nullptr)
 	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID())
@@ -60,49 +58,19 @@ void FJusticeSDKModule::ShutdownModule()
 bool FJusticeSDKModule::GameClientParseJson(FString json)
 {
 	FScopeLock lock(&GameClientCritical);
-	TSharedPtr<FJsonObject> JsonObject;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(json);		
-	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+	if (GameClientToken->FromJson(json))
 	{
-		if (GameClientToken->FromJson(JsonObject))
-		{
-			TArray<TSharedPtr<FJsonValue>> PermissionArray = JsonObject->GetArrayField(TEXT("permissions"));
-			for (TSharedPtr<FJsonValue> Permission : PermissionArray)
-			{
-				TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
-				FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
-				int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-				FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-				GameClientToken->Permissions.Add(PermissionObject);
-			}
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
 
 bool FJusticeSDKModule::UserParseJson(FString json)
 {
-	TSharedPtr<FJsonObject> jsonObject;
-	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(json);
-	if (FJsonSerializer::Deserialize(Reader, jsonObject) && jsonObject.IsValid())
+	if (FJusticeSDKModule::Get().UserToken->FromJson(json))
 	{
-		if (FJusticeSDKModule::Get().UserToken->FromJson(jsonObject))
-		{
-			TArray<TSharedPtr<FJsonValue>> PermissionArray = jsonObject->GetArrayField(TEXT("permissions"));
-			for (TSharedPtr<FJsonValue> Permission : PermissionArray)
-			{
-				TSharedPtr<FJsonObject> JsonPermissionObject = Permission->AsObject();
-				FString Resource = JsonPermissionObject->GetStringField(TEXT("Resource"));
-				int32 Action = JsonPermissionObject->GetIntegerField(TEXT("Action"));
-				FPermissionJustice PermissionObject = FPermissionJustice(Resource, Action);
-				FJusticeSDKModule::Get().UserToken->Permissions.Add(PermissionObject);
-				//FJusticeSDKModule::Get().UserAccount->SetUserAttribute(Resource, FString::FromInt(Action));
-			}
-			return true;
-		}
+		return true;
 	}
-
 	return false;
 }
 

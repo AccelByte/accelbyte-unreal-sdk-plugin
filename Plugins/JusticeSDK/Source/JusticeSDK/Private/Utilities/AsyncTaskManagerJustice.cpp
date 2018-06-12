@@ -47,10 +47,16 @@ void FAsyncTaskManagerJustice::OnlineTick()
 	}
 }
 
-void FAsyncTaskManagerJustice::AddToRefreshQueue(FJusticeAsyncTask * NewTask)
+void FAsyncTaskManagerJustice::AddQueue(FJusticeAsyncTask * NewTask)
 {
 	FScopeLock Lock(&InJusticeQueueLock);
 	InJusticeQueue.Add(NewTask);
+}
+
+void FAsyncTaskManagerJustice::AddQueue(FOnJusticeTickDelegate tick, FDateTime nextUpdate)
+{
+	FJusticeAsyncTask* NewTask = new FJusticeAsyncTask(tick, nextUpdate);
+	AddQueue(NewTask);
 }
 
 void FAsyncTaskManagerJustice::ClearRefreshQueue()

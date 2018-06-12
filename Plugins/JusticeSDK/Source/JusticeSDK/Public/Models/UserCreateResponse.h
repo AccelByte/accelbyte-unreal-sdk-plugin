@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
+#include "JusticeBaseModel.h"
 #include "UserCreateResponse.generated.h"
 
 
@@ -30,7 +31,7 @@ public:
 
 
 UCLASS()
-class UUserCreateResponse : public UObject, public UserCreateResponse
+class UUserCreateResponse : public UObject, public UserCreateResponse, public JusticeBaseModel<UUserCreateResponse, UserCreateResponse>
 {
 	GENERATED_BODY()
 	
@@ -49,23 +50,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
 		FString LoginId;
-
-	//void LoadFromStruct(FUserCreateResponse item) 
-	//{
-	//	Namespace = item.Namespace;
-	//	UserId = item.UserId;
-	//	AuthType = item.AuthType;
-	//	DisplayName = item.DisplayName;
-	//	LoginId = item.LoginId;
-	//}
-
-	static UUserCreateResponse* Deserialize(FString json)
-	{
-		UUserCreateResponse* newToken = NewObject<UUserCreateResponse>();
-		if (newToken->FromJson(json))
-		{
-			return newToken;
-		}
-		return nullptr;
-	}
 };

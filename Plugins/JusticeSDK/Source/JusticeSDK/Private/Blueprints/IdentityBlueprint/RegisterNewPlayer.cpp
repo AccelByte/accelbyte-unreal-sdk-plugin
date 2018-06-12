@@ -17,19 +17,19 @@ UAsyncRegisterNewPlayer * UAsyncRegisterNewPlayer::RegisterNewPlayer(FString Use
 
 void UAsyncRegisterNewPlayer::Activate()
 {
-	JusticeIdentity::RegisterNewPlayer(this->UserId, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr, UUserCreateResponse* Response) {
+	JusticeIdentity::RegisterNewPlayer(this->UserId, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr, UserCreateResponse* Response) {
 		if (IsSuccess)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(Response);
+				OnSuccess.Broadcast(UUserCreateResponse::Deserialize(Response));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(NewObject<UUserCreateResponse>());
+				OnFailed.Broadcast(nullptr);
 			}
 		}
 	}));

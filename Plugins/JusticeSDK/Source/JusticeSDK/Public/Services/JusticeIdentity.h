@@ -16,28 +16,15 @@
 #include "RetryTaskManagerJustice.h"
 #include "JusticeSDK.h"
 
-DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, UOAuthTokenJustice*);
+DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, OAuthTokenJustice*);
 DECLARE_DELEGATE_TwoParams(FUserLogoutCompleteDelegate, bool, FString);
-DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UUserCreateResponse*);
+DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UserCreateResponse*);
 DECLARE_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FForgotPasswordCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FResetPasswordCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<LinkedPlatform>);
 DECLARE_DELEGATE_TwoParams(FLinkPlatformCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FUnlinkPlatformCompleteDelegate, bool, FString);
-
-enum FTaskTypeJustice
-{
-	IdentityRefresh = 1
-};
-
-enum FGrantTypeJustice
-{
-	PasswordGrant = 1,
-	RefreshGrant = 2,
-	ClientCredentialGrant = 3,
-	Device = 4,
-};
 
 enum FUserAuthTypeJustice
 {
@@ -52,12 +39,12 @@ enum class UUserAuthTypeJustice : uint8
 	AT_Phone = 1 	UMETA(DisplayName = "Phone")
 };
 
-
 class JUSTICESDK_API JusticeIdentity 
 {
 public:
 	static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDelegate OnComplete);
 	static void UserRefreshToken(FUserLoginCompleteDelegate OnComplete);
+	static void UserRefresh();
 	static void UserLogout(FUserLogoutCompleteDelegate OnComplete);
 	static void DeviceLogin(FUserLoginCompleteDelegate OnComplete);
 	static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete);
@@ -72,12 +59,7 @@ public:
 	static void ClientLogin(FUserLoginCompleteDelegate OnComplete = nullptr);
 	static void ClientLogout();
 	static void ClientRefreshToken();
-
 	static void SetRefreshToken(FString UserRefreshToken);
-
-	//static OAuthTokenJustice* GetUserToken();
-	//static OAuthTokenJustice* GetClientToken();
-	//static FString GetUserId();
 
 private:
 	static void OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
@@ -91,8 +73,6 @@ private:
 	static void OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void OnForgotPasswordResponse(FJusticeHttpResponsePtr Response, FForgotPasswordCompleteDelegate OnComplete);
 	static void OnResetPasswordResponse(FJusticeHttpResponsePtr Response, FResetPasswordCompleteDelegate OnComplete);
-};
-
 	static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete);
 	static void OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete);
 	static void OnGetLinkedPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetLinkedPlatformCompleteDelegate OnComplete);

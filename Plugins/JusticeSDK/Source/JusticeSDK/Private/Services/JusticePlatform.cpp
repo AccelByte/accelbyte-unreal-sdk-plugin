@@ -79,7 +79,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		break;
 	}
 	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, UOAuthTokenJustice* Token) {
+		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (IsSuccess)
 			{
 				if (Token->Bans.Num() > 0)

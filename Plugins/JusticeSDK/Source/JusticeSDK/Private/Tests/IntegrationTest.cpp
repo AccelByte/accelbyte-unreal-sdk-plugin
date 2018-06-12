@@ -25,7 +25,7 @@ bool FLoginSuccessTest::RunTest(const FString & Parameters)
 
 	UE_LOG(LogTemp, Log, TEXT("FLoginLatentCommand::Update()"));
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token) 
 	{
 		UE_LOG(LogTemp, Log, TEXT("FLoginLatentCommand::Update() Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
@@ -65,7 +65,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -82,7 +82,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -99,7 +99,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
@@ -155,7 +155,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -172,7 +172,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -189,7 +189,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
@@ -245,7 +245,7 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -262,7 +262,7 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -366,7 +366,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -401,7 +401,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token) 
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -486,7 +486,7 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -503,7 +503,7 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -560,7 +560,7 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 	double LastTime;
 
 	AddExpectedError(TEXT("OnRegisterNewPlayerResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -577,7 +577,7 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FRegisterPlayerCompleteDelegate OnRegisterPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterPlayerDone, &isRegisterPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterPlayerDone, &isRegisterPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterPlayerDone = true;
@@ -594,7 +594,7 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -645,7 +645,7 @@ bool FRegisterNewPlayerInvalidEmailTest::RunTest(const FString & Parameters)
 	double LastTime;
 
 	AddExpectedError(TEXT("OnRegisterNewPlayerResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -683,7 +683,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -700,7 +700,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -773,7 +773,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -790,7 +790,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token) 
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -901,7 +901,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -918,7 +918,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -1009,7 +1009,7 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -1026,7 +1026,7 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -1104,7 +1104,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* UserCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -1121,7 +1121,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;

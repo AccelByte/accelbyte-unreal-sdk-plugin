@@ -13,8 +13,8 @@ void UJusticeCatalogFunctions::GetItemByQuery(FString language, FString region, 
 		{
 			for (int i = 0; i < result.Num(); i++)
 			{
-				UItemInfo* item = NewObject<UItemInfo>();
-				item->FromItemInfo(result[i]);
+				UItemInfo* item = UItemInfo::Deserialize(result[i]);
+				check(item);
 				Result.Add(item);
 			}
 		}

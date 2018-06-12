@@ -20,18 +20,7 @@ public:
 	int balance;
 	FString  createdAt;
 	FString  updatedAt;
-	//TArray<BalanceInfo> balances;
 	FString status;
-
-
-	//id(string, optional),
-	//	namespace (string, optional),
-	//	userId(string, optional),
-	//	currencyCode(string, optional),
-	//	balance(integer, optional),
-	//	createdAt(string, optional),
-	//	updatedAt(string, optional),
-	//	status(string, optional) = ['ACTIVE', 'INACTIVE']
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("id", ID);
@@ -41,7 +30,6 @@ public:
 		JSON_SERIALIZE("balance", balance);
 		JSON_SERIALIZE("createdAt", createdAt);
 		JSON_SERIALIZE("updatedAt", updatedAt);
-		//JSON_SERIALIZE_ARRAY_SERIALIZABLE("balances", balances, BalanceInfo);
 		JSON_SERIALIZE("status", status);
 	END_JSON_SERIALIZER
 };

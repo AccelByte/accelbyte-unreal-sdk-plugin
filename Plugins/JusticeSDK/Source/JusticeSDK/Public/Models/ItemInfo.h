@@ -10,6 +10,7 @@
 #include "JusticeImage.h"
 #include "Price.h"
 #include "RegionData.h"
+#include "JusticeBaseModel.h"
 #include "ItemInfo.generated.h"
 
 class ItemInfo : public FJsonSerializable
@@ -36,7 +37,6 @@ public:
 	TArray<FString> ItemIds;
 	TArray<FString> Tags;
 
-
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("title", Title);
 		JSON_SERIALIZE("description", Description);
@@ -58,12 +58,11 @@ public:
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("regionData", RegionDatas, RegionData);		
 		JSON_SERIALIZE_ARRAY("itemIds", ItemIds);
 		JSON_SERIALIZE_ARRAY("tags", Tags);
-		
 	END_JSON_SERIALIZER
 };
 
 UCLASS()
-class UItemInfo : public UObject, public ItemInfo
+class UItemInfo : public UObject, public ItemInfo, public JusticeBaseModel<UItemInfo, ItemInfo>
 {
 	GENERATED_BODY()
 
@@ -88,7 +87,4 @@ class UItemInfo : public UObject, public ItemInfo
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetStoreID() { return StoreId; };
-
-public:
-		void FromItemInfo(ItemInfo item);	
 };

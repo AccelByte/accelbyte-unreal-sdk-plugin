@@ -93,8 +93,6 @@ void JusticeCatalog::OnGetRootCategoryComplete(FJusticeHttpResponsePtr Response,
 	}
 }
 
-
-
 void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
@@ -122,7 +120,6 @@ void JusticeCatalog::OnGetCategoryComplete(FJusticeHttpResponsePtr Response, FGe
 		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
 		return;
 	}
-
 	switch (Response->Code)
 	{
 	case EHttpResponseCodes::Ok:
@@ -256,7 +253,7 @@ void JusticeCatalog::OnGetItemByQueryComplete(FJusticeHttpResponsePtr Response, 
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, UOAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (IsSuccess)
 			{
 				if (Token->Bans.Num() > 0)

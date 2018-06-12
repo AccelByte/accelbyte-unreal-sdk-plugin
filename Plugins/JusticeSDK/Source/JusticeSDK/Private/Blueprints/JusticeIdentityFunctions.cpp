@@ -6,16 +6,20 @@
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::UserLogin(LoginId, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
-			OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Token);
+	JusticeIdentity::UserLogin(LoginId, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* Token) {
+		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
+		check(UToken);
+		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, UToken);
 	}));
 }
 
 void UJusticeIdentityFunctions::WebLoginRefresh(FString UserRefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::SetRefreshToken(UserRefreshToken);
-	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
-		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Token);
+	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* Token) {
+		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
+		check(UToken);
+		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, UToken);
 	}));
 }
 
@@ -31,8 +35,9 @@ void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate On
 void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::RegisterNewPlayer(UserId, Password, DisplayName, (FUserAuthTypeJustice)AuthType,
-		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UUserCreateResponse* Response) {
-		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, Response);
+		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorStr, UserCreateResponse* Response) {
+		UUserCreateResponse* UResponse = UUserCreateResponse::Deserialize(Response);
+		OnComplete.ExecuteIfBound(IsSuccess, ErrorStr, UResponse);
 	}));
 
 }
@@ -63,15 +68,15 @@ void UJusticeIdentityFunctions::ResetPassword(FString UserId, FString Verificati
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
 {
-	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
-	NewOAuthTokenJustice->FromParent(FJusticeUserToken);
+	UOAuthTokenJustice* NewOAuthTokenJustice = UOAuthTokenJustice::Deserialize(FJusticeUserToken);
+	check(NewOAuthTokenJustice);
 	return NewOAuthTokenJustice; 
 }
 
 UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
 {
-	UOAuthTokenJustice* NewOAuthTokenJustice = NewObject<UOAuthTokenJustice>();
-	NewOAuthTokenJustice->FromParent(FJusticeGameClientToken);
+	UOAuthTokenJustice* NewOAuthTokenJustice = UOAuthTokenJustice::Deserialize(FJusticeGameClientToken);
+	check(NewOAuthTokenJustice);
 	return NewOAuthTokenJustice; 
 }
 

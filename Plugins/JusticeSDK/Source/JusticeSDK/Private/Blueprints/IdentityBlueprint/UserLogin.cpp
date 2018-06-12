@@ -15,19 +15,19 @@ UAsyncUserLogin * UAsyncUserLogin::UserLogin(FString UserId, FString Password)
 
 void UAsyncUserLogin::Activate()
 {
-	JusticeIdentity::UserLogin(this->UserId, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* Token) {
+	JusticeIdentity::UserLogin(this->UserId, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* Token) {
 		if (IsSuccess)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(Token);
+				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(NewObject<UOAuthTokenJustice>());
+				OnFailed.Broadcast(nullptr);
 			}
 		}		
 	}));
