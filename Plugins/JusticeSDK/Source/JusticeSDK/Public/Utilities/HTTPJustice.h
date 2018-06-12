@@ -87,6 +87,7 @@ public:
 
 #define TYPE_JSON TEXT("application/json")
 #define TYPE_FORM TEXT("application/x-www-form-urlencoded; charset=utf-8")
+#define TYPE_PLAIN TEXT("text/plain; charset=UTF-8");
 
 #define POST TEXT("POST")
 #define PUT TEXT("PUT")

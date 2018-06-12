@@ -1236,7 +1236,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isCreateDefaultPlayerProfileDone = false;
 	bool isCreateDefaultPlayerProfileSuccess = false;
 	bool isUpdatePlayerProfileDone = false;
@@ -1314,7 +1314,7 @@ bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	bool isRegisterNewPlayerDone = false;
 	bool isRegisterNewPlayerSuccess = false;
 	bool isLoginDone = false;
@@ -1325,7 +1325,7 @@ bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* userCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -1342,7 +1342,7 @@ bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -1404,7 +1404,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	FString PlatformId = "device";
 	FString DeviceId = "deviceIdTest";
 	bool isRegisterNewPlayerDone = false;
@@ -1422,7 +1422,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* userCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -1439,7 +1439,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -1541,7 +1541,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	FString LoginID = "testSDK@example.com";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
-	FString AuthType = "EMAILPASSWD";
+	FUserAuthTypeJustice AuthType = Email;
 	FString PlatformId = "device";
 	FString DeviceId = "deviceIdTest";
 	bool isRegisterNewPlayerDone = false;
@@ -1559,7 +1559,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool IsSuccess, FString ErrorStr, UserCreateResponse* userCreateResponse)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
@@ -1576,7 +1576,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, UOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), IsSuccess ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;

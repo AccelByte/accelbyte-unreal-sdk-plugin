@@ -48,9 +48,9 @@ public:
 	};
 	void ScheduleNormalRefresh()
 	{
-		//NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
+		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
 		//DEBUG
-		NextTokenRefreshUtc = FDateTime::UtcNow() + FTimespan::FromSeconds(10);
+		//NextTokenRefreshUtc = FDateTime::UtcNow() + FTimespan::FromSeconds(10);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG(LogJustice, Log, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
