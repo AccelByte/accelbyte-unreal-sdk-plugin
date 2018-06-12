@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Models/OAuthTokenJustice.h"
+#include "Services/JusticeIdentity.h"
 #include "VerifyNewPlayer.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FVerifyNewPlayerOutputPin);
@@ -24,11 +25,12 @@ public:
 		FVerifyNewPlayerOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncVerifyNewPlayer* VerifyNewPlayer(FString UserId, FString VerificationCode);
+		static UAsyncVerifyNewPlayer* VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType);
 
 	virtual void Activate() override;
 
 private:
     FString UserId;
     FString VerificationCode;
+	FUserAuthTypeJustice AuthType;
 };

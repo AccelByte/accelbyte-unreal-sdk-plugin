@@ -19,8 +19,8 @@ class JUSTICESDK_API JusticePurchase
 {
 
 public:
-	static void CreateNewOrder(FString itemId, int Price, FString Currency, FCreateNewOrderCompleteDelegate OnComplete);
+	static void CreateNewOrder(FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId, FCreateNewOrderCompleteDelegate OnComplete);
 private:
-	static void OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FCreateNewOrderCompleteDelegate OnComplete);
+	static void OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FCreateNewOrderCompleteDelegate OnComplete, FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId);
 };
 

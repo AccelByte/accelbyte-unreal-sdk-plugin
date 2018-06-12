@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Models/OAuthTokenJustice.h"
+#include "Services/JusticeIdentity.h"
 #include "RegisterNewPlayer.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRegisterPlayerOutputPin, const UUserCreateResponse*, CreateResponse);
@@ -24,7 +25,7 @@ public:
 		FRegisterPlayerOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncRegisterNewPlayer* RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType);
+		static UAsyncRegisterNewPlayer* RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType);
 
 	virtual void Activate() override;
 
@@ -32,5 +33,5 @@ private:
     FString UserId;
     FString Password;
     FString DisplayName;
-    FString AuthType;
+	FUserAuthTypeJustice AuthType;
 };

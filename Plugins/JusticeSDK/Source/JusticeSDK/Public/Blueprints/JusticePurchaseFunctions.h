@@ -17,6 +17,6 @@ class JUSTICESDK_API UJusticePurchaseFunctions : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 
 		UFUNCTION(BlueprintCallable, Category = "JusticePurchaseFunctions")
-		static void CreateNewOrder(FString itemId, int Price, FString Currency, FCreateNewOrderCompleteDynamicDelegate OnComplete);
+		static void CreateNewOrder(FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId, FCreateNewOrderCompleteDynamicDelegate OnComplete);
 
 };

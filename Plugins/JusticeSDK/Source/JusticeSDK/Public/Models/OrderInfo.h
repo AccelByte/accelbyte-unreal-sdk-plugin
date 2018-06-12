@@ -20,7 +20,15 @@ public:
 	FString OrderNo;
 	FString UserId;
 	FString ItemId ;
+	FString StoreId;
+	bool Sandbox;
+	bool Quantity;
 	int Price;
+	int DiscountedPrice;
+	int Vat;
+	int SalesTax;
+	int PaymentProviderFee;
+	int PaymentMethodFee;
 	CurrencySummary Currency ;
 	PaymentUrl PaymentUrl;
 	TArray<Transaction> Transactions;
@@ -28,6 +36,10 @@ public:
 	FString Status; // ['INIT', 'CHARGED', 'FINISHED', 'CHARGE_FAILED', 'ERROR', 'REFUNDED', 'DELETED'],
 	FString StatusReason;
 	FString Namespace;
+	FString CreatedTime;
+	FString ChargedTime;
+	FString FinishedTime;
+	FString RefundedTime;
 	FString CreatedAt;
 	FString UpdatedAt;
 
@@ -35,7 +47,15 @@ public:
 		JSON_SERIALIZE("orderNo", OrderNo);
 		JSON_SERIALIZE("userId", UserId);
 		JSON_SERIALIZE("itemId", ItemId);
+		JSON_SERIALIZE("storeId", StoreId);
+		JSON_SERIALIZE("sandbox", Sandbox);
+		JSON_SERIALIZE("quantity", Quantity);
 		JSON_SERIALIZE("price", Price);
+		JSON_SERIALIZE("discountedPrice", DiscountedPrice);
+		JSON_SERIALIZE("vat", Vat);
+		JSON_SERIALIZE("salesTax", SalesTax);
+		JSON_SERIALIZE("paymentProviderFee", PaymentProviderFee);
+		JSON_SERIALIZE("paymentMethodFee", PaymentMethodFee);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("currency", Currency);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paymentUrl", PaymentUrl);
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("transactions", Transactions, Transaction);
@@ -43,6 +63,10 @@ public:
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("statusReason", StatusReason);
 		JSON_SERIALIZE("namespace", Namespace);
+		JSON_SERIALIZE("createdTime", CreatedTime);
+		JSON_SERIALIZE("chargedTime", ChargedTime);
+		JSON_SERIALIZE("finishedTime", FinishedTime);
+		JSON_SERIALIZE("refundedTime", RefundedTime);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
 

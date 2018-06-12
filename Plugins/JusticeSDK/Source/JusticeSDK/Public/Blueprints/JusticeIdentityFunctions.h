@@ -17,8 +17,6 @@ DECLARE_DYNAMIC_DELEGATE_TwoParams(FVerifyNewPlayerCompleteDynamicDelegate, bool
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FForgotPasswordCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FResetPasswordCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr);
 
-
-
 UCLASS()
 class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrary
 {
@@ -29,16 +27,16 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 		static void UserLogin(FString LoginId, FString Password, FUserLoginCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void WebLoginRefresh(FString RefreshToken, FUserLoginCompleteDynamicDelegate OnComplete);
+		static void WebLoginRefresh(FString UserRefreshToken, FUserLoginCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete) ;
 	
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, FString AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
+		static void RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void VerifyNewPlayer(FString UserId, FString VerificationCode, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
+		static void VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void ForgotPassword(FString LoginId, FForgotPasswordCompleteDynamicDelegate OnComplete);
@@ -56,10 +54,8 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static FString GetUserId();
 
-
 	// Platform Specific 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete);
 
-	
 };

@@ -15,13 +15,17 @@
 #define POLLING_INTERVAL_MS 1000
 
 DECLARE_DELEGATE_TwoParams(FOnScheduleTickDelegate, struct FDateTime, int32);
+DECLARE_DELEGATE(FOnJusticeTickDelegate);
+
 
 class FJusticeAsyncTask 
 {
 public:
-	FJusticeAsyncTask(FDateTime nextUpdate):
+	FJusticeAsyncTask(FOnJusticeTickDelegate tick, FDateTime nextUpdate):
 		Done(false), 
-		NextUpdate(nextUpdate)	{}
+		NextUpdate(nextUpdate),
+		OnTick(tick){}
+	virtual ~FJusticeAsyncTask() {}
 
 	virtual bool IsDone()
 	{
@@ -34,14 +38,17 @@ public:
 	}
 
 	virtual FString ToString() const { return TEXT("FJusticeAsyncTask"); }
-
-	virtual void Tick() = 0;
+	virtual void Tick()
+	{
+		OnTick.ExecuteIfBound();
+	}
 	FDateTime GetNextUpdate() { return NextUpdate; };
 	void SetAsDone() { Done = true; }
 
 private:
 	bool Done;
 	FDateTime NextUpdate;
+	FOnJusticeTickDelegate OnTick;
 };
 
 
@@ -66,7 +73,9 @@ public:
 	virtual void Exit();
 	virtual void Tick() {};
 	virtual void OnlineTick() ;
-	void AddToRefreshQueue(FJusticeAsyncTask* NewTask);
+	void AddQueue(FJusticeAsyncTask* NewTask);
+	void AddQueue(FOnJusticeTickDelegate tick, FDateTime nextUpdate);
+
 	void ClearRefreshQueue();
 
 private:	

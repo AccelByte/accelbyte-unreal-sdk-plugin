@@ -2,14 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AsyncTaskManagerJustice.h"
+#include "RetryTaskManagerJustice.h"
 #include "HAL/PlatformProcess.h"
 #include "JusticeLog.h"
 #include "JusticeIdentity.h"
 
-int32 FAsyncTaskManagerJustice::InvocationCount = 0;
+int32 FRetryTaskManagerJustice::InvocationCount = 0;
 
-bool FAsyncTaskManagerJustice::Init(void)
+bool FRetryTaskManagerJustice::Init(void)
 {
 	WorkEvent = FPlatformProcess::GetSynchEventFromPool();
 	int32 PollingConfig = POLLING_INTERVAL_MS;
@@ -20,7 +20,7 @@ bool FAsyncTaskManagerJustice::Init(void)
 	return WorkEvent != nullptr;
 }
 
-void FAsyncTaskManagerJustice::OnlineTick()
+void FRetryTaskManagerJustice::OnlineTick()
 {
 	check(FPlatformTLS::GetCurrentThreadId() == OnlineThreadId || !FPlatformProcess::SupportsMultithreading());
 	int32 QueueSize = 0;
@@ -30,14 +30,14 @@ void FAsyncTaskManagerJustice::OnlineTick()
 	}
 	if (QueueSize > 0)
 	{
-		FJusticeAsyncTask* Task = nullptr;
+		FJusticeRetryTask* Task = nullptr;
 		{
 			FScopeLock LockInQueue(&InJusticeQueueLock);
 			Task = InJusticeQueue[0];
 		}
 
-		if (FDateTime::UtcNow() >= Task->GetNextUpdate()) {
-			UE_LOG(LogJustice, Log, TEXT("Executing Refresh Token Task"));
+		if (FDateTime::UtcNow() >= Task->GetNextRetry()) {
+			UE_LOG(LogJustice, Log, TEXT("Executing Retry Task"));
 			Task->Tick();
 			{
 				FScopeLock LockInQueue(&InJusticeQueueLock);
@@ -47,25 +47,19 @@ void FAsyncTaskManagerJustice::OnlineTick()
 	}
 }
 
-void FAsyncTaskManagerJustice::AddQueue(FJusticeAsyncTask * NewTask)
+void FRetryTaskManagerJustice::AddQueue(FJusticeRetryTask * NewTask)
 {
 	FScopeLock Lock(&InJusticeQueueLock);
 	InJusticeQueue.Add(NewTask);
 }
 
-void FAsyncTaskManagerJustice::AddQueue(FOnJusticeTickDelegate tick, FDateTime nextUpdate)
-{
-	FJusticeAsyncTask* NewTask = new FJusticeAsyncTask(tick, nextUpdate);
-	AddQueue(NewTask);
-}
-
-void FAsyncTaskManagerJustice::ClearRefreshQueue()
+void FRetryTaskManagerJustice::ClearRetryQueue()
 {
 	FScopeLock Lock(&InJusticeQueueLock);
 	InJusticeQueue.Empty();
 }
 
-uint32 FAsyncTaskManagerJustice::Run()
+uint32 FRetryTaskManagerJustice::Run()
 {
 	InvocationCount++;
 	check(OnlineThreadId == 0);
@@ -83,19 +77,19 @@ uint32 FAsyncTaskManagerJustice::Run()
 	return 0;
 }
 
-void FAsyncTaskManagerJustice::Stop()
+void FRetryTaskManagerJustice::Stop()
 {
-	UE_LOG(LogJustice, Display, TEXT("FOnlineAsyncTaskManager::Stop() "));
+	UE_LOG(LogJustice, Display, TEXT("FRetryTaskManagerJustice::Stop() "));
 	bRequestingExit = true;
 	WorkEvent->Trigger();
 }
 
-void FAsyncTaskManagerJustice::Exit()
+void FRetryTaskManagerJustice::Exit()
 {
-	UE_LOG(LogJustice, Log, TEXT("FOnlineAsyncTaskManager::Exit() started"));
+	UE_LOG(LogJustice, Log, TEXT("FRetryTaskManagerJustice::Exit() started"));
 	FPlatformProcess::ReturnSynchEventToPool(WorkEvent);
 	WorkEvent = nullptr;
 	OnlineThreadId = 0;
 	InvocationCount--;
-	UE_LOG(LogJustice, Log, TEXT("FOnlineAsyncTaskManager::Exit() finished"));
+	UE_LOG(LogJustice, Log, TEXT("FRetryTaskManagerJustice::Exit() finished"));
 }

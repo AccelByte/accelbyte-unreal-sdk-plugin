@@ -13,6 +13,7 @@ class Category : public FJsonSerializable
 {
 	FString ID;
 	FString Namespace;
+	FString StoreID;
 	FString ParentCategoryPath;
 	FString DisplayName;
 	FString ChildCategories;
@@ -23,6 +24,7 @@ class Category : public FJsonSerializable
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("id", ID);
 		JSON_SERIALIZE("namespace", Namespace);
+		JSON_SERIALIZE("storeId", StoreID);
 		JSON_SERIALIZE("parentCategoryPath", ParentCategoryPath);
 		JSON_SERIALIZE("displayName", DisplayName);
 		JSON_SERIALIZE("childCategories", ChildCategories);
@@ -34,7 +36,7 @@ class Category : public FJsonSerializable
 
 
 UCLASS()
-class UCategory : public UObject, public Category
+class UCategory:public UObject, public Category
 {
 	GENERATED_BODY()
 public:

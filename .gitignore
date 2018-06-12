@@ -84,3 +84,6 @@ Plugins/JusticeSDK/Intermediate/Build/
 Plugins/JusticeWebBrowserWidget/Binaries/
 Plugins/JusticeWebBrowserWidget/Content/WebTexture_M.uasset
 Plugins/JusticeWebBrowserWidget/Intermediate/Build/
+
+!Content/StarterContent/Maps/Minimal_Default.umap
+!Content/StarterContent/Maps/Minimal_Default_BuiltData.uasset

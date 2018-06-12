@@ -25,7 +25,7 @@ public:
 	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete);
 	static UserProfileInfo* GetUserProfileInfo();
 private:
-	static void OnRequestCurrentPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
-	static void OnUpdatePlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
-	static void OnCreateDefaultPlayerProfileComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUpdatePlayerProfileCompleteDelegate OnComplete);
+	static void OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponsePtr Response, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
+	static void OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete);
+	static void OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete);
 };

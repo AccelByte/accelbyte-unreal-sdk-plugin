@@ -19,11 +19,12 @@ DECLARE_DELEGATE_ThreeParams(FItemCompleteDelegate, bool, FString, TArray<ItemIn
 class JUSTICESDK_API JusticeCatalog
 {
 public:
-	static void GetRootCategory(FGetRootCategoryCompleteDelegate OnComplete);
-	static void GetSubCategory(FString ParentPath, FGetRootCategoryCompleteDelegate OnComplete);
-	static void GetItemByCriteria(FString CategoryPath, FItemCompleteDelegate OnComplete);
+	static void GetRootCategory(FString Language, FGetRootCategoryCompleteDelegate OnComplete);
+	static void GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete);
+	static void GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDelegate OnComplete);
 
 private:
-	static void OnGetRootCategoryComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetRootCategoryCompleteDelegate OnComplete);	
-	static void OnGetItemByCriteriaComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FItemCompleteDelegate OnComplete);
+	static void OnGetRootCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetItemByQueryComplete(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete);
 };

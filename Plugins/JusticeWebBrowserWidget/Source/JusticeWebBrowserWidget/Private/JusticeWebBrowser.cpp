@@ -18,10 +18,10 @@
 class CefData : public FJsonSerializable
 {
 public:
-	FString RefreshToken;
+	FString UserRefreshToken;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("refresh_token", RefreshToken);
+		JSON_SERIALIZE("refresh_token", UserRefreshToken);
 	END_JSON_SERIALIZER
 };
 
@@ -194,15 +194,15 @@ FString UJusticeWebBrowser::CefQuery(FString value)
 
 				response.ClientId = ClientID;
 				response.GlobalNamespace = Namespace;
-				response.ClientAuthorizationHeader = FHTTPJustice::BasicAuth(ClientID, ClientSecret);
+				response.ClientAuthorizationHeader = FJusticeHTTP::BasicAuth(ClientID, ClientSecret);
 
 
 				return response.ToJson();
 			}
 			else if (request.Action.Contains(TEXT("success")))
 			{
-				UE_LOG(LogTemp, Log, TEXT("JusticeWebBrowser::CefQuery WE GOT REFRESH TOKEN: %s"), *request.Data.RefreshToken);
-				OnJusticeWebLoggedIn.Broadcast(FText::FromString(request.Data.RefreshToken));
+				UE_LOG(LogTemp, Log, TEXT("JusticeWebBrowser::CefQuery WE GOT REFRESH TOKEN: %s"), *request.Data.UserRefreshToken);
+				OnJusticeWebLoggedIn.Broadcast(FText::FromString(request.Data.UserRefreshToken));
 				return TEXT("");
 			}
 		}

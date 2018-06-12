@@ -3,19 +3,19 @@
 // and restrictions contact your company contract manager.
 
 #include "Blueprints/IdentityBlueprint/VerifyNewPlayer.h"
-#include "Services/JusticeIdentity.h"
 
-UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserId, FString VerificationCode)
+UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserId, FString VerificationCode, UUserAuthTypeJustice AuthType)
 {
 	UAsyncVerifyNewPlayer* Node = NewObject<UAsyncVerifyNewPlayer>();
 	Node->UserId = UserId;
-	Node->VerificationCode = VerificationCode;
+	Node->VerificationCode = VerificationCode;	
+	Node->AuthType = (FUserAuthTypeJustice)AuthType;
 	return Node;
 }
 
 void UAsyncVerifyNewPlayer::Activate()
 {
-	JusticeIdentity::VerifyNewPlayer(this->UserId, this->VerificationCode, FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
+	JusticeIdentity::VerifyNewPlayer(this->UserId, this->VerificationCode, this->AuthType, FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
 		if (IsSuccess)
 		{
 			if (OnSuccess.IsBound())

@@ -5,16 +5,16 @@
 #include "JusticeCatalogFunctions.h"
 #include "JusticeCatalog.h"
 
-void UJusticeCatalogFunctions::GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete)
+void UJusticeCatalogFunctions::GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDynamicDelegate OnComplete)
 {
-	JusticeCatalog::GetItemByCriteria(CategoryPath, FItemCompleteDelegate::CreateLambda([OnComplete](bool isSuccess, FString errorString, TArray<ItemInfo> result) {
+	JusticeCatalog::GetItemByQuery(language, region, CategoryPath, itemType, status, page, size, FItemCompleteDelegate::CreateLambda([OnComplete](bool isSuccess, FString errorString, TArray<ItemInfo> result) {
 		TArray<UItemInfo*> Result;
 		if (isSuccess)
 		{
 			for (int i = 0; i < result.Num(); i++)
 			{
-				UItemInfo* item = NewObject<UItemInfo>();
-				item->FromItemInfo(result[i]);
+				UItemInfo* item = UItemInfo::Deserialize(result[i]);
+				check(item);
 				Result.Add(item);
 			}
 		}

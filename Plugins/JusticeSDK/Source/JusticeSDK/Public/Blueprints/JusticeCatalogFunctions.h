@@ -19,6 +19,6 @@ class JUSTICESDK_API UJusticeCatalogFunctions : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeCatalogFunctions")
-	static void GetItemByCriteria(FString CategoryPath, FItemCompleteDynamicDelegate OnComplete);
+	static void GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDynamicDelegate OnComplete);
 	
 };

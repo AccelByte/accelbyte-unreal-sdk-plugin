@@ -17,9 +17,9 @@ public:
 	FString Namespace;
 	FString userId;
 	FString currencyCode;
+	int balance;
 	FString  createdAt;
 	FString  updatedAt;
-	TArray<BalanceInfo> balances;
 	FString status;
 
 	BEGIN_JSON_SERIALIZER
@@ -27,9 +27,9 @@ public:
 		JSON_SERIALIZE("namespace", Namespace);
 		JSON_SERIALIZE("userId", userId);
 		JSON_SERIALIZE("currencyCode", currencyCode);
+		JSON_SERIALIZE("balance", balance);
 		JSON_SERIALIZE("createdAt", createdAt);
 		JSON_SERIALIZE("updatedAt", updatedAt);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("balances", balances, BalanceInfo);
 		JSON_SERIALIZE("status", status);
 	END_JSON_SERIALIZER
 };

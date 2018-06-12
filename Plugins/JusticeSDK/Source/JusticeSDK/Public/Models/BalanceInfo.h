@@ -31,7 +31,6 @@ public:
 	END_JSON_SERIALIZER
 };
 
-
 UCLASS()
 class UBalanceInfo : public UObject, public BalanceInfo
 {

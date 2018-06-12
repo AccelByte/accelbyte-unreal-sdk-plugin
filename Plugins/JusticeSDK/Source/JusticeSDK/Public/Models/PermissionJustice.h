@@ -4,13 +4,18 @@
 
 #pragma once
 #include "CoreMinimal.h"
+#include "Serialization/JsonSerializerMacros.h"
 
-class FPermissionJustice
+class PermissionJustice : public FJsonSerializable
 {
 public:
 	FString Resource;
 	int32 Action;
-	FPermissionJustice(FString resource, int32 action) :Resource(resource), Action(action)
-	{	}
+
+	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("Resource", Resource);
+		JSON_SERIALIZE("Action", Action);
+	END_JSON_SERIALIZER
+
 };
 
