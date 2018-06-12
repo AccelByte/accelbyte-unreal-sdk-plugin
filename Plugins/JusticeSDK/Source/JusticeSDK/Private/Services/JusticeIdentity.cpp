@@ -9,6 +9,7 @@
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
 #include "Models/FUserCreateResponse.h"
+#include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
 FCriticalSection Mutex;
 
 class FUserRefreshTokenAsyncTask : public FJusticeAsyncTask
@@ -866,6 +867,219 @@ void JusticeIdentity::OnReissueVerificationCodeComplete(FHttpRequestPtr Request,
 		UE_LOG(LogJustice, Error, TEXT("OnReissueVerificationCodeComplete. Error:%s XRay: %s ReqTime: %.3f"),
 			*ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
 		OnComplete.ExecuteIfBound(false, ErrorStr);
+	}
+}
+
+void JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete) 
+{
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserId = GetUserId();
+
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms"), *BaseURL, *Namespace, *UserId));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnGetLinkedPlatformComplete, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("GetLinkedPlatform failed. Error=%s XrayID=%s ReqTime=%.3f"));
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<LinkedPlatform>());
+	}
+}
+
+void JusticeIdentity::OnGetLinkedPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetLinkedPlatformCompleteDelegate OnComplete)
+{
+	check(&OnComplete != nullptr);
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid()) 
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::Ok:
+		{
+			FString ResponseStr = Response->GetContentAsString();
+			UE_LOG(LogJustice, Log, TEXT("OnGetLinkedPlatformComplete : %s"), *ResponseStr);
+
+			TSharedPtr<FJsonValue> JsonObject;
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+			TArray<LinkedPlatform> Result;
+
+			if (ResponseStr.Contains("null")) {
+				OnComplete.ExecuteIfBound(true, ErrorStr, TArray<LinkedPlatform>());
+			}
+			else
+			if (FJsonSerializer::Deserialize(Reader, JsonObject)) 
+			{
+				if (JsonObject.IsValid()) 
+				{
+					TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
+					for (int platform = 0; platform != JsonArray.Num(); platform++)
+					{
+						LinkedPlatform linkedPlatform;
+						if (linkedPlatform.FromJson(JsonArray[platform]->AsObject()))
+						{
+							Result.Add(linkedPlatform);
+						}
+					}
+					OnComplete.ExecuteIfBound(true, ErrorStr, Result);
+				}
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserialize response from server");
+			}
+		}
+		break;
+
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->GetResponseCode());
+		}
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("On Get User Linked Platforms Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<LinkedPlatform>());
+		return;
+	}
+}
+
+void JusticeIdentity::LinkPlatform(FString PlatformId, FString Ticket, FLinkPlatformCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserId = GetUserId();
+	FString TicketForm = FString::Printf(TEXT("ticket=%s"), *Ticket);
+	
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *BaseURL, *Namespace, *UserId, *PlatformId));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded; charset=utf-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	Request->SetContentAsString(TicketForm);
+	
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnLinkPlatformComplete, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("LinkPlatform failed. Error=%s XrayID=%s ReqTime%.3f"));
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+	}
+}
+
+void JusticeIdentity::OnLinkPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FLinkPlatformCompleteDelegate OnComplete)
+{
+	check(&OnComplete != nullptr);
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else 
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::NoContent:
+			UE_LOG(LogJustice, VeryVerbose, TEXT("OnLinkPlatformComplete : Operation succeeded"));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+			break;
+		case EHttpResponseCodes::BadRequest:
+			ErrorStr = TEXT("Invalid Request");
+			break;
+		case EHttpResponseCodes::Forbidden:
+			ErrorStr = TEXT("Forbidden");
+			break;
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpected response code=%d"), Response->GetResponseCode());
+		}
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("On Link Platform Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+		return;
+	}
+}
+
+void JusticeIdentity::UnlinkPlatform(FString PlatformId, FUnlinkPlatformCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	FString Namespace = FJusticeSDKModule::Get().Namespace;
+	FString UserId = GetUserId();
+
+	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *BaseURL, *Namespace, *UserId, *PlatformId));
+	Request->SetHeader(TEXT("Authorization"), FHTTPJustice::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	Request->SetVerb(TEXT("POST"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=UTF-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+
+	Request->OnProcessRequestComplete().BindStatic(&JusticeIdentity::OnUnlinkPlatformComplete, RequestTrace, OnComplete);
+	if (!Request->ProcessRequest())
+	{
+		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Warning, TEXT("UnlinkPlatform failed. Error=%s XrayID=%s ReqTime%.3f"));
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+	}
+}
+
+void JusticeIdentity::OnUnlinkPlatformComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FUnlinkPlatformCompleteDelegate OnComplete)
+{
+	check(&OnComplete != nullptr);
+	FString ErrorStr;
+	if (!bSuccessful || !Response.IsValid())
+	{
+		ErrorStr = TEXT("request failed");
+	}
+	else
+	{
+		switch (Response->GetResponseCode())
+		{
+		case EHttpResponseCodes::NoContent:
+			UE_LOG(LogJustice, VeryVerbose, TEXT("OnUnlinkPlatformComplete : Operation succeeded"));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+			break;
+		case EHttpResponseCodes::BadRequest:
+			ErrorStr = TEXT("Invalid Request");
+			break;
+		case EHttpResponseCodes::Forbidden:
+			ErrorStr = TEXT("Forbidden");
+			break;
+		default:
+			ErrorStr = FString::Printf(TEXT("unexpected response code=%d"), Response->GetResponseCode());
+		}
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("On Unlink Platform Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+		return;
 	}
 }
 
