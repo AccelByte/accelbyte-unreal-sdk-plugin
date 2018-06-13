@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Models/OAuthTokenJustice.h"
+#include "Models/LinkedPlatform.h"
 #include "JusticeIdentity.h"
 #include "JusticeIdentityFunctions.generated.h"
 
@@ -58,4 +59,15 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete);
 
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static TArray<ULinkedPlatform*> GetUnlinkedPlatforms(TArray<ULinkedPlatform*> LinkedPlatforms);
+
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static TArray<ULinkedPlatform*> GetCompleteListOfPlatforms();
+
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static FString GetPlatformPageURL(FString PlatformID);
+
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static FString GetPlatformRedirectURL(FString PlatformID);
 };

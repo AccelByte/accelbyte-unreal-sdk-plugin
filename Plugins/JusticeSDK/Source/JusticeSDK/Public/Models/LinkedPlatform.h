@@ -33,4 +33,7 @@ class ULinkedPlatform : public UObject, public LinkedPlatform, public JusticeBas
 
 	UFUNCTION(BlueprintPure, Category = "LinkedPlatform")
 		FString GetPlatformId() { return PlatformID; };
+
+	UFUNCTION(BlueprintPure, Category = "LinkedPlatform")
+		FString GetPlatformUserId() { return PlatformUserId; };
 };
