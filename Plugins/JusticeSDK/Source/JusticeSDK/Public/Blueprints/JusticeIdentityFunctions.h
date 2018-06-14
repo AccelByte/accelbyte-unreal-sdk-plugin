@@ -52,12 +52,13 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static UOAuthTokenJustice* GetClientToken();
 
-	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
 		static FString GetUserId();
 
-	// Platform Specific 
-	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static void LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete);
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static bool IsHeadlessAccount() { return FJusticeSDKModule::Get().bHeadlessAccount; }
+
+
 
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeWebBrowserFunctions")

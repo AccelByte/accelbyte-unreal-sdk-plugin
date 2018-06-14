@@ -342,8 +342,63 @@ void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUserLoginResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnDeviceLoginResponse, OnComplete));
 }
+
+void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("User Login Failed. Error Message: %s."), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		FJusticeSDKModule::Get().bHeadlessAccount = true;
+		bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
+		check(result);
+		FJusticeUserToken->SetLastRefreshTimeToNow();
+		FJusticeUserToken->ScheduleNormalRefresh();
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken);
+		break;
+	}
+
+	case EHttpResponseCodes::Denied:
+		ErrorStr = FString::Printf(TEXT("User Login Failed, Response: %s. XRay: %s"), *Response->Content, *Response->AmazonTraceID);
+		break;
+	case EHttpResponseCodes::RequestTimeout:
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnDeviceLoginResponse, OnComplete));
+		break;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("User Login Unexpcted Result,Response Code: %d  Content:%s"), Response->Code, *Response->Content);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("%s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+		return;
+	}
+}
+
 
 void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 {
@@ -1182,6 +1237,83 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
 			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUnlinkPlatformResponse, OnComplete));
+		break;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Unlink Platform Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+		return;
+	}
+}
+
+void JusticeIdentity::UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FUpgradeHeadlessAccountCompleteDelegate OnComplete)
+{
+	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString Verb			= POST;
+	FString ContentType		= TYPE_JSON;
+	FString Accept			= TYPE_JSON;
+	FString Payload			= FString::Printf(TEXT("{ \"LoginId\": \"%s\", \"Password\": \"%s\"}"), *Email, *Password);
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUpgradeHeadlessAccountResponse, OnComplete, Email));
+}
+
+void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FUpgradeHeadlessAccountCompleteDelegate OnComplete, FString LoginID)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Upgrade Headless Account Failed. Error Message: %s."), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString);
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		UE_LOG(LogJustice, VeryVerbose, TEXT("Upgrade Headless Account : Operation succeeded"));
+		
+		JusticeIdentity::ReissueVerificationCode(
+			*FJusticeUserID, 
+			LoginID, 
+			FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+				if (bSuccessful)
+				{
+					OnComplete.ExecuteIfBound(true, TEXT(""));
+				}
+				else
+				{
+					OnComplete.ExecuteIfBound(false, ErrorStr);
+				}
+			}));		
+		return;
+	}
+	case EHttpResponseCodes::RequestTimeout:
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUpgradeHeadlessAccountResponse, OnComplete, LoginID));
 		break;
 	}
 	default:

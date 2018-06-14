@@ -54,6 +54,7 @@ public:
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
 	FString LoginID;
+	bool bHeadlessAccount;
 	FString Password;
 	UserProfileInfo* UserProfile;
 	FAsyncTaskManagerJustice* AsyncTaskManager;
