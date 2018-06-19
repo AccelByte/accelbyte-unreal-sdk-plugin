@@ -278,6 +278,7 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 	{
 	case EHttpResponseCodes::Ok:
 	{
+		FJusticeSDKModule::Get().bHeadlessAccount = false;
 		bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
@@ -372,6 +373,8 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FU
 		ErrorStr = FString::Printf(TEXT("User Login Failed, Response: %s. XRay: %s"), *Response->Content, *Response->AmazonTraceID);
 		break;
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -741,9 +744,9 @@ void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, 
 	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
 
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *FJusticeBaseURL, *FJusticeNamespace);
+	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
 	FString Verb			= POST;
-	FString ContentType		= TYPE_FORM;
+	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
 	FString Payload			= FString::Printf(TEXT("{ \"Code\": \"%s\",\"ContactType\":\"%s\"}"), *VerificationCode, *ContactType);
 
@@ -846,7 +849,7 @@ void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, F
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
 	FString Verb			= POST;
-	FString ContentType		= TYPE_FORM;
+	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
 	FString Payload			= FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
 
@@ -941,12 +944,12 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 		break;
 	}
 	default:
-		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+		ErrorStr = FString::Printf(TEXT("Unexpcted Response Code: %d"), Response->Code);
 	}
 	
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("%s"), *ErrorStr);
+		UE_LOG(LogJustice, Error, TEXT("ReissueVerificationCode Error: %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr);
 	}
 }
@@ -1283,14 +1286,15 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		UE_LOG(LogJustice, VeryVerbose, TEXT("Upgrade Headless Account : Operation succeeded"));
-		
+		UE_LOG(LogJustice, Log, TEXT("Upgrade Headless Account : Operation succeeded"));
+		UE_LOG(LogJustice, Log, TEXT("Upgrade Headless Account : Send Verification Code"));
 		JusticeIdentity::ReissueVerificationCode(
 			*FJusticeUserID, 
 			LoginID, 
-			FVerifyNewPlayerCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+			FVerifyNewPlayerCompleteDelegate::CreateLambda([=](bool bSuccessful, FString ErrorStr) {
 				if (bSuccessful)
 				{
+					UE_LOG(LogJustice, Log, TEXT("Upgrade Headless Account : Verification Code Success"));
 					OnComplete.ExecuteIfBound(true, TEXT(""));
 				}
 				else
@@ -1299,8 +1303,11 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 				}
 			}));		
 		return;
+		break;
 	}
 	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1317,12 +1324,12 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 		break;
 	}
 	default:
-		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d"), Response->Code);
+		ErrorStr = FString::Printf(TEXT("Unexpected response Code:%d Content:%s"), Response->Code, *Response->Content);
 	}
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("Unlink Platform Error : %s"), *ErrorStr);
+		UE_LOG(LogJustice, Error, TEXT("Upgrade Headless Account Error: %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr);
 		return;
 	}
