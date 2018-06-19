@@ -3,6 +3,9 @@
 // and restrictions contact your company contract manager.
 
 #include "JusticeIdentityFunctions.h"
+#include "WebBrowserModule.h"
+#include "IWebBrowserCookieManager.h"
+#include "IWebBrowserSingleton.h"
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
@@ -87,6 +90,14 @@ FString UJusticeIdentityFunctions::GetUserId()
 
 void UJusticeIdentityFunctions::LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete)
 {
+}
+
+void UJusticeIdentityFunctions::ClearCacheAndLocalStorage()
+{
+	IWebBrowserSingleton* WebModule = IWebBrowserModule::Get().GetSingleton();
+	TSharedPtr<IWebBrowserCookieManager> cookieMan = WebModule->GetCookieManager();
+	cookieMan->DeleteCookies("", "");
+	WebModule->DeleteBrowserCookies();
 }
 
 TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<ULinkedPlatform*> LinkedPlatforms)

@@ -33,6 +33,7 @@ public class JusticeSDK : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
+                "WebBrowser",
             }
 			);
 			

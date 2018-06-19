@@ -59,6 +59,10 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete);
 
+
+	UFUNCTION(BlueprintCallable, Category = "JusticeWebBrowserFunctions")
+		static void ClearCacheAndLocalStorage();
+
 	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
 		static TArray<ULinkedPlatform*> GetUnlinkedPlatforms(TArray<ULinkedPlatform*> LinkedPlatforms);
 
