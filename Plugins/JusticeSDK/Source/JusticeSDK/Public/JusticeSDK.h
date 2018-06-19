@@ -29,14 +29,6 @@ public:
 		return module;
 	}
 
-
-	//LogModuleManager: Warning: ModuleManager: Attempting to load 'JusticeSDK' outside the main thread.  
-	// This module was already loaded - so we didn't crash but this isn't safe.  
-	// Please call LoadModule on the main/game thread only.  
-	// You can use GetModule or GetModuleChecked instead, those are safe to call outside the game thread.
-
-
-
 	static inline bool IsAvailable()
 	{
 		return FModuleManager::Get().IsModuleLoaded("JusticeSDK");
@@ -45,8 +37,8 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	bool GameClientParseJson(FString json);
-	bool UserParseJson(FString json);
+	bool ParseClientToken(FString json);
+	bool ParseUserToken(FString json);
 
 	FString BaseURL;
 	FString Namespace;
@@ -54,13 +46,11 @@ public:
 	FString ClientSecret;
 	class FRunnableThread* OnlineAsyncTaskThread;
 	class FRunnableThread* RetryAsyncTaskThread;
-
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
-	FString LoginId;
+	FString LoginID;
 	FString Password;
 	UserProfileInfo* UserProfile;
-
 	FAsyncTaskManagerJustice* AsyncTaskManager;
 	FRetryTaskManagerJustice* RetryTaskManager;
 
@@ -72,12 +62,9 @@ private:
 #define FJusticeRefreshManager FJusticeSDKModule::Get().AsyncTaskManager
 #define FJusticeBaseURL FJusticeSDKModule::Get().BaseURL
 #define FJusticeNamespace FJusticeSDKModule::Get().Namespace
-
 #define FJusticeUserToken FJusticeSDKModule::Get().UserToken
 #define FJusticeGameClientToken FJusticeSDKModule::Get().GameClientToken
-
-#define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserId
-
+#define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserID
 
 #define INITIAL_WAIT 1
 #define INITIAL_ELAPSED_WAIT 0

@@ -25,7 +25,7 @@ public:
 		FGetItemByQueryOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Catalog"))
-		static UGetItemByQuery* GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size);
+		static UGetItemByQuery* GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size);
 
 	virtual void Activate() override;
 
@@ -35,6 +35,6 @@ private:
     FString CategoryPath;
     FString ItemType;
     FString Status;
-    int Page;
-    int Size;
+    int32 Page;
+    int32 Size;
 };

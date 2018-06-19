@@ -3,12 +3,3 @@
 // and restrictions contact your company contract manager.
 
 #include "RegionData.h"
-
-void URegionData::FromRegionData(RegionData regionData)
-{
-	// this->CurrencyCode = price.CurrencyCode;
-	// this->CurrencyType = price.CurrencyType;
-	// this->Value = price.Value;
-	// this->Namespace = price.Namespace;
-}
-

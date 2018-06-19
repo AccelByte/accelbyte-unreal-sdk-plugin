@@ -12,21 +12,21 @@ class OrderCreate : public FJsonSerializable
 {
 public:
 
-    FString itemId;
-	FString storeId;
-	int quantity;
-    int price;
-	int discountedPrice;
-    FString currencyCode;
-	FString returnUrl;
+    FString ItemID;
+	FString StoreID;
+	int32 Quantity;
+    int32 Price;
+	int32 DiscountedPrice;
+    FString CurrencyCode;
+	FString ReturnURL;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("itemId", itemId);
-		JSON_SERIALIZE("storeId", storeId);
-		JSON_SERIALIZE("quantity", quantity);	
-		JSON_SERIALIZE("price", price);
-		JSON_SERIALIZE("discountedPrice", discountedPrice);
-		JSON_SERIALIZE("currencyCode", currencyCode);
-		JSON_SERIALIZE("returnUrl", returnUrl);
+		JSON_SERIALIZE("itemId", ItemID);
+		JSON_SERIALIZE("storeId", StoreID);
+		JSON_SERIALIZE("quantity", Quantity);	
+		JSON_SERIALIZE("price", Price);
+		JSON_SERIALIZE("discountedPrice", DiscountedPrice);
+		JSON_SERIALIZE("currencyCode", CurrencyCode);
+		JSON_SERIALIZE("returnUrl", ReturnURL);
 	END_JSON_SERIALIZER
 };

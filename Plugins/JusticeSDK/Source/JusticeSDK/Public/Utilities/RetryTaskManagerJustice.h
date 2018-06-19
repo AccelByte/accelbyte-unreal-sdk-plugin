@@ -18,51 +18,50 @@
 class FJusticeRetryTask 
 {
 public:
-	FJusticeRetryTask(int wait, int elapsedWait):
-		Done(false), 
-		LastWait(wait),
-		ElapsedWait(elapsedWait)
+	FJusticeRetryTask(int32 Wait, int32 ElapsedWaitValue):
+		bDone(false), 
+		LastWait(Wait),
+		ElapsedWait(ElapsedWaitValue)
 	{
-		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(wait) + FTimespan::FromSeconds(FMath::RandRange(1, 60));
+		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(Wait) + FTimespan::FromSeconds(FMath::RandRange(1, 60));
 	}
 
 	virtual ~FJusticeRetryTask() {}
 
 	virtual bool IsDone()
 	{
-		return Done;
+		return bDone;
 	}
 
 	virtual bool WasSuccessful()
 	{
-		return Done;
+		return bDone;
 	}
 
 	virtual FString ToString() const { return TEXT("FJusticeRetryTask"); }
 
 	virtual void Tick() = 0;
 	FDateTime GetNextRetry() { return NextRetry; };
-	int GetTotalElapsedWait() { return ElapsedWait + LastWait; }
-	int GetElapsedWait() { return ElapsedWait; }
+	int32 GetTotalElapsedWait() { return ElapsedWait + LastWait; }
+	int32 GetElapsedWait() { return ElapsedWait; }
 
-	void SetAsDone() { Done = true; }
-	int GetNextWait() {return LastWait * 2;	}
+	void SetAsDone() { bDone = true; }
 
 private:
-	bool Done;
+	bool bDone;
 	FDateTime NextRetry;
-	int LastWait;
-	int ElapsedWait;
+	int32 LastWait;
+	int32 ElapsedWait;
 
 };
 
 class FWebRequestTask : public FJusticeRetryTask
 {
 public:
-	FWebRequestTask(FJusticeHttpRequestPtr request, int waitTime, FWebRequestResponseDelegate reponseDelegate)
-		: FJusticeRetryTask(waitTime, 0),
-		  Request(request),
-		  OnReponseDelegate(reponseDelegate)
+	FWebRequestTask(FJusticeHttpRequestPtr HttpRequest, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
+		: FJusticeRetryTask(WaitTime, 0),
+		  Request(HttpRequest),
+		  OnReponseDelegate(ReponseDelegate)
 	{}
 
 	FString GetTaskName() { return TEXT("ClientLogin"); }
@@ -81,7 +80,7 @@ private:
 
 
 /**
- *	Justice version of the async task manager to register the various Justice callbacks with the engine
+ *	Justice version of the async task manager to register the various retry Justice callbacks
  */
 class FRetryTaskManagerJustice : public FRunnable, FSingleThreadRunnable
 {
@@ -102,14 +101,7 @@ public:
 	virtual void Tick() {};
 	virtual void OnlineTick() ;
 	void AddQueue(FJusticeRetryTask* NewTask);
-
-	void AddQueue(FJusticeHttpRequestPtr Request, int WaitTime, FWebRequestResponseDelegate reponseDelegate)
-	{
-		FWebRequestTask* newTask = new FWebRequestTask(Request, WaitTime, reponseDelegate);
-		check(newTask);
-		AddQueue(newTask);
-	}
-
+	void AddQueue(FJusticeHttpRequestPtr Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate);
 	void ClearRetryQueue();
 
 private:	

@@ -13,16 +13,16 @@ class Transaction : public FJsonSerializable
 {
 public:
     FString txId ;
-    int amount ;
-	int vat;
-	int salesTax;
+    int32 amount ;
+	int32 vat;
+	int32 salesTax;
     CurrencySummary currency ;
     FString type ; //['CHARGE', 'REFUND'],
     FString status ; // ['INIT', 'FINISHED', 'FAILED'],
     FString provider ; //['XSOLLA', 'WALLET'],
-	int paymentProviderFee;
+	int32 paymentProviderFee;
     FString paymentMethod ;
-	int paymentMethodFee;
+	int32 paymentMethodFee;
     FString merchantId ;
     FString extTxId ;
     FString extStatusCode ;

@@ -12,7 +12,7 @@
 #include "Models/OrderInfo.h"
 #include "GetWalletBalance.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetWalletBalanceOutputPin, const int, WalletBalance);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetWalletBalanceOutputPin, const int32, WalletBalance);
 
 UCLASS()
 class JUSTICESDK_API UAsyncGetWalletBalance : public UBlueprintAsyncActionBase

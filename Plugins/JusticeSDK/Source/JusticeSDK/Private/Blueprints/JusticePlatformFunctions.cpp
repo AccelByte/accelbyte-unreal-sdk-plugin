@@ -13,8 +13,8 @@
 void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete)
 {
 	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, UserProfileInfo userInfo) {
-		UUserProfileJustice* UserProfile = NewObject<UUserProfileJustice>();
-		UserProfile->FromUserProfileInfo(userInfo);
+		UUserProfileJustice* UserProfile = UUserProfileJustice::Deserialize(userInfo);
+		check(UserProfile);
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString, UserProfile);
 	}));
 }

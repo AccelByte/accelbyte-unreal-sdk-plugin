@@ -32,8 +32,8 @@ void UAsyncUpdatePlayerProfile::Activate()
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Status = OldUserProfile->Status;
 
-	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorString) {
-		if (IsSuccess)
+	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{

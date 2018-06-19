@@ -8,7 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "JusticeWalletFunctions.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FGetWalletCompleteDelegate, bool, IsSuccess, int, Balance);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FGetWalletCompleteDelegate, bool, IsSuccess, int32, Balance);
 
 UCLASS()
 class JUSTICESDK_API UJusticeWalletFunctions : public UBlueprintFunctionLibrary

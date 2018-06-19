@@ -13,21 +13,21 @@ class RegionData : public FJsonSerializable
 {
 public:
 
-    int Price;
-    int DiscountPercentage;
-    int DiscountAmount;
-    int DiscountedPrice;
+    int32 Price;
+    int32 DiscountPercentage;
+    int32 DiscountAmount;
+    int32 DiscountedPrice;
     FString CurrencyCode;
     FString CurrencyType;
     FString CurrencyNamespace;
     FString PurchaseAt;
     FString ExpireAt;
-    int TotalNum;
-    int TotalNumPerAccount;
+    int32 TotalNum;
+    int32 TotalNumPerAccount;
     FString DiscountPurchaseAt;
     FString DiscountExpireAt;
-    int DiscountTotalNum;
-    int DiscountTotalNumPerAccount;
+    int32 DiscountTotalNum;
+    int32 DiscountTotalNumPerAccount;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("price", Price);
@@ -45,7 +45,6 @@ public:
         JSON_SERIALIZE("discountExpireAt", DiscountExpireAt);
         JSON_SERIALIZE("discountTotalNum", DiscountTotalNum);
         JSON_SERIALIZE("discountTotalNumPerAccount", DiscountTotalNumPerAccount);
-
 	END_JSON_SERIALIZER
 };
 
@@ -54,14 +53,4 @@ UCLASS()
 class URegionData : public UObject, public RegionData
 {
 	GENERATED_BODY()	
-
-	// UFUNCTION(BlueprintPure, Category = "Price")
-	// 	FString GetCurrency() { return CurrencyCode; };
-
-	// UFUNCTION(BlueprintPure, Category = "Price")
-	// 	int GetValue() { return Value; };
-
-public:
-	void FromRegionData(RegionData regionData);
-
 };

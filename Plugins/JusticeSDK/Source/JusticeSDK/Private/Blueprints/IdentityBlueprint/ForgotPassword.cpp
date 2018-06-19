@@ -5,28 +5,28 @@
 #include "Blueprints/IdentityBlueprint/ForgotPassword.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncForgotPassword * UAsyncForgotPassword::ForgotPassword(FString LoginId)
+UAsyncForgotPassword * UAsyncForgotPassword::ForgotPassword(FString LoginID)
 {
 	UAsyncForgotPassword* Node = NewObject<UAsyncForgotPassword>();
-	Node->LoginId = LoginId;
+	Node->LoginID = LoginID;
 	return Node;
 }
 
 void UAsyncForgotPassword::Activate()
 {
-	JusticeIdentity::ForgotPassword(this->LoginId, FForgotPasswordCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::ForgotPassword(this->LoginID, FForgotPasswordCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast();
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast();
+				OnFailed.Broadcast(ErrorStr);
 			}
 		}
 	}));

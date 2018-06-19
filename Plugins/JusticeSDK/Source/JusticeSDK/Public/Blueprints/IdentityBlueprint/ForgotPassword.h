@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "ForgotPassword.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FForgotPasswordOutputPin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FForgotPasswordOutputPin, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncForgotPassword : public UBlueprintAsyncActionBase
@@ -24,10 +24,10 @@ public:
 		FForgotPasswordOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncForgotPassword* ForgotPassword(FString LoginId);
+		static UAsyncForgotPassword* ForgotPassword(FString LoginID);
 
 	virtual void Activate() override;
 
 private:
-    FString LoginId;
+    FString LoginID;
 };

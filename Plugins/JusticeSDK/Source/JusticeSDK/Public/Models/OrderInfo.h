@@ -10,6 +10,7 @@
 #include "Transaction.h"
 #include "PaymentUrl.h"
 #include "CurrencySummary.h"
+#include "JusticeBaseModel.h"
 #include "OrderInfo.generated.h"
 
 class OrderInfo : public FJsonSerializable
@@ -18,17 +19,17 @@ public:
 	OrderInfo() {}
 
 	FString OrderNo;
-	FString UserId;
-	FString ItemId ;
+	FString UserID;
+	FString ItemID ;
 	FString StoreId;
-	bool Sandbox;
-	bool Quantity;
-	int Price;
-	int DiscountedPrice;
-	int Vat;
-	int SalesTax;
-	int PaymentProviderFee;
-	int PaymentMethodFee;
+	bool bSandbox;
+	int32 Quantity;
+	int32 Price;
+	int32 DiscountedPrice;
+	int32 Vat;
+	int32 SalesTax;
+	int32 PaymentProviderFee;
+	int32 PaymentMethodFee;
 	CurrencySummary Currency ;
 	PaymentUrl PaymentUrl;
 	TArray<Transaction> Transactions;
@@ -45,10 +46,10 @@ public:
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("orderNo", OrderNo);
-		JSON_SERIALIZE("userId", UserId);
-		JSON_SERIALIZE("itemId", ItemId);
+		JSON_SERIALIZE("userId", UserID);
+		JSON_SERIALIZE("itemId", ItemID);
 		JSON_SERIALIZE("storeId", StoreId);
-		JSON_SERIALIZE("sandbox", Sandbox);
+		JSON_SERIALIZE("sandbox", bSandbox);
 		JSON_SERIALIZE("quantity", Quantity);
 		JSON_SERIALIZE("price", Price);
 		JSON_SERIALIZE("discountedPrice", DiscountedPrice);
@@ -75,19 +76,17 @@ public:
 
 
 UCLASS()
-class UOrderInfo : public UObject, public OrderInfo
+class UOrderInfo : public UObject, public OrderInfo, public JusticeBaseModel<UOrderInfo, OrderInfo>
 {
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
-		FString GetItemId() { return ItemId; };
+		FString GetItemId() { return ItemID; };
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
-		int GetPrice() { return Price; };
+		int32 GetPrice() { return Price; };
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
 		FString GetPaymenUrl() { return PaymentUrl.paymentUrl; };
-public:
-		void FromOrderInfo(OrderInfo order);
 		
 };

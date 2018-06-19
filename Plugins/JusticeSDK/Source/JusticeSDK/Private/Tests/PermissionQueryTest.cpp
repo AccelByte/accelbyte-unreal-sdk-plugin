@@ -5,7 +5,7 @@
 #include "AutomationTest.h"
 #include "Public/Models/UserOnlineAccountJustice.h"
 
-const int AutomationPermissionFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
+const int32 AutomationPermissionFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter); 
 // Context: EditorContext (run via editor cli) ClientContext (run via external cli)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWildcardMatchOnQueryCW, "JusticeTest.Permission.WildcardMatch.OnQuery.ConsecutiveWildcard", AutomationPermissionFlagMask);

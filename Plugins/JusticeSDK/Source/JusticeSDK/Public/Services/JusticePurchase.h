@@ -13,14 +13,14 @@
 #include "Utilities/HTTPJustice.h"
 #include "Models/OrderInfo.h"
 
-DECLARE_DELEGATE_ThreeParams(FCreateNewOrderCompleteDelegate, bool, FString, OrderInfo);
+DECLARE_DELEGATE_ThreeParams(FCreateNewOrderCompleteDelegate, bool, FString, OrderInfo*);
 
 class JUSTICESDK_API JusticePurchase
 {
 
 public:
-	static void CreateNewOrder(FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId, FCreateNewOrderCompleteDelegate OnComplete);
+	static void CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FString StoreId, FCreateNewOrderCompleteDelegate OnComplete);
 private:
-	static void OnCreateNewOrderComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FCreateNewOrderCompleteDelegate OnComplete, FString itemId, int Price, int DiscountedPrice, FString Currency, FString StoreId);
+	static void OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response, FCreateNewOrderCompleteDelegate OnComplete);
 };
 

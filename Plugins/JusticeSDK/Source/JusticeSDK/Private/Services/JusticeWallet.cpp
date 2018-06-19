@@ -6,87 +6,112 @@
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
+#include "Services/JusticeIdentity.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Utilities/HTTPJustice.h"
 #include "Models/WalletInfo.h"
 
 void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete)
 {
-	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
-	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	FString UserID = FJusticeSDKModule::Get().UserToken->UserId;
+	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *CurrencyCode);
+	FString Verb			= GET;
+	FString ContentType		= TYPE_JSON;
+	FString Accept			= TYPE_JSON;
+	FString Payload			= TEXT("");
 
-	Request->SetURL(FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *BaseURL, *Namespace, *UserID, *CurrencyCode));	
-	Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BearerAuth(FJusticeSDKModule::Get().UserToken->AccessToken));
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-	UE_LOG(LogJustice, Log, TEXT("Attemp to call GetWalletBalance: %s"), *Request->GetURL());
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
 
-	Request->OnProcessRequestComplete().BindStatic(JusticeWallet::OnGetWalletBalanceComplete, RequestTrace, OnComplete, CurrencyCode);
-	if (!Request->ProcessRequest())
-	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	}
-	if (!ErrorStr.IsEmpty())
-	{
-		//UE_LOG(LogJustice, Warning, TEXT("JusticeWallet::GetWalletBalance failed. Error=%s XrayID=%s ReqTime=%.3f"), *ErrorStr, *RequestTrace->ToString(), Request->GetElapsedTime());
-		OnComplete.ExecuteIfBound(false, 0);
-	}
 }
-void JusticeWallet::OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete, FString CurrencyCode)
+void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	if (!bSuccessful || !Response.IsValid())
+	if (!Response->ErrorString.IsEmpty())
 	{
-		ErrorStr = TEXT("request failed");
+		UE_LOG(LogJustice, Error, TEXT("Get wallet balance Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, 0);
+		return;
 	}
-	else
+	switch (Response->Code)
 	{
-		switch (Response->GetResponseCode())
+	case EHttpResponseCodes::Ok:
+	{
+		WalletInfo* wallet = new WalletInfo();
+		if (wallet->FromJson(Response->Content))
 		{
-		case EHttpResponseCodes::Ok:
+			OnComplete.ExecuteIfBound(true, wallet->balance);
+		}
+		else
 		{
-			FString ResponseStr = Response->GetContentAsString();
-			TSharedPtr<FJsonObject> JsonObject;
-			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-			{				
-				WalletInfo* wallet = new WalletInfo();				
-				if (wallet->FromJson(JsonObject))
+			ErrorStr = TEXT("unable to deserialize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Token->Bans.Num() > 0)
 				{
-					OnComplete.ExecuteIfBound(true, wallet->balance);					
+					FString bansList = FString::Join(Token->Bans, TEXT(","));
+					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					OnComplete.ExecuteIfBound(false, 0);
 				}
 				else
 				{
-					ErrorStr = TEXT("unable to deserlize response from server");
+					if (Response->TooManyRetries() || Response->TakesTooLong())
+					{
+						OnComplete.ExecuteIfBound(false, 0);
+						return;
+					}
+					Response->UpdateRequestForNextRetry();
+					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+						Response->NextWait,
+						FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
+					return;
 				}
 			}
 			else
 			{
-				ErrorStr = TEXT("unable to deserlize response from server");
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, 0);
+				return;
 			}
-			break;
-		}
-		case EHttpResponseCodes::Denied:
-		case EHttpResponseCodes::RequestTimeout:
-		case EHttpResponseCodes::ServerError:
-		case EHttpResponseCodes::ServiceUnavail:
-		case EHttpResponseCodes::GatewayTimeout:
+		}));
+		return;
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			JusticeWallet::GetWalletBalance(CurrencyCode, OnComplete);
+			OnComplete.ExecuteIfBound(false, 0);
 			return;
 		}
-		default:
-			ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d, response content=%s"), Response->GetResponseCode(), *Response->GetContentAsString());
-		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
+		return;
 	}
+	default:
+		ErrorStr = FString::Printf(TEXT("Unexpected Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+	}
+	
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("GetJusticeWallet::GetWalletBalance Error : %s"), *ErrorStr);
+		UE_LOG(LogJustice, Error, TEXT("Get Wallet Balance Error : %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, 0);
 		return;
 	}

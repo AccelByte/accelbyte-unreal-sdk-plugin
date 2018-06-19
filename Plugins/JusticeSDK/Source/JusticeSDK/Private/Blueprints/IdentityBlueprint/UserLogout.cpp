@@ -13,19 +13,19 @@ UAsyncUserLogout * UAsyncUserLogout::UserLogout()
 
 void UAsyncUserLogout::Activate()
 {
-	JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast();
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast();
+				OnFailed.Broadcast(ErrorStr);
 			}
 		}		
 	}));

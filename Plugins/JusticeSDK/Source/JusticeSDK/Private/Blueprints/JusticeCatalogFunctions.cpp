@@ -5,19 +5,19 @@
 #include "JusticeCatalogFunctions.h"
 #include "JusticeCatalog.h"
 
-void UJusticeCatalogFunctions::GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDynamicDelegate OnComplete)
+void UJusticeCatalogFunctions::GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDynamicDelegate OnComplete)
 {
-	JusticeCatalog::GetItemByQuery(language, region, CategoryPath, itemType, status, page, size, FItemCompleteDelegate::CreateLambda([OnComplete](bool isSuccess, FString errorString, TArray<ItemInfo> result) {
-		TArray<UItemInfo*> Result;
-		if (isSuccess)
+	JusticeCatalog::GetItemByQuery(Language, Region, CategoryPath, ItemType, Status, Page, Size, FItemCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorString, TArray<ItemInfo> Result) {
+		TArray<UItemInfo*> FinalResult;
+		if (bSuccessful)
 		{
-			for (int i = 0; i < result.Num(); i++)
+			for (int32 i = 0; i < Result.Num(); i++)
 			{
-				UItemInfo* item = UItemInfo::Deserialize(result[i]);
-				check(item);
-				Result.Add(item);
+				UItemInfo* Item = UItemInfo::Deserialize(Result[i]);
+				check(Item);
+				FinalResult.Add(Item);
 			}
 		}
-		OnComplete.ExecuteIfBound(isSuccess, errorString, Result);
+		OnComplete.ExecuteIfBound(bSuccessful, ErrorString, FinalResult);
 	}));
 }

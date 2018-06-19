@@ -15,17 +15,17 @@ class UserCreateResponse: public FJsonSerializable
 {
 public:
 	FString Namespace;
-	FString UserId;
+	FString UserID;
 	FString AuthType;
 	FString DisplayName;
-	FString LoginId;
+	FString LoginID;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("Namespace", Namespace);
-		JSON_SERIALIZE("UserId", UserId);
+		JSON_SERIALIZE("UserId", UserID);
 		JSON_SERIALIZE("AuthType", AuthType);
 		JSON_SERIALIZE("DisplayName", DisplayName);
-		JSON_SERIALIZE("LoginId", LoginId);
+		JSON_SERIALIZE("LoginId", LoginID);
 	END_JSON_SERIALIZER
 };
 
@@ -40,7 +40,7 @@ public:
 		FString Namespace;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString UserId;
+		FString UserID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
 		FString AuthType;
@@ -49,5 +49,5 @@ public:
 		FString DisplayName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString LoginId;
+		FString LoginID;
 };

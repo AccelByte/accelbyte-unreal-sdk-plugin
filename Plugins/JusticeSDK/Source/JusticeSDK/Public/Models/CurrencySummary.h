@@ -14,7 +14,7 @@ public:
     FString CurrencyCode ;
     FString CurrencyType ;
     FString Namespace ;
-    int Decimals ;
+    int32 Decimals ;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("currencyCode", CurrencyCode);

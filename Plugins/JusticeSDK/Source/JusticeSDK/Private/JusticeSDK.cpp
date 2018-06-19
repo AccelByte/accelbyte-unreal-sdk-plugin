@@ -55,7 +55,7 @@ void FJusticeSDKModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 }
-bool FJusticeSDKModule::GameClientParseJson(FString json)
+bool FJusticeSDKModule::ParseClientToken(FString json)
 {
 	FScopeLock lock(&GameClientCritical);
 	if (GameClientToken->FromJson(json))
@@ -65,7 +65,7 @@ bool FJusticeSDKModule::GameClientParseJson(FString json)
 	return false;
 }
 
-bool FJusticeSDKModule::UserParseJson(FString json)
+bool FJusticeSDKModule::ParseUserToken(FString json)
 {
 	if (FJusticeSDKModule::Get().UserToken->FromJson(json))
 	{

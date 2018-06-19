@@ -22,7 +22,7 @@ struct JusticeHttpRequest
 	FString Content;
 	//FWebRequestResponseDelegate OnResponse;
 
-	int RetryAttempt;
+	int32 RetryAttempt;
 	float ElapsedTime;
 };
 typedef TSharedPtr<JusticeHttpRequest> FJusticeHttpRequestPtr;
@@ -40,7 +40,7 @@ struct JusticeHttpResponse
 	bool bSuccessful;
 
 	FJusticeHttpRequestPtr JusticeRequest;
-	int NextWait;
+	int32 NextWait;
 
 	void UpdateRequestForNextRetry()
 	{

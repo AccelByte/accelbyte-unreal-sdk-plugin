@@ -21,10 +21,10 @@ class JUSTICESDK_API JusticeCatalog
 public:
 	static void GetRootCategory(FString Language, FGetRootCategoryCompleteDelegate OnComplete);
 	static void GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete);
-	static void GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDelegate OnComplete);
+	static void GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
 
 private:
-	static void OnGetRootCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
-	static void OnGetCategoryComplete(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
-	static void OnGetItemByQueryComplete(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete);
+	static void OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete);
+	static void OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete);
 };

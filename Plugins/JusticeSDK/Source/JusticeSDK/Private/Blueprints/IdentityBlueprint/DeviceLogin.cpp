@@ -13,19 +13,19 @@ UAsyncDeviceLogin * UAsyncDeviceLogin::DeviceLogin()
 
 void UAsyncDeviceLogin::Activate()
 {
-	JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr, OAuthTokenJustice* Token) {
-		if (IsSuccess)
+	JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token));
+				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token), TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(nullptr);
+				OnFailed.Broadcast(nullptr, ErrorStr);
 			}
 		}
 	}));

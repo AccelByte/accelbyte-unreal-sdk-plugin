@@ -5,17 +5,17 @@
 #include "Blueprints/IdentityBlueprint/UnlinkPlatform.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncUnlinkPlatform * UAsyncUnlinkPlatform::UnlinkPlatform(FString PlatformId)
+UAsyncUnlinkPlatform * UAsyncUnlinkPlatform::UnlinkPlatform(FString PlatformID)
 {
 	UAsyncUnlinkPlatform* Node = NewObject<UAsyncUnlinkPlatform>();
-	Node->PlatformId = PlatformId;
+	Node->PlatformID = PlatformID;
 	return Node;
 }
 
 void UAsyncUnlinkPlatform::Activate()
 {
-	JusticeIdentity::UnlinkPlatform(this->PlatformId, FUnlinkPlatformCompleteDelegate::CreateLambda([&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::UnlinkPlatform(this->PlatformID, FUnlinkPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{

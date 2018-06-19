@@ -10,7 +10,7 @@
 #include "Services/JusticeIdentity.h"
 #include "RegisterNewPlayer.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRegisterPlayerOutputPin, const UUserCreateResponse*, CreateResponse);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRegisterPlayerOutputPin, const UUserCreateResponse*, CreateResponse, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncRegisterNewPlayer : public UBlueprintAsyncActionBase
@@ -25,12 +25,12 @@ public:
 		FRegisterPlayerOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncRegisterNewPlayer* RegisterNewPlayer(FString UserId, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType);
+		static UAsyncRegisterNewPlayer* RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType);
 
 	virtual void Activate() override;
 
 private:
-    FString UserId;
+    FString UserID;
     FString Password;
     FString DisplayName;
 	FUserAuthTypeJustice AuthType;

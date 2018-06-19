@@ -21,13 +21,13 @@ public:
 	FString LongDescription;
 	TArray<JusticeImage> Images;
 	JusticeImage ThumbnailImage;
-	FString ItemId;
+	FString ItemID;
 	FString AppId;
 	FString Namespace;
 	FString StoreId;
 	FString EntitlementName;
 	FString EntitlementType;
-	int UseCount;
+	int32 UseCount;
 	FString CategoryPath;
 	FString Status;
 	FString ItemType;
@@ -43,7 +43,7 @@ public:
 		JSON_SERIALIZE("longDescription", LongDescription);
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
-		JSON_SERIALIZE("itemId", ItemId);
+		JSON_SERIALIZE("itemId", ItemID);
 		JSON_SERIALIZE("appId", AppId);
 		JSON_SERIALIZE("namespace", Namespace);
 		JSON_SERIALIZE("storeId", StoreId);
@@ -67,7 +67,7 @@ class UItemInfo : public UObject, public ItemInfo, public JusticeBaseModel<UItem
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		FString GetItemId() { return ItemId; };
+		FString GetItemId() { return ItemID; };
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetTitle() { return Title; };
@@ -78,12 +78,11 @@ class UItemInfo : public UObject, public ItemInfo, public JusticeBaseModel<UItem
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetCurrencyCode() { return RegionDatas[0].CurrencyCode; };
 
+	UFUNCTION(BlueprintPure, Category = "ItemInfo")
+		int32 GetPrice() { return RegionDatas[0].Price; };
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		int GetPrice() { return RegionDatas[0].Price; };
-
-	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		int GetDiscountedPrice() { return RegionDatas[0].DiscountedPrice; };
+		int32 GetDiscountedPrice() { return RegionDatas[0].DiscountedPrice; };
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		FString GetStoreID() { return StoreId; };

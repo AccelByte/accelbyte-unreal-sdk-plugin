@@ -14,7 +14,7 @@
 #include "Utilities/JusticeLog.h"
 #include "Models/Category.h"
 
-DECLARE_DELEGATE_TwoParams(FGetWalletBalanceCompleteDelegate, bool, int);
+DECLARE_DELEGATE_TwoParams(FGetWalletBalanceCompleteDelegate, bool, int32);
 
 class JUSTICESDK_API JusticeWallet
 {
@@ -22,6 +22,6 @@ public:
 	static void GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete);
 	
 private:
-	static void OnGetWalletBalanceComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FGetWalletBalanceCompleteDelegate OnComplete, FString CurrencyCode);
+	static void OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete);
 };
 

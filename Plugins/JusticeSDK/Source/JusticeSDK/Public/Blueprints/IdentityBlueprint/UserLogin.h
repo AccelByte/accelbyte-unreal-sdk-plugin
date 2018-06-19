@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "UserLogin.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLoginOutputPin, const UOAuthTokenJustice*, Token);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FLoginOutputPin, const UOAuthTokenJustice*, Token, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncUserLogin : public UBlueprintAsyncActionBase
@@ -24,11 +24,11 @@ public:
 		FLoginOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Identity"))
-		static UAsyncUserLogin* UserLogin(FString UserId, FString Password);
+		static UAsyncUserLogin* UserLogin(FString UserID, FString Password);
 
 	virtual void Activate() override;
 
 private:
-	FString UserId;
+	FString UserID;
 	FString Password;	
 };

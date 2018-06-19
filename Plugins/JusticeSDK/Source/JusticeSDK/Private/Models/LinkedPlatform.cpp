@@ -3,11 +3,3 @@
 // and restrictions contact your company contract manager.
 
 #include "LinkedPlatform.h"
-
-void ULinkedPlatform::FromLinkedPlatform(LinkedPlatform linkedPlatform)
-{
-	this->PlatformId		= linkedPlatform.PlatformId;
-	this->PlatformUserId	= linkedPlatform.PlatformUserId;
-	this->Namespace			= linkedPlatform.Namespace;
-	this->UserId		=	 linkedPlatform.UserId;
-}

@@ -5,18 +5,18 @@
 #include "Blueprints/IdentityBlueprint/ReissueVerificationCode.h"
 #include "Services/JusticeIdentity.h"
 
-UAsyncReissueVerificationCode * UAsyncReissueVerificationCode::ReissueVerificationCode(FString UserId, FString LoginId)
+UAsyncReissueVerificationCode * UAsyncReissueVerificationCode::ReissueVerificationCode(FString UserID, FString LoginID)
 {
 	UAsyncReissueVerificationCode* Node = NewObject<UAsyncReissueVerificationCode>();
-	Node->UserId = UserId;
-	Node->LoginId = LoginId;
+	Node->UserID = UserID;
+	Node->LoginID = LoginID;
 	return Node;
 }
 
 void UAsyncReissueVerificationCode::Activate()
 {
-	JusticeIdentity::ReissueVerificationCode(this->UserId, this->LoginId, FVerifyNewPlayerCompleteDelegate::CreateLambda( [&](bool IsSuccess, FString ErrorStr) {
-		if (IsSuccess)
+	JusticeIdentity::ReissueVerificationCode(this->UserID, this->LoginID, FVerifyNewPlayerCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{

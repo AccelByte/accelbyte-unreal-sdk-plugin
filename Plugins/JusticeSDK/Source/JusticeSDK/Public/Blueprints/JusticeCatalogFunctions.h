@@ -11,7 +11,7 @@
 #include "Models/ItemInfo.h"
 #include "JusticeCatalogFunctions.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, IsSuccess, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FItemCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr, const TArray<UItemInfo*>&, ItemArray);
 
 UCLASS()
 class JUSTICESDK_API UJusticeCatalogFunctions : public UBlueprintFunctionLibrary
@@ -19,6 +19,6 @@ class JUSTICESDK_API UJusticeCatalogFunctions : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeCatalogFunctions")
-	static void GetItemByQuery(FString language, FString region, FString CategoryPath, FString itemType, FString status, int page, int size, FItemCompleteDynamicDelegate OnComplete);
+	static void GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDynamicDelegate OnComplete);
 	
 };

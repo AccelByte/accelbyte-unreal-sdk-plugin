@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "UserLogout.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLogoutOutputPin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLogoutOutputPin, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncUserLogout : public UBlueprintAsyncActionBase
