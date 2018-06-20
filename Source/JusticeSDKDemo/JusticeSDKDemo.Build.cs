@@ -10,7 +10,7 @@ public class JusticeSDKDemo : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "JusticeSDK" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "JusticeSDK",  "Json", "JsonUtilities", });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem" });
 

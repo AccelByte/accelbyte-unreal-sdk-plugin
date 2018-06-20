@@ -8,6 +8,8 @@
 #include "Misc/AssertionMacros.h"
 #include "GameFramework/GameModeBase.h"
 #include "Online.h"
+#include "Models/TelemetryEvent.h"
+#include "Models/TelemetryEventDataExample.h"
 #include "JusticeIdentity.h"
 #include "JusticeSDKDemoGameModeBase.generated.h"
 
