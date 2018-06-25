@@ -48,6 +48,8 @@ public:
 	class FRunnableThread* RetryAsyncTaskThread;
 	FString GooglePlatformURL;
 	FString GoogleRedirectURL;
+	FString FacebookPlatformURL;
+	FString FacebookRedirectURL;
 
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
@@ -71,6 +73,8 @@ private:
 
 #define FGooglePlatformURL FJusticeSDKModule::Get().GooglePlatformURL
 #define FGoogleRedirectURL FJusticeSDKModule::Get().GoogleRedirectURL
+#define FFacebookPlatformURL FJusticeSDKModule::Get().FacebookPlatformURL
+#define FFacebookRedirectURL FJusticeSDKModule::Get().FacebookRedirectURL
 
 #define INITIAL_WAIT 1
 #define INITIAL_ELAPSED_WAIT 0

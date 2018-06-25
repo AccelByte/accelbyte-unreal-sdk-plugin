@@ -145,6 +145,10 @@ FString UJusticeIdentityFunctions::GetPlatformPageURL(FString PlatformID)
 	{
 		PlatformPage = *FGooglePlatformURL;
 	} 
+	else if (PlatformID == TEXT("facebook"))
+	{
+		PlatformPage = *FFacebookPlatformURL;
+	}
 
 	return PlatformPage;
 }
@@ -157,6 +161,10 @@ FString UJusticeIdentityFunctions::GetPlatformRedirectURL(FString PlatformID)
 	{
 		RedirectURL = *FGoogleRedirectURL;
 	} 
+	else if (PlatformID == TEXT("facebook"))
+	{
+		RedirectURL = *FFacebookRedirectURL;
+	}
 
 	return RedirectURL;
 }

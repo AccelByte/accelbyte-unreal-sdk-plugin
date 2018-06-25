@@ -42,7 +42,17 @@ void FJusticeSDKModule::StartupModule()
 		UE_LOG(LogJustice, Error, TEXT("Missing GoogleRedirectURL= in [PlatformURL] of DefaultEngine.ini"));
 		IsInitialized = false;
 	}
-	
+	if (!GConfig->GetString(TEXT("PlatformURL"), TEXT("FacebookPlatformURL"), FacebookPlatformURL, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing FacebookPlatformURL= in [PlatformURL] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
+	if (!GConfig->GetString(TEXT("PlatformURL"), TEXT("FacebookRedirectURL"), FacebookRedirectURL, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing FacebookRedirectURL= in [PlatformURL] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
+
 	GameClientToken = new OAuthTokenJustice;
 	UserToken = new OAuthTokenJustice;
 	UserProfile = new UserProfileInfo;
