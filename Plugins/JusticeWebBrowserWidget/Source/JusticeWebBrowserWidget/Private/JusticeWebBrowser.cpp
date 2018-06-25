@@ -74,6 +74,12 @@ void UJusticeWebBrowser::LoadURL(FString NewURL)
 	}
 }
 
+
+void UJusticeWebBrowser::SetRedirectSuccessURL(FString NewURL)
+{
+	RedirectSuccessUrl = NewURL;
+}
+
 void UJusticeWebBrowser::LoadString(FString Contents, FString DummyURL)
 {
 	if ( WebBrowserWidget.IsValid() )
@@ -158,7 +164,9 @@ void UJusticeWebBrowser::HandleOnUrlChanged(const FText& InText)
 	OnUrlChanged.Broadcast(InText);
 	if (InText.ToString().Contains(RedirectSuccessUrl))
 	{
-		OnRedirectSuccess.Broadcast(InText);
+		FString URL = InText.ToString();
+		FString Token = URL.Replace(*RedirectSuccessUrl, TEXT(""));
+		OnRedirectSuccess.Broadcast(InText, FText::FromString(Token) );
 	}
 }
 

@@ -16,7 +16,8 @@ class JUSTICEWEBBROWSERWIDGET_API UJusticeWebBrowser : public UWidget
 	GENERATED_UCLASS_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUrlChanged, const FText&, Text);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUrlChanged, const FText&, URL);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRedirectSuccess, const FText&, NewURL, const FText&, Token);
 
 	/**
 	 * Load the specified URL
@@ -25,6 +26,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category="Justice Web Browser")
 	void LoadURL(FString NewURL);
+
+	UFUNCTION(BlueprintCallable, Category = "Justice Web Browser")
+	void SetRedirectSuccessURL(FString NewURL);
 
 	/**
 	 * Load a string as data to create a web page
@@ -66,7 +70,7 @@ public:
 	FOnUrlChanged OnUrlChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Justice Web Browser|Event")
-	FOnUrlChanged OnRedirectSuccess;
+	FOnRedirectSuccess OnRedirectSuccess;
 
 	UPROPERTY(BlueprintAssignable, Category = "Justice Web Browser|Event")
 	FOnUrlChanged OnJusticeWebLoggedIn;

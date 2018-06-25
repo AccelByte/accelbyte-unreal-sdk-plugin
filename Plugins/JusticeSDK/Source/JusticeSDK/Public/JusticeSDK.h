@@ -46,6 +46,9 @@ public:
 	FString ClientSecret;
 	class FRunnableThread* OnlineAsyncTaskThread;
 	class FRunnableThread* RetryAsyncTaskThread;
+	FString GooglePlatformURL;
+	FString GoogleRedirectURL;
+
 	OAuthTokenJustice*	GameClientToken;
 	OAuthTokenJustice* UserToken;
 	FString LoginID;
@@ -65,6 +68,9 @@ private:
 #define FJusticeUserToken FJusticeSDKModule::Get().UserToken
 #define FJusticeGameClientToken FJusticeSDKModule::Get().GameClientToken
 #define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserID
+
+#define FGooglePlatformURL FJusticeSDKModule::Get().GooglePlatformURL
+#define FGoogleRedirectURL FJusticeSDKModule::Get().GoogleRedirectURL
 
 #define INITIAL_WAIT 1
 #define INITIAL_ELAPSED_WAIT 0

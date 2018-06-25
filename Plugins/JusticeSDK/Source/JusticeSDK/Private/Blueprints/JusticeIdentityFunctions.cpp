@@ -88,3 +88,75 @@ FString UJusticeIdentityFunctions::GetUserId()
 void UJusticeIdentityFunctions::LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete)
 {
 }
+
+TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<ULinkedPlatform*> LinkedPlatforms)
+{
+	TArray<ULinkedPlatform*> UUnlinkedPlatforms = UJusticeIdentityFunctions::GetCompleteListOfPlatforms();
+	for (int32 i = 0; i < LinkedPlatforms.Num(); i++)
+	{
+		for (int32 j = 0; j < UUnlinkedPlatforms.Num(); j++)
+		{
+			FString LinkedPlatformID = LinkedPlatforms[i]->PlatformID;
+			FString CompletePlatformID = UUnlinkedPlatforms[j]->PlatformID;
+			if (LinkedPlatformID == CompletePlatformID)
+			{
+				UUnlinkedPlatforms.RemoveAt(j);
+			}
+		}
+	}
+	return UUnlinkedPlatforms;
+}
+
+TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetCompleteListOfPlatforms()
+{
+	LinkedPlatform DevicePlatform;
+	LinkedPlatform GooglePlatform;
+	LinkedPlatform FacebookPlatform;
+	LinkedPlatform TwitchPlatform;
+	LinkedPlatform OculusPlatform;
+	DevicePlatform.PlatformID = TEXT("device");
+	GooglePlatform.PlatformID = TEXT("google");
+	FacebookPlatform.PlatformID = TEXT("facebook");
+	TwitchPlatform.PlatformID = TEXT("twitch");
+	OculusPlatform.PlatformID = TEXT("twitter");
+
+	TArray<LinkedPlatform> CompletePlatforms;
+	CompletePlatforms.Add(DevicePlatform);
+	CompletePlatforms.Add(GooglePlatform);
+	CompletePlatforms.Add(FacebookPlatform);
+	CompletePlatforms.Add(TwitchPlatform);
+	CompletePlatforms.Add(OculusPlatform);
+
+	TArray<ULinkedPlatform*> UCompletePlatforms;
+	for (int32 i = 0; i < CompletePlatforms.Num(); i++)
+	{
+		ULinkedPlatform* platform = ULinkedPlatform::Deserialize(CompletePlatforms[i]);
+		UCompletePlatforms.Add(platform);
+	}
+
+	return UCompletePlatforms;
+}
+
+FString UJusticeIdentityFunctions::GetPlatformPageURL(FString PlatformID)
+{
+	FString PlatformPage = TEXT("");
+
+	if (PlatformID == TEXT("google"))
+	{
+		PlatformPage = *FGooglePlatformURL;
+	} 
+
+	return PlatformPage;
+}
+
+FString UJusticeIdentityFunctions::GetPlatformRedirectURL(FString PlatformID)
+{
+	FString RedirectURL = TEXT("");
+
+	if (PlatformID == TEXT("google"))
+	{
+		RedirectURL = *FGoogleRedirectURL;
+	} 
+
+	return RedirectURL;
+}

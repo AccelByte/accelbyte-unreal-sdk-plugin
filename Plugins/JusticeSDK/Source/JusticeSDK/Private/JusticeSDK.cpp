@@ -32,6 +32,16 @@ void FJusticeSDKModule::StartupModule()
 		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [JusticeSDK] of DefaultEngine.ini"));
 		IsInitialized = false;
 	}
+	if (!GConfig->GetString(TEXT("PlatformURL"), TEXT("GooglePlatformURL"), GooglePlatformURL, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing GooglePlatformURL= in [PlatformURL] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
+	if (!GConfig->GetString(TEXT("PlatformURL"), TEXT("GoogleRedirectURL"), GoogleRedirectURL, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing GoogleRedirectURL= in [PlatformURL] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
 	
 	GameClientToken = new OAuthTokenJustice;
 	UserToken = new OAuthTokenJustice;
