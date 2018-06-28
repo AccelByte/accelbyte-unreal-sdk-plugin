@@ -93,7 +93,7 @@ void FJusticeHTTP::CreateRequest(FJusticeHttpRequestPtr JusticeRequest, FWebRequ
 	JusticeResponse->AmazonTraceID = AmazonTraceID;
 	JusticeResponse->JusticeRequest = JusticeRequest;
 
-	Request->OnProcessRequestComplete().BindLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful) {
+	Request->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful) {
 		JusticeResponse->Request = Request;
 		JusticeResponse->Response = Response;
 		JusticeResponse->bSuccessful = bSuccessful;

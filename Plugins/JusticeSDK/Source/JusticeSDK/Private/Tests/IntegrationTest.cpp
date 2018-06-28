@@ -60,7 +60,7 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 	bool isLoginDone = false;
 	bool isLoginSuccess = false;
 	bool isDone = false;
-	bool bSuccessful = false;
+	bool bTestSuccessful = false;
 	bool isDeleteDone = false;
 	bool isDeleteSuccess = false;
 	double LastTime;
@@ -99,11 +99,11 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bSuccessful](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
-		bSuccessful = bSuccessful;
+		bTestSuccessful = bSuccessful;
 	});
 	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
 
@@ -150,7 +150,7 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 	bool isLoginDone = false;
 	bool isLoginSuccess = false;
 	bool isDone = false;
-	bool bSuccessful = false;
+	bool bTestSuccessful = false;
 	bool isDeleteDone = false;
 	bool isDeleteSuccess = false;
 	double LastTime;
@@ -189,11 +189,11 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bSuccessful](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
-		bSuccessful = bSuccessful;
+		bTestSuccessful = bSuccessful;
 	});
 	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
 
