@@ -75,7 +75,8 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr);
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -101,7 +102,8 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -191,7 +193,8 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr);
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -217,7 +220,8 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -300,7 +304,8 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -381,7 +386,8 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FU
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -691,7 +697,8 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -717,7 +724,8 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		//retry 
@@ -797,7 +805,8 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr);
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -824,7 +833,8 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -900,7 +910,8 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr);
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -928,7 +939,8 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -1010,7 +1022,8 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -1098,7 +1111,8 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), Result);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, Result);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -1167,7 +1181,8 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -1233,7 +1248,8 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -1314,7 +1330,8 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();

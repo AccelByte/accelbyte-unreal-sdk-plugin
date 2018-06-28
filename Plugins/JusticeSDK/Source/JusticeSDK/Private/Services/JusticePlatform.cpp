@@ -91,7 +91,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), UserProfileInfo());
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -120,7 +121,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), UserProfileInfo());
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -219,7 +221,8 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -345,7 +348,8 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"));
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();

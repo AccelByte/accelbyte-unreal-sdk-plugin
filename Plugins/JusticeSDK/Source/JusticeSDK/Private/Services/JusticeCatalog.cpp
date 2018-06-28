@@ -81,7 +81,8 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -109,7 +110,8 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -201,7 +203,8 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 						return;
 					}
 					Response->UpdateRequestForNextRetry();
@@ -229,7 +232,8 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<Category>());
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -335,7 +339,8 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 				{
 					if (Response->TooManyRetries() || Response->TakesTooLong())
 					{
-						OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<ItemInfo>());
+						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
 						return;
 					}
 					//retry 
@@ -363,7 +368,8 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), TArray<ItemInfo>());
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
