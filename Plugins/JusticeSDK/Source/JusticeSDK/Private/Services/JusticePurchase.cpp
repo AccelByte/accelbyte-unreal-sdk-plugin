@@ -98,7 +98,8 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	{
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
-			OnComplete.ExecuteIfBound(false, TEXT("Timeout, too many retries"), nullptr);
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();

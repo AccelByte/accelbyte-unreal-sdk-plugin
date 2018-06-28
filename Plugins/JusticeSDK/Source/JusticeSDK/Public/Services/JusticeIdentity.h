@@ -25,6 +25,7 @@ DECLARE_DELEGATE_TwoParams(FResetPasswordCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<LinkedPlatform>);
 DECLARE_DELEGATE_TwoParams(FLinkPlatformCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FUnlinkPlatformCompleteDelegate, bool, FString);
+DECLARE_DELEGATE_TwoParams(FUpgradeHeadlessAccountCompleteDelegate, bool, FString);
 
 enum FUserAuthTypeJustice
 {
@@ -55,6 +56,7 @@ public:
 	static void GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete);
 	static void LinkPlatform(FString PlatformID, FString Ticket, FLinkPlatformCompleteDelegate OnComplete);
 	static void UnlinkPlatform(FString PlatformID, FUnlinkPlatformCompleteDelegate OnComplete);
+	static void UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FUpgradeHeadlessAccountCompleteDelegate OnComplete);
 	
 	static void ClientLogin(FUserLoginCompleteDelegate OnComplete = nullptr);
 	static void ClientLogout();
@@ -62,6 +64,7 @@ public:
 	static void SetRefreshToken(FString UserRefreshToken);
 
 private:
+	static void OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 	static void OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 	static void OnUserRefreshResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 	static void OnUserLogoutResponse(FJusticeHttpResponsePtr Response, FUserLogoutCompleteDelegate OnComplete);
@@ -73,11 +76,8 @@ private:
 	static void OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete);
 	static void OnForgotPasswordResponse(FJusticeHttpResponsePtr Response, FForgotPasswordCompleteDelegate OnComplete);
 	static void OnResetPasswordResponse(FJusticeHttpResponsePtr Response, FResetPasswordCompleteDelegate OnComplete);
-
-	//static void OnForgotPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FForgotPasswordCompleteDelegate OnComplete);
-	//static void OnResetPasswordComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FResetPasswordCompleteDelegate OnComplete);
-
 	static void OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Response, FGetLinkedPlatformCompleteDelegate OnComplete);
 	static void OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, FLinkPlatformCompleteDelegate OnComplete);
 	static void OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response, FUnlinkPlatformCompleteDelegate OnComplete);
+	static void OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FUpgradeHeadlessAccountCompleteDelegate OnComplete, FString LoginID);
 };

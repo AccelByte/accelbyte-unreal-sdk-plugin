@@ -88,9 +88,6 @@ FString UJusticeIdentityFunctions::GetUserId()
 	return FJusticeUserID;
 }
 
-void UJusticeIdentityFunctions::LinkSteam(FUserLoginCompleteDynamicDelegate OnComplete)
-{
-}
 
 void UJusticeIdentityFunctions::ClearCacheAndLocalStorage()
 {
