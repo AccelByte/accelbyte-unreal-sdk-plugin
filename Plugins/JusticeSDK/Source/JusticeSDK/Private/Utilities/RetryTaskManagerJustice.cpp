@@ -4,7 +4,6 @@
 
 #include "RetryTaskManagerJustice.h"
 #include "HAL/PlatformProcess.h"
-#include "JusticeLog.h"
 #include "JusticeIdentity.h"
 
 int32 FRetryTaskManagerJustice::InvocationCount = 0;
@@ -55,6 +54,7 @@ void FRetryTaskManagerJustice::AddQueue(FJusticeRetryTask * NewTask)
 
 void FRetryTaskManagerJustice::AddQueue(FJusticeHttpRequestPtr Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
 {
+	UE_LOG(LogJustice, Log, TEXT("Add Retry Queue : %s"), *Request->URL);
 	FWebRequestTask* newTask = new FWebRequestTask(Request, WaitTime, ReponseDelegate);
 	check(newTask);
 	AddQueue(newTask);

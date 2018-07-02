@@ -94,6 +94,8 @@ void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response,
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
 	{
+		ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+		UE_LOG(LogJustice, Log, TEXT("Get Wallet Balance Error, Attempt Retry : %s"), *ErrorStr);
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			OnComplete.ExecuteIfBound(false, 0);

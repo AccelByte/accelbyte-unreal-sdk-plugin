@@ -12,6 +12,7 @@
 #include "HAL/ThreadSafeBool.h"
 #include "Misc/SingleThreadRunnable.h"
 #include "HttpJustice.h"
+#include "JusticeLog.h"
 
 #define POLLING_INTERVAL_MS 1000
 
@@ -23,7 +24,7 @@ public:
 		LastWait(Wait),
 		ElapsedWait(ElapsedWaitValue)
 	{
-		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(Wait) + FTimespan::FromSeconds(FMath::RandRange(1, 60));
+		NextRetry = FDateTime::UtcNow() + FTimespan::FromSeconds(Wait);
 	}
 
 	virtual ~FJusticeRetryTask() {}
@@ -69,6 +70,7 @@ public:
 
 	virtual void Tick()
 	{
+		UE_LOG(LogJustice, Log, TEXT("Executing FWebRequestTask URL: %s"), *Request->URL);
 		check(!IsInGameThread() || !FPlatformProcess::SupportsMultithreading());
 		FJusticeHTTP::CreateRequest(Request, OnReponseDelegate);
 	}

@@ -45,10 +45,11 @@ struct JusticeHttpResponse
 	void UpdateRequestForNextRetry()
 	{
 		this->JusticeRequest->RetryAttempt++;
-		this->JusticeRequest->ElapsedTime += this->Request->GetElapsedTime();
-		
+		this->JusticeRequest->ElapsedTime += this->Request->GetElapsedTime();		
 		// exponential wait + jitter
-		NextWait = 2 ^ this->JusticeRequest->RetryAttempt + FMath::RandRange(1, 60) ;
+		UE_LOG(LogTemp, Log, TEXT("Next Retry Attempt: %d"), this->JusticeRequest->RetryAttempt);
+		NextWait = 2 ^ this->JusticeRequest->RetryAttempt + FMath::RandRange(1, 7) ;
+		UE_LOG(LogTemp, Log, TEXT("Next Retry in: %d second"), NextWait);
 	}
 
 	float GetTotalElapsed()
