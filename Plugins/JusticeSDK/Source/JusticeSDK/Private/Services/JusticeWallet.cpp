@@ -14,7 +14,7 @@
 void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *CurrencyCode);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FJusticeUserID, *CurrencyCode);
 	FString Verb			= GET;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -59,25 +59,16 @@ void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response,
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
 					OnComplete.ExecuteIfBound(false, 0);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						OnComplete.ExecuteIfBound(false, 0);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -89,6 +80,9 @@ void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response,
 		return;
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:

@@ -5,7 +5,7 @@
 #include "Blueprints/PlatformBlueprint/UpdatePlayerProfile.h"
 #include "Services/JusticePlatform.h"
 
-UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl)
+UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes)
 {
 	UAsyncUpdatePlayerProfile* Node = NewObject<UAsyncUpdatePlayerProfile>();
 	Node->DisplayName = DisplayName;
@@ -13,6 +13,10 @@ UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FStri
 	Node->LastName = LastName;
 	Node->Country = Country;
 	Node->AvatarUrl = AvatarUrl;
+	Node->Language = Language;
+	Node->Timezone = Timezone;
+	Node->DateOfBirth = DateOfBirth;
+	Node->CustomAttributes = CustomAttributes;
 	return Node;
 }
 
@@ -31,20 +35,24 @@ void UAsyncUpdatePlayerProfile::Activate()
 	NewUserProfile.Namespace = OldUserProfile->Namespace;
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Status = OldUserProfile->Status;
+	NewUserProfile.Language = !Language.IsEmpty() ? this->Language : OldUserProfile->Language;
+	NewUserProfile.Timezone = !Timezone.IsEmpty() ? this->Timezone : OldUserProfile->Timezone;
+	NewUserProfile.DateOfBirth = !DateOfBirth.IsEmpty() ? this->DateOfBirth : OldUserProfile->DateOfBirth;
+	NewUserProfile.CustomAttributes = CustomAttributes.Num()!=0 ? this->CustomAttributes : OldUserProfile->CustomAttributes;
 
 	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast();
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast();
+				OnFailed.Broadcast(ErrorString);
 			}
 		}
 	}));

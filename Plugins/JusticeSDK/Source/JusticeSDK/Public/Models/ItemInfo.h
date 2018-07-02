@@ -23,8 +23,9 @@ public:
 	JusticeImage ThumbnailImage;
 	FString ItemID;
 	FString AppId;
+	FString AppType;
+	FString SKU;
 	FString Namespace;
-	FString StoreId;
 	FString EntitlementName;
 	FString EntitlementType;
 	int32 UseCount;
@@ -33,6 +34,8 @@ public:
 	FString ItemType;
 	FString CreatedAt;
 	FString UpdatedAt;
+	FString TargetCurrencyCode;
+	FString TargetNamespace;
 	TArray<RegionData> RegionDatas;
 	TArray<FString> ItemIds;
 	TArray<FString> Tags;
@@ -45,8 +48,9 @@ public:
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
 		JSON_SERIALIZE("itemId", ItemID);
 		JSON_SERIALIZE("appId", AppId);
+		JSON_SERIALIZE("appType", AppType);
+		JSON_SERIALIZE("sku", SKU);
 		JSON_SERIALIZE("namespace", Namespace);
-		JSON_SERIALIZE("storeId", StoreId);
 		JSON_SERIALIZE("entitlementName", EntitlementName);
 		JSON_SERIALIZE("entitlementType", EntitlementType);
 		JSON_SERIALIZE("useCount", UseCount);
@@ -55,6 +59,8 @@ public:
 		JSON_SERIALIZE("itemType", ItemType);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
+		JSON_SERIALIZE("targetCurrencyCode", TargetCurrencyCode);
+		JSON_SERIALIZE("targetNamespace", TargetNamespace);
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("regionData", RegionDatas, RegionData);		
 		JSON_SERIALIZE_ARRAY("itemIds", ItemIds);
 		JSON_SERIALIZE_ARRAY("tags", Tags);
@@ -83,7 +89,4 @@ class UItemInfo : public UObject, public ItemInfo, public JusticeBaseModel<UItem
 
 	UFUNCTION(BlueprintPure, Category = "ItemInfo")
 		int32 GetDiscountedPrice() { return RegionDatas[0].DiscountedPrice; };
-
-	UFUNCTION(BlueprintPure, Category = "ItemInfo")
-		FString GetStoreID() { return StoreId; };
 };

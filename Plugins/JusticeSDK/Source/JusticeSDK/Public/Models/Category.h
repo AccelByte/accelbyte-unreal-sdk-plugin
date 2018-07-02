@@ -7,27 +7,25 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
+#include "JusticeBaseModel.h"
 #include "Category.generated.h"
 
 class Category : public FJsonSerializable
 {
-	FString ID;
+public:
 	FString Namespace;
-	FString StoreID;
 	FString ParentCategoryPath;
+	FString CategoryPath;
 	FString DisplayName;
-	FString ChildCategories;
 	FString CreatedAt;
 	FString UpdatedAt;
 	bool Root;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("id", ID);
 		JSON_SERIALIZE("namespace", Namespace);
-		JSON_SERIALIZE("storeId", StoreID);
 		JSON_SERIALIZE("parentCategoryPath", ParentCategoryPath);
+		JSON_SERIALIZE("categoryPath", CategoryPath);
 		JSON_SERIALIZE("displayName", DisplayName);
-		JSON_SERIALIZE("childCategories", ChildCategories);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
 		JSON_SERIALIZE("root", Root);
@@ -36,8 +34,14 @@ class Category : public FJsonSerializable
 
 
 UCLASS()
-class UCategory:public UObject, public Category
+class UCategory:public UObject, public Category, public JusticeBaseModel<UCategory, Category>
 {
 	GENERATED_BODY()
 public:
+
+	UFUNCTION(BlueprintPure, Category = "Category")
+		FString GetCategoryDisplayName() { return DisplayName; };
+
+	UFUNCTION(BlueprintPure, Category = "Category")
+		FString GetCategoryPath() { return CategoryPath; };
 };

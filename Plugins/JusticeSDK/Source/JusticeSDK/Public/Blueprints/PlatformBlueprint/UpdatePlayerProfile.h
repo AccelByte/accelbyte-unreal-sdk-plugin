@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "UpdatePlayerProfile.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdatePlayerProfileOutputPin);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdatePlayerProfileOutputPin, FString, ErrorStr);
 
 UCLASS()
 class JUSTICESDK_API UAsyncUpdatePlayerProfile : public UBlueprintAsyncActionBase
@@ -24,7 +24,7 @@ public:
 		FUpdatePlayerProfileOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Platform"))
-		static UAsyncUpdatePlayerProfile* UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl);
+		static UAsyncUpdatePlayerProfile* UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes);
 
 	virtual void Activate() override;
 
@@ -34,4 +34,8 @@ private:
     FString LastName;
     FString Country;
     FString AvatarUrl;
+	FString Language;
+	FString Timezone;
+	FString DateOfBirth;
+	TMap<FString, FString> CustomAttributes;
 };

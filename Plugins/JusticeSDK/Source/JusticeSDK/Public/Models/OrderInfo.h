@@ -21,7 +21,6 @@ public:
 	FString OrderNo;
 	FString UserID;
 	FString ItemID ;
-	FString StoreId;
 	bool bSandbox;
 	int32 Quantity;
 	int32 Price;
@@ -32,6 +31,7 @@ public:
 	int32 PaymentMethodFee;
 	CurrencySummary Currency ;
 	PaymentUrl PaymentUrl;
+	FString PaymentStationUrl;
 	TArray<Transaction> Transactions;
 	TArray<FString> EntitlementIds;
 	FString Status; // ['INIT', 'CHARGED', 'FINISHED', 'CHARGE_FAILED', 'ERROR', 'REFUNDED', 'DELETED'],
@@ -39,7 +39,7 @@ public:
 	FString Namespace;
 	FString CreatedTime;
 	FString ChargedTime;
-	FString FinishedTime;
+	FString FulfilledTime;
 	FString RefundedTime;
 	FString CreatedAt;
 	FString UpdatedAt;
@@ -48,7 +48,6 @@ public:
 		JSON_SERIALIZE("orderNo", OrderNo);
 		JSON_SERIALIZE("userId", UserID);
 		JSON_SERIALIZE("itemId", ItemID);
-		JSON_SERIALIZE("storeId", StoreId);
 		JSON_SERIALIZE("sandbox", bSandbox);
 		JSON_SERIALIZE("quantity", Quantity);
 		JSON_SERIALIZE("price", Price);
@@ -59,6 +58,7 @@ public:
 		JSON_SERIALIZE("paymentMethodFee", PaymentMethodFee);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("currency", Currency);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paymentUrl", PaymentUrl);
+		JSON_SERIALIZE("paymentStationUrl", PaymentStationUrl);
 		JSON_SERIALIZE_ARRAY_SERIALIZABLE("transactions", Transactions, Transaction);
 		JSON_SERIALIZE_ARRAY("entitlementIds", EntitlementIds);
 		JSON_SERIALIZE("status", Status);
@@ -66,7 +66,7 @@ public:
 		JSON_SERIALIZE("namespace", Namespace);
 		JSON_SERIALIZE("createdTime", CreatedTime);
 		JSON_SERIALIZE("chargedTime", ChargedTime);
-		JSON_SERIALIZE("finishedTime", FinishedTime);
+		JSON_SERIALIZE("fulfilledTime", FulfilledTime);
 		JSON_SERIALIZE("refundedTime", RefundedTime);
 		JSON_SERIALIZE("createdAt", CreatedAt);
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
@@ -87,6 +87,12 @@ class UOrderInfo : public UObject, public OrderInfo, public JusticeBaseModel<UOr
 		int32 GetPrice() { return Price; };
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
-		FString GetPaymenUrl() { return PaymentUrl.paymentUrl; };
+		FString GetPaymentUrl() { return PaymentUrl.paymentUrl; };		
+
+	UFUNCTION(BlueprintPure, Category = "OrderInfo")
+		FString GetPaymentStationURL() { return PaymentStationUrl; };		
+
+	UFUNCTION(BlueprintPure, Category = "OrderInfo")
+		FString GetOrderNo() { return OrderNo; };
 		
 };

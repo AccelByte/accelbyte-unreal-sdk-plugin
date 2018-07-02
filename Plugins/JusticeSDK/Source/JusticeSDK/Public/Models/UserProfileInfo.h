@@ -122,4 +122,22 @@ public:
 	{
 		return Namespace;
 	}
+
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
+		FString GetLanguage()
+	{
+		return Language;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
+		FString GetTimezone()
+	{
+		return Timezone;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
+		FString GetDateOfBirth()
+	{
+		return DateOfBirth;
+	}
 };
