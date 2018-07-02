@@ -1672,6 +1672,141 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetrySuccessTest, "JusticeTest.User.TelemetrySendSuccess", AutomationFlagMask);
+bool FSendTelemetrySuccessTest::RunTest(const FString & Parameters)
+{
+	TelemetryEventDataExample TelemetryData;
+	TelemetryData.ExampleField1 = 1555;
+	TelemetryData.ExampleField2 = "1555";
+	TelemetryData.ExampleField3 = 1555;
+	FGuid Guid = FGuid::NewGuid();
+	FString UUID = FString::Printf(TEXT("%x%x%x%x"), Guid.A, Guid.B, Guid.C, Guid.D);
+	TelemetryEvent Telemetry;
+	Telemetry.AppID = 1555;
+	Telemetry.ClientID = FJusticeSDKModule::GetModule().ClientID;
+	Telemetry.Data = TelemetryData.ToJson();
+	Telemetry.DeviceID = FPlatformMisc::GetDeviceId();
+	Telemetry.EventID = 1555;
+	Telemetry.EventLevel = 1555;
+	Telemetry.EventTime = FDateTime::Now().ToIso8601();
+	Telemetry.EventType = 1555;
+	Telemetry.UserID = "exampleUserID";
+	Telemetry.UUID = UUID;
+	Telemetry.UX = 1555;
+	bool bSendTelemetryDone = false;
+	bool bSendTelemetrySuccessful = false;
+	double LastTime;
+
+	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryDone, &bSendTelemetrySuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Send Telemetry Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSendTelemetryDone = true;
+		bSendTelemetrySuccessful = bSuccessful;
+	});
+	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSendTelemetryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bSendTelemetrySuccessful)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryIncompleteDataSuccessTest, "JusticeTest.User.TelemetrySendIncompleteDataSuccess", AutomationFlagMask);
+bool FSendTelemetryIncompleteDataSuccessTest::RunTest(const FString & Parameters)
+{
+	TelemetryEventDataExample TelemetryData;
+	FGuid Guid = FGuid::NewGuid();
+	FString UUID = FString::Printf(TEXT("%x%x%x%x"), Guid.A, Guid.B, Guid.C, Guid.D);
+	TelemetryEvent Telemetry;
+	Telemetry.AppID = 1555;
+	Telemetry.ClientID = FJusticeSDKModule::GetModule().ClientID;
+	Telemetry.Data = TelemetryData.ToJson();
+	Telemetry.DeviceID = FPlatformMisc::GetDeviceId();
+	Telemetry.EventID = 1555;
+	Telemetry.EventLevel = 1555;
+	Telemetry.EventTime = FDateTime::Now().ToIso8601();
+	Telemetry.EventType = 1555;
+	Telemetry.UserID = "exampleUserID";
+	Telemetry.UUID = UUID;
+	Telemetry.UX = 1555;
+	bool bSendTelemetryIncompleteDataDone = false;
+	bool bSendTelemetryIncompleteDataSuccessful = false;
+	double LastTime;
+
+	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryIncompleteDataDone, &bSendTelemetryIncompleteDataSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Send Telemetry With Incomplete Telemetry Data Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSendTelemetryIncompleteDataDone = true;
+		bSendTelemetryIncompleteDataSuccessful = bSuccessful;
+	});
+	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSendTelemetryIncompleteDataDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bSendTelemetryIncompleteDataSuccessful)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryRandomPathSuccessTest, "JusticeTest.User.TelemetrySendToRandomPathSuccess", AutomationFlagMask);
+bool FSendTelemetryRandomPathSuccessTest::RunTest(const FString & Parameters)
+{
+	TelemetryEventDataExample TelemetryData;
+	TelemetryData.ExampleField1 = 1555;
+	TelemetryData.ExampleField2 = "1555";
+	TelemetryData.ExampleField3 = 1555;
+	FGuid Guid = FGuid::NewGuid();
+	FString UUID = FString::Printf(TEXT("%x%x%x%x"), Guid.A, Guid.B, Guid.C, Guid.D);
+	TelemetryEvent Telemetry;
+	Telemetry.AppID = rand();
+	Telemetry.ClientID = FJusticeSDKModule::GetModule().ClientID;
+	Telemetry.Data = TelemetryData.ToJson();
+	Telemetry.DeviceID = FPlatformMisc::GetDeviceId();
+	Telemetry.EventID = rand();
+	Telemetry.EventLevel = rand();
+	Telemetry.EventTime = FDateTime::Now().ToIso8601();
+	Telemetry.EventType = rand();
+	Telemetry.UserID = "exampleUserID";
+	Telemetry.UUID = UUID;
+	Telemetry.UX = 1555;
+	bool bSendTelemetryRandomPathDone = false;
+	bool bSendTelemetryRandomPathSuccessful = false;
+	double LastTime;
+
+	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryRandomPathDone, &bSendTelemetryRandomPathSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Send Telemetry To Random Path Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSendTelemetryRandomPathDone = true;
+		bSendTelemetryRandomPathSuccessful = bSuccessful;
+	});
+	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSendTelemetryRandomPathDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bSendTelemetryRandomPathSuccessful)
+		return true;
+}
+
 void FIntegrationTestModule::DeleteUser(FString UserID, FDeleteUserDelegate OnComplete)
 {
 	FString ErrorStr;

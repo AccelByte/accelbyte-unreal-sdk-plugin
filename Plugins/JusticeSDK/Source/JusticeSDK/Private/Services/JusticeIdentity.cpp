@@ -1351,3 +1351,71 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 		return;
 	}
 }
+
+void JusticeIdentity::SendTelemetry(TelemetryEvent Telemetry, FSendTelemetryCompleteDelegate OnComplete)
+{
+	FString Authorization = TEXT("");
+	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *FJusticeNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);
+	FString Verb = POST;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TEXT("*/*");
+	FString Payload = Telemetry.ToJson();
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnSendTelemetryResponse, OnComplete));
+}
+
+void JusticeIdentity::OnSendTelemetryResponse(FJusticeHttpResponsePtr Response, FSendTelemetryCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Send Telemetry Failed. Error Message: %s."), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString);
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::NoContent:
+	{
+		UE_LOG(LogJustice, VeryVerbose, TEXT("OnSendTelemetryComplete: Operation succeeded"));
+		OnComplete.ExecuteIfBound(true, TEXT(""));
+		break;
+	}
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr);
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnSendTelemetryResponse, OnComplete));
+		break;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("Unexpected Response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Send Telemetry Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+		return;
+	}
+}
+

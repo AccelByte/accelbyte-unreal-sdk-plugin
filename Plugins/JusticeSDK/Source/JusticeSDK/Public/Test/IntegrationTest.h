@@ -7,6 +7,8 @@
 #include "ModuleManager.h"
 #include "IHttpRequest.h"
 #include "Utilities/AWSXRayJustice.h"
+#include "Models/TelemetryEvent.h"
+#include "Models/TelemetryEventDataExample.h"
 
 DECLARE_DELEGATE_TwoParams(FDeleteUserDelegate, bool, FString);
 
