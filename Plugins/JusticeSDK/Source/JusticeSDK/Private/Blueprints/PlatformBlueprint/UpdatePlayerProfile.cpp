@@ -11,7 +11,6 @@ UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FStri
 	Node->DisplayName = DisplayName;
 	Node->FirstName = FirstName;
 	Node->LastName = LastName;
-	Node->Country = Country;
 	Node->AvatarUrl = AvatarUrl;
 	Node->Language = Language;
 	Node->Timezone = Timezone;
@@ -23,16 +22,14 @@ UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FStri
 void UAsyncUpdatePlayerProfile::Activate()
 {
 	UserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
-	UserProfileInfo NewUserProfile;
+	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? this->DisplayName : OldUserProfile->DisplayName;
 	NewUserProfile.FirstName = !FirstName.IsEmpty() ? this->FirstName : OldUserProfile->FirstName;
 	NewUserProfile.LastName = !LastName.IsEmpty() ? this->LastName : OldUserProfile->LastName;
-	NewUserProfile.Country = !Country.IsEmpty() ? this->Country : OldUserProfile->Country;
 	NewUserProfile.AvatarUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarUrl;
 	NewUserProfile.AvatarSmallUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarSmallUrl;
 	NewUserProfile.AvatarLargeUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarLargeUrl;
-	NewUserProfile.Namespace = OldUserProfile->Namespace;
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Status = OldUserProfile->Status;
 	NewUserProfile.Language = !Language.IsEmpty() ? this->Language : OldUserProfile->Language;

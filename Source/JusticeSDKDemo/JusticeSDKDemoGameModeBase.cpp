@@ -31,7 +31,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 
 	TelemetryEvent Telemetry;
 	Telemetry.AppID = 1555;
-	Telemetry.ClientID = FJusticeSDKModule::GetModule().ClientID;
+	Telemetry.ClientID = FJusticeSDKModule::Get().ClientID;
 	Telemetry.Data = Data;
 	Telemetry.DeviceID = FPlatformMisc::GetDeviceId();
 	Telemetry.EventID = 1555;

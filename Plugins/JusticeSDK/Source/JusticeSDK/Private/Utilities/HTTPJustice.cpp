@@ -9,8 +9,8 @@
 
 FString FJusticeHTTP::BasicAuth(const FString& Username, const FString& Password)
 {
-	FString User = Username.IsEmpty() ? FJusticeSDKModule::GetModule().ClientID : Username;
-	FString Pass = Password.IsEmpty() ? FJusticeSDKModule::GetModule().ClientSecret : Password;
+	FString User = Username.IsEmpty() ? FJusticeSDKModule::Get().ClientID : Username;
+	FString Pass = Password.IsEmpty() ? FJusticeSDKModule::Get().ClientSecret : Password;
 	return TEXT("Basic " + FBase64::Encode(User + ":" + Pass));
 }
 

@@ -19,21 +19,20 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 	}));
 }
 
-void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
+void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
 {
 	UserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
-	UserProfileInfo NewUserProfile;
+	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? DisplayName : OldUserProfile->DisplayName;
 	NewUserProfile.FirstName = !FirstName.IsEmpty() ? FirstName : OldUserProfile->FirstName;
 	NewUserProfile.LastName = !LastName.IsEmpty() ? LastName : OldUserProfile->LastName;
-	NewUserProfile.Country = !Country.IsEmpty() ? Country : OldUserProfile->Country;
 	NewUserProfile.AvatarUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarUrl;
 	NewUserProfile.AvatarSmallUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarSmallUrl;
 	NewUserProfile.AvatarLargeUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarLargeUrl;
-	NewUserProfile.Namespace = OldUserProfile->Namespace;
 	NewUserProfile.Email = OldUserProfile->Email;
-	NewUserProfile.Status = OldUserProfile->Status;
+	NewUserProfile.Language = Language;
+	NewUserProfile.Timezone = Timezone;
 
 	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString);

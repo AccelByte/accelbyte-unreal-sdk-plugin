@@ -44,6 +44,7 @@ enum class UUserAuthTypeJustice : uint8
 class JUSTICESDK_API JusticeIdentity 
 {
 public:
+	static void AuthCodeLogin(FString AuthCode, FString RedirectURI, FUserLoginCompleteDelegate OnComplete);
 	static void UserLogin(FString LoginID, FString Password, FUserLoginCompleteDelegate OnComplete);
 	static void UserRefreshToken(FUserLoginCompleteDelegate OnComplete);
 	static void UserRefresh();

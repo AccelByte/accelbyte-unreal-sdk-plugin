@@ -134,7 +134,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	}
 }
 
-void JusticePlatform::UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
@@ -215,7 +215,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 		return;		
 	}
 	default:
-		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d, Content: %s"), Response->Code, *Response->Content);
 	}
 	
 	if (!ErrorStr.IsEmpty())

@@ -92,9 +92,8 @@ FString UJusticeIdentityFunctions::GetUserId()
 void UJusticeIdentityFunctions::ClearCacheAndLocalStorage()
 {
 	IWebBrowserSingleton* WebModule = IWebBrowserModule::Get().GetSingleton();
-	TSharedPtr<IWebBrowserCookieManager> cookieMan = WebModule->GetCookieManager();
-	cookieMan->DeleteCookies("", "");
-	WebModule->DeleteBrowserCookies();
+	TSharedPtr<IWebBrowserCookieManager> cookieMgr = WebModule->GetCookieManager();	
+	cookieMgr->DeleteCookies();
 }
 
 TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<ULinkedPlatform*> LinkedPlatforms)
