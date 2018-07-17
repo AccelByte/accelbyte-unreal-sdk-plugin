@@ -13,7 +13,7 @@
 void JusticeCatalog::GetRootCategory(FString Language, FGetRootCategoryCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *FJusticeBaseURL, *FJusticeNamespace, *Language);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *Language);
 	FString Verb			= GET;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -71,26 +71,17 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
 					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -103,6 +94,9 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	}
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
@@ -134,7 +128,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *FJusticeBaseURL, *FJusticeNamespace, *ParentPath, *Language);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(ParentPath), *Language);
 	FString Verb			= GET;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -193,26 +187,17 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
 					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -225,6 +210,9 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 	}
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
@@ -254,10 +242,369 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 	}
 }
 
+void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FGetChildCategoryCompleteDelegate OnComplete)
+{
+	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/children?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Verb = GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+
+	FJusticeHTTP::CreateRequest(Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+}
+
+void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response, FGetChildCategoryCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Child Categories Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		FString ResponseStr = Response->Content;
+
+		TSharedPtr<FJsonValue> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		TArray<Category> Result;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
+			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
+			{
+				Category categoryObj;
+				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
+				{
+					Result.Add(categoryObj);
+				}
+			}
+			OnComplete.ExecuteIfBound(true, ErrorStr, Result);
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserialize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+	{
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Response->TooManyRetries() || Response->TakesTooLong())
+				{
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					return;
+				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+				return;
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				return;
+			}
+		}));
+		return;
+	}
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Children Categories Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		return;
+	}
+}
+
+void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPath, FGetDescendantCategoryCompleteDelegate OnComplete)
+{
+	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/descendants?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Verb = GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+
+	FJusticeHTTP::CreateRequest(Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+}
+
+void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Response, FGetDescendantCategoryCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Descendant Categories Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		FString ResponseStr = Response->Content;
+		TSharedPtr<FJsonValue> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		TArray<Category> Result;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
+			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
+			{
+				Category categoryObj;
+				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
+				{
+					Result.Add(categoryObj);
+				}
+			}
+			OnComplete.ExecuteIfBound(true, ErrorStr, Result);
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserialize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+	{
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Response->TooManyRetries() || Response->TakesTooLong())
+				{
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					return;
+				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+				return;
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				return;
+			}
+		}));
+		return;
+	}
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Descendant Categories Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		return;
+	}
+}
+
+void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete)
+{
+	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/%s/locale"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *ItemID);
+	if (!Region.IsEmpty() || !Language.IsEmpty()) 
+	{
+		URL.Append(FString::Printf(TEXT("?")));
+		if (!Region.IsEmpty())
+		{
+			URL.Append(FString::Printf(TEXT("region=%s"), *Region));
+			if (!Language.IsEmpty())
+			{
+				URL.Append(FString::Printf(TEXT("&language=%s"), *Language));
+			}
+		}
+		else if (!Language.IsEmpty())
+		{
+			URL.Append(FString::Printf(TEXT("language=%s"), *Language));
+		}
+	}
+
+	FString Verb = GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+}
+
+void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetItemCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	ItemInfo Result;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, Result);
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			if (Result.FromJson(JsonObject))
+			{
+				OnComplete.ExecuteIfBound(true, TEXT(""), Result);
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserialize response from server");
+			}
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserialize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Response->TooManyRetries() || Response->TakesTooLong())
+				{
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+					return;
+				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+				return;
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+				return;
+			}
+		}));
+		break;
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnGetItemResponse Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+		return;
+	}
+}
+
 void JusticeCatalog::GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *FJusticeBaseURL, *FJusticeNamespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
 	if (!ItemType.IsEmpty())
 	{
 		URL.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
@@ -330,26 +677,17 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
-						return;
-					}
-					//retry 
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -361,6 +699,9 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 		break;
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:

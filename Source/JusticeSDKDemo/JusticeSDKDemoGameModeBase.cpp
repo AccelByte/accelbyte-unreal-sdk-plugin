@@ -42,7 +42,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 	Telemetry.UUID = UUID;
 	Telemetry.UX = 1555;
 	
-	JusticeIdentity::SendTelemetry(Telemetry);
+	JusticeTelemetry::SendTelemetryEvent(Telemetry);
 }
 
 void AJusticeSDKDemoGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)

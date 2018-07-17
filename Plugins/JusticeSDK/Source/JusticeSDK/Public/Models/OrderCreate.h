@@ -13,7 +13,6 @@ class OrderCreate : public FJsonSerializable
 public:
 
     FString ItemID;
-	FString StoreID;
 	int32 Quantity;
     int32 Price;
 	int32 DiscountedPrice;
@@ -22,7 +21,6 @@ public:
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("itemId", ItemID);
-		JSON_SERIALIZE("storeId", StoreID);
 		JSON_SERIALIZE("quantity", Quantity);	
 		JSON_SERIALIZE("price", Price);
 		JSON_SERIALIZE("discountedPrice", DiscountedPrice);

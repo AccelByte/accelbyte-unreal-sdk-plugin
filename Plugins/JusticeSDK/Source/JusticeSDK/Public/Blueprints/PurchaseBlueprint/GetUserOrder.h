@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -10,32 +10,28 @@
 #include "Utilities/HTTPJustice.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Models/OrderInfo.h"
-#include "CreateNewOrder.generated.h"
+#include "GetUserOrder.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCreateNewOrderOutputPin, const UOrderInfo*, OrderInformation);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetUserOrderOutputPin, const UOrderInfo*, OrderInformation);
 
 UCLASS()
-class JUSTICESDK_API UAsyncCreateNewOrder : public UBlueprintAsyncActionBase
+class JUSTICESDK_API UAsyncGetUserOrder : public UBlueprintAsyncActionBase
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable)
-		FCreateNewOrderOutputPin OnSuccess;
+		FGetUserOrderOutputPin OnSuccess;
 
 	UPROPERTY(BlueprintAssignable)
-		FCreateNewOrderOutputPin OnFailed;
+		FGetUserOrderOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Purchase"))
-		static UAsyncCreateNewOrder* CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency);
+		static UAsyncGetUserOrder* GetUserOrder(FString OrderNo);
 
 	virtual void Activate() override;
 private:
-	FString ItemID;
-	int32 Price;
-	int32 DiscountedPrice;
-	FString Currency;
-
+	FString OrderNo;
 };
 	
 	

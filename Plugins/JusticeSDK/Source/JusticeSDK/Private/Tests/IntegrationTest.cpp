@@ -8,6 +8,10 @@
 #include "HttpManager.h"
 #include "Public/Models/UserOnlineAccountJustice.h"
 #include "Public/Services/JusticeIdentity.h"
+#include "Public/Services/JusticePurchase.h"
+#include "Public/Services/JusticeCatalog.h"
+#include "Public/Services/JusticePlatform.h"
+#include "Public/Services/JusticeTelemetry.h"
 #include "JusticeSDK.h"
 #include "JusticePlatform.h"
 #include "stdio.h"
@@ -1672,8 +1676,8 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetrySuccessTest, "JusticeTest.User.TelemetrySendSuccess", AutomationFlagMask);
-bool FSendTelemetrySuccessTest::RunTest(const FString & Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryEventSuccessTest, "JusticeTest.Telemetry.SendSuccess", AutomationFlagMask);
+bool FSendTelemetryEventSuccessTest::RunTest(const FString & Parameters)
 {
 	TelemetryEventDataExample TelemetryData;
 	TelemetryData.ExampleField1 = 1555;
@@ -1697,13 +1701,13 @@ bool FSendTelemetrySuccessTest::RunTest(const FString & Parameters)
 	bool bSendTelemetrySuccessful = false;
 	double LastTime;
 
-	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryDone, &bSendTelemetrySuccessful](bool bSuccessful, FString ErrorStr)
+	FSendTelemetryEventCompleteDelegate OnSendTelemetryComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryDone, &bSendTelemetrySuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Send Telemetry Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryDone = true;
 		bSendTelemetrySuccessful = bSuccessful;
 	});
-	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+	JusticeTelemetry::SendTelemetryEvent(Telemetry, OnSendTelemetryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bSendTelemetryDone)
@@ -1718,7 +1722,7 @@ bool FSendTelemetrySuccessTest::RunTest(const FString & Parameters)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryIncompleteDataSuccessTest, "JusticeTest.User.TelemetrySendIncompleteDataSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryIncompleteDataSuccessTest, "JusticeTest.Telemetry.SendIncompleteDataSuccess", AutomationFlagMask);
 bool FSendTelemetryIncompleteDataSuccessTest::RunTest(const FString & Parameters)
 {
 	TelemetryEventDataExample TelemetryData;
@@ -1740,13 +1744,13 @@ bool FSendTelemetryIncompleteDataSuccessTest::RunTest(const FString & Parameters
 	bool bSendTelemetryIncompleteDataSuccessful = false;
 	double LastTime;
 
-	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryIncompleteDataDone, &bSendTelemetryIncompleteDataSuccessful](bool bSuccessful, FString ErrorStr)
+	FSendTelemetryEventCompleteDelegate OnSendTelemetryEventComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryIncompleteDataDone, &bSendTelemetryIncompleteDataSuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Send Telemetry With Incomplete Telemetry Data Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryIncompleteDataDone = true;
 		bSendTelemetryIncompleteDataSuccessful = bSuccessful;
 	});
-	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+	JusticeTelemetry::SendTelemetryEvent(Telemetry, OnSendTelemetryEventComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bSendTelemetryIncompleteDataDone)
@@ -1761,8 +1765,8 @@ bool FSendTelemetryIncompleteDataSuccessTest::RunTest(const FString & Parameters
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryRandomPathSuccessTest, "JusticeTest.User.TelemetrySendToRandomPathSuccess", AutomationFlagMask);
-bool FSendTelemetryRandomPathSuccessTest::RunTest(const FString & Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSendTelemetryEventRandomPathSuccessTest, "JusticeTest.User.TelemetrySendToRandomPathSuccess", AutomationFlagMask);
+bool FSendTelemetryEventRandomPathSuccessTest::RunTest(const FString & Parameters)
 {
 	TelemetryEventDataExample TelemetryData;
 	TelemetryData.ExampleField1 = 1555;
@@ -1786,13 +1790,13 @@ bool FSendTelemetryRandomPathSuccessTest::RunTest(const FString & Parameters)
 	bool bSendTelemetryRandomPathSuccessful = false;
 	double LastTime;
 
-	FSendTelemetryCompleteDelegate OnSendTelemetryComplete = FSendTelemetryCompleteDelegate::CreateLambda([&bSendTelemetryRandomPathDone, &bSendTelemetryRandomPathSuccessful](bool bSuccessful, FString ErrorStr)
+	FSendTelemetryEventCompleteDelegate OnSendTelemetryEventComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryRandomPathDone, &bSendTelemetryRandomPathSuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogTemp, Log, TEXT("Send Telemetry To Random Path Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryRandomPathDone = true;
 		bSendTelemetryRandomPathSuccessful = bSuccessful;
 	});
-	JusticeIdentity::SendTelemetry(Telemetry, OnSendTelemetryComplete);
+	JusticeTelemetry::SendTelemetryEvent(Telemetry, OnSendTelemetryEventComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bSendTelemetryRandomPathDone)
@@ -1804,6 +1808,1098 @@ bool FSendTelemetryRandomPathSuccessTest::RunTest(const FString & Parameters)
 	}
 
 	check(bSendTelemetryRandomPathSuccessful)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetChildCategorySuccess, "JusticeTest.Category.GetChildSuccess", AutomationFlagMask);
+bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	TArray<Category> RootCategory;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetChildCategoryDone = false;
+	bool bGetChildCategorySuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		RootCategory = Result;
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetChildCategoryDone = true;
+		bGetChildCategorySuccess = bSuccessful;
+	});
+	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetChildCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bGetChildCategoryDone)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetRootCategorySuccess, "JusticeTest.Category.GetRootSuccess", AutomationFlagMask);
+bool FGetRootCategorySuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString RootCategoryPath;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategoryPath](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bGetRootCategorySuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetDescendantCategorySuccess, "JusticeTest.Category.GetDescendantSuccess", AutomationFlagMask);
+bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	TArray<Category> RootCategory;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetDescendantCategoryDone = false;
+	bool bGetDescendantCategorySuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		if (bSuccessful) { RootCategory = Result; }
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetDescendantCategoryCompleteDelegate OnGetDescendantCategoryComplete = FGetDescendantCategoryCompleteDelegate::CreateLambda([&bGetDescendantCategoryDone, &bGetDescendantCategorySuccess](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetDescendantCategoryDone = true;
+		bGetDescendantCategorySuccess = bSuccessful;
+	});
+	JusticeCatalog::GetDescendantCategory(Language, RootCategory[0].CategoryPath, OnGetDescendantCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetDescendantCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bGetDescendantCategorySuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetItemSuccess, "JusticeTest.Category.GetItemSuccess", AutomationFlagMask);
+bool FGetItemSuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString Region = "US";
+	TArray<Category> RootCategory;
+	TArray<Category> ChildCategory;
+	TArray<ItemInfo> ItemQuery;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetChildCategoryDone = false;
+	bool bGetChildCategorySuccess = false;
+	bool bGetItemByQueryDone = false;
+	bool bGetItemByQuerySuccess = false;
+	bool bGetItemDone = false;
+	bool bGetItemSuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		if (bSuccessful) { RootCategory = Result; }
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetChildCategoryDone = true;
+		bGetChildCategorySuccess = bSuccessful;
+		if (bSuccessful) { ChildCategory = Result; }
+	});
+	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetChildCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess, &ItemQuery](bool bSuccessful, FString ErrorStr, TArray<ItemInfo> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Item by Query Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetItemByQueryDone = true;
+		bGetItemByQuerySuccess = bSuccessful;
+		if (bSuccessful) { ItemQuery = Result; }
+	});
+	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetItemByQueryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetItemCompleteDelegate OnGetItemComplete = FGetItemCompleteDelegate::CreateLambda([&bGetItemDone, &bGetItemSuccess](bool bSuccessful, FString ErrorStr, ItemInfo Item)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Item Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetItemDone = true;
+		bGetItemSuccess = bSuccessful;
+	});
+	JusticeCatalog::GetItem(ItemQuery[0].ItemID, Region, Language, OnGetItemComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetItemDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bGetItemDone)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetItemByQuerySuccess, "JusticeTest.Category.GetItemByQuerySuccess", AutomationFlagMask);
+bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString Region = "US";
+	TArray<Category> RootCategory;
+	TArray<Category> ChildCategory;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetChildCategoryDone = false;
+	bool bGetChildCategorySuccess = false;
+	bool bGetItemByQueryDone = false;
+	bool bGetItemByQuerySuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		if (bSuccessful) { RootCategory = Result; }
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetChildCategoryDone = true;
+		bGetChildCategorySuccess = bSuccessful;
+		if (bSuccessful) { ChildCategory = Result; }
+	});
+	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetChildCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess](bool bSuccessful, FString ErrorStr, TArray<ItemInfo> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Item by Query Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetItemByQueryDone = true;
+		bGetItemByQuerySuccess = bSuccessful;
+	});
+	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetItemByQueryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bGetItemByQuerySuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCreateOrderSuccess, "JusticeTest.Purchase.CreateOrderSuccess", AutomationFlagMask);
+bool FCreateOrderSuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString Region = "US";
+	TArray<Category> RootCategory;
+	TArray<Category> ChildCategory;
+	TArray<ItemInfo> ItemQuery;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetChildCategoryDone = false;
+	bool bGetChildCategorySuccess = false;
+	bool bGetItemByQueryDone = false;
+	bool bGetItemByQuerySuccess = false;
+	bool bCreateUserProfileDone = false;
+	bool bCreateUserProfileSuccess = false;
+	bool bCreateOrderDone = false;
+	bool bCreateOrderSuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		if (bSuccessful) { RootCategory = Result; }
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetChildCategoryDone = true;
+		bGetChildCategorySuccess = bSuccessful;
+		if (bSuccessful) { ChildCategory = Result; }
+	});
+	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetChildCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess, &ItemQuery](bool bSuccessful, FString ErrorStr, TArray<ItemInfo> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Item by Query Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetItemByQueryDone = true;
+		bGetItemByQuerySuccess = bSuccessful;
+		if (bSuccessful) { ItemQuery = Result; }
+	});
+	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetItemByQueryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bCreateUserProfileDone = true;
+		bCreateUserProfileSuccess = bSuccessful;
+	});
+	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bCreateUserProfileDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	
+	FCreateNewOrderCompleteDelegate OnCreateOrderComplete = FCreateNewOrderCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, OrderInfo Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bCreateOrderDone = true;
+		bCreateOrderSuccess = bSuccessful;
+	});
+	JusticePurchase::CreateNewOrder(ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bCreateOrderDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bCreateOrderSuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserOrderSuccess, "JusticeTest.Purchase.GetUserOrderSuccess", AutomationFlagMask);
+bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString Region = "US";
+	OrderInfo CreatedOrder = OrderInfo();
+	TArray<Category> RootCategory;
+	TArray<Category> ChildCategory;
+	TArray<ItemInfo> ItemQuery;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bGetRootCategoryDone = false;
+	bool bGetRootCategorySuccess = false;
+	bool bGetChildCategoryDone = false;
+	bool bGetChildCategorySuccess = false;
+	bool bGetItemByQueryDone = false;
+	bool bGetItemByQuerySuccess = false;
+	bool bCreateUserProfileDone = false;
+	bool bCreateUserProfileSuccess = false;
+	bool bCreateOrderDone = false;
+	bool bCreateOrderSuccess = false;
+	bool bGetUserOrderDone = false;
+	bool bGetUserOrderSuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetRootCategoryDone = true;
+		bGetRootCategorySuccess = bSuccessful;
+		if (bSuccessful) { RootCategory = Result; }
+	});
+	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetRootCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetChildCategoryDone = true;
+		bGetChildCategorySuccess = bSuccessful;
+		if (bSuccessful) { ChildCategory = Result; }
+	});
+	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetChildCategoryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess, &ItemQuery](bool bSuccessful, FString ErrorStr, TArray<ItemInfo> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get Item by Query Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetItemByQueryDone = true;
+		bGetItemByQuerySuccess = bSuccessful;
+		if (bSuccessful) { ItemQuery = Result; }
+	});
+	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetItemByQueryDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bCreateUserProfileDone = true;
+		bCreateUserProfileSuccess = bSuccessful;
+	});
+	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bCreateUserProfileDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	
+	FCreateNewOrderCompleteDelegate OnCreateOrderComplete = FCreateNewOrderCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess, &CreatedOrder](bool bSuccessful, FString ErrorStr, OrderInfo Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bCreateOrderDone = true;
+		bCreateOrderSuccess = bSuccessful;
+		if (bSuccessful) { CreatedOrder = Result; }
+	});
+	JusticePurchase::CreateNewOrder(ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bCreateOrderDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetUserOrderCompleteDelegate OnGetUserOrderComplete = FGetUserOrderCompleteDelegate::CreateLambda([&bGetUserOrderDone, &bGetUserOrderSuccess](bool bSuccessful, FString ErroStr, OrderInfo Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetUserOrderDone = true;
+		bGetUserOrderSuccess = bSuccessful;
+	});
+	JusticePurchase::GetUserOrder(CreatedOrder.OrderNo, OnGetUserOrderComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetUserOrderDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bCreateOrderSuccess)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserOrdersSuccess, "JusticeTest.Purchase.GetUserOrdersSuccess", AutomationFlagMask);
+bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
+{
+	FString LoginID = "SDKtest@example.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	FUserAuthTypeJustice AuthType = Email;
+	FString Language = "en";
+	FString Region = "US";
+	int32 Page = 0;
+	int32 PageSize = 5;
+	TArray<OrderInfo> UserOrders;
+	bool bRegisterNewPlayerDone = false;
+	bool bRegisterNewPlayerSuccess = false;
+	bool bLoginDone = false;
+	bool bLoginSuccess = false;
+	bool bCreateUserProfileDone = false;
+	bool bCreateUserProfileSuccess = false;
+	bool bGetUserOrdersDone = false;
+	bool bGetUserOrdersSuccess = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccess = false;
+	double LastTime;
+
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, UserCreateResponse* userCreateResponse)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bRegisterNewPlayerDone = true;
+		bRegisterNewPlayerSuccess = bSuccessful;
+	});
+	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bRegisterNewPlayerDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* token)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bLoginDone = true;
+		bLoginSuccess = bSuccessful;
+	});
+	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
+
+	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bCreateUserProfileDone = true;
+		bCreateUserProfileSuccess = bSuccessful;
+	});
+	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bCreateUserProfileDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FGetUserOrdersCompleteDelegate OnGetUserOrdersComplete = FGetUserOrdersCompleteDelegate::CreateLambda([&bGetUserOrdersDone, &bGetUserOrdersSuccess, &UserOrders](bool bSuccessful, FString ErroStr, TArray<OrderInfo> Result)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetUserOrdersDone = true;
+		bGetUserOrdersSuccess = bSuccessful;
+		if (bSuccessful) { UserOrders = Result; }
+	});
+	JusticePurchase::GetUserOrders(Page, PageSize, OnGetUserOrdersComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetUserOrdersDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteUserComplete = FDeleteUserDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccess](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Delete User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccess = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(UserID, OnDeleteUserComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(UserOrders.Num()==0)
+		return true;
+	check(bGetUserOrdersDone)
 		return true;
 }
 

@@ -66,25 +66,17 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnForgotPasswordResponse, OnComplete));
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr);
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnForgotPasswordResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -184,25 +176,17 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnResetPasswordResponse, OnComplete));
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr);
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnResetPasswordResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -298,6 +282,9 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
 		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -379,6 +366,9 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FU
 		break;
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
@@ -625,10 +615,10 @@ void JusticeIdentity::RegisterNewPlayer(FString UserID, FString Password, FStrin
 	NewUserRequest.LoginID = UserID;
 	NewUserRequest.AuthType = (AuthType == Email) ? TEXT("EMAILPASSWD"): TEXT("PHONEPASSWD");
 
-	FString Authorization	= FJusticeHTTP::BasicAuth();
+	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *FJusticeBaseURL, *FJusticeNamespace);
 	FString Verb			= POST;
-	FString ContentType		= TYPE_FORM;
+	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
 	FString Payload			= NewUserRequest.ToJson();
 
@@ -688,25 +678,17 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnRegisterNewPlayerResponse, OnComplete));
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnRegisterNewPlayerResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -752,7 +734,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, 
 	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
 
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -795,26 +777,17 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
 					OnComplete.ExecuteIfBound(false, ErrorStr);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnVerifyNewPlayerResponse, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnVerifyNewPlayerResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -900,26 +873,17 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
 					OnComplete.ExecuteIfBound(false, ErrorStr);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
+				return;
 			}
 			else
 			{
@@ -1016,6 +980,9 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
 		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1105,6 +1072,9 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
 		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1175,6 +1145,9 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
 		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1241,6 +1214,9 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 	}
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
 		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
@@ -1324,6 +1300,9 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 	case EHttpResponseCodes::RequestTimeout:
 		ErrorStr = TEXT("Request Timeout");
 		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
 	case EHttpResponseCodes::ServerError:
 	case EHttpResponseCodes::ServiceUnavail:
 	case EHttpResponseCodes::GatewayTimeout:
@@ -1351,71 +1330,3 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 		return;
 	}
 }
-
-void JusticeIdentity::SendTelemetry(TelemetryEvent Telemetry, FSendTelemetryCompleteDelegate OnComplete)
-{
-	FString Authorization = TEXT("");
-	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *FJusticeNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);
-	FString Verb = POST;
-	FString ContentType = TYPE_JSON;
-	FString Accept = TEXT("*/*");
-	FString Payload = Telemetry.ToJson();
-
-	FJusticeHTTP::CreateRequest(
-		Authorization,
-		URL,
-		Verb,
-		ContentType,
-		Accept,
-		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnSendTelemetryResponse, OnComplete));
-}
-
-void JusticeIdentity::OnSendTelemetryResponse(FJusticeHttpResponsePtr Response, FSendTelemetryCompleteDelegate OnComplete)
-{
-	FString ErrorStr;
-	if (!Response->ErrorString.IsEmpty())
-	{
-		UE_LOG(LogJustice, Error, TEXT("Send Telemetry Failed. Error Message: %s."), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString);
-		return;
-	}
-	switch (Response->Code)
-	{
-	case EHttpResponseCodes::NoContent:
-	{
-		UE_LOG(LogJustice, VeryVerbose, TEXT("OnSendTelemetryComplete: Operation succeeded"));
-		OnComplete.ExecuteIfBound(true, TEXT(""));
-		break;
-	}
-	case EHttpResponseCodes::RequestTimeout:
-		ErrorStr = TEXT("Request Timeout");
-		break;
-	case EHttpResponseCodes::ServerError:
-	case EHttpResponseCodes::ServiceUnavail:
-	case EHttpResponseCodes::GatewayTimeout:
-	{
-		if (Response->TooManyRetries() || Response->TakesTooLong())
-		{
-			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr);
-			return;
-		}
-		Response->UpdateRequestForNextRetry();
-		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnSendTelemetryResponse, OnComplete));
-		break;
-	}
-	default:
-		ErrorStr = FString::Printf(TEXT("Unexpected Response Code=%d"), Response->Code);
-	}
-
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Error, TEXT("Send Telemetry Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr);
-		return;
-	}
-}
-

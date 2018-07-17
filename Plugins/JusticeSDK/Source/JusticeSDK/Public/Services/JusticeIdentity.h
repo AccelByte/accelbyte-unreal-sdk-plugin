@@ -26,7 +26,6 @@ DECLARE_DELEGATE_TwoParams(FResetPasswordCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<LinkedPlatform>);
 DECLARE_DELEGATE_TwoParams(FLinkPlatformCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FUnlinkPlatformCompleteDelegate, bool, FString);
-DECLARE_DELEGATE_TwoParams(FSendTelemetryCompleteDelegate, bool, FString);
 DECLARE_DELEGATE_TwoParams(FUpgradeHeadlessAccountCompleteDelegate, bool, FString);
 
 enum FUserAuthTypeJustice
@@ -58,7 +57,6 @@ public:
 	static void GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete);
 	static void LinkPlatform(FString PlatformID, FString Ticket, FLinkPlatformCompleteDelegate OnComplete);
 	static void UnlinkPlatform(FString PlatformID, FUnlinkPlatformCompleteDelegate OnComplete);
-	static void SendTelemetry(TelemetryEvent TelemetryEvent, FSendTelemetryCompleteDelegate OnComplete = nullptr);
 	static void UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FUpgradeHeadlessAccountCompleteDelegate OnComplete);
 	
 	static void ClientLogin(FUserLoginCompleteDelegate OnComplete = nullptr);
@@ -82,6 +80,5 @@ private:
 	static void OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Response, FGetLinkedPlatformCompleteDelegate OnComplete);
 	static void OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, FLinkPlatformCompleteDelegate OnComplete);
 	static void OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response, FUnlinkPlatformCompleteDelegate OnComplete);
-	static void OnSendTelemetryResponse(FJusticeHttpResponsePtr Response, FSendTelemetryCompleteDelegate OnComplete);
 	static void OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FUpgradeHeadlessAccountCompleteDelegate OnComplete, FString LoginID);
 };

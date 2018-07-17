@@ -11,6 +11,7 @@
 #include "Models/TelemetryEvent.h"
 #include "Models/TelemetryEventDataExample.h"
 #include "JusticeIdentity.h"
+#include "JusticeTelemetry.h"
 #include "JusticeSDKDemoGameModeBase.generated.h"
 
 UCLASS()

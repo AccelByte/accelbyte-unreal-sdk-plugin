@@ -82,25 +82,17 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-						OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, OnComplete));
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, OnComplete));
+				return;
 			}
 			else
 			{
@@ -184,25 +176,16 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
 					OnComplete.ExecuteIfBound(false, ErrorStr);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnUpdatePlayerProfileComplete, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnUpdatePlayerProfileComplete, OnComplete));
+				return;
 			}
 			else
 			{
@@ -311,25 +294,16 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
-				if (Token->Bans.Num() > 0)
+				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					FString bansList = FString::Join(Token->Bans, TEXT(","));
-					ErrorStr = FString::Printf(TEXT("You got banned, Ban List=%s"), *bansList);
 					OnComplete.ExecuteIfBound(false, ErrorStr);
-				}
-				else
-				{
-					if (Response->TooManyRetries() || Response->TakesTooLong())
-					{
-						OnComplete.ExecuteIfBound(false, ErrorStr);
-						return;
-					}
-					Response->UpdateRequestForNextRetry();
-					FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-						Response->NextWait,
-						FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateDefaultPlayerProfileComplete, OnComplete));
 					return;
 				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateDefaultPlayerProfileComplete, OnComplete));
+				return;
 			}
 			else
 			{
