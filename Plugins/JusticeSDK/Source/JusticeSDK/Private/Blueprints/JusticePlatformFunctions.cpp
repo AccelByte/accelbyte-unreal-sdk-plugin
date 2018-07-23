@@ -34,7 +34,7 @@ void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString
 	NewUserProfile.Language = Language;
 	NewUserProfile.Timezone = Timezone;
 
-	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
+	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FDefaultCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString);
 	}));
 }

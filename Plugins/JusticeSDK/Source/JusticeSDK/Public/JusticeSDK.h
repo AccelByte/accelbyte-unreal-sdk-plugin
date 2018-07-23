@@ -11,6 +11,8 @@
 #include "Models/OAuthTokenJustice.h"
 #include "Models/UserProfileInfo.h"
 
+DECLARE_DELEGATE_TwoParams(FDefaultCompleteDelegate, bool, FString);
+
 class FJusticeSDKModule : public IModuleInterface
 {
 public:

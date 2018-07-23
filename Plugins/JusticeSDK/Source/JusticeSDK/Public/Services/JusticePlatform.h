@@ -15,17 +15,16 @@
 #include "Models/UserProfileInfo.h"
 
 DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, UserProfileInfo);
-DECLARE_DELEGATE_TwoParams(FUpdatePlayerProfileCompleteDelegate, bool, FString);
 
 class JUSTICESDK_API JusticePlatform
 {
 public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
-    static void UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete);
-	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete);
+    static void UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete);
+	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FDefaultCompleteDelegate OnComplete);
 	static UserProfileInfo* GetUserProfileInfo();
 private:
 	static void OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponsePtr Response, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
-	static void OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete);
-	static void OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete);
+	static void OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
+	static void OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 };

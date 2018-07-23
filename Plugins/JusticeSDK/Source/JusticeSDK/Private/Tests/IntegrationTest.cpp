@@ -286,7 +286,7 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUserLogoutCompleteDelegate OnUserLogoutResponse = FUserLogoutCompleteDelegate::CreateLambda([&isLogoutDone, &isLogoutSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUserLogoutResponse = FDefaultCompleteDelegate::CreateLambda([&isLogoutDone, &isLogoutSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Logout Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLogoutDone = true;
@@ -332,7 +332,7 @@ bool FForgotPasswordSuccessTest::RunTest(const FString & Parameters)
 	bool isForgotPasswdSuccess = false;
 	double LastTime;
 
-	FForgotPasswordCompleteDelegate OnForgotPasswdComplete = FForgotPasswordCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnForgotPasswdComplete = FDefaultCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Forgot password Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isForgotPasswdDone = true;
@@ -390,7 +390,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 	}
 
 	AddExpectedError(TEXT("OnForgotPasswordResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FForgotPasswordCompleteDelegate OnForgotPasswordResponse = FForgotPasswordCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnForgotPasswordResponse = FDefaultCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Forgot password Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isForgotPasswdDone = true;
@@ -456,7 +456,7 @@ bool FForgotPasswordFailedInvalidUserTest::RunTest(const FString & Parameters)
 	double LastTime;
 
 	AddExpectedError(TEXT("OnForgotPasswordResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FForgotPasswordCompleteDelegate OnForgotPasswordResponse = FForgotPasswordCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnForgotPasswordResponse = FDefaultCompleteDelegate::CreateLambda([&isForgotPasswdDone, &isForgotPasswdSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Forgot password Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isForgotPasswdDone = true;
@@ -724,7 +724,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUpdatePlayerProfileCompleteDelegate OnUpdatePlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUpdatePlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -815,7 +815,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 	
 	AddExpectedError(TEXT("OnCreateDefaultPlayerProfileComplete"), EAutomationExpectedErrorFlags::Contains, 1);
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -867,7 +867,7 @@ bool FCreateDefaultPlayerProfileFailedUnregisteredUserTest::RunTest(const FStrin
 	double LastTime;
 
 	AddExpectedError(TEXT("OnCreateDefaultPlayerProfileComplete"), EAutomationExpectedErrorFlags::Contains, 1);
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -942,7 +942,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUpdatePlayerProfileCompleteDelegate OnUpdatePlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUpdatePlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -1145,7 +1145,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUpdatePlayerProfileCompleteDelegate OnCreatePlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreatePlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -1163,7 +1163,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString userID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUpdatePlayerProfileCompleteDelegate OnUpdatePlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isUpdatePlayerProfileDone, &isUpdatePlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUpdatePlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isUpdatePlayerProfileDone, &isUpdatePlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Update Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isUpdatePlayerProfileDone = true;
@@ -1247,7 +1247,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 	bool isGetPlayerProfileSuccess = false;
 	double LastTime;
 
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isCreateDefaultPlayerProfileDone, &isCreateDefaultPlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isCreateDefaultPlayerProfileDone = true;
@@ -1266,7 +1266,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 	FString userID = FJusticeSDKModule::Get().UserToken->UserID;
 
 	AddExpectedError(TEXT("OnUpdatePlayerProfileComplete"), EAutomationExpectedErrorFlags::Contains, 1);
-	FUpdatePlayerProfileCompleteDelegate OnUpdatePlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&isUpdatePlayerProfileDone, &isUpdatePlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUpdatePlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&isUpdatePlayerProfileDone, &isUpdatePlayerProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Update Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isUpdatePlayerProfileDone = true;
@@ -1458,7 +1458,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FLinkPlatformCompleteDelegate OnLinkDevicePlatformComplete = FLinkPlatformCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr) 
+	FDefaultCompleteDelegate OnLinkDevicePlatformComplete = FDefaultCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr) 
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Link device platform: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLinkDevicePlatformDone = true;
@@ -1496,7 +1496,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUnlinkPlatformCompleteDelegate OnUnlinkDevicePlatformComplete = FUnlinkPlatformCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUnlinkDevicePlatformComplete = FDefaultCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Unlink device platform: %s"), isUnlinkDevicePlatformDone ? TEXT("Success") : TEXT("Failed"));
 		isUnlinkDevicePlatformDone = true;
@@ -1595,7 +1595,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FLinkPlatformCompleteDelegate OnLinkDevicePlatformComplete = FLinkPlatformCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnLinkDevicePlatformComplete = FDefaultCompleteDelegate::CreateLambda([&isLinkDevicePlatformDone, &isLinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Link device platform: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLinkDevicePlatformDone = true;
@@ -1612,7 +1612,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUnlinkPlatformCompleteDelegate OnUnlinkDevicePlatformComplete = FUnlinkPlatformCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnUnlinkDevicePlatformComplete = FDefaultCompleteDelegate::CreateLambda([&isUnlinkDevicePlatformDone, &isUnlinkDevicePlatformSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Unlink device platform: %s"), isUnlinkDevicePlatformDone ? TEXT("Success") : TEXT("Failed"));
 		isUnlinkDevicePlatformDone = true;
@@ -1698,7 +1698,7 @@ bool FSendTelemetryEventSuccessTest::RunTest(const FString & Parameters)
 	bool bSendTelemetrySuccessful = false;
 	double LastTime;
 
-	FSendTelemetryEventCompleteDelegate OnSendTelemetryComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryDone, &bSendTelemetrySuccessful](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnSendTelemetryComplete = FDefaultCompleteDelegate::CreateLambda([&bSendTelemetryDone, &bSendTelemetrySuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Send Telemetry Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryDone = true;
@@ -1741,7 +1741,7 @@ bool FSendTelemetryIncompleteDataSuccessTest::RunTest(const FString & Parameters
 	bool bSendTelemetryIncompleteDataSuccessful = false;
 	double LastTime;
 
-	FSendTelemetryEventCompleteDelegate OnSendTelemetryEventComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryIncompleteDataDone, &bSendTelemetryIncompleteDataSuccessful](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnSendTelemetryEventComplete = FDefaultCompleteDelegate::CreateLambda([&bSendTelemetryIncompleteDataDone, &bSendTelemetryIncompleteDataSuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Send Telemetry With Incomplete Telemetry Data Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryIncompleteDataDone = true;
@@ -1787,7 +1787,7 @@ bool FSendTelemetryEventRandomPathSuccessTest::RunTest(const FString & Parameter
 	bool bSendTelemetryRandomPathSuccessful = false;
 	double LastTime;
 
-	FSendTelemetryEventCompleteDelegate OnSendTelemetryEventComplete = FSendTelemetryEventCompleteDelegate::CreateLambda([&bSendTelemetryRandomPathDone, &bSendTelemetryRandomPathSuccessful](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnSendTelemetryEventComplete = FDefaultCompleteDelegate::CreateLambda([&bSendTelemetryRandomPathDone, &bSendTelemetryRandomPathSuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Send Telemetry To Random Path Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bSendTelemetryRandomPathDone = true;
@@ -1844,7 +1844,7 @@ bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -1863,7 +1863,7 @@ bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 3 GetChildCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
@@ -1919,7 +1919,7 @@ bool FGetRootCategorySuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -1982,7 +1982,7 @@ bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -2002,7 +2002,7 @@ bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetDescendantCategoryCompleteDelegate OnGetDescendantCategoryComplete = FGetDescendantCategoryCompleteDelegate::CreateLambda([&bGetDescendantCategoryDone, &bGetDescendantCategorySuccess](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetDescendantCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetDescendantCategoryDone, &bGetDescendantCategorySuccess](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 3 GetDescendantCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetDescendantCategoryDone = true;
@@ -2073,7 +2073,7 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -2099,7 +2099,7 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
@@ -2214,7 +2214,7 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategory Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -2239,7 +2239,7 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategory Result: %s"), bSuccessful && Result.Num() > 0 ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
@@ -2354,7 +2354,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -2372,7 +2372,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
@@ -2408,7 +2408,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateUserProfileDone = true;
@@ -2425,7 +2425,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FCreateNewOrderCompleteDelegate OnCreateOrderComplete = FCreateNewOrderCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, OrderInfo Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, OrderInfo Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
@@ -2531,7 +2531,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FGetRootCategoryCompleteDelegate OnGetRootCategoryComplete = FGetRootCategoryCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Root Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
@@ -2549,7 +2549,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetChildCategoryCompleteDelegate OnGetChildCategoryComplete = FGetChildCategoryCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
+	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Child Category Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
@@ -2585,7 +2585,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateUserProfileDone = true;
@@ -2602,7 +2602,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FCreateNewOrderCompleteDelegate OnCreateOrderComplete = FCreateNewOrderCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess, &CreatedOrder](bool bSuccessful, FString ErrorStr, OrderInfo Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess, &CreatedOrder](bool bSuccessful, FString ErrorStr, OrderInfo Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
@@ -2620,7 +2620,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetUserOrderCompleteDelegate OnGetUserOrderComplete = FGetUserOrderCompleteDelegate::CreateLambda([&bGetUserOrderDone, &bGetUserOrderSuccess](bool bSuccessful, FString ErroStr, OrderInfo Result)
+	FOrderInfoCompleteDelegate OnGetUserOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bGetUserOrderDone, &bGetUserOrderSuccess](bool bSuccessful, FString ErroStr, OrderInfo Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetUserOrderDone = true;
@@ -2717,7 +2717,7 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FUpdatePlayerProfileCompleteDelegate OnCreateDefaultPlayerProfileComplete = FUpdatePlayerProfileCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
+	FDefaultCompleteDelegate OnCreateDefaultPlayerProfileComplete = FDefaultCompleteDelegate::CreateLambda([&bCreateUserProfileDone, &bCreateUserProfileSuccess](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create Default User Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateUserProfileDone = true;

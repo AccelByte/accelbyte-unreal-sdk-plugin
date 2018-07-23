@@ -13,7 +13,7 @@ UAsyncUserLogout * UAsyncUserLogout::UserLogout()
 
 void UAsyncUserLogout::Activate()
 {
-	JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::UserLogout(FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

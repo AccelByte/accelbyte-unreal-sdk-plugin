@@ -2,7 +2,7 @@
 #include "Models/OrderCreate.h"
 #include "Services/JusticeIdentity.h"
 
-void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FCreateNewOrderCompleteDelegate OnComplete)
+void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete)
 {
 	OrderCreate NewOrderRequest;
 	NewOrderRequest.ItemID = ItemID;
@@ -29,7 +29,7 @@ void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 Discount
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnCreateNewOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response, FCreateNewOrderCompleteDelegate OnComplete)
+void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -113,7 +113,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticePurchase::GetUserOrder(FString OrderNo, FGetUserOrderCompleteDelegate OnComplete)
+void JusticePurchase::GetUserOrder(FString OrderNo, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FJusticeUserID, *OrderNo);
@@ -132,7 +132,7 @@ void JusticePurchase::GetUserOrder(FString OrderNo, FGetUserOrderCompleteDelegat
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnGetUserOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, FGetUserOrderCompleteDelegate OnComplete)
+void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -336,7 +336,7 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 	}
 }
 
-void JusticePurchase::FulfillOrder(FString OrderNo, FFulfillOrderCompleteDelegate OnComplete)
+void JusticePurchase::FulfillOrder(FString OrderNo, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/fulfill"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FJusticeUserID, *OrderNo);
@@ -355,7 +355,7 @@ void JusticePurchase::FulfillOrder(FString OrderNo, FFulfillOrderCompleteDelegat
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnFulfillOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, FFulfillOrderCompleteDelegate OnComplete)
+void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

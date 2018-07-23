@@ -15,7 +15,7 @@ UGetDescendantCategory * UGetDescendantCategory::GetDescendantCategory(FString L
 
 void UGetDescendantCategory::Activate()
 {
-	JusticeCatalog::GetDescendantCategory(this->Language, this->CategoryPath, FGetRootCategoryCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<Category> Result) {		
+	JusticeCatalog::GetDescendantCategory(this->Language, this->CategoryPath, FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<Category> Result) {		
         TArray<UCategory*> DescendantCategories;
         if (bSuccessful)
 		{

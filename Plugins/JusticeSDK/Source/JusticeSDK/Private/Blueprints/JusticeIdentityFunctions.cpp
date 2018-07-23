@@ -26,9 +26,9 @@ void UJusticeIdentityFunctions::WebLoginRefresh(FString UserRefreshToken, FUserL
 	}));
 }
 
-void UJusticeIdentityFunctions::UserLogout(FUserLogoutCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::UserLogout(FDefaultCompleteDynamicDelegate OnComplete)
 {
-	FUserLogoutCompleteDelegate LogoutCompleteDelegate;
+	FDefaultCompleteDelegate LogoutCompleteDelegate;
 	LogoutCompleteDelegate.BindLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	});
@@ -45,26 +45,26 @@ void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserID, FString Passwo
 
 }
 
-void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType, FDefaultCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::VerifyNewPlayer(UserID, VerificationCode, (FUserAuthTypeJustice)AuthType,
-		FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }
 
-void UJusticeIdentityFunctions::ForgotPassword(FString LoginID, FForgotPasswordCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::ForgotPassword(FString LoginID, FDefaultCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::ForgotPassword(LoginID,
-		FForgotPasswordCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }
 
-void UJusticeIdentityFunctions::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDynamicDelegate OnComplete)
+void UJusticeIdentityFunctions::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::ResetPassword(UserID, VerificationCode, NewPassword,
-		FResetPasswordCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }

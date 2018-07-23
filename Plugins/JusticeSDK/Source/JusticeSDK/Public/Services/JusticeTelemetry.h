@@ -12,13 +12,11 @@
 #include "RetryTaskManagerJustice.h"
 #include "JusticeSDK.h"
 
-DECLARE_DELEGATE_TwoParams(FSendTelemetryEventCompleteDelegate, bool, FString);
-
 class JUSTICESDK_API JusticeTelemetry 
 {
 public:
-	static void SendTelemetryEvent(TelemetryEvent TelemetryEvent, FSendTelemetryEventCompleteDelegate OnComplete = nullptr);
+	static void SendTelemetryEvent(TelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnComplete = nullptr);
 	
 private:
-	static void OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FSendTelemetryEventCompleteDelegate OnComplete);
+	static void OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 };

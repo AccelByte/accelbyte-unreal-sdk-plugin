@@ -63,7 +63,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		FString DisplayName = FJusticeSDKModule::Get().UserToken->DisplayName;
 		FString Email = FJusticeSDKModule::Get().LoginID;
 		UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
-		JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FUpdatePlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+		JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 			if (bSuccessful)
 			{
@@ -134,7 +134,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	}
 }
 
-void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
@@ -153,7 +153,7 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, 
 		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnUpdatePlayerProfileComplete, OnComplete));
 }
 
-void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -226,7 +226,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 	}
 }
 
-void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayName, FDefaultCompleteDelegate OnComplete)
 {
 	FString DefaultLocale;
 	#if PLATFORM_IOS
@@ -256,7 +256,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateDefaultPlayerProfileComplete, OnComplete));
 }
 
-void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FUpdatePlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
