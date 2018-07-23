@@ -17,18 +17,10 @@ public:
 	bool IsInitialized;
 	static inline FJusticeSDKModule& Get()
 	{
-		FJusticeSDKModule& module = FModuleManager::LoadModuleChecked< FJusticeSDKModule >("JusticeSDK");
-		check(module.IsInitialized);
-		return module;
+		FJusticeSDKModule& moduleInstance = FModuleManager::LoadModuleChecked< FJusticeSDKModule >("JusticeSDK");
+		check(moduleInstance.IsInitialized);
+		return moduleInstance;
 	}
-
-	static inline FJusticeSDKModule& GetModule()
-	{
-		FJusticeSDKModule& module = FModuleManager::GetModuleChecked< FJusticeSDKModule >("JusticeSDK");
-		check(module.IsInitialized);
-		return module;
-	}
-
 	static inline bool IsAvailable()
 	{
 		return FModuleManager::Get().IsModuleLoaded("JusticeSDK");

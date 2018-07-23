@@ -21,7 +21,7 @@ class JUSTICESDK_API JusticePlatform
 {
 public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
-    static void UpdatePlayerProfile(UserProfileInfo newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete);
+    static void UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FUpdatePlayerProfileCompleteDelegate OnComplete);
 	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FUpdatePlayerProfileCompleteDelegate OnComplete);
 	static UserProfileInfo* GetUserProfileInfo();
 private:

@@ -232,6 +232,29 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 	}
 }
 
+
+void JusticeIdentity::AuthCodeLogin(FString AuthCode, FString RedirectURI, FUserLoginCompleteDelegate OnComplete)
+{
+	FScopeLock Lock(&Mutex);
+
+	FString Authorization = FJusticeHTTP::BasicAuth();
+	FString URL = FString::Printf(TEXT("%s/iam/oauth/token"), *FJusticeBaseURL);
+	FString Verb = POST;
+	FString ContentType = TYPE_FORM;
+	FString Accept = TYPE_JSON;
+	FString Payload = FString::Printf(TEXT("grant_type=authorization_code&code=%s&redirect_uri=%s"), *AuthCode, *RedirectURI);
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUserLoginResponse, OnComplete));
+}
+
+
 void JusticeIdentity::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDelegate OnComplete)
 {
 	FScopeLock Lock(&Mutex);
@@ -449,10 +472,10 @@ void JusticeIdentity::OnUserLogoutResponse(FJusticeHttpResponsePtr Response, FUs
 
 void JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate OnComplete)
 {
-	FString RefreshToken = FJusticeSDKModule::GetModule().UserToken->UserRefreshToken;
+	FString RefreshToken = FJusticeSDKModule::Get().UserToken->UserRefreshToken;
 
 	FString Authorization	= FJusticeHTTP::BasicAuth();
-	FString URL				= FString::Printf(TEXT("%s/iam/oauth/token"), *FJusticeSDKModule::GetModule().BaseURL);
+	FString URL				= FString::Printf(TEXT("%s/iam/oauth/token"), *FJusticeSDKModule::Get().BaseURL);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_FORM;
 	FString Accept			= TYPE_JSON;
@@ -513,7 +536,7 @@ void JusticeIdentity::ClientRefreshToken()
 	FScopeLock Lock(&Mutex);
 
 	FString Authorization	= FJusticeHTTP::BasicAuth();
-	FString URL				= FString::Printf(TEXT("%s/iam/oauth/token"), *FJusticeSDKModule::GetModule().BaseURL);
+	FString URL				= FString::Printf(TEXT("%s/iam/oauth/token"), *FJusticeSDKModule::Get().BaseURL);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_FORM;
 	FString Accept			= TYPE_JSON;
@@ -542,7 +565,7 @@ void JusticeIdentity::OnClientRefreshResponse(FJusticeHttpResponsePtr Response)
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		FJusticeSDKModule::GetModule().ParseClientToken(Response->Content);
+		FJusticeSDKModule::Get().ParseClientToken(Response->Content);
 		FJusticeGameClientToken->SetLastRefreshTimeToNow();
 		FJusticeGameClientToken->ScheduleNormalRefresh();
 		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);

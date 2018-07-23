@@ -30,7 +30,6 @@ public:
 	FString Timezone;
 	FString DateOfBirth;
 	TMap<FString, FString> CustomAttributes;
-
 public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("userId", UserID);
@@ -50,6 +49,47 @@ public:
 		JSON_SERIALIZE_MAP("customAttributes", CustomAttributes);
 	END_JSON_SERIALIZER
 };
+
+
+
+class UserProfileInfoUpdate : public FJsonSerializable
+{
+public:
+	UserProfileInfoUpdate() {};
+
+	FString DisplayName;
+	FString FirstName;
+	FString LastName;
+	FString AvatarSmallUrl;
+	FString AvatarUrl;
+	FString AvatarLargeUrl;
+	FString Email;
+	FString Language;
+	FString Timezone;
+	FString DateOfBirth;
+	TMap<FString, FString> CustomAttributes;
+	FString Country;
+	FString Status;
+
+public:
+	BEGIN_JSON_SERIALIZER
+		JSON_SERIALIZE("displayName", DisplayName);
+		JSON_SERIALIZE("firstName", FirstName);
+		JSON_SERIALIZE("lastName", LastName);		
+		JSON_SERIALIZE("avatarSmallUrl", AvatarSmallUrl);
+		JSON_SERIALIZE("avatarUrl", AvatarUrl);
+		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeUrl);
+		JSON_SERIALIZE("email", Email);
+		JSON_SERIALIZE("language", Language);
+		JSON_SERIALIZE("timeZone", Timezone);
+		JSON_SERIALIZE("dateOfBirth", DateOfBirth);
+		JSON_SERIALIZE_MAP("customAttributes", CustomAttributes);
+		JSON_SERIALIZE("country", Country);
+		JSON_SERIALIZE("status", Status);
+	END_JSON_SERIALIZER
+};
+
+
 
 UCLASS(Blueprintable, BlueprintType)
 class UUserProfileJustice : public UObject, public UserProfileInfo, public JusticeBaseModel<UUserProfileJustice, UserProfileInfo>

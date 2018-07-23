@@ -11,7 +11,7 @@
 #include "HAL/Runnable.h"
 #include "HAL/ThreadSafeBool.h"
 #include "Misc/SingleThreadRunnable.h"
-#include "HttpJustice.h"
+#include "HTTPJustice.h"
 #include "JusticeLog.h"
 
 #define POLLING_INTERVAL_MS 1000
