@@ -10,7 +10,7 @@
 #include "Services/JusticeIdentity.h"
 #include "JusticeLog.h"
 
-void JusticeCatalog::GetRootCategory(FString Language, FGetRootCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *Language);
@@ -29,7 +29,7 @@ void JusticeCatalog::GetRootCategory(FString Language, FGetRootCategoryCompleteD
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -125,7 +125,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FGetRootCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(ParentPath), *Language);
@@ -143,7 +143,7 @@ void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FGetRootC
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGetRootCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {	
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -242,7 +242,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FGe
 	}
 }
 
-void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FGetChildCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/children?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -260,7 +260,7 @@ void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FG
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response, FGetChildCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -358,7 +358,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 	}
 }
 
-void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPath, FGetDescendantCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/descendants?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -376,7 +376,7 @@ void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPat
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Response, FGetDescendantCategoryCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

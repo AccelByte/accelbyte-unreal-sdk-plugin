@@ -9,7 +9,7 @@
 #include "AsyncTaskManagerJustice.h"
 FCriticalSection Mutex;
 
-void JusticeIdentity::ForgotPassword(FString LoginID, FForgotPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *FJusticeBaseURL, *FJusticeNamespace);
@@ -28,7 +28,7 @@ void JusticeIdentity::ForgotPassword(FString LoginID, FForgotPasswordCompleteDel
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnForgotPasswordResponse, OnComplete));
 }
 
-void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response, FForgotPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -115,7 +115,7 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FResetPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete)
 {
 	ResetPasswordRequest resetPasswordRequest;
 	resetPasswordRequest.Code = VerificationCode;
@@ -139,7 +139,7 @@ void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FS
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnResetPasswordResponse, OnComplete));
 }
 
-void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, FResetPasswordCompleteDelegate OnComplete)
+void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -422,7 +422,7 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FU
 }
 
 
-void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
+void JusticeIdentity::UserLogout(FDefaultCompleteDelegate OnComplete)
 {
 	FScopeLock Lock(&Mutex);
 
@@ -442,7 +442,7 @@ void JusticeIdentity::UserLogout(FUserLogoutCompleteDelegate OnComplete)
 		Payload,
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUserLogoutResponse, OnComplete));
 }
-void JusticeIdentity::OnUserLogoutResponse(FJusticeHttpResponsePtr Response, FUserLogoutCompleteDelegate OnComplete)
+void JusticeIdentity::OnUserLogoutResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -675,7 +675,7 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 
 		ReissueVerificationCode(userCreate->UserID, 
 			userCreate->LoginID, 
-			FVerifyNewPlayerCompleteDelegate::CreateLambda([OnComplete, userCreate](bool bSuccessful, FString ErrorStr) {
+			FDefaultCompleteDelegate::CreateLambda([OnComplete, userCreate](bool bSuccessful, FString ErrorStr) {
 			if (bSuccessful)
 			{
 				OnComplete.ExecuteIfBound(true, TEXT(""), userCreate);
@@ -752,7 +752,7 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 	}
 }
 
-void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, FUserAuthTypeJustice AuthType, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, FUserAuthTypeJustice AuthType, FDefaultCompleteDelegate OnComplete)
 {
 	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
 
@@ -773,7 +773,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, 
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnVerifyNewPlayerResponse, OnComplete));
 }
 
-void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -850,7 +850,7 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 	}
 }
 
-void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
@@ -868,7 +868,7 @@ void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, F
 		Payload,
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
 }
-void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr Response, FVerifyNewPlayerCompleteDelegate OnComplete)
+void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -1128,7 +1128,7 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 	}
 }
 
-void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FLinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
@@ -1147,7 +1147,7 @@ void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FLinkPlat
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnLinkPlatformResponse, OnComplete));
 }
 
-void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, FLinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 
 	FString ErrorStr;
@@ -1199,7 +1199,7 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 	}
 }
 
-void JusticeIdentity::UnlinkPlatform(FString PlatformID, FUnlinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::UnlinkPlatform(FString PlatformID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
@@ -1218,7 +1218,7 @@ void JusticeIdentity::UnlinkPlatform(FString PlatformID, FUnlinkPlatformComplete
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUnlinkPlatformResponse, OnComplete));
 }
 
-void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response, FUnlinkPlatformCompleteDelegate OnComplete)
+void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -1269,7 +1269,7 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticeIdentity::UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FUpgradeHeadlessAccountCompleteDelegate OnComplete)
+void JusticeIdentity::UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
@@ -1288,7 +1288,7 @@ void JusticeIdentity::UpgradeHeadlessAccount(FString Namespace, FString ClientAc
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnUpgradeHeadlessAccountResponse, OnComplete, Email));
 }
 
-void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FUpgradeHeadlessAccountCompleteDelegate OnComplete, FString LoginID)
+void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete, FString LoginID)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -1306,7 +1306,7 @@ void JusticeIdentity::OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr R
 		JusticeIdentity::ReissueVerificationCode(
 			*FJusticeUserID, 
 			LoginID, 
-			FVerifyNewPlayerCompleteDelegate::CreateLambda([=](bool bSuccessful, FString ErrorStr) {
+			FDefaultCompleteDelegate::CreateLambda([=](bool bSuccessful, FString ErrorStr) {
 				if (bSuccessful)
 				{
 					UE_LOG(LogJustice, Log, TEXT("Upgrade Headless Account : Verification Code Success"));

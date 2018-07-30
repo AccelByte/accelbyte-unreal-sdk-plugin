@@ -13,7 +13,7 @@ UUpgradeHeadlessAccount * UUpgradeHeadlessAccount::UpgradeHeadlessAccount(FStrin
 
 void UUpgradeHeadlessAccount::Activate()
 {
-	JusticeIdentity::UpgradeHeadlessAccount(FJusticeNamespace, FJusticeUserToken->AccessToken, FJusticeUserID, this->Email, this->Password, FUpgradeHeadlessAccountCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::UpgradeHeadlessAccount(FJusticeNamespace, FJusticeUserToken->AccessToken, FJusticeUserID, this->Email, this->Password, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

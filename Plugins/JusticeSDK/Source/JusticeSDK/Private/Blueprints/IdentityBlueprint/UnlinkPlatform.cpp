@@ -14,7 +14,7 @@ UAsyncUnlinkPlatform * UAsyncUnlinkPlatform::UnlinkPlatform(FString PlatformID)
 
 void UAsyncUnlinkPlatform::Activate()
 {
-	JusticeIdentity::UnlinkPlatform(this->PlatformID, FUnlinkPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::UnlinkPlatform(this->PlatformID, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

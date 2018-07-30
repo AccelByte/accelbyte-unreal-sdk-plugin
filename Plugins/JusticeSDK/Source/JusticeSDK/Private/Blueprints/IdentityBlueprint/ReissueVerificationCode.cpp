@@ -15,7 +15,7 @@ UAsyncReissueVerificationCode * UAsyncReissueVerificationCode::ReissueVerificati
 
 void UAsyncReissueVerificationCode::Activate()
 {
-	JusticeIdentity::ReissueVerificationCode(this->UserID, this->LoginID, FVerifyNewPlayerCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::ReissueVerificationCode(this->UserID, this->LoginID, FDefaultCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

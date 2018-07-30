@@ -8,7 +8,7 @@
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
 
-void JusticeTelemetry::SendTelemetryEvent(TelemetryEvent Telemetry, FSendTelemetryEventCompleteDelegate OnComplete)
+void JusticeTelemetry::SendTelemetryEvent(TelemetryEvent Telemetry, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = TEXT("");
 	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *FJusticeNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);
@@ -27,7 +27,7 @@ void JusticeTelemetry::SendTelemetryEvent(TelemetryEvent Telemetry, FSendTelemet
 		FWebRequestResponseDelegate::CreateStatic(JusticeTelemetry::OnSendTelemetryEventResponse, OnComplete));
 }
 
-void JusticeTelemetry::OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FSendTelemetryEventCompleteDelegate OnComplete)
+void JusticeTelemetry::OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
