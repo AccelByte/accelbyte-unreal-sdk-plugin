@@ -12,7 +12,7 @@ pipeline {
       }
       steps {
           sh '''
-          aws ec2 start-instances --instance-ids i-0a0a74363d53b45df
+          aws ec2 start-instances --instance-ids i-0627e8b0d88cff6de
           ''' 
       }
       post {
@@ -200,7 +200,7 @@ pipeline {
         if (turnOff){
           node('master'){
             sh '''
-            aws ec2 stop-instances --instance-ids i-0a0a74363d53b45df
+            aws ec2 stop-instances --instance-ids i-0627e8b0d88cff6de
             '''
           }
         }
@@ -230,7 +230,7 @@ pipeline {
         if (turnOff){
           node('master'){
             sh '''
-            aws ec2 stop-instances --instance-ids i-0a0a74363d53b45df
+            aws ec2 stop-instances --instance-ids i-0627e8b0d88cff6de
             '''
           }
         }
