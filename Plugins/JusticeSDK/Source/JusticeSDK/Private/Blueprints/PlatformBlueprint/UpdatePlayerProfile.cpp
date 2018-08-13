@@ -5,13 +5,13 @@
 #include "Blueprints/PlatformBlueprint/UpdatePlayerProfile.h"
 #include "Services/JusticePlatform.h"
 
-UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes)
+UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarURL, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes)
 {
 	UAsyncUpdatePlayerProfile* Node = NewObject<UAsyncUpdatePlayerProfile>();
 	Node->DisplayName = DisplayName;
 	Node->FirstName = FirstName;
 	Node->LastName = LastName;
-	Node->AvatarUrl = AvatarUrl;
+	Node->AvatarURL = AvatarURL;
 	Node->Language = Language;
 	Node->Timezone = Timezone;
 	Node->DateOfBirth = DateOfBirth;
@@ -21,15 +21,15 @@ UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FStri
 
 void UAsyncUpdatePlayerProfile::Activate()
 {
-	UserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
+	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
 	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? this->DisplayName : OldUserProfile->DisplayName;
 	NewUserProfile.FirstName = !FirstName.IsEmpty() ? this->FirstName : OldUserProfile->FirstName;
 	NewUserProfile.LastName = !LastName.IsEmpty() ? this->LastName : OldUserProfile->LastName;
-	NewUserProfile.AvatarUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarUrl;
-	NewUserProfile.AvatarSmallUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarSmallUrl;
-	NewUserProfile.AvatarLargeUrl = !AvatarUrl.IsEmpty() ? this->AvatarUrl : OldUserProfile->AvatarLargeUrl;
+	NewUserProfile.AvatarURL = !AvatarURL.IsEmpty() ? this->AvatarURL : OldUserProfile->AvatarURL;
+	NewUserProfile.AvatarSmallURL = !AvatarURL.IsEmpty() ? this->AvatarURL : OldUserProfile->AvatarSmallURL;
+	NewUserProfile.AvatarLargeURL = !AvatarURL.IsEmpty() ? this->AvatarURL : OldUserProfile->AvatarLargeURL;
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Status = OldUserProfile->Status;
 	NewUserProfile.Language = !Language.IsEmpty() ? this->Language : OldUserProfile->Language;

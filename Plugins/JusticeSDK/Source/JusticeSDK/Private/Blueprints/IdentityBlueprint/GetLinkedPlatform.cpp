@@ -13,7 +13,7 @@ UAsyncGetLinkedPlatform * UAsyncGetLinkedPlatform::GetLinkedPlatform()
 
 void UAsyncGetLinkedPlatform::Activate()
 {
-	JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<LinkedPlatform> result) {
+	JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<FLinkedPlatform> result) {
 		TArray<ULinkedPlatform*> Result;
 		if (bSuccessful)
 		{

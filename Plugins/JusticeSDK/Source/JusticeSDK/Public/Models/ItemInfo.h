@@ -13,38 +13,38 @@
 #include "JusticeBaseModel.h"
 #include "ItemInfo.generated.h"
 
-class ItemInfo : public FJsonSerializable
+struct FItemInfoJustice : public FJsonSerializable
 {
 public:
-	FString Title;
-	FString Description;
-	FString LongDescription;
-	TArray<JusticeImage> Images;
-	JusticeImage ThumbnailImage;
-	FString ItemID;
-	FString AppId;
-	FString AppType;
-	FString SKU;
-	FString Namespace;
-	FString EntitlementName;
-	FString EntitlementType;
-	int32 UseCount;
-	FString CategoryPath;
-	FString Status;
-	FString ItemType;
-	FString CreatedAt;
-	FString UpdatedAt;
-	FString TargetCurrencyCode;
-	FString TargetNamespace;
-	TArray<RegionData> RegionDatas;
-	TArray<FString> ItemIds;
-	TArray<FString> Tags;
+	FString				Title;
+	FString				Description;
+	FString				LongDescription;
+	TArray<FImage>		Images;
+	FImage				ThumbnailImage;
+	FString				ItemID;
+	FString				AppId;
+	FString				AppType;
+	FString				SKU;
+	FString				Namespace;
+	FString				EntitlementName;
+	FString				EntitlementType;
+	int32				UseCount;
+	FString				CategoryPath;
+	FString				Status;
+	FString				ItemType;
+	FString				CreatedAt;
+	FString				UpdatedAt;
+	FString				TargetCurrencyCode;
+	FString				TargetNamespace;
+	TArray<FRegionData>	RegionDatas;
+	TArray<FString>		ItemIds;
+	TArray<FString>		Tags;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("title", Title);
 		JSON_SERIALIZE("description", Description);
 		JSON_SERIALIZE("longDescription", LongDescription);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, JusticeImage);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("images", Images, FImage);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("thumbnailImage", ThumbnailImage);
 		JSON_SERIALIZE("itemId", ItemID);
 		JSON_SERIALIZE("appId", AppId);
@@ -61,14 +61,14 @@ public:
 		JSON_SERIALIZE("updatedAt", UpdatedAt);
 		JSON_SERIALIZE("targetCurrencyCode", TargetCurrencyCode);
 		JSON_SERIALIZE("targetNamespace", TargetNamespace);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("regionData", RegionDatas, RegionData);		
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("regionData", RegionDatas, FRegionData);		
 		JSON_SERIALIZE_ARRAY("itemIds", ItemIds);
 		JSON_SERIALIZE_ARRAY("tags", Tags);
 	END_JSON_SERIALIZER
 };
 
 UCLASS()
-class UItemInfo : public UObject, public ItemInfo, public JusticeBaseModel<UItemInfo, ItemInfo>
+class UItemInfo : public UObject, public FItemInfoJustice, public FBaseModelJustice<UItemInfo, FItemInfoJustice>
 {
 	GENERATED_BODY()
 

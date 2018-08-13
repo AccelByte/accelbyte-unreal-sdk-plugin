@@ -16,7 +16,7 @@ UGetItem * UGetItem::GetItem(FString ItemID, FString Region, FString Language)
 
 void UGetItem::Activate()
 {
-	JusticeCatalog::GetItem(this->ItemID, this->Region, this->Language, FGetItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, ItemInfo Result) {
+	JusticeCatalog::GetItem(this->ItemID, this->Region, this->Language, FGetItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FItemInfoJustice Result) {
         UItemInfo* ItemResult = NewObject<UItemInfo>();
         if (bSuccessful)
 		{

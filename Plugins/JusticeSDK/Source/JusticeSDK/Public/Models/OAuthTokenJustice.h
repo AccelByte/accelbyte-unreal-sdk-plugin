@@ -13,42 +13,42 @@
 #include "JusticeBaseModel.h"
 #include "OAuthTokenJustice.generated.h"
 
-class OAuthTokenJustice: public FJsonSerializable
+struct FOAuthTokenJustice: public FJsonSerializable
 {
 public:
-	FString AccessToken;
-	FString UserRefreshToken;
-	FString TokenType;
-	double  ExpiresIn;
-	TArray<PermissionJustice> Permissions;
-	TArray<FString> Roles;
-	TArray<FString> Bans;
-	FString UserID;
-	FString DisplayName;
-	FString Namespace;
-	FDateTime LastTokenRefreshUtc;
-	FDateTime NextTokenRefreshUtc;
-	FTimespan TokenRefreshBackoff;
-	int32 JFlags;
+	FString						AccessToken;
+	FString						UserRefreshToken;
+	FString						TokenType;
+	double						ExpiresIn;
+	TArray<FPermissionJustice>	Permissions;
+	TArray<FString>				Roles;
+	TArray<FString>				Bans;
+	FString						UserID;
+	FString						DisplayName;
+	FString						Namespace;
+	FDateTime					LastTokenRefreshUTC;
+	FDateTime					NextTokenRefreshUTC;
+	FTimespan					TokenRefreshBackoff;
+	int32						JFlags;
 public:
-	OAuthTokenJustice():
+	FOAuthTokenJustice():
 		ExpiresIn(0),
-		LastTokenRefreshUtc(FDateTime::MinValue()),
-		NextTokenRefreshUtc(FDateTime::MinValue()),
+		LastTokenRefreshUTC(FDateTime::MinValue()),
+		NextTokenRefreshUTC(FDateTime::MinValue()),
 		TokenRefreshBackoff(FTimespan::Zero())
 	{ }
 
 	bool ShouldRefresh()
 	{
-		if (NextTokenRefreshUtc > FDateTime::MinValue() && !UserRefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
+		if (NextTokenRefreshUTC > FDateTime::MinValue() && !UserRefreshToken.IsEmpty() && TokenRefreshBackoff < FTimespan::FromDays(1))
 		{
-			return NextTokenRefreshUtc <= FDateTime::UtcNow();
+			return NextTokenRefreshUTC <= FDateTime::UtcNow();
 		}
 		return false;
 	};
 	void ScheduleNormalRefresh()
 	{
-		NextTokenRefreshUtc = LastTokenRefreshUtc + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
+		NextTokenRefreshUTC = LastTokenRefreshUTC + FTimespan::FromSeconds((ExpiresIn + 1) * 0.8);
 		TokenRefreshBackoff = FTimespan::Zero();
 		UE_LOG(LogJustice, Log, TEXT("FOAuthTokenJustice::ScheduleNormalRefresh(): %s"), *GetRefreshStr());
 	};
@@ -59,14 +59,14 @@ public:
 			TokenRefreshBackoff = FTimespan::FromSeconds(10);
 		}
 		TokenRefreshBackoff *= 2;
-		NextTokenRefreshUtc = FDateTime::UtcNow() + TokenRefreshBackoff + FTimespan::FromSeconds(FMath::RandRange(1, 60));
+		NextTokenRefreshUTC = FDateTime::UtcNow() + TokenRefreshBackoff + FTimespan::FromSeconds(FMath::RandRange(1, 60));
 		UE_LOG(LogJustice, Log, TEXT("FOAuthTokenJustice::ScheduelBackoffRefresh(): %s"), *GetRefreshStr());
 	};
 
-	FDateTime GetExpireTime() { return LastTokenRefreshUtc - FTimespan::FromSeconds(ExpiresIn); };
+	FDateTime GetExpireTime() { return LastTokenRefreshUTC - FTimespan::FromSeconds(ExpiresIn); };
 	FString GetExpireTimeStr() { return GetExpireTime().ToIso8601(); };
-	FString GetRefreshStr() { return FString::Printf(TEXT("Expire=%s Refresh=%s Backoff=%.0f"), *GetExpireTimeStr(), *NextTokenRefreshUtc.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
-	void SetLastRefreshTimeToNow() { LastTokenRefreshUtc = FDateTime::UtcNow(); };
+	FString GetRefreshStr() { return FString::Printf(TEXT("Expire=%s Refresh=%s Backoff=%.0f"), *GetExpireTimeStr(), *NextTokenRefreshUTC.ToIso8601(), TokenRefreshBackoff.GetTotalSeconds()); };
+	void SetLastRefreshTimeToNow() { LastTokenRefreshUTC = FDateTime::UtcNow(); };
 	FString GetAccessToken() { return AccessToken; };
 	FString GetRefreshToken() { return UserRefreshToken; };
 	FString GetTokenType() { return TokenType; };
@@ -81,7 +81,7 @@ public:
 		JSON_SERIALIZE("expires_in", ExpiresIn);
 		JSON_SERIALIZE("token_type", TokenType);
 		JSON_SERIALIZE_ARRAY("roles", Roles);		
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("permissions", Permissions, PermissionJustice);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("permissions", Permissions, FPermissionJustice);
 		JSON_SERIALIZE_ARRAY("bans", Bans);
 		JSON_SERIALIZE("user_id", UserID);
 		JSON_SERIALIZE("display_name", DisplayName);
@@ -90,7 +90,7 @@ public:
 };
 
 UCLASS()
-class UOAuthTokenJustice : public UObject, public OAuthTokenJustice, public JusticeBaseModel<UOAuthTokenJustice, OAuthTokenJustice>
+class UOAuthTokenJustice : public UObject, public FOAuthTokenJustice, public FBaseModelJustice<UOAuthTokenJustice, FOAuthTokenJustice>
 {
 	GENERATED_BODY()
 public:

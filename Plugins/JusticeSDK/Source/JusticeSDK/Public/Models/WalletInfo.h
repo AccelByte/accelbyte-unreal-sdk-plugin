@@ -10,34 +10,34 @@
 #include "BalanceInfo.h"
 #include "WalletInfo.generated.h"
 
-class WalletInfo : public FJsonSerializable
+struct FWalletInfo : public FJsonSerializable
 {
 public:
 	FString ID;
 	FString Namespace;
-	FString userId;
+	FString UserID;
 	FString CurrencyCode;
 	FString CurrencySymbol;
-	int32 balance;
-	FString  createdAt;
-	FString  updatedAt;
-	FString status;
+	int32	Balance;
+	FString CreatedAt;
+	FString UpdatedAt;
+	FString Status;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("id", ID);
 		JSON_SERIALIZE("namespace", Namespace);
-		JSON_SERIALIZE("userId", userId);
+		JSON_SERIALIZE("userId", UserID);
 		JSON_SERIALIZE("currencyCode", CurrencyCode);
 		JSON_SERIALIZE("currencySymbol", CurrencySymbol);
-		JSON_SERIALIZE("balance", balance);
-		JSON_SERIALIZE("createdAt", createdAt);
-		JSON_SERIALIZE("updatedAt", updatedAt);
-		JSON_SERIALIZE("status", status);
+		JSON_SERIALIZE("balance", Balance);
+		JSON_SERIALIZE("createdAt", CreatedAt);
+		JSON_SERIALIZE("updatedAt", UpdatedAt);
+		JSON_SERIALIZE("status", Status);
 	END_JSON_SERIALIZER
 };
 
 UCLASS()
-class UWalletInfo : public UObject, public WalletInfo
+class UWalletInfo : public UObject, public FWalletInfo
 {
 	GENERATED_BODY()
 public:

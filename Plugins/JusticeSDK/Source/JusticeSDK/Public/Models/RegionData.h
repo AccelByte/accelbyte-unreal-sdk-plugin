@@ -9,25 +9,25 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "RegionData.generated.h"
 
-class RegionData : public FJsonSerializable
+struct FRegionData : public FJsonSerializable
 {
 public:
 
-    int32 Price;
-    int32 DiscountPercentage;
-    int32 DiscountAmount;
-    int32 DiscountedPrice;
+    int32	Price;
+    int32	DiscountPercentage;
+    int32	DiscountAmount;
+    int32	DiscountedPrice;
     FString CurrencyCode;
     FString CurrencyType;
     FString CurrencyNamespace;
     FString PurchaseAt;
     FString ExpireAt;
-    int32 TotalNum;
-    int32 TotalNumPerAccount;
+    int32	TotalNum;
+    int32	TotalNumPerAccount;
     FString DiscountPurchaseAt;
     FString DiscountExpireAt;
-    int32 DiscountTotalNum;
-    int32 DiscountTotalNumPerAccount;
+    int32	DiscountTotalNum;
+    int32	DiscountTotalNumPerAccount;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("price", Price);
@@ -50,7 +50,7 @@ public:
 
 
 UCLASS()
-class URegionData : public UObject, public RegionData
+class URegionData : public UObject, public FRegionData
 {
 	GENERATED_BODY()	
 };

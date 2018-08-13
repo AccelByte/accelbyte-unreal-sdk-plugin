@@ -9,7 +9,7 @@
 #include "Serialization/JsonSerializerMacros.h"
 
 
-class Paging : public FJsonSerializable
+struct FPaging : public FJsonSerializable
 {
 public:
     FString Previous;

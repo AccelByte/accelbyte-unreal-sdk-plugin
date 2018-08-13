@@ -43,10 +43,10 @@ void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response,
 	{
 	case EHttpResponseCodes::Ok:
 	{
-		WalletInfo* wallet = new WalletInfo();
+		FWalletInfo* wallet = new FWalletInfo();
 		if (wallet->FromJson(Response->Content))
 		{
-			OnComplete.ExecuteIfBound(true, wallet->balance);
+			OnComplete.ExecuteIfBound(true, wallet->Balance);
 		}
 		else
 		{
@@ -56,7 +56,7 @@ void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response,
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())

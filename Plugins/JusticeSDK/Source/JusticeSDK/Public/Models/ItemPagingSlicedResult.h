@@ -10,15 +10,15 @@
 #include "ItemInfo.h"
 #include "Paging.h"
 
-class ItemPagingSlicedResult : public FJsonSerializable
+struct FItemPagingSlicedResult : public FJsonSerializable
 {
 public:
-	TArray<ItemInfo> Data;
-	Paging PagingInfo;
+	TArray<FItemInfoJustice>	Data;
+	FPaging						Paging;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("data", Data, ItemInfo);
-		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paging", PagingInfo);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("data", Data, FItemInfoJustice);
+		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paging", Paging);
 	END_JSON_SERIALIZER
 };
 

@@ -9,7 +9,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Online.h"
 #include "Models/TelemetryEvent.h"
-#include "Models/TelemetryEventDataExample.h"
+#include "TelemetryEventDataExample.h"
 #include "JusticeIdentity.h"
 #include "JusticeTelemetry.h"
 #include "JusticeSDKDemoGameModeBase.generated.h"

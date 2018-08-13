@@ -9,30 +9,30 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "BalanceInfo.generated.h"
 
-class BalanceInfo: public FJsonSerializable
+struct FBalanceInfo: public FJsonSerializable
 {
 public:
-	FString ID;
-	FString walletId;
-	FString CurrencyCode;
-	int32 balance;
-	FString  balanceSource;
-	FString  updatedAt;
-	FString status;
+	FString	ID;
+	FString	WalletID;
+	FString	CurrencyCode;
+	int32	Balance;
+	FString	BalanceSource;
+	FString	UpdatedAt;
+	FString	Status;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("id", ID);
-		JSON_SERIALIZE("walletId", walletId);
+		JSON_SERIALIZE("walletId", WalletID);
 		JSON_SERIALIZE("currencyCode", CurrencyCode);
-		JSON_SERIALIZE("balance", balance);
-		JSON_SERIALIZE("balanceSource", balanceSource);
-		JSON_SERIALIZE("updatedAt", updatedAt);
-		JSON_SERIALIZE("status", status);
+		JSON_SERIALIZE("balance", Balance);
+		JSON_SERIALIZE("balanceSource", BalanceSource);
+		JSON_SERIALIZE("updatedAt", UpdatedAt);
+		JSON_SERIALIZE("status", Status);
 	END_JSON_SERIALIZER
 };
 
 UCLASS()
-class UBalanceInfo : public UObject, public BalanceInfo
+class UBalanceInfo : public UObject, public FBalanceInfo
 {
 	GENERATED_BODY()
 };

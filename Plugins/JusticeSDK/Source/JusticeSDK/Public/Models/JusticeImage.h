@@ -9,25 +9,24 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "JusticeImage.generated.h"
 
-class JusticeImage : public FJsonSerializable
+struct FImage : public FJsonSerializable
 {
 public:
-	int32 Height;
-	int32 Width;
-	FString ImageUrl;
-	FString SmallImageUrl;
+	int32	Height;
+	int32	Width;
+	FString ImageURL;
+	FString SmallImageURL;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("height", Height);
 		JSON_SERIALIZE("width", Width);
-		JSON_SERIALIZE("imageUrl", ImageUrl);
-		JSON_SERIALIZE("smallImageUrl", SmallImageUrl);
+		JSON_SERIALIZE("imageUrl", ImageURL);
+		JSON_SERIALIZE("smallImageUrl", SmallImageURL);
 	END_JSON_SERIALIZER
 };
 
-
 UCLASS()
-class UJusticeImage : public UObject, public JusticeImage
+class UJusticeImage : public UObject, public FImage
 {
 	GENERATED_BODY()		
 };

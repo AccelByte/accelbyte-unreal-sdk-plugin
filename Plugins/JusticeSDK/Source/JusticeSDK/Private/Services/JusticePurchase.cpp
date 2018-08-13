@@ -4,7 +4,7 @@
 
 void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete)
 {
-	OrderCreate NewOrderRequest;
+	FOrderCreate NewOrderRequest;
 	NewOrderRequest.ItemID = ItemID;
 	NewOrderRequest.CurrencyCode = Currency;
 	NewOrderRequest.Price = Price;
@@ -35,7 +35,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Create new order Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, OrderInfo());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, FOrderInfo());
 		return;
 	}
 
@@ -44,7 +44,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		OrderInfo Info = OrderInfo();		
+		FOrderInfo Info = FOrderInfo();		
 		if (Info.FromJson(Response->Content))
 		{
 			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
@@ -57,12 +57,12 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	}		
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+					OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -74,7 +74,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+				OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 				return;
 			}
 		}));
@@ -92,7 +92,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+			OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -108,7 +108,7 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT(" Create NewOrder Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 		return;
 	}
 }
@@ -138,7 +138,7 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get user's order Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, OrderInfo());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, FOrderInfo());
 		return;
 	}
 
@@ -147,7 +147,7 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		OrderInfo Info = OrderInfo();
+		FOrderInfo Info = FOrderInfo();
 		if (Info.FromJson(Response->Content))
 		{
 			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
@@ -160,12 +160,12 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+					OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -177,7 +177,7 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+				OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 				return;
 			}
 		}));
@@ -195,7 +195,7 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+			OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -211,7 +211,7 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT(" Get User Order Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 		return;
 	}
 }
@@ -243,7 +243,7 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get user's orders Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<OrderInfo>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FOrderInfo>());
 		return;
 	}
 
@@ -254,11 +254,11 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 	{
 		TSharedPtr<FJsonObject> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
-		TArray<OrderInfo> ArrayResult;
+		TArray<FOrderInfo> ArrayResult;
 
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			OrderInfoPaging Result;
+			FOrderInfoPaging Result;
 			if (Result.FromJson(JsonObject))
 			{
 				for (int32 i = 0; i < Result.Data.Num(); i++)
@@ -280,12 +280,12 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderInfo>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderInfo>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -297,7 +297,7 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderInfo>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderInfo>());
 				return;
 			}
 		}));
@@ -315,7 +315,7 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderInfo>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderInfo>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -331,7 +331,7 @@ void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, 
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT(" Get User Orders Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderInfo>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderInfo>());
 		return;
 	}
 }
@@ -361,7 +361,7 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Fulfill Order Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, OrderInfo());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, FOrderInfo());
 		return;
 	}
 
@@ -370,7 +370,7 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		OrderInfo Info = OrderInfo();
+		FOrderInfo Info = FOrderInfo();
 		if (Info.FromJson(Response->Content))
 		{
 			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
@@ -383,12 +383,12 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+					OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -400,7 +400,7 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+				OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 				return;
 			}
 		}));
@@ -418,7 +418,7 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+			OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -434,7 +434,7 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT(" Fulfill Order Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, OrderInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, FOrderInfo());
 		return;
 	}
 }
@@ -464,7 +464,7 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get User Order Histroy Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<OrderHistoryInfo>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FOrderHistoryInfo>());
 		return;
 	}
 
@@ -476,13 +476,13 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 		FString ResponseStr = Response->Content;
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		TArray<OrderHistoryInfo> Result;
+		TArray<FOrderHistoryInfo> Result;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 			for (int32 i = 0; i != JsonArray.Num(); i++)
 			{
-				OrderHistoryInfo OrderHistory;
+				FOrderHistoryInfo OrderHistory;
 				if (OrderHistory.FromJson(JsonArray[i]->AsObject()))
 				{
 					Result.Add(OrderHistory);
@@ -497,12 +497,12 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderHistoryInfo>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderHistoryInfo>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -514,7 +514,7 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderHistoryInfo>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderHistoryInfo>());
 				return;
 			}
 		}));
@@ -532,7 +532,7 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderHistoryInfo>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderHistoryInfo>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -548,7 +548,7 @@ void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FG
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT(" Get User Order History Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<OrderHistoryInfo>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FOrderHistoryInfo>());
 		return;
 	}
 }

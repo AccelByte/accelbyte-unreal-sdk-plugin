@@ -19,7 +19,7 @@ UAsyncFulfillOrder * UAsyncFulfillOrder::FulfillOrder(FString OrderNo)
 
 void UAsyncFulfillOrder::Activate()
 {
-	JusticePurchase::FulfillOrder(this->OrderNo, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, OrderInfo Order) {
+	JusticePurchase::FulfillOrder(this->OrderNo, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo Order) {
 		if (bSuccessful)
 		{			
 			UOrderInfo* Result = UOrderInfo::Deserialize(Order);

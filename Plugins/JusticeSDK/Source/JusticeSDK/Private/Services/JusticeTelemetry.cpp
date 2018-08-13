@@ -8,7 +8,7 @@
 #include "Async.h"
 #include "AsyncTaskManagerJustice.h"
 
-void JusticeTelemetry::SendTelemetryEvent(TelemetryEvent Telemetry, FDefaultCompleteDelegate OnComplete)
+void JusticeTelemetry::SendTelemetryEvent(FTelemetryEvent Telemetry, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = TEXT("");
 	FString URL = FString::Printf(TEXT("%s/telemetry/public/namespaces/%s/events/gameclient/%d/%d/%d/%d"), *FJusticeBaseURL, *FJusticeNamespace, Telemetry.AppID, Telemetry.EventType, Telemetry.EventLevel, Telemetry.EventID);

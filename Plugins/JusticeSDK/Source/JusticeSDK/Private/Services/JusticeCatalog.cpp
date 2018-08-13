@@ -35,7 +35,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Root Category Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FCategory>());
 		return;
 	}
 	switch (Response->Code)
@@ -45,13 +45,13 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 		FString ResponseStr = Response->Content;
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		TArray<Category> Result;
+		TArray<FCategory> Result;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
 			{
-				Category categoryObj;
+				FCategory categoryObj;
 				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
 				{
 					Result.Add(categoryObj);
@@ -68,13 +68,13 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	case EHttpResponseCodes::Denied:
 	{
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -86,7 +86,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 				return;
 			}
 		}));
@@ -105,7 +105,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -120,7 +120,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response,
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 		return;
 	}
 }
@@ -149,7 +149,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FCategory>());
 		return;
 	}
 	switch (Response->Code)
@@ -161,13 +161,13 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		TArray<Category> Result;
+		TArray<FCategory> Result;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
 			{
-				Category categoryObj;
+				FCategory categoryObj;
 				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
 				{
 					Result.Add(categoryObj);
@@ -184,13 +184,13 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 	case EHttpResponseCodes::Denied:
 	{
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -202,7 +202,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 				return;
 			}
 		}));
@@ -221,7 +221,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -237,7 +237,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCa
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 		return;
 	}
 }
@@ -266,7 +266,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Child Categories Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FCategory>());
 		return;
 	}
 	switch (Response->Code)
@@ -277,13 +277,13 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		TArray<Category> Result;
+		TArray<FCategory> Result;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
 			{
-				Category categoryObj;
+				FCategory categoryObj;
 				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
 				{
 					Result.Add(categoryObj);
@@ -300,13 +300,13 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 	case EHttpResponseCodes::Denied:
 	{
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -318,7 +318,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 				return;
 			}
 		}));
@@ -337,7 +337,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -353,7 +353,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Children Categories Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 		return;
 	}
 }
@@ -382,7 +382,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Descendant Categories Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FCategory>());
 		return;
 	}
 	switch (Response->Code)
@@ -392,13 +392,13 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 		FString ResponseStr = Response->Content;
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
-		TArray<Category> Result;
+		TArray<FCategory> Result;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 			for (int32 itCatagory = 0; itCatagory != JsonArray.Num(); itCatagory++)
 			{
-				Category categoryObj;
+				FCategory categoryObj;
 				if (categoryObj.FromJson(JsonArray[itCatagory]->AsObject()))
 				{
 					Result.Add(categoryObj);
@@ -415,13 +415,13 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 	case EHttpResponseCodes::Denied:
 	{
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -433,7 +433,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 				return;
 			}
 		}));
@@ -452,7 +452,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -468,7 +468,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Res
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Descendant Categories Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<Category>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FCategory>());
 		return;
 	}
 }
@@ -512,7 +512,7 @@ void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, F
 void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
-	ItemInfo Result;
+	FItemInfoJustice Result;
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
@@ -544,7 +544,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -640,7 +640,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<ItemInfo>());
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, TArray<FItemInfoJustice>());
 		return;
 	}
 	switch (Response->Code)
@@ -649,10 +649,10 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 	{
 		TSharedPtr<FJsonObject> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
-		TArray<ItemInfo> ArrayResult;
+		TArray<FItemInfoJustice> ArrayResult;
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			ItemPagingSlicedResult Result;
+			FItemPagingSlicedResult Result;
 			if (Result.FromJson(JsonObject))
 			{
 				for (int32 i = 0; i < Result.Data.Num(); i++)
@@ -674,13 +674,13 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
+					OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -692,7 +692,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
+				OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
 				return;
 			}
 		}));
@@ -710,7 +710,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
+			OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -726,7 +726,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, 
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryResponse Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<ItemInfo>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
 		return;
 	}
 }

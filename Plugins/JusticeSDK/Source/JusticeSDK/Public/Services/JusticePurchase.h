@@ -15,9 +15,9 @@
 #include "Models/OrderInfoPaging.h"
 #include "Models/OrderHistoryInfo.h"
 
-DECLARE_DELEGATE_ThreeParams(FOrderInfoCompleteDelegate, bool, FString, OrderInfo);
-DECLARE_DELEGATE_ThreeParams(FGetUserOrdersCompleteDelegate, bool, FString, TArray<OrderInfo>);
-DECLARE_DELEGATE_ThreeParams(FGetUserOrderHistoryCompleteDelegate, bool, FString, TArray<OrderHistoryInfo>);
+DECLARE_DELEGATE_ThreeParams(FOrderInfoCompleteDelegate, bool, FString, FOrderInfo);
+DECLARE_DELEGATE_ThreeParams(FGetUserOrdersCompleteDelegate, bool, FString, TArray<FOrderInfo>);
+DECLARE_DELEGATE_ThreeParams(FGetUserOrderHistoryCompleteDelegate, bool, FString, TArray<FOrderHistoryInfo>);
 
 class JUSTICESDK_API JusticePurchase
 {

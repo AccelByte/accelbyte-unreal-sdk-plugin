@@ -13,7 +13,7 @@ UAsyncDeviceLogin * UAsyncDeviceLogin::DeviceLogin()
 
 void UAsyncDeviceLogin::Activate()
 {
-	JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+	JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

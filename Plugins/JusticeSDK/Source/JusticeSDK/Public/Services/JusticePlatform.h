@@ -14,7 +14,7 @@
 #include "Utilities/JusticeLog.h"
 #include "Models/UserProfileInfo.h"
 
-DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, UserProfileInfo);
+DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, FUserProfileInfo);
 
 class JUSTICESDK_API JusticePlatform
 {
@@ -22,7 +22,7 @@ public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
     static void UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete);
 	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FDefaultCompleteDelegate OnComplete);
-	static UserProfileInfo* GetUserProfileInfo();
+	static FUserProfileInfo* GetUserProfileInfo();
 private:
 	static void OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponsePtr Response, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static void OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);

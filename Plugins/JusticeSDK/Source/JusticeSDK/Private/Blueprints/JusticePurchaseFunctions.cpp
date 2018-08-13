@@ -7,7 +7,7 @@ void UJusticePurchaseFunctions::CreateNewOrder(FString ItemID, int32 Price, int3
 		Price, 
 		DiscountedPrice, 
 		Currency, 
-		FOrderInfoCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorString, OrderInfo Order) {
+		FOrderInfoCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorString, FOrderInfo Order) {
 			UOrderInfo* Result = UOrderInfo::Deserialize(Order);
 			check(Result);
 			OnComplete.ExecuteIfBound(bSuccessful, ErrorString, Result);

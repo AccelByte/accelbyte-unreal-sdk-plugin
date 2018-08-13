@@ -31,7 +31,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, UserProfileInfo() );
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, FUserProfileInfo() );
 		return;
 	}
 	switch (Response->Code)
@@ -73,19 +73,19 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 			else
 			{
 				UE_LOG(LogJustice, Error, TEXT("Create Default User Profile Error:  %s"), *ErrorStr);
-				OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), UserProfileInfo());
+				OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), FUserProfileInfo());
 			}
 		}));
 		break;
 	}
 	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
+					OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -97,7 +97,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
+				OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
 				return;
 			}
 		}));
@@ -114,7 +114,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
+			OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -129,7 +129,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, UserProfileInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
 		return;
 	}
 }
@@ -173,7 +173,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -291,7 +291,7 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -342,7 +342,7 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 	}
 }
 
-UserProfileInfo * JusticePlatform::GetUserProfileInfo()
+FUserProfileInfo * JusticePlatform::GetUserProfileInfo()
 {
 	return FJusticeSDKModule::Get().UserProfile;
 }

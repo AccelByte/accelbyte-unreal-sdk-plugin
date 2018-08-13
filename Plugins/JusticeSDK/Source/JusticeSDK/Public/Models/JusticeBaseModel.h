@@ -1,7 +1,7 @@
 #pragma once
 
-template <class T, class U>
-class JusticeBaseModel
+template <typename T, typename U>
+struct FBaseModelJustice
 {
 public:
 	static T* Deserialize(U* item)

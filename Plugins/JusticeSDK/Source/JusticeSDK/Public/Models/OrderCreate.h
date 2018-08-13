@@ -8,14 +8,14 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "Runtime/Core/Public/Misc/Guid.h"
 
-class OrderCreate : public FJsonSerializable
+struct FOrderCreate : public FJsonSerializable
 {
 public:
 
     FString ItemID;
-	int32 Quantity;
-    int32 Price;
-	int32 DiscountedPrice;
+	int32	Quantity;
+    int32	Price;
+	int32	DiscountedPrice;
     FString CurrencyCode;
 	FString ReturnURL;
 

@@ -14,7 +14,7 @@ UAsyncGetUserOrders * UAsyncGetUserOrders::GetUserOrders(int32 Page, int32 Size)
 
 void UAsyncGetUserOrders::Activate()
 {
-	JusticePurchase::GetUserOrders(this->Page, this->Size, FGetUserOrdersCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<OrderInfo> Orders) {
+	JusticePurchase::GetUserOrders(this->Page, this->Size, FGetUserOrdersCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<FOrderInfo> Orders) {
 		TArray<UOrderInfo*> FinalResult;
 		if (bSuccessful)
 		{

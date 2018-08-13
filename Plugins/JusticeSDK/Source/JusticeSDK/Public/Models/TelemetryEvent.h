@@ -14,24 +14,24 @@
 #include "TelemetryEvent.generated.h"
 
 
-class TelemetryEvent : public FJsonSerializable
+struct FTelemetryEvent : public FJsonSerializable
 {
 private:
-	int32 AgentType;
+	int32	AgentType;
 public:
-	int32 AppID;
+	int32	AppID;
 	FString ClientID;
 	FString Data;
 	FString DeviceID;
-	int32 EventID;
-	int32 EventLevel;
+	int32	EventID;
+	int32	EventLevel;
 	FString EventTime;
-	int32 EventType;
+	int32	EventType;
 	FString UUID;
-	int32 UX;
+	int32	UX;
 	FString UserID;
 
-	TelemetryEvent()
+	FTelemetryEvent()
 	{
 		#if PLATFORM_DESKTOP && PLATFORM_64BITS
 			if (!IsRunningDedicatedServer()) { AgentType = 20; }
@@ -61,7 +61,6 @@ public:
 			if (IsRunningDedicatedServer()) { AgentType = 63; }
 		#endif
 	}
-
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("AgentType", AgentType);
 		JSON_SERIALIZE("AppID", AppID);
@@ -79,7 +78,7 @@ public:
 };
 
 UCLASS()
-class UTelemetryEvent : public UObject, public TelemetryEvent, public JusticeBaseModel<UTelemetryEvent, TelemetryEvent>
+class UTelemetryEvent : public UObject, public FTelemetryEvent, public FBaseModelJustice<UTelemetryEvent, FTelemetryEvent>
 {
 	GENERATED_BODY()
 

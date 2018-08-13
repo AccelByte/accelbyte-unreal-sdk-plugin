@@ -10,24 +10,24 @@
 #include "JusticeBaseModel.h"
 #include "LinkedPlatform.generated.h"
 
-class LinkedPlatform : public FJsonSerializable
+struct FLinkedPlatform : public FJsonSerializable
 {
 public:
 	FString PlatformID;
-	FString PlatformUserId;
+	FString PlatformUserID;
 	FString Namespace;
 	FString UserID;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("PlatformId", PlatformID);
-		JSON_SERIALIZE("PlatformUserId", PlatformUserId);
+		JSON_SERIALIZE("PlatformUserId", PlatformUserID);
 		JSON_SERIALIZE("Namespace", Namespace);
 		JSON_SERIALIZE("UserId", UserID);
 	END_JSON_SERIALIZER
 };
 
 UCLASS()
-class ULinkedPlatform : public UObject, public LinkedPlatform, public JusticeBaseModel<ULinkedPlatform, LinkedPlatform>
+class ULinkedPlatform : public UObject, public FLinkedPlatform, public FBaseModelJustice<ULinkedPlatform, FLinkedPlatform>
 {
 	GENERATED_BODY()
 
@@ -35,5 +35,5 @@ class ULinkedPlatform : public UObject, public LinkedPlatform, public JusticeBas
 		FString GetPlatformId() { return PlatformID; };
 
 	UFUNCTION(BlueprintPure, Category = "LinkedPlatform")
-		FString GetPlatformUserId() { return PlatformUserId; };
+		FString GetPlatformUserId() { return PlatformUserID; };
 };

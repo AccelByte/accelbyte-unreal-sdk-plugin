@@ -13,36 +13,36 @@
 #include "JusticeBaseModel.h"
 #include "OrderInfo.generated.h"
 
-class OrderInfo : public FJsonSerializable
+struct FOrderInfo : public FJsonSerializable
 {
 public:
-	OrderInfo() {}
+	FOrderInfo() {}
 
-	FString OrderNo;
-	FString UserID;
-	FString ItemID ;
-	bool bSandbox;
-	int32 Quantity;
-	int32 Price;
-	int32 DiscountedPrice;
-	int32 Vat;
-	int32 SalesTax;
-	int32 PaymentProviderFee;
-	int32 PaymentMethodFee;
-	CurrencySummary Currency ;
-	PaymentUrl PaymentUrl;
-	FString PaymentStationUrl;
-	TArray<Transaction> Transactions;
-	TArray<FString> EntitlementIds;
-	FString Status; // ['INIT', 'CHARGED', 'FINISHED', 'CHARGE_FAILED', 'ERROR', 'REFUNDED', 'DELETED'],
-	FString StatusReason;
-	FString Namespace;
-	FString CreatedTime;
-	FString ChargedTime;
-	FString FulfilledTime;
-	FString RefundedTime;
-	FString CreatedAt;
-	FString UpdatedAt;
+	FString					OrderNo;
+	FString					UserID;
+	FString					ItemID ;
+	bool					bSandbox;
+	int32					Quantity;
+	int32					Price;
+	int32					DiscountedPrice;
+	int32					Vat;
+	int32					SalesTax;
+	int32					PaymentProviderFee;
+	int32					PaymentMethodFee;
+	FCurrencySummary		Currency ;
+	FPaymentURL				PaymentUrl;
+	FString					PaymentStationUrl;
+	TArray<FTransaction>	Transactions;
+	TArray<FString>			EntitlementIds;
+	FString					Status; // ['INIT', 'CHARGED', 'FINISHED', 'CHARGE_FAILED', 'ERROR', 'REFUNDED', 'DELETED'],
+	FString					StatusReason;
+	FString					Namespace;
+	FString					CreatedTime;
+	FString					ChargedTime;
+	FString					FulfilledTime;
+	FString					RefundedTime;
+	FString					CreatedAt;
+	FString					UpdatedAt;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("orderNo", OrderNo);
@@ -59,7 +59,7 @@ public:
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("currency", Currency);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("paymentUrl", PaymentUrl);
 		JSON_SERIALIZE("paymentStationUrl", PaymentStationUrl);
-		JSON_SERIALIZE_ARRAY_SERIALIZABLE("transactions", Transactions, Transaction);
+		JSON_SERIALIZE_ARRAY_SERIALIZABLE("transactions", Transactions, FTransaction);
 		JSON_SERIALIZE_ARRAY("entitlementIds", EntitlementIds);
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("statusReason", StatusReason);
@@ -76,7 +76,7 @@ public:
 
 
 UCLASS()
-class UOrderInfo : public UObject, public OrderInfo, public JusticeBaseModel<UOrderInfo, OrderInfo>
+class UOrderInfo : public UObject, public FOrderInfo, public FBaseModelJustice<UOrderInfo, FOrderInfo>
 {
 	GENERATED_BODY()
 
@@ -87,12 +87,11 @@ class UOrderInfo : public UObject, public OrderInfo, public JusticeBaseModel<UOr
 		int32 GetPrice() { return Price; };
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
-		FString GetPaymentUrl() { return PaymentUrl.paymentUrl; };		
+		FString GetPaymentUrl() { return PaymentUrl.PaymentURL; };		
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
 		FString GetPaymentStationURL() { return PaymentStationUrl; };		
 
 	UFUNCTION(BlueprintPure, Category = "OrderInfo")
 		FString GetOrderNo() { return OrderNo; };
-		
 };

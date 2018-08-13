@@ -10,10 +10,10 @@
 #include "JusticeBaseModel.h"
 #include "OrderHistoryInfo.generated.h"
 
-class OrderHistoryInfo : public FJsonSerializable
+struct FOrderHistoryInfo : public FJsonSerializable
 {
 public:
-	OrderHistoryInfo() {}
+	FOrderHistoryInfo() {}
 
 	FString OrderNo;
 	FString Operator;
@@ -36,7 +36,7 @@ public:
 
 
 UCLASS()
-class UOrderHistoryInfo : public UObject, public OrderHistoryInfo, public JusticeBaseModel<UOrderHistoryInfo, OrderHistoryInfo>
+class UOrderHistoryInfo : public UObject, public FOrderHistoryInfo, public FBaseModelJustice<UOrderHistoryInfo, FOrderHistoryInfo>
 {
 	GENERATED_BODY()
 

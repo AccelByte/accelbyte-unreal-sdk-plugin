@@ -10,34 +10,38 @@
 			"LoadingPhase": "Default"
 		}
 	],
-  "Plugins": [
-    {
-      "Name": "EditorTests",
-      "Enabled": true
-    },
-    {
-      "Name": "RuntimeTests",
-      "Enabled": true
-    },
-    {
-      "Name": "FunctionalTestingEditor",
-      "Enabled": true
-    },
-    {
-      "Name": "FbxAutomationTestBuilder",
-      "Enabled": true
-    },
-    {
-      "Name": "ScreenshotTools",
-      "Enabled": true
-    },
-    {
-      "Name": "JusticeSDK",
-      "Enabled": true
-    }, 
-    {
-      "Name": "JusticeWebBrowserWidget",
-      "Enabled": true
-    }
-  ]
+	"Plugins": [
+		{
+			"Name": "EditorTests",
+			"Enabled": true
+		},
+		{
+			"Name": "RuntimeTests",
+			"Enabled": true
+		},
+		{
+			"Name": "FunctionalTestingEditor",
+			"Enabled": true
+		},
+		{
+			"Name": "FbxAutomationTestBuilder",
+			"Enabled": true
+		},
+		{
+			"Name": "ScreenshotTools",
+			"Enabled": true
+		},
+		{
+			"Name": "JusticeSDK",
+			"Enabled": true
+		},
+		{
+			"Name": "JusticeWebBrowserWidget",
+			"Enabled": true
+		},
+		{
+			"Name": "HoudiniEngine",
+			"Enabled": true
+		}
+	]
 }
