@@ -20,7 +20,7 @@ UGetItemByQuery * UGetItemByQuery::GetItemByQuery(FString Language, FString Regi
 
 void UGetItemByQuery::Activate()
 {
-	JusticeCatalog::GetItemByQuery(this->Language, this->Region, this->CategoryPath, this->ItemType, this->Status, this->Page, this->Size, FItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<ItemInfo> Result) {		
+	JusticeCatalog::GetItemByQuery(this->Language, this->Region, this->CategoryPath, this->ItemType, this->Status, this->Page, this->Size, FItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<FItemInfoJustice> Result) {		
         TArray<UItemInfo*> FinalResult;
         if (bSuccessful)
 		{

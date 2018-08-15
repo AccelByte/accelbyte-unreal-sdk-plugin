@@ -15,7 +15,7 @@
 class JUSTICESDK_API JusticeTelemetry 
 {
 public:
-	static void SendTelemetryEvent(TelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnComplete = nullptr);
+	static void SendTelemetryEvent(FTelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnComplete = nullptr);
 	
 private:
 	static void OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);

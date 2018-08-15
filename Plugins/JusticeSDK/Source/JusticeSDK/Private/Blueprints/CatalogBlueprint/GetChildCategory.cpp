@@ -15,7 +15,7 @@ UGetChildCategory * UGetChildCategory::GetChildCategory(FString Language, FStrin
 
 void UGetChildCategory::Activate()
 {
-	JusticeCatalog::GetChildCategory(this->Language, this->CategoryPath, FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<Category> Result) {
+	JusticeCatalog::GetChildCategory(this->Language, this->CategoryPath, FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<FCategory> Result) {
         TArray<UCategory*> ChildCategories;
         if (bSuccessful)
 		{

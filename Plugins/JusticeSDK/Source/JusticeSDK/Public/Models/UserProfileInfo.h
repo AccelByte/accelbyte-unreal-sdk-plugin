@@ -10,26 +10,26 @@
 #include "JusticeBaseModel.h"
 #include "UserProfileInfo.generated.h"
 
-class UserProfileInfo : public FJsonSerializable
+struct FUserProfileInfo : public FJsonSerializable
 {
 public:
-	UserProfileInfo() {};
+	FUserProfileInfo() {};
 
-	FString UserID;
-	FString Namespace;
-	FString DisplayName;
-	FString FirstName;
-	FString LastName;
-	FString Country;
-	FString AvatarSmallUrl;
-	FString AvatarUrl;
-	FString AvatarLargeUrl;
-	FString Email;
-	FString Status;
-	FString Language;
-	FString Timezone;
-	FString DateOfBirth;
-	TMap<FString, FString> CustomAttributes;
+	FString                 UserID;
+	FString                 Namespace;
+	FString                 DisplayName;
+	FString                 FirstName;
+	FString                 LastName;
+	FString                 Country;
+	FString                 AvatarSmallURL;
+	FString                 AvatarURL;
+	FString                 AvatarLargeURL;
+	FString                 Email;
+	FString                 Status;
+	FString                 Language;
+	FString                 Timezone;
+	FString                 DateOfBirth;
+	TMap<FString, FString>  CustomAttributes;
 public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("userId", UserID);
@@ -38,9 +38,9 @@ public:
 		JSON_SERIALIZE("firstName", FirstName);
 		JSON_SERIALIZE("lastName", LastName);
 		JSON_SERIALIZE("country", Country);		
-		JSON_SERIALIZE("avatarSmallUrl", AvatarSmallUrl);
-		JSON_SERIALIZE("avatarUrl", AvatarUrl);
-		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeUrl);
+		JSON_SERIALIZE("avatarSmallUrl", AvatarSmallURL);
+		JSON_SERIALIZE("avatarUrl", AvatarURL);
+		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeURL);
 		JSON_SERIALIZE("email", Email);
 		JSON_SERIALIZE("status", Status);
 		JSON_SERIALIZE("language", Language);
@@ -57,28 +57,28 @@ class UserProfileInfoUpdate : public FJsonSerializable
 public:
 	UserProfileInfoUpdate() {};
 
-	FString DisplayName;
-	FString FirstName;
-	FString LastName;
-	FString AvatarSmallUrl;
-	FString AvatarUrl;
-	FString AvatarLargeUrl;
-	FString Email;
-	FString Language;
-	FString Timezone;
-	FString DateOfBirth;
-	TMap<FString, FString> CustomAttributes;
-	FString Country;
-	FString Status;
+	FString                 DisplayName;
+	FString                 FirstName;
+	FString                 LastName;
+	FString                 AvatarSmallURL;
+	FString                 AvatarURL;
+	FString                 AvatarLargeURL;
+	FString                 Email;
+	FString                 Language;
+	FString                 Timezone;
+	FString                 DateOfBirth;
+	TMap<FString, FString>  CustomAttributes;
+	FString                 Country;
+	FString                 Status;
 
 public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("displayName", DisplayName);
 		JSON_SERIALIZE("firstName", FirstName);
 		JSON_SERIALIZE("lastName", LastName);		
-		JSON_SERIALIZE("avatarSmallUrl", AvatarSmallUrl);
-		JSON_SERIALIZE("avatarUrl", AvatarUrl);
-		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeUrl);
+		JSON_SERIALIZE("avatarSmallUrl", AvatarSmallURL);
+		JSON_SERIALIZE("avatarUrl", AvatarURL);
+		JSON_SERIALIZE("avatarLargeUrl", AvatarLargeURL);
 		JSON_SERIALIZE("email", Email);
 		JSON_SERIALIZE("language", Language);
 		JSON_SERIALIZE("timeZone", Timezone);
@@ -89,95 +89,51 @@ public:
 	END_JSON_SERIALIZER
 };
 
-
-
 UCLASS(Blueprintable, BlueprintType)
-class UUserProfileJustice : public UObject, public UserProfileInfo, public JusticeBaseModel<UUserProfileJustice, UserProfileInfo>
+class UUserProfileJustice : public UObject, public FUserProfileInfo, public FBaseModelJustice<UUserProfileJustice, FUserProfileInfo>
 {
 	GENERATED_BODY()
 public:
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetUserId()
-	{
-		return UserID;
-	};
+		FString GetUserId()	{ return UserID; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetDisplayName()
-	{
-		return DisplayName;
-	}
+		FString GetDisplayName() { return DisplayName; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetFirstName()
-	{
-		return FirstName;
-	}
+		FString GetFirstName() { return FirstName; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetLastName()
-	{
-		return LastName;
-	}
+		FString GetLastName() {	return LastName; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-		FString GetCountry()
-	{
-		return Country;
-	}
+		FString GetCountry() {	return Country;	}
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetAvatarSmallUrl()
-	{
-		return AvatarSmallUrl;
-	}
+		FString GetAvatarSmallUrl()	{ return AvatarSmallURL; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetAvatarLargeUrl()
-	{
-		return AvatarLargeUrl;
-	}
+		FString GetAvatarLargeUrl()	{ return AvatarLargeURL; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetAvatarUrl()
-	{
-		return AvatarUrl;
-	}
+		FString GetAvatarUrl() { return AvatarURL; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetEmail()
-	{
-		return Email;
-	}
+		FString GetEmail() { return Email; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetStatus()
-	{
-		return Status;
-	}
+		FString GetStatus()	{ return Status; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-	FString GetNamespace()
-	{
-		return Namespace;
-	}
+		FString GetNamespace() { return Namespace; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-		FString GetLanguage()
-	{
-		return Language;
-	}
+		FString GetLanguage() {	return Language; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-		FString GetTimezone()
-	{
-		return Timezone;
-	}
+		FString GetTimezone() {	return Timezone; }
 
 	UFUNCTION(BlueprintPure, Category = "UserProfileJustice")
-		FString GetDateOfBirth()
-	{
-		return DateOfBirth;
-	}
+		FString GetDateOfBirth() { return DateOfBirth; }
 };

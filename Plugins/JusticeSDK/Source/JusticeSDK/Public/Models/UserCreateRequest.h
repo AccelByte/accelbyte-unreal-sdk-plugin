@@ -8,7 +8,7 @@
 #include "Serialization/JsonSerializerMacros.h"
 #include "Runtime/Core/Public/Misc/Guid.h"
 
-class FUserCreateRequest : public FJsonSerializable
+struct FUserCreateRequest : public FJsonSerializable
 {
 public:
 	FUserCreateRequest(){}

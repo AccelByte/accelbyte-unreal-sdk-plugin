@@ -7,7 +7,7 @@
 
 void UJusticeCatalogFunctions::GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDynamicDelegate OnComplete)
 {
-	JusticeCatalog::GetItemByQuery(Language, Region, CategoryPath, ItemType, Status, Page, Size, FItemCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorString, TArray<ItemInfo> Result) {
+	JusticeCatalog::GetItemByQuery(Language, Region, CategoryPath, ItemType, Status, Page, Size, FItemCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorString, TArray<FItemInfoJustice> Result) {
 		TArray<UItemInfo*> FinalResult;
 		if (bSuccessful)
 		{

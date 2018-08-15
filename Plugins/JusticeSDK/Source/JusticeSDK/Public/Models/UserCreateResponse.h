@@ -11,7 +11,7 @@
 #include "UserCreateResponse.generated.h"
 
 
-class UserCreateResponse: public FJsonSerializable
+struct FUserCreateResponse: public FJsonSerializable
 {
 public:
 	FString Namespace;
@@ -31,7 +31,7 @@ public:
 
 
 UCLASS()
-class UUserCreateResponse : public UObject, public UserCreateResponse, public JusticeBaseModel<UUserCreateResponse, UserCreateResponse>
+class UUserCreateResponse : public UObject, public FUserCreateResponse, public FBaseModelJustice<UUserCreateResponse, FUserCreateResponse>
 {
 	GENERATED_BODY()
 	

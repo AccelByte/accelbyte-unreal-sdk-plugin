@@ -17,9 +17,9 @@
 #include "RetryTaskManagerJustice.h"
 #include "JusticeSDK.h"
 
-DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, OAuthTokenJustice*);
-DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, UserCreateResponse*);
-DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<LinkedPlatform>);
+DECLARE_DELEGATE_ThreeParams(FUserLoginCompleteDelegate, bool, FString, FOAuthTokenJustice*);
+DECLARE_DELEGATE_ThreeParams(FRegisterPlayerCompleteDelegate, bool, FString, FUserCreateResponse*);
+DECLARE_DELEGATE_ThreeParams(FGetLinkedPlatformCompleteDelegate, bool, FString, TArray<FLinkedPlatform>);
 
 enum FUserAuthTypeJustice
 {
@@ -51,7 +51,7 @@ public:
 	static void GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete);
 	static void LinkPlatform(FString PlatformID, FString Ticket, FDefaultCompleteDelegate OnComplete);
 	static void UnlinkPlatform(FString PlatformID, FDefaultCompleteDelegate OnComplete);
-	static void UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FDefaultCompleteDelegate OnComplete);
+	static void UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete);
 	
 	static void ClientLogin(FUserLoginCompleteDelegate OnComplete = nullptr);
 	static void ClientLogout();

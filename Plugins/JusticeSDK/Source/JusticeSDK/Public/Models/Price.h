@@ -10,10 +10,10 @@
 #include "JusticeBaseModel.h"
 #include "Price.generated.h"
 
-class Price : public FJsonSerializable
+struct FPrice : public FJsonSerializable
 {
 public:
-	int32 Value;
+	int32	Value;
 	FString CurrencyCode;
 	FString CurrencyType;
 	FString Namespace;
@@ -28,7 +28,7 @@ public:
 
 
 UCLASS()
-class UPrice : public UObject, public Price, public JusticeBaseModel<UPrice, Price>
+class UPrice : public UObject, public FPrice, public FBaseModelJustice<UPrice, FPrice>
 {
 	GENERATED_BODY()	
 

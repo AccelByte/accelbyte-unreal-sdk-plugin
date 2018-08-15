@@ -45,12 +45,12 @@ public:
 	FString FacebookPlatformURL;
 	FString FacebookRedirectURL;
 
-	OAuthTokenJustice*	GameClientToken;
-	OAuthTokenJustice* UserToken;
+	FOAuthTokenJustice*	GameClientToken;
+	FOAuthTokenJustice* UserToken;
 	FString LoginID;
 	bool bHeadlessAccount;
 	FString Password;
-	UserProfileInfo* UserProfile;
+	FUserProfileInfo* UserProfile;
 	FAsyncTaskManagerJustice* AsyncTaskManager;
 	FRetryTaskManagerJustice* RetryTaskManager;
 

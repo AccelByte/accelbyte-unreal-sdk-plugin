@@ -15,7 +15,7 @@ UWebLoginRefresh* UWebLoginRefresh::WebLoginRefresh(FString UserRefreshToken)
 void UWebLoginRefresh::Activate()
 {
 	JusticeIdentity::SetRefreshToken(this->UserRefreshToken);
-	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
 		check(UToken);
 		if (bSuccessful)

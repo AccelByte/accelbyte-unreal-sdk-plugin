@@ -17,7 +17,7 @@ UAsyncRegisterNewPlayer * UAsyncRegisterNewPlayer::RegisterNewPlayer(FString Use
 
 void UAsyncRegisterNewPlayer::Activate()
 {
-	JusticeIdentity::RegisterNewPlayer(this->UserID, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr, UserCreateResponse* Response) {
+	JusticeIdentity::RegisterNewPlayer(this->UserID, this->Password, this->DisplayName, this->AuthType, FRegisterPlayerCompleteDelegate::CreateLambda( [&](bool bSuccessful, FString ErrorStr, FUserCreateResponse* Response) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

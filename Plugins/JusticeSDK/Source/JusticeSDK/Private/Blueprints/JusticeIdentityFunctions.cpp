@@ -9,7 +9,7 @@
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::UserLogin(LoginID, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+	JusticeIdentity::UserLogin(LoginID, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
 		check(UToken);
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UToken);
@@ -19,7 +19,7 @@ void UJusticeIdentityFunctions::UserLogin(FString LoginID, FString Password, FUs
 void UJusticeIdentityFunctions::WebLoginRefresh(FString UserRefreshToken, FUserLoginCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::SetRefreshToken(UserRefreshToken);
-	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
 		check(UToken);
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UToken);
@@ -38,7 +38,7 @@ void UJusticeIdentityFunctions::UserLogout(FDefaultCompleteDynamicDelegate OnCom
 void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::RegisterNewPlayer(UserID, Password, DisplayName, (FUserAuthTypeJustice)AuthType,
-		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, UserCreateResponse* Response) {
+		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FUserCreateResponse* Response) {
 		UUserCreateResponse* UResponse = UUserCreateResponse::Deserialize(Response);
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UResponse);
 	}));
@@ -116,31 +116,19 @@ TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<
 
 TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetCompleteListOfPlatforms()
 {
-	LinkedPlatform DevicePlatform;
-	LinkedPlatform GooglePlatform;
-	LinkedPlatform FacebookPlatform;
-	LinkedPlatform TwitchPlatform;
-	LinkedPlatform OculusPlatform;
-	DevicePlatform.PlatformID = TEXT("device");
-	GooglePlatform.PlatformID = TEXT("google");
-	FacebookPlatform.PlatformID = TEXT("facebook");
-	TwitchPlatform.PlatformID = TEXT("twitch");
-	OculusPlatform.PlatformID = TEXT("twitter");
-
-	TArray<LinkedPlatform> CompletePlatforms;
-	CompletePlatforms.Add(DevicePlatform);
-	CompletePlatforms.Add(GooglePlatform);
-	CompletePlatforms.Add(FacebookPlatform);
-	CompletePlatforms.Add(TwitchPlatform);
-	CompletePlatforms.Add(OculusPlatform);
-
+    TArray<FLinkedPlatform> CompletePlatforms = { 
+        FLinkedPlatform("device"), 
+        FLinkedPlatform("google"), 
+        FLinkedPlatform("facebook"),
+        FLinkedPlatform("twitch"),
+        FLinkedPlatform("twitter"),
+    };
 	TArray<ULinkedPlatform*> UCompletePlatforms;
 	for (int32 i = 0; i < CompletePlatforms.Num(); i++)
 	{
 		ULinkedPlatform* platform = ULinkedPlatform::Deserialize(CompletePlatforms[i]);
 		UCompletePlatforms.Add(platform);
 	}
-
 	return UCompletePlatforms;
 }
 

@@ -24,6 +24,6 @@ class JUSTICESDK_API UJusticePlatformFunctions : public UBlueprintFunctionLibrar
 		static void RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category = "JusticePlatformFunctions")
-		static void UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete);
+		static void UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarURL, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete);
 
 };

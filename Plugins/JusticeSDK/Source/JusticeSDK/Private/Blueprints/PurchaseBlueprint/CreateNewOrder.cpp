@@ -22,7 +22,7 @@ UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(FString ItemID, int3
 
 void UAsyncCreateNewOrder::Activate() 
 {
-	JusticePurchase::CreateNewOrder(this->ItemID, this->Price, this->DiscountedPrice, this->Currency, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, OrderInfo Order) {
+	JusticePurchase::CreateNewOrder(this->ItemID, this->Price, this->DiscountedPrice, this->Currency, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo *Order) {
 		if (bSuccessful)
 		{			
 			UOrderInfo* Result = UOrderInfo::Deserialize(Order);

@@ -15,7 +15,7 @@ UAsyncUserLogin * UAsyncUserLogin::UserLogin(FString UserID, FString Password)
 
 void UAsyncUserLogin::Activate()
 {
-	JusticeIdentity::UserLogin(this->UserID, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+	JusticeIdentity::UserLogin(this->UserID, this->Password, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

@@ -63,7 +63,7 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 	}
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -117,7 +117,7 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeHttpResponsePtr Response,
 
 void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete)
 {
-	ResetPasswordRequest resetPasswordRequest;
+	FResetPasswordRequest resetPasswordRequest;
 	resetPasswordRequest.Code = VerificationCode;
 	resetPasswordRequest.LoginID = UserID;
 	resetPasswordRequest.NewPassword = NewPassword;
@@ -173,7 +173,7 @@ void JusticeIdentity::OnResetPasswordResponse(FJusticeHttpResponsePtr Response, 
 		break;
 	}
 	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+		JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -294,7 +294,7 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUse
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();		
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
 		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken);
 		break;
 	}
@@ -379,7 +379,7 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FU
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
 		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken);
 		break;
 	}
@@ -502,7 +502,7 @@ void JusticeIdentity::OnUserRefreshResponse(FJusticeHttpResponsePtr Response, FU
 	{
 		UE_LOG(LogJustice, Error, TEXT("Refresh User Token Failed. Backoff refresh. Error Message: %s."), *Response->ErrorString);
 		FJusticeUserToken->ScheduleBackoffRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
 		return;
 	}
 
@@ -514,14 +514,14 @@ void JusticeIdentity::OnUserRefreshResponse(FJusticeHttpResponsePtr Response, FU
 		check(result);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
 		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken);
 		break;
 	}		
 	default:
 		ErrorStr = FString::Printf(TEXT("User Refresh Unexpected Response. Code: %d, Response:%s, Start Backoff refresh !"), Response->Code, *Response->Content);
 		FJusticeUserToken->ScheduleBackoffRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
 	}
 	if (!ErrorStr.IsEmpty())
 	{
@@ -557,7 +557,7 @@ void JusticeIdentity::OnClientRefreshResponse(FJusticeHttpResponsePtr Response)
 	{
 		UE_LOG(LogJustice, Error, TEXT("Refresh Game Client Credential Failed. Backoff refresh. Error Message: %s."), *Response->ErrorString);
 		FJusticeGameClientToken->ScheduleBackoffRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUTC);
 		return;
 	}
 
@@ -568,14 +568,14 @@ void JusticeIdentity::OnClientRefreshResponse(FJusticeHttpResponsePtr Response)
 		FJusticeSDKModule::Get().ParseClientToken(Response->Content);
 		FJusticeGameClientToken->SetLastRefreshTimeToNow();
 		FJusticeGameClientToken->ScheduleNormalRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUTC);
 		UE_LOG(LogJustice, Log, TEXT("Refresh Game Client Credential Success. XRay: %s"), *Response->AmazonTraceID);
 		break;
 	}
 	default:
 		UE_LOG(LogJustice, Error, TEXT("Refresh Game Client Credential Failed. Backoff refresh. Reponse Code: %d. Error Message: %s. XRay: %s"), Response->Code,  *Response->ErrorString, *Response->AmazonTraceID);
 		FJusticeGameClientToken->ScheduleBackoffRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUTC);
 		break;
 	}
 }
@@ -616,7 +616,7 @@ void JusticeIdentity::OnClientLogoutResponse(FJusticeHttpResponsePtr Response)
 	{
 	case EHttpResponseCodes::Ok: 
 		UE_LOG(LogJustice, Log, TEXT("Client Logout Success"));
-		FJusticeGameClientToken = new OAuthTokenJustice;
+		FJusticeGameClientToken = new FOAuthTokenJustice;
 		FJusticeRefreshManager->ClearRefreshQueue();		
 		break;
 	default:		
@@ -669,7 +669,7 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 	case EHttpResponseCodes::Created:
 	{
 		UE_LOG(LogJustice, Log, TEXT(" Register New Player Entity Created"));
-		UserCreateResponse* userCreate = new UserCreateResponse();
+		FUserCreateResponse* userCreate = new FUserCreateResponse();
 		userCreate->FromJson(Response->Content);
 		check(userCreate);
 
@@ -698,7 +698,7 @@ void JusticeIdentity::OnRegisterNewPlayerResponse(FJusticeHttpResponsePtr Respon
 		break;
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -797,7 +797,7 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 		break;
 	case EHttpResponseCodes::Denied:
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -893,7 +893,7 @@ void JusticeIdentity::OnReissueVerificationCodeResponse(FJusticeHttpResponsePtr 
 	case EHttpResponseCodes::Denied:
 	{
 		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, OAuthTokenJustice* Token) {
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (Response->TooManyRetries() || Response->TakesTooLong())
@@ -992,7 +992,7 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 		check(result);
 		FJusticeGameClientToken->SetLastRefreshTimeToNow();
 		FJusticeGameClientToken->ScheduleNormalRefresh();
-		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUtc);
+		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(ClientRefreshToken), FJusticeGameClientToken->NextTokenRefreshUTC);
 		UE_LOG(LogJustice, Log, TEXT("Game Client Credential Success. XRay: %s"), *Response->AmazonTraceID);
 		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeGameClientToken);
 		break;
@@ -1055,7 +1055,7 @@ void JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnCom
 
 void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Response, FGetLinkedPlatformCompleteDelegate OnComplete)
 {
-	TArray<LinkedPlatform> Result;
+	TArray<FLinkedPlatform> Result;
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
 	{
@@ -1077,7 +1077,7 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 				TArray< TSharedPtr<FJsonValue> >JsonArray = JsonObject->AsArray();
 				for (int32 platform = 0; platform != JsonArray.Num(); platform++)
 				{
-					LinkedPlatform linkedPlatform;
+					FLinkedPlatform linkedPlatform;
 					if (linkedPlatform.FromJson(JsonArray[platform]->AsObject()))
 					{
 						Result.Add(linkedPlatform);
@@ -1123,7 +1123,7 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get User Linked Platforms Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<LinkedPlatform>());
+		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FLinkedPlatform>());
 		return;
 	}
 }
@@ -1269,14 +1269,14 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 	}
 }
 
-void JusticeIdentity::UpgradeHeadlessAccount(FString Namespace, FString ClientAccessToken, FString UserId, FString Email, FString Password, FDefaultCompleteDelegate OnComplete)
+void JusticeIdentity::UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
-	FString Payload			= FString::Printf(TEXT("{ \"LoginId\": \"%s\", \"Password\": \"%s\"}"), *Email, *Password);
+	FString Payload			= FString::Printf(TEXT("{ \"LoginID\": \"%s\", \"Password\": \"%s\"}"), *Email, *Password);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,

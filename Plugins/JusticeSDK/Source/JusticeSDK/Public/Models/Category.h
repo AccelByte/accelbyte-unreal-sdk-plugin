@@ -10,7 +10,7 @@
 #include "JusticeBaseModel.h"
 #include "Category.generated.h"
 
-class Category : public FJsonSerializable
+struct FCategory : public FJsonSerializable
 {
 public:
 	FString Namespace;
@@ -19,7 +19,7 @@ public:
 	FString DisplayName;
 	FString CreatedAt;
 	FString UpdatedAt;
-	bool Root;
+	bool	Root;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("namespace", Namespace);
@@ -34,7 +34,7 @@ public:
 
 
 UCLASS()
-class UCategory:public UObject, public Category, public JusticeBaseModel<UCategory, Category>
+class UCategory:public UObject, public FCategory, public FBaseModelJustice<UCategory, FCategory>
 {
 	GENERATED_BODY()
 public:

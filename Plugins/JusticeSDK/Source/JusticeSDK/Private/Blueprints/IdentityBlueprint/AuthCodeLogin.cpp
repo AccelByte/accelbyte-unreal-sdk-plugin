@@ -14,7 +14,6 @@ UAsyncAuthCodeLogin * UAsyncAuthCodeLogin::AuthCodeLogin()
 	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthCode, 512);
 #endif
 
-
 	UAsyncAuthCodeLogin* Node = NewObject<UAsyncAuthCodeLogin>();
 	Node->AuthCode = FString(AuthCode);
 	Node->RedirectURI = TEXT("https://accelbyte.net/");
@@ -25,7 +24,7 @@ void UAsyncAuthCodeLogin::Activate()
 {
 	if (this->AuthCode.Len() > 0)
 	{
-		JusticeIdentity::AuthCodeLogin(this->AuthCode, this->RedirectURI, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, OAuthTokenJustice* Token) {
+		JusticeIdentity::AuthCodeLogin(this->AuthCode, this->RedirectURI, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
 			if (bSuccessful)
 			{
 				if (OnSuccess.IsBound())

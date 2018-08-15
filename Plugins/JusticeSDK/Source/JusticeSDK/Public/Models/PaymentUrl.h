@@ -8,20 +8,20 @@
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
 
-class PaymentUrl : public FJsonSerializable
+struct FPaymentURL : public FJsonSerializable
 {
 public:
-    FString paymentProvider ;
-    FString paymentUrl ;
-    FString paymentToken  ;
-	FString ReturnUrl;
+    FString PaymentProvider ;
+    FString PaymentURL ;
+    FString PaymentToken  ;
+	FString ReturnURL;
 	FString PaymentType;
 
 	BEGIN_JSON_SERIALIZER
-		JSON_SERIALIZE("paymentProvider", paymentProvider );
-		JSON_SERIALIZE("paymentUrl", paymentUrl );
-        JSON_SERIALIZE("paymentToken", paymentToken );
-		JSON_SERIALIZE("returnUrl", ReturnUrl);
+		JSON_SERIALIZE("paymentProvider", PaymentProvider );
+		JSON_SERIALIZE("paymentUrl", PaymentURL );
+        JSON_SERIALIZE("paymentToken", PaymentToken );
+		JSON_SERIALIZE("returnUrl", ReturnURL);
 		JSON_SERIALIZE("paymentType", PaymentType);
 	END_JSON_SERIALIZER
 };

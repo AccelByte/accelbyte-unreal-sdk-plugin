@@ -8,7 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Serialization/JsonSerializerMacros.h"
 
-class ResetPasswordRequest : public FJsonSerializable
+struct FResetPasswordRequest : public FJsonSerializable
 {
 public:
     FString Code;

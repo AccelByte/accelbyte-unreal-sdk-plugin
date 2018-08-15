@@ -12,24 +12,24 @@
 
 void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete)
 {
-	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, UserProfileInfo userInfo) {
+	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, FUserProfileInfo* userInfo) {
 		UUserProfileJustice* UserProfile = UUserProfileJustice::Deserialize(userInfo);
 		check(UserProfile);
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString, UserProfile);
 	}));
 }
 
-void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
+void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarURL, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
 {
-	UserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
+	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
 	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? DisplayName : OldUserProfile->DisplayName;
 	NewUserProfile.FirstName = !FirstName.IsEmpty() ? FirstName : OldUserProfile->FirstName;
 	NewUserProfile.LastName = !LastName.IsEmpty() ? LastName : OldUserProfile->LastName;
-	NewUserProfile.AvatarUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarUrl;
-	NewUserProfile.AvatarSmallUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarSmallUrl;
-	NewUserProfile.AvatarLargeUrl = !AvatarUrl.IsEmpty() ? AvatarUrl : OldUserProfile->AvatarLargeUrl;
+	NewUserProfile.AvatarURL = !AvatarURL.IsEmpty() ? AvatarURL : OldUserProfile->AvatarURL;
+	NewUserProfile.AvatarSmallURL = !AvatarURL.IsEmpty() ? AvatarURL : OldUserProfile->AvatarSmallURL;
+	NewUserProfile.AvatarLargeURL = !AvatarURL.IsEmpty() ? AvatarURL : OldUserProfile->AvatarLargeURL;
 	NewUserProfile.Email = OldUserProfile->Email;
 	NewUserProfile.Language = Language;
 	NewUserProfile.Timezone = Timezone;

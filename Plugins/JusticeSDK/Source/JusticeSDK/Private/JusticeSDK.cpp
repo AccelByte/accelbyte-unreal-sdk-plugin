@@ -53,9 +53,9 @@ void FJusticeSDKModule::StartupModule()
 		IsInitialized = false;
 	}
 
-	GameClientToken = new OAuthTokenJustice;
-	UserToken = new OAuthTokenJustice;
-	UserProfile = new UserProfileInfo;
+	GameClientToken = new FOAuthTokenJustice;
+	UserToken = new FOAuthTokenJustice;
+	UserProfile = new FUserProfileInfo;
 
 	AsyncTaskManager = new FAsyncTaskManagerJustice();
 	RetryTaskManager = new FRetryTaskManagerJustice();

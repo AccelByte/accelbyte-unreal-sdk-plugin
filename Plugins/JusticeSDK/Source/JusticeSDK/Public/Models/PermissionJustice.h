@@ -6,11 +6,11 @@
 #include "CoreMinimal.h"
 #include "Serialization/JsonSerializerMacros.h"
 
-class PermissionJustice : public FJsonSerializable
+struct FPermissionJustice : public FJsonSerializable
 {
 public:
 	FString Resource;
-	int32 Action;
+	int32	Action;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("Resource", Resource);

@@ -19,7 +19,7 @@ UAsyncGetUserOrderHistory * UAsyncGetUserOrderHistory::GetUserOrderHistory(FStri
 
 void UAsyncGetUserOrderHistory::Activate()
 {
-	JusticePurchase::GetUserOrderHistory(this->OrderNo, FGetUserOrderHistoryCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<OrderHistoryInfo> OrderHistories) {
+	JusticePurchase::GetUserOrderHistory(this->OrderNo, FGetUserOrderHistoryCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, TArray<FOrderHistoryInfo> OrderHistories) {
 		TArray<UOrderHistoryInfo*> Result = TArray<UOrderHistoryInfo*>();
 		if (bSuccessful)
 		{	

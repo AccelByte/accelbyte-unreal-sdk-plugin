@@ -20,7 +20,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 	Super::BeginPlay();
 	JusticeIdentity::ClientLogin();
 
-	TelemetryEventDataExample TelemetryData;
+	FTelemetryEventDataExample TelemetryData;
 	TelemetryData.ExampleField1 = 256;
 	TelemetryData.ExampleField2 = "512";
 	TelemetryData.ExampleField3 = 1024;
@@ -29,7 +29,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 	FGuid Guid = FGuid::NewGuid();
 	FString UUID = FString::Printf(TEXT("%x%x%x%x"), Guid.A, Guid.B, Guid.C, Guid.D);
 
-	TelemetryEvent Telemetry;
+	FTelemetryEvent Telemetry;
 	Telemetry.AppID = 1555;
 	Telemetry.ClientID = FJusticeSDKModule::Get().ClientID;
 	Telemetry.Data = Data;

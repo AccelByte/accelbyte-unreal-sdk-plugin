@@ -24,7 +24,7 @@ public:
 		FUpdatePlayerProfileOutputPin OnFailed;
 
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "Platform"))
-		static UAsyncUpdatePlayerProfile* UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarUrl, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes);
+		static UAsyncUpdatePlayerProfile* UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarURL, FString Language, FString Timezone, FString DateOfBirth, TMap<FString, FString> CustomAttributes);
 
 	virtual void Activate() override;
 
@@ -33,7 +33,7 @@ private:
     FString FirstName;
     FString LastName;
     FString Country;
-    FString AvatarUrl;
+    FString AvatarURL;
 	FString Language;
 	FString Timezone;
 	FString DateOfBirth;
