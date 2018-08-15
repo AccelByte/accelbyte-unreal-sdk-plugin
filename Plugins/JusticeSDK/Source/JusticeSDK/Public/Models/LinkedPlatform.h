@@ -18,6 +18,12 @@ public:
 	FString Namespace;
 	FString UserID;
 
+    FLinkedPlatform() {}
+    FLinkedPlatform(FString PlatformID) 
+    {
+        this->PlatformID = PlatformID;
+    }
+
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("PlatformId", PlatformID);
 		JSON_SERIALIZE("PlatformUserId", PlatformUserID);

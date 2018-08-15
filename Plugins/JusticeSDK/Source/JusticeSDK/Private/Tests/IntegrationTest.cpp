@@ -959,7 +959,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo userProfile)
+	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
@@ -1050,7 +1050,7 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo userProfile)
+	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
@@ -1193,7 +1193,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo userProfile)
+	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
@@ -1287,7 +1287,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo userProfile)
+	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
@@ -2146,7 +2146,7 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FGetItemCompleteDelegate OnGetItemComplete = FGetItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FItemInfoJustice Item)
+	FGetItemCompleteDelegate OnGetItemComplete = FGetItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FItemInfoJustice* Item)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 5 GetItem Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetItemDone = true;
@@ -2425,7 +2425,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, FOrderInfo Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, FOrderInfo *Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
@@ -2472,7 +2472,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 	FUserAuthTypeJustice AuthType = Email;
 	FString Language = "en";
 	FString Region = "US";
-	FOrderInfo CreatedOrder = FOrderInfo();
+	FOrderInfo* CreatedOrder = nullptr;
 	TArray<FCategory> RootCategory;
 	TArray<FCategory> ChildCategory;
 	TArray<FItemInfoJustice> ItemQuery;
@@ -2602,7 +2602,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess, &CreatedOrder](bool bSuccessful, FString ErrorStr, FOrderInfo Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOrderInfo *Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
@@ -2620,13 +2620,13 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FOrderInfoCompleteDelegate OnGetUserOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bGetUserOrderDone, &bGetUserOrderSuccess](bool bSuccessful, FString ErroStr, FOrderInfo Result)
+	FOrderInfoCompleteDelegate OnGetUserOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErroStr, FOrderInfo *Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetUserOrderDone = true;
 		bGetUserOrderSuccess = bSuccessful;
 	});
-	JusticePurchase::GetUserOrder(CreatedOrder.OrderNo, OnGetUserOrderComplete);
+	JusticePurchase::GetUserOrder(CreatedOrder->OrderNo, OnGetUserOrderComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetUserOrderDone)

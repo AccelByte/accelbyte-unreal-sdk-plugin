@@ -14,7 +14,7 @@
 #include "Models/ItemPagingSlicedResult.h"
 
 DECLARE_DELEGATE_ThreeParams(FCategoryDefaultCompleteDelegate, bool, FString, TArray<FCategory>);
-DECLARE_DELEGATE_ThreeParams(FGetItemCompleteDelegate, bool, FString, FItemInfoJustice);
+DECLARE_DELEGATE_ThreeParams(FGetItemCompleteDelegate, bool, FString, FItemInfoJustice*);
 DECLARE_DELEGATE_ThreeParams(FItemCompleteDelegate, bool, FString, TArray<FItemInfoJustice>);
 
 class JUSTICESDK_API JusticeCatalog

@@ -1,5 +1,5 @@
-### TABLE OF CONTENT ###
-- [Table of Content](#table-of-content)
+### TABLE OF CONTENTS ###
+- [Table of Contents](#table-of-contents)
 - [JUSTICE IDENTITY](#justice-identity)
 - [PLATFORM SERVICE](#platform-service)
     - [JUSTICE CATALOG](#justice-catalog)
@@ -8,7 +8,7 @@
     - [USER PROFILE](#user-profile)
 
 ## JUSTICE IDENTITY ##
-Justice Identity is the first service that required before we can proceed to platform service. 
+Justice Identity is the first service required before we can proceed to other service such as platform service.
 
 * #### RegisterNewPlayer
 
@@ -46,7 +46,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### ReissueVerificationCode
 
-    This function should be called after register a new user account. This method requires user's ID (**UserID**) and user's email (**LoginId**) as parameters. User ID can be obtained from token response that obtained after user login. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function would be called after registering a new user account. This method requires user ID (**UserID**) and user email (**LoginId**) as parameters. User ID can be obtained from token response obtained after user login. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <pre class="prettyprint lang-cpp"> 
     void JusticeIdentity::ReissueVerificationCode(
         FString UserID, 
@@ -75,7 +75,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### VerifyNewPlayer
 
-    This function will verify the email that registered, **AFTER** user received the verification code that has been send with [ReissueVerificationCode](../functions/#reissueverificationcode) to their email. This method requires **user's ID** (UserID), **VerificationCode**, **[AuthType](../models/#fuserauthtypejustice)** as parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function will verify the registered email **AFTER** user receives verification code sent with [ReissueVerificationCode](../functions/#reissueverificationcode) to their email. This method requires **user ID** (UserID), **VerificationCode**, and **[AuthType](../models/#fuserauthtypejustice)** as parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <pre class="prettyprint lang-cpp"> 
     void JusticeIdentity::VerifyNewPlayer(
         FString UserID, 
@@ -105,7 +105,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### UserLogin
 
-    Login the user with their email account. User should insert their **email** (LoginID) and **Password** as parameters. It will return [OAuthTokenJustice](../models/#oauthtokenjustice) from [FUserLoginCompleteDelegate](../callback/#fuserlogincompletedelegate) callback.
+    Log user in with their email account. User needs to insert their **email** (LoginID) and **Password** as parameters. It will return [OAuthTokenJustice](../models/#oauthtokenjustice) from [FUserLoginCompleteDelegate](../callback/#fuserlogincompletedelegate) callback.
     <pre class="prettyprint lang-cpp"> 
     void JusticeIdentity::UserLogin(
         FString LoginID, 
@@ -134,7 +134,8 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### DeviceLogin
 
-    This function allow user to login without entering any information, it'll automatically obtain device's information as their account. It will return [OAuthTokenJustice](../models/#oauthtokenjustice) from [FUserLoginCompleteDelegate](../callback/#fuserlogincompletedelegate) callback.
+    This function allows user to login without entering any information, it'll automatically obtain their device's information for their account. It will return [OAuthTokenJustice](../models/#oauthtokenjustice) from [FUserLoginCompleteDelegate](../callback/#fuserlogincompletedelegate) callback.
+
     <!--language lang-cpp -->
 
         void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete){}
@@ -178,7 +179,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### UpgradeHeadlessAccount
 
-    This function will upgrade user's headless account. Headless account is an account that doesn't have an email-password. If the user login with device/platform and they can't login with email-password, their account is considered as headless account. It requires **Email** and **Password** as parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function will upgrade user's headless account. Headless account is an account that doesn't have an email-password. If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account. Therefore, the function requests user’s **Email** and **Password** for parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeIdentity::UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete){}
@@ -223,7 +224,8 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### ResetPassword
 
-    This function will verify the user's [request to reset password](#forgotpassword). User should insert their **email** (UserID), **VerificationCode** that has been sent to their email, and **NewPassword** as parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function verifies user's [request to reset password](#forgotpassword). User should insert their **email** (UserID), **VerificationCode** sent to their email, and **NewPassword** as parameters. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+
     <!--language lang-cpp -->
 
         void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete){}
@@ -246,7 +248,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### LinkPlatform
 
-    This function will link user's current account to another account in another platform. Required parameter is **PlatformID** and **Ticket**. Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform). The browser will redirect the url to a site with a code in the form parameter URL. This function will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function links user's current account to their other account in other platform. The required parameters are **PlatformID** and **Ticket**. Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform). The browser will redirect the url to a site with a code in form of parameter URL. This function will return [default](../callback/#fdefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FDefaultCompleteDelegate OnComplete){}
@@ -270,7 +272,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### UnlinkPlatform
 
-    This function unlink user's platfrom account that linked with current account. It only requires the **PlatformID** as the parameter. That platform account will be unlinked. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    This function unlinks user's platform account that is linked with user’s current account. It only requires **PlatformID** as the parameter to unlink user’s platform account. It will return [default](../callback/#fdefaultcompletedelegate) callback.
 
     <!--language lang-cpp -->
 
@@ -294,7 +296,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### GetLinkedUserPlatform
 
-    Get user's platform accounts those have been linked. It doesn't need any parameter. It will return a TArray<[LinkedPlatform](../models/#linkedplatform)> from [FGetLinkedPlatformCompleteDelegate](../callback/#fgetlinkedplatformcompletedelegate) callback.
+    This function gets user's platform accounts linked to user’s account. It doesn't need any parameter. It will return a TArray<[LinkedPlatform](../models/#linkedplatform)> from [FGetLinkedPlatformCompleteDelegate](../callback/#fgetlinkedplatformcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete){}
@@ -317,7 +319,7 @@ Justice Identity is the first service that required before we can proceed to pla
 
 * #### Logout
 
-    Logout the user's from game. It doesn't require any parameter. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    Log user out from the game.. It doesn't require any parameter. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeIdentity::UserLogout(FDefaultCompleteDelegate OnComplete)
@@ -338,12 +340,12 @@ Justice Identity is the first service that required before we can proceed to pla
         }
 
 ## PLATFORM SERVICE ##
-User should be logged in first before it can use platform. Please refer to [Justice Identity](#justice-identity) to see how to log in user.
+User should log in to use the platform. Please refer to [Justice Identity](#justice-identity) to see how to log user in.
 ### JUSTICE CATALOG ###
 
 * #### GetCategory
 
-    Get category from a store in a namespace. Required parameter is **ParentPath** and optional parameter is **Language**. It'll return the TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
+    This function gets the category from a store in a namespace. The required parameter is **ParentPath** and the optional parameter is **Language**. It'll return the TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
     <!--language lang-cpp -->
     
         void JusticeCatalog::GetCategory(
@@ -371,7 +373,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetRootCategory
 
-    Get root categories those exists in the same namespace with user's namespace. Optional parameter is **Language**. It'll return the root TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
+    This function gets root categories that exist in the same namespace with user's namespace. The optional parameter is **Language**. It'll return the root TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
     <!--language lang-cpp -->
     
         void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteDelegate OnComplete){}
@@ -395,7 +397,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetChildCategory
 
-    Get child categories from a category. This method requires the parent path / **CategoryPath** parameter and optional **Language** parameter. It'll return a child TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
+    This function gets the subcategories from a category. This method requires the parent path / **CategoryPath** parameter and optional **Language** parameter. It'll return a subcategory TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeCatalog::GetChildCategory(
@@ -423,7 +425,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetDescendantCategory
 
-    Get every descendant categories from a category. Required parameter is **CategoryPath** and optional parameter is **Language**. It'll return a descendant TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
+    Get every subcategories from a category. The required parameter is **CategoryPath** and the optional parameter is **Language**. It'll return a descendant TArray<[Category](../models/#category)> from the [FCategoryDefaultCompleteDelegate](../callback/#fcategorydefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeCatalog::GetDescendantCategory(
@@ -451,7 +453,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetItem
 
-    Get an item information from a store within the user's namespace. Required parameters are **ItemID** and **Region**. Optional parameter is **Language**. It'll return an [ItemInfo](../models/#iteminfo) from the [FGetItemCompleteDelegate](../callback/#fgetitemcompletedelegate) callback.
+    Get an item information from a store within the user's namespace. The required parameters are **ItemID** and **Region**. The optional parameter is **Language**. It'll return an [ItemInfo](../models/#iteminfo) from the [FGetItemCompleteDelegate](../callback/#fgetitemcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeCatalog::GetItem(
@@ -481,7 +483,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetItemByQuery
 
-    Get an array of item with specific criteria/filter from a store within user's namespace. All paramaters is required, except the **Language** paramater. This function will return a TArray<[ItemInfo](../models/#iteminfo)> that fulfilled the criteria from the [FItemCompleteDelegate](../callback/#fitemcompletedelegate) callback.
+    Get an array of items with specific criteria/filter from a store within user's namespace. All parameters are required, except **Language** paramater. This function will return a TArray<[ItemInfo](../models/#iteminfo)> that fulfilled the criteria from the [FItemCompleteDelegate](../callback/#fitemcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticeCatalog::GetItemByQuery(
@@ -521,7 +523,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### CreateNewOrder
 
-    Create order to purchase something from store. It requires all parameters (**ItemID**, **Price**, **DiscountedPrice**, and **Currency**. It'll return [OrderInfo](../models/#orderinfo) from the [FOrderInfoCompleteDelegate](../callback/#forderinfocompletedelegate) callback.
+    Create order to purchase something from the store. It requires all parameters (**ItemID**, **Price**, **DiscountedPrice**, and **Currency**. It'll return [OrderInfo](../models/#orderinfo) from the [FOrderInfoCompleteDelegate](../callback/#forderinfocompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticePurchase::CreateNewOrder(
@@ -579,7 +581,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetUserOrders
 
-    Get all of user's order that has been created. It has two optional parameters; **Page** and **Size**. It'll return a TArray<[OrderInfo](../models/#orderinfo)> from the [FGetUserOrdersCompleteDelegate](../models/#fgetuserorderscompletedelegate) callback.
+    Get all of user's orders that have been created. It has two optional parameters; **Page** and **Size**. It'll return a TArray<[OrderInfo](../models/#orderinfo)> from the [FGetUserOrdersCompleteDelegate](../models/#fgetuserorderscompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticePurchase::GetUserOrders(
@@ -607,7 +609,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### GetUserOrderHistory
 
-    Get history of an order that has been created. It requires an **OrderNo** parameter. It'll return an TArray<[OrderHistoryInfo](../models/#orderhistoryinfo)> from the [FGetUserOrderHistoryCompleteDelegate](../callback/#fgetuserorderhistorycompletedelegate) callback.
+    Get the history of the created orders. It requires an **OrderNo** parameter. It'll return an TArray<[OrderHistoryInfo](../models/#orderhistoryinfo)> from the [FGetUserOrderHistoryCompleteDelegate](../callback/#fgetuserorderhistorycompletedelegate) callback.
 
         void JusticePurchase::GetUserOrderHistory(
             FString OrderNo, 
@@ -632,7 +634,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### FulfillOrder
 
-    Fulfill user's order. Required parameter is **OrderNo**. It'll return an [OrderInfo](../models/#orderinfo) from the [FOrderInfoCompleteDelegate](../callback/#forderinfocompletedelegate) callback.
+    Fulfill user's order. The required parameter is **OrderNo**. It'll return an [OrderInfo](../models/#orderinfo) from the [FOrderInfoCompleteDelegate](../callback/#forderinfocompletedelegate) callback.
     <!--language lang-cpp -->
         
         void JusticePurchase::FulfillOrder(
@@ -712,7 +714,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### CreateDefaultPlayerProfile
 
-    Create user's minimum profile information. It requires two parameter to be filled: **Email** and **DisplayName**. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    Create user's minimum profile information. It requires two parameters to be filled: **Email** and **DisplayName**. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticePlatform::CreateDefaultPlayerProfile(
@@ -739,7 +741,7 @@ User should be logged in first before it can use platform. Please refer to [Just
 
 * #### UpdatePlayerProfile
 
-    Update user's current profile information. The profile should exists. It requires an object (**[UserProfileInfoUpdate](../models/#userprofileinfoupdate)**) as the parameter. It will return [default](../callback/#fdefaultcompletedelegate) callback.
+    Update user's current profile information. The profile should exist. It requires an object (**[UserProfileInfoUpdate](../models/#userprofileinfoupdate)**) as the parameter. It will return [default](../callback/#fdefaultcompletedelegate) callback.
     <!--language lang-cpp -->
 
         void JusticePlatform::UpdatePlayerProfile(

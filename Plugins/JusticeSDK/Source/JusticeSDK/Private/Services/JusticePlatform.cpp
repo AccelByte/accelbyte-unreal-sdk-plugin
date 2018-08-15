@@ -31,7 +31,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, FUserProfileInfo() );
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
 		return;
 	}
 	switch (Response->Code)
@@ -45,7 +45,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		{
 			if (FJusticeSDKModule::Get().UserProfile->FromJson(JsonObject))
 			{
-				OnComplete.ExecuteIfBound(true, TEXT(""), *FJusticeSDKModule::Get().UserProfile);
+				OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeSDKModule::Get().UserProfile);
 			}
 			else
 			{
@@ -73,7 +73,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 			else
 			{
 				UE_LOG(LogJustice, Error, TEXT("Create Default User Profile Error:  %s"), *ErrorStr);
-				OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), FUserProfileInfo());
+				OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), nullptr);
 			}
 		}));
 		break;
@@ -85,7 +85,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
+					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -97,7 +97,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
+				OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 				return;
 			}
 		}));
@@ -114,7 +114,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -129,7 +129,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Player Profile Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, FUserProfileInfo());
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 }

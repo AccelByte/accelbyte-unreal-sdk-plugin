@@ -1,4 +1,4 @@
-# Welcome to Accelbyte SDK Documentation Page
+# Welcome to AccelByte SDK Documentation Page
 
 * [Getting Started](overview)
 * [User Guide](usingTheSdk)

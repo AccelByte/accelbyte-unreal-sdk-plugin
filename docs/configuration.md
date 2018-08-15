@@ -1,6 +1,6 @@
 ## Integrate with Your Game:
 
-Copy `JusticeSDK` and `JusticeWebBrowserWidget` folders from  Plugin folder to your Game Plugins' folder.
+Copy `JusticeSDK` folder and `JusticeWebBrowserWidget` folder from Plugin folder to your Game Plugins folder.
 
 Make sure you add dependency to your .uproject file
     <pre class="prettyprint lang-json">

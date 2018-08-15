@@ -12,23 +12,23 @@
 struct FTransaction : public FJsonSerializable
 {
 public:
-    FString				TransactionID;
-    int32				Amount;
-	int32				Vat;
-	int32				SalesTax;
-    FCurrencySummary	Currency;
-    FString				Type; //['CHARGE', 'REFUND'],
-    FString				Status; // ['INIT', 'FINISHED', 'FAILED'],
-    FString				Provider; //['XSOLLA', 'WALLET'],
-	int32				PaymentProviderFee;
-    FString				PaymentMethod;
-	int32				PaymentMethodFee;
-    FString				MerchantID;
-    FString				ExternalTransactionID;
-    FString				ExternalStatusCode;
-    FString				ExternalMessage;
-    FString				TransactionStartTime;
-    FString				TransactionEndTime;
+    FString             TransactionID;
+    int32               Amount;
+    int32               Vat;
+    int32               SalesTax;
+    FCurrencySummary    Currency;
+    FString             Type; //['CHARGE', 'REFUND'],
+    FString             Status; // ['INIT', 'FINISHED', 'FAILED'],
+    FString             Provider; //['XSOLLA', 'WALLET'],
+    int32               PaymentProviderFee;
+    FString             PaymentMethod;
+    int32               PaymentMethodFee;
+    FString             MerchantID;
+    FString             ExternalTransactionID;
+    FString             ExternalStatusCode;
+    FString             ExternalMessage;
+    FString             TransactionStartTime;
+    FString             TransactionEndTime;
 
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("txId", TransactionID);
@@ -36,16 +36,16 @@ public:
 		JSON_SERIALIZE("vat", Vat);
 		JSON_SERIALIZE("salesTax", SalesTax);
 		JSON_SERIALIZE_OBJECT_SERIALIZABLE("currency", Currency);
-        JSON_SERIALIZE("status", Status);
-        JSON_SERIALIZE("provider", Provider);
+		JSON_SERIALIZE("status", Status);
+		JSON_SERIALIZE("provider", Provider);
 		JSON_SERIALIZE("paymentProviderFee", PaymentProviderFee);
-        JSON_SERIALIZE("paymentMethod", PaymentMethod);
+		JSON_SERIALIZE("paymentMethod", PaymentMethod);
 		JSON_SERIALIZE("paymentMethodFee", PaymentMethodFee);
-        JSON_SERIALIZE("merchantId", MerchantID);
-        JSON_SERIALIZE("extTxId", ExternalTransactionID);
-        JSON_SERIALIZE("extStatusCode", ExternalStatusCode);
-        JSON_SERIALIZE("extMessage", ExternalMessage);
-        JSON_SERIALIZE("txStartTime", TransactionStartTime);
-        JSON_SERIALIZE("txEndTime", TransactionEndTime);
+		JSON_SERIALIZE("merchantId", MerchantID);
+		JSON_SERIALIZE("extTxId", ExternalTransactionID);
+		JSON_SERIALIZE("extStatusCode", ExternalStatusCode);
+		JSON_SERIALIZE("extMessage", ExternalMessage);
+		JSON_SERIALIZE("txStartTime", TransactionStartTime);
+		JSON_SERIALIZE("txEndTime", TransactionEndTime);
 	END_JSON_SERIALIZER
 };

@@ -1,7 +1,9 @@
-The Justice SDK is a plugin for Unreal Engine 4 (4.18.).
-This plugin use to interact with Justice Online Service.
+# Overview
 
-The Justice SDK includes:
+Justice SDK is a plugin for Unreal Engine 4 (4.18.).
+This plugin is used to interact with Justice Online Service.
+
+Justice SDK includes:
 
 * Justice Plugin Source Code (located at `/Plugin/JusticeSDK` folder)
 * Justice Custom Web Browser (located at `/Plugin/JusticeWebBrowserWidget` folder)
@@ -11,7 +13,7 @@ The Justice SDK includes:
 
 ```
  .
- +-- Config                            // Configuration files goes here 
+ +-- Config                            // Configuration files go here
  +-- Content
  +-- Plugins
  |   +-- JusticeSDK                    // Justice SDK Plugin
@@ -48,4 +50,4 @@ The Justice SDK includes:
 
 ### Stop Using OSS
 Starting from March 13, 2018 at commit `48b28dd`, we stop using OnlineSubsystem (OSS). Now we use singleton class based on FModuleManager.
-If you still have `OnlineSubsystemJustice` folder on Plugins folder, please remove it, since it will break your game.
+If you still have `OnlineSubsystemJustice` folder on Plugins folder, please remove it, since it breaks your game.

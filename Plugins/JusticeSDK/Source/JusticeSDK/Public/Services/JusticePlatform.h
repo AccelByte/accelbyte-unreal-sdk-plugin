@@ -14,7 +14,7 @@
 #include "Utilities/JusticeLog.h"
 #include "Models/UserProfileInfo.h"
 
-DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, FUserProfileInfo);
+DECLARE_DELEGATE_ThreeParams(FReqestCurrentPlayerProfileCompleteDelegate, bool, FString, FUserProfileInfo*);
 
 class JUSTICESDK_API JusticePlatform
 {

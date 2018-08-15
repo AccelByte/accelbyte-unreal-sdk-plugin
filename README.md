@@ -17,10 +17,10 @@
 
 ## 1. Overview
 
-The Justice SDK is a plugin for Unreal Engine 4 (4.18.).
-This plugin use to interact with Justice Online Service
+Justice SDK is a plugin for Unreal Engine 4 (4.18.).
+This plugin is used to interact with Justice Online Service.
 
-The Justice SDK includes:
+Justice SDK includes:
 
 * Justice Plugin Source Code (located at `/Plugin/JusticeSDK` folder)
 * Justice Custom Web Browser (located at `/Plugin/JusticeWebBrowserWidget` folder)
@@ -30,7 +30,7 @@ Folder Structure:
 
 ```text
  .
- +-- Config                            // Configuration files goes here 
+ +-- Config                            // Configuration files go here
  +-- Content
  +-- Plugins
  |   +-- JusticeSDK                    // Justice SDK Plugin
@@ -69,7 +69,7 @@ Folder Structure:
 
 ## 4. Integrate with Your Game
 
-Copy `JusticeSDK` and `JusticeWebBrowserWidget` folders from  Plugin folder to your Game Plugins' folder.
+Copy `JusticeSDK` folder and `JusticeWebBrowserWidget` folder from Plugin folder to your Game Plugins folder.
 
 Make sure you add dependency to your .uproject file
 
@@ -139,7 +139,7 @@ public class JusticeSDKDemo : ModuleRules
 
 #### a. OAuth2 Login
 
-Before you want to use other service, you must call `ClientLogin()` function first.
+Before you use other services, you need to call `ClientLogin()` function first.
 `ClientLogin()` function is actually OAuth2 Login to our service. It will login against **ClientID** and **ClientSecret** from `DefaultEngine.ini` file under `JusticeSDK` section.
 If you build Game Client and Dedicated Server, you should call this function. There is **no** `ServerLogin` Function.
 
@@ -163,7 +163,7 @@ void AYourAwesomeGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 #### b. User Login
 
-To call login with email and password you do like this
+Here is what you likely do to call login with email and password
 
 ```c++
 void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -172,7 +172,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
     JusticeIdentity::UserLogin(TEXT("user@example.com"), 
       TEXT("userpassword"),
       FUserLoginCompleteDelegate::CreateLambda([](bool IsSuccess, FString ErrorString, UOAuthTokenJustice* token) {
-        // this will be called when login request receive a response 
+        // this will be called when login request receives a response
     }));
     ...
 }
@@ -180,7 +180,7 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 
 ### Blueprint
 
-We can call all of The Justice SDK function from blueprint. We have 2 different kind of blueprint function:
+We are able to call all Justice SDK function from the blueprint. We have 2 different kinds of blueprint function:
 
 1. Blueprint function with delegates parameter 
 2. Blueprint async function with multiple output pins
@@ -190,11 +190,11 @@ We can call all of The Justice SDK function from blueprint. We have 2 different 
 ### Stop Using OSS
 
 Starting from March 13, 2018 at commit `48b28dd`, we stop using OnlineSubsystem (OSS). Now we use singleton class based on FModuleManager.
-If you still have `OnlineSubsystemJustice` folder on Plugins folder, please remove it, since it will break your game.
+If you still have `OnlineSubsystemJustice` folder in Plugins folder, please remove it, for it breaks your game.
  
 ## 7. Complete Documentation
 
-For more detailed documentation, please take a look on docs folder. There is a more specific documentation on each file.You can also use mkdocs to view this docs in HTML format.
+For more detailed documentation, please take a look on docs folder. There is a more specific documentation on each file. You can also use mkdocs to view this docs in HTML format.
 
 Go to root folder of this repository, and run this command
 

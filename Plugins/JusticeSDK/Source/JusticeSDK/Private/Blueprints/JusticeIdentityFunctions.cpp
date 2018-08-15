@@ -116,31 +116,19 @@ TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<
 
 TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetCompleteListOfPlatforms()
 {
-	FLinkedPlatform DevicePlatform;
-	FLinkedPlatform GooglePlatform;
-	FLinkedPlatform FacebookPlatform;
-	FLinkedPlatform TwitchPlatform;
-	FLinkedPlatform OculusPlatform;
-	DevicePlatform.PlatformID = TEXT("device");
-	GooglePlatform.PlatformID = TEXT("google");
-	FacebookPlatform.PlatformID = TEXT("facebook");
-	TwitchPlatform.PlatformID = TEXT("twitch");
-	OculusPlatform.PlatformID = TEXT("twitter");
-
-	TArray<FLinkedPlatform> CompletePlatforms;
-	CompletePlatforms.Add(DevicePlatform);
-	CompletePlatforms.Add(GooglePlatform);
-	CompletePlatforms.Add(FacebookPlatform);
-	CompletePlatforms.Add(TwitchPlatform);
-	CompletePlatforms.Add(OculusPlatform);
-
+    TArray<FLinkedPlatform> CompletePlatforms = { 
+        FLinkedPlatform("device"), 
+        FLinkedPlatform("google"), 
+        FLinkedPlatform("facebook"),
+        FLinkedPlatform("twitch"),
+        FLinkedPlatform("twitter"),
+    };
 	TArray<ULinkedPlatform*> UCompletePlatforms;
 	for (int32 i = 0; i < CompletePlatforms.Num(); i++)
 	{
 		ULinkedPlatform* platform = ULinkedPlatform::Deserialize(CompletePlatforms[i]);
 		UCompletePlatforms.Add(platform);
 	}
-
 	return UCompletePlatforms;
 }
 

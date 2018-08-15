@@ -511,12 +511,11 @@ void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, F
 
 void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetItemCompleteDelegate OnComplete)
 {
-	FString ErrorStr;
-	FItemInfoJustice Result;
+	FString ErrorStr;	
 	if (!Response->ErrorString.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, Result);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
 		return;
 	}
 	switch (Response->Code)
@@ -527,7 +526,8 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-			if (Result.FromJson(JsonObject))
+            FItemInfoJustice* Result = new FItemInfoJustice();
+			if (Result->FromJson(JsonObject))
 			{
 				OnComplete.ExecuteIfBound(true, TEXT(""), Result);
 			}
@@ -550,7 +550,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 				if (Response->TooManyRetries() || Response->TakesTooLong())
 				{
 					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 					return;
 				}
 				Response->UpdateRequestForNextRetry();
@@ -562,7 +562,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 			else
 			{
 				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+				OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 				return;
 			}
 		}));
@@ -580,7 +580,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 		if (Response->TooManyRetries() || Response->TakesTooLong())
 		{
 			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 			return;
 		}
 		Response->UpdateRequestForNextRetry();
@@ -596,7 +596,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 	if (!ErrorStr.IsEmpty())
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnGetItemResponse Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, Result);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 }

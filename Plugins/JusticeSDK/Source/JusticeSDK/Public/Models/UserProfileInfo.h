@@ -15,21 +15,21 @@ struct FUserProfileInfo : public FJsonSerializable
 public:
 	FUserProfileInfo() {};
 
-	FString					UserID;
-	FString					Namespace;
-	FString					DisplayName;
-	FString					FirstName;
-	FString					LastName;
-	FString					Country;
-	FString					AvatarSmallURL;
-	FString					AvatarURL;
-	FString					AvatarLargeURL;
-	FString					Email;
-	FString					Status;
-	FString					Language;
-	FString					Timezone;
-	FString					DateOfBirth;
-	TMap<FString, FString>	CustomAttributes;
+	FString                 UserID;
+	FString                 Namespace;
+	FString                 DisplayName;
+	FString                 FirstName;
+	FString                 LastName;
+	FString                 Country;
+	FString                 AvatarSmallURL;
+	FString                 AvatarURL;
+	FString                 AvatarLargeURL;
+	FString                 Email;
+	FString                 Status;
+	FString                 Language;
+	FString                 Timezone;
+	FString                 DateOfBirth;
+	TMap<FString, FString>  CustomAttributes;
 public:
 	BEGIN_JSON_SERIALIZER
 		JSON_SERIALIZE("userId", UserID);
@@ -57,19 +57,19 @@ class UserProfileInfoUpdate : public FJsonSerializable
 public:
 	UserProfileInfoUpdate() {};
 
-	FString					DisplayName;
-	FString					FirstName;
-	FString					LastName;
-	FString					AvatarSmallURL;
-	FString					AvatarURL;
-	FString					AvatarLargeURL;
-	FString					Email;
-	FString					Language;
-	FString					Timezone;
-	FString					DateOfBirth;
-	TMap<FString, FString>	CustomAttributes;
-	FString					Country;
-	FString					Status;
+	FString                 DisplayName;
+	FString                 FirstName;
+	FString                 LastName;
+	FString                 AvatarSmallURL;
+	FString                 AvatarURL;
+	FString                 AvatarLargeURL;
+	FString                 Email;
+	FString                 Language;
+	FString                 Timezone;
+	FString                 DateOfBirth;
+	TMap<FString, FString>  CustomAttributes;
+	FString                 Country;
+	FString                 Status;
 
 public:
 	BEGIN_JSON_SERIALIZER
