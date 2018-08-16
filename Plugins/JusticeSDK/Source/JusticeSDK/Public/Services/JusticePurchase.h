@@ -35,4 +35,3 @@ private:
 	static void OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
 	static void OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FGetUserOrderHistoryCompleteDelegate OnComplete);
 };
-

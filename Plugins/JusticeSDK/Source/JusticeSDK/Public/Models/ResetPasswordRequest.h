@@ -10,7 +10,6 @@
 
 struct FResetPasswordRequest : public FJsonSerializable
 {
-public:
     FString Code;
     FString LoginID;
     FString NewPassword;

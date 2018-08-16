@@ -11,19 +11,23 @@
 class FUserOnlineAccountJustice
 {
 public:
-	FString					LoginID;	
-	TMap<FString, FString>	AdditionalAuthData;
-	TMap<FString, FString>	UserAttributes;
-	int32					LocalUserNum;
-	UOAuthTokenJustice*		Token;
-
+	FString                         LoginID;	
+	TMap<FString, FString>          AdditionalAuthData;
+	TMap<FString, FString>          UserAttributes;
+	int32                           LocalUserNum;
+	TSharedPtr<FOAuthTokenJustice>  Token;
+	
 public:
 	FUserOnlineAccountJustice(const FString& LoginID = TEXT(""), int32 LocalUserNumber = 0)
 		:LoginID(LoginID), 
-		LocalUserNum(LocalUserNumber), 
-		Token(NewObject<UOAuthTokenJustice>()) {}
-	virtual ~FUserOnlineAccountJustice(){ }
+		LocalUserNum(LocalUserNumber){}
 
+	FUserOnlineAccountJustice(TSharedPtr<FOAuthTokenJustice> OAuthToken, const FString& LoginID = TEXT(""), int32 LocalUserNumber = 0)
+		:LoginID(LoginID),
+		LocalUserNum(LocalUserNumber),
+		Token(OAuthToken) {}
+
+	virtual ~FUserOnlineAccountJustice(){ }
 	FString GetUserId() { return Token->UserID; }
 	FString GetDisplayName(const FString& Platform = FString()) { return Token->DisplayName; }
 	bool GetUserAttribute(const FString& AttrName, FString& OutAttrValue) const;

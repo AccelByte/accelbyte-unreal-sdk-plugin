@@ -12,7 +12,6 @@
 
 struct FOrderInfoPaging : public FJsonSerializable
 {
-public:
 	TArray<FOrderInfo>	Data;
 	FPaging				Paging;
 

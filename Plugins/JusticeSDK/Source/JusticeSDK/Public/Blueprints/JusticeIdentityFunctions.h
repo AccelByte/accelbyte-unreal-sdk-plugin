@@ -12,7 +12,7 @@
 #include "JusticeSDK.h"
 #include "JusticeIdentityFunctions.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FUserLoginCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr, UOAuthTokenJustice*, Token);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FUserLoginCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
 DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRegisterPlayerCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr, UUserCreateResponse*, Response);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FDefaultCompleteDynamicDelegate, bool, bSuccessful, FString, ErrorStr);
 
@@ -43,13 +43,6 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
 		static void ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDynamicDelegate OnComplete);
-
-
-	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static UOAuthTokenJustice* GetUserToken();
-
-	UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
-		static UOAuthTokenJustice* GetClientToken();
 
 	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
 		static FString GetUserId();

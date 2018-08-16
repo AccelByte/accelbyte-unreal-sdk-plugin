@@ -3,8 +3,17 @@
 template <typename T, typename U>
 struct FBaseModelJustice
 {
-public:
 	static T* Deserialize(U* item)
+	{
+		T* newToken = NewObject<T>();
+		if (newToken->FromJson(item->ToJson()))
+		{
+			return newToken;
+		}
+		return nullptr;
+	}
+
+	static T* Deserialize(TSharedPtr<U> item)
 	{
 		T* newToken = NewObject<T>();
 		if (newToken->FromJson(item->ToJson()))
@@ -34,4 +43,3 @@ public:
 		return nullptr;
 	}
 };
-

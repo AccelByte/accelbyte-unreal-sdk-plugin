@@ -12,7 +12,6 @@
 
 struct FPrice : public FJsonSerializable
 {
-public:
 	int32	Value;
 	FString CurrencyCode;
 	FString CurrencyType;

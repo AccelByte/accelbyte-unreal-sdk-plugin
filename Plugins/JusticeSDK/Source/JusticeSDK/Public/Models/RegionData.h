@@ -11,8 +11,6 @@
 
 struct FRegionData : public FJsonSerializable
 {
-public:
-
     int32	Price;
     int32	DiscountPercentage;
     int32	DiscountAmount;

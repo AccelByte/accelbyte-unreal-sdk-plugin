@@ -8,7 +8,6 @@
 
 struct FPermissionJustice : public FJsonSerializable
 {
-public:
 	FString Resource;
 	int32	Action;
 

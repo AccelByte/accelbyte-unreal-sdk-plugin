@@ -10,7 +10,6 @@
 
 struct FPaymentURL : public FJsonSerializable
 {
-public:
     FString PaymentProvider ;
     FString PaymentURL ;
     FString PaymentToken  ;

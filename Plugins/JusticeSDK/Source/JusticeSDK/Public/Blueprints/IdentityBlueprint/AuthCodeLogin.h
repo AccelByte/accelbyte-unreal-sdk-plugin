@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "AuthCodeLogin.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FAuthCodeLoginOutputPin, const UOAuthTokenJustice*, Token, FString, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAuthCodeLoginOutputPin, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UAsyncAuthCodeLogin : public UBlueprintAsyncActionBase

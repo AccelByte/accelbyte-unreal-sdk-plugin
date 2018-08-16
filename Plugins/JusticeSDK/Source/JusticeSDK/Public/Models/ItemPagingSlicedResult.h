@@ -12,7 +12,6 @@
 
 struct FItemPagingSlicedResult : public FJsonSerializable
 {
-public:
 	TArray<FItemInfoJustice>	Data;
 	FPaging						Paging;
 

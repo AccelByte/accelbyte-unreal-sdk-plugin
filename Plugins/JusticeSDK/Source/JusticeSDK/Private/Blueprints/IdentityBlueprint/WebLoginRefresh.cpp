@@ -16,20 +16,19 @@ void UWebLoginRefresh::Activate()
 {
 	JusticeIdentity::SetRefreshToken(this->UserRefreshToken);
 	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
-		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
-		check(UToken);
+	
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(UToken, TEXT(""));
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(nullptr, ErrorStr);
+				OnFailed.Broadcast(ErrorStr);
 			}
 		}	
 	}));

@@ -526,10 +526,10 @@ void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetIte
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
-            FItemInfoJustice* Result = new FItemInfoJustice();
-			if (Result->FromJson(JsonObject))
+			FItemInfoJustice Result;
+			if (Result.FromJson(JsonObject))
 			{
-				OnComplete.ExecuteIfBound(true, TEXT(""), Result);
+				OnComplete.ExecuteIfBound(true, TEXT(""), &Result);
 			}
 			else
 			{

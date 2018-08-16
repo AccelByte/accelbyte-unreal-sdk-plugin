@@ -10,7 +10,6 @@
 
 struct FCurrencySummary : public FJsonSerializable
 {
-public:
     FString CurrencyCode;
     FString CurrencyType;
 	FString CurrencySymbol;

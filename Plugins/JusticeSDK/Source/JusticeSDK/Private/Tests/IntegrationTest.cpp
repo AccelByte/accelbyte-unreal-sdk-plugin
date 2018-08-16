@@ -14,6 +14,7 @@
 #include "Public/Services/JusticeTelemetry.h"
 #include "JusticeSDK.h"
 #include "JusticePlatform.h"
+#include <algorithm>
 
 DECLARE_LOG_CATEGORY_EXTERN(LogJusticeTest, Log, All);
 DEFINE_LOG_CATEGORY(LogJusticeTest);
@@ -29,10 +30,9 @@ bool FLoginSuccessTest::RunTest(const FString & Parameters)
 	FString Password = "123456";
 	bool isDone = false;
 	bool isLoginSuccess = false;
-
 	UE_LOG(LogJusticeTest, Log, TEXT("FLoginLatentCommand::Update()"));
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("FLoginLatentCommand::Update() Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
@@ -407,7 +407,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -796,7 +796,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token) 
+	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
@@ -2425,7 +2425,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, FOrderInfo *Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&bCreateOrderDone, &bCreateOrderSuccess](bool bSuccessful, FString ErrorStr, FOrderInfo* Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
@@ -2472,7 +2472,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 	FUserAuthTypeJustice AuthType = Email;
 	FString Language = "en";
 	FString Region = "US";
-	FOrderInfo* CreatedOrder = nullptr;
+    FOrderInfo* CreatedOrder = nullptr;
 	TArray<FCategory> RootCategory;
 	TArray<FCategory> ChildCategory;
 	TArray<FItemInfoJustice> ItemQuery;
@@ -2602,12 +2602,12 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 	
-	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOrderInfo *Result)
+	FOrderInfoCompleteDelegate OnCreateOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOrderInfo* Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Create New Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bCreateOrderDone = true;
 		bCreateOrderSuccess = bSuccessful;
-		if (bSuccessful) { CreatedOrder = Result; }
+		if (bSuccessful) { CreatedOrder = std::move(Result); }
 	});
 	JusticePurchase::CreateNewOrder(ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
 
@@ -2620,7 +2620,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FOrderInfoCompleteDelegate OnGetUserOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErroStr, FOrderInfo *Result)
+	FOrderInfoCompleteDelegate OnGetUserOrderComplete = FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErroStr, FOrderInfo* Result)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetUserOrderDone = true;

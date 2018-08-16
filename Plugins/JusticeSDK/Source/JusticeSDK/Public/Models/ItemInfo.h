@@ -15,7 +15,6 @@
 
 struct FItemInfoJustice : public FJsonSerializable
 {
-public:
 	FString				Title;
 	FString				Description;
 	FString				LongDescription;

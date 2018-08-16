@@ -16,9 +16,7 @@
 
 struct FTelemetryEvent : public FJsonSerializable
 {
-private:
 	int32	AgentType;
-public:
 	int32	AppID;
 	FString ClientID;
 	FString Data;

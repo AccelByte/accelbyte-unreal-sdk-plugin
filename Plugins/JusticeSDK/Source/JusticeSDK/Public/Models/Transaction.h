@@ -11,7 +11,6 @@
 
 struct FTransaction : public FJsonSerializable
 {
-public:
     FString             TransactionID;
     int32               Amount;
     int32               Vat;
