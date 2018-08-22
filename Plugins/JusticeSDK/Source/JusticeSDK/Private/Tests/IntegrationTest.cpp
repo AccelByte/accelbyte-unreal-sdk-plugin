@@ -32,13 +32,13 @@ bool FLoginSuccessTest::RunTest(const FString & Parameters)
 	bool isLoginSuccess = false;
 	UE_LOG(LogJusticeTest, Log, TEXT("FLoginLatentCommand::Update()"));
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("FLoginLatentCommand::Update() Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	double LastTime = FPlatformTime::Seconds();
 	while (!isDone)
@@ -71,13 +71,13 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -88,13 +88,13 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, "test", OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, "test", OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -105,13 +105,13 @@ bool FLoginFailedWrongPasswordTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
 		bTestSuccessful = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isDone)
@@ -161,13 +161,13 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -178,13 +178,13 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin("sdk@example.com", Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, "sdk@example.com", Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -195,13 +195,13 @@ bool FLoginFailedUnregisteredEmailTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isDone, &bTestSuccessful](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isDone = true;
 		bTestSuccessful = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isDone)
@@ -251,13 +251,13 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -268,13 +268,13 @@ bool FLogoutSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -338,7 +338,7 @@ bool FForgotPasswordSuccessTest::RunTest(const FString & Parameters)
 		isForgotPasswdDone = true;
 		isForgotPasswdSuccess = bSuccessful;
 	});
-	JusticeIdentity::ForgotPassword(LoginID, OnForgotPasswdComplete);
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, LoginID, OnForgotPasswdComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isForgotPasswdDone)
@@ -372,13 +372,13 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -396,7 +396,7 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 		isForgotPasswdDone = true;
 		isForgotPasswdSuccess = bSuccessful;
 	});
-	JusticeIdentity::ForgotPassword(LoginID, OnForgotPasswordResponse);
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, LoginID, OnForgotPasswordResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isForgotPasswdDone)
@@ -407,13 +407,13 @@ bool FForgotPasswordFailedEmailNotVerifiedTest::RunTest(const FString & Paramete
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -462,7 +462,7 @@ bool FForgotPasswordFailedInvalidUserTest::RunTest(const FString & Parameters)
 		isForgotPasswdDone = true;
 		isForgotPasswdSuccess = bSuccessful;
 	});
-	JusticeIdentity::ForgotPassword(LoginID, OnForgotPasswordResponse);
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, LoginID, OnForgotPasswordResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isForgotPasswdDone)
@@ -492,13 +492,13 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName,AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName,AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -509,13 +509,13 @@ bool FRegisterNewPlayerSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -566,13 +566,13 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 	double LastTime;
 
 	AddExpectedError(TEXT("OnRegisterNewPlayerResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -583,13 +583,13 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FRegisterPlayerCompleteDelegate OnRegisterPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterPlayerDone, &isRegisterPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterPlayerDone, &isRegisterPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterPlayerDone = true;
 		isRegisterPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -600,13 +600,13 @@ bool FRegisterNewPlayerFailedUserExistTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -651,13 +651,13 @@ bool FRegisterNewPlayerInvalidEmailTest::RunTest(const FString & Parameters)
 	double LastTime;
 
 	AddExpectedError(TEXT("OnRegisterNewPlayerResponse"), EAutomationExpectedErrorFlags::Contains, 1);
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -689,13 +689,13 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -706,13 +706,13 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -779,13 +779,13 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -796,13 +796,13 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -907,13 +907,13 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -924,13 +924,13 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1015,13 +1015,13 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -1032,13 +1032,13 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1110,13 +1110,13 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* UserCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerResponse = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -1127,13 +1127,13 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnUserLoginResponse = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnUserLoginResponse = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnUserLoginResponse);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnUserLoginResponse);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1326,13 +1326,13 @@ bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -1343,13 +1343,13 @@ bool FGetUserLinkedPlatformTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1423,13 +1423,13 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -1440,13 +1440,13 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1464,7 +1464,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		isLinkDevicePlatformDone = true;
 		isLinkDevicePlatformSuccess = bSuccessful;
 	});
-	JusticeIdentity::LinkPlatform(PlatformID, DeviceId, OnLinkDevicePlatformComplete);
+	JusticeIdentity::LinkPlatform(JusticeGameNamespace, PlatformID, DeviceId, OnLinkDevicePlatformComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLinkDevicePlatformDone)
@@ -1502,7 +1502,7 @@ bool FLinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		isUnlinkDevicePlatformDone = true;
 		isUnlinkDevicePlatformSuccess = bSuccessful;
 	});
-	JusticeIdentity::UnlinkPlatform("device", OnUnlinkDevicePlatformComplete);
+	JusticeIdentity::UnlinkPlatform(JusticeGameNamespace, "device", OnUnlinkDevicePlatformComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isUnlinkDevicePlatformDone)
@@ -1560,13 +1560,13 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 	bool isDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&isRegisterNewPlayerDone, &isRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isRegisterNewPlayerDone = true;
 		isRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isRegisterNewPlayerDone)
@@ -1577,13 +1577,13 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnComplete = FUserLoginCompleteDelegate::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnComplete = FUserLoginCompleteDelegate2::CreateLambda([&isLoginDone, &isLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isLoginDone = true;
 		isLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLoginDone)
@@ -1601,7 +1601,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		isLinkDevicePlatformDone = true;
 		isLinkDevicePlatformSuccess = bSuccessful;
 	});
-	JusticeIdentity::LinkPlatform(PlatformID, DeviceId, OnLinkDevicePlatformComplete);
+	JusticeIdentity::LinkPlatform(JusticeGameNamespace, PlatformID, DeviceId, OnLinkDevicePlatformComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isLinkDevicePlatformDone)
@@ -1618,7 +1618,7 @@ bool FUnlinkDevicePlatformSuccessTest::RunTest(const FString & Parameters)
 		isUnlinkDevicePlatformDone = true;
 		isUnlinkDevicePlatformSuccess = bSuccessful;
 	});
-	JusticeIdentity::UnlinkPlatform("device", OnUnlinkDevicePlatformComplete);
+	JusticeIdentity::UnlinkPlatform(JusticeGameNamespace, "device", OnUnlinkDevicePlatformComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isUnlinkDevicePlatformDone)
@@ -1826,14 +1826,14 @@ bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 1 User Login Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		check(bSuccessful);		
 	});
 	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 1 User Login Started..."));
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -1901,14 +1901,14 @@ bool FGetRootCategorySuccess::RunTest(const FString & Parameter)
 	bool bGetRootCategorySuccess = false;
 	double LastTime;
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 1 User Login Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		check(bSuccessful);
 	});
 	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 1 User Login Started..."));
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -1963,14 +1963,14 @@ bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 1 User Login Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		check(bSuccessful);
 	});
 	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 1 User Login Started..."));
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2053,7 +2053,7 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 1 UserLogin Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
@@ -2061,7 +2061,7 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 		check(bSuccessful);
 	});
 	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 1 UserLogin Started..."));
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2194,7 +2194,7 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 1 UserLogin Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
@@ -2202,7 +2202,7 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 		check(bSuccessful);
 	});
 	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 1 UserLogin Started..."));
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2319,13 +2319,13 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bRegisterNewPlayerDone = true;
 		bRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bRegisterNewPlayerDone)
@@ -2336,13 +2336,13 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		bLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2431,7 +2431,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		bCreateOrderDone = true;
 		bCreateOrderSuccess = bSuccessful;
 	});
-	JusticePurchase::CreateNewOrder(ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
+	JusticePurchase::CreateNewOrder(*FJusticeUserToken, 1, ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bCreateOrderDone)
@@ -2496,13 +2496,13 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bRegisterNewPlayerDone = true;
 		bRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bRegisterNewPlayerDone)
@@ -2513,13 +2513,13 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		bLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2609,7 +2609,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		bCreateOrderSuccess = bSuccessful;
 		if (bSuccessful) { CreatedOrder = std::move(Result); }
 	});
-	JusticePurchase::CreateNewOrder(ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
+	JusticePurchase::CreateNewOrder(*FJusticeUserToken, 1, ItemQuery[0].ItemID, ItemQuery[0].RegionDatas[0].Price, ItemQuery[0].RegionDatas[0].DiscountedPrice, ItemQuery[0].RegionDatas[0].CurrencyCode, OnCreateOrderComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bCreateOrderDone)
@@ -2682,13 +2682,13 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 	bool bDeleteSuccess = false;
 	double LastTime;
 
-	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, FUserCreateResponse* userCreateResponse)
+	FRegisterPlayerCompleteDelegate OnRegisterNewPlayerComplete = FRegisterPlayerCompleteDelegate::CreateLambda([&bRegisterNewPlayerDone, &bRegisterNewPlayerSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> userCreateResponse)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Register New Player Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bRegisterNewPlayerDone = true;
 		bRegisterNewPlayerSuccess = bSuccessful;
 	});
-	JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, LoginID, Password, DisplayName, AuthType, OnRegisterNewPlayerComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bRegisterNewPlayerDone)
@@ -2699,13 +2699,13 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FUserLoginCompleteDelegate OnLoginComplete = FUserLoginCompleteDelegate::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* token)
+	FUserLoginCompleteDelegate2 OnLoginComplete = FUserLoginCompleteDelegate2::CreateLambda([&bLoginDone, &bLoginSuccess](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> token)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login to get UserID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bLoginDone = true;
 		bLoginSuccess = bSuccessful;
 	});
-	JusticeIdentity::UserLogin(LoginID, Password, OnLoginComplete);
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, OnLoginComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bLoginDone)
@@ -2777,66 +2777,66 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 
 void FIntegrationTestModule::DeleteUser(FString UserID, FDeleteUserDelegate OnComplete)
 {
-	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
-	TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
+	//FString ErrorStr;
+	//TSharedRef<IJusticeHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	//TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
 
-	FString BaseURL = FJusticeSDKModule::Get().BaseURL;
-	FString Namespace = FJusticeSDKModule::Get().Namespace;
-	if (BaseURL == "" || Namespace == "") {
-		UE_LOG(LogJustice, Warning, TEXT("DeleteUser: URL or Namespace is empty"));
-	}
+	//FString BaseURL = FJusticeSDKModule::Get().BaseURL;
+	//FString Namespace = FJusticeSDKModule::Get().Namespace;
+	//if (BaseURL == "" || Namespace == "") {
+	//	UE_LOG(LogJustice, Warning, TEXT("DeleteUser: URL or Namespace is empty"));
+	//}
 
-	Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseURL, *Namespace, *UserID));
-	Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
-	Request->SetVerb(TEXT("DELETE"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
-	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
-	Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
-	Request->OnProcessRequestComplete().BindStatic(&FIntegrationTestModule::OnDeleteUserComplete, RequestTrace, OnComplete);
-	if (!Request->ProcessRequest())
-	{
-		ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
-	}
-	
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Warning, TEXT("DeleteUser failed. Error=%s"), *ErrorStr);
-	}
+	//Request->SetURL(FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseURL, *Namespace, *UserID));
+	//Request->SetHeader(TEXT("Authorization"), FJusticeHTTP::BearerAuth(FJusticeSDKModule::Get().GameClientToken->AccessToken));
+	//Request->SetVerb(TEXT("DELETE"));
+	//Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	//Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	//Request->SetHeader(TEXT("X-Amzn-TraceId"), RequestTrace->XRayTraceID());
+	//Request->OnProcessRequestComplete().BindStatic(&FIntegrationTestModule::OnDeleteUserComplete, RequestTrace, OnComplete);
+	//if (!Request->ProcessRequest())
+	//{
+	//	ErrorStr = FString::Printf(TEXT("request failed. URL=%s"), *Request->GetURL());
+	//}
+	//
+	//if (!ErrorStr.IsEmpty())
+	//{
+	//	UE_LOG(LogJustice, Warning, TEXT("DeleteUser failed. Error=%s"), *ErrorStr);
+	//}
 }
 
 void FIntegrationTestModule::OnDeleteUserComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FDeleteUserDelegate OnComplete)
 {
-	FString ErrorStr;
-	if (!bSuccessful || !Response.IsValid())
-	{
-		ErrorStr = TEXT("OnDeleteUserComplete: request failed");
-	}
-	else
-	{
-		switch (Response->GetResponseCode())
-		{
-		case EHttpResponseCodes::NoContent:
-		{
-			UE_LOG(LogJustice, Log, TEXT("OnDeleteUserComplete receive success response "));
-			OnComplete.ExecuteIfBound(true, TEXT(""));
-			break;
-		}
-		case EHttpResponseCodes::Forbidden:
-		{
-			ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
-			break;
-		}
-		case EHttpResponseCodes::NotFound:
-		{
-			ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
-			break;
-		}
-		}
-	}
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Error, TEXT("OnDeleteUserComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
-		OnComplete.ExecuteIfBound(false, ErrorStr);
-	}
+	//FString ErrorStr;
+	//if (!bSuccessful || !Response.IsValid())
+	//{
+	//	ErrorStr = TEXT("OnDeleteUserComplete: request failed");
+	//}
+	//else
+	//{
+	//	switch (Response->GetResponseCode())
+	//	{
+	//	case EHttpResponseCodes::NoContent:
+	//	{
+	//		UE_LOG(LogJustice, Log, TEXT("OnDeleteUserComplete receive success response "));
+	//		OnComplete.ExecuteIfBound(true, TEXT(""));
+	//		break;
+	//	}
+	//	case EHttpResponseCodes::Forbidden:
+	//	{
+	//		ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
+	//		break;
+	//	}
+	//	case EHttpResponseCodes::NotFound:
+	//	{
+	//		ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
+	//		break;
+	//	}
+	//	}
+	//}
+	//if (!ErrorStr.IsEmpty())
+	//{
+	//	UE_LOG(LogJustice, Error, TEXT("OnDeleteUserComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
+	//	OnComplete.ExecuteIfBound(false, ErrorStr);
+	//}
 }

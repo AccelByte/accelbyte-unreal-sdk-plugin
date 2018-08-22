@@ -16,6 +16,7 @@
 DECLARE_DELEGATE_ThreeParams(FCategoryDefaultCompleteDelegate, bool, FString, TArray<FCategory>);
 DECLARE_DELEGATE_ThreeParams(FGetItemCompleteDelegate, bool, FString, FItemInfoJustice*);
 DECLARE_DELEGATE_ThreeParams(FItemCompleteDelegate, bool, FString, TArray<FItemInfoJustice>);
+DECLARE_DELEGATE_ThreeParams(FItemIDCompleteDelegate, bool, FString, FItemInfoJustice*);
 
 class JUSTICESDK_API JusticeCatalog
 {
@@ -26,6 +27,8 @@ public:
 	static void GetDescendantCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete);
 	static void GetItem(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete);
 	static void GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
+	static void GetItemByCriteria(FString Namespace, FString AccessToken, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
+	static void GetEntitlementItemIDFromAppID(FString Token, FString Namespace, FItemIDCompleteDelegate OnComplete);
 
 private:
 	static void OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
@@ -34,4 +37,5 @@ private:
 	static void OnGetDescendantCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
 	static void OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete);
 	static void OnGetItemByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete);
+	static void OnItemIDResponse(FJusticeResponsePtr Response, FItemIDCompleteDelegate OnComplete);
 };

@@ -48,9 +48,10 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 		static FString GetUserId();
 
 	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
+		static FString GetPublisherUserId();
+
+	UFUNCTION(BlueprintPure, Category = "JusticeIdentityFunctions")
 		static bool IsHeadlessAccount() { return FJusticeSDKModule::Get().bHeadlessAccount; }
-
-
 
 
 	UFUNCTION(BlueprintCallable, Category = "JusticeWebBrowserFunctions")
@@ -79,6 +80,11 @@ class JUSTICESDK_API UJusticeIdentityFunctions : public UBlueprintFunctionLibrar
 
     UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
         static FString GetSteamNickName();
+
+
+	// utils functiom
+	//UFUNCTION(BlueprintCallable, Category = "JusticeIdentityFunctions")
+	//	static FString GetSteamNickName();
 
     
 

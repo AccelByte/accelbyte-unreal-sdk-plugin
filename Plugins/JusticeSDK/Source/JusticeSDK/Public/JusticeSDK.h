@@ -33,6 +33,7 @@ public:
 
 	bool ParseClientToken(FString json);
 	bool ParseUserToken(FString json);
+	bool ParsePublisherUserToken(FString json);
 
 	FString                                 BaseURL;
 	FString                                 Namespace;
@@ -62,6 +63,7 @@ public:
     FString                                 SteamAuthTicket;
     FString                                 SteamNickName;
     UTexture2D*                             Avatar;
+	bool                                    bClientCredentialReady;
 
 private:
 	FCriticalSection                        GameClientCritical;
@@ -76,7 +78,7 @@ private:
 #define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserID
 #define FJusticePublisherUserID FJusticeSDKModule::Get().PublisherUserToken->UserID
 #define FJusticeAppID FJusticeSDKModule::Get().AppID
-#define FJusticePublisherNamespace FJusticeSDKModule::Get().PublisherNamespace
+#define JusticePublisherNamespace FJusticeSDKModule::Get().PublisherNamespace
 
 #define FGooglePlatformURL FJusticeSDKModule::Get().GooglePlatformURL
 #define FGoogleRedirectURL FJusticeSDKModule::Get().GoogleRedirectURL

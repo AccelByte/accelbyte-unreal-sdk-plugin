@@ -24,7 +24,7 @@ void UAsyncAuthCodeLogin::Activate()
 {
 	if (this->AuthCode.Len() > 0)
 	{
-		JusticeIdentity::AuthCodeLogin(this->AuthCode, this->RedirectURI, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
+		JusticeIdentity::AuthCodeLogin(this->AuthCode, this->RedirectURI, FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token) {
 			if (bSuccessful)
 			{
 				if (OnSuccess.IsBound())

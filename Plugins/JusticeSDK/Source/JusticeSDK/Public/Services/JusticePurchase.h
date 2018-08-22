@@ -14,6 +14,7 @@
 #include "Models/OrderInfo.h"
 #include "Models/OrderInfoPaging.h"
 #include "Models/OrderHistoryInfo.h"
+#include "Models/OAuthTokenJustice.h"
 
 DECLARE_DELEGATE_ThreeParams(FOrderInfoCompleteDelegate, bool, FString, FOrderInfo*);
 DECLARE_DELEGATE_ThreeParams(FGetUserOrdersCompleteDelegate, bool, FString, TArray<FOrderInfo>);
@@ -23,7 +24,7 @@ class JUSTICESDK_API JusticePurchase
 {
 
 public:
-	static void CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete);
+	static void CreateNewOrder(FOAuthTokenJustice Token, int32 Quantity, FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete);
 	static void GetUserOrder(FString OrderNo, FOrderInfoCompleteDelegate OnComplete);
 	static void GetUserOrders(int32 Page, int32 Size, FGetUserOrdersCompleteDelegate OnComplete);
 	static void FulfillOrder(FString OrderNo, FOrderInfoCompleteDelegate OnComplete);

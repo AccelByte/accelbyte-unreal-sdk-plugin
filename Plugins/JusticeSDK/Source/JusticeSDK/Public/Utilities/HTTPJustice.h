@@ -8,7 +8,7 @@
 #include "HAL/ThreadSafeCounter.h"
 #include "UObject/CoreOnline.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
-#include "JusticeHttp.h"
+#include "Http.h"
 
 struct JusticeHttpRequest
 {
@@ -21,7 +21,7 @@ struct JusticeHttpRequest
 	int32 RetryAttempt;
 	float ElapsedTime;
 };
-typedef TSharedPtr<JusticeHttpRequest> FJusticeRequestPtr;
+typedef TSharedPtr<IHttpRequest> FJusticeRequestPtr;
 
 
 struct JusticeHttpResponse
@@ -31,8 +31,8 @@ struct JusticeHttpResponse
 	FString AmazonTraceID;
 	FString ErrorString;
 
-    FJusticeHttpRequestPtr Request;
-    FJusticeHttpResponsePtr Response;
+    FHttpRequestPtr Request;
+    FHttpResponsePtr Response;
 	bool bSuccessful;
 
     TSharedPtr<JusticeHttpRequest> JusticeRequest;

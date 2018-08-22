@@ -9,7 +9,7 @@
 
 void UJusticeIdentityFunctions::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::UserLogin(LoginID, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
+	JusticeIdentity::UserLogin(JusticeGameNamespace, LoginID, Password, FUserLoginCompleteDelegate2::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }
@@ -33,8 +33,8 @@ void UJusticeIdentityFunctions::UserLogout(FDefaultCompleteDynamicDelegate OnCom
 
 void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserID, FString Password, FString DisplayName, UUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::RegisterNewPlayer(UserID, Password, DisplayName, (FUserAuthTypeJustice)AuthType,
-		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FUserCreateResponse* Response) {
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, UserID, Password, DisplayName, (FUserAuthTypeJustice)AuthType,
+		FRegisterPlayerCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> Response) {
 		UUserCreateResponse* UResponse = UUserCreateResponse::Deserialize(Response);
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UResponse);
 	}));
@@ -43,7 +43,7 @@ void UJusticeIdentityFunctions::RegisterNewPlayer(FString UserID, FString Passwo
 
 void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserID, FString VerificationCode, UUserAuthTypeJustice AuthType, FDefaultCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::VerifyNewPlayer(UserID, VerificationCode, (FUserAuthTypeJustice)AuthType,
+	JusticeIdentity::VerifyNewPlayer(JusticeGameNamespace, UserID, VerificationCode, (FUserAuthTypeJustice)AuthType,
 		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
@@ -51,7 +51,7 @@ void UJusticeIdentityFunctions::VerifyNewPlayer(FString UserID, FString Verifica
 
 void UJusticeIdentityFunctions::ForgotPassword(FString LoginID, FDefaultCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::ForgotPassword(LoginID,
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, LoginID,
 		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
@@ -59,7 +59,7 @@ void UJusticeIdentityFunctions::ForgotPassword(FString LoginID, FDefaultComplete
 
 void UJusticeIdentityFunctions::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDynamicDelegate OnComplete)
 {
-	JusticeIdentity::ResetPassword(UserID, VerificationCode, NewPassword,
+	JusticeIdentity::ResetPassword(JusticeGameNamespace, UserID, VerificationCode, NewPassword,
 		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
 		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
@@ -68,6 +68,11 @@ void UJusticeIdentityFunctions::ResetPassword(FString UserID, FString Verificati
 FString UJusticeIdentityFunctions::GetUserId()
 {
 	return FJusticeUserID;
+}
+
+FString UJusticeIdentityFunctions::GetPublisherUserId()
+{
+	return FJusticePublisherUserID;
 }
 
 void UJusticeIdentityFunctions::ClearCacheAndLocalStorage()
@@ -141,7 +146,7 @@ FString UJusticeIdentityFunctions::GetPlatformRedirectURL(FString PlatformID)
 
 void UJusticeIdentityFunctions::LoginWithSteam(FUserLoginCompleteDynamicDelegate OnComplete)
 {
-    JusticeIdentity::LoginWithSteam(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
+    JusticeIdentity::LoginWithPlatform(JusticeGameNamespace, TEXT("steam"), JusticeIdentity::GetSteamAuthTicket(), FUserLoginCompleteDelegate2::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token) {
 
         if (GEngine)
         {

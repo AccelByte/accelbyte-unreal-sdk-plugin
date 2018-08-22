@@ -15,7 +15,7 @@ UAsyncLinkPlatform * UAsyncLinkPlatform::LinkPlatform(FString PlatformID, FStrin
 
 void UAsyncLinkPlatform::Activate()
 {
-	JusticeIdentity::LinkPlatform(this->PlatformID, this->Ticket, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::LinkPlatform(JusticeGameNamespace, this->PlatformID, this->Ticket, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

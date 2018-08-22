@@ -15,7 +15,7 @@ UAsyncVerifyNewPlayer * UAsyncVerifyNewPlayer::VerifyNewPlayer(FString UserID, F
 
 void UAsyncVerifyNewPlayer::Activate()
 {
-	JusticeIdentity::VerifyNewPlayer(this->UserID, this->VerificationCode, this->AuthType, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::VerifyNewPlayer(JusticeGameNamespace, this->UserID, this->VerificationCode, this->AuthType, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

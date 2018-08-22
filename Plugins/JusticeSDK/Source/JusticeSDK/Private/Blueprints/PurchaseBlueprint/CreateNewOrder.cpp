@@ -10,19 +10,20 @@
 #include "JusticeSDK.h"
 #include "JusticePurchase.h"
 
-UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency)
+UAsyncCreateNewOrder * UAsyncCreateNewOrder::CreateNewOrder(int32 Quantity, FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency)
 {
 	UAsyncCreateNewOrder* Node = NewObject<UAsyncCreateNewOrder>();
+	Node->Quantity = Quantity;
 	Node->ItemID = ItemID;
-	Node->Price = Price;
-	Node->DiscountedPrice = DiscountedPrice;
+	Node->Price = Price * Quantity;
+	Node->DiscountedPrice = DiscountedPrice * Quantity;
 	Node->Currency = Currency;
 	return Node;
 }
 
 void UAsyncCreateNewOrder::Activate() 
 {
-	JusticePurchase::CreateNewOrder(this->ItemID, this->Price, this->DiscountedPrice, this->Currency, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo* Order) {
+	JusticePurchase::CreateNewOrder(*FJusticeUserToken, this->Quantity, this->ItemID, this->Price, this->DiscountedPrice, this->Currency, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo* Order) {
 		if (bSuccessful)
 		{			
 			UOrderInfo* Result = UOrderInfo::Deserialize(Order);
