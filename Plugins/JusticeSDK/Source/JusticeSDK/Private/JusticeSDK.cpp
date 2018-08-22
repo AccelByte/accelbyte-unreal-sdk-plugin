@@ -37,7 +37,17 @@ void FJusticeSDKModule::StartupModule()
         UE_LOG(LogJustice, Error, TEXT("Missing RedirectURI = in [JusticeSDK] of DefaultEngine.ini"));
         IsInitialized = false;
     }
-    
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("AppId"), AppID, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing AppId = in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("PublisherNamespace"), PublisherNamespace, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing PublisherNamespace = in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
+
     if (!GConfig->GetArray(TEXT("Platform"), TEXT("SupportedPlatform"), SupportedPlatform, GEngineIni))
     {
         UE_LOG(LogJustice, Error, TEXT("Missing SupportedPlatform = in [Platform] of DefaultEngine.ini"));

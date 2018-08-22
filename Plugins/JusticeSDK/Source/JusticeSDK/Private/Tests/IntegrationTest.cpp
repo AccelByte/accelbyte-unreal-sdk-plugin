@@ -730,7 +730,7 @@ bool FCreateDefaultPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID,DisplayName, OnUpdatePlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnUpdatePlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -821,7 +821,7 @@ bool FCreateDefaultPlayerProfileFailedEmptyDisplayNameTest::RunTest(const FStrin
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, "", OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, "", OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -873,7 +873,7 @@ bool FCreateDefaultPlayerProfileFailedUnregisteredUserTest::RunTest(const FStrin
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -948,7 +948,7 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnUpdatePlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnUpdatePlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -959,13 +959,13 @@ bool FGetPlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
 		isGetPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::RequestCurrentPlayerProfile(OnGetPlayerProfileComplete);
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, OnGetPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isGetPlayerProfileDone)
@@ -1050,13 +1050,13 @@ bool FGetPlayerProfileSuccessUnregisteredUserTest::RunTest(const FString & Param
 	}
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfileComplete = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
 		isGetPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::RequestCurrentPlayerProfile(OnGetPlayerProfileComplete);
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, OnGetPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isGetPlayerProfileDone)
@@ -1151,7 +1151,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreatePlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreatePlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -1182,7 +1182,7 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 	newUserProfileinfo.DateOfBirth = "2018-05-23";
 	newUserProfileinfo.CustomAttributes = FJusticeSDKModule::Get().UserProfile->CustomAttributes;
 
-	JusticePlatform::UpdatePlayerProfile(newUserProfileinfo, OnUpdatePlayerProfileComplete);
+	JusticePlatform::UpdatePlayerProfile(*FJusticeUserToken, newUserProfileinfo, OnUpdatePlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isUpdatePlayerProfileDone)
@@ -1193,13 +1193,13 @@ bool FUpdatePlayerProfileSuccessTest::RunTest(const FString & Parameters)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
 		isGetPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::RequestCurrentPlayerProfile(OnGetPlayerProfile1Complete);
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, OnGetPlayerProfile1Complete);
 	
 	LastTime = FPlatformTime::Seconds();
 	while (!isGetPlayerProfileDone)
@@ -1253,7 +1253,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 		isCreateDefaultPlayerProfileDone = true;
 		isCreateDefaultPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isCreateDefaultPlayerProfileDone)
@@ -1276,7 +1276,7 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 	newUserProfileinfo.Email = LoginID;
 	newUserProfileinfo.DisplayName = "updated";
 
-	JusticePlatform::UpdatePlayerProfile(newUserProfileinfo, OnUpdatePlayerProfileComplete);
+	JusticePlatform::UpdatePlayerProfile(*FJusticeUserToken, newUserProfileinfo, OnUpdatePlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isUpdatePlayerProfileDone)
@@ -1287,13 +1287,13 @@ bool FUpdatePlayerProfileFailedInvalidRequestTest::RunTest(const FString & Param
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FReqestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetPlayerProfile1Complete = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&isGetPlayerProfileDone, &isGetPlayerProfileSuccess](bool bSuccessful, FString ErrorStr, FUserProfileInfo* userProfile)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Get Current Player Profile Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		isGetPlayerProfileDone = true;
 		isGetPlayerProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::RequestCurrentPlayerProfile(OnGetPlayerProfile1Complete);
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, OnGetPlayerProfile1Complete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!isGetPlayerProfileDone)
@@ -2414,7 +2414,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		bCreateUserProfileDone = true;
 		bCreateUserProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bCreateUserProfileDone)
@@ -2591,7 +2591,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		bCreateUserProfileDone = true;
 		bCreateUserProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bCreateUserProfileDone)
@@ -2723,7 +2723,7 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 		bCreateUserProfileDone = true;
 		bCreateUserProfileSuccess = bSuccessful;
 	});
-	JusticePlatform::CreateDefaultPlayerProfile(LoginID, DisplayName, OnCreateDefaultPlayerProfileComplete);
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, DisplayName, OnCreateDefaultPlayerProfileComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bCreateUserProfileDone)

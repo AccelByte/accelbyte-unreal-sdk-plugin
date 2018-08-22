@@ -13,7 +13,7 @@ UAsyncRequestCurrentPlayerProfile * UAsyncRequestCurrentPlayerProfile::RequestCu
 
 void UAsyncRequestCurrentPlayerProfile::Activate()
 {
-	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FUserProfileInfo* UserProfile) {
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FUserProfileInfo* UserProfile) {
 		if (bSuccessful)
 		{
 			UUserProfileJustice* ResultUserProfile = UUserProfileJustice::Deserialize(UserProfile);

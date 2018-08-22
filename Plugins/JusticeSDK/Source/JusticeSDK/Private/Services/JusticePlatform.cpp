@@ -6,10 +6,10 @@
 #include "JusticeSDK.h"
 #include "Services/JusticeIdentity.h"
 
-void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::RequestCurrentPlayerProfile(FOAuthTokenJustice Token, FRequestCurrentPlayerProfileCompleteDelegate OnComplete)
 {
-	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
+	FString Authorization	= FJusticeHTTP::BearerAuth(Token.AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
 	FString Verb			= GET;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
@@ -22,10 +22,10 @@ void JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCom
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, Token, OnComplete));
 }
 
-void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponsePtr Response, FReqestCurrentPlayerProfileCompleteDelegate OnComplete)
+void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeResponsePtr Response, FOAuthTokenJustice Token, FRequestCurrentPlayerProfileCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -60,15 +60,14 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	}
 	case EHttpResponseCodes::NotFound:
 	{			
-		FString DisplayName = FJusticeSDKModule::Get().UserToken->DisplayName;
-		FString Email = FJusticeSDKModule::Get().LoginID;
+		FString DisplayName = Token.DisplayName;		
 		UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
-		JusticePlatform::CreateDefaultPlayerProfile(Email, DisplayName, FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr) {
+		JusticePlatform::CreateDefaultPlayerProfile(Token, DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 			if (bSuccessful)
 			{
 				UE_LOG(LogJustice, Log, TEXT("Call another GetCurrentProfileRequest"));
-				JusticePlatform::RequestCurrentPlayerProfile(OnComplete);
+				JusticePlatform::RequestCurrentPlayerProfile(Token, OnComplete);
 			}
 			else
 			{
@@ -91,7 +90,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, *Token, OnComplete));
 				return;
 			}
 			else
@@ -120,7 +119,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnRequestCurrentPlayerProfileComplete, Token, OnComplete));
 		return;	
 	}
 	default:
@@ -134,14 +133,14 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 	}
 }
 
-void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete)
+void JusticePlatform::UpdatePlayerProfile(FOAuthTokenJustice Token, UserProfileInfoUpdate NewUserProfile, FDefaultCompleteDelegate OnComplete)
 {
-	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
+	FString Authorization	= FJusticeHTTP::BearerAuth(Token.AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
 	FString Verb			= PUT;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;
-	FString Payload			= newUserProfile.ToJson();
+	FString Payload			= NewUserProfile.ToJson();
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -153,7 +152,7 @@ void JusticePlatform::UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, 
 		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnUpdatePlayerProfileComplete, OnComplete));
 }
 
-void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
+void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -226,7 +225,7 @@ void JusticePlatform::OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Resp
 	}
 }
 
-void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayName, FDefaultCompleteDelegate OnComplete)
+void JusticePlatform::CreateDefaultPlayerProfile(FOAuthTokenJustice Token, FString DisplayName, FDefaultCompleteDelegate OnComplete)
 {
 	FString DefaultLocale;
 	#if PLATFORM_IOS
@@ -240,11 +239,11 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 	DefaultLocale.ParseIntoArray(RegionID, TEXT("_"), true);
 
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
 	FString Accept = TYPE_JSON;
-	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"country\": \"%s\", \"email\": \"%s\"}"), *DisplayName, *RegionID[1], *Email);
+	FString Payload = FString::Printf(TEXT("{\"displayName\": \"%s\", \"country\": \"%s\"}"), *DisplayName, *RegionID[1]);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -256,7 +255,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FString Email, FString DisplayN
 		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateDefaultPlayerProfileComplete, OnComplete));
 }
 
-void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
+void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

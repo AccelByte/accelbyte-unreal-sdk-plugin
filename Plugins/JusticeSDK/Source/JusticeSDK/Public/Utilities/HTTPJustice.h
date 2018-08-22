@@ -6,11 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "HAL/ThreadSafeCounter.h"
-
 #include "UObject/CoreOnline.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
-
-
+#include "JusticeHttp.h"
 
 struct JusticeHttpRequest
 {
@@ -20,12 +18,10 @@ struct JusticeHttpRequest
 	FString ContentType;
 	FString Accept;
 	FString Content;
-	//FWebRequestResponseDelegate OnResponse;
-
 	int32 RetryAttempt;
 	float ElapsedTime;
 };
-typedef TSharedPtr<JusticeHttpRequest> FJusticeHttpRequestPtr;
+typedef TSharedPtr<JusticeHttpRequest> FJusticeRequestPtr;
 
 
 struct JusticeHttpResponse
@@ -35,11 +31,11 @@ struct JusticeHttpResponse
 	FString AmazonTraceID;
 	FString ErrorString;
 
-	FHttpRequestPtr Request;
-	FHttpResponsePtr Response;
+    FJusticeHttpRequestPtr Request;
+    FJusticeHttpResponsePtr Response;
 	bool bSuccessful;
 
-	FJusticeHttpRequestPtr JusticeRequest;
+    TSharedPtr<JusticeHttpRequest> JusticeRequest;
 	int32 NextWait;
 
 	void UpdateRequestForNextRetry()
@@ -71,9 +67,9 @@ struct JusticeHttpResponse
 };
 
 
-typedef TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> FJusticeHttpResponsePtr;
+typedef TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> FJusticeResponsePtr;
 
-DECLARE_DELEGATE_OneParam(FWebRequestResponseDelegate, FJusticeHttpResponsePtr/* Response*/);
+DECLARE_DELEGATE_OneParam(FWebRequestResponseDelegate, FJusticeResponsePtr/* Response*/);
 
 class JUSTICESDK_API FJusticeHTTP
 {
@@ -83,7 +79,7 @@ public:
 	static FString BasicAuth(const FString& Username = TEXT(""), const FString& Password = TEXT(""));
 	static FString BearerAuth(const FString& Token);	
 	static void CreateRequest(FString Authorization, FString URL, FString Verb, FString ContentType, FString Accept, FString Content, FWebRequestResponseDelegate OnResponse);
-	static void CreateRequest(FJusticeHttpRequestPtr JusticeRequest, FWebRequestResponseDelegate OnResponse);	
+	static void CreateRequest(TSharedPtr<JusticeHttpRequest> JusticeRequest, FWebRequestResponseDelegate OnResponse);
 };
 
 #define TYPE_JSON TEXT("application/json")

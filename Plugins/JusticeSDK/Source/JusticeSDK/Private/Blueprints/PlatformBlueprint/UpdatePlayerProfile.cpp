@@ -37,7 +37,7 @@ void UAsyncUpdatePlayerProfile::Activate()
 	NewUserProfile.DateOfBirth = !DateOfBirth.IsEmpty() ? this->DateOfBirth : OldUserProfile->DateOfBirth;
 	NewUserProfile.CustomAttributes = CustomAttributes.Num()!=0 ? this->CustomAttributes : OldUserProfile->CustomAttributes;
 
-	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString) {
+	JusticePlatform::UpdatePlayerProfile(*FJusticeUserToken, NewUserProfile, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

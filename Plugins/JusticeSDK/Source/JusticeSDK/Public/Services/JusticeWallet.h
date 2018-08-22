@@ -22,6 +22,6 @@ public:
 	static void GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete);
 	
 private:
-	static void OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete);
+	static void OnGetWalletBalanceResponse(FJusticeResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete);
 };
 

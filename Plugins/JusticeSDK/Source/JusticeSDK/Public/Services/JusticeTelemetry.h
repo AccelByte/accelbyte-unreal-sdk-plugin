@@ -18,5 +18,5 @@ public:
 	static void SendTelemetryEvent(FTelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnComplete = nullptr);
 	
 private:
-	static void OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
+	static void OnSendTelemetryEventResponse(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 };

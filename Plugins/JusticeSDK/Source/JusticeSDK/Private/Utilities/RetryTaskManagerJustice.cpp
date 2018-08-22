@@ -52,7 +52,7 @@ void FRetryTaskManagerJustice::AddQueue(FJusticeRetryTask * NewTask)
 	InJusticeQueue.Add(NewTask);
 }
 
-void FRetryTaskManagerJustice::AddQueue(FJusticeHttpRequestPtr Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
+void FRetryTaskManagerJustice::AddQueue(TSharedPtr<JusticeHttpRequest> Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
 {
 	UE_LOG(LogJustice, Log, TEXT("Add Retry Queue : %s"), *Request->URL);
 	FWebRequestTask* newTask = new FWebRequestTask(Request, WaitTime, ReponseDelegate);

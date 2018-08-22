@@ -27,7 +27,7 @@ void JusticeTelemetry::SendTelemetryEvent(FTelemetryEvent Telemetry, FDefaultCom
 		FWebRequestResponseDelegate::CreateStatic(JusticeTelemetry::OnSendTelemetryEventResponse, OnComplete));
 }
 
-void JusticeTelemetry::OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete)
+void JusticeTelemetry::OnSendTelemetryEventResponse(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -38,6 +38,7 @@ void JusticeTelemetry::OnSendTelemetryEventResponse(FJusticeHttpResponsePtr Resp
 	}
 	switch (Response->Code)
 	{
+	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::NoContent:
 	{
 		UE_LOG(LogJustice, VeryVerbose, TEXT("OnSendTelemetryEventComplete: Operation succeeded"));
