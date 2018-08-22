@@ -12,7 +12,6 @@
 
 struct FWalletInfo : public FJsonSerializable
 {
-public:
 	FString ID;
 	FString Namespace;
 	FString UserID;

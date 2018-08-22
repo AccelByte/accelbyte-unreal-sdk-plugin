@@ -34,28 +34,29 @@ public:
 	bool ParseClientToken(FString json);
 	bool ParseUserToken(FString json);
 
-	FString BaseURL;
-	FString Namespace;
-	FString ClientID;
-	FString ClientSecret;
-	class FRunnableThread* OnlineAsyncTaskThread;
-	class FRunnableThread* RetryAsyncTaskThread;
-	FString GooglePlatformURL;
-	FString GoogleRedirectURL;
-	FString FacebookPlatformURL;
-	FString FacebookRedirectURL;
-
-	FOAuthTokenJustice*	GameClientToken;
-	FOAuthTokenJustice* UserToken;
-	FString LoginID;
-	bool bHeadlessAccount;
-	FString Password;
-	FUserProfileInfo* UserProfile;
-	FAsyncTaskManagerJustice* AsyncTaskManager;
-	FRetryTaskManagerJustice* RetryTaskManager;
+	FString                                 BaseURL;
+	FString                                 Namespace;
+	FString                                 ClientID;
+	FString                                 ClientSecret;
+	class FRunnableThread*                  OnlineAsyncTaskThread;
+	class FRunnableThread*                  RetryAsyncTaskThread;
+	FString                                 GooglePlatformURL;
+	FString                                 GoogleRedirectURL;
+	FString                                 FacebookPlatformURL;
+	FString                                 FacebookRedirectURL;
+	FString                                 RedirectURI;
+	TArray<FString>                         SupportedPlatform;
+	TSharedPtr<FOAuthTokenJustice>          GameClientToken;
+	TSharedPtr<FOAuthTokenJustice>          UserToken;
+	FString                                 LoginID;
+	bool                                    bHeadlessAccount;
+	FString                                 Password;
+	TSharedPtr<FUserProfileInfo>            UserProfile;
+	TSharedPtr<FAsyncTaskManagerJustice>    AsyncTaskManager;
+	TSharedPtr<FRetryTaskManagerJustice>    RetryTaskManager;
 
 private:
-	FCriticalSection GameClientCritical;
+	FCriticalSection                        GameClientCritical;
 };
 
 #define FJusticeRetryManager FJusticeSDKModule::Get().RetryTaskManager

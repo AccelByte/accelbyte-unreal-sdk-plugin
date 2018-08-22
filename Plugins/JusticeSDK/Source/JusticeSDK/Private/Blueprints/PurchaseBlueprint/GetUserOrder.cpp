@@ -19,7 +19,7 @@ UAsyncGetUserOrder * UAsyncGetUserOrder::GetUserOrder(FString OrderNo)
 
 void UAsyncGetUserOrder::Activate()
 {
-	JusticePurchase::GetUserOrder(this->OrderNo, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo *Order) {
+	JusticePurchase::GetUserOrder(this->OrderNo, FOrderInfoCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorString, FOrderInfo* Order) {
 		if (bSuccessful)
 		{			
 			UOrderInfo* Result = UOrderInfo::Deserialize(Order);

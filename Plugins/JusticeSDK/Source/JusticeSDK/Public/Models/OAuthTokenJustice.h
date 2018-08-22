@@ -11,11 +11,9 @@
 #include "Misc/DateTime.h"
 #include "JusticeLog.h"
 #include "JusticeBaseModel.h"
-#include "OAuthTokenJustice.generated.h"
 
 struct FOAuthTokenJustice: public FJsonSerializable
 {
-public:
 	FString						AccessToken;
 	FString						UserRefreshToken;
 	FString						TokenType;
@@ -30,8 +28,8 @@ public:
 	FDateTime					NextTokenRefreshUTC;
 	FTimespan					TokenRefreshBackoff;
 	int32						JFlags;
-public:
-	FOAuthTokenJustice():
+
+    FOAuthTokenJustice():
 		ExpiresIn(0),
 		LastTokenRefreshUTC(FDateTime::MinValue()),
 		NextTokenRefreshUTC(FDateTime::MinValue()),
@@ -87,31 +85,4 @@ public:
 		JSON_SERIALIZE("display_name", DisplayName);
 		JSON_SERIALIZE("namespace", Namespace);
 	END_JSON_SERIALIZER
-};
-
-UCLASS()
-class UOAuthTokenJustice : public UObject, public FOAuthTokenJustice, public FBaseModelJustice<UOAuthTokenJustice, FOAuthTokenJustice>
-{
-	GENERATED_BODY()
-public:
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetAccessToken() { return AccessToken; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetRefreshToken() { return UserRefreshToken; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetTokenType() { return TokenType; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetUserId() { return UserID; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetDisplayName() { return DisplayName; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetNamespace() { return Namespace; };
-
-	UFUNCTION(BlueprintCallable, Category = "OAuthTokenJustice")
-		FString GetRoles(int32 Index) { return Roles[Index]; };
 };

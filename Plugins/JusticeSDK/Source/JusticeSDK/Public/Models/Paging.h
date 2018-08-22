@@ -11,7 +11,6 @@
 
 struct FPaging : public FJsonSerializable
 {
-public:
     FString Previous;
     FString Next;
 

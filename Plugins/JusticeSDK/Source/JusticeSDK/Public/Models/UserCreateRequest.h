@@ -10,7 +10,6 @@
 
 struct FUserCreateRequest : public FJsonSerializable
 {
-public:
 	FUserCreateRequest(){}
 
 	FString AuthType;

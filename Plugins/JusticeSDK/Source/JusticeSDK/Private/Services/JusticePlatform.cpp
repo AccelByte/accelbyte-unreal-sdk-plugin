@@ -45,7 +45,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponse
 		{
 			if (FJusticeSDKModule::Get().UserProfile->FromJson(JsonObject))
 			{
-				OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeSDKModule::Get().UserProfile);
+				OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeSDKModule::Get().UserProfile.Get());
 			}
 			else
 			{
@@ -342,7 +342,7 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeHttpResponseP
 	}
 }
 
-FUserProfileInfo * JusticePlatform::GetUserProfileInfo()
+TSharedPtr<FUserProfileInfo> JusticePlatform::GetUserProfileInfo()
 {
 	return FJusticeSDKModule::Get().UserProfile;
 }

@@ -12,7 +12,6 @@
 
 struct FCategory : public FJsonSerializable
 {
-public:
 	FString Namespace;
 	FString ParentCategoryPath;
 	FString CategoryPath;

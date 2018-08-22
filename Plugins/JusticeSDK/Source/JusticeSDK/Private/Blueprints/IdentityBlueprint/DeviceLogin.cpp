@@ -18,14 +18,14 @@ void UAsyncDeviceLogin::Activate()
 		{
 			if (OnSuccess.IsBound())
 			{
-				OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token), TEXT(""));
+				OnSuccess.Broadcast(TEXT(""));
 			}
 		}
 		else
 		{
 			if (OnFailed.IsBound())
 			{
-				OnFailed.Broadcast(nullptr, ErrorStr);
+				OnFailed.Broadcast(ErrorStr);
 			}
 		}
 	}));

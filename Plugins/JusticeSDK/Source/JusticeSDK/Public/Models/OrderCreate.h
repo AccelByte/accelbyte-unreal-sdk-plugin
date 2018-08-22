@@ -10,8 +10,6 @@
 
 struct FOrderCreate : public FJsonSerializable
 {
-public:
-
     FString ItemID;
 	int32	Quantity;
     int32	Price;

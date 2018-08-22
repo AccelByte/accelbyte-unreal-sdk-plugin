@@ -44,10 +44,10 @@ void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response,
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		FOrderInfo* Info = new FOrderInfo();		
-		if (Info->FromJson(Response->Content))
+		FOrderInfo Info;		
+		if (Info.FromJson(Response->Content))
 		{
-			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
+			OnComplete.ExecuteIfBound(true, TEXT(""), &Info);
 		}
 		else
 		{
@@ -147,10 +147,10 @@ void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, F
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		FOrderInfo* Info = new FOrderInfo();
-		if (Info->FromJson(Response->Content))
+		FOrderInfo Info;
+		if (Info.FromJson(Response->Content))
 		{
-			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
+			OnComplete.ExecuteIfBound(true, TEXT(""), &Info);
 		}
 		else
 		{
@@ -370,10 +370,10 @@ void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, F
 	case EHttpResponseCodes::Ok:
 	case EHttpResponseCodes::Created:
 	{
-		FOrderInfo* Info = new FOrderInfo();
-		if (Info->FromJson(Response->Content))
+		FOrderInfo Info;
+		if (Info.FromJson(Response->Content))
 		{
-			OnComplete.ExecuteIfBound(true, TEXT(""), Info);
+			OnComplete.ExecuteIfBound(true, TEXT(""), &Info);
 		}
 		else
 		{

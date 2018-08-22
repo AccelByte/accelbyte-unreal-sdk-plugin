@@ -12,7 +12,6 @@
 
 struct FLinkedPlatform : public FJsonSerializable
 {
-public:
 	FString PlatformID;
 	FString PlatformUserID;
 	FString Namespace;

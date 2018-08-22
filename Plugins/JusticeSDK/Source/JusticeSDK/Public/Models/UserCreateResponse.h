@@ -13,7 +13,6 @@
 
 struct FUserCreateResponse: public FJsonSerializable
 {
-public:
 	FString Namespace;
 	FString UserID;
 	FString AuthType;

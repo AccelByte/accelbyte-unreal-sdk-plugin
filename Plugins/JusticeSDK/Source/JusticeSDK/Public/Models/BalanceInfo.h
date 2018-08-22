@@ -11,7 +11,6 @@
 
 struct FBalanceInfo: public FJsonSerializable
 {
-public:
 	FString	ID;
 	FString	WalletID;
 	FString	CurrencyCode;

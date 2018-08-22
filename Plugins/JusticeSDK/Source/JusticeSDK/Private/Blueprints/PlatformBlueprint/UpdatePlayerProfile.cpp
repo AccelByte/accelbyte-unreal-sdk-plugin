@@ -21,7 +21,7 @@ UAsyncUpdatePlayerProfile * UAsyncUpdatePlayerProfile::UpdatePlayerProfile(FStri
 
 void UAsyncUpdatePlayerProfile::Activate()
 {
-	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
+	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile.Get();
 	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? this->DisplayName : OldUserProfile->DisplayName;

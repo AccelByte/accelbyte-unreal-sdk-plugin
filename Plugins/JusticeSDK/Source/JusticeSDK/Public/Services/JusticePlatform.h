@@ -22,7 +22,7 @@ public:
 	static void RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
     static void UpdatePlayerProfile(UserProfileInfoUpdate newUserProfile, FDefaultCompleteDelegate OnComplete);
 	static void CreateDefaultPlayerProfile(FString Email, FString DisplayName, FDefaultCompleteDelegate OnComplete);
-	static FUserProfileInfo* GetUserProfileInfo();
+	static TSharedPtr<FUserProfileInfo> GetUserProfileInfo();
 private:
 	static void OnRequestCurrentPlayerProfileComplete(FJusticeHttpResponsePtr Response, FReqestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static void OnUpdatePlayerProfileComplete(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);

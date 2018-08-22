@@ -11,7 +11,6 @@
 
 struct FImage : public FJsonSerializable
 {
-public:
 	int32	Height;
 	int32	Width;
 	FString ImageURL;

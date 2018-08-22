@@ -10,9 +10,7 @@
 void UJusticeIdentityFunctions::UserLogin(FString LoginID, FString Password, FUserLoginCompleteDynamicDelegate OnComplete)
 {
 	JusticeIdentity::UserLogin(LoginID, Password, FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
-		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
-		check(UToken);
-		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UToken);
+		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }
 
@@ -20,9 +18,7 @@ void UJusticeIdentityFunctions::WebLoginRefresh(FString UserRefreshToken, FUserL
 {
 	JusticeIdentity::SetRefreshToken(UserRefreshToken);
 	JusticeIdentity::UserRefreshToken(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
-		UOAuthTokenJustice* UToken = UOAuthTokenJustice::Deserialize(Token);
-		check(UToken);
-		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr, UToken);
+		OnComplete.ExecuteIfBound(bSuccessful, ErrorStr);
 	}));
 }
 
@@ -69,25 +65,10 @@ void UJusticeIdentityFunctions::ResetPassword(FString UserID, FString Verificati
 	}));
 }
 
-UOAuthTokenJustice * UJusticeIdentityFunctions::GetUserToken()
-{
-	UOAuthTokenJustice* NewOAuthTokenJustice = UOAuthTokenJustice::Deserialize(FJusticeUserToken);
-	check(NewOAuthTokenJustice);
-	return NewOAuthTokenJustice; 
-}
-
-UOAuthTokenJustice * UJusticeIdentityFunctions::GetClientToken()
-{
-	UOAuthTokenJustice* NewOAuthTokenJustice = UOAuthTokenJustice::Deserialize(FJusticeGameClientToken);
-	check(NewOAuthTokenJustice);
-	return NewOAuthTokenJustice; 
-}
-
 FString UJusticeIdentityFunctions::GetUserId()
 {
 	return FJusticeUserID;
 }
-
 
 void UJusticeIdentityFunctions::ClearCacheAndLocalStorage()
 {
@@ -116,20 +97,14 @@ TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetUnlinkedPlatforms(TArray<
 
 TArray<ULinkedPlatform*> UJusticeIdentityFunctions::GetCompleteListOfPlatforms()
 {
-    TArray<FLinkedPlatform> CompletePlatforms = { 
-        FLinkedPlatform("device"), 
-        FLinkedPlatform("google"), 
-        FLinkedPlatform("facebook"),
-        FLinkedPlatform("twitch"),
-        FLinkedPlatform("twitter"),
-    };
-	TArray<ULinkedPlatform*> UCompletePlatforms;
-	for (int32 i = 0; i < CompletePlatforms.Num(); i++)
+	TArray<ULinkedPlatform*> Result;
+	for (int32 i = 0; i < FJusticeSDKModule::Get().SupportedPlatform.Num(); i++)
 	{
-		ULinkedPlatform* platform = ULinkedPlatform::Deserialize(CompletePlatforms[i]);
-		UCompletePlatforms.Add(platform);
+        FLinkedPlatform CurrentPlatformString(FJusticeSDKModule::Get().SupportedPlatform[i]);
+		ULinkedPlatform* Platform = ULinkedPlatform::Deserialize(CurrentPlatformString);
+		Result.Add(Platform);
 	}
-	return UCompletePlatforms;
+	return Result;
 }
 
 FString UJusticeIdentityFunctions::GetPlatformPageURL(FString PlatformID)

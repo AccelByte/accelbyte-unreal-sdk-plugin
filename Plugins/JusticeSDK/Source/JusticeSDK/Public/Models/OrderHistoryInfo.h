@@ -12,7 +12,6 @@
 
 struct FOrderHistoryInfo : public FJsonSerializable
 {
-public:
 	FOrderHistoryInfo() {}
 
 	FString OrderNo;

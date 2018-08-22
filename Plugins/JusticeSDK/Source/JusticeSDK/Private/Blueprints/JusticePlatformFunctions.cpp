@@ -21,7 +21,7 @@ void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestComple
 
 void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString FirstName, FString LastName, FString Country, FString AvatarURL, FString Language, FString Timezone, FUpdatePlayerProfileCompleteDynamicDelegate OnComplete)
 {
-	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile;
+	FUserProfileInfo* OldUserProfile = FJusticeSDKModule::Get().UserProfile.Get();
 	UserProfileInfoUpdate NewUserProfile;
 
 	NewUserProfile.DisplayName = !DisplayName.IsEmpty() ? DisplayName : OldUserProfile->DisplayName;

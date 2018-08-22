@@ -16,7 +16,7 @@ UAsyncAuthCodeLogin * UAsyncAuthCodeLogin::AuthCodeLogin()
 
 	UAsyncAuthCodeLogin* Node = NewObject<UAsyncAuthCodeLogin>();
 	Node->AuthCode = FString(AuthCode);
-	Node->RedirectURI = TEXT("https://accelbyte.net/");
+	Node->RedirectURI = FJusticeSDKModule::Get().RedirectURI;
 	return Node;
 }
 
@@ -29,21 +29,21 @@ void UAsyncAuthCodeLogin::Activate()
 			{
 				if (OnSuccess.IsBound())
 				{
-					OnSuccess.Broadcast(UOAuthTokenJustice::Deserialize(Token), TEXT(""));
+					OnSuccess.Broadcast(TEXT(""));
 				}
 			}
 			else
 			{
 				if (OnFailed.IsBound())
 				{
-					OnFailed.Broadcast(nullptr, ErrorStr);
+					OnFailed.Broadcast(ErrorStr);
 				}
 			}
 		}));
 	}
 	else
 	{
-		OnFailed.Broadcast(nullptr, TEXT("No auth code was provided"));
+		OnFailed.Broadcast(TEXT("No auth code was provided"));
 	}
 
 }

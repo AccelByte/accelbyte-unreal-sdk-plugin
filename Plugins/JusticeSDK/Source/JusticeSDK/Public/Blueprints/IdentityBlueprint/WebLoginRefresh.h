@@ -9,7 +9,7 @@
 #include "Models/OAuthTokenJustice.h"
 #include "WebLoginRefresh.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWebLoginRefreshOutputPin, const UOAuthTokenJustice*, Token, FString, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWebLoginRefreshOutputPin, FString, ErrorMessage);
 
 UCLASS()
 class JUSTICESDK_API UWebLoginRefresh : public UBlueprintAsyncActionBase
