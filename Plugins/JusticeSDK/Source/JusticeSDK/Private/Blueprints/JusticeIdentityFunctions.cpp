@@ -138,3 +138,34 @@ FString UJusticeIdentityFunctions::GetPlatformRedirectURL(FString PlatformID)
 
 	return RedirectURL;
 }
+
+void UJusticeIdentityFunctions::LoginWithSteam(FUserLoginCompleteDynamicDelegate OnComplete)
+{
+    JusticeIdentity::LoginWithSteam(FUserLoginCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* Token) {
+
+        if (GEngine)
+        {
+            if (bSuccessful)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("UJusticeIdentityFunctions::LoginWithSteam Successfull"));
+            }                
+            else
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("UJusticeIdentityFunctions::LoginWithSteam FAILED"));
+                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, *ErrorStr);
+            }
+        }
+
+        OnComplete.Execute(bSuccessful, ErrorStr);
+    }));
+}
+
+UTexture2D * UJusticeIdentityFunctions::GetSteamAvatar()
+{
+    return JusticeIdentity::GetAvatar();
+}
+
+FString UJusticeIdentityFunctions::GetSteamNickName()
+{
+    return JusticeIdentity::GetSteamNickName();
+}

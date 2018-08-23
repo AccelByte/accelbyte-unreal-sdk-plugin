@@ -4,6 +4,9 @@
 
 #include "JusticeSDKDemoGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
+THIRD_PARTY_INCLUDES_START
+#include "steam/steam_api.h"
+THIRD_PARTY_INCLUDES_END
 
 
 AJusticeSDKDemoGameModeBase::AJusticeSDKDemoGameModeBase()
@@ -13,12 +16,24 @@ AJusticeSDKDemoGameModeBase::AJusticeSDKDemoGameModeBase()
 void AJusticeSDKDemoGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
+
+	OnlineSub = IOnlineSubsystem::Get();
+	check(OnlineSub);
+	Identity = OnlineSub->GetIdentityInterface();
+
+	// Setup Login delegates
+	LoginCompleteHandle = Identity->AddOnLoginCompleteDelegate_Handle(
+		0,
+		FOnLoginCompleteDelegate::CreateUObject(this, &AJusticeSDKDemoGameModeBase::OnLoginCompleteDelegate));
 }
 
 void AJusticeSDKDemoGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	JusticeIdentity::ClientLogin();
+	FOnlineAccountCredentials* NewAccount = new FOnlineAccountCredentials;
+	NewAccount->Id = "480";
+	Identity->Login(0, *NewAccount);
 
 	FTelemetryEventDataExample TelemetryData;
 	TelemetryData.ExampleField1 = 256;
@@ -55,4 +70,47 @@ void AJusticeSDKDemoGameModeBase::Tick(float DeltaSeconds)
 {
 }
 
+void AJusticeSDKDemoGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr)
+{
+	FString SteamTicket = Identity->GetAuthToken(0);
+	FString SteamDislayName = Identity->GetPlayerNickname(0);
+	JusticeIdentity::SetSteamAuthTicket(SteamTicket);
+	JusticeIdentity::SetSteamNickName(SteamDislayName);
+	
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, SteamTicket);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, UserId.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, SteamDislayName);
+	}
 
+	uint32 Width;
+	uint32 Height;
+
+	if (SteamAPI_Init())
+	{
+		//Getting the PictureID from the SteamAPI and getting the Size with the ID
+		int Picture = SteamFriends()->GetMediumFriendAvatar(SteamUser()->GetSteamID());
+		SteamUtils()->GetImageSize(Picture, &Width, &Height);
+		if (Width > 0 && Height > 0)
+		{
+			BYTE *oAvatarRGBA = new BYTE[Width * Height * 4];
+			SteamUtils()->GetImageRGBA(Picture, (uint8*)oAvatarRGBA, 4 * Height * Width * sizeof(char));
+			//Swap R and B channels 
+			for (uint32 i = 0; i < (Width * Height * 4); i += 4)
+			{
+				uint8 Temp = oAvatarRGBA[i + 0];
+				oAvatarRGBA[i + 0] = oAvatarRGBA[i + 2];
+				oAvatarRGBA[i + 2] = Temp;
+			}
+			UTexture2D* Avatar = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8);
+			uint8* MipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+			FMemory::Memcpy(MipData, (void*)oAvatarRGBA, Height * Width * 4);
+			Avatar->PlatformData->Mips[0].BulkData.Unlock();
+			Avatar->PlatformData->NumSlices = 1;
+			Avatar->NeverStream = true;
+			Avatar->UpdateResource();
+			JusticeIdentity::SetAvatar(Avatar);
+		}
+	}
+}

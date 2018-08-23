@@ -55,6 +55,11 @@ public:
 	TSharedPtr<FAsyncTaskManagerJustice>    AsyncTaskManager;
 	TSharedPtr<FRetryTaskManagerJustice>    RetryTaskManager;
 
+    // Steam Specific
+    FString                                 SteamAuthTicket;
+    FString                                 SteamNickName;
+    UTexture2D*                             Avatar;
+
 private:
 	FCriticalSection                        GameClientCritical;
 };
@@ -62,7 +67,7 @@ private:
 #define FJusticeRetryManager FJusticeSDKModule::Get().RetryTaskManager
 #define FJusticeRefreshManager FJusticeSDKModule::Get().AsyncTaskManager
 #define FJusticeBaseURL FJusticeSDKModule::Get().BaseURL
-#define FJusticeNamespace FJusticeSDKModule::Get().Namespace
+#define JusticeGameNamespace FJusticeSDKModule::Get().Namespace
 #define FJusticeUserToken FJusticeSDKModule::Get().UserToken
 #define FJusticeGameClientToken FJusticeSDKModule::Get().GameClientToken
 #define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserID

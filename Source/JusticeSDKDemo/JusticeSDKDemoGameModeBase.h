@@ -25,5 +25,13 @@ class JUSTICESDKDEMO_API AJusticeSDKDemoGameModeBase : public AGameModeBase
 	void BeginPlay();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 	virtual void Tick(float DeltaSeconds) override;
+
+private:
+	const IOnlineSubsystem* OnlineSub;
+	IOnlineIdentityPtr Identity;
+	FDelegateHandle LoginCompleteHandle;
+	
+
+	void OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr);
 };
 

@@ -58,6 +58,18 @@ public:
 	static void ClientRefreshToken();
 	static void SetRefreshToken(FString UserRefreshToken);
 
+    static void LoginWithPlatfrom(FString PlatformID, FString Token, FUserLoginCompleteDelegate OnComplete);
+
+    // Steam Specific
+    static void LoginWithSteam(FUserLoginCompleteDelegate OnComplete);
+    static void LoginWithSteam(FString Ticket, FUserLoginCompleteDelegate OnComplete);
+    static void SetSteamAuthTicket(FString ticket);
+    static void SetSteamNickName(FString nickname);
+    static void SetAvatar(UTexture2D* avatar);
+    static FString GetSteamAuthTicket();
+    static FString GetSteamNickName();
+    static UTexture2D* GetAvatar();
+
 private:
 	static void OnDeviceLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 	static void OnUserLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
@@ -75,4 +87,6 @@ private:
 	static void OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 	static void OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 	static void OnUpgradeHeadlessAccountResponse(FJusticeHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete, FString LoginID);
+
+    static void OnPlatformLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 };

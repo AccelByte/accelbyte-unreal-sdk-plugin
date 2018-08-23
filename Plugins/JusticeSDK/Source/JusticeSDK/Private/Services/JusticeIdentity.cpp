@@ -12,7 +12,7 @@ FCriticalSection Mutex;
 void JusticeIdentity::ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *FJusticeBaseURL, *FJusticeNamespace);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *FJusticeBaseURL, *JusticeGameNamespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_FORM;
 	FString Accept          = TYPE_JSON;
@@ -123,7 +123,7 @@ void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FS
 	resetPasswordRequest.NewPassword = NewPassword;
 
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *FJusticeBaseURL, *FJusticeNamespace);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *FJusticeBaseURL, *JusticeGameNamespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_FORM;
 	FString Accept          = TYPE_JSON;
@@ -345,7 +345,7 @@ void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
 	check(!deviceID.IsEmpty() && "Cannot get Device ID");
 
 	FString Authorization   = FJusticeHTTP::BasicAuth();
-	FString URL             = FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/platforms/device/token"), *FJusticeBaseURL, *FJusticeNamespace);;	
+	FString URL             = FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/platforms/device/token"), *FJusticeBaseURL, *JusticeGameNamespace);;	
 	FString Verb            = POST;
 	FString ContentType     = TYPE_FORM;
 	FString Accept          = TYPE_JSON;
@@ -585,10 +585,132 @@ void JusticeIdentity::SetRefreshToken(FString UserRefreshToken)
 	FJusticeUserToken->UserRefreshToken = UserRefreshToken;
 }
 
+void JusticeIdentity::LoginWithPlatfrom(FString PlatformID, FString Token, FUserLoginCompleteDelegate OnComplete)
+{
+    FScopeLock Lock(&Mutex);
+
+    FString Namespace      = JusticeGameNamespace; 
+    FString Authorization  = FJusticeHTTP::BasicAuth();
+    FString URL            = FString::Printf(TEXT("%s/iam/oauth/platforms/%s/token"), *FJusticeSDKModule::Get().BaseURL, *PlatformID);
+    FString Verb           = POST;
+    FString ContentType    = TYPE_FORM;
+    FString Accept         = TYPE_JSON;
+    FString Payload        = FString::Printf(TEXT("platform_token=%s&namespace=%s"), *Token, *Namespace);
+
+    FJusticeHTTP::CreateRequest(Authorization,
+        URL,
+        Verb,
+        ContentType,
+        Accept,
+        Payload,
+        FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnPlatformLoginResponse, OnComplete));
+}
+
+void JusticeIdentity::OnPlatformLoginResponse(FJusticeHttpResponsePtr Response, FUserLoginCompleteDelegate OnComplete)
+{
+    FString ErrorStr;
+    if (!Response->ErrorString.IsEmpty())
+    {
+        UE_LOG(LogJustice, Error, TEXT("Platform Login Failed. Error Message: %s."), *Response->ErrorString);
+        OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
+        return;
+    }
+    switch (Response->Code)
+    {
+    case EHttpResponseCodes::Ok:
+    {
+        FJusticeSDKModule::Get().bHeadlessAccount = false;
+        bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
+        check(result);
+        FJusticeUserToken->SetLastRefreshTimeToNow();
+        FJusticeUserToken->ScheduleNormalRefresh();
+        FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
+        OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken.Get());
+        break;
+    }
+
+    case EHttpResponseCodes::Denied:
+        ErrorStr = FString::Printf(TEXT("Platform Login Failed, Response: %s. XRay: %s"), *Response->Content, *Response->AmazonTraceID);
+        break;
+    case EHttpResponseCodes::RequestTimeout:
+        ErrorStr = TEXT("Request Timeout");
+        break;
+    case EHttpResponseCodes::Forbidden:
+        ErrorStr = TEXT("Forbidden");
+        break;
+    case EHttpResponseCodes::ServerError:
+    case EHttpResponseCodes::ServiceUnavail:
+    case EHttpResponseCodes::GatewayTimeout:
+    {
+        if (Response->TooManyRetries() || Response->TakesTooLong())
+        {
+            ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+            OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+            return;
+        }
+        Response->UpdateRequestForNextRetry();
+        FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+            Response->NextWait,
+            FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnPlatformLoginResponse, OnComplete));
+        break;
+    }
+    default:
+        ErrorStr = FString::Printf(TEXT("Platform Login Unexpcted Result,Response Code: %d  Content:%s"), Response->Code, *Response->Content);
+    }
+
+    if (!ErrorStr.IsEmpty())
+    {
+        UE_LOG(LogJustice, Error, TEXT("%s"), *ErrorStr);
+        OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+        return;
+    }
+}
+
+
+void JusticeIdentity::LoginWithSteam(FUserLoginCompleteDelegate OnComplete)
+{
+    JusticeIdentity::LoginWithPlatfrom(TEXT("steam"), JusticeIdentity::GetSteamAuthTicket(), OnComplete);
+}
+
+void JusticeIdentity::LoginWithSteam(FString Ticket, FUserLoginCompleteDelegate OnComplete)
+{
+    JusticeIdentity::LoginWithPlatfrom(TEXT("steam"), Ticket, OnComplete);
+}
+
+void JusticeIdentity::SetSteamAuthTicket(FString ticket)
+{
+    FJusticeSDKModule::Get().SteamAuthTicket = ticket;
+}
+
+void JusticeIdentity::SetSteamNickName(FString nickname)
+{
+    FJusticeSDKModule::Get().SteamNickName = nickname;
+}
+
+void JusticeIdentity::SetAvatar(UTexture2D * avatar)
+{
+    FJusticeSDKModule::Get().Avatar = avatar;
+}
+
+FString JusticeIdentity::GetSteamAuthTicket()
+{
+    return FJusticeSDKModule::Get().SteamAuthTicket;
+}
+
+FString JusticeIdentity::GetSteamNickName()
+{
+    return FJusticeSDKModule::Get().SteamNickName;
+}
+
+UTexture2D * JusticeIdentity::GetAvatar()
+{
+    return FJusticeSDKModule::Get().Avatar;
+}
+
 void JusticeIdentity::ClientLogout()
 {
 	FString Authorization   = FJusticeHTTP::BasicAuth();
-	FString URL             = FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *FJusticeBaseURL, *FJusticeNamespace);
+	FString URL             = FString::Printf(TEXT("%s/iam/oauth/revoke/token"), *FJusticeBaseURL, *JusticeGameNamespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_FORM;
 	FString Accept          = TYPE_JSON;
@@ -639,7 +761,7 @@ void JusticeIdentity::RegisterNewPlayer(FString UserID, FString Password, FStrin
 	NewUserRequest.AuthType = (AuthType == Email) ? TEXT("EMAILPASSWD"): TEXT("PHONEPASSWD");
 
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *FJusticeBaseURL, *FJusticeNamespace);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *FJusticeBaseURL, *JusticeGameNamespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;
@@ -756,7 +878,7 @@ void JusticeIdentity::VerifyNewPlayer(FString UserID, FString VerificationCode, 
 	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
 
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *FJusticeBaseURL, *JusticeGameNamespace, *UserID);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;
@@ -852,7 +974,7 @@ void JusticeIdentity::OnVerifyNewPlayerResponse(FJusticeHttpResponsePtr Response
 void JusticeIdentity::ReissueVerificationCode(FString UserID, FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *FJusticeNamespace, *UserID);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *JusticeGameNamespace, *UserID);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;
@@ -1036,7 +1158,7 @@ void JusticeIdentity::OnClientLoginResponse(FJusticeHttpResponsePtr Response, FU
 void JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete) 
 {
 	FString Authorization     = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);;
-	FString URL               = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL               = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
 	FString Verb              = GET;
 	FString ContentType       = TYPE_JSON;
 	FString Accept            = TYPE_JSON;
@@ -1130,7 +1252,7 @@ void JusticeIdentity::OnGetLinkedPlatformResponse(FJusticeHttpResponsePtr Respon
 void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization  = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL            = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
+	FString URL            = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID, *PlatformID);
 	FString Verb           = POST;
 	FString ContentType    = TYPE_FORM;
 	FString Accept         = TYPE_JSON;
@@ -1201,7 +1323,7 @@ void JusticeIdentity::OnLinkPlatformResponse(FJusticeHttpResponsePtr Response, F
 void JusticeIdentity::UnlinkPlatform(FString PlatformID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID, *PlatformID);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID, *PlatformID);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_PLAIN;
 	FString Accept          = TYPE_JSON;
@@ -1271,7 +1393,7 @@ void JusticeIdentity::OnUnlinkPlatformResponse(FJusticeHttpResponsePtr Response,
 void JusticeIdentity::UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
-	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *FJusticeBaseURL, *FJusticeNamespace, *FJusticeUserID);
+	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *FJusticeBaseURL, *JusticeGameNamespace, *FJusticeUserID);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;

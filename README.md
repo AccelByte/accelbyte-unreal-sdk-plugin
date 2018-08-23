@@ -182,8 +182,27 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 
 We are able to call all Justice SDK function from the blueprint. We have 2 different kinds of blueprint function:
 
+##### D. Steam Login
+Our Justice Service support login with many providers, one of them is Steam.
+you can use `SteamTicket` to login with our platform.
 1. Blueprint function with delegates parameter 
 2. Blueprint async function with multiple output pins
+
+```c++
+void AJusticeSDKDemoGameModeBase::BeginPlay()
+{
+	...
+    FString SteamTicket = TEXT("YOUR STEAM TICKET");
+    JusticeIdentity::LoginWithSteam(
+      SteamTicket
+      FUserLoginCompleteDelegate::CreateLambda([](bool IsSuccess, FString ErrorString, UOAuthTokenJustice* token) {
+  		// this will be called when login request receive a response 
+    }));
+    ...
+}
+```
+
+
 
 ## 6. Changes
 
