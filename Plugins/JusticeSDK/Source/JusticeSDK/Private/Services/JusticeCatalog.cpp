@@ -29,7 +29,7 @@ void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteD
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -143,7 +143,7 @@ void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FCategory
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {	
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -260,7 +260,7 @@ void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FC
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetChildCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -376,7 +376,7 @@ void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPat
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -509,7 +509,7 @@ void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, F
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetItemCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;	
 	if (!Response->ErrorString.IsEmpty())
@@ -634,7 +634,7 @@ void JusticeCatalog::GetItemByQuery(FString Language, FString Region, FString Ca
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetItemByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

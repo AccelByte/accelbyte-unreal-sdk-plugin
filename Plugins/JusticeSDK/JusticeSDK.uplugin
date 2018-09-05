@@ -20,10 +20,14 @@
       "LoadingPhase": "Default"
     }
   ],
-  "Plugins": [                       
-     {                                
-       "Name": "OnlineSubsystemSteam",    
-       "Enabled": true                
-     }                                
-   ]      
+  "Plugins": [
+    {
+      "Name": "OnlineSubsystemSteam",
+      "Enabled": true
+    },
+    {
+      "Name": "JusticeHttp",
+      "Enabled": true
+    }
+  ]      
 }

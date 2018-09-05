@@ -11,6 +11,6 @@ public class JusticeSDKDemoTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "JusticeSDKDemo", "JusticeSDK", "JusticeWebBrowserWidget" } );
+		ExtraModuleNames.AddRange( new string[] { "JusticeSDKDemo", "JusticeSDK", "JusticeWebBrowserWidget", "JusticeHttp" } );
 	}
 }

@@ -29,9 +29,9 @@ public:
 	static void FulfillOrder(FString OrderNo, FOrderInfoCompleteDelegate OnComplete);
 	static void GetUserOrderHistory(FString OrderNo, FGetUserOrderHistoryCompleteDelegate OnComplete);
 private:
-	static void OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
-	static void OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
-	static void OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, FGetUserOrdersCompleteDelegate OnComplete);
-	static void OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
-	static void OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FGetUserOrderHistoryCompleteDelegate OnComplete);
+	static void OnCreateNewOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
+	static void OnGetUserOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
+	static void OnGetUserOrdersResponse(FJusticeResponsePtr Response, FGetUserOrdersCompleteDelegate OnComplete);
+	static void OnFulfillOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete);
+	static void OnGetUserOrderHistory(FJusticeResponsePtr Response, FGetUserOrderHistoryCompleteDelegate OnComplete);
 };

@@ -29,7 +29,7 @@ void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 Discount
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnCreateNewOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnCreateNewOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
+void JusticePurchase::OnCreateNewOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -132,7 +132,7 @@ void JusticePurchase::GetUserOrder(FString OrderNo, FOrderInfoCompleteDelegate O
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnGetUserOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnGetUserOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
+void JusticePurchase::OnGetUserOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -237,7 +237,7 @@ void JusticePurchase::GetUserOrders(int32 Page, int32 Size, FGetUserOrdersComple
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnGetUserOrdersResponse, OnComplete));
 }
 
-void JusticePurchase::OnGetUserOrdersResponse(FJusticeHttpResponsePtr Response, FGetUserOrdersCompleteDelegate OnComplete)
+void JusticePurchase::OnGetUserOrdersResponse(FJusticeResponsePtr Response, FGetUserOrdersCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -355,7 +355,7 @@ void JusticePurchase::FulfillOrder(FString OrderNo, FOrderInfoCompleteDelegate O
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnFulfillOrderResponse, OnComplete));
 }
 
-void JusticePurchase::OnFulfillOrderResponse(FJusticeHttpResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
+void JusticePurchase::OnFulfillOrderResponse(FJusticeResponsePtr Response, FOrderInfoCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -458,7 +458,7 @@ void JusticePurchase::GetUserOrderHistory(FString OrderNo, FGetUserOrderHistoryC
 		FWebRequestResponseDelegate::CreateStatic(JusticePurchase::OnGetUserOrderHistory, OnComplete));
 }
 
-void JusticePurchase::OnGetUserOrderHistory(FJusticeHttpResponsePtr Response, FGetUserOrderHistoryCompleteDelegate OnComplete)
+void JusticePurchase::OnGetUserOrderHistory(FJusticeResponsePtr Response, FGetUserOrderHistoryCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

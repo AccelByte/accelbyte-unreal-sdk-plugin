@@ -12,7 +12,7 @@
 
 void UJusticePlatformFunctions::RequestCurrentPlayerProfile(FProfileReqestCompleteDelegate OnComplete)
 {
-	JusticePlatform::RequestCurrentPlayerProfile(FReqestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, FUserProfileInfo* userInfo) {
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken, FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString, FUserProfileInfo* userInfo) {
 		UUserProfileJustice* UserProfile = UUserProfileJustice::Deserialize(userInfo);
 		check(UserProfile);
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString, UserProfile);
@@ -34,7 +34,7 @@ void UJusticePlatformFunctions::UpdatePlayerProfile(FString DisplayName, FString
 	NewUserProfile.Language = Language;
 	NewUserProfile.Timezone = Timezone;
 
-	JusticePlatform::UpdatePlayerProfile(NewUserProfile, FDefaultCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
+	JusticePlatform::UpdatePlayerProfile(*FJusticeUserToken, NewUserProfile, FDefaultCompleteDelegate::CreateLambda([OnComplete](bool IsSuccess, FString ErrorString) {
 		OnComplete.ExecuteIfBound(IsSuccess, ErrorString);
 	}));
 }

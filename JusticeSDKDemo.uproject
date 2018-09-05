@@ -34,9 +34,13 @@
     {
       "Name": "JusticeSDK",
       "Enabled": true
-    }, 
+    },
     {
       "Name": "JusticeWebBrowserWidget",
+      "Enabled": true
+    },
+    {
+      "Name": "JusticeHttp",
       "Enabled": true
     }
   ]

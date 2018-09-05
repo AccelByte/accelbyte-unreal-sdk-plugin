@@ -59,7 +59,7 @@ private:
 class FWebRequestTask : public FJusticeRetryTask
 {
 public:
-	FWebRequestTask(FJusticeHttpRequestPtr HttpRequest, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
+	FWebRequestTask(TSharedPtr<JusticeHttpRequest> HttpRequest, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate)
 		: FJusticeRetryTask(WaitTime, 0),
 		  Request(HttpRequest),
 		  OnReponseDelegate(ReponseDelegate)
@@ -75,7 +75,7 @@ public:
 		FJusticeHTTP::CreateRequest(Request, OnReponseDelegate);
 	}
 private:
-	FJusticeHttpRequestPtr Request;
+    TSharedPtr<JusticeHttpRequest> Request;
 	FWebRequestResponseDelegate OnReponseDelegate;
 };
 
@@ -103,7 +103,7 @@ public:
 	virtual void Tick() {};
 	virtual void OnlineTick() ;
 	void AddQueue(FJusticeRetryTask* NewTask);
-	void AddQueue(FJusticeHttpRequestPtr Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate);
+	void AddQueue(TSharedPtr<JusticeHttpRequest> Request, int32 WaitTime, FWebRequestResponseDelegate ReponseDelegate);
 	void ClearRetryQueue();
 
 private:	

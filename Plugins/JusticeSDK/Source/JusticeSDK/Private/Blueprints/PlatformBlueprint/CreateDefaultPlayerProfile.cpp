@@ -15,7 +15,7 @@ UAsyncCreateDefaultPlayerProfile * UAsyncCreateDefaultPlayerProfile::CreateDefau
 
 void UAsyncCreateDefaultPlayerProfile::Activate()
 {
-	JusticePlatform::CreateDefaultPlayerProfile(this->Email, this->DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticePlatform::CreateDefaultPlayerProfile(*FJusticeUserToken, this->DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

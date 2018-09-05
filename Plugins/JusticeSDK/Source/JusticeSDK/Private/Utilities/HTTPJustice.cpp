@@ -7,6 +7,7 @@
 #include "Utilities/AWSXRayJustice.h"
 #include "JusticeSDK.h"
 
+
 FString FJusticeHTTP::BasicAuth(const FString& Username, const FString& Password)
 {
 	FString User = Username.IsEmpty() ? FJusticeSDKModule::Get().ClientID : Username;
@@ -22,7 +23,7 @@ FString FJusticeHTTP::BearerAuth(const FString& Token)
 void FJusticeHTTP::CreateRequest(FString Authorization, FString URL, FString Verb, FString ContentType, FString Accept, FString Content, FWebRequestResponseDelegate OnResponse)
 {
 	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IJusticeHttpRequest> Request = FJusticeHttpModule::Get().CreateRequest();
 	FString AmazonTraceID = FAWSXRayJustice::XRayTraceID();
 
 	Request->SetURL(URL);
@@ -31,11 +32,13 @@ void FJusticeHTTP::CreateRequest(FString Authorization, FString URL, FString Ver
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), AmazonTraceID);
-	Request->SetContentAsString(Content);
+	Request->SetContentAsString(Content);    
 
-	Request->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful) {
+    //Request->OnRequestProgress().bind
 
-		FJusticeHttpRequestPtr JusticeRequest = MakeShareable(new JusticeHttpRequest());
+	Request->OnProcessRequestComplete().BindLambda([=](FJusticeHttpRequestPtr Request, FJusticeHttpResponsePtr Response, bool bSuccessful) {
+
+        TSharedPtr<JusticeHttpRequest> JusticeRequest = MakeShareable(new JusticeHttpRequest());
 		JusticeRequest->Accept = Accept;
 		JusticeRequest->Authorization = Authorization;
 		JusticeRequest->Content = Content;
@@ -45,7 +48,7 @@ void FJusticeHTTP::CreateRequest(FString Authorization, FString URL, FString Ver
 		JusticeRequest->URL = URL;
 		JusticeRequest->Verb = Verb;
 
-		FJusticeHttpResponsePtr JusticeResponse = MakeShareable(new JusticeHttpResponse());
+        TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> JusticeResponse = MakeShareable(new JusticeHttpResponse());
 		JusticeResponse->AmazonTraceID = AmazonTraceID;
 		JusticeResponse->JusticeRequest = JusticeRequest;
 
@@ -68,17 +71,17 @@ void FJusticeHTTP::CreateRequest(FString Authorization, FString URL, FString Ver
 
 	if (!Request->ProcessRequest())
 	{
-		FJusticeHttpResponsePtr JusticeResponse = MakeShareable(new JusticeHttpResponse());
+        TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> JusticeResponse = MakeShareable(new JusticeHttpResponse());
 		JusticeResponse->AmazonTraceID = AmazonTraceID;
 		JusticeResponse->ErrorString = FString::Printf(TEXT("Web Request Failed. URL=%s"), *Request->GetURL());
 		OnResponse.ExecuteIfBound(JusticeResponse);
 	}
 }
 
-void FJusticeHTTP::CreateRequest(FJusticeHttpRequestPtr JusticeRequest, FWebRequestResponseDelegate OnResponse)
+void FJusticeHTTP::CreateRequest(TSharedPtr<JusticeHttpRequest> JusticeRequest, FWebRequestResponseDelegate OnResponse)
 {
 	FString ErrorStr;
-	TSharedRef<IHttpRequest> Request = FHttpModule::Get().CreateRequest();
+	TSharedRef<IJusticeHttpRequest> Request = FJusticeHttpModule::Get().CreateRequest();
 	FString AmazonTraceID = FAWSXRayJustice::XRayTraceID();
 
 	Request->SetURL(JusticeRequest->URL);
@@ -89,11 +92,11 @@ void FJusticeHTTP::CreateRequest(FJusticeHttpRequestPtr JusticeRequest, FWebRequ
 	Request->SetHeader(TEXT("X-Amzn-TraceId"), AmazonTraceID);
 	Request->SetContentAsString(JusticeRequest->Content);
 
-	FJusticeHttpResponsePtr JusticeResponse = MakeShareable(new JusticeHttpResponse());
+    TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> JusticeResponse = MakeShareable(new JusticeHttpResponse());
 	JusticeResponse->AmazonTraceID = AmazonTraceID;
 	JusticeResponse->JusticeRequest = JusticeRequest;
-
-	Request->OnProcessRequestComplete().BindLambda([=](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful) {
+    
+	Request->OnProcessRequestComplete().BindLambda([=](FJusticeHttpRequestPtr Request, FJusticeHttpResponsePtr Response, bool bSuccessful) {
 		JusticeResponse->Request = Request;
 		JusticeResponse->Response = Response;
 		JusticeResponse->bSuccessful = bSuccessful;

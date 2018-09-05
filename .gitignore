@@ -87,3 +87,6 @@ Plugins/JusticeWebBrowserWidget/Intermediate/Build/
 
 !Content/StarterContent/Maps/Minimal_Default.umap
 !Content/StarterContent/Maps/Minimal_Default_BuiltData.uasset
+Plugins/JusticeHttp/Binaries/Win64/UE4Editor.modules
+Plugins/JusticeHttp/Intermediate/
+Plugins/JusticeHttp/Binaries/Win64/UE4Editor-JusticeHttp.pdb

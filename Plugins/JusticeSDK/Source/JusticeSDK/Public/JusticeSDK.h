@@ -38,6 +38,8 @@ public:
 	FString                                 Namespace;
 	FString                                 ClientID;
 	FString                                 ClientSecret;
+	FString                                 AppID;
+	FString                                 PublisherNamespace;
 	class FRunnableThread*                  OnlineAsyncTaskThread;
 	class FRunnableThread*                  RetryAsyncTaskThread;
 	FString                                 GooglePlatformURL;
@@ -48,6 +50,7 @@ public:
 	TArray<FString>                         SupportedPlatform;
 	TSharedPtr<FOAuthTokenJustice>          GameClientToken;
 	TSharedPtr<FOAuthTokenJustice>          UserToken;
+	TSharedPtr<FOAuthTokenJustice>          PublisherUserToken;
 	FString                                 LoginID;
 	bool                                    bHeadlessAccount;
 	FString                                 Password;
@@ -71,6 +74,9 @@ private:
 #define FJusticeUserToken FJusticeSDKModule::Get().UserToken
 #define FJusticeGameClientToken FJusticeSDKModule::Get().GameClientToken
 #define FJusticeUserID FJusticeSDKModule::Get().UserToken->UserID
+#define FJusticePublisherUserID FJusticeSDKModule::Get().PublisherUserToken->UserID
+#define FJusticeAppID FJusticeSDKModule::Get().AppID
+#define FJusticePublisherNamespace FJusticeSDKModule::Get().PublisherNamespace
 
 #define FGooglePlatformURL FJusticeSDKModule::Get().GooglePlatformURL
 #define FGoogleRedirectURL FJusticeSDKModule::Get().GoogleRedirectURL

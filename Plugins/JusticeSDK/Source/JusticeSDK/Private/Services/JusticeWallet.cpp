@@ -30,7 +30,7 @@ void JusticeWallet::GetWalletBalance(FString CurrencyCode, FGetWalletBalanceComp
 		FWebRequestResponseDelegate::CreateStatic(JusticeWallet::OnGetWalletBalanceResponse, OnComplete));
 
 }
-void JusticeWallet::OnGetWalletBalanceResponse(FJusticeHttpResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete)
+void JusticeWallet::OnGetWalletBalanceResponse(FJusticeResponsePtr Response, FGetWalletBalanceCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())

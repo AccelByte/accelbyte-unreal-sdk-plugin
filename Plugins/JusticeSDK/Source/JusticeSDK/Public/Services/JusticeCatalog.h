@@ -28,10 +28,10 @@ public:
 	static void GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
 
 private:
-	static void OnGetRootCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetChildCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetDescendantCategoryResponse(FJusticeHttpResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetItemResponse(FJusticeHttpResponsePtr Response, FGetItemCompleteDelegate OnComplete);
-	static void OnGetItemByQueryResponse(FJusticeHttpResponsePtr Response, FItemCompleteDelegate OnComplete);
+	static void OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetChildCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetDescendantCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete);
+	static void OnGetItemByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete);
 };
