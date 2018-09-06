@@ -200,11 +200,11 @@ pipeline {
                     }
                 }
                 if (turnOff){
-                    //node('master'){
-                    //sh '''
-                    //aws ec2 stop-instances --instance-ids i-0627e8b0d88cff6de
-                    //'''
-                    //}
+                    node('master'){
+                    sh '''
+                    aws ec2 stop-instances --instance-ids i-0627e8b0d88cff6de
+                    '''
+                    }
                 }
             }
         }
@@ -230,11 +230,11 @@ pipeline {
                     }
                 }
                 if (turnOff){
-                    //node('master'){
-                    //sh '''
-                    //aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
-                    //'''
-                    //}
+                    node('master'){
+                    sh '''
+                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
+                    '''
+                    }
                 }
             }
         }
