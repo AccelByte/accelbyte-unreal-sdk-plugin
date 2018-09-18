@@ -1846,13 +1846,13 @@ bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
 		RootCategory = Result;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Started..."));
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategories Started..."));
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -1865,12 +1865,12 @@ bool FGetChildCategorySuccess::RunTest(const FString & Parameter)
 
 	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 3 GetChildCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 3 GetChildCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 3 GetChildCategory Started..."));
-	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 3 GetChildCategories Started..."));
+	JusticeCatalog::GetChildCategories(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
 	
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetChildCategoryDone)
@@ -1921,13 +1921,13 @@ bool FGetRootCategorySuccess::RunTest(const FString & Parameter)
 	FString UserID = FJusticeSDKModule::Get().UserToken->UserID;
 	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
 		bGetRootCategorySuccess = bSuccessful;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategory Started..."));
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetChildSuccess] Phase 2 GetRootCategories Started..."));
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -1984,14 +1984,14 @@ bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
 
 	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 2 GetRootCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
 		bGetRootCategorySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { RootCategory = Result; }
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 2 GetRootCategory Started..."));
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 2 GetRootCategories Started..."));
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -2004,13 +2004,13 @@ bool FGetDescendantCategorySuccess::RunTest(const FString & Parameter)
 
 	FCategoryDefaultCompleteDelegate OnGetDescendantCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetDescendantCategoryDone, &bGetDescendantCategorySuccess](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 3 GetDescendantCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 3 GetDescendantCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetDescendantCategoryDone = true;
 		bGetDescendantCategorySuccess = bSuccessful;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 3 GetDescendantCategory Started..."));
-	JusticeCatalog::GetDescendantCategory(Language, RootCategory[0].CategoryPath, OnGetDescendantCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetDescendantSuccess] Phase 3 GetDescendantCategories Started..."));
+	JusticeCatalog::GetDescendantCategories(Language, RootCategory[0].CategoryPath, OnGetDescendantCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetDescendantCategoryDone)
@@ -2075,14 +2075,14 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 
 	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
 		bGetRootCategorySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { RootCategory = Result; }
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategory Started..."));
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategories Started..."));
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -2094,21 +2094,21 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 	}
 	if (RootCategory.Num() == 0)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategory return 0 entries"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 2 GetRootCategories return 0 entries"));
 		check(false);
 		return false;
 	}
 
 	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetChildCategoryDone, &bGetChildCategorySuccess, &ChildCategory](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategory Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategories Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
 		bGetChildCategorySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { ChildCategory = Result; }
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategory Started..."));
-	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategories Started..."));
+	JusticeCatalog::GetChildCategories(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetChildCategoryDone)
@@ -2121,21 +2121,21 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 
 	if (ChildCategory.Num() == 0)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategory return 0 entries"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 3 GetChildCategories return 0 entries"));
 		check(false);
 		return false;
 	}
 
 	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess, &ItemQuery](bool bSuccessful, FString ErrorStr, TArray<FItemInfoJustice> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 4 GetItemByQuery Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 4 GetItemsByQuery Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetItemByQueryDone = true;
 		bGetItemByQuerySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { ItemQuery = Result; }
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 4 GetItemByQuery Started..."));
-	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 4 GetItemsByQuery Started..."));
+	JusticeCatalog::GetItemsByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetItemByQueryDone)
@@ -2148,13 +2148,13 @@ bool FGetItemSuccess::RunTest(const FString & Parameter)
 
 	FGetItemCompleteDelegate OnGetItemComplete = FGetItemCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FItemInfoJustice* Item)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 5 GetItem Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 5 GetItemById Result...: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetItemDone = true;
 		bGetItemSuccess = bSuccessful;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 5 GetItem Started..."));
-	JusticeCatalog::GetItem(ItemQuery[0].ItemID, Region, Language, OnGetItemComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemSuccess] Phase 5 GetItemById Started..."));
+	JusticeCatalog::GetItemById(ItemQuery[0].ItemID, Region, Language, OnGetItemComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetItemDone)
@@ -2216,14 +2216,14 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 
 	FCategoryDefaultCompleteDelegate OnGetRootCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&bGetRootCategoryDone, &bGetRootCategorySuccess, &RootCategory](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategory Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategories Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetRootCategoryDone = true;
 		bGetRootCategorySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { RootCategory = Result; }
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategory Started..."));
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategories Started..."));
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -2235,21 +2235,21 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 	}
 	if (RootCategory.Num() == 0)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategory return 0 entries"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 2 GetRootCategories return 0 entries"));
 		return false;
 	}
 
 	FCategoryDefaultCompleteDelegate OnGetChildCategoryComplete = FCategoryDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, TArray<FCategory> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategory Result: %s"), bSuccessful && Result.Num() > 0 ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategories Result: %s"), bSuccessful && Result.Num() > 0 ? TEXT("Success") : TEXT("Failed"));
 		bGetChildCategoryDone = true;
 		bGetChildCategorySuccess = bSuccessful;
 		check(bSuccessful);
 		if (bSuccessful) { ChildCategory = Result; }
 		check(Result.Num() > 0);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategory, Path=%s Started..."), *RootCategory[0].CategoryPath);
-	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategories, Path=%s Started..."), *RootCategory[0].CategoryPath);
+	JusticeCatalog::GetChildCategories(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetChildCategoryDone)
@@ -2261,20 +2261,20 @@ bool FGetItemByQuerySuccess::RunTest(const FString & Parameter)
 	}
 	if (ChildCategory.Num() == 0)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategory return 0 entries"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 3 GetChildCategories return 0 entries"));
 		return false;
 	}
 
 
 	FItemCompleteDelegate OnGetItemByQueryComplete = FItemCompleteDelegate::CreateLambda([&bGetItemByQueryDone, &bGetItemByQuerySuccess](bool bSuccessful, FString ErrorStr, TArray<FItemInfoJustice> Result)
 	{
-		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 4 GetItemByQuery Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 4 GetItemsByQuery Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bGetItemByQueryDone = true;
 		bGetItemByQuerySuccess = bSuccessful;
 		check(bSuccessful);
 	});
-	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 4 GetItemByQuery Started..."));
-	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+	UE_LOG(LogJusticeTest, Log, TEXT("[JusticeTest.Category.GetItemByQuerySuccess] Phase 4 GetItemsByQuery Started..."));
+	JusticeCatalog::GetItemsByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetItemByQueryDone)
@@ -2361,7 +2361,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		bGetRootCategorySuccess = bSuccessful;
 		if (bSuccessful) { RootCategory = Result; }
 	});
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -2379,7 +2379,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		bGetChildCategorySuccess = bSuccessful;
 		if (bSuccessful) { ChildCategory = Result; }
 	});
-	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	JusticeCatalog::GetChildCategories(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetChildCategoryDone)
@@ -2397,7 +2397,7 @@ bool FCreateOrderSuccess::RunTest(const FString & Parameter)
 		bGetItemByQuerySuccess = bSuccessful;
 		if (bSuccessful) { ItemQuery = Result; }
 	});
-	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+	JusticeCatalog::GetItemsByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetItemByQueryDone)
@@ -2538,7 +2538,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		bGetRootCategorySuccess = bSuccessful;
 		if (bSuccessful) { RootCategory = Result; }
 	});
-	JusticeCatalog::GetRootCategory(Language, OnGetRootCategoryComplete);
+	JusticeCatalog::GetRootCategories(Language, OnGetRootCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetRootCategoryDone)
@@ -2556,7 +2556,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		bGetChildCategorySuccess = bSuccessful;
 		if (bSuccessful) { ChildCategory = Result; }
 	});
-	JusticeCatalog::GetChildCategory(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
+	JusticeCatalog::GetChildCategories(Language, RootCategory[0].CategoryPath, OnGetChildCategoryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetChildCategoryDone)
@@ -2574,7 +2574,7 @@ bool FGetUserOrderSuccess::RunTest(const FString & Parameter)
 		bGetItemByQuerySuccess = bSuccessful;
 		if (bSuccessful) { ItemQuery = Result; }
 	});
-	JusticeCatalog::GetItemByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
+	JusticeCatalog::GetItemsByQuery(Language, Region, ChildCategory[0].CategoryPath, TEXT(""), TEXT(""), 0, 1, OnGetItemByQueryComplete);
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bGetItemByQueryDone)

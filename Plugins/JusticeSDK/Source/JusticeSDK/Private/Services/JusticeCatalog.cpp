@@ -10,7 +10,7 @@
 #include "Services/JusticeIdentity.h"
 #include "JusticeLog.h"
 
-void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::GetRootCategories(FString Language, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *Language);
@@ -26,10 +26,10 @@ void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteD
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoriesResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetRootCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -80,7 +80,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCa
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoriesResponse, OnComplete));
 				return;
 			}
 			else
@@ -111,7 +111,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCa
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoryResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetRootCategoriesResponse, OnComplete));
 		return;
 	}
 	default:
@@ -125,7 +125,7 @@ void JusticeCatalog::OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCa
 	}
 }
 
-void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::GetCategories(FString ParentPath, FString Language, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(ParentPath), *Language);
@@ -140,10 +140,10 @@ void JusticeCatalog::GetCategory(FString ParentPath, FString Language, FCategory
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoriesResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {	
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -157,7 +157,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCatego
 	case EHttpResponseCodes::Ok:
 	{
 		FString ResponseStr = Response->Content;
-		UE_LOG(LogJustice, Error, TEXT("OnGetRootCategoryComplete : %s"), *ResponseStr);
+		UE_LOG(LogJustice, Error, TEXT("OnGetCategoryComplete : %s"), *ResponseStr);
 
 		TSharedPtr<FJsonValue> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
@@ -196,7 +196,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCatego
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoriesResponse, OnComplete));
 				return;
 			}
 			else
@@ -227,7 +227,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCatego
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoryResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetCategoriesResponse, OnComplete));
 		return;
 	}
 	default:
@@ -242,7 +242,7 @@ void JusticeCatalog::OnGetCategoryResponse(FJusticeResponsePtr Response, FCatego
 	}
 }
 
-void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::GetChildCategories(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/children?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -257,10 +257,10 @@ void JusticeCatalog::GetChildCategory(FString Language, FString CategoryPath, FC
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoriesResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetChildCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetChildCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -312,7 +312,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeResponsePtr Response, FC
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoriesResponse, OnComplete));
 				return;
 			}
 			else
@@ -343,7 +343,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeResponsePtr Response, FC
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoryResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetChildCategoriesResponse, OnComplete));
 		return;
 	}
 	default:
@@ -358,7 +358,7 @@ void JusticeCatalog::OnGetChildCategoryResponse(FJusticeResponsePtr Response, FC
 	}
 }
 
-void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::GetDescendantCategories(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/descendants?language=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -373,10 +373,10 @@ void JusticeCatalog::GetDescendantCategory(FString Language, FString CategoryPat
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoriesResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetDescendantCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -427,7 +427,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeResponsePtr Respons
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoriesResponse, OnComplete));
 				return;
 			}
 			else
@@ -458,7 +458,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeResponsePtr Respons
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoryResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetDescendantCategoriesResponse, OnComplete));
 		return;
 	}
 	default:
@@ -473,7 +473,7 @@ void JusticeCatalog::OnGetDescendantCategoryResponse(FJusticeResponsePtr Respons
 	}
 }
 
-void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete)
+void JusticeCatalog::GetItemById(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/%s/locale"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *ItemID);
@@ -506,10 +506,10 @@ void JusticeCatalog::GetItem(FString ItemID, FString Region, FString Language, F
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByIdResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetItemByIdResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;	
 	if (!Response->ErrorString.IsEmpty())
@@ -556,7 +556,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCom
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByIdResponse, OnComplete));
 				return;
 			}
 			else
@@ -586,7 +586,7 @@ void JusticeCatalog::OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCom
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByIdResponse, OnComplete));
 		return;
 	}
 	default:
@@ -595,13 +595,13 @@ void JusticeCatalog::OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCom
 
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("OnGetItemResponse Error : %s"), *ErrorStr);
+		UE_LOG(LogJustice, Error, TEXT("OnGetItemByIdResponse Error : %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 }
 
-void JusticeCatalog::GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete)
+void JusticeCatalog::GetItemsByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *FJusticeBaseURL, *FJusticeUserToken->Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
@@ -631,55 +631,10 @@ void JusticeCatalog::GetItemByQuery(FString Language, FString Region, FString Ca
 		ContentType,
 		Accept,
 		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemsByQueryResponse, OnComplete));
 }
 
-void JusticeCatalog::GetItemByCriteria(FString Namespace, FString AccessToken, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete)
-{
-	FString Authorization = FJusticeHTTP::BearerAuth(AccessToken);
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s"), *FJusticeBaseURL, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath));
-
-	if (!Language.IsEmpty())
-	{
-		URL.Append(FString::Printf(TEXT("&language=%s"), *Language));
-	}
-	if (!Region.IsEmpty())
-	{
-		URL.Append(FString::Printf(TEXT("&region=%s"), *Region));
-	}
-	if (!ItemType.IsEmpty())
-	{
-		URL.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
-	}
-	if (!Status.IsEmpty())
-	{
-		URL.Append(FString::Printf(TEXT("&status=%"), *Status));
-	}
-	if (Page > 0)
-	{
-		URL.Append(FString::Printf(TEXT("&page=%d"), Page));
-	}	
-	if (Size > 0)
-	{
-		URL.Append(FString::Printf(TEXT("&size=%d"), Size));
-	}
-
-	FString Verb = GET;
-	FString ContentType = TYPE_JSON;
-	FString Accept = TYPE_JSON;
-	FString Payload = TEXT("");
-
-	FJusticeHTTP::CreateRequest(
-		Authorization,
-		URL,
-		Verb,
-		ContentType,
-		Accept,
-		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
-}
-
-void JusticeCatalog::OnGetItemByQueryResponse(TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> Response, FItemCompleteDelegate OnComplete)
+void JusticeCatalog::OnGetItemsByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -731,7 +686,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(TSharedPtr<JusticeHttpResponse, ES
 				Response->UpdateRequestForNextRetry();
 				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemsByQueryResponse, OnComplete));
 				return;
 			}
 			else
@@ -761,7 +716,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(TSharedPtr<JusticeHttpResponse, ES
 		Response->UpdateRequestForNextRetry();
 		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
 			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemsByQueryResponse, OnComplete));
 		return;
 	}
 	default:
@@ -770,166 +725,8 @@ void JusticeCatalog::OnGetItemByQueryResponse(TSharedPtr<JusticeHttpResponse, ES
 	
 	if (!ErrorStr.IsEmpty())
 	{
-		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryResponse Error : %s"), *ErrorStr);
+		UE_LOG(LogJustice, Error, TEXT("OnGetItemsByQueryResponse Error : %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
-		return;
-	}
-}
-
-void JusticeCatalog::GetEntitlementItemIDFromAppID(FString Token, FString Namespace, FItemIDCompleteDelegate OnComplete)
-{
-	FString Authorization = FJusticeHTTP::BearerAuth(Token);	
-	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?itemType=PRODUCT&status=ACTIVE&page=0&size=100"), *FJusticeBaseURL, *Namespace);
-	FString Verb = GET;
-	FString ContentType = TYPE_JSON;
-	FString Accept = TYPE_JSON;
-	FString Payload = TEXT("");
-
-	FJusticeHTTP::CreateRequest(
-		Authorization,
-		URL,
-		Verb,
-		ContentType,
-		Accept,
-		Payload,
-		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
-}
-
-void JusticeCatalog::OnItemIDResponse(FJusticeResponsePtr Response, FItemIDCompleteDelegate OnComplete)
-{
-	FString ErrorStr;
-	if (!Response->ErrorString.IsEmpty())
-	{
-		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
-		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
-		return;
-	}
-	switch (Response->Code)
-	{
-	case EHttpResponseCodes::Ok:
-	{
-		TSharedPtr<FJsonObject> JsonObject;
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
-		TArray<FItemInfoJustice> ArrayResult;
-		bool bFound = false;
-		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
-		{
-			FItemPagingSlicedResult Result;
-			if (Result.FromJson(JsonObject))
-			{
-
-				for (int32 i = 0; i < Result.Data.Num(); i++)
-				{
-					if (FJusticeAppID == Result.Data[i].AppId && Result.Data[i].RegionDatas.Num() > 0)
-					{
-						if (Result.Data[i].RegionDatas[0].Price == 0)
-						{
-							bFound = true;
-							OnComplete.ExecuteIfBound(true, TEXT(""), &Result.Data[i]);
-							return;
-						}
-					}
-				}
-
-
-				if (!bFound)
-				{
-					// proceed to next page
-					FString NextPageURL = Result.Paging.Next;
-					if (!NextPageURL.IsEmpty())
-					{
-						// new request						
-						FString Authorization = Response->JusticeRequest->Authorization;
-						FString URL = NextPageURL;
-						FString Verb = GET;
-						FString ContentType = TYPE_JSON;
-						FString Accept = TYPE_JSON;
-						FString Payload = TEXT("");
-
-						FJusticeHTTP::CreateRequest(
-							Authorization,
-							URL,
-							Verb,
-							ContentType,
-							Accept,
-							Payload,
-							FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
-						return;
-
-					}
-					else
-					{
-						OnComplete.Execute(false, TEXT("Can't find entitlement item that match with App ID."), nullptr);
-					}
-
-				}
-			}
-			else
-			{
-				ErrorStr = TEXT("unable to deserlize response from server");
-			}
-		}
-		else
-		{
-			ErrorStr = TEXT("unable to deserlize response from server");
-		}
-		break;
-	}
-	case EHttpResponseCodes::Denied:
-		JusticeIdentity::UserRefreshToken(
-			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
-			if (bSuccessful)
-			{
-				if (Response->TooManyRetries() || Response->TakesTooLong())
-				{
-					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
-					return;
-				}
-				Response->UpdateRequestForNextRetry();
-				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-					Response->NextWait,
-					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
-				return;
-			}
-			else
-			{
-				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
-				OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
-				return;
-			}
-		}));
-		break;
-	case EHttpResponseCodes::RequestTimeout:
-		ErrorStr = TEXT("Request Timeout");
-		break;
-	case EHttpResponseCodes::Forbidden:
-		ErrorStr = TEXT("Forbidden");
-		break;
-	case EHttpResponseCodes::ServerError:
-	case EHttpResponseCodes::ServiceUnavail:
-	case EHttpResponseCodes::GatewayTimeout:
-	{
-		if (Response->TooManyRetries() || Response->TakesTooLong())
-		{
-			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
-			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
-			return;
-		}
-		Response->UpdateRequestForNextRetry();
-		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
-			Response->NextWait,
-			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
-		return;
-	}
-	default:
-		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
-	}
-
-	if (!ErrorStr.IsEmpty())
-	{
-		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryResponse Error : %s"), *ErrorStr);
-		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 }
