@@ -31,39 +31,64 @@ enum class EPlatformType
 	Facebook,
 	Android,
 	iOS,
-	device,
+	Device,
 	Twitch,
 	Oculus,
 	Twitter
 };
 
+/**
+ * @brief Justice User
+ * User identity access management and profile information are handled by this class.
+ */
 class JUSTICESDK_API JusticeUser
 {
 public:
-    
-    static void Login(EPlatformType PlatformType, FString Token, FUserLoginCompleteDelegate2 OnComplete);
+	/**
+	* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
+	* 
+	* @param PlatformType Required. Specify platform type that chosen by user to log in.
+	* @param Token Required. Authentication code that provided by another platform.
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	*/
+    static void Login(EPlatformType PlatformType, FString Token, FDefaultCompleteDelegate OnComplete);
+
 	static void Login(FString LoginID, FString Password, FUserLoginCompleteDelegate2 OnComplete);
+
 	static void Logout(FDefaultCompleteDelegate OnComplete);
-	static void LoginWithDeviceId(FUserLoginCompleteDelegate2 OnComplete);
-	static void UpgradeHeadlessAccount(FString Email, FString Password, FString DisplayName, FDefaultCompleteDelegate OnComplete);
+
+	/**
+	* @brief Log in as a guest (anonymous log in).
+	*
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	*/
+	static void LoginWithDeviceId(FDefaultCompleteDelegate OnComplete);
+
+	/**
+	* @brief User should log in with headless account to upgrade it with email.
+	*
+	* @param Email Required. User's valid email.
+	* @param Password Required. User's password.
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	*/
+	static void UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete);
+
 	static void Register(FString UserID, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete);
 	static void Verify(FString VerificationCode, FDefaultCompleteDelegate OnComplete);
 	static void ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete);
 	static void ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete);
-	static void LoginFromLauncher(FUserLoginCompleteDelegate OnComplete);
 
-	// Steam Specific
-	static void LoginWithSteam(FUserLoginCompleteDelegate2 OnComplete);
-	static void LoginWithSteam(FString SteamAuthTicket, FUserLoginCompleteDelegate2 OnComplete);
-	static void SetSteamAuthTicket(FString Ticket);
-	static FString GetSteamAuthTicket();
-	static void SetAvatar(UTexture2D* Avatar);
-	static UTexture2D* GetAvatar();
+	/**
+	* @brief This function should be called automatically if the game started by AccelByte's launcher.
+	*
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	*/
+	static void LoginFromLauncher(FDefaultCompleteDelegate OnComplete);
 
-	// User
 	static void GetProfile(FRequestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static void UpdateProfile(UserProfileInfoUpdate UpdateProfile, FDefaultCompleteDelegate OnComplete);
 
-private:    
+private:
+	static void InitProfile(FOAuthTokenJustice OAuthToken, FDefaultCompleteDelegate OnComplete);
 	static void OnLogoutResponse(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete);
 };

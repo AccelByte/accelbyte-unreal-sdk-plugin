@@ -1132,7 +1132,7 @@ void JusticeIdentity::ReissueVerificationCode(FString Namespace, FString UserID,
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;
-	FString Payload         = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
+	FString Payload         = FString::Printf(TEXT("{ \"LoginId\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -1144,14 +1144,14 @@ void JusticeIdentity::ReissueVerificationCode(FString Namespace, FString UserID,
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
 }
 
-void JusticeIdentity::ReissueVerificationCodeUpgradedAccount(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete)
+void JusticeIdentity::ReissueVerificationCode(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(Token.AccessToken);
 	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
 	FString Accept = TYPE_JSON;
-	FString Payload = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
+	FString Payload = FString::Printf(TEXT("{ \"LoginId\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,

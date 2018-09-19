@@ -125,7 +125,7 @@ public:
 	 * 
 	 * @TODO Add more description here. What's this for?
 	 */
-	static void ReissueVerificationCodeUpgradedAccount(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete);
+	static void ReissueVerificationCode(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete);
 
     /**
 	 * @brief Send a request to reset user's password.

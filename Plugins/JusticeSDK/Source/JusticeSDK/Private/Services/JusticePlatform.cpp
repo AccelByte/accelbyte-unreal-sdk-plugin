@@ -62,20 +62,8 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeResponsePtr 
 	case EHttpResponseCodes::NotFound:
 	{			
 		FString DisplayName = Token.DisplayName;		
-		UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
-		JusticePlatform::CreateDefaultPlayerProfile(Token, DisplayName, FDefaultCompleteDelegate::CreateLambda([&, Token, OnComplete](bool bSuccessful, FString ErrorStr) {
-			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
-			if (bSuccessful)
-			{
-				UE_LOG(LogJustice, Log, TEXT("Call another GetCurrentProfileRequest"));
-				JusticePlatform::RequestCurrentPlayerProfile(Token, OnComplete);
-			}
-			else
-			{
-				UE_LOG(LogJustice, Error, TEXT("Create Default User Profile Error:  %s"), *ErrorStr);
-				OnComplete.ExecuteIfBound(false, TEXT("Cannot create default user profile"), nullptr);
-			}
-		}));
+		UE_LOG(LogJustice, Log, TEXT("Userprofile not found."));
+		OnComplete.ExecuteIfBound(false, TEXT("Cannot get user profile, not found."), nullptr);
 		break;
 	}
 	case EHttpResponseCodes::Denied:
