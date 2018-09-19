@@ -146,7 +146,7 @@ public:
 	 * @param NewPassword New user's password.
 	 * @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	 */
-	static void ResetPassword(FString Namespace, FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete);
+	static void ResetPassword(FString Namespace, FString LoginID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete);
 
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.

@@ -6,6 +6,7 @@
 
 #include "ModuleManager.h"
 #include "IHttpRequest.h"
+#include "Utilities/HttpJustice.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Models/TelemetryEvent.h"
 #include "TelemetryEventDataExample.h"
@@ -16,6 +17,7 @@ class FIntegrationTestModule : public IModuleInterface {
 public:
 	static void DeleteUser(FString UserID, FDeleteUserDelegate OnComplete);
 	static FString GetSteamTicket();
+	static FString GetVerificationCode(FString Email);
 private:
 	static void OnDeleteUserComplete(FJusticeResponsePtr Response, FDeleteUserDelegate OnComplete);
 };

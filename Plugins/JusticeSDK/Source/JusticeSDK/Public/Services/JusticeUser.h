@@ -52,9 +52,7 @@ public:
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/
     static void Login(EPlatformType PlatformType, FString Token, FDefaultCompleteDelegate OnComplete);
-
-	static void Login(FString LoginID, FString Password, FUserLoginCompleteDelegate2 OnComplete);
-
+	static void Login(FString Email, FString Password, FDefaultCompleteDelegate OnComplete);
 	static void Logout(FDefaultCompleteDelegate OnComplete);
 
 	/**
@@ -72,14 +70,13 @@ public:
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/
 	static void UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete);
-
-	static void Register(FString UserID, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete);
+	static void Register(FString Email, FString Password, FString DisplayName, FDefaultCompleteDelegate OnComplete);
 	static void Verify(FString VerificationCode, FDefaultCompleteDelegate OnComplete);
-	static void ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete);
-	static void ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete);
-
+	static void ForgotPassword(FString Email, FDefaultCompleteDelegate OnComplete);
+	static void ResetPassword(FString VerificationCode, FString Email, FString NewPassword, FDefaultCompleteDelegate OnComplete);
+	
 	/**
-	* @brief This function should be called if the game started by AccelByte's launcher.
+	* @brief This function should be called automatically if the game started by AccelByte's launcher.
 	*
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/
