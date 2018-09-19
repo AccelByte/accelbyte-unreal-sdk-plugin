@@ -1,0 +1,1 @@
+"F:\UE4\UE_4.18\Engine\Binaries\DotNet\UnrealBuildTool.exe" -projectfiles  -project="E:\justice-ue4-sdk\JusticeSDKDemo.uproject" -game -rocket -progress'

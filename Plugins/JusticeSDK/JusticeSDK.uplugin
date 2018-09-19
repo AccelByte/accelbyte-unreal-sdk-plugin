@@ -18,15 +18,11 @@
       "Name": "JusticeSDK",
       "Type": "Developer",
       "LoadingPhase": "Default"
-    }
+    },
   ],
   "Plugins": [
     {
       "Name": "OnlineSubsystemSteam",
-      "Enabled": true
-    },
-    {
-      "Name": "JusticeHttp",
       "Enabled": true
     }
   ]      

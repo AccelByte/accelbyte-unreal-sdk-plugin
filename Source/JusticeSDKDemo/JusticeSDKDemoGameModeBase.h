@@ -26,12 +26,17 @@ class JUSTICESDKDEMO_API AJusticeSDKDemoGameModeBase : public AGameModeBase
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 	virtual void Tick(float DeltaSeconds) override;
 
+public:
+	// Create Event
+	UFUNCTION(BlueprintNativeEvent, Category = "JusticeSDKDemoGameModeBase")
+		void OnClientCredentialReady();
+
+	void OnClientCredentialReady_Implementation();
+
 private:
 	const IOnlineSubsystem* OnlineSub;
 	IOnlineIdentityPtr Identity;
 	FDelegateHandle LoginCompleteHandle;
-	
-
 	void OnLoginCompleteDelegate(int32 LocalUserNum, bool bSuccessful, const FUniqueNetId& UserId, const FString& ErrorStr);
 };
 

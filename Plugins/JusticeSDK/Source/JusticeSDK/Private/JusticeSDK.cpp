@@ -74,9 +74,9 @@ void FJusticeSDKModule::StartupModule()
 		IsInitialized = false;
 	}
   
-	GameClientToken = TSharedPtr<FOAuthTokenJustice>(new FOAuthTokenJustice);
-	UserToken       = TSharedPtr<FOAuthTokenJustice>(new FOAuthTokenJustice);
-	UserProfile     = TSharedPtr<FUserProfileInfo>(new FUserProfileInfo);
+	GameClientToken = MakeShared<FOAuthTokenJustice>();
+	UserToken       = MakeShared<FOAuthTokenJustice>();
+	UserProfile     = MakeShared<FUserProfileInfo>();
 
 	AsyncTaskManager = TSharedPtr<FAsyncTaskManagerJustice>(new FAsyncTaskManagerJustice);
 	RetryTaskManager = TSharedPtr<FRetryTaskManagerJustice>(new FRetryTaskManagerJustice);
@@ -100,6 +100,11 @@ void FJusticeSDKModule::ShutdownModule()
 bool FJusticeSDKModule::ParseClientToken(FString json)
 {
 	FScopeLock lock(&GameClientCritical);
+	if (!GameClientToken.IsValid())
+	{
+		GameClientToken = MakeShared<FOAuthTokenJustice>();
+	}
+
 	if (GameClientToken->FromJson(json))
 	{
 		return true;
@@ -109,12 +114,32 @@ bool FJusticeSDKModule::ParseClientToken(FString json)
 
 bool FJusticeSDKModule::ParseUserToken(FString json)
 {
-	if (FJusticeSDKModule::Get().UserToken->FromJson(json))
+	if (!UserToken.IsValid())
+	{
+		UserToken = MakeShared<FOAuthTokenJustice>();
+	}
+
+	if (UserToken->FromJson(json))
 	{
 		return true;
 	}
 	return false;
 }
+
+bool FJusticeSDKModule::ParsePublisherUserToken(FString json)
+{
+	if (!PublisherUserToken.IsValid())
+	{
+		PublisherUserToken = MakeShared<FOAuthTokenJustice>();
+	}
+
+	if (PublisherUserToken->FromJson(json))
+	{
+		return true;
+	}
+	return false;
+}
+
 
 #undef LOCTEXT_NAMESPACE
 	

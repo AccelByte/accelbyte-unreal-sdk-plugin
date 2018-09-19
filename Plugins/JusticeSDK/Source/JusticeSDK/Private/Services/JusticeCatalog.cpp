@@ -634,7 +634,52 @@ void JusticeCatalog::GetItemByQuery(FString Language, FString Region, FString Ca
 		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
 }
 
-void JusticeCatalog::OnGetItemByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete)
+void JusticeCatalog::GetItemByCriteria(FString Namespace, FString AccessToken, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete)
+{
+	FString Authorization = FJusticeHTTP::BearerAuth(AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s"), *FJusticeBaseURL, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath));
+
+	if (!Language.IsEmpty())
+	{
+		URL.Append(FString::Printf(TEXT("&language=%s"), *Language));
+	}
+	if (!Region.IsEmpty())
+	{
+		URL.Append(FString::Printf(TEXT("&region=%s"), *Region));
+	}
+	if (!ItemType.IsEmpty())
+	{
+		URL.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
+	}
+	if (!Status.IsEmpty())
+	{
+		URL.Append(FString::Printf(TEXT("&status=%"), *Status));
+	}
+	if (Page > 0)
+	{
+		URL.Append(FString::Printf(TEXT("&page=%d"), Page));
+	}	
+	if (Size > 0)
+	{
+		URL.Append(FString::Printf(TEXT("&size=%d"), Size));
+	}
+
+	FString Verb = GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnGetItemByQueryResponse, OnComplete));
+}
+
+void JusticeCatalog::OnGetItemByQueryResponse(TSharedPtr<JusticeHttpResponse, ESPMode::ThreadSafe> Response, FItemCompleteDelegate OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -657,7 +702,7 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeResponsePtr Response, FIte
 			{
 				for (int32 i = 0; i < Result.Data.Num(); i++)
 				{
-					ArrayResult.Add(Result.Data[i]);						
+					ArrayResult.Add(Result.Data[i]);
 				}
 				OnComplete.ExecuteIfBound(true, TEXT(""), ArrayResult);
 			}
@@ -727,6 +772,164 @@ void JusticeCatalog::OnGetItemByQueryResponse(FJusticeResponsePtr Response, FIte
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryResponse Error : %s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr, TArray<FItemInfoJustice>());
+		return;
+	}
+}
+
+void JusticeCatalog::GetEntitlementItemIDFromAppID(FString Token, FString Namespace, FItemIDCompleteDelegate OnComplete)
+{
+	FString Authorization = FJusticeHTTP::BearerAuth(Token);	
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?itemType=PRODUCT&status=ACTIVE&page=0&size=100"), *FJusticeBaseURL, *Namespace);
+	FString Verb = GET;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
+}
+
+void JusticeCatalog::OnItemIDResponse(FJusticeResponsePtr Response, FItemIDCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Get Category Failed. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
+		return;
+	}
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Ok:
+	{
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->Content);
+		TArray<FItemInfoJustice> ArrayResult;
+		bool bFound = false;
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			FItemPagingSlicedResult Result;
+			if (Result.FromJson(JsonObject))
+			{
+
+				for (int32 i = 0; i < Result.Data.Num(); i++)
+				{
+					if (FJusticeAppID == Result.Data[i].AppId && Result.Data[i].RegionDatas.Num() > 0)
+					{
+						if (Result.Data[i].RegionDatas[0].Price == 0)
+						{
+							bFound = true;
+							OnComplete.ExecuteIfBound(true, TEXT(""), &Result.Data[i]);
+							return;
+						}
+					}
+				}
+
+
+				if (!bFound)
+				{
+					// proceed to next page
+					FString NextPageURL = Result.Paging.Next;
+					if (!NextPageURL.IsEmpty())
+					{
+						// new request						
+						FString Authorization = Response->JusticeRequest->Authorization;
+						FString URL = NextPageURL;
+						FString Verb = GET;
+						FString ContentType = TYPE_JSON;
+						FString Accept = TYPE_JSON;
+						FString Payload = TEXT("");
+
+						FJusticeHTTP::CreateRequest(
+							Authorization,
+							URL,
+							Verb,
+							ContentType,
+							Accept,
+							Payload,
+							FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
+						return;
+
+					}
+					else
+					{
+						OnComplete.Execute(false, TEXT("Can't find entitlement item that match with App ID."), nullptr);
+					}
+
+				}
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserlize response from server");
+			}
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserlize response from server");
+		}
+		break;
+	}
+	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Response->TooManyRetries() || Response->TakesTooLong())
+				{
+					ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+					return;
+				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
+				return;
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+				return;
+			}
+		}));
+		break;
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::Forbidden:
+		ErrorStr = TEXT("Forbidden");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticeCatalog::OnItemIDResponse, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpcted response Code=%d"), Response->Code);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnGetItemByQueryResponse Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
 		return;
 	}
 }

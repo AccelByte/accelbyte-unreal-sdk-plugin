@@ -14,7 +14,7 @@ UAsyncForgotPassword * UAsyncForgotPassword::ForgotPassword(FString LoginID)
 
 void UAsyncForgotPassword::Activate()
 {
-	JusticeIdentity::ForgotPassword(this->LoginID, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, this->LoginID, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

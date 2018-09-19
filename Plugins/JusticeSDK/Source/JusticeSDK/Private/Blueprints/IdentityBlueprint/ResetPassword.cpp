@@ -16,7 +16,7 @@ UAsyncResetPassword * UAsyncResetPassword::ResetPassword(FString UserID, FString
 
 void UAsyncResetPassword::Activate()
 {
-	JusticeIdentity::ResetPassword(this->UserID, this->VerificationCode, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeIdentity::ResetPassword(JusticeGameNamespace, this->UserID, this->VerificationCode, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			if (OnSuccess.IsBound())

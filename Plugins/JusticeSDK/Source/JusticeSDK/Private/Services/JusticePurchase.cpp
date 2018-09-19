@@ -2,18 +2,18 @@
 #include "Models/OrderCreate.h"
 #include "Services/JusticeIdentity.h"
 
-void JusticePurchase::CreateNewOrder(FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete)
+void JusticePurchase::CreateNewOrder(FOAuthTokenJustice Token, int32 Quantity, FString ItemID, int32 Price, int32 DiscountedPrice, FString Currency, FOrderInfoCompleteDelegate OnComplete)
 {
 	FOrderCreate NewOrderRequest;
 	NewOrderRequest.ItemID = ItemID;
 	NewOrderRequest.CurrencyCode = Currency;
-	NewOrderRequest.Price = Price;
-	NewOrderRequest.DiscountedPrice = DiscountedPrice;
-	NewOrderRequest.Quantity = 1;
+	NewOrderRequest.Price = Price * Quantity;
+	NewOrderRequest.DiscountedPrice = DiscountedPrice * Quantity;
+	NewOrderRequest.Quantity = Quantity;
 	NewOrderRequest.ReturnURL = TEXT("https://api.justice.accelbyte.net/");
 
-	FString Authorization	= FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
-	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders?isSandbox=true"), *FJusticeBaseURL, *FJusticeUserToken->Namespace,  *FJusticeUserID);
+	FString Authorization	= FJusticeHTTP::BearerAuth(Token.AccessToken);
+	FString URL				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *FJusticeBaseURL, *Token.Namespace,  *Token.UserID);
 	FString Verb			= POST;
 	FString ContentType		= TYPE_JSON;
 	FString Accept			= TYPE_JSON;

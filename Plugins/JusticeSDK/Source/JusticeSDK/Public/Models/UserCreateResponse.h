@@ -35,18 +35,20 @@ class UUserCreateResponse : public UObject, public FUserCreateResponse, public F
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString Namespace;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString UserID;
+	UFUNCTION(BlueprintPure, Category = "UserCreateResponse")
+		FString GetUserID() { return UserID; };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString AuthType;
+	UFUNCTION(BlueprintPure, Category = "UserCreateResponse")
+		FString GetNamespace() { return Namespace; };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString DisplayName;
+	UFUNCTION(BlueprintPure, Category = "UserCreateResponse")
+		FString GetAuthType() { return AuthType; };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UserCreateResponse")
-		FString LoginID;
+	UFUNCTION(BlueprintPure, Category = "UserCreateResponse")
+		FString GetDisplayName() { return DisplayName; };
+
+	UFUNCTION(BlueprintPure, Category = "UserCreateResponse")
+		FString GetLoginID() { return LoginID; };
+
 };

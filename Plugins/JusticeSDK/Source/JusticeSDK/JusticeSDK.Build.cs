@@ -11,7 +11,6 @@ public class JusticeSDK : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				"JusticeSDK/Public",
-                "JusticeHttp/Public"
 				// ... add public include paths required here ...
 			}
 			);
@@ -20,7 +19,6 @@ public class JusticeSDK : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				"JusticeSDK/Private",
-                "JusticeHttp/Private",
 				// ... add other private include paths required here ...
 			}
 			);
@@ -38,7 +36,6 @@ public class JusticeSDK : ModuleRules
                 "OnlineSubsystem",
                 "OnlineSubsystemUtils",
                 "WebBrowser",
-                "JusticeHttp"
             }
 			);
 			

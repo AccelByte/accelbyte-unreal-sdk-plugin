@@ -8,6 +8,8 @@ THIRD_PARTY_INCLUDES_START
 #include "steam/steam_api.h"
 THIRD_PARTY_INCLUDES_END
 
+#include "JusticeUser.h"
+
 
 AJusticeSDKDemoGameModeBase::AJusticeSDKDemoGameModeBase()
 {
@@ -30,7 +32,13 @@ void AJusticeSDKDemoGameModeBase::InitGame(const FString& MapName, const FString
 void AJusticeSDKDemoGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-	JusticeIdentity::ClientLogin();
+	JusticeIdentity::ClientLogin(); // this function is locking
+
+
+
+
+
+
 	FOnlineAccountCredentials* NewAccount = new FOnlineAccountCredentials;
 	NewAccount->Id = "480";
 	Identity->Login(0, *NewAccount);
@@ -60,11 +68,21 @@ void AJusticeSDKDemoGameModeBase::BeginPlay()
 	JusticeTelemetry::SendTelemetryEvent(Telemetry);
 }
 
+
+void AJusticeSDKDemoGameModeBase::OnClientCredentialReady_Implementation()
+{
+
+}
+
+
+
 void AJusticeSDKDemoGameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	JusticeIdentity::ClientLogout();
 }
+
+
 
 void AJusticeSDKDemoGameModeBase::Tick(float DeltaSeconds)
 {
@@ -112,5 +130,23 @@ void AJusticeSDKDemoGameModeBase::OnLoginCompleteDelegate(int32 LocalUserNum, bo
 			Avatar->UpdateResource();
 			JusticeIdentity::SetAvatar(Avatar);
 		}
+
+        //test
+   //     JusticeUser::LoginByPublisher(Steam, SteamTicket, FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FOAuthTokenJustice* OAuthToken) {
+			//if (bSuccessful)
+			//{
+			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("FINAL LoginByPublisher With Steam Ticket Success...."));
+			//}
+			//else
+			//{
+			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("FINAL LoginByPublisher With Steam Ticket FAILED...."));
+			//}
+			//
+   //     }));
+
+
+
+		
+
 	}
 }

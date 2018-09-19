@@ -41,6 +41,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeResponsePtr 
 		FString ResponseStr = Response->Content;
 		TSharedPtr<FJsonObject> JsonObject;
 		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+		
 		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 		{
 			if (FJusticeSDKModule::Get().UserProfile->FromJson(JsonObject))
@@ -62,7 +63,7 @@ void JusticePlatform::OnRequestCurrentPlayerProfileComplete(FJusticeResponsePtr 
 	{			
 		FString DisplayName = Token.DisplayName;		
 		UE_LOG(LogJustice, Log, TEXT("Userprofile not found, Attempt to create Default User Profile"));
-		JusticePlatform::CreateDefaultPlayerProfile(Token, DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		JusticePlatform::CreateDefaultPlayerProfile(Token, DisplayName, FDefaultCompleteDelegate::CreateLambda([&, Token, OnComplete](bool bSuccessful, FString ErrorStr) {
 			UE_LOG(LogJustice, Log, TEXT("Create Default User Profile return with result:  %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 			if (bSuccessful)
 			{
@@ -238,7 +239,7 @@ void JusticePlatform::CreateDefaultPlayerProfile(FOAuthTokenJustice Token, FStri
 	TArray<FString> RegionID;
 	DefaultLocale.ParseIntoArray(RegionID, TEXT("_"), true);
 
-	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeUserToken->AccessToken);
+	FString Authorization = FJusticeHTTP::BearerAuth(Token.AccessToken);
 	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
@@ -338,6 +339,127 @@ void JusticePlatform::OnCreateDefaultPlayerProfileComplete(FJusticeResponsePtr R
 	{
 		UE_LOG(LogJustice, Error, TEXT("OnCreateDefaultPlayerProfileComplete Error=%s"), *ErrorStr);
 		OnComplete.ExecuteIfBound(false, ErrorStr);
+	}
+}
+
+void JusticePlatform::CreateCompletePlayerProfile(FOAuthTokenJustice Token, FUserCreateRequest ProfileRequest, FRequestCurrentPlayerProfileCompleteDelegate OnComplete)
+{
+	FString DefaultLocale;
+#if PLATFORM_IOS
+	DefaultLocale = FIOSPlatformMisc::GetDefaultLocale();
+#elif PLATFORM_ANDROID
+	DefaultLocale = FAndroidMisc::GetDefaultLocale();
+#else
+	DefaultLocale = FGenericPlatformMisc::GetDefaultLocale();
+#endif
+	TArray<FString> RegionID;
+	DefaultLocale.ParseIntoArray(RegionID, TEXT("_"), true);
+
+	FString Authorization = FJusticeHTTP::BearerAuth(Token.AccessToken);
+	FString URL = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
+	FString Verb = POST;
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = ProfileRequest.ToJson();
+
+	FJusticeHTTP::CreateRequest(
+		Authorization,
+		URL,
+		Verb,
+		ContentType,
+		Accept,
+		Payload,
+		FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateCompletePlayerProfile, OnComplete));
+}
+
+void JusticePlatform::OnCreateCompletePlayerProfile(FJusticeResponsePtr Response, FRequestCurrentPlayerProfileCompleteDelegate OnComplete)
+{
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("Create Complete Player Profile. Error Message: %s"), *Response->ErrorString);
+		OnComplete.ExecuteIfBound(false, Response->ErrorString, nullptr);
+		return;
+	}
+
+	switch (Response->Code)
+	{
+	case EHttpResponseCodes::Created:
+	{
+		FString ResponseStr = Response->Content;
+		TSharedPtr<FJsonObject> JsonObject;
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseStr);
+
+		if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+		{
+			if (FJusticeSDKModule::Get().UserProfile->FromJson(JsonObject))
+			{
+				OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeSDKModule::Get().UserProfile.Get());
+			}
+			else
+			{
+				ErrorStr = TEXT("unable to deserialize response from json object");
+			}
+		}
+		else
+		{
+			ErrorStr = TEXT("unable to deserialize response from server");
+		}
+		break;
+
+	}
+	case EHttpResponseCodes::Denied:
+		JusticeIdentity::UserRefreshToken(
+			FUserLoginCompleteDelegate::CreateLambda([&](bool bSuccessful, FString InnerErrorStr, FOAuthTokenJustice* Token) {
+			if (bSuccessful)
+			{
+				if (Response->TooManyRetries() || Response->TakesTooLong())
+				{
+					OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+					return;
+				}
+				Response->UpdateRequestForNextRetry();
+				FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+					Response->NextWait,
+					FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateCompletePlayerProfile, OnComplete));
+				return;
+			}
+			else
+			{
+				ErrorStr = FString::Printf(TEXT("Your token is expired, but we cannot refresh your token. Error: %s"), *InnerErrorStr);
+				OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+				return;
+			}
+		}));
+		return;
+	case EHttpResponseCodes::RequestTimeout:
+		ErrorStr = TEXT("Request Timeout");
+		break;
+	case EHttpResponseCodes::ServerError:
+	case EHttpResponseCodes::ServiceUnavail:
+	case EHttpResponseCodes::GatewayTimeout:
+	{
+		if (Response->TooManyRetries() || Response->TakesTooLong())
+		{
+			ErrorStr = FString::Printf(TEXT("Retry Error, Response Code: %d, Content: %s"), Response->Code, *Response->Content);
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+			return;
+		}
+		Response->UpdateRequestForNextRetry();
+		FJusticeRetryManager->AddQueue(Response->JusticeRequest,
+			Response->NextWait,
+			FWebRequestResponseDelegate::CreateStatic(JusticePlatform::OnCreateCompletePlayerProfile, OnComplete));
+		return;
+	}
+	default:
+		ErrorStr = FString::Printf(TEXT("unexpected response Code=%d, Content: %s"), Response->Code, *Response->Content);
+	}
+
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnCreateCompletePlayerProfile Error : %s"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+		return;
 	}
 }
 

@@ -11,6 +11,6 @@ public class JusticeSDKDemoEditorTarget : TargetRules
 	{
 		Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "JusticeSDKDemo", "JusticeSDK", "JusticeWebBrowserWidget", "JusticeHttp" } );
+		ExtraModuleNames.AddRange( new string[] { "JusticeSDKDemo", "JusticeSDK", "JusticeWebBrowserWidget" } );
 	}
 }
