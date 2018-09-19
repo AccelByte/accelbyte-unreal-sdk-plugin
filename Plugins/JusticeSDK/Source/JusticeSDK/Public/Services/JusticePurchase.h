@@ -8,7 +8,6 @@
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
 #include "JusticeLog.h"
-#include "JusticePlatformFunctions.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Utilities/HTTPJustice.h"
 #include "Models/OrderInfo.h"

@@ -8,7 +8,6 @@
 #include "UObject/NoExportTypes.h"
 #include "Misc/ConfigCacheIni.h"
 #include "JusticeSDK.h"
-#include "JusticePlatformFunctions.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Utilities/HTTPJustice.h"
 #include "Utilities/JusticeLog.h"

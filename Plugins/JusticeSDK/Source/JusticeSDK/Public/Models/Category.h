@@ -33,7 +33,7 @@ struct FCategory : public FJsonSerializable
 
 
 UCLASS()
-class UCategory:public UObject, public FCategory, public FBaseModelJustice<UCategory, FCategory>
+class UCategory : public UObject, public FCategory, public FBaseModelJustice<UCategory, FCategory>
 {
 	GENERATED_BODY()
 public:

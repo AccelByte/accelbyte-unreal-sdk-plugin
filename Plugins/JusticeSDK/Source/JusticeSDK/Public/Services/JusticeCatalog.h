@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Misc/ConfigCacheIni.h"
-#include "JusticePlatformFunctions.h"
 #include "JusticeSDK.h"
 #include "Utilities/AWSXRayJustice.h"
 #include "Utilities/HTTPJustice.h"
@@ -21,21 +20,18 @@ DECLARE_DELEGATE_ThreeParams(FItemIDCompleteDelegate, bool, FString, FItemInfoJu
 class JUSTICESDK_API JusticeCatalog
 {
 public:
-	static void GetRootCategory(FString Language, FCategoryDefaultCompleteDelegate OnComplete);
-	static void GetCategory(FString ParentPath, FString Language, FCategoryDefaultCompleteDelegate OnComplete);
-	static void GetChildCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete);
-	static void GetDescendantCategory(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete);
-	static void GetItem(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete);
-	static void GetItemByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
-	static void GetItemByCriteria(FString Namespace, FString AccessToken, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
-	static void GetEntitlementItemIDFromAppID(FString Token, FString Namespace, FItemIDCompleteDelegate OnComplete);
+	static void GetRootCategories(FString Language, FCategoryDefaultCompleteDelegate OnComplete);
+	static void GetCategories(FString ParentPath, FString Language, FCategoryDefaultCompleteDelegate OnComplete);
+	static void GetChildCategories(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete);
+	static void GetDescendantCategories(FString Language, FString CategoryPath, FCategoryDefaultCompleteDelegate OnComplete);
+	static void GetItemById(FString ItemID, FString Region, FString Language, FGetItemCompleteDelegate OnComplete);
+	static void GetItemsByQuery(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FItemCompleteDelegate OnComplete);
 
 private:
-	static void OnGetRootCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetChildCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetDescendantCategoryResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
-	static void OnGetItemResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete);
-	static void OnGetItemByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete);
-	static void OnItemIDResponse(FJusticeResponsePtr Response, FItemIDCompleteDelegate OnComplete);
+	static void OnGetRootCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetChildCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetDescendantCategoriesResponse(FJusticeResponsePtr Response, FCategoryDefaultCompleteDelegate OnComplete);
+	static void OnGetItemByIdResponse(FJusticeResponsePtr Response, FGetItemCompleteDelegate OnComplete);
+	static void OnGetItemsByQueryResponse(FJusticeResponsePtr Response, FItemCompleteDelegate OnComplete);
 };
