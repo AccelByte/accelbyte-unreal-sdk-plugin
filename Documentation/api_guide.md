@@ -1,10 +1,10 @@
 \page api_guide API Guide
 
-\section blueprints Blueprints
+We have blueprint version for each C++ Function on each services.
 
-\subsection overview Overview
+\section using_the_sdk_with_blueprints Using the SDK with Blueprints
 
-We have blueprint version for each C++ Function on each services. The blueprint function is available in two flavors.
+The blueprint function is available in two flavors.
 
 1. As an Async Action Base single node with multiple output pin, whether it succeeds or fails
 2. As a Function Library using delegate node to handle callback
@@ -126,24 +126,15 @@ This blueprint is similar to `JusticeIdentity::UserLogout` function. You can use
 
 ![Blueprint Function Library User Logout](images/bp_functionlibrary_userlogout.png "Blueprint Function Library User Logout")
 
-\section functions Functions
+\section using_the_sdk_with_cpp Using the SDK with C++
+
+See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and JusticeWallet.
+
+\section usage_examples Usage examples
 
 \subsection justice_identity Justice Identity
 
-Justice Identity is the first service required before we can proceed to other service such as platform service.
-
 * `RegisterNewPlayer`
-
-    This function will register a new user with email-based account. It requires user's **email** (UserID), **password**, and **displayName** that will be registered through the parameter. It'll return a complete information from the user that has been registered, wrapped in UserCreateResponse object from the FRegisterPlayerCompleteDelegate callback.
-```cpp
-        void JusticeIdentity::RegisterNewPlayer(
-            FString UserID, 
-            FString Password, 
-            FString DisplayName, 
-            FUserAuthTypeJustice AuthType, 
-            FRegisterPlayerCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -165,15 +156,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `ReissueVerificationCode`
-
-    This function would be called after registering a new user account. This method requires user ID (**UserID**) and user email (**LoginId**) as parameters. User ID can be obtained from token response obtained after user login. It will return default callback.
-```cpp
-    void JusticeIdentity::ReissueVerificationCode(
-        FString UserID, 
-        FString LoginID, 
-        FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -193,16 +175,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `VerifyNewPlayer`
-
-    This function will verify the registered email **AFTER** user receives verification code sent with [ReissueVerificationCode](../functions/#reissueverificationcode) to their email. This method requires **user ID** (UserID), **VerificationCode**, and **AuthType** as parameters. It will return default callback.
-```cpp
-    void JusticeIdentity::VerifyNewPlayer(
-        FString UserID, 
-        FString VerificationCode, 
-        FUserAuthTypeJustice AuthType, 
-        FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -222,15 +194,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `UserLogin`
-
-    Log user in with their email account. User needs to insert their **email** (LoginID) and **Password** as parameters. It will return OAuthTokenJustice from FUserLoginCompleteDelegate callback.
-```cpp
-    void JusticeIdentity::UserLogin(
-        FString LoginID, 
-        FString Password, 
-        FUserLoginCompleteDelegate OnComplete)
-```
-    Usage:
 ```cpp
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -250,13 +213,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `DeviceLogin`
-
-    This function allows user to login without entering any information, it'll automatically obtain their device's information for their account. It will return OAuthTokenJustice from FUserLoginCompleteDelegate callback.
-
-```cpp
-        void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -271,12 +227,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `AuthCodeLogin`
-
-    This function will login the user automatically from Justice Launcher with their account on Justice Launcher too. **AuthCode** parameter should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable. **RedirectURI** is optional. This function will return OAuthTokenJustice from FUserLoginCompleteDelegate callback.
-```cpp
-        void JusticeIdentity::AuthCodeLogin(FString AuthCode, FString RedirectURI, FUserLoginCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -293,12 +243,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `UpgradeHeadlessAccount`
-
-    This function will upgrade user's headless account. Headless account is an account that doesn't have an email-password. If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account. Therefore, the function requests user’s **Email** and **Password** for parameters. It will return default callback.
-```cpp
-        void JusticeIdentity::UpgradeHeadlessAccount(FString Email, FString Password, FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -316,12 +260,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `ForgotPassword`
-
-    Send a request to reset user's password. This function requires user's email to reset their password. It requires email as **LoginID** parameter. It will return default callback.
-```cpp
-        void JusticeIdentity::ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -336,13 +274,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `ResetPassword`
-
-    This function verifies user's [request to reset password](#forgotpassword). User should insert their **email** (UserID), **VerificationCode** sent to their email, and **NewPassword** as parameters. It will return default callback.
-
-```cpp
-        void JusticeIdentity::ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -358,12 +289,6 @@ Justice Identity is the first service required before we can proceed to other se
         }
 ```
 * `LinkPlatform`
-
-    This function links user's current account to their other account in other platform. The required parameters are **PlatformID** and **Ticket**. Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform). The browser will redirect the url to a site with a code in form of parameter URL. This function will return default callback.
-```cpp
-        void JusticeIdentity::LinkPlatform(FString PlatformID, FString Ticket, FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
     
         void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -381,13 +306,6 @@ Justice Identity is the first service required before we can proceed to other se
         }
 ```
 * `UnlinkPlatform`
-
-    This function unlinks user's platform account that is linked with user’s current account. It only requires **PlatformID** as the parameter to unlink user’s platform account. It will return default callback.
-
-```cpp
-        void JusticeIdentity::UnlinkPlatform(FString PlatformID, FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -404,12 +322,6 @@ Justice Identity is the first service required before we can proceed to other se
 ```
 
 * `GetLinkedUserPlatform`
-
-    This function gets user's platform accounts linked to user’s account. It doesn't need any parameter. It will return a TArray<LinkedPlatform> from FGetLinkedPlatformCompleteDelegate callback.
-```cpp
-        void JusticeIdentity::GetLinkedPlatform(FGetLinkedPlatformCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -425,12 +337,6 @@ Justice Identity is the first service required before we can proceed to other se
         }
 ```
 * `Logout`
-
-    Log user out from the game. It doesn't require any parameter. It will return default callback.
-```cpp
-        void JusticeIdentity::UserLogout(FDefaultCompleteDelegate OnComplete)
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -447,21 +353,9 @@ Justice Identity is the first service required before we can proceed to other se
 
 \subsection platform_service Platform Service
 
-User should log in to use the platform. Please refer to [Justice Identity](#justice-identity) to see how to log user in.
-
 \subsubsection justice_catalog Justice Catalog
 
 * `GetCategory`
-
-    This function gets the category from a store in a namespace. The required parameter is **ParentPath** and the optional parameter is **Language**. It'll return the TArray<Category> from the FCategoryDefaultCompleteDelegate callback.
-```cpp
-    
-        void JusticeCatalog::GetCategory(
-            FString ParentPath, 
-            FString Language, 
-            FCategoryDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
     
         void AJusticeSDKDemoGameModeBase::BeginPlay()
@@ -480,13 +374,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
         }
 ```
 * `GetRootCategory`
-
-    This function gets root categories that exist in the same namespace with user's namespace. The optional parameter is **Language**. It'll return the root TArray<Category> from the FCategoryDefaultCompleteDelegate callback.
-```cpp
-    
-        void JusticeCatalog::GetRootCategory(FString Language, FCategoryDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -504,15 +391,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetChildCategory`
-
-    This function gets the subcategories from a category. This method requires the parent path / **CategoryPath** parameter and optional **Language** parameter. It'll return a subcategory TArray<Category> from the FCategoryDefaultCompleteDelegate callback.
-```cpp
-        void JusticeCatalog::GetChildCategory(
-            FString Language, 
-            FString CategoryPath, 
-            FCategoryDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -531,15 +409,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetDescendantCategory`
-
-    Get every subcategories from a category. The required parameter is **CategoryPath** and the optional parameter is **Language**. It'll return a descendant TArray<Category> from the FCategoryDefaultCompleteDelegate callback.
-```cpp
-        void JusticeCatalog::GetDescendantCategory(
-            FString Language, 
-            FString CategoryPath, 
-            FCategoryDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -558,16 +427,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetItem`
-
-    Get an item information from a store within the user's namespace. The required parameters are **ItemID** and **Region**. The optional parameter is **Language**. It'll return an ItemInfo from the FGetItemCompleteDelegate callback.
-```cpp
-        void JusticeCatalog::GetItem(
-            FString ItemID, 
-            FString Region, 
-            FString Language, 
-            FGetItemCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -587,20 +446,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetItemByQuery`
-
-    Get an array of items with specific criteria/filter from a store within user's namespace. All parameters are required, except **Language** paramater. This function will return a TArray<ItemInfo> that fulfilled the criteria from the FItemCompleteDelegate callback.
-```cpp
-        void JusticeCatalog::GetItemByQuery(
-            FString Language, 
-            FString Region, 
-            FString CategoryPath, 
-            FString ItemType, 
-            FString Status, 
-            int32 Page, 
-            int32 Size, 
-            FItemCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -626,17 +471,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 \subsection justice_purchase Justice Purchase
 
 * `CreateNewOrder`
-
-    Create order to purchase something from the store. It requires all parameters (**ItemID**, **Price**, **DiscountedPrice**, and **Currency**. It'll return OrderInfo from the FOrderInfoCompleteDelegate callback.
-```cpp
-        void JusticePurchase::CreateNewOrder(
-            FString ItemID, 
-            int32 Price, 
-            int32 DiscountedPrice, 
-            FString Currency, 
-            FOrderInfoCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -657,14 +491,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetUserOrder`
-
-    Get user's order information. It requires the order's number (**OrderNo**) as parameter. It'll return an OrderInfo from the FOrderInfoCompleteDelegate callback.
-```cpp
-        void JusticePurchase::GetUserOrder(
-            FString OrderNo, 
-            FOrderInfoCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -682,15 +508,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetUserOrders`
-
-    Get all of user's orders that have been created. It has two optional parameters; **Page** and **Size**. It'll return a TArray<OrderInfo> from the FGetUserOrdersCompleteDelegate callback.
-```cpp
-        void JusticePurchase::GetUserOrders(
-            int32 Page, 
-            int32 Size, 
-            FGetUserOrdersCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -709,14 +526,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `GetUserOrderHistory`
-
-    Get the history of the created orders. It requires an **OrderNo** parameter. It'll return an TArray<OrderHistoryInfo> from the FGetUserOrderHistoryCompleteDelegate callback.
-```cpp
-        void JusticePurchase::GetUserOrderHistory(
-            FString OrderNo, 
-            FGetUserOrderHistoryCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -734,15 +543,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `FulfillOrder`
-
-    Fulfill user's order. The required parameter is **OrderNo**. It'll return an OrderInfo from the FOrderInfoCompleteDelegate callback.
-```cpp
-        
-        void JusticePurchase::FulfillOrder(
-            FString OrderNo, 
-            FOrderInfoCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -762,14 +562,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 \subsubsection justice_wallet Justice Wallet
 
 * `GetWalletBalance`
-
-    Get user's wallet information for a specific currency code. It requires **CurrencyCode** as a parameter. It'll return an **integer** number of the wallet's balance from the FGetWalletBalanceCompleteDelegatecallback.
-```cpp
-        void JusticeWallet::GetWalletBalance(
-            FString CurrencyCode, 
-            FGetWalletBalanceCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -788,13 +580,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 \subsubsection user_profile User Profile
 
 * `RequestCurrentPlayerProfile`
-
-    Get user's profile information. The profile should exists. It doesn't require any parameter. It'll return the UserProfileInfo from the FReqestCurrentPlayerProfileCompleteDelegate callback.
-```cpp
-        void JusticePlatform::RequestCurrentPlayerProfile(
-            FReqestCurrentPlayerProfileCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -811,15 +596,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `CreateDefaultPlayerProfile`
-
-    Create user's minimum profile information. It requires two parameters to be filled: **Email** and **DisplayName**. It will return default callback.
-```cpp
-        void JusticePlatform::CreateDefaultPlayerProfile(
-            FString Email, 
-            FString DisplayName, 
-            FDefaultCompleteDelegate OnComplete){}
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -837,14 +613,6 @@ User should log in to use the platform. Please refer to [Justice Identity](#just
 ```
 
 * `UpdatePlayerProfile`
-
-    Update user's current profile information. The profile should exist. It requires an object (**UserProfileInfoUpdate**) as the parameter. It will return default callback.
-```cpp
-        void JusticePlatform::UpdatePlayerProfile(
-            UserProfileInfoUpdate newUserProfile, 
-            FDefaultCompleteDelegate OnComplete)
-```
-    Usage:
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
@@ -975,10 +743,10 @@ Bans            |TArray< FString>|Ban(s) of the client.
 UserID          |FString|ID of the client.
 DisplayName     |FString|Display name of the client.
 Namespace       |FString|Namespace of the client.
-LastTokenRefreshUtc|FDateTime|
-NextTokenRefreshUtc|FDateTime|
-TokenRefreshBackoff|FTimespan|
-JFlags          |int32|
+LastTokenRefreshUtc|FDateTime|Last token refresh in UTC.
+NextTokenRefreshUtc|FDateTime|Next token refresh in UTC.
+TokenRefreshBackoff|FTimespan|Refresh token backoff.
+JFlags          |int32|Flags
 
 ## FOrderCreate
 
