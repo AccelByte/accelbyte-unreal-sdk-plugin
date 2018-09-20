@@ -16,12 +16,39 @@
 
 DECLARE_DELEGATE_ThreeParams(FRequestCurrentPlayerProfileCompleteDelegate, bool, FString, FUserProfileInfo*);
 
+/**
+ * @brief Justice platform service
+ * User should log in before using this. See JusticeIdentity to see how to log user in.
+ */
 class JUSTICESDK_API JusticePlatform
 {
 public:
+	/**
+	 * @brief Get user's profile information, if it exists.
+	 * 
+	 * @param Token Required. User acess token.
+	 * @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is FUserProfileInfo, set in FRequestCurrentPlayerProfileCompleteDelegate callback.
+	 */
 	static void RequestCurrentPlayerProfile(FOAuthTokenJustice Token, FRequestCurrentPlayerProfileCompleteDelegate OnComplete);
+
+	/**
+	 * @brief Update user's current profile information, if it exists.
+	 * 
+	 * @param Token Required. Token User acess token.
+	 * @param NewUserProfile Required. UserProfileInfoUpdate object.
+	 * @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	 */
     static void UpdatePlayerProfile(FOAuthTokenJustice Token, UserProfileInfoUpdate NewUserProfile, FDefaultCompleteDelegate OnComplete);
+	
+	/**
+	 * @brief Create empty profile information.
+	 * 
+	 * @param Token  Required. User acess token.
+	 * @param DisplayName Required.
+	 * @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	 */
 	static void CreateDefaultPlayerProfile(FOAuthTokenJustice Token, FString DisplayName, FDefaultCompleteDelegate OnComplete);
+
 	static void CreateCompletePlayerProfile(FOAuthTokenJustice Token, FUserCreateRequest ProfileRequest, FRequestCurrentPlayerProfileCompleteDelegate OnComplete);
 	static TSharedPtr<FUserProfileInfo> GetUserProfileInfo();
 private:

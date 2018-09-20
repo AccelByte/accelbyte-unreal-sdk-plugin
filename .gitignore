@@ -73,11 +73,8 @@ Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
-Content/StarterContent/
-!Content/StarterContent/Maps
-!Content/StarterContent/Maps/*
-Plugins/OnlineSubsystemJustice/Binaries/
-Plugins/OnlineSubsystemJustice/Intermediate/
+Content/StarterContent/*
+
 *.bak
 Plugins/JusticeSDK/Binaries/
 Plugins/JusticeSDK/Intermediate/Build/
@@ -85,8 +82,5 @@ Plugins/JusticeWebBrowserWidget/Binaries/
 Plugins/JusticeWebBrowserWidget/Content/WebTexture_M.uasset
 Plugins/JusticeWebBrowserWidget/Intermediate/Build/
 
-!Content/StarterContent/Maps/Minimal_Default.umap
-!Content/StarterContent/Maps/Minimal_Default_BuiltData.uasset
-Plugins/JusticeHttp/Binaries/Win64/UE4Editor.modules
-Plugins/JusticeHttp/Intermediate/
-Plugins/JusticeHttp/Binaries/Win64/UE4Editor-JusticeHttp.pdb
+# Doxygen generated files
+Doxygen/*

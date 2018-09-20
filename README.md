@@ -213,12 +213,10 @@ If you still have `OnlineSubsystemJustice` folder in Plugins folder, please remo
  
 ## 7. Complete Documentation
 
-For more detailed documentation, please take a look on docs folder. There is a more specific documentation on each file. You can also use mkdocs to view this docs in HTML format.
-
-Go to root folder of this repository, and run this command
+For more detailed documentation, install [Doxygen](http://www.doxygen.nl/), go to Documentation folder, and run this command
 
 ```bash
-mkdocs serve
+doxygen
 ```
 
-Open `http://127.0.0.1:8000` on your browser
+Open Doxygen\html\index.html on your browser.

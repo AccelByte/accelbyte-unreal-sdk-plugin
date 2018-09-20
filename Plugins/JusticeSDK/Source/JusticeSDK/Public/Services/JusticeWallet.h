@@ -15,9 +15,19 @@
 
 DECLARE_DELEGATE_TwoParams(FGetWalletBalanceCompleteDelegate, bool, int32);
 
+/**
+ * @brief Justice wallet service.
+ * User should log in before using this. See JusticeIdentity to see how to log user in.
+ */
 class JUSTICESDK_API JusticeWallet
 {
 public:
+/**
+ * @brief Get user's wallet information for a specific currency code. It requires CurrencyCode as a parameter. 
+ * 
+ * @param CurrencyCode Required.
+ * @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is int32, set in FGetWalletBalanceCompleteDelegate callback.
+ */
 	static void GetWalletBalance(FString CurrencyCode, FGetWalletBalanceCompleteDelegate OnComplete);
 	
 private:
