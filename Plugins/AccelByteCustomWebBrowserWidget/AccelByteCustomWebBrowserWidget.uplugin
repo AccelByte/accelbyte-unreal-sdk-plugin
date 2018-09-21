@@ -1,0 +1,40 @@
+{
+	"FileVersion" : 3,
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"FriendlyName" : "AccelByte Custom Web Browser Widget",
+	"Description" : "Allows the user to create a Web Browser Widget with custom redirect event",
+	"Category" : "Widgets",
+	"CreatedBy" : "AccelByte",
+	"CreatedByUrl" : "https://accelbyte.net",
+	"DocsUrl" : "",
+	"MarketplaceUrl" : "",
+	"SupportUrl" : "",
+	"EnabledByDefault" : false,
+	"CanContainContent" : false,
+	"IsBetaVersion" : false,
+	"Installed" : false,
+  "Modules": 
+  [
+    {
+      "Name": "AccelByteCustomWebBrowserWidget",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64",
+        "Win32",
+        "Mac"
+      ]
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "AccelByteUe4Sdk",
+      "Enabled": true
+    },
+    {
+      "Name": "EditorTests",
+      "Enabled": true
+    }
+  ]
+}
