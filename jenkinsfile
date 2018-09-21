@@ -52,6 +52,28 @@ pipeline {
             }
             steps {
                 bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -game -rocket -progress'
+                powershell '''
+                    $CONFIG_FILE = "$Env:WORKSPACE\\Config\\DefaultEngine.ini"
+                    $CONFIG_FIELD = 
+                    "[JusticeSDK]" + 
+                    "`r`nbEnabled=true" + 
+                    "`r`nAppId=" + $Env:UE4_APP_ID + 
+                    "`r`nBaseURL=`"" + $Env:BaseURL + '"' +
+                    "`r`nClientID=" + $Env:UE4_CLIENT_ID + 
+                    "`r`nClientSecret=" + $Env:UE4_CLIENT_SECRET + 
+                    "`r`nNamespace=" + $Env:UE4_NAMESPACE + 
+                    "`r`nRedirectURI=`"" + $Env:UE4_RedirectURI + '"' + 
+                    "`r`nPublisherNamespace=" + $Env:UE4_PublisherNamespace + 
+                    "`r`n`r`n[Platform]"
+                    (get-content -raw $CONFIG_FILE) -replace "(?ms)^\\[JusticeSDK\\]+.+(\\[Platform\\])", $CONFIG_FIELD | out-file $CONFIG_FILE
+                    foreach ($LINE in get-content $CONFIG_FILE)
+                    {
+                        if (($LINE -match "ClientID" -or $LINE -match "ClientSecret" ) -eq $false)
+                        {
+                            echo $LINE
+                        }
+                    }
+                '''
             }
             post {
                 failure {
@@ -202,7 +224,7 @@ pipeline {
                 if (turnOff){
                     node('master'){
                     sh '''
-                    aws ec2 stop-instances --instance-ids i-0627e8b0d88cff6de
+                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
                     '''
                     }
                 }
