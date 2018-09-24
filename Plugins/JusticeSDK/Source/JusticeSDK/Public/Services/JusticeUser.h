@@ -79,7 +79,7 @@ public:
 	static void ResetPassword(FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete);
 
 	/**
-	* @brief This function should be called automatically if the game started by AccelByte's launcher.
+	* @brief This function should be called if the game started by AccelByte's launcher.
 	*
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/

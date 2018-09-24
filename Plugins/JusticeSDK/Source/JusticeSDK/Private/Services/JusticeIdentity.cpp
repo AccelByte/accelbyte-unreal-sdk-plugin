@@ -1132,7 +1132,7 @@ void JusticeIdentity::ReissueVerificationCode(FString Namespace, FString UserID,
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
 	FString Accept          = TYPE_JSON;
-	FString Payload         = FString::Printf(TEXT("{ \"LoginId\": \"%s\"}"), *LoginID);
+	FString Payload         = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -1151,7 +1151,7 @@ void JusticeIdentity::ReissueVerificationCode(FOAuthTokenJustice Token, FString 
 	FString Verb = POST;
 	FString ContentType = TYPE_JSON;
 	FString Accept = TYPE_JSON;
-	FString Payload = FString::Printf(TEXT("{ \"LoginId\": \"%s\"}"), *LoginID);
+	FString Payload = FString::Printf(TEXT("{ \"LoginID\": \"%s\"}"), *LoginID);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
