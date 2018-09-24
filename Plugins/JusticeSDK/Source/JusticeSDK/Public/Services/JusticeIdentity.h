@@ -82,10 +82,11 @@ public:
 	 * @brief This function allows user to login without entering any information.
 	 * It'll automatically obtain their device's information for their account.
 	 * 
+	 * @param Namespace Required.
 	 * @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	 * The result is FUserLoginCompleteDelegate, set in OAuthTokenJustice callback.
 	 */
-	static void DeviceLogin(FUserLoginCompleteDelegate OnComplete);
+	static void DeviceLogin(FString Namespace, FUserLoginCompleteDelegate2 OnComplete);
 	/**
 	 * @brief This function will register a new user with email-based account.
 	 * 
@@ -211,7 +212,7 @@ public:
 private:
 
 /* Delegates. */
-	static void OnDeviceLoginResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
+	static void OnDeviceLoginResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate2 OnComplete);
 	static void OnUserLoginResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate2 OnComplete);
 	static void OnUserRefreshResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate OnComplete);
 	static void OnUserLogoutResponse(FJusticeResponsePtr Response, FDefaultCompleteDelegate OnComplete);

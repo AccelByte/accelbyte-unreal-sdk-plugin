@@ -73,7 +73,7 @@ void JusticeUser::OnLogoutResponse(FJusticeResponsePtr Response, FDefaultComplet
 
 void JusticeUser::LoginWithDeviceId(FDefaultCompleteDelegate OnComplete)
 {
-	JusticeIdentity::LoginWithPlatform(JusticeGameNamespace, TEXT("device"), FGenericPlatformMisc::GetDeviceId(), FUserLoginCompleteDelegate2::CreateLambda([&, OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> OAuthToken)
+	JusticeIdentity::DeviceLogin(JusticeGameNamespace, FUserLoginCompleteDelegate2::CreateLambda([&, OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> OAuthToken)
 	{
 		if (bSuccessful)
 		{
