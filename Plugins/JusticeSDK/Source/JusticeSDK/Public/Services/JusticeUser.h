@@ -85,7 +85,19 @@ public:
 	*/
 	static void LoginFromLauncher(FDefaultCompleteDelegate OnComplete);
 
+	/**
+	* @brief Get user's profile information.
+	*
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is FUserProfileInfo, set in FRequestCurrentPlayerProfileCompleteDelegate callback.
+	*/
 	static void GetProfile(FRequestCurrentPlayerProfileCompleteDelegate OnComplete);
+
+	/**
+	* @brief Update user's profile information.
+	*
+	* @param UpdateProfile Required. This is the new profile information that'll be updated.
+	* @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is FUserProfileInfo, set in FRequestCurrentPlayerProfileCompleteDelegate callback.
+	*/
 	static void UpdateProfile(UserProfileInfoUpdate UpdateProfile, FDefaultCompleteDelegate OnComplete);
 
 private:

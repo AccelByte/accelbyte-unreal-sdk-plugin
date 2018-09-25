@@ -3379,7 +3379,126 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "JusticeTest.SteamTicket.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfileUtilitiesSuccess, "JusticeTest.GetAndUpdateProfile.Success", AutomationFlagMask);
+bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
+{
+	bool bDeviceLoginDone1 = false;
+	bool bDeviceLoginSuccessful1 = false;
+	bool bGetProfileDone1 = false;
+	bool bUpdateProfileDone = false;
+	bool bUpdateProfileSuccessful = false;
+	bool bGetProfileSuccessful1 = false;
+	bool bGetProfileDone2 = false;
+	bool bGetProfileSuccessful2 = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	
+	UserProfileInfoUpdate ProfileUpdate;
+	ProfileUpdate.Country = "US";
+	ProfileUpdate.Language = "en";
+	ProfileUpdate.Timezone = "Asia/Shanghai";
+	ProfileUpdate.DateOfBirth = "1999-09-09";
+	ProfileUpdate.Email = "test@example.com";
+	ProfileUpdate.DisplayName = "TestProfile";
+	FUserProfileInfo * UpdatedProfile;
+	double LastTime = 0;
+
+	FDefaultCompleteDelegate OnLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone1 = true;
+		bDeviceLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetProfileComplete1 = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FUserProfileInfo * Result)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Get user profile result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetProfileDone1 = true;
+		bGetProfileSuccessful1 = bSuccessful;
+	});
+	JusticeUser::GetProfile(OnGetProfileComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetProfileDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDefaultCompleteDelegate OnUpdateProfileComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Update user profile result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bUpdateProfileDone = true;
+		bUpdateProfileSuccessful = bSuccessful;
+	});
+	JusticeUser::UpdateProfile(ProfileUpdate, OnUpdateProfileComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bUpdateProfileDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FRequestCurrentPlayerProfileCompleteDelegate OnGetProfileComplete2 = FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FUserProfileInfo * Result)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Get user profile result after updated: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bGetProfileDone2 = true;
+		bGetProfileSuccessful2 = bSuccessful;
+		UpdatedProfile = Result;
+	});
+	JusticeUser::GetProfile(OnGetProfileComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bGetProfileDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(FJusticeUserID, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bDeviceLoginSuccessful1);
+	check(bGetProfileSuccessful2);
+	check(bUpdateProfileSuccessful);
+	check(UpdatedProfile->DisplayName == ProfileUpdate.DisplayName);
+	check(bGetProfileSuccessful2);
+	check(bDeleteSuccessful);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "Disabled.SteamTicket.Success", AutomationFlagMask);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
 	FString Ticket = FIntegrationTestModule::GetSteamTicket();

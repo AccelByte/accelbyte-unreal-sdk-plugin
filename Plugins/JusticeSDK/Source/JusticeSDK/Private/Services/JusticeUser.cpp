@@ -130,10 +130,32 @@ void JusticeUser::ResetPassword(FString LoginID, FString VerificationCode, FStri
 
 void JusticeUser::GetProfile(FRequestCurrentPlayerProfileCompleteDelegate OnComplete)
 {	
+	JusticePlatform::RequestCurrentPlayerProfile(*FJusticeUserToken.Get(), FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&, OnComplete](bool bSuccessful, FString ErrorStr, FUserProfileInfo * UserProfile)
+	{
+		if (bSuccessful)
+		{
+			OnComplete.ExecuteIfBound(true, TEXT(""), UserProfile);
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, ErrorStr, nullptr);
+		}
+	}));
 }
 
 void JusticeUser::UpdateProfile(UserProfileInfoUpdate UpdateProfile, FDefaultCompleteDelegate OnComplete)
 {
+	JusticePlatform::UpdatePlayerProfile(*FJusticeUserToken.Get(), UpdateProfile, FDefaultCompleteDelegate::CreateLambda([&, OnComplete](bool bSuccessful, FString ErrorStr)
+	{
+		if (bSuccessful)
+		{
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, ErrorStr);
+		}
+	}));
 }
 
 void JusticeUser::InitProfile(FOAuthTokenJustice OAuthToken, FDefaultCompleteDelegate OnComplete)
