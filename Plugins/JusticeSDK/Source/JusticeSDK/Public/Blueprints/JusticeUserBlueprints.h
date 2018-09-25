@@ -89,7 +89,7 @@ private:
 	FString Password;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetProfileOutputPin, FString, ErrorMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGetProfileOutputPin, FString, ErrorMessage, UUserProfileJustice*, UserProfile);
 UCLASS(Blueprintable, BlueprintType)
 class JUSTICESDK_API UGetProfile : public UBlueprintAsyncActionBase
 {
@@ -115,6 +115,19 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FUpdateProfileOutputPin OnFail;
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "JusticeSDK | User"))
-		static UUpdateProfile* UpdateProfile();
+		static UUpdateProfile* UpdateProfile(FString DisplayName, FString FirstName, FString LastName, FString AvatarSmallUrl, FString AvatarUrl, FString AvatarLargeUrl, FString Email, FString Language, FString Timezone, FString DateOfBirth, FString Country, TMap<FString, FString> CustomAttributes);
 	virtual void Activate() override;
+private:
+	FString                 DisplayName;
+	FString                 FirstName;
+	FString                 LastName;
+	FString                 AvatarSmallUrl;
+	FString                 AvatarUrl;
+	FString                 AvatarLargeUrl;
+	FString                 Email;
+	FString                 Language;
+	FString                 Timezone;
+	FString                 DateOfBirth;
+	FString                 Country;
+	TMap<FString, FString>  CustomAttributes;
 };
