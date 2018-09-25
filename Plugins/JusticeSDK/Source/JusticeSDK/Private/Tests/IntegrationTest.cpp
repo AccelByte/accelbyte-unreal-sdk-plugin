@@ -8,6 +8,7 @@
 #include "HttpManager.h"
 #include "Public/Models/UserOnlineAccountJustice.h"
 #include "Public/Services/JusticeIdentity.h"
+#include "Public/Services/JusticeUser.h"
 #include "Public/Services/JusticePurchase.h"
 #include "Public/Services/JusticeCatalog.h"
 #include "Public/Services/JusticePlatform.h"
@@ -2775,8 +2776,631 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 		return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "JusticeTest.LoginWithDeviceId.LoginTwiceGetSameUserId", AutomationFlagMask);
+bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
+{
+	bool bDeviceLoginDone1 = false;
+	bool bDeviceLoginSuccessful1 = false;
+	bool bDeviceLoginDone2 = false;
+	bool bDeviceLoginSuccessful2 = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	FString FirstUserId = "";
+	FString SecondUserId = "";
+	double LastTime = 0;
+
+	FDefaultCompleteDelegate OnLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 1st time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone1 = true;
+		bDeviceLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FirstUserId = FJusticeUserID;
+	FJusticeSDKModule::Get().UserToken.Reset();
+
+	FDefaultCompleteDelegate OnLoginComplete2 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 2nd time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone2 = true;
+		bDeviceLoginSuccessful2 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	SecondUserId = FJusticeUserID;
+
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(SecondUserId, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bDeviceLoginSuccessful1)
+	check(bDeviceLoginSuccessful2)
+	check(bDeleteSuccessful)
+	check(FirstUserId == SecondUserId && FirstUserId != "" && SecondUserId != "")
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdUniqueIdCreated, "JusticeTest.LoginWithDeviceId.UniqueUserIdCreatedForEachDevice", AutomationFlagMask);
+bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
+{
+	bool bDeviceLoginDone1 = false;
+	bool bDeviceLoginSuccessful1 = false;
+	bool bDeviceLoginDone2 = false;
+	bool bDeviceLoginSuccessful2 = false;
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	bool bDeleteDone2 = false;
+	bool bDeleteSuccessful2 = false;
+	FString FirstUserId = "";
+	FString SecondUserId = "";
+	double LastTime = 0;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Login first user..."))
+	FDefaultCompleteDelegate OnLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 1st time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone1 = true;
+		bDeviceLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FirstUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting first user..."));
+	FDeleteUserDelegate OnDeleteComplete1 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete first user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone1 = true;
+		bDeleteSuccessful1 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(FirstUserId, OnDeleteComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FJusticeSDKModule::Get().UserToken.Reset();
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in second user..."))
+	FDefaultCompleteDelegate OnLoginComplete2 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 2nd time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone2 = true;
+		bDeviceLoginSuccessful2 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	SecondUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting second user..."))
+	FDeleteUserDelegate OnDeleteComplete2 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete second user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone2 = true;
+		bDeleteSuccessful2 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(SecondUserId, OnDeleteComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Asserting..."))
+	check(bDeviceLoginSuccessful1)
+	check(bDeviceLoginSuccessful2)
+	check(bDeleteSuccessful1)
+	check(bDeleteSuccessful2)
+	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "JusticeTest.UpgradeHeadlessDeviceAccount.Succes", AutomationFlagMask);
+bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
+{
+	FString Email = TEXT("testSDK@example.com");
+	FString Password = TEXT("password");
+	bool bDeviceLoginDone1 = false;
+	bool bDeviceLoginSuccessful1 = false;
+	bool bUpgradeDone = false;
+	bool bUpgradeSuccessful = false;
+	bool bEmailLoginDone = false;
+	bool bEmailLoginSuccessful = false;
+	bool bUpgradedHeadlessAccountUserIdRemain = false;
+	bool bDeviceLoginDone2 = false;
+	bool bDeviceLoginSuccessful2 = false;
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	bool bDeleteDone2 = false;
+	bool bDeleteSuccessful2 = false;
+	FString FirstUserId = "";
+	FString SecondUserId = "";
+	FString ThirdUserId = "";
+	double LastTime = 0;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in with device ID..."));
+	FDefaultCompleteDelegate OnDeviceLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 1st time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone1 = true;
+		bDeviceLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnDeviceLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FirstUserId = FJusticeUserID;
+	
+	UE_LOG(LogJusticeTest, Log, TEXT("Upgrading headless account..."));
+	FDefaultCompleteDelegate OnUpgradeComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Upgrade headless device account result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bUpgradeDone = true;
+		bUpgradeSuccessful = bSuccessful;
+	});
+	JusticeUser::UpgradeHeadlessAccount(Email, Password, OnUpgradeComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bUpgradeDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FJusticeSDKModule::Get().UserToken.Reset();
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in the email account..."));
+	FUserLoginCompleteDelegate2 OnLoginEmailComplete = FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with upgrade account result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bEmailLoginDone = true;
+		bEmailLoginSuccessful = bSuccessful;
+	});
+	JusticeUser::Login(Email, Password, OnLoginEmailComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bEmailLoginDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bUpgradedHeadlessAccountUserIdRemain = (FirstUserId == FJusticeUserID && FJusticeUserID != "");
+	FJusticeSDKModule::Get().UserToken.Reset();
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in with device account (second attempt)..."));
+	FDefaultCompleteDelegate OnDeviceLoginComplete2 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 2nd time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeviceLoginDone2 = true;
+		bDeviceLoginSuccessful2 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnDeviceLoginComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeviceLoginDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	SecondUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting first user..."));
+	FDeleteUserDelegate OnDeleteComplete1 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete first user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone1 = true;
+		bDeleteSuccessful1 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(FirstUserId, OnDeleteComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting second user..."));
+	FDeleteUserDelegate OnDeleteComplete2 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete second user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone2 = true;
+		bDeleteSuccessful2 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(SecondUserId, OnDeleteComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bUpgradeSuccessful)
+	check(bUpgradedHeadlessAccountUserIdRemain)
+	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
+	check(bEmailLoginSuccessful)
+	check(bDeviceLoginSuccessful1)
+	check(bDeviceLoginSuccessful2)
+	check(bDeleteSuccessful1)
+	check(bDeleteSuccessful2)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "JusticeTest.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMask);
+bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
+{
+	bool bSteamLoginDone1 = false;
+	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone2 = false;
+	bool bSteamLoginSuccessful2 = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	FString FirstUserId = "";
+	FString SecondUserId = "";
+	double LastTime = 0;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in with your Steam account..."));
+	FDefaultCompleteDelegate OnLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 1st time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSteamLoginDone1 = true;
+		bSteamLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::Login(EPlatformType::Steam, FIntegrationTestModule::GetSteamTicket(), OnLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSteamLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FirstUserId = FJusticeUserID;
+	FJusticeSDKModule::Get().UserToken.Reset();
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in with your Steam account (second attempt)..."));
+	FDefaultCompleteDelegate OnLoginComplete2 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with device ID for the 2nd time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSteamLoginDone2 = true;
+		bSteamLoginSuccessful2 = bSuccessful;
+	});
+	JusticeUser::Login(EPlatformType::Steam, FIntegrationTestModule::GetSteamTicket(), OnLoginComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSteamLoginDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	SecondUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting current account..."));
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(SecondUserId, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bSteamLoginSuccessful1)
+	check(bSteamLoginSuccessful2)
+	check(bDeleteSuccessful)
+	check(FirstUserId == SecondUserId && FirstUserId != "" && SecondUserId != "")
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamUniqueIdCreated, "JusticeTest.LoginWithSteam.UniqueUserIdCreatedForSteamAccount", AutomationFlagMask);
+bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
+{
+	bool bSteamLoginDone1 = false;
+	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone2 = false;
+	bool bSteamLoginSuccessful2 = false;
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	bool bDeleteDone2 = false;
+	bool bDeleteSuccessful2 = false;
+	FString FirstUserId = "";
+	FString SecondUserId = "";
+	double LastTime = 0;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in first user..."))
+		FDefaultCompleteDelegate OnLoginComplete1 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with Steam account for the 1st time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSteamLoginDone1 = true;
+		bSteamLoginSuccessful1 = bSuccessful;
+	});
+	JusticeUser::Login(EPlatformType::Steam, FIntegrationTestModule::GetSteamTicket(), OnLoginComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSteamLoginDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FirstUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting first user..."));
+	FDeleteUserDelegate OnDeleteComplete1 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete first user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone1 = true;
+		bDeleteSuccessful1 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(FirstUserId, OnDeleteComplete1);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone1)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FJusticeSDKModule::Get().UserToken.Reset();
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in second user..."))
+		FDefaultCompleteDelegate OnLoginComplete2 = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with Steam account for the 2nd time result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bSteamLoginDone2 = true;
+		bSteamLoginSuccessful2 = bSuccessful;
+	});
+	JusticeUser::LoginWithDeviceId(OnLoginComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bSteamLoginDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	SecondUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting second user..."))
+		FDeleteUserDelegate OnDeleteComplete2 = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete second user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone2 = true;
+		bDeleteSuccessful2 = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(SecondUserId, OnDeleteComplete2);
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bDeleteDone2)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Asserting..."))
+		check(bSteamLoginSuccessful1)
+		check(bSteamLoginSuccessful2)
+		check(bDeleteSuccessful1)
+		check(bDeleteSuccessful2)
+		check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "JusticeTest.UpgradeHeadlessSteamAccount.Success", AutomationFlagMask);
+bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
+{
+	FString Email = TEXT("testSDK@example.com");
+	FString Password = TEXT("password");
+	bool bLoginPlatformDone = false;
+	bool bLoginPlatformSuccessful = false;
+	bool bUpgradeDone = false;
+	bool bUpgradeSuccessful = false;
+	bool bLoginEmailDone = false;
+	bool bLoginEmailSuccessful = false;
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	double LastTime = 0;
+	FString FirstUserId = TEXT("");
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Logging in Steam account..."))
+		FDefaultCompleteDelegate OnLoginPlatformComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with Steam account result: %s"), bSuccessful ? TEXT("Success!") : TEXT("Failed"));
+		bLoginPlatformDone = true;
+		bLoginPlatformSuccessful = bSuccessful;
+	});
+	JusticeUser::Login(EPlatformType::Steam, FIntegrationTestModule::GetSteamTicket(), OnLoginPlatformComplete);
+
+	while (!bLoginPlatformDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+	FirstUserId = FJusticeUserID;
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Upgrading headless account..."));
+	FDefaultCompleteDelegate OnUpgradeComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Upgrade headless account result: %s"), bSuccessful ? TEXT("Success!") : TEXT("Failed"));
+		bUpgradeDone = true;
+		bUpgradeSuccessful = bSuccessful;
+	});
+	JusticeUser::UpgradeHeadlessAccount(Email, Password, OnUpgradeComplete);
+
+	while (!bUpgradeDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FJusticeSDKModule::Get().UserToken.Reset();
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Loggin in with upgraded account..."));
+	FUserLoginCompleteDelegate2 OnLoginEmailComplete = FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Login with upgrade account result: %s"), bSuccessful ? TEXT("Success!") : TEXT("Failed"));
+		bLoginEmailDone = true;
+		bLoginEmailSuccessful = bSuccessful;
+	});
+	JusticeUser::Login(Email, Password, OnLoginEmailComplete);
+
+	while (!bLoginEmailDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	UE_LOG(LogJusticeTest, Log, TEXT("Deleting current account..."));
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete current account result: %s"), bSuccessful ? TEXT("Success!") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+	FIntegrationTestModule::DeleteUser(FJusticeUserID, OnDeleteComplete);
+
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(FirstUserId == FJusticeUserID)
+		check(bLoginPlatformSuccessful)
+		check(bUpgradeSuccessful)
+		check(bLoginEmailSuccessful)
+		check(bDeleteSuccessful)
+		return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "JusticeTest.SteamTicket.Success", AutomationFlagMask);
+bool FGetSteamTicket::RunTest(const FString & Parameter)
+{
+	FString Ticket = FIntegrationTestModule::GetSteamTicket();
+	UE_LOG(LogJusticeTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
+	check(Ticket != TEXT(""))
+		return true;
+}
+
 void FIntegrationTestModule::DeleteUser(FString UserID, FDeleteUserDelegate OnComplete)
 {
+	FCriticalSection Mutex;
+	FScopeLock Lock(&Mutex);
+
+	FString Authorization = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
+	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *FJusticeBaseURL, *JusticeGameNamespace, *UserID);
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TYPE_JSON;
+	FString Accept = TYPE_JSON;
+	FString Payload = TEXT("");
+	FJusticeHTTP::CreateRequest(Authorization, URL, Verb, ContentType, Accept, Payload, FWebRequestResponseDelegate::CreateStatic(FIntegrationTestModule::OnDeleteUserComplete, OnComplete));
+
 	//FString ErrorStr;
 	//TSharedRef<IJusticeHttpRequest> Request = FHttpModule::Get().CreateRequest();
 	//TSharedRef<FAWSXRayJustice> RequestTrace = MakeShareable(new FAWSXRayJustice());
@@ -2805,38 +3429,53 @@ void FIntegrationTestModule::DeleteUser(FString UserID, FDeleteUserDelegate OnCo
 	//}
 }
 
-void FIntegrationTestModule::OnDeleteUserComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FDeleteUserDelegate OnComplete)
+void FIntegrationTestModule::OnDeleteUserComplete(FJusticeResponsePtr Response, FDeleteUserDelegate OnComplete)
 {
-	//FString ErrorStr;
-	//if (!bSuccessful || !Response.IsValid())
-	//{
-	//	ErrorStr = TEXT("OnDeleteUserComplete: request failed");
-	//}
-	//else
-	//{
-	//	switch (Response->GetResponseCode())
-	//	{
-	//	case EHttpResponseCodes::NoContent:
-	//	{
-	//		UE_LOG(LogJustice, Log, TEXT("OnDeleteUserComplete receive success response "));
-	//		OnComplete.ExecuteIfBound(true, TEXT(""));
-	//		break;
-	//	}
-	//	case EHttpResponseCodes::Forbidden:
-	//	{
-	//		ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Forbidden. Code=%d"), Response->GetResponseCode());
-	//		break;
-	//	}
-	//	case EHttpResponseCodes::NotFound:
-	//	{
-	//		ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Data not found. Code=%d"), Response->GetResponseCode());
-	//		break;
-	//	}
-	//	}
-	//}
-	//if (!ErrorStr.IsEmpty())
-	//{
-	//	UE_LOG(LogJustice, Error, TEXT("OnDeleteUserComplete Error=%s ReqTime=%.3f"), *ErrorStr, Request->GetElapsedTime());
-	//	OnComplete.ExecuteIfBound(false, ErrorStr);
-	//}
+	FString ErrorStr;
+	if (!Response->ErrorString.IsEmpty())
+	{
+		OnComplete.ExecuteIfBound(false, Response->ErrorString);
+		return;
+	}
+	switch (Response->Code)
+	{
+		case EHttpResponseCodes::NoContent:
+		{
+			UE_LOG(LogJustice, Log, TEXT("OnDeleteUserComplete receive success response "));
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+			break;
+		}
+		case EHttpResponseCodes::Forbidden:
+		{
+			ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Forbidden. Code=%d"), Response->Code);
+			break;
+		}
+		case EHttpResponseCodes::NotFound:
+		{
+			ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Expected Error: Data not found. Code=%d"), Response->Code);
+			break;
+		}
+		default:
+			ErrorStr = FString::Printf(TEXT("OnDeleteUserComplete Error Code=%d"), Response->Code);
+	}
+	if (!ErrorStr.IsEmpty())
+	{
+		UE_LOG(LogJustice, Error, TEXT("OnDeleteUserComplete Error=%s ReqTime=%.3f"), *ErrorStr);
+		OnComplete.ExecuteIfBound(false, ErrorStr);
+		return;
+	}
+}
+
+FString FIntegrationTestModule::GetSteamTicket()
+{
+	FString SteamTicket = TEXT("");
+	FString SteamHelperOutput = TEXT("");
+	FString CurrentDirectory = TEXT("");
+	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("SteamHelper/SteamTicketHelper.exe"));
+	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
+	UE_LOG(LogJusticeTest, Log, TEXT("%s"), *CurrentDirectory);
+	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), nullptr, nullptr, &SteamHelperOutput, nullptr);
+	SteamHelperOutput.Split(TEXT("STEAMTICKET\r\n"), nullptr, &SteamTicket);
+	return SteamTicket;
 }

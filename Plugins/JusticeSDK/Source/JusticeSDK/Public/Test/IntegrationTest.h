@@ -15,6 +15,7 @@ DECLARE_DELEGATE_TwoParams(FDeleteUserDelegate, bool, FString);
 class FIntegrationTestModule : public IModuleInterface {
 public:
 	static void DeleteUser(FString UserID, FDeleteUserDelegate OnComplete);
+	static FString GetSteamTicket();
 private:
-	static void OnDeleteUserComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful, TSharedRef<FAWSXRayJustice> RequestTrace, FDeleteUserDelegate OnComplete);
+	static void OnDeleteUserComplete(FJusticeResponsePtr Response, FDeleteUserDelegate OnComplete);
 };

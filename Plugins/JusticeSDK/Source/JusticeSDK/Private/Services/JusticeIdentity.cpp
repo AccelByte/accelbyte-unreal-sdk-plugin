@@ -362,7 +362,7 @@ void JusticeIdentity::OnUserLoginResponse(FJusticeResponsePtr Response, FUserLog
 }
 
 
-void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::DeviceLogin(FString Namespace, FUserLoginCompleteDelegate2 OnComplete)
 {
 	FScopeLock Lock(&Mutex);
 
@@ -370,11 +370,11 @@ void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
 	check(!deviceID.IsEmpty() && "Cannot get Device ID");
 
 	FString Authorization   = FJusticeHTTP::BasicAuth();
-	FString URL             = FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/platforms/device/token"), *FJusticeBaseURL, *JusticeGameNamespace);;	
+	FString URL             = FString::Printf(TEXT("%s/iam/oauth/platforms/device/token"), *FJusticeBaseURL);;	
 	FString Verb            = POST;
 	FString ContentType     = TYPE_FORM;
 	FString Accept          = TYPE_JSON;
-	FString Payload         = FString::Printf(TEXT("device_id=%s"), *deviceID);
+	FString Payload         = FString::Printf(TEXT("device_id=%s&namespace=%s"), *deviceID, *Namespace);
 
 	FJusticeHTTP::CreateRequest(
 		Authorization,
@@ -386,7 +386,7 @@ void JusticeIdentity::DeviceLogin(FUserLoginCompleteDelegate OnComplete)
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnDeviceLoginResponse, OnComplete));
 }
 
-void JusticeIdentity::OnDeviceLoginResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate OnComplete)
+void JusticeIdentity::OnDeviceLoginResponse(FJusticeResponsePtr Response, FUserLoginCompleteDelegate2 OnComplete)
 {
 	FString ErrorStr;
 	if (!Response->ErrorString.IsEmpty())
@@ -402,10 +402,12 @@ void JusticeIdentity::OnDeviceLoginResponse(FJusticeResponsePtr Response, FUserL
 		FJusticeSDKModule::Get().bHeadlessAccount = true;
 		bool result = FJusticeSDKModule::Get().ParseUserToken(Response->Content);
 		check(result);
+		TSharedPtr<FOAuthTokenJustice> OAuthToken = MakeShared<FOAuthTokenJustice>();
+		OAuthToken->FromJson(Response->Content);
 		FJusticeUserToken->SetLastRefreshTimeToNow();
 		FJusticeUserToken->ScheduleNormalRefresh();
 		FJusticeRefreshManager->AddQueue(FOnJusticeTickDelegate::CreateStatic(JusticeIdentity::UserRefresh), FJusticeUserToken->NextTokenRefreshUTC);
-		OnComplete.ExecuteIfBound(true, TEXT(""), FJusticeUserToken.Get());
+		OnComplete.ExecuteIfBound(true, TEXT(""), OAuthToken);
 		break;
 	}
 
@@ -1144,7 +1146,7 @@ void JusticeIdentity::ReissueVerificationCode(FString Namespace, FString UserID,
 		FWebRequestResponseDelegate::CreateStatic(JusticeIdentity::OnReissueVerificationCodeResponse, OnComplete));
 }
 
-void JusticeIdentity::ReissueVerificationCodeUpgradedAccount(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete)
+void JusticeIdentity::ReissueVerificationCode(FOAuthTokenJustice Token, FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
 	FString Authorization = FJusticeHTTP::BearerAuth(Token.AccessToken);
 	FString URL = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *FJusticeBaseURL, *Token.Namespace, *Token.UserID);
