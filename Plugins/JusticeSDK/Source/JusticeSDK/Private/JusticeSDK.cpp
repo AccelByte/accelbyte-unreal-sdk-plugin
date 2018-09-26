@@ -4,6 +4,7 @@
 
 #include "JusticeSDK.h"
 #include "Engine.h"
+#include "Services/JusticeIdentity.h"
 #include "JusticeLog.h"
 #include "Utilities/AsyncTaskManagerJustice.h"
 
@@ -32,11 +33,11 @@ void FJusticeSDKModule::StartupModule()
 		UE_LOG(LogJustice, Error, TEXT("Missing ClientSecret= in [JusticeSDK] of DefaultEngine.ini"));
 		IsInitialized = false;
 	}
-    if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("RedirectURI"), RedirectURI, GEngineIni))
-    {
-        UE_LOG(LogJustice, Error, TEXT("Missing RedirectURI = in [JusticeSDK] of DefaultEngine.ini"));
-        IsInitialized = false;
-    }
+	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("RedirectURI"), RedirectURI, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing RedirectURI = in [JusticeSDK] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
 	if (!GConfig->GetString(TEXT("JusticeSDK"), TEXT("AppId"), AppID, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing AppId = in [JusticeSDK] of DefaultEngine.ini"));
@@ -48,11 +49,11 @@ void FJusticeSDKModule::StartupModule()
 		IsInitialized = false;
 	}
 
-    if (!GConfig->GetArray(TEXT("Platform"), TEXT("SupportedPlatform"), SupportedPlatform, GEngineIni))
-    {
-        UE_LOG(LogJustice, Error, TEXT("Missing SupportedPlatform = in [Platform] of DefaultEngine.ini"));
-        IsInitialized = false;
-    }
+	if (!GConfig->GetArray(TEXT("Platform"), TEXT("SupportedPlatform"), SupportedPlatform, GEngineIni))
+	{
+		UE_LOG(LogJustice, Error, TEXT("Missing SupportedPlatform = in [Platform] of DefaultEngine.ini"));
+		IsInitialized = false;
+	}
 	if (!GConfig->GetString(TEXT("Platform"), TEXT("GooglePlatformURL"), GooglePlatformURL, GEngineIni))
 	{
 		UE_LOG(LogJustice, Error, TEXT("Missing GooglePlatform= in [Platform] of DefaultEngine.ini"));
@@ -73,10 +74,10 @@ void FJusticeSDKModule::StartupModule()
 		UE_LOG(LogJustice, Error, TEXT("Missing FacebookRedirectURL= in [Platform] of DefaultEngine.ini"));
 		IsInitialized = false;
 	}
-  
+
 	GameClientToken = MakeShared<FOAuthTokenJustice>();
-	UserToken       = MakeShared<FOAuthTokenJustice>();
-	UserProfile     = MakeShared<FUserProfileInfo>();
+	UserToken = MakeShared<FOAuthTokenJustice>();
+	UserProfile = MakeShared<FUserProfileInfo>();
 
 	AsyncTaskManager = TSharedPtr<FAsyncTaskManagerJustice>(new FAsyncTaskManagerJustice);
 	RetryTaskManager = TSharedPtr<FRetryTaskManagerJustice>(new FRetryTaskManagerJustice);
@@ -87,8 +88,10 @@ void FJusticeSDKModule::StartupModule()
 	RetryAsyncTaskThread = FRunnableThread::Create(RetryTaskManager.Get(), *FString::Printf(TEXT("AsyncTaskManagerJustice")), 128 * 1024, TPri_Normal);
 	UE_LOG(LogJustice, Log, TEXT("Justice RetryAsyncTaskThread thread (ID:%d)."), RetryAsyncTaskThread->GetThreadID());
 
-	check(OnlineAsyncTaskThread != nullptr)
-	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID())
+	check(OnlineAsyncTaskThread != nullptr);
+	UE_LOG(LogJustice, Log, TEXT("Justice AsyncTaskManagerCreated thread (ID:%d)."), OnlineAsyncTaskThread->GetThreadID());
+
+	JusticeIdentity::ClientLogin();
 }
 
 void FJusticeSDKModule::ShutdownModule()

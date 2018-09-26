@@ -15,7 +15,7 @@ FCriticalSection Mutex;
 
 void JusticeIdentity::ForgotPassword(FString Namespace, FString LoginID, FDefaultCompleteDelegate OnComplete)
 {
-	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
+	FString Authorization   = FJusticeHTTP::BasicAuth(FJusticeSDKModule::Get().ClientID, FJusticeSDKModule::Get().ClientSecret);
 	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *FJusticeBaseURL, *Namespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;
@@ -119,14 +119,14 @@ void JusticeIdentity::OnForgotPasswordResponse(FJusticeResponsePtr Response, FDe
 	}
 }
 
-void JusticeIdentity::ResetPassword(FString Namespace, FString UserID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete)
+void JusticeIdentity::ResetPassword(FString Namespace, FString LoginID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete)
 {
 	FResetPasswordRequest resetPasswordRequest;
 	resetPasswordRequest.Code = VerificationCode;
-	resetPasswordRequest.LoginID = UserID;
+	resetPasswordRequest.LoginID = LoginID;
 	resetPasswordRequest.NewPassword = NewPassword;
 
-	FString Authorization   = FJusticeHTTP::BearerAuth(FJusticeGameClientToken->AccessToken);
+	FString Authorization   = FJusticeHTTP::BasicAuth(FJusticeSDKModule::Get().ClientID, FJusticeSDKModule::Get().ClientSecret);
 	FString URL             = FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *FJusticeBaseURL, *Namespace);
 	FString Verb            = POST;
 	FString ContentType     = TYPE_JSON;

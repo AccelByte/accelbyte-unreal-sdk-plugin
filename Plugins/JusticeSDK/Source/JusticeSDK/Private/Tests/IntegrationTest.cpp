@@ -8,11 +8,11 @@
 #include "HttpManager.h"
 #include "Public/Models/UserOnlineAccountJustice.h"
 #include "Public/Services/JusticeIdentity.h"
-#include "Public/Services/JusticeUser.h"
 #include "Public/Services/JusticePurchase.h"
 #include "Public/Services/JusticeCatalog.h"
 #include "Public/Services/JusticePlatform.h"
 #include "Public/Services/JusticeTelemetry.h"
+#include "Public/Services/JusticeUser.h"
 #include "JusticeSDK.h"
 #include "JusticePlatform.h"
 #include <algorithm>
@@ -2776,7 +2776,300 @@ bool FGetUserOrdersSuccess::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "JusticeTest.LoginWithDeviceId.LoginTwiceGetSameUserId", AutomationFlagMask);
+#pragma region Email Accounts
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "JusticeTest.RegisterEmail_ThenLogin_Successful", AutomationFlagMask);
+bool FUserRegisterTest::RunTest(const FString & Parameter)
+{
+	FString LoginID = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@gmail.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bHasDone = false;
+	JusticeUser::Register(LoginID, Password, DisplayName, 
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bRegisterSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bLoginSuccessful = false;
+	bHasDone = false;
+	JusticeUser::Login(LoginID, Password,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bLoginSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+
+	FIntegrationTestModule::DeleteUser(FJusticeUserID, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bLoginSuccessful);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "JusticeTest.LoginEmail_ThenVerify_Successful", AutomationFlagMask);
+bool FUserLoginTest::RunTest(const FString & Parameter)
+{
+	FString LoginID = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@gmail.com";
+	FString Password = "testtest";
+	FString DisplayName = "testSDK";
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bHasDone = false;
+	JusticeUser::Register(LoginID, Password, DisplayName,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bRegisterSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bLoginSuccessful = false;
+	bHasDone = false;
+	JusticeUser::Login(LoginID, Password,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bLoginSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	FString VerificationCode = FIntegrationTestModule::GetVerificationCode(LoginID);
+	UE_LOG(LogJusticeTest, Log, TEXT("Verification code: %s"), *VerificationCode);
+
+	bool bVerifySuccessful = false;
+	bHasDone = false;
+	JusticeUser::Verify(VerificationCode, 
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bVerifySuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Verify result: %s"), bSuccessful ? TEXT("Success") : *ErrorStr);
+		bVerifySuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+
+	FIntegrationTestModule::DeleteUser(FJusticeUserID, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bVerifySuccessful);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "JusticeTest.RegisterEmail_ThenResetPassword_Successful", AutomationFlagMask);
+bool FUserResetPasswordTest::RunTest(const FString & Parameter)
+{
+	FString LoginID = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@gmail.com";
+	FString Password = "old_password";
+	FString DisplayName = "testSDK";
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bHasDone = false;
+	JusticeUser::Register(LoginID, Password, DisplayName,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bRegisterSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bForgotPaswordSuccessful = false;
+	bHasDone = false;
+	JusticeUser::ForgotPassword(LoginID,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bForgotPaswordSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bForgotPaswordSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bForgotPaswordSuccessful);
+
+	FString VerificationCode = FIntegrationTestModule::GetVerificationCode(LoginID);
+	UE_LOG(LogJusticeTest, Log, TEXT("Verification code: %s"), *VerificationCode);
+
+	bool bResetPasswordSuccessful = false;
+	bHasDone = false;
+	Password = "new_password";
+	JusticeUser::ResetPassword(VerificationCode, LoginID, Password,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bResetPasswordSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Reset password result: %s"), bSuccessful ? TEXT("Success") : *ErrorStr);
+		bResetPasswordSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bResetPasswordSuccessful);
+
+	bool bLoginSuccessful = false;
+	bHasDone = false;
+	JusticeUser::Login(LoginID, Password,
+		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](bool bSuccessful, FString ErrorStr)
+	{
+		bLoginSuccessful = bSuccessful;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+
+	FDeleteUserDelegate OnDeleteComplete = FDeleteUserDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	{
+		UE_LOG(LogJusticeTest, Log, TEXT("Delete user result: %s"), bSuccessful ? TEXT("Success") : *ErrorStr);
+		bDeleteDone = true;
+		bDeleteSuccessful = bSuccessful;
+	});
+	
+	FIntegrationTestModule::DeleteUser(FJusticeUserID, OnDeleteComplete);
+
+	LastTime = FPlatformTime::Seconds();
+
+	while (!bDeleteDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	check(bResetPasswordSuccessful);
+
+	return true;
+}
+
+#pragma endregion
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "Disabled.LoginWithDeviceId.LoginTwiceGetSameUserId", AutomationFlagMask);
 bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 {
 	bool bDeviceLoginDone1 = false;
@@ -3017,7 +3310,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	FJusticeSDKModule::Get().UserToken.Reset();
 
 	UE_LOG(LogJusticeTest, Log, TEXT("Logging in the email account..."));
-	FUserLoginCompleteDelegate2 OnLoginEmailComplete = FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token)
+	FDefaultCompleteDelegate OnLoginEmailComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login with upgrade account result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
 		bEmailLoginDone = true;
@@ -3275,16 +3568,16 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	UE_LOG(LogJusticeTest, Log, TEXT("Asserting..."))
-		check(bSteamLoginSuccessful1)
-		check(bSteamLoginSuccessful2)
-		check(bDeleteSuccessful1)
-		check(bDeleteSuccessful2)
-		check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
-		return true;
+	UE_LOG(LogJusticeTest, Log, TEXT("Asserting..."));
+	check(bSteamLoginSuccessful1);
+	check(bSteamLoginSuccessful2);
+	check(bDeleteSuccessful1);
+	check(bDeleteSuccessful2);
+	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
+	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "JusticeTest.UpgradeHeadlessSteamAccount.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "Disabled.UpgradeHeadlessSteamAccount.Success", AutomationFlagMask);
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	FString Email = TEXT("testSDK@example.com");
@@ -3338,7 +3631,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	FJusticeSDKModule::Get().UserToken.Reset();
 
 	UE_LOG(LogJusticeTest, Log, TEXT("Loggin in with upgraded account..."));
-	FUserLoginCompleteDelegate2 OnLoginEmailComplete = FUserLoginCompleteDelegate2::CreateLambda([&](bool bSuccessful, FString ErrorStr, TSharedPtr<FOAuthTokenJustice> Token)
+	FDefaultCompleteDelegate OnLoginEmailComplete = FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Login with upgrade account result: %s"), bSuccessful ? TEXT("Success!") : TEXT("Failed"));
 		bLoginEmailDone = true;
@@ -3583,6 +3876,19 @@ void FIntegrationTestModule::OnDeleteUserComplete(FJusticeResponsePtr Response, 
 		OnComplete.ExecuteIfBound(false, ErrorStr);
 		return;
 	}
+}
+
+FString FIntegrationTestModule::GetVerificationCode(FString Email)
+{
+	FString VerificationCodeOutput = TEXT("");
+	FString CurrentDirectory = TEXT("");
+	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
+	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
+	UE_LOG(LogJusticeTest, Log, TEXT("%s"), *CurrentDirectory);
+	FString args = TEXT("verificationcode -a " + Email);
+	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
+	return VerificationCodeOutput;
 }
 
 FString FIntegrationTestModule::GetSteamTicket()

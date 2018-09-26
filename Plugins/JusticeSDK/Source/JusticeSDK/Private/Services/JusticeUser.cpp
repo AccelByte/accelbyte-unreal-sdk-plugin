@@ -27,7 +27,7 @@ static FString EPlatformString[] = {
 
 void JusticeUser::Login(EPlatformType PlatformID, FString Token, FDefaultCompleteDelegate OnComplete)
 {
-	JusticeIdentity::LoginWithPlatform(JusticeGameNamespace, EPlatformString[(int)PlatformID], Token, FUserLoginCompleteDelegate2::CreateLambda([&, OnComplete](bool bLoginSuccessful, FString LoginErrorStr, TSharedPtr<FOAuthTokenJustice> OAuthToken)
+	JusticeIdentity::LoginWithPlatform(JusticeGameNamespace, EPlatformString[(int)PlatformID], Token, FUserLoginCompleteDelegate2::CreateLambda([OnComplete](bool bLoginSuccessful, FString LoginErrorStr, TSharedPtr<FOAuthTokenJustice> OAuthToken)
 	{
 		if (bLoginSuccessful)
 		{
@@ -41,8 +41,21 @@ void JusticeUser::Login(EPlatformType PlatformID, FString Token, FDefaultComplet
 	}));
 }
 
-void JusticeUser::Login(FString LoginID, FString Password, FUserLoginCompleteDelegate2 OnComplete)
+void JusticeUser::Login(FString Email, FString Password, FDefaultCompleteDelegate OnComplete)
 {
+	JusticeIdentity::UserLogin(JusticeGameNamespace, Email, Password,
+		FUserLoginCompleteDelegate2::CreateLambda([OnComplete](bool bSuccessful, FString LoginErrorStr, TSharedPtr<FOAuthTokenJustice> OAuthToken)
+	{
+		if (bSuccessful)
+		{
+			FJusticeSDKModule::Get().UserToken = OAuthToken;
+			JusticeUser::InitProfile(*OAuthToken.Get(), OnComplete);
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, LoginErrorStr);
+		}
+	}));
 }
 
 void JusticeUser::LoginFromLauncher(FDefaultCompleteDelegate OnComplete)
@@ -112,20 +125,82 @@ void JusticeUser::UpgradeHeadlessAccount(FString Email, FString Password, FDefau
 	}));
 }
 
-void JusticeUser::Register(FString LoginID, FString Password, FString DisplayName, FUserAuthTypeJustice AuthType, FRegisterPlayerCompleteDelegate OnComplete)
+void JusticeUser::Register(FString Email, FString Password, FString DisplayName, FDefaultCompleteDelegate OnComplete)
 {
+	JusticeIdentity::RegisterNewPlayer(JusticeGameNamespace, Email, Password, DisplayName, FUserAuthTypeJustice::Email,
+		FRegisterPlayerCompleteDelegate::CreateLambda([Email, OnComplete](bool bSuccessful, FString ErrorStr, TSharedPtr<FUserCreateResponse> UserCreateResponse)
+	{
+		if (bSuccessful)
+		{
+			JusticeIdentity::ReissueVerificationCode(JusticeGameNamespace, UserCreateResponse.Get()->UserID, Email,
+				FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr)
+			{
+				if (bSuccessful)
+				{
+					OnComplete.ExecuteIfBound(true, TEXT(""));
+				}
+				else
+				{
+					OnComplete.ExecuteIfBound(false, "ErrorStr");
+				}
+			}));
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, ErrorStr);
+		}
+	}));
 }
 
 void JusticeUser::Verify(FString VerificationCode, FDefaultCompleteDelegate OnComplete)
 {
+	JusticeIdentity::VerifyNewPlayer(JusticeGameNamespace, FJusticeUserID, VerificationCode, FUserAuthTypeJustice::Email,
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bLoginSuccessful, FString ErrorStr)
+	{
+		if (bLoginSuccessful)
+		{
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, ErrorStr);
+		}
+	}));
 }
 
-void JusticeUser::ForgotPassword(FString LoginID, FDefaultCompleteDelegate OnComplete)
+void JusticeUser::ForgotPassword(FString Email, FDefaultCompleteDelegate OnComplete)
 {
+	JusticeIdentity::ForgotPassword(JusticeGameNamespace, Email,
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr)
+	{
+
+		if (bSuccessful)
+		{
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, "ErrorStr");
+		}
+	}));
 }
 
-void JusticeUser::ResetPassword(FString LoginID, FString VerificationCode, FString NewPassword, FDefaultCompleteDelegate OnComplete)
+void JusticeUser::ResetPassword(FString VerificationCode, FString Email, FString NewPassword, FDefaultCompleteDelegate OnComplete)
 {
+	JusticeIdentity::ResetPassword(JusticeGameNamespace, Email, VerificationCode, NewPassword,
+		FDefaultCompleteDelegate::CreateLambda([OnComplete](bool bSuccessful, FString ErrorStr)
+	{
+
+		if (bSuccessful)
+		{
+			OnComplete.ExecuteIfBound(true, TEXT(""));
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, "ErrorStr");
+		}
+	}));
 }
 
 void JusticeUser::GetProfile(FRequestCurrentPlayerProfileCompleteDelegate OnComplete)

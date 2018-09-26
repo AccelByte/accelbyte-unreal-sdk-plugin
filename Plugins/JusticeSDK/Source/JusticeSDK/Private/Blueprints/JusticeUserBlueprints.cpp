@@ -5,6 +5,141 @@
 #include "JusticeUserBlueprints.h"
 #include "JusticeUser.h"
 
+#pragma region RegisterWithEmail
+
+URegisterWithEmail * URegisterWithEmail::RegisterWithEmail(FString Email, FString Password, FString DisplayName)
+{
+	URegisterWithEmail* Node = NewObject<URegisterWithEmail>();
+	Node->Email = Email;
+	Node->Password = Password;
+	Node->DisplayName = DisplayName;
+
+	return Node;
+}
+
+void URegisterWithEmail::Activate()
+{
+	JusticeUser::Register(this->Email, this->Password, this->DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
+		{
+			OnSuccess.Broadcast(TEXT(""));
+		}
+		else
+		{
+			OnFailed.Broadcast(ErrorStr);
+		}
+	}));
+}
+
+#pragma endregion RegisterWithEmail
+
+#pragma region LoginWithEmail
+
+ULoginWithEmail * ULoginWithEmail::LoginWithEmail(FString Email, FString Password)
+{
+	ULoginWithEmail* Node = NewObject<ULoginWithEmail>();
+	Node->Email = Email;
+	Node->Password = Password;
+	
+	return Node;
+}
+
+void ULoginWithEmail::Activate()
+{
+	JusticeUser::Login(this->Email, this->Password, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
+		{
+			OnSuccess.Broadcast(TEXT(""));
+		}
+		else
+		{
+			OnFailed.Broadcast(ErrorStr);
+		}
+	}));
+}
+
+#pragma endregion LoginWithEmail
+
+#pragma region VerifyEmail
+
+UVerifyEmail * UVerifyEmail::VerifyEmail(FString VerificationCode)
+{
+	UVerifyEmail* Node = NewObject<UVerifyEmail>();
+	Node->VerificationCode = VerificationCode;
+
+	return Node;
+}
+
+void UVerifyEmail::Activate()
+{
+	JusticeUser::Verify(this->VerificationCode, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
+		{
+			OnSuccess.Broadcast(TEXT(""));
+		}
+		else
+		{
+			OnFailed.Broadcast(ErrorStr);
+		}
+	}));
+}
+
+#pragma endregion VerifyEmail
+
+#pragma region ForgotPassword
+
+UForgotPassword * UForgotPassword::ForgotPassword(FString Email)
+{
+	UForgotPassword* Node = NewObject<UForgotPassword>();
+	Node->Email = Email;
+
+	return Node;
+}
+
+void UForgotPassword::Activate()
+{
+	JusticeUser::ForgotPassword(this->Email, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
+		{
+			OnSuccess.Broadcast(TEXT(""));
+		}
+		else
+		{
+			OnFailed.Broadcast(ErrorStr);
+		}
+	}));
+}
+
+#pragma endregion ForgotPassword
+
+#pragma region ResetPassword
+
+UResetPassword * UResetPassword::ResetPassword(FString VerificationCode, FString Email, FString NewPassword)
+{
+	UResetPassword* Node = NewObject<UResetPassword>();
+	Node->VerificationCode = VerificationCode;
+	Node->Email = Email;
+	Node->NewPassword = NewPassword;
+
+	return Node;
+}
+
+void UResetPassword::Activate()
+{
+	JusticeUser::ResetPassword(this->VerificationCode, this->Email, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+		if (bSuccessful)
+		{
+			OnSuccess.Broadcast(TEXT(""));
+		}
+		else
+		{
+			OnFailed.Broadcast(ErrorStr);
+		}
+	}));
+}
+
+#pragma endregion ResetPassword
+
 #pragma region LoginFromLauncher
 
 ULoginFromLauncher * ULoginFromLauncher::LoginFromLauncher()
