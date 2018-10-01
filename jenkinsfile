@@ -68,7 +68,7 @@ pipeline {
                     (get-content -raw $CONFIG_FILE) -replace "(?ms)^\\[JusticeSDK\\]+.+(\\[Platform\\])", $CONFIG_FIELD | out-file $CONFIG_FILE
                     foreach ($LINE in get-content $CONFIG_FILE)
                     {
-                        if (($LINE -match "ClientID" -or $LINE -match "ClientSecret" ) -eq $false)
+                        if (($LINE -match "ClientId" -or $LINE -match "ClientSecret" ) -eq $false)
                         {
                             echo $LINE
                         }

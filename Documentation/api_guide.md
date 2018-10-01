@@ -57,7 +57,7 @@ This blueprint is similar to `JusticeIdentity::VerifyNewPlayer` function. You ca
 
 ### Device Login ###
 
-This blueprint is similar to `JusticeIdentity::DeviceLogin` function. You can use this blueprint function to login with device ID. We use value from `FGenericPlatformMisc::GetDeviceId()` as Device ID. It comes only in Async Action Base flavor.
+This blueprint is similar to `JusticeIdentity::DeviceLogin` function. You can use this blueprint function to login with device Id. We use value from `FGenericPlatformMisc::GetDeviceId()` as Device Id. It comes only in Async Action Base flavor.
 
 #### Async Action Base flavor ####
 
@@ -128,7 +128,7 @@ This blueprint is similar to `JusticeIdentity::UserLogout` function. You can use
 
 \section using_the_sdk_with_cpp Using the SDK with C++
 
-See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and JusticeWallet.
+See JusticeIdentity, JusticePlatform, Catalog, JusticePurchase, and JusticeWallet.
 
 \section usage_examples Usage examples
 
@@ -138,17 +138,17 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString LoginID = "johnDoe@example.com";
+            FString LoginId = "johnDoe@example.com";
             FString Password = "password";
             FString DisplayName = "John_Doe";
             FUserAuthTypeJustice AuthType = Email;
-            JusticeIdentity::RegisterNewPlayer(LoginID, Password, DisplayName, AuthType, 
+            JusticeIdentity::RegisterNewPlayer(LoginId, Password, DisplayName, AuthType,
                 FRegisterPlayerCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, UserCreateResponse* Response)
                     {
                         UE_LOG(LogTmp, Log, TEXT("Register User Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
                         UE_LOG(LogTmp, Log, TEXT("User's registered display name is %s"), *Response->DisplayName)
-                        UE_LOG(LogTmp, Log, TEXT("User's registered UserID is %s"), *Response->UserID)
+                        UE_LOG(LogTmp, Log, TEXT("User's registered UserId is %s"), *Response->UserId)
                     }
                 );
             );
@@ -160,10 +160,10 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString UserID = "1223334444";
-            FString LoginID = "johnDoe@example.com";
+            FString UserId = "1223334444";
+            FString LoginId = "johnDoe@example.com";
             FUserAuthTypeJustice AuthType = Email;
-            JusticeIdentity::ReissueVerificationCode(UserID, LoginID, 
+            JusticeIdentity::ReissueVerificationCode(UserId, LoginId,
                 FDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr)
                     {
@@ -179,10 +179,10 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString UserID = "1223334444";
+            FString UserId = "1223334444";
             FString VerificationCode = "13579";
             FUserAuthTypeJustice AuthType = Email;
-            JusticeIdentity::VerifyNewPlayer(UserID, VerificationCode, AuthType, 
+            JusticeIdentity::VerifyNewPlayer(UserId, VerificationCode, AuthType,
                 FDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr)
                     {
@@ -198,9 +198,9 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString LoginID = "johnDoe@example.com";
+            FString LoginId = "johnDoe@example.com";
             FString Password = "password";
-            JusticeIdentity::UserLogin(LoginID, Password, 
+            JusticeIdentity::UserLogin(LoginId, Password,
                 FUserLoginCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, *OAuthTokenJustice Token)
                     {
@@ -263,8 +263,8 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString LoginID = "johnDoe@example.com";
-            JusticeIdentity::ForgotPassword(LoginID, FDefaultCompleteDelegate::CreateLambda(
+            FString LoginId = "johnDoe@example.com";
+            JusticeIdentity::ForgotPassword(LoginId, FDefaultCompleteDelegate::CreateLambda(
                 [](bool bSuccessful, FString ErrorStr)
                 {
                     UE_LOG(LogTmp, Log, TEXT("User Request to Reset Password Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
@@ -278,9 +278,9 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
             FString VerificationCode = "123456";
-            FString UserID = "johnDoe@example.com";
+            FString UserId = "johnDoe@example.com";
             FString NewPassword = "freshPassword";
-            JusticeIdentity::ResetPassword(UserID, VerificationCode, NewPassword, FDefaultCompleteDelegate::CreateLambda(
+            JusticeIdentity::ResetPassword(UserId, VerificationCode, NewPassword, FDefaultCompleteDelegate::CreateLambda(
                 [](bool bSuccessful, FString ErrorStr)
                 {
                     UE_LOG(LogTmp, Log, TEXT("User Reset Password Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
@@ -362,7 +362,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
         {
             FString ParentPath = "/game/weapon/example";
             FString Language = "en";
-            JusticeCatalog::GetCategory(ParentPath, Language,
+            Catalog::GetCategory(ParentPath, Language,
                 FCategoryDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
                     {
@@ -378,7 +378,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
             FString Language = "en";
-            JusticeCatalog::GetRootCategory(Language,
+            Catalog::GetRootCategory(Language,
                 FCategoryDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
                     {
@@ -396,7 +396,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
         {
             FString Language = "en";
             FString CategoryPath = "/game/weapon";
-            JusticeCatalog::GetChildCategory(Language, CategoryPath,
+            Catalog::GetChildCategory(Language, CategoryPath,
                 FCategoryDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
                     {
@@ -414,7 +414,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
         {
             FString Language = "en";
             FString CategoryPath = "/game/potion";
-            JusticeCatalog::GetDescendantCategory(Language, CategoryPath,
+            Catalog::GetDescendantCategory(Language, CategoryPath,
                 FCategoryDefaultCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, TArray<Category> Result)
                     {
@@ -430,10 +430,10 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString ItemID = "123456789";
+            FString ItemId = "123456789";
             FString Region = "US";
             FString Language = "en";
-            JusticeCatalog::GetItem(ItemID, Region, Language,
+            Catalog::GetItem(ItemId, Region, Language,
                 FGetItemCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, ItemInfo Result)
                     {
@@ -456,7 +456,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
             FString Status = "ACTIVE";
             FString Page = "0";
             FString Size = "5";
-            JusticeCatalog::GetItemByQuery(Language, Region, CategoryPath, ItemType, Status, Page, Size, 
+            Catalog::GetItemByQuery(Language, Region, CategoryPath, ItemType, Status, Page, Size,
                 FItemCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, TArray<ItemInfo> Result)
                     {
@@ -474,11 +474,11 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            FString ItemID = "0123456789";
+            FString ItemId = "0123456789";
             int32 Price = 10;
             int32 DiscountedPrice = "8";
             FString Currency = "USD";
-            JusticePurchase::CreateNewOrder(ItemID, Price, DiscountedPrice, Currency, 
+            JusticePurchase::CreateNewOrder(ItemId, Price, DiscountedPrice, Currency,
                 FOrderInfoCompleteDelegate::CreateLambda(
                     [](bool bSuccessful, FString ErrorStr, OrderInfo Result)
                     {
@@ -500,7 +500,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
                     [](bool bSuccessful, FString ErrorStr, OrderInfo Result)
                     {
                         UE_LOG(LogTmp, Log, TEXT("Get User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
-                        UE_LOG(LogTmp, Log, TEXT("Order's Item ID: %s"), *Result->ItemID;
+                        UE_LOG(LogTmp, Log, TEXT("Order's Item Id: %s"), *Result->ItemId;
                     }
                 );
             );
@@ -552,7 +552,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
                     [](bool bSuccessful, FString ErrorStr, OrderInfo Result)
                     {
                         UE_LOG(LogTmp, Log, TEXT("Fulfill User Order Result: %s"), bSuccessful ? TEXT("Success") : TEXT("Failed"));
-                        UE_LOG(LogTmp, Log, TEXT("Item ID that fulfilled is %s."), *Result->ItemID;
+                        UE_LOG(LogTmp, Log, TEXT("Item Id that fulfilled is %s."), *Result->ItemId;
                     }
                 );
             );
@@ -616,7 +616,7 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 ```cpp
         void AJusticeSDKDemoGameModeBase::BeginPlay()
         {
-            UserProfileInfoUpdate NewUserProfile;
+            FAccelByteModelsUserProfileInfoUpdate NewUserProfile;
             NewUserProfile.Email = "johndoe@example.com";
             NewUserProfile.DisplayName = "JohnDoe";
             NewUserProfile.AvatarLargeUrl = "https://example.com/large.jpg";
@@ -645,8 +645,8 @@ See JusticeIdentity, JusticePlatform, JusticeCatalog, JusticePurchase, and Justi
 
 |Field|Type|Description|
 |---|---|---|
-ID              |FString    |User ID that owns this balance.
-WalletID        |FString    |Wallet ID from the balance.
+Id              |FString    |User Id that owns this balance.
+WalletID        |FString    |Wallet Id from the balance.
 CurrencyCode    |FString    |Currency code from the balance (e.g. USD)
 Balance         |int32      |Amount of the balance.
 BalanceSource   |FString    |Balance's source.
@@ -685,8 +685,8 @@ Description         |FString     |Item's description
 LongDescription     |FString     |Item's long description
 Images              |TArray<FJusticeImage>    |Item's image(s)
 ThumbnailImage      |FJusticeImage     |Item's thumbnail
-ItemID              |FString     |Item's ID
-AppID               |FString     |App ID for the item.
+ItemId              |FString     |Item's Id
+AppId               |FString     |App Id for the item.
 AppType             |FString     |App type for the item.
 SKU                 |FString     |Item's SKU.
 Namespace           |FString     |Item's namespace.
@@ -700,7 +700,7 @@ CreatedAt           |FString     |Item's creation time.
 UpdatedAt           |FString   |Item latest update time.
 TargetCurrencyCode  |FString     |Item's target currency code.
 TargetNamespace     |FString     |Item's target namespace.
-RegionData          |TArray<FRegionData>|Region data of this item.
+RegionData          |TArray<FAccelByteModelsRegionData>|Region data of this item.
 ItemIds             |TArray< FString>   |Array of item IDs if this item is a bundle item.
 Tags                |TArray< FString>   |Item's tag(s).
 
@@ -720,14 +720,14 @@ Width           |int32  |Image's width in pixel.
 ImageURL        |FString|Image's URL.
 SmallImageURL   |FString|Small image's URL.
 
-## FLinkedPlatform
+## FAccelByteModelsLinkedPlatform
 
 |Field|Type|Description|
 |---|---|---|
-PlatformID      |FString|ID of the platform linked to user.
-PlatformUserID  |FString|User ID that links the user to platform.
+PlatformID      |FString|Id of the platform linked to user.
+PlatformUserID  |FString|User Id that links the user to platform.
 Namespace       |FString|Namespace of the linked account.
-UserID          |FString|User ID that is linked to platform.
+UserId          |FString|User Id that is linked to platform.
 
 ## FOAuthTokenJustice
 
@@ -737,10 +737,10 @@ AccessToken     |FString|Client's access token.
 UserRefreshToken|FString|Client's refresh token.
 TokenType       |FString|Type of token.
 ExpiresIn       |double|Token expiration time.
-Permissions     |TArray<FPermissionJustice>|Permission(s) of the client.
+Permissions     |TArray<FAccelByteModelsPermission>|Permission(s) of the client.
 Roles           |TArray< FString>|Role(s) of the client.
 Bans            |TArray< FString>|Ban(s) of the client.
-UserID          |FString|ID of the client.
+UserId          |FString|Id of the client.
 DisplayName     |FString|Display name of the client.
 Namespace       |FString|Namespace of the client.
 LastTokenRefreshUtc|FDateTime|Last token refresh in UTC.
@@ -752,12 +752,12 @@ JFlags          |int32|Flags
 
 |Field|Type|Description|
 |---|---|---|
-ItemID          |FString|ID of item ordered.
+ItemId          |FString|Id of item ordered.
 Quantity        |FString|Quantity of item ordered.
 Price           |int32  |Total price of item ordered.
 DiscountedPrice |int32  |Total price of item ordered after discount.
 CurrencyCode    |FString|The currency code of item ordered.
-ReturnURL       |FString|URL that is opened after order is fulfilled.
+ReturnUrl       |FString|URL that is opened after order is fulfilled.
 
 ## FOrderHistoryInfo
 
@@ -767,7 +767,7 @@ OrderNo     |FString     |Order's number.
 Operator    |FString     |Operator of the order.
 Action      |FString     |Order's current action.
 Reason      |FString     |Order's reason.
-UserID      |FString     |ID of user dealing with this order.
+UserId      |FString     |Id of user dealing with this order.
 CreatedAt   |FString     |Order's creation time.
 UpdatedAt   |FString     |Order latest update time.
 
@@ -776,8 +776,8 @@ UpdatedAt   |FString     |Order latest update time.
 |Field|Type|Description|
 |---|---|---|
 OrderNo             |FString    |Order's number.
-UserID              |FString    |ID of user that creates this order.
-ItemID              |FString    |Item's ID included in this order.
+UserId              |FString    |Id of user that creates this order.
+ItemId              |FString    |Item's Id included in this order.
 bSandBox            |bool       |Is this order sandbox mode?
 Quantity            |int32      |The amount of item ordered.
 Price               |int32      |Item's price.
@@ -787,10 +787,10 @@ SalesTax            |int32      |Order's sales tax.
 PaymentProviderFee  |int32      |Payment provider fee for this order.
 PaymentMethodFee    |int32      |Payment method fee for this order.
 Currency            |FCurrencySummary|Currency used in this order.
-PaymentURL          |FPaymentURL|Order's payment information.
+PaymentUrl          |FPaymentURL|Order's payment information.
 PaymentStationURL   |FString    |URL used to pay this order.
-Transactions        |TArray<FTransaction>|Order's transaction step.
-EntitlementIds      |TArray< FString>   |Entitlement ID from this order.
+Transactions        |TArray<FAccelByteModelsTransaction>|Order's transaction step.
+EntitlementIds      |TArray< FString>   |Entitlement Id from this order.
 Status              |FString    |Order's status.
 StatusReason        |FString    |Reason for order's status.
 Namespace           |FString    |Namespace of this order.
@@ -820,19 +820,19 @@ Next        |FString|Next page.
 |Field|Type|Description|
 |---|---|---|
 PaymentProvider |FString |Provider of this payment.
-PaymentURL      |FString |URL to continue the payment.
+PaymentUrl      |FString |URL to continue the payment.
 PaymentToken    |FString |Payment's token.
-ReturnURL       |FString |URL returned from OrderCreate
+ReturnUrl       |FString |URL returned from OrderCreate
 PaymentType     |FString |Payment's type.
 
-## FPermissionJustice
+## FAccelByteModelsPermission
 
 |Field|Type|Description|
 |---|---|---|
 Resource    |FString|Resource of the permission.
 Action      |int32  |Code number for the possible action.
 
-## FPrice
+## FAccelByteModelsPrice
 
 |Field|Type|Description|
 |---|---|---|
@@ -841,7 +841,7 @@ CurrencyCode|FString |Code of currency for this price.
 CurrencyType|FString |Type of the currency.
 Namespace   |FString |Namespace of the currency.
 
-## FRegionData
+## FAccelByteModelsRegionData
 
 |Field|Type|Description|
 |---|---|---|
@@ -861,19 +861,19 @@ DiscountExpireAt            |FString    |Discount expiration time.
 DiscountTotalNum            |int32      |Total discount amount.
 DiscountTotalNumPerAccount  |int32      |Total discount amount per user.
 
-## FResetPasswordRequest
+## FAccelByteModelsResetPasswordRequest
 
 |Field|Type|Description|
 |---|---|---|
 Code        |FString |Verification code to reset old password.
-LoginID     |FString |LoginID (e.g. email) of the user that forgets the password.
+LoginId     |FString |LoginId (e.g. email) of the user that forgets the password.
 NewPassword |FString |New password to replace the old password.
 
-## FTransaction
+## FAccelByteModelsTransaction
 
 |Field|Type|Description|
 |---|---|---|
-TransactionID           |FString |Transaction ID.
+TransactionId           |FString |Transaction Id.
 Amount                  |int32   |Transaction's amount.
 Vat                     |int32   |Transcation's VAT.
 SalesTax                |int32   |Transaction's sales tax.
@@ -884,8 +884,8 @@ Provider                |FString |Transaction's provider (e.g. [XSOLLA](https://
 PaymentProviderFee      |int32   |Transaction's fee for provider.
 PaymentMethod           |FString |Transaction's payment method.
 PaymentMethodFee        |int32   |Transaction's fee for payment method used.
-MerchantID              |FString |Transaction merchant's ID
-ExternalTransactionID   |FString |External transaction's ID.
+MerchantId              |FString |Transaction merchant's Id
+ExternalTransactionId   |FString |External transaction's Id.
 ExternalStatusCode      |FString |External transaction status code.
 ExternalMessage         |FString |External transaction message.
 TransactionStartTime    |FString |Transaction's starting time.
@@ -898,38 +898,38 @@ TransactionEndTime      |FString |Transaction's ending time.
 Email|enum(readonly)|Email-based account.
 Phone|enum(readonly)|Phone-based account.
 
-## FUserCreateRequest
+## FAccelByteModelsUserCreateRequest
 
 |Field|Type|Description|
 |---|---|---|
 AuthType    |FString|Type of authentication.
 DisplayName |FString|User's display name.
-LoginID     |FString|User's login ID.
+LoginId     |FString|User's login Id.
 Password    |FString|User's password.
 
-## FUserCreateResponse
+## FAccelByteModelsUserCreateResponse
 
 |Field|Type|Description|
 |---|---|---|
 Namespace   |FString|Namespace of the user that has been created.
-UserID      |FString|ID of the user that has been created.
+UserId      |FString|Id of the user that has been created.
 AuthType    |FString|Authentication type of the user that has been created.
 DisplayName |FString|Display name of the user that has been created.
-LoginID     |FString|Login ID (e.g. email) of the user that has been created.
+LoginId     |FString|Login Id (e.g. email) of the user that has been created.
 
-## FUserProfileInfo
+## FAccelByteModelsUserProfileInfo
 
 |Field|Type|Description|
 |---|---|---|
-UserID          |FString|User's ID.
+UserId          |FString|User's Id.
 Namespace       |FString|Namespace of the user.
 DisplayName     |FString|User's display name.
 FirstName       |FString|User's first name.
 LastName        |FString|User's last name.
 Country         |FString|User's country.
-AvatarSmallURL  |FString|URL of user's small avatar.
-AvatarURL       |FString|URL of user's avatar.
-AvatarLargeURL  |FString|URL of user's large avatar.
+AvatarSmallUrl  |FString|URL of user's small avatar.
+AvatarUrl       |FString|URL of user's avatar.
+AvatarLargeUrl  |FString|URL of user's large avatar.
 Email           |FString|User's email.
 Status          |FString|User's status.
 Language        |FString|User's language.
@@ -944,9 +944,9 @@ CustomAttributes|TMap< FString, FString>|User's custom attributes.
 DisplayName     |FString|Update user's display name.
 FirstName       |FString|Update user's first name.
 LastName        |FString|Update user's last name.
-AvatarSmallURL  |FString|Update user's URL of their small avatar.
-AvatarURL       |FString|Update user's URL of their avatar.
-AvatarLargeURL  |FString|Update user's URL of their large avatar.
+AvatarSmallUrl  |FString|Update user's URL of their small avatar.
+AvatarUrl       |FString|Update user's URL of their avatar.
+AvatarLargeUrl  |FString|Update user's URL of their large avatar.
 Email           |FString|Update user's email.
 Language        |FString|Update user's language.
 Timezone        |FString|Update user's timezone.
@@ -955,13 +955,13 @@ CustomAttributes|TMap< FString, FString>|User's custom attributes.
 Country         |FString|Update user's country.
 Status          |FString|Update user's status.
 
-## FWalletInfo
+## FAccelByteModelsWalletInfo
 
 |Field|Type|Description|
 |---|---|---|
-ID              |FString|Wallet's ID.
+Id              |FString|Wallet's Id.
 Namespace       |FString|Wallet's namespace.
-UserID          |FString|Wallet's owner's ID.
+UserId          |FString|Wallet's owner's Id.
 CurrencyCode    |FString|Currency code for this wallet.
 CurrencySymbol  |FString|Symbol of the currency code.
 Balance         |int32  |Wallet's balance.

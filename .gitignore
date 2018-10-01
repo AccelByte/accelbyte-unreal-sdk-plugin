@@ -76,11 +76,11 @@ DerivedDataCache/*
 Content/StarterContent/*
 
 *.bak
-Plugins/JusticeSDK/Binaries/
-Plugins/JusticeSDK/Intermediate/Build/
-Plugins/JusticeWebBrowserWidget/Binaries/
-Plugins/JusticeWebBrowserWidget/Content/WebTexture_M.uasset
-Plugins/JusticeWebBrowserWidget/Intermediate/Build/
+Plugins/AccelByteUe4Sdk/Binaries/
+Plugins/AccelByteUe4Sdk/Intermediate/Build/
+Plugins/AccelByteCustomWebBrowserWidget/Binaries/
+Plugins/AccelByteCustomWebBrowserWidget/Content/WebTexture_M.uasset
+Plugins/AccelByteCustomWebBrowserWidget/Intermediate/Build/
 
 # Doxygen generated files
 Doxygen/*

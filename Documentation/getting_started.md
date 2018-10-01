@@ -91,7 +91,7 @@ Edit your DefaultEngine.inifile, make sure you add this configuration
 bEnabled=true
 AppId=myapp01
 BaseURL="https://api.justice.accelbyte.net"
-ClientID=<your client id>
+ClientId=<your client id>
 ClientSecret=<your client secret>
 Namespace=<your game namespace>
 ```

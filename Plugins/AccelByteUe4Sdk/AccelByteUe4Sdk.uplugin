@@ -1,0 +1,29 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "AccelByte Unreal Engine 4 SDK",
+	"Description": "Official AccelByte SDK for Unreal Engine 4",
+	"Category": "Online Platform",
+	"CreatedBy": "Accelbyte Inc",
+	"CreatedByUrl": "https://accelbyte.net/",
+	"DocsUrl": "",
+	"MarketplaceUrl": "",
+	"SupportUrl": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+  "Modules": [
+    {
+      "Name": "AccelByteUe4Sdk",
+      "Type": "Developer",
+      "LoadingPhase": "Default"
+    },
+  ],
+  "Plugins": [
+    {
+      "Name": "OnlineSubsystemSteam",
+      "Enabled": true
+    }
+  ]      
+}
