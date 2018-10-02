@@ -261,9 +261,9 @@ void Identity::VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessTo
 	Request->ProcessRequest();
 }
 
-void Identity::SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString LoginId, FSendVerificationCodeForPasswordResetSuccess OnSuccess, ErrorDelegate OnError)
+void Identity::SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FSendVerificationCodeForPasswordResetSuccess OnSuccess, ErrorDelegate OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
+	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *ServerBaseUrl, *Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -284,13 +284,13 @@ void Identity::SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FStri
 	Request->ProcessRequest();
 }
 
-void Identity::VerifyPasswordReset(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void Identity::VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FAccelByteModelsResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code = VerificationCode;
 	ResetPasswordRequest.LoginId = UserId;
 	ResetPasswordRequest.NewPassword = NewPassword;
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
+	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *ServerBaseUrl, *Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");

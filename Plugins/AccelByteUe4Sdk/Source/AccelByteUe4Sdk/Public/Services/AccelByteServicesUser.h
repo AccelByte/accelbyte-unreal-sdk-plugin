@@ -90,7 +90,7 @@ public:
 	 * \param OnSuccess Called when the operation succeeded.
 	 * \param OnError Called when the operation failed.
 	 */
-	static void RequestPasswordResetCode(FString ServerBaseUrl, FString Email, FRequestResetPasswordSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void RequestPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FVerifyRegistrationSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FVerifyResetPasswordSuccess)
 	/**
@@ -102,7 +102,7 @@ public:
 	 * \param OnSuccess Called when the operation succeeded.
 	 * \param OnError Called when the operation failed.
 	 */
-	static void ResetPasswordWithCode(FString ServerBaseUrl, FString VerificationCode, FString Email, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void ResetPasswordWithCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLoginFromLauncherSuccess)
 	/**

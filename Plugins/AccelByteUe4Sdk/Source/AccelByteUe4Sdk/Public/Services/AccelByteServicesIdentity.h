@@ -182,20 +182,18 @@ public:
 	 * @brief Send a request to reset user's password.
 	 * 
 	 * @param ServerBaseUrl The server's base URL.
-	 * @param AccessToken Client token. Required.
 	 * @param Namespace Required.
 	 * @param LoginId User's email address.
 	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
 	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
 	 */
-	static void SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString LoginId, FSendVerificationCodeForPasswordResetSuccess OnSuccess, ErrorDelegate OnError);
+	static void SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FSendVerificationCodeForPasswordResetSuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FVerifyResetPasswordSuccess);
 	/**
 	 * @brief This function verifies user's request to reset password. See Identity::SendVerificationCodeForPasswordReset().
 	 * 
 	 * @param ServerBaseUrl The server's base URL.
-	 * @param AccessToken Client token. Required.
 	 * @param Namespace Required.
 	 * @param UserId Required.
 	 * @param VerificationCode Code sent to the email address.
@@ -203,7 +201,7 @@ public:
 	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
 	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
 	 */
-	static void VerifyPasswordReset(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
+	static void VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetLinkedUserAccountsSuccess, TArray<FAccelByteModelsLinkedPlatform>)
 	/**
