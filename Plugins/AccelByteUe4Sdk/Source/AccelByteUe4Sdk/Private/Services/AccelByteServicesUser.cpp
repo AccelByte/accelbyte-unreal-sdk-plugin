@@ -12,7 +12,7 @@
 using namespace AccelByte;
 using namespace Services;
 
-static FString EPlatformString[] = {
+static FString PlatformStrings[] = {
 	TEXT("steam"),
 	TEXT("google"),
 	TEXT("facebook"),
@@ -26,7 +26,7 @@ static FString EPlatformString[] = {
 
 void User::LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, EPlatformType PlatformId, FString Token, FLoginWithPlatformAccountSuccess OnSuccess, ErrorDelegate OnError)
 {
-	Identity::GetAccessTokenWithPlatformGrant(ServerBaseUrl, ClientId, ClientSecret, Namespace, EPlatformString[static_cast<std::underlying_type<EPlatformType>::type>(PlatformId)], Token, Identity::FGetAccessTokenWithPlatformGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
+	Identity::GetAccessTokenWithPlatformGrant(ServerBaseUrl, ClientId, ClientSecret, Namespace, PlatformStrings[static_cast<std::underlying_type<EPlatformType>::type>(PlatformId)], Token, Identity::FGetAccessTokenWithPlatformGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
 		UserCredentials.SetUserAccessToken(Result);
 		User::InitializeProfile(ServerBaseUrl, OnSuccess, OnError);
