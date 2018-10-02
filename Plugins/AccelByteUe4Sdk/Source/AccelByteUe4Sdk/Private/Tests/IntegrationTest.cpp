@@ -2997,7 +2997,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	bool bResetPasswordSuccessful = false;
 	bHasDone = false;
 	Password = "new_password";
-	JusticeUser::VerifyPasswordReset(VerificationCode, LoginID, Password,
+	JusticeUser::ResetPasswordWithCode(VerificationCode, LoginID, Password,
 		FDefaultCompleteDelegate::CreateLambda([&bHasDone, &bResetPasswordSuccessful](bool bSuccessful, FString ErrorStr)
 	{
 		UE_LOG(LogJusticeTest, Log, TEXT("Reset password result: %s"), bSuccessful ? TEXT("Success") : *ErrorStr);

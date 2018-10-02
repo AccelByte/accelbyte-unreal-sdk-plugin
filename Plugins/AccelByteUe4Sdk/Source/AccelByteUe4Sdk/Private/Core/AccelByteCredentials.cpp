@@ -15,7 +15,7 @@ Credentials::~Credentials()
 {
 }
 
-	FAccelByteModelsOAuthToken Credentials::GetClientAccessToken()
+FAccelByteModelsOAuthToken Credentials::GetClientAccessToken()
 {
 	return ClientAccessToken; // the return value is constructed before local variables get destroyed
 }

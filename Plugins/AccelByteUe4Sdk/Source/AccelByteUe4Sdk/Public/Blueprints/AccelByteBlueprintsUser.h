@@ -41,7 +41,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FLoginWithEmailOutputPin OnFailed;
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "JusticeSDK | User"))
-		static ULoginWithEmail* LoginWithEmail(FString Email, FString Password);
+		static ULoginWithEmail* LoginWithEmailAccount(FString Email, FString Password);
 	virtual void Activate() override;
 private:
 	FString Email;
@@ -93,7 +93,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 		FResetPasswordOutputPin OnFailed;
 	UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", Category = "JusticeSDK | User"))
-		static UResetPassword* VerifyPasswordReset(FString VerificationCode, FString Email, FString NewPassword);
+		static UResetPassword* ResetPasswordWithCode(FString VerificationCode, FString Email, FString NewPassword);
 	virtual void Activate() override;
 private:
 	FString VerificationCode;

@@ -9,7 +9,7 @@ namespace AccelByte
 
 const std::unordered_map<int32, FString> ErrorMessages::Default
 {
-	{ static_cast<int32>(ErrorCodes::DefaultError), TEXT("Default error.") },
+	{ static_cast<int32>(ErrorCodes::ErrorCodeNotSet), TEXT("Error code is not set (0).") },
 	{ static_cast<int32>(ErrorCodes::UnknownError), TEXT("Unknown error.") },
 	{ static_cast<int32>(ErrorCodes::JsonDeserializationFailed), TEXT("JSON deserialization failed. ") },
 	{ static_cast<int32>(ErrorCodes::HttpOther), TEXT("Other HTTP error.") },

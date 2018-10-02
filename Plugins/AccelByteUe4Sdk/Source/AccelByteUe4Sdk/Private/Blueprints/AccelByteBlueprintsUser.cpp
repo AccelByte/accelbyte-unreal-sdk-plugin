@@ -38,9 +38,9 @@ void URegisterWithEmail::Activate()
 
 #pragma endregion RegisterWithEmail
 
-#pragma region LoginWithEmail
+#pragma region LoginWithEmailAccount
 
-ULoginWithEmail * ULoginWithEmail::LoginWithEmail(FString Email, FString Password)
+ULoginWithEmail * ULoginWithEmail::LoginWithEmailAccount(FString Email, FString Password)
 {
 	ULoginWithEmail* Node = NewObject<ULoginWithEmail>();
 	Node->Email = Email;
@@ -63,7 +63,7 @@ void ULoginWithEmail::Activate()
 	}));
 }
 
-#pragma endregion LoginWithEmail
+#pragma endregion LoginWithEmailAccount
 
 #pragma region VerifyEmail
 
@@ -117,9 +117,9 @@ void UForgotPassword::Activate()
 
 #pragma endregion SendVerificationCodeForPasswordReset
 
-#pragma region VerifyPasswordReset
+#pragma region ResetPasswordWithCode
 
-UResetPassword * UResetPassword::VerifyPasswordReset(FString VerificationCode, FString Email, FString NewPassword)
+UResetPassword * UResetPassword::ResetPasswordWithCode(FString VerificationCode, FString Email, FString NewPassword)
 {
 	UResetPassword* Node = NewObject<UResetPassword>();
 	Node->VerificationCode = VerificationCode;
@@ -131,7 +131,7 @@ UResetPassword * UResetPassword::VerifyPasswordReset(FString VerificationCode, F
 
 void UResetPassword::Activate()
 {
-	JusticeUser::VerifyPasswordReset(this->VerificationCode, this->Email, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
+	JusticeUser::ResetPasswordWithCode(this->VerificationCode, this->Email, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
 		if (bSuccessful)
 		{
 			OnSuccess.Broadcast(TEXT(""));
@@ -143,7 +143,7 @@ void UResetPassword::Activate()
 	}));
 }
 
-#pragma endregion VerifyPasswordReset
+#pragma endregion ResetPasswordWithCode
 
 #pragma region LoginFromLauncher
 
