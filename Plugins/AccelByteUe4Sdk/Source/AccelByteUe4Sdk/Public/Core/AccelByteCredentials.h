@@ -33,6 +33,7 @@ private:
 	FString ClientRefeshtoken;
 	FDateTime ClientAccessTokenExpiration;
 	FString UserId;
+	FString DisplayName;
 #endif
 };
 
