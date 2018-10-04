@@ -138,10 +138,9 @@ void User::VerifyEmailAccount(FString ServerBaseUrl, FString UserId, FString Ver
 	}));
 }
 
-void User::RequestPasswordResetCode(FString ServerBaseUrl, FString LoginId, FVerifyRegistrationSuccess OnSuccess, ErrorDelegate OnError)
+void User::RequestPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FVerifyRegistrationSuccess OnSuccess, ErrorDelegate OnError)
 {
-	FAccelByteModelsOAuthToken ClientAccessToken = UserCredentials.GetClientAccessToken();
-	Identity::SendVerificationCodeForPasswordReset(ServerBaseUrl, ClientAccessToken.Access_token, ClientAccessToken.Namespace, LoginId,
+	Identity::SendVerificationCodeForPasswordReset(ServerBaseUrl, ClientId, ClientSecret, Namespace, LoginId,
 		Identity::FSendVerificationCodeForPasswordResetSuccess::CreateLambda([OnSuccess, OnError]()
 	{
 		OnSuccess.ExecuteIfBound();
@@ -151,11 +150,9 @@ void User::RequestPasswordResetCode(FString ServerBaseUrl, FString LoginId, FVer
 	}));
 }
 
-void User::ResetPasswordWithCode(FString ServerBaseUrl, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void User::ResetPasswordWithCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
 {
-	FAccelByteModelsOAuthToken ClientAccessToken = UserCredentials.GetClientAccessToken();
-	Identity::VerifyPasswordReset(ServerBaseUrl, ClientAccessToken.Access_token, ClientAccessToken.Namespace, LoginId, VerificationCode, NewPassword,
-		Identity::FVerifyResetPasswordSuccess::CreateLambda([OnSuccess, OnError]()
+	Identity::VerifyPasswordReset(ServerBaseUrl, ClientId, ClientSecret, Namespace, LoginId, VerificationCode, NewPassword, Identity::FVerifyResetPasswordSuccess::CreateLambda([OnSuccess, OnError]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -206,6 +203,5 @@ void User::InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess On
 		{
 			OnError.ExecuteIfBound(Code, Message);
 		}));
-		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
