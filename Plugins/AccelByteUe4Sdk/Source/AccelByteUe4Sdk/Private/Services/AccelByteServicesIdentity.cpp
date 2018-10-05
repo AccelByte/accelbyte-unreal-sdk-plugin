@@ -14,6 +14,7 @@ namespace Services
 
 #pragma region OAuth
 
+// WARNING: THIS DOESN'T ACTUALLY WORK!!!
 void Identity::GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetUserAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
@@ -21,6 +22,7 @@ void Identity::GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, F
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
+	// Missing state parameter. Do not use this!!! You (user) will be susceptible to Cross-Site Request Forgery attack!!!
 	FString Content = FString::Printf(TEXT("grant_type=authorization_code&code=%s&redirect_uri=%s"), *AuthorizationCode, *RedirectUri);
 
 	FHttpRequestPtr Request = RetrySystem.Manager.CreateRequest(RetrySystem.RetryLimitCount, RetrySystem.RetryTimeoutRelativeSeconds, RetrySystem.RetryResponseCodes);
@@ -116,11 +118,11 @@ void Identity::GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString Clie
 	check(!DeviceId.IsEmpty() && "Cannot get Device Id");
 
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/iam/oauth/namespaces/%s/platforms/device/token"), *ServerBaseUrl, *Namespace);;
+	FString Url = FString::Printf(TEXT("%s/iam/oauth/platforms/device/token"), *ServerBaseUrl, *Namespace);;
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("device_id=%s"), *DeviceId);
+	FString Content = FString::Printf(TEXT("namespace=%s&device_id=%s"), *Namespace, *DeviceId);
 
 	FHttpRequestPtr Request = RetrySystem.Manager.CreateRequest(RetrySystem.RetryLimitCount, RetrySystem.RetryTimeoutRelativeSeconds, RetrySystem.RetryResponseCodes);
 	Request->SetURL(Url);
@@ -161,13 +163,13 @@ void Identity::GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString Cl
 
 #pragma endregion OAuth
 
-void Identity::CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Password, FString DisplayName, EUserAuthTypeJustice AuthType, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void Identity::CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Password, FString DisplayName, EUserAuthType AuthType, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FAccelByteModelsUserCreateRequest NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
 	NewUserRequest.Password = Password;
 	NewUserRequest.LoginId = UserId;
-	NewUserRequest.AuthType = (AuthType == Email) ? TEXT("EMAILPASSWD"): TEXT("PHONEPASSWD");
+	NewUserRequest.AuthType = (AuthType == EUserAuthType::Email) ? TEXT("EMAILPASSWD"): TEXT("PHONEPASSWD");
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users"), *ServerBaseUrl, *Namespace);
@@ -237,9 +239,9 @@ void Identity::SendVerificationCodeForUserAccountCreation(FString ServerBaseUrl,
 	Request->ProcessRequest();
 }
 
-void Identity::VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, EUserAuthTypeJustice AuthType, FVerifyUserAccountCreation OnSuccess, ErrorDelegate OnError)
+void Identity::VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, EUserAuthType AuthType, FVerifyUserAccountCreation OnSuccess, ErrorDelegate OnError)
 {
-	FString ContactType = (AuthType == Email) ? TEXT("email") : TEXT("phone");
+	FString ContactType = (AuthType == EUserAuthType::Email) ? TEXT("email") : TEXT("phone");
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verification"), *ServerBaseUrl, *Namespace, *UserId);
 	FString Verb = TEXT("POST");
@@ -284,11 +286,11 @@ void Identity::SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FStri
 	Request->ProcessRequest();
 }
 
-void Identity::VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void Identity::VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FAccelByteModelsResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code = VerificationCode;
-	ResetPasswordRequest.LoginId = UserId;
+	ResetPasswordRequest.LoginId = LoginId;
 	ResetPasswordRequest.NewPassword = NewPassword;
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/resetPassword"), *ServerBaseUrl, *Namespace);

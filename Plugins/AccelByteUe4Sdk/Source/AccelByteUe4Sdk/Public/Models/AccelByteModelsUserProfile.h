@@ -39,8 +39,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileInfo
 	FString Timezone;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfo")
 	FString DateOfBirth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfo")
-	TMap<FString, FString> CustomAttributes;
 };
 
 USTRUCT(BlueprintType)
@@ -80,15 +78,11 @@ struct FAccelByteModelsUserProfileInfoUpdate
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
 	FString Language;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
+	FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
 	FString Timezone;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
 	FString DateOfBirth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
-	TMap<FString, FString> CustomAttributes;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
-	FString Country;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileInfoUpdate")
-	FString Status;
 };
 
 USTRUCT(BlueprintType)
@@ -117,7 +111,5 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileRequest
 		FString Timezone;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileRequest")
 		FString DateOfBirth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | UserProfile | UserProfileRequest")
-		TMap<FString, FString> CustomAttributes;
 };
 

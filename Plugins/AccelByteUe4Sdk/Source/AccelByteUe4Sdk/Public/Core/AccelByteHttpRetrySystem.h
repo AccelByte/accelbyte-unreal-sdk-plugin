@@ -15,7 +15,7 @@ class FRetrySystemTicker : public FTickerObjectBase
 {
 public:
 	// Samuel's note: transient faults
-	FHttpRetrySystem::FRetryLimitCountSetting RetryLimitCount{ 5 };
+	FHttpRetrySystem::FRetryLimitCountSetting RetryLimitCount{ 3 };
 	FHttpRetrySystem::FRetryTimeoutRelativeSecondsSetting RetryTimeoutRelativeSeconds{ 10.0 };
 	FHttpRetrySystem::FRetryResponseCodes RetryResponseCodes
 	{ // Samuel's note: transient faults

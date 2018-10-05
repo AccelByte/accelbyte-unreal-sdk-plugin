@@ -17,7 +17,7 @@ namespace Services
 /**
  * @brief Either Email or Phone.
  */
-enum EUserAuthTypeJustice
+enum class EUserAuthType : uint8
 {
 	Email = 0,
 	Phone = 1,
@@ -25,7 +25,7 @@ enum EUserAuthTypeJustice
 
 
 /**
- * @brief Justice Identity is the first service required before we can proceed to other service such as platform service.
+ * @brief Justice Identity is the first service The service.before we can proceed to other service such as platform service.
  * There are 2 types of access tokens: user access token and client access token. Most of the functions in this class use client token.
  */
 class ACCELBYTEUE4SDK_API Identity
@@ -33,80 +33,96 @@ class ACCELBYTEUE4SDK_API Identity
 public:
 #pragma region OAuth
 
-	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithAuthorizationCodeGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
-	 * @brief This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
+	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
+	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
+	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
+	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
+	 * Also missing state parameter. Do not use this!!! You (user) will be susceptible to Cross-Site Request Forgery attack!!!
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
 	 * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
-	 * @param RedirectUri This is optional.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param RedirectUri The URL the IAM server will redirect you to when the operation succeeded. Again, this doesn't work at all. Do not use this function!!!
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetUserAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithPasswordGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithPasswordGrantSuccess, const FAccelByteModelsOAuthToken &);
 	/**
 	 * @brief Log user in with their email account.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
-	 * @param Namespace Required.
-	 * @param LoginId Required. This is the email address.
-	 * @param Password Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param Namespace The namespace.
+	 * @param LoginId The email address. Dunno why it's called Login ID instead of username.
+	 * @param Password The password.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetUserAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString Password, FGetUserAccessTokenWithPasswordGrantSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithClientCredentialsGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithClientCredentialsGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
 	* @brief Get client token.
-	* Client token is required for creating request from AccelByteServicesIdentity. The result is FAccelByteModelsOAuthToken.
+	* Client token is The is.for creating request from AccelByteServicesIdentity. The result is FAccelByteModelsOAuthToken.
 	*
-	* @param ServerBaseUrl The server's base URL.
-	* @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	* @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	* @param ServerBaseUrl Your server's base URL.
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
 	*/
 	static void GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithRefreshTokenGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithRefreshTokenGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
 	* @brief Get new access token with refresh token.
 	*
-	* @param ServerBaseUrl The server's base URL.
-	* @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
-	* @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	* @param ServerBaseUrl Your server's base URL.
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param RefreshToken Refresh token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
+	* @param OnError This will be called when the operation failed.
 	*/
 	static void GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RefreshToken, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, ErrorDelegate OnError);
 
 	//
 	// Custom grant types
+	// I have no idea why these are actually here at all
 	//
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithDeviceGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithDeviceGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
 	 * @brief This function allows user to login without entering any information.
 	 * This will automatically obtain user's device information using UE4 function.
 	 * Will return a "user" access token.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
-	 * @param Namespace Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param ClientId The issued OAuth2 client credentials.
+	 * @param ClientSecret The issued OAuth2 client credentials.
+	 * @param Namespace Namespace.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, ErrorDelegate OnError);
 	
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPlatformGrantSuccess, FAccelByteModelsOAuthToken);
+	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPlatformGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
 	* @brief Log user in with their other platform account, e.g., Steam, Google, Facebook, Twitter, Twitch, etc.
 	* Will return a "user" access token.
 	* 
-	* @param ServerBaseUrl The server's base URL.
-	* @param Namespace Required.
-	* @param PlatformId Required. The platform ID.
-	* @param Token Required.
-	* @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
-	* @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	* @param ServerBaseUrl Your server's base URL.
+	* @param Namespace The Namespace.
+	* @param PlatformId The PlatformId. The platform ID.
+	* @param Token The Token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
+	* @param OnError This will be called when the operation failed.
 	*/
 	static void GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString PlatformId, FString Token, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -114,21 +130,21 @@ public:
 
 #pragma region Users
 
-	DECLARE_DELEGATE_OneParam(FCreateUserAccountSuccess, FAccelByteModelsUserCreateResponse);
+	DECLARE_DELEGATE_OneParam(FCreateUserAccountSuccess, const FAccelByteModelsUserCreateResponse&);
 	/**
 	 * @brief This function will register a new user with email-based account.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
-	 * @param UserId Required.
-	 * @param Password Required.
-	 * @param DisplayName Required.
-	 * @param AuthType Either EUserAuthTypeJustice::Email or EUserAuthTypeJustice::Phone.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param Namespace The Namespace.
+	 * @param UserId The UserId.
+	 * @param Password The Password.
+	 * @param DisplayName The DisplayName.
+	 * @param AuthType Either EUserAuthType::Email or EUserAuthType::Phone.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Password, FString DisplayName, EUserAuthTypeJustice AuthType, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError);
+	static void CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Password, FString DisplayName, EUserAuthType AuthType, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FUpgradeHeadlessAccountSuccess);
 	/**
@@ -137,14 +153,14 @@ public:
 	 * If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
 	 * Therefore, the function requests user’s Email and Password for parameters.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
-	 * @param UserId  Required.
-	 * @param Email Required.
-	 * @param Password Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param Namespace The Namespace.
+	 * @param UserId The UserId.
+	 * @param Email The Email.
+	 * @param Password The Password.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void UpgradeHeadlessUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, ErrorDelegate OnError);
 	
@@ -152,13 +168,13 @@ public:
 	/**
 	 * @brief This function shall be called after registering a new user account.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
+	 * @param Namespace The Namespace.
 	 * @param UserId Obtained from token response obtained after user login. 
-	 * @param LoginId Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param LoginId The LoginId.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void SendVerificationCodeForUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString LoginId, FSendVerificationCodeForUserAccountCreationSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -166,26 +182,26 @@ public:
 	/**
 	 * @brief This function will verify the registered email **after** user receives verification code sent with Identity::::SendVerificationCodeForUserAccountCreation() to their email.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
-	 * @param UserId Required.
-	 * @param VerificationCode Required.
-	 * @param AuthType Either EUserAuthTypeJustice::Email or EUserAuthTypeJustice::Phone.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when response has been received.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param Namespace The Namespace.
+	 * @param UserId The UserId.
+	 * @param VerificationCode The VerificationCode.
+	 * @param AuthType Either EUserAuthType::Email or EUserAuthType::Phone.
+	 * @param OnSuccess This will be called when response has been received.
+	 * @param OnError This will be called when the operation failed.
 	 */
-	static void VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, EUserAuthTypeJustice AuthType, FVerifyUserAccountCreation OnSuccess, ErrorDelegate OnError);
+	static void VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, EUserAuthType AuthType, FVerifyUserAccountCreation OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FSendVerificationCodeForPasswordResetSuccess);
     /**
 	 * @brief Send a request to reset user's password.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
-	 * @param Namespace Required.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param Namespace The Namespace.
 	 * @param LoginId User's email address.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void SendVerificationCodeForPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FSendVerificationCodeForPasswordResetSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -193,13 +209,13 @@ public:
 	/**
 	 * @brief This function verifies user's request to reset password. See Identity::SendVerificationCodeForPasswordReset().
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
-	 * @param Namespace Required.
-	 * @param UserId Required.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param Namespace The Namespace.
+	 * @param UserId The UserId.
 	 * @param VerificationCode Code sent to the email address.
-	 * @param NewPassword Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param NewPassword The NewPassword.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString UserId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -207,10 +223,10 @@ public:
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is TArray<FAccelByteModelsLinkedPlatform>.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsLinkedPlatform>.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetLinkedUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -220,13 +236,13 @@ public:
 	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
 	 * The browser will redirect the URL to a site with a code in form of parameter URL. 
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
-	 * @param PlatformId Required.
-	 * @param Ticket Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param Namespace The Namespace.
+	 * @param PlatformId The PlatformId.
+	 * @param Ticket The Ticket.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void LinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -236,12 +252,12 @@ public:
 	 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch).
 	 * The browser will redirect the URL to a site with a code in form of parameter URL.
 	 * 
-	 * @param ServerBaseUrl The server's base URL.
+	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Client token. Required.
-	 * @param Namespace Required.
-	 * @param PlatformId Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param Namespace The Namespace.
+	 * @param PlatformId The PlatformId.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void UnlinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
 #pragma endregion Users

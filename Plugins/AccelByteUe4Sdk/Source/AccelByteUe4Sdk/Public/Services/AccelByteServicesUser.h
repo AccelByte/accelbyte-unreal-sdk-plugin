@@ -9,18 +9,12 @@
 #include "AccelByteServicesUserProfile.h"
 #include "AccelByteModelsUserProfile.h"
 
-enum class EPlatformType : int32
+
+
+namespace AccelByte
 {
-	Steam,
-	Google,
-	Facebook,
-	Android,
-	iOS,
-	Device,
-	Twitch,
-	Oculus,
-	Twitter
-};
+namespace Services
+{
 
 
 /**
@@ -32,7 +26,23 @@ class ACCELBYTEUE4SDK_API User
 {
 public:
 
-	DECLARE_DELEGATE(FLoginWithPlatformAccountSuccess)
+	enum class EPlatformType : uint8
+	{
+		Steam,
+		Google,
+		Facebook,
+		Android,
+		iOS,
+		Device,
+		Twitch,
+		Oculus,
+		Twitter
+	};
+	
+	DECLARE_DELEGATE(FClientLoginSuccess)
+    static void ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+
+	DECLARE_DELEGATE(FLoginWithOtherPlatformAccountSuccess)
 	/**
 	* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
 	* 
@@ -40,11 +50,12 @@ public:
 	* @param Token Required. Authentication code that provided by another platform.
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/
-    static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, EPlatformType PlatformId, FString Token, FLoginWithPlatformAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+    static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, uint8 PlatformId, FString Token, FLoginWithOtherPlatformAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
-	DECLARE_DELEGATE(FLoginWithEmailSuccess)
+	DECLARE_DELEGATE(FLoginWithEmailAccountSuccess)
 	/**
 	 * @brief Log in with email account.
+	 * 
 	 * @param ServerBaseUrl 
 	 * @param ClientId 
 	 * @param ClientSecret 
@@ -54,9 +65,7 @@ public:
 	 * @param OnSuccess 
 	 * @param OnError 
 	 */
-	static void LoginWithEmailAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Email, FString Password, FLoginWithEmailSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
-
-	static void ResetCredentials();
+	static void LoginWithEmailAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Email, FString Password, FLoginWithEmailAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLoginWithDeviceIdSuccess)
 	/**
@@ -65,6 +74,8 @@ public:
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
 	*/
 	static void LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FLoginWithDeviceIdSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	
+	static void ResetCredentials();
 
 	/**
 	* @brief User should log in with headless account to upgrade it with email.
@@ -76,39 +87,41 @@ public:
 	DECLARE_DELEGATE(FUpgradeHeadlessAccountSuccess)
 	static void UpgradeHeadlessAccount(FString ServerBaseUrl, FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FRegisterEmailAccountSuccess, FAccelByteModelsUserCreateResponse)
-	static void CreateEmailAccount(FString ServerBaseUrl, FString Email, FString Password, FString DisplayName, AccelByte::Services::Identity::FCreateUserAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	DECLARE_DELEGATE_OneParam(FCreateEmailAccountSuccess, const FAccelByteModelsUserCreateResponse&)
+	static void CreateEmailAccount(FString ServerBaseUrl, FString Email, FString Password, FString DisplayName, FCreateEmailAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
-	DECLARE_DELEGATE(FVerifyRegistrationSuccess)
-	static void VerifyEmailAccount(FString ServerBaseUrl, FString UserId, FString VerificationCode, FVerifyRegistrationSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	DECLARE_DELEGATE(FVerifyEmailAccountSuccess)
+	static void VerifyEmailAccount(FString ServerBaseUrl, FString UserId, FString VerificationCode, FVerifyEmailAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
-	DECLARE_DELEGATE(FRequestResetPasswordSuccess)
+	DECLARE_DELEGATE(FRequestPasswordResetSuccess)
 	/**
-	 * @brief Request a password reset code to be used for ResetPasswordWithCode().
-	 * \param ServerBaseUrl Your server base URL.
-	 * \param Email User email address.
-	 * \param OnSuccess Called when the operation succeeded.
-	 * \param OnError Called when the operation failed.
+	 * @brief Request a password reset code to be used for VerifyPasswordReset().
+	 * 
+	 * @param ServerBaseUrl Your server base URL.
+	 * @param Email User email address.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
 	 */
-	static void RequestPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FVerifyRegistrationSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void RequestPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FRequestPasswordResetSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
-	DECLARE_DELEGATE(FVerifyResetPasswordSuccess)
+	DECLARE_DELEGATE(FVerifyPasswordResetSuccess)
 	/**
-	 * \brief Reset password with the code from RequestPasswordResetCode().
-	 * \param ServerBaseUrl Your server base URL.
-	 * \param VerificationCode The code from RequestPasswordResetCode()
-	 * \param Email User email address.
-	 * \param NewPassword The new password.
-	 * \param OnSuccess Called when the operation succeeded.
-	 * \param OnError Called when the operation failed.
+	 * @brief Reset password with the code from RequestPasswordReset().
+	 * 
+	 * @param ServerBaseUrl Your server base URL.
+	 * @param VerificationCode The code from RequestPasswordReset()
+	 * @param Email User email address.
+	 * @param NewPassword The new password.
+	 * @param OnSuccess Called when the operation succeeded.
+	 * @param OnError Called when the operation failed.
 	 */
-	static void ResetPasswordWithCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyResetPasswordSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FString VerificationCode, FString NewPassword, FVerifyPasswordResetSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLoginFromLauncherSuccess)
 	/**
 	* @brief This function should be called automatically if the game started by AccelByte's launcher.
 	*
-	 * @param OnSuccess Called when the operation succeeded.
+	* @param OnSuccess Called when the operation succeeded.
 	*/
 	static void LoginFromLauncher(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RedirectUri, FLoginFromLauncherSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
@@ -124,10 +137,11 @@ public:
 	/**
 	* @brief Update user's profile information.
 	*
+	* @param ServerBaseUrl Your server's base URL.
 	* @param UpdateProfile Required. This is the new profile information that'll be updated.
 	* @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is FUserProfileInfo, set in FRequestCurrentPlayerProfileCompleteDelegate callback.
 	*/
-	static void UpdateProfile(FString ServerBaseUrl, FAccelByteModelsUserProfileInfoUpdate UpdateProfile, FUpdateProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void UpdateProfile(FString ServerBaseUrl, const FAccelByteModelsUserProfileInfoUpdate& UpdateProfile, FUpdateProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 private:
 	DECLARE_DELEGATE(FInitializeProfileSuccess)
@@ -140,3 +154,6 @@ private:
 	 */
 	static void InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 };
+
+} // Namespace Services
+} // Namespace AccelByte

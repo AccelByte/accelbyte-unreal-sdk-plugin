@@ -18,23 +18,28 @@ class Credentials
 public:
 	Credentials(); 
 	~Credentials();
-	FAccelByteModelsOAuthToken GetClientAccessToken();
-	void SetClientAccessToken(const FAccelByteModelsOAuthToken& New);
-	FAccelByteModelsOAuthToken GetUserAccessToken();
-	void SetUserAccessToken(const FAccelByteModelsOAuthToken& New);
+	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace);
+	void SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace);
+	Credentials operator=(const Credentials& Other);
+	FString GetUserAccessToken() const;
+	FString GetUserRefreshToken() const;
+	FDateTime GetUserAccessTokenExpirationUtc() const;
+	FString GetUserId() const;
+	FString GetUserDisplayName() const;
+	FString GetUserNamespace() const;
+	FString GetClientAccessToken() const;
+	FDateTime GetClientAccessTokenExpirationUtc() const;
+	FString GetClientNamespace() const;
 private:
-	FAccelByteModelsOAuthToken ClientAccessToken;
-	FAccelByteModelsOAuthToken UserAccessToken;
-#if 0
 	FString UserAccessToken;
 	FString UserRefreshToken;
-	FDateTime UserAccessTokenExpiration;
-	FString ClientAccesstoken;
-	FString ClientRefeshtoken;
-	FDateTime ClientAccessTokenExpiration;
+	FDateTime UserAccessTokenExpirationUtc;
+	FString UserNamespace;
 	FString UserId;
-	FString DisplayName;
-#endif
+	FString UserDisplayName;
+	FString ClientAccessToken;
+	FDateTime ClientAccessTokenExpirationUtc;
+	FString ClientNamespace;
 };
 
 static Credentials UserCredentials;

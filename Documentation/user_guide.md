@@ -2,9 +2,8 @@
 
 \section using_the_sdk_in_cpp Using the SDK in C++
 
-\subsection oauth2_login OAuth2 Login
-Before you use other services, you must call `ClientLogin()` function first.
-`ClientLogin()` function is actually OAuth2 Login to our service. It will login against **ClientId** and **ClientSecret** from `DefaultEngine.ini` file under `JusticeSDK` section.
+\subsection oauth2_login Getting client access token
+You should call `User::ClientLogin()` to get a client access token. Client credentials (**ClientId** and **ClientSecret**) defined in `AccelByteSettings.cpp`.
 If you build Game Client and Dedicated Server, you should call this function. There is **no** `ServerLogin` Function.
 
 For more information about OAuth2 you can follow [this link](https://oauth.net/2/) and [this link](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-protocols-oauth-code).
