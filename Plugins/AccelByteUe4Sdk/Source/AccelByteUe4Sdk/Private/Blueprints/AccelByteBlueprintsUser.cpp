@@ -4,326 +4,284 @@
 
 #include "AccelByteBlueprintsUser.h"
 #include "AccelByteServicesUser.h"
+#include "AccelByteSettings.h"
+#include "AccelByteCredentials.h"
 
 using namespace AccelByte::Services;
 using namespace AccelByte;
 
-#if 0
-
-#pragma region RegisterWithEmail
-
-URegisterWithEmail * URegisterWithEmail::RegisterWithEmail(FString Email, FString Password, FString DisplayName)
+void UAccelByteBlueprintsUser::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, FBlueprintError OnError)
 {
-	URegisterWithEmail* Node = NewObject<URegisterWithEmail>();
-	Node->Email = Email;
-	Node->Password = Password;
-	Node->DisplayName = DisplayName;
-
-	return Node;
-}
-
-void URegisterWithEmail::Activate()
-{
-	JusticeUser::Register(this->Email, this->Password, this->DisplayName, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFailed.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion RegisterWithEmail
-
-#pragma region LoginWithEmailAccount
-
-ULoginWithEmail * ULoginWithEmail::LoginWithEmailAccount(FString Email, FString Password)
-{
-	ULoginWithEmail* Node = NewObject<ULoginWithEmail>();
-	Node->Email = Email;
-	Node->Password = Password;
-	
-	return Node;
-}
-
-void ULoginWithEmail::Activate()
-{
-	JusticeUser::Login(this->Email, this->Password, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFailed.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion LoginWithEmailAccount
-
-#pragma region VerifyEmail
-
-UVerifyEmail * UVerifyEmail::VerifyEmail(FString VerificationCode)
-{
-	UVerifyEmail* Node = NewObject<UVerifyEmail>();
-	Node->VerificationCode = VerificationCode;
-
-	return Node;
-}
-
-void UVerifyEmail::Activate()
-{
-	JusticeUser::Verify(this->VerificationCode, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFailed.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion VerifyEmail
-
-#pragma region SendVerificationCodeForPasswordReset
-
-UForgotPassword * UForgotPassword::SendVerificationCodeForPasswordReset(FString Email)
-{
-	UForgotPassword* Node = NewObject<UForgotPassword>();
-	Node->Email = Email;
-
-	return Node;
-}
-
-void UForgotPassword::Activate()
-{
-	JusticeUser::SendVerificationCodeForPasswordReset(this->Email, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFailed.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion SendVerificationCodeForPasswordReset
-
-#pragma region ResetPasswordWithCode
-
-UResetPassword * UResetPassword::ResetPasswordWithCode(FString VerificationCode, FString Email, FString NewPassword)
-{
-	UResetPassword* Node = NewObject<UResetPassword>();
-	Node->VerificationCode = VerificationCode;
-	Node->Email = Email;
-	Node->NewPassword = NewPassword;
-
-	return Node;
-}
-
-void UResetPassword::Activate()
-{
-	JusticeUser::ResetPasswordWithCode(this->VerificationCode, this->Email, this->NewPassword, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFailed.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion ResetPasswordWithCode
-
-#pragma region LoginFromLauncher
-
-ULoginFromLauncher * ULoginFromLauncher::LoginFromLauncher()
-{
-	ULoginFromLauncher* Node = NewObject<ULoginFromLauncher>();
-	return Node;
-}
-
-void ULoginFromLauncher::Activate()
-{
-	JusticeUser::LoginFromLauncher(FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr) {
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion LoginFromLauncher
-
-#pragma region GetAccessTokenWithPlatformGrant
-
-ULoginWithPlatform * ULoginWithPlatform::GetAccessTokenWithPlatformGrant(UPlatformType PlatformType, FString PlatformToken)
-{
-	ULoginWithPlatform* Node = NewObject<ULoginWithPlatform>();
-	Node->PlatformType = (EPlatformType)PlatformType;
-	Node->PlatformToken = PlatformToken;
-	return Node;
-}
-
-void ULoginWithPlatform::Activate()
-{
-	JusticeUser::Login(this->PlatformType, this->PlatformToken, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	User::ClientLogin(ServerBaseUrl, ClientId, ClientSecret,
+		User::FClientLoginSuccess::CreateLambda([OnSuccess]()
 	{
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion GetAccessTokenWithPlatformGrant
-
-
-#pragma region LoginWithDeviceId
-
-ULoginWithDeviceId * ULoginWithDeviceId::LoginWithDeviceId()
-{
-	ULoginWithDeviceId* Node = NewObject<ULoginWithDeviceId>();
-	return Node;
-}
-
-void ULoginWithDeviceId::Activate()
-{
-	User::LoginWithDeviceId(FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr);
-		}
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-#pragma endregion LoginWithDeviceId
-
-#pragma region UpgradeHeadlessUserAccount
-
-UUpgradeHeadlessAccount * UUpgradeHeadlessAccount::UpgradeHeadlessUserAccount(FString Email, FString Password)
+void UAccelByteBlueprintsUser::ClientLoginEasy(FClientLoginSuccess OnSuccess, FBlueprintError OnError)
 {
-	UUpgradeHeadlessAccount* Node = NewObject<UUpgradeHeadlessAccount>();
-	Node->Email = Email;
-	Node->Password = Password;
-	return Node;
+	ClientLogin(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, OnSuccess, OnError);
 }
 
-void UUpgradeHeadlessAccount::Activate()
+void UAccelByteBlueprintsUser::LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId,
+	FString ClientSecret, FString Namespace, EAccelBytePlatformType PlatformId, FString Token,
+	FLoginWithOtherPlatformAccountSuccess OnSuccess, FBlueprintError OnError)
 {
-	JusticeUser::UpgradeHeadlessUserAccount(this->Email, this->Password, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	User::LoginWithOtherPlatformAccount(ServerBaseUrl, ClientId,
+		ClientSecret, Namespace, static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformId), Token,
+		User::FLoginWithOtherPlatformAccountSuccess::CreateLambda([OnSuccess]()
 	{
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr);
-		}
-	}));
-}
-
-#pragma endregion UpgradeHeadlessUserAccount
-
-#pragma region GetProfile
-
-UGetProfile * UGetProfile::GetProfile()
-{
-	UGetProfile* Node = NewObject<UGetProfile>();
-	return Node;
-}
-
-void UGetProfile::Activate()
-{
-	JusticeUser::GetProfile(FRequestCurrentPlayerProfileCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr, FUserProfileInfo * Result)
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
-		if (bSuccessful)
-		{
-			UUserProfileJustice* UserProfile = UUserProfileJustice::Deserialize(Result);
-			OnSuccess.Broadcast(TEXT(""), UserProfile);
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr, nullptr);
-		}
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-#pragma endregion GetProfile
-
-#pragma region UpdateProfile
-
-UUpdateProfile * UUpdateProfile::UpdateProfile(FString DisplayName, FString FirstName, FString LastName, FString AvatarSmallUrl, FString AvatarUrl, FString AvatarLargeUrl, FString Email, FString Language, FString Timezone, FString DateOfBirth, FString Country, TMap<FString, FString> CustomAttributes)
+void UAccelByteBlueprintsUser::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, FString Token, FLoginWithOtherPlatformAccountSuccess OnSuccess, FBlueprintError OnError)
 {
-	UUpdateProfile* Node = NewObject<UUpdateProfile>();
-	Node->DisplayName = DisplayName;
-	Node->FirstName = FirstName;
-	Node->LastName = LastName;
-	Node->AvatarSmallUrl = AvatarSmallUrl;
-	Node->AvatarUrl = AvatarUrl;
-	Node->AvatarLargeUrl = AvatarLargeUrl;
-	Node->Email = Email;
-	Node->Language = Language;
-	Node->Timezone = Timezone;
-	Node->DateOfBirth = DateOfBirth;
-	Node->Country = Country;
-	Node->CustomAttributes = CustomAttributes;
-	return Node;
+	LoginWithOtherPlatformAccount(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, PlatformId, Token, OnSuccess, OnError);
 }
 
-void UUpdateProfile::Activate()
+void UAccelByteBlueprintsUser::LoginWithEmailAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Email, FString Password, FLoginWithEmailAccountSuccess OnSuccess, FBlueprintError OnError)
 {
-	UserProfileInfoUpdate ProfileUpdate;
-	ProfileUpdate.DisplayName = this->DisplayName;
-	ProfileUpdate.FirstName = this->FirstName;
-	ProfileUpdate.LastName = this->LastName;
-	ProfileUpdate.AvatarSmallURL = this->AvatarSmallUrl;
-	ProfileUpdate.AvatarURL = this->AvatarUrl;
-	ProfileUpdate.AvatarSmallURL = this->AvatarSmallUrl;
-	ProfileUpdate.AvatarLargeURL = this->AvatarLargeUrl;
-	ProfileUpdate.Email = this->Email;
-	ProfileUpdate.Language = this->Language;
-	ProfileUpdate.Timezone = this->Timezone;
-	ProfileUpdate.DateOfBirth = this->DateOfBirth;
-	ProfileUpdate.Country = this->Country;
-	ProfileUpdate.CustomAttributes = this->CustomAttributes;
-	JusticeUser::UpdateProfile(ProfileUpdate, FDefaultCompleteDelegate::CreateLambda([&](bool bSuccessful, FString ErrorStr)
+	User::LoginWithEmailAccount(ServerBaseUrl, ClientId,
+		ClientSecret, Namespace, Email, Password,
+		User::FLoginWithEmailAccountSuccess::CreateLambda([OnSuccess]()
 	{
-		if (bSuccessful)
-		{
-			OnSuccess.Broadcast(TEXT(""));
-		}
-		else
-		{
-			OnFail.Broadcast(ErrorStr);
-		}
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-#pragma endregion UpdateProfile
+void UAccelByteBlueprintsUser::LoginWithEmailAccountEasy(FString Email, FString Password, FLoginWithEmailAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	LoginWithEmailAccount(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, Email, Password, OnSuccess, OnError);
+}
 
-#endif
+void UAccelByteBlueprintsUser::ResetCredentials()
+{
+	User::ResetCredentials();
+}
+
+void UAccelByteBlueprintsUser::LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret,
+	FString Namespace, FLoginWithDeviceIdSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::LoginWithDeviceId(ServerBaseUrl, ClientId,
+		ClientSecret, Namespace,
+		User::FLoginWithDeviceIdSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::LoginWithDeviceIdEasy(FLoginWithDeviceIdSuccess OnSuccess, FBlueprintError OnError)
+{
+	LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::UpgradeHeadlessAccount(FString ServerBaseUrl, FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::UpgradeHeadlessAccount(ServerBaseUrl, Email, Password,
+		User::FUpgradeHeadlessAccountSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::UpgradeHeadlessAccounEasy(FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	UpgradeHeadlessAccount(Settings::ServerBaseUrl, Email, Password, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::CreateEmailAccount(FString ServerBaseUrl, FString Namespace, FString Email, FString Password, FString DisplayName, FCreateEmailAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::CreateEmailAccount(ServerBaseUrl, Email, Password, DisplayName,
+		User::FCreateEmailAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserCreateResponse& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::CreateEmailAccountEasy(FString Email, FString Password, FString DisplayName, FCreateEmailAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	CreateEmailAccount(Settings::ServerBaseUrl, Settings::Namespace, Email, Password, DisplayName, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::VerifyEmailAccount(FString ServerBaseUrl, FString Namespace, FString UserId, FString VerificationCode, FVerifyEmailAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::VerifyEmailAccount(ServerBaseUrl, UserId, VerificationCode,
+		User::FVerifyEmailAccountSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::VerifyEmailAccountEasy(FString UserId, FString VerificationCode, FVerifyEmailAccountSuccess OnSuccess, FBlueprintError OnError)
+{
+	VerifyEmailAccount(Settings::ServerBaseUrl, Settings::Namespace, UserId, VerificationCode, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::RequestPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Email, FRequestPasswordResetSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::RequestPasswordReset(ServerBaseUrl, ClientId, ClientSecret, Namespace, Email,
+		User::FRequestPasswordResetSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::RequestPasswordResetEasy(FString Email, FRequestPasswordResetSuccess OnSuccess, FBlueprintError OnError)
+{
+	RequestPasswordReset(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, Email, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString VerificationCode, FString Email, FString NewPassword, FVerifyPasswordResetSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::VerifyPasswordReset(ServerBaseUrl, ClientId, ClientSecret, Namespace, Email, VerificationCode, NewPassword,
+		User::FVerifyPasswordResetSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::VerifyPasswordResetEasy(FString VerificationCode, FString Email, FString NewPassword, FVerifyPasswordResetSuccess OnSuccess, FBlueprintError OnError)
+{
+	VerifyPasswordReset(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, VerificationCode, Email, NewPassword, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::LoginFromLauncher(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RedirectUri, FLoginFromLauncherSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::LoginFromLauncher(ServerBaseUrl, ClientId, ClientSecret, RedirectUri,
+		User::FLoginFromLauncherSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::LoginFromLauncherEasy(FString RedirectUri, FLoginFromLauncherSuccess OnSuccess, FBlueprintError OnError)
+{
+	LoginFromLauncher(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, RedirectUri, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::GetProfile(FString ServerBaseUrl, FGetProfileSuccess OnSuccess, FBlueprintError OnError)
+{
+	User::GetProfile(ServerBaseUrl,
+		User::FGetProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::GetProfileEasy(FGetProfileSuccess OnSuccess, FBlueprintError OnError)
+{
+	GetProfile(Settings::ServerBaseUrl, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsUser::UpdateProfile(FString ServerBaseUrl,
+	const FAccelByteModelsUserProfileInfoUpdate& NewProfile, FUpdateProfileSuccess OnSuccess,
+	FBlueprintError OnError)
+{
+	User::UpdateProfile(ServerBaseUrl, NewProfile,
+		User::FLoginWithOtherPlatformAccountSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUser::UpdateProfileEasy(const FAccelByteModelsUserProfileInfoUpdate& NewProfile, FUpdateProfileSuccess OnSuccess, FBlueprintError OnError)
+{
+	UpdateProfile(Settings::ServerBaseUrl, NewProfile, OnSuccess, OnError);
+}
+
+FString UAccelByteBlueprintsUser::GetUserAccessToken()
+{
+	return UserCredentials.GetUserAccessToken();
+}
+
+FString UAccelByteBlueprintsUser::GetUserRefreshToken()
+{
+	return UserCredentials.GetUserRefreshToken();
+}
+
+FDateTime UAccelByteBlueprintsUser::GetUserAccessTokenExpirationUtc()
+{
+	return UserCredentials.GetUserAccessTokenExpirationUtc();
+}
+
+FString UAccelByteBlueprintsUser::GetUserId()
+{
+	return UserCredentials.GetUserId();
+}
+
+FString UAccelByteBlueprintsUser::GetUserDisplayName()
+{
+	return UserCredentials.GetUserDisplayName();
+}
+
+FString UAccelByteBlueprintsUser::GetUserNamespace()
+{
+	return UserCredentials.GetUserNamespace();
+}
+
+FString UAccelByteBlueprintsUser::GetSettingsServerBaseUrl()
+{
+	return Settings::ServerBaseUrl;
+}
+
+FString UAccelByteBlueprintsUser::GetSettingsClientId()
+{
+	return Settings::ClientId;
+}
+
+FString UAccelByteBlueprintsUser::GetSettingsClientSecret()
+{
+	return Settings::ClientSecret;
+}
+
+FString UAccelByteBlueprintsUser::GetSettingsNamespace()
+{
+	return Settings::Namespace;
+}

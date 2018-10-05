@@ -7,9 +7,9 @@
 namespace AccelByte
 {
 
-const FString Settings::ServerBaseUrl = TEXT("");
-const FString Settings::ClientId = TEXT("");
-const FString Settings::ClientSecret = TEXT("");
-const FString Settings::Namespace = TEXT("");
+const FString Settings::ServerBaseUrl = TEXT("https://alpha.justice.accelbyte.net");
+const FString Settings::ClientId = TEXT("Aha");
+const FString Settings::ClientSecret = TEXT("Aha");
+const FString Settings::Namespace = TEXT("master");
 
 } // Namespace AccelByte

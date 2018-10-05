@@ -1,1 +1,1 @@
-"C:\Program Files\Epic Games\UE_4.18\Engine\Binaries\Win64\UE4Editor-Cmd.exe" .\JusticeSDKDemo.uproject -Server -unattended -nopause -ExecCmds="Automation RunTests JusticeTest;Quit" -log
+"C:\Program Files\Epic Games\UE_4.18\Engine\Binaries\Win64\UE4Editor-Cmd.exe" C:\Users\User\source\repos\accelbyte\justice-ue4-sdk-2\AccelByteUe4SdkDemo.uproject -Server -unattended -nopause -ExecCmds="Automation RunTests LogAccelByteTest;Quit" -log

@@ -9,7 +9,8 @@ namespace AccelByte
 
 bool FRetrySystemTicker::Tick(float DeltaTime)
 {
-	return Manager.Update();
+	Manager.Update();
+	return true;
 }
 
 }
