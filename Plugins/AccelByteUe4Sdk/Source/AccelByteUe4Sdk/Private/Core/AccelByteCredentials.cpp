@@ -7,6 +7,9 @@
 
 namespace AccelByte
 {
+
+Credentials UserCredentials;
+	
 Credentials::Credentials()
 {
 }

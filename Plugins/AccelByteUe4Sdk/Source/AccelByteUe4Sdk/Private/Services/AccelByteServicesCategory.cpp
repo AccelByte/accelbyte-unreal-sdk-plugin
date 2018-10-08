@@ -35,10 +35,10 @@ void Category::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FSt
 	Request->ProcessRequest();
 }
 
-void Category::GetCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ParentPath, FString Language, FGetCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(ParentPath), *Language);
+	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -53,7 +53,7 @@ void Category::GetCategories(FString ServerBaseUrl, FString AccessToken, FString
 	Request->SetContentAsString(Content);
 	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 	{
-		GetCategoriesResponse(Request, Response, OnSuccess, OnError);
+		GetCategoryResponse(Request, Response, OnSuccess, OnError);
 	});
 	Request->ProcessRequest();
 }
@@ -132,14 +132,14 @@ void Category::GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponseP
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Category::GetCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetCategorySuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
-	TArray<FAccelByteModelsFullCategoryInfo> Result;
+	FAccelByteModelsFullCategoryInfo Result;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		if (FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 		{
 			OnSuccess.ExecuteIfBound(Result);
 			return;

@@ -32,7 +32,7 @@ public:
 	 */
 	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const TArray<FAccelByteModelsItemInfo>&);
+	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
 	 * @brief Get an array of items with specific criteria/filter from a store within user's namespace.
 	 *
