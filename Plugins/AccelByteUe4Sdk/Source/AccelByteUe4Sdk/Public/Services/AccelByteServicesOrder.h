@@ -18,7 +18,7 @@ namespace Services
  * @brief AccelByte purchasing service.
  * User should log in before using this. See AccelByteServicesUser to see how to log user in.
  */
-class ACCELBYTEUE4SDK_API Purchase
+class ACCELBYTEUE4SDK_API Order
 {
 public:
 	DECLARE_DELEGATE_OneParam(FCreateNewOrderSuccess, const FAccelByteModelsOrderInfo&);

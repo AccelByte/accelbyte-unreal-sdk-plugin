@@ -30,7 +30,7 @@ public:
 	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
 	 */
-	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
@@ -46,7 +46,7 @@ public:
 	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is const TArray<ItemInfo>&.
 	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
 	 */
-	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
 
 private:
 	static void GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);

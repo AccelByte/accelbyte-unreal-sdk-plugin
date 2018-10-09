@@ -238,32 +238,32 @@ void UAccelByteBlueprintsUser::UpdateProfileEasy(const FAccelByteModelsUserProfi
 
 FString UAccelByteBlueprintsUser::GetUserAccessToken()
 {
-	return UserCredentials.GetUserAccessToken();
+	return CredentialStore.GetUserAccessToken();
 }
 
 FString UAccelByteBlueprintsUser::GetUserRefreshToken()
 {
-	return UserCredentials.GetUserRefreshToken();
+	return CredentialStore.GetUserRefreshToken();
 }
 
 FDateTime UAccelByteBlueprintsUser::GetUserAccessTokenExpirationUtc()
 {
-	return UserCredentials.GetUserAccessTokenExpirationUtc();
+	return CredentialStore.GetUserAccessTokenExpirationUtc();
 }
 
 FString UAccelByteBlueprintsUser::GetUserId()
 {
-	return UserCredentials.GetUserId();
+	return CredentialStore.GetUserId();
 }
 
 FString UAccelByteBlueprintsUser::GetUserDisplayName()
 {
-	return UserCredentials.GetUserDisplayName();
+	return CredentialStore.GetUserDisplayName();
 }
 
 FString UAccelByteBlueprintsUser::GetUserNamespace()
 {
-	return UserCredentials.GetUserNamespace();
+	return CredentialStore.GetUserNamespace();
 }
 
 FString UAccelByteBlueprintsUser::GetSettingsServerBaseUrl()

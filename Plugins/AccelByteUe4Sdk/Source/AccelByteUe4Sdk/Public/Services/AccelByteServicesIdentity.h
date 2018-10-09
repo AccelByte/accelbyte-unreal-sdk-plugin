@@ -35,10 +35,7 @@ public:
 
 	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
-	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
+	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! DO NOT USE!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
 	 * Also missing state parameter. Do not use this!!! You (user) will be susceptible to Cross-Site Request Forgery attack!!!
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.

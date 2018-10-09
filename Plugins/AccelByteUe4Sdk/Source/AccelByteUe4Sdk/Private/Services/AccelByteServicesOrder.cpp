@@ -12,7 +12,7 @@ namespace AccelByte
 namespace Services
 {
 
-void Purchase::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *ServerBaseUrl, *Namespace,  *UserId);
@@ -36,7 +36,7 @@ void Purchase::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FStrin
 	Request->ProcessRequest();
 }
 
-void Purchase::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
@@ -59,7 +59,7 @@ void Purchase::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString 
 	Request->ProcessRequest();
 }
 
-void Purchase::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *ServerBaseUrl, *Namespace, *UserId);
@@ -84,7 +84,7 @@ void Purchase::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString
 	Request->ProcessRequest();
 }
 
-void Purchase::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/fulfill"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
@@ -107,7 +107,7 @@ void Purchase::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString 
 	Request->ProcessRequest();
 }
 
-void Purchase::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/history"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
@@ -134,7 +134,7 @@ void Purchase::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, F
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void Purchase::CreateNewOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateNewOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::CreateNewOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateNewOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -158,7 +158,7 @@ void Purchase::CreateNewOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr 
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Purchase::GetUserOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -182,7 +182,7 @@ void Purchase::GetUserOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Re
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Purchase::GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -206,7 +206,7 @@ void Purchase::GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr R
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Purchase::FulfillOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FFulfillOrderSuccess OnSuccess, ErrorDelegate OnError)
+void Order::FulfillOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FFulfillOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -230,7 +230,7 @@ void Purchase::FulfillOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Re
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Purchase::GetUserOrderHistoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError)
+void Order::GetUserOrderHistoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
