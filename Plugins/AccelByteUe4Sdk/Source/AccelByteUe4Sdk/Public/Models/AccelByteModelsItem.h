@@ -102,7 +102,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Item | ItemInfo")
 		FString TargetNamespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Item | ItemInfo")
-		TArray<FAccelByteModelsItemInfoRegionData> RegionDatas;
+		TArray<FAccelByteModelsItemInfoRegionData> RegionData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Item | ItemInfo")
 		TArray<FString> ItemIds;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Item | ItemInfo")

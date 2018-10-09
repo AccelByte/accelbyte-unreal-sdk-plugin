@@ -42,6 +42,6 @@ private:
 	FString ClientNamespace;
 };
 
-static Credentials UserCredentials;
+extern Credentials UserCredentials;
 
 } // Namespace AccelByte

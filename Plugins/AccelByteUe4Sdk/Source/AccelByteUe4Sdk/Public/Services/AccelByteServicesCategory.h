@@ -31,16 +31,16 @@ public:
 	 */
 	static void GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
+	DECLARE_DELEGATE_OneParam(FGetCategorySuccess, const FAccelByteModelsFullCategoryInfo&);
 	/**
 	 * @brief This function gets the category from a store in a namespace.
 	 *
-	 * @param ParentPath Required.
+	 * @param CategoryPath Required.
 	 * @param Language Optional.
 	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
 	 */
-	static void GetCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ParentPath, FString Language, FGetCategoriesSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetChildCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
@@ -66,7 +66,7 @@ public:
 
 private:
 	static void GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetCategoriesSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetCategorySuccess OnSuccess, ErrorDelegate OnError);
 	static void GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetChildCategoriesSuccess OnSuccess, ErrorDelegate OnError);
 	static void GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetDescendantCategoriesSuccess OnSuccess, ErrorDelegate OnError);
 };

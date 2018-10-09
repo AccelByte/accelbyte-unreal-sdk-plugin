@@ -55,7 +55,7 @@ void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Names
 void Item::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *ServerBaseUrl, *AccessToken, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
+	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
 	if (!ItemType.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
@@ -120,10 +120,10 @@ void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr 
 {
 	int32 Code;
 	FString Message;
-	TArray<FAccelByteModelsItemInfo> Output;
+	FAccelByteModelsItemPagingSlicedResult Output;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		if (FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Output, 0, 0))
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Output, 0, 0))
 		{
 			OnSuccess.ExecuteIfBound(Output);
 			return;

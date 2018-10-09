@@ -39,7 +39,7 @@ void Purchase::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FStrin
 void Purchase::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s"), *ServerBaseUrl, *AccessToken, *UserId, *OrderNo);
+	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -62,7 +62,7 @@ void Purchase::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString 
 void Purchase::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *ServerBaseUrl, *AccessToken, *UserId);
+	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders"), *ServerBaseUrl, *Namespace, *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -87,7 +87,7 @@ void Purchase::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString
 void Purchase::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/fulfill"), *ServerBaseUrl, *AccessToken, *UserId, *OrderNo);
+	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/fulfill"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -110,7 +110,7 @@ void Purchase::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString 
 void Purchase::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/history"), *ServerBaseUrl, *AccessToken, *UserId, *OrderNo);
+	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/orders/%s/history"), *ServerBaseUrl, *Namespace, *UserId, *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -188,8 +188,8 @@ void Purchase::GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr R
 	FString Message;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		TArray<FAccelByteModelsOrderInfo> Result;
-		if (FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
+		FAccelByteModelsOrderInfoPaging Result;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 		{
 			OnSuccess.ExecuteIfBound(Result);
 			return;

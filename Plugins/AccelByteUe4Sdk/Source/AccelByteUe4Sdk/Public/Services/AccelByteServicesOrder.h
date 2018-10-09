@@ -47,7 +47,7 @@ public:
 	 */
 	static void GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetUserOrdersSuccess, const TArray<FAccelByteModelsOrderInfo>&);
+	DECLARE_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&);
 	/**
 	 * @brief Get all of user's orders that have been created. 
 	 * 
