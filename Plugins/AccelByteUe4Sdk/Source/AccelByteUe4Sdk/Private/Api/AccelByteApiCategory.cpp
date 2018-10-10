@@ -2,14 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesCategory.h"
+#include "AccelByteApiCategory.h"
 #include "AccelByteError.h"
 #include "JsonUtilities.h"
 #include "AccelByteHttpRetrySystem.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 void Category::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError)
@@ -204,5 +204,5 @@ void Category::GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpRes
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

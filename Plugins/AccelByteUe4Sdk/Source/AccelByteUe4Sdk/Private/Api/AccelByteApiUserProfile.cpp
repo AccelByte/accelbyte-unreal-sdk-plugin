@@ -2,14 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesUserProfile.h"
-#include "Services/AccelByteServicesIdentity.h"
+#include "AccelByteApiUserProfile.h"
+#include "AccelByteApiIdentity.h"
 #include "AccelByteHttpRetrySystem.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError)
@@ -191,5 +191,5 @@ void UserProfile::CreateCompleteUserProfileResponse(FHttpRequestPtr Request, FHt
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

@@ -5,22 +5,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteServicesIdentity.h"
-#include "AccelByteServicesUserProfile.h"
+#include "AccelByteApiIdentity.h"
+#include "AccelByteApiUserProfile.h"
 #include "AccelByteModelsUserProfile.h"
 
 
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
-
 
 /**
  * @brief AccelByte User
- * A convenience class for using Identity (Identity Access Management) and UserProfile services.
- * Stores tokens after successful login.
+ * A convenience class for using Identity and UserProfile APIs.
+ * Stores access tokens and other credentials after successful login.
  */
 class ACCELBYTEUE4SDK_API User
 {
@@ -46,9 +45,13 @@ public:
 	/**
 	* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
 	* 
-	* @param PlatformType Required. Specify platform type that chosen by user to log in.
-	* @param Token Required. Authentication code that provided by another platform.
-	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	* @param ServerBaseUrl Your server's base URL.
+	* @param ClientId Client credentials.
+	* @param ClientSecret Client credentials.
+	* @param Namespace Namespace.
+	* @param PlatformId Specify platform type that chosen by user to log in.
+	* @param Token Authentication code that provided by another platform.
+	* @param OnSuccess This will be called when the operation succeeded.
 	*/
     static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, uint8 PlatformId, FString Token, FLoginWithOtherPlatformAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
@@ -56,12 +59,12 @@ public:
 	/**
 	 * @brief Log in with email account.
 	 * 
-	 * @param ServerBaseUrl 
-	 * @param ClientId 
-	 * @param ClientSecret 
-	 * @param Namespace 
-	 * @param Email 
-	 * @param Password 
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param ClientId Client credentials.
+	 * @param ClientSecret Client credentials.
+	 * @param Namespace Namespace.
+	 * @param Email User email address.
+	 * @param Password Password
 	 * @param OnSuccess 
 	 * @param OnError 
 	 */
@@ -71,26 +74,54 @@ public:
 	/**
 	* @brief Log in as a guest (anonymous log in).
 	*
-	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	* @param ServerBaseUrl Your server's base URL.
+	* @param ClientId Client credentials.
+	* @param ClientSecret Client credentials.
+	* @param Namespace Namespace.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
 	*/
 	static void LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FLoginWithDeviceIdSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
-	
+
+	/**
+	 * @brief Remove access tokens, user ID, and other credentials from memory.
+	 */
 	static void ResetCredentials();
 
 	/**
 	* @brief User should log in with headless account to upgrade it with email.
 	*
-	* @param Email Required. User's valid email.
-	* @param Password Required. User's password.
-	* @param OnComplete Required, but can be nullptr. This will be called when response has been received.
+	* @param Email User's valid email.
+	* @param Password User's password.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
 	*/
 	DECLARE_DELEGATE(FUpgradeHeadlessAccountSuccess)
 	static void UpgradeHeadlessAccount(FString ServerBaseUrl, FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FCreateEmailAccountSuccess, const FAccelByteModelsUserCreateResponse&)
+	/**
+	 * @brief Register a new user with email-based account, then send a verification code to that email.
+	 * 
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param Email User email address.
+	 * @param Password User chosen password.
+	 * @param DisplayName User display name.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
 	static void CreateEmailAccount(FString ServerBaseUrl, FString Email, FString Password, FString DisplayName, FCreateEmailAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FVerifyEmailAccountSuccess)
+	/**
+	 * @brief Verify user email address.
+	 * 
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param UserId UserId from User::CreateEmailAccount().
+	 * @param VerificationCode The verification code that was sent to email address.
+	 * @param OnSuccess This will be called when the operation succeeded. 
+	 * @param OnError This will be called when the operation failed.
+	 */
 	static void VerifyEmailAccount(FString ServerBaseUrl, FString UserId, FString VerificationCode, FVerifyEmailAccountSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FRequestPasswordResetSuccess)
@@ -98,7 +129,10 @@ public:
 	 * @brief Request a password reset code to be used for VerifyPasswordReset().
 	 * 
 	 * @param ServerBaseUrl Your server base URL.
-	 * @param Email User email address.
+	 * @param ClientId Client credentials.
+	 * @param ClientSecret Client credentials.
+	 * @param Namespace Namespace.
+	 * @param LoginId User email address.
 	 * @param OnSuccess Called when the operation succeeded.
 	 * @param OnError Called when the operation failed.
 	 */
@@ -109,8 +143,9 @@ public:
 	 * @brief Reset password with the code from RequestPasswordReset().
 	 * 
 	 * @param ServerBaseUrl Your server base URL.
-	 * @param VerificationCode The code from RequestPasswordReset()
-	 * @param Email User email address.
+	 * @param ClientId Client credentials.
+	 * @param VerificationCode The code from User::RequestPasswordReset()
+	 * @param LoginId User email address.
 	 * @param NewPassword The new password.
 	 * @param OnSuccess Called when the operation succeeded.
 	 * @param OnError Called when the operation failed.
@@ -119,28 +154,32 @@ public:
 
 	DECLARE_DELEGATE(FLoginFromLauncherSuccess)
 	/**
-	* @brief This function should be called automatically if the game started by AccelByte's launcher.
-	*
-	* @param OnSuccess Called when the operation succeeded.
-	*/
+	 * @brief DOES NOT WORK AT THE MOMENT. DO NOT USE. This function should be called automatically if the game started by AccelByte's launcher.
+	 *
+	 * @param ServerBaseUrl
+	 * @param OnSuccess Called when the operation succeeded.
+	 */
 	static void LoginFromLauncher(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RedirectUri, FLoginFromLauncherSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetProfileSuccess, const FAccelByteModelsUserProfileInfo&)
 	/**
-	* @brief Get user's profile information.
-	*
-	* @param OnComplete Called when the operation succeeded.. The result is FUserProfileInfo.
-	*/
+	 * @brief Get user's profile information.
+	 *
+	 * @param ServerBaseUrl The server base URL.
+	 * @param OnSuccess Called when the operation succeeded. The result is FUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
 	static void GetProfile(FString ServerBaseUrl, FGetProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FUpdateProfileSuccess)
 	/**
-	* @brief Update user's profile information.
-	*
-	* @param ServerBaseUrl Your server's base URL.
-	* @param UpdateProfile Required. This is the new profile information that'll be updated.
-	* @param OnComplete Required, but can be nullptr. This will be called when response has been received. The result is FUserProfileInfo, set in FRequestCurrentPlayerProfileCompleteDelegate callback.
-	*/
+	 * @brief Update user's profile information.
+	 *
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param UpdateProfile This is the new profile information that'll be updated.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
 	static void UpdateProfile(FString ServerBaseUrl, const FAccelByteModelsUserProfileInfoUpdate& UpdateProfile, FUpdateProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 
 private:
@@ -149,11 +188,11 @@ private:
 	 * @brief Create default user profile when user doesn't have one yet.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
-	 * @param OnSuccess Called when the operation succeeded.
-	 * @param OnError Called when the operation failed.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 };
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

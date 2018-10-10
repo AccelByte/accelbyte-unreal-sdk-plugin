@@ -6,10 +6,23 @@
 
 #include "CoreMinimal.h"
 #include "Http.h"
-#include "AccelByteModelsError.h"
 #include "JsonUtilities.h"
 
 #include <unordered_map>
+
+#include "AccelByteError.generated.h"
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsErrorEntity
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+		int32 NumericErrorCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+		FString ErrorCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+		FString ErrorMessage;
+};
 
 namespace AccelByte
 {
@@ -256,45 +269,7 @@ public:
 	const static std::unordered_map<int32, FString> Default;
 };
 
-inline void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
-{
-	int32 Code = 0;
-	FAccelByteModelsErrorEntity Error;
-	FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0);
-	Code = Error.NumericErrorCode;
-	auto it = ErrorMessages::Default.find(Code);
-	if (it != ErrorMessages::Default.cend())
-	{
-		OutMessage += ErrorMessages::Default.at(Code);
-		OutMessage += " " + Error.ErrorMessage;
-	}
-	else
-	{
-		Code = Response->GetResponseCode();
-	}
-	// debug message
-#if 1
-	OutMessage += "\n\nResponse";
-	OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
-	OutMessage += "\nContent: \n" + Response->GetContentAsString();
-	
-	OutMessage += " \n\nRequest";
-	OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
-	OutMessage += "\nVerb: " + Request->GetVerb();
-	OutMessage += "\nURL: " + Request->GetURL();
-	OutMessage += "\nHeaders: \n";
-	for (auto a : Request->GetAllHeaders())
-	{
-		OutMessage += a + "\n";
-	}
-	OutCode = Code;
-	OutMessage += "\nContent: \n";
-	for (auto a : Request->GetContent())
-	{
-		OutMessage += static_cast<char>(a);
-	}
-#endif
-}
+void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
 
 } // Namespace AccelByte
 

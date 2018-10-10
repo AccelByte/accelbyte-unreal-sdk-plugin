@@ -3,13 +3,12 @@
 // and restrictions contact your company contract manager.
 #pragma once
 
-#include "Http.h"
 #include "AccelByteError.h"
 #include "Models/AccelByteModelsItem.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 /**
@@ -24,27 +23,33 @@ public:
 	/**
 	 * @brief Get an item information from a store within the user's namespace.
 	 *
-	 * @param ItemId Required.
-	 * @param Region Required.
-	 * @param Language Optional.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param AccessToken Access token.
+	 * @param Namespace Namespace.
+	 * @param ItemId The item ID.
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN". 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
+	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
 	 * @brief Get an array of items with specific criteria/filter from a store within user's namespace.
 	 *
-	 * @param Language Optional.
-	 * @param Region Required.
-	 * @param CategoryPath Required.
-	 * @param ItemType Required.
-	 * @param Status Required.
-	 * @param Page Required.
-	 * @param Size Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when the operation succeeded. The result is const TArray<ItemInfo>&.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param ServerBaseUrl Your server's base URL.
+	 * @param AccessToken Access token.
+	 * @param Namespace Namespace.
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN". 
+	 * @param CategoryPath Item's category path.
+	 * @param ItemType Type of the item.
+	 * @param Status Status of the item.
+	 * @param Page Page number.
+	 * @param Size Page size.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsItemInfo>&.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -53,5 +58,5 @@ private:
 	static void GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
 };
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

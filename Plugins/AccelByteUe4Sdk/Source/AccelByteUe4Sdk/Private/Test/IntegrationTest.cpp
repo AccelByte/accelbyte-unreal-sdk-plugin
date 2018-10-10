@@ -6,10 +6,10 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteServicesOrder.h"
-#include "AccelByteServicesCategory.h"
-#include "AccelByteServicesItem.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiOrder.h"
+#include "AccelByteApiCategory.h"
+#include "AccelByteApiItem.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteModelsIdentity.h"
 #include "AccelByteModelsUserProfile.h"
 #include "AccelByteSettings.h"
@@ -22,7 +22,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteTest);
 const int32 AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 using namespace AccelByte;
-using namespace AccelByte::Services;
+using namespace AccelByte::Api;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClientSuccess", AutomationFlagMask);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)

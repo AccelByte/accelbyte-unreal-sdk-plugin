@@ -11,7 +11,7 @@ namespace AccelByte
 {
 
 /**
- * @brief Class for storing user's credentials.
+ * @brief Class for storing  credentials.
  */
 class Credentials
 {

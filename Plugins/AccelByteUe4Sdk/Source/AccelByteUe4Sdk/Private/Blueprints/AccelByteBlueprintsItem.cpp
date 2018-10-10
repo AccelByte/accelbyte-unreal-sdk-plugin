@@ -4,15 +4,17 @@
 
 #include "AccelByteBlueprintsItem.h"
 #include "AccelByteSettings.h"
-#include "AccelByteServicesItem.h"
+#include "AccelByteApiItem.h"
 #include "AccelByteCredentials.h"
 
-using namespace AccelByte::Services;
-using namespace AccelByte;
+using AccelByte::Api::Item;
+using AccelByte::ErrorDelegate;
+using AccelByte::Settings;
+using AccelByte::CredentialStore;
 
 void UAccelByteBlueprintsItem::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError)
 {
-	Item::GetItemById(ServerBaseUrl, AccessToken, Namespace, ItemId, Region, Language, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
+	Item::GetItemById(ServerBaseUrl, AccessToken, Namespace, ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)

@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteModelsUserProfile.h"
 #include "AccelByteBlueprintsUser.generated.h"
 

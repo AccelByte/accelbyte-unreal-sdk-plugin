@@ -244,5 +244,45 @@ const std::unordered_map<int32, FString> ErrorMessages::Default
 
 };
 
+void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
+{
+	int32 Code = 0;
+	FAccelByteModelsErrorEntity Error;
+	FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0);
+	Code = Error.NumericErrorCode;
+	auto it = ErrorMessages::Default.find(Code);
+	if (it != ErrorMessages::Default.cend())
+	{
+		OutMessage += ErrorMessages::Default.at(Code);
+		OutMessage += " " + Error.ErrorMessage;
+	}
+	else
+	{
+		Code = Response->GetResponseCode();
+	}
+	// Debug message. Delete this code section for production
+	#if 1
+	OutMessage += "\n\nResponse";
+	OutMessage += "\nCode: " + FString::FromInt(Response->GetResponseCode());
+	OutMessage += "\nContent: \n" + Response->GetContentAsString();
+
+	OutMessage += " \n\nRequest";
+	OutMessage += "\nElapsed time (seconds): " + FString::SanitizeFloat(Request->GetElapsedTime());
+	OutMessage += "\nVerb: " + Request->GetVerb();
+	OutMessage += "\nURL: " + Request->GetURL();
+	OutMessage += "\nHeaders: \n";
+	for (auto a : Request->GetAllHeaders())
+	{
+		OutMessage += a + "\n";
+	}
+	OutCode = Code;
+	OutMessage += "\nContent: \n";
+	for (auto a : Request->GetContent())
+	{
+		OutMessage += static_cast<char>(a);
+	}
+#endif
+}
+
 } // Namespace AccelByte
 

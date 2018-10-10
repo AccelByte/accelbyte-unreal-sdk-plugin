@@ -2,16 +2,15 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesWallet.h"
+#include "AccelByteApiWallet.h"
 #include "AccelByteHttpRetrySystem.h"
-#include "AccelByteModelsWallet.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 void Wallet::GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError)
@@ -62,5 +61,5 @@ void Wallet::GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpR
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

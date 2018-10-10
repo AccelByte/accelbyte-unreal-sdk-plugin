@@ -14,7 +14,7 @@
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 /**
@@ -28,10 +28,10 @@ public:
 	/**
 	 * @brief Get user's profile information, if it exists.
 	 * 
-	 * @param AccessToken Required. User access token.
+	 * @param AccessToken User access token.
 	 * @param Namespace Required.
 	 * @param UserId Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when response has been received. The result is FAccelByteModelsUserProfileInfo.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 */
 	static void GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -39,12 +39,12 @@ public:
 	/**
 	 * @brief Update user's current profile information, if it exists.
 	 * 
-	 * @param AccessToken Required. Token User access token.
+	 * @param AccessToken Token User access token.
 	 * @param Namespace Required.
 	 * @param UserId Required.
-	 * @param NewUserProfile Required. UserProfileInfoUpdate object.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when response has been received.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param NewUserProfile UserProfileInfoUpdate object.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
 	 * @param OnError 
 	 */
     static void UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileInfoUpdate& NewUserProfile, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
@@ -53,12 +53,12 @@ public:
 	/**
 	 * @brief Create empty profile information.
 	 * 
-	 * @param AccessToken Required. User access token.
+	 * @param AccessToken User access token.
 	 * @param Namespace Required.
 	 * @param UserId Required.
 	 * @param DisplayName Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when response has been received. The result is FAccelByteModelsUserCreateResponse.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void CreateDefaultUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString DisplayName, FCreateDefaultUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -66,12 +66,12 @@ public:
 	/**
 	 * @brief Create complete player profile.
 	 *
-	 * @param AccessToken Required. User access token.
+	 * @param AccessToken User access token.
 	 * @param Namespace Required.
 	 * @param UserId Required.
 	 * @param ProfileRequest Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when response has been received. The result is FAccelByteModelsUserCreateResponse.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void CreateCompleteUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileRequest& ProfileRequest, FCreateCompleteUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 

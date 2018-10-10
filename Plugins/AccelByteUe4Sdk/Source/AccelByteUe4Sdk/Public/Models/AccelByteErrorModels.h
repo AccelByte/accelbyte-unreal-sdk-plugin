@@ -2,17 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteHttpRetrySystem.h"
+#pragma once
 
-namespace AccelByte
-{
-
-bool FRetrySystemTicker::Tick(float DeltaTime)
-{
-	Manager.Update();
-	return true;
-}
-
-FRetrySystemTicker RetrySystem;
-
-}
+#include "CoreMinimal.h"

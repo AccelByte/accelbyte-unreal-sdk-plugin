@@ -2,16 +2,16 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesUser.h"
-#include "AccelByteServicesIdentity.h"
+#include "AccelByteApiUser.h"
+#include "AccelByteApiIdentity.h"
 #include "AccelByteModelsIdentity.h"
-#include "AccelByteServicesUserProfile.h"
-#include "AccelByteSettings.h"
+#include "AccelByteApiUserProfile.h"
 #include "AccelByteCredentials.h"
+#include "AccelByteModelsUserProfile.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 static FString PlatformStrings[] = {
@@ -218,5 +218,5 @@ void User::InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess On
 	}));
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

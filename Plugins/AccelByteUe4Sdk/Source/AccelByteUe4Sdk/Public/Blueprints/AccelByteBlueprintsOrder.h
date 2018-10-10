@@ -28,7 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | Order")
 	static void GetUserOrderEasy(FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const TArray<FAccelByteModelsOrderInfo>&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | Order")
 	static void GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | Order")

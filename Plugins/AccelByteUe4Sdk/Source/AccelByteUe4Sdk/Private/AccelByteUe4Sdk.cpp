@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4Sdk.h"
-#include "AccelByteServicesIdentity.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiIdentity.h"
+#include "AccelByteApiUser.h"
 #include "AccelbyteSettings.h"
 #include "AccelbyteCredentials.h"
 

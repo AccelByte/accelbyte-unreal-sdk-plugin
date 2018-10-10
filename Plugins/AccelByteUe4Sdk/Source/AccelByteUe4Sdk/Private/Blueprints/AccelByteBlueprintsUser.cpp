@@ -3,12 +3,14 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteBlueprintsUser.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 
-using namespace AccelByte::Services;
-using namespace AccelByte;
+using AccelByte::Api::User;
+using AccelByte::ErrorDelegate;
+using AccelByte::Settings;
+using AccelByte::CredentialStore;
 
 void UAccelByteBlueprintsUser::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, FBlueprintError OnError)
 {

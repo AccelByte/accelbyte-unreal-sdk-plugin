@@ -11,7 +11,7 @@
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 /**
@@ -26,8 +26,8 @@ public:
 	 * @brief Get user's wallet information for a specific currency code.
 	 *
 	 * @param CurrencyCode Required.
-	 * @param OnSuccess Required, but can be nullptr. This will be called when operation succeeded. The result is const FAccelByteModelsWalletInfo&.
-	 * @param OnError Required, but can be nullptr. This will be called when the operation failed.
+	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletInfo&.
+	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError);
 
@@ -35,5 +35,5 @@ private:
 	static void GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError);
 };
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

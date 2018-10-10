@@ -2,17 +2,17 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesItem.h"
+#include "AccelByteApiItem.h"
 #include "AccelByteError.h"
 #include "AccelByteHttpRetrySystem.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
-void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError)
+void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/%s/locale"), *ServerBaseUrl, *Namespace, *ItemId);
@@ -140,5 +140,5 @@ void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr 
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

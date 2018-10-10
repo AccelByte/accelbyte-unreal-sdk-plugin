@@ -4,9 +4,8 @@
 
 #include "AccelByteBlueprintsUserProfile.h"
 
-using namespace AccelByte;
-using namespace Services;
-
+using AccelByte::Api::UserProfile;
+using AccelByte::ErrorDelegate;
 
 void UAccelByteBlueprintsUserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace,
 	FString UserId, FGetUserProfileSuccess OnSuccess, FBlueprintError OnError)

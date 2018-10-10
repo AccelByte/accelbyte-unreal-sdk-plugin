@@ -4,11 +4,13 @@
 
 #include "AccelByteBlueprintsOrder.h"
 #include "AccelByteSettings.h"
-#include "AccelByteServicesOrder.h"
+#include "AccelByteApiOrder.h"
 #include "AccelByteCredentials.h"
 
-using namespace AccelByte::Services;
-using namespace AccelByte;
+using AccelByte::Api::Order;
+using AccelByte::ErrorDelegate;
+using AccelByte::Settings;
+using AccelByte::CredentialStore;
 
 void UAccelByteBlueprintsOrder::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError)
 {
@@ -44,7 +46,7 @@ void UAccelByteBlueprintsOrder::GetUserOrderEasy(FString OrderNo, FGetUserOrderS
 
 void UAccelByteBlueprintsOrder::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError)
 {
-	Order::GetUserOrders(ServerBaseUrl, AccessToken, Namespace, UserId, Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderInfo>& Result)
+	Order::GetUserOrders(ServerBaseUrl, AccessToken, Namespace, UserId, Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
