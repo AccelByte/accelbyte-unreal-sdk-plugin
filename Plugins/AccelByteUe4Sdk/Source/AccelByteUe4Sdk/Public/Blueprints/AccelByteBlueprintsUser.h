@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteModelsUserProfile.h"
 #include "AccelByteBlueprintsUser.generated.h"
 
@@ -106,17 +106,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User")
 	static void UpdateProfileEasy(const FAccelByteModelsUserProfileInfoUpdate& UpdateProfile, FUpdateProfileSuccess OnSuccess, FBlueprintError OnError);
 	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FString GetUserAccessToken();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FString GetUserRefreshToken();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FDateTime GetUserAccessTokenExpirationUtc();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FString GetUserId();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FString GetUserDisplayName();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Services | User | UserCredentials")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CredentialStore")
 	static FString GetUserNamespace();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")

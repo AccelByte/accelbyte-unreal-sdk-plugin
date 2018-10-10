@@ -3,32 +3,83 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteBlueprintsCategory.h"
-#include "AccelByteServicesCategory.h"
+#include "AccelByteApiCategory.h"
+#include "AccelByteSettings.h"
+#include "AccelByteCredentials.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Services;
+using AccelByte::Api::Category;
+using AccelByte::ErrorDelegate;
+using AccelByte::Settings;
+using AccelByte::CredentialStore;
 
-UAccelByteCatalogGetChildCategories* UAccelByteCatalogGetChildCategories::GetChildCategories(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FBlueprintErrorDelegate OnError)
+void UAccelByteBlueprintsCategory::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, FBlueprintError OnError)
 {
-	UAccelByteCatalogGetChildCategories* Node = NewObject<UAccelByteCatalogGetChildCategories>();
-	Node->Language = Language;
-	Node->CategoryPath = CategoryPath;
-	Node->OnSuccess = OnSuccess;
-	Node->OnError = OnError;
-	return Node;
-}
-
-void UAccelByteCatalogGetChildCategories::Activate()
-{
-#if 0
-	Category::GetChildCategories(this->Language, this->CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([this](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	Category::GetRootCategories(ServerBaseUrl, AccessToken, Namespace, Language,
+		Category::FGetRootCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-		/*Result.Reset();*/
 	}),
-		ErrorDelegate::CreateLambda([this](int32 ErrorCode, FString ErrorString)
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorString);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
-#endif
+}
+
+void UAccelByteBlueprintsCategory::GetRootCategoriesEasy(FString Language, FGetRootCategoriesSuccess OnSuccess, FBlueprintError OnError)
+{
+	GetRootCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, Language, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsCategory::GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FBlueprintError OnError)
+{
+	Category::GetCategory(ServerBaseUrl, AccessToken, Namespace, CategoryPath, Language,
+		Category::FGetCategorySuccess::CreateLambda([OnSuccess](const FAccelByteModelsFullCategoryInfo& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsCategory::GetCategoryEasy(FString ParentPath, FString Language, FGetCategorySuccess OnSuccess, FBlueprintError OnError)
+{
+	GetCategory(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, ParentPath, Language, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsCategory::GetChildCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FBlueprintError OnError)
+{
+	Category::GetChildCategories(ServerBaseUrl, AccessToken, Namespace, Language, CategoryPath,
+		Category::FGetChildCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsCategory::GetChildCategoriesEasy(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FBlueprintError OnError)
+{
+	 GetChildCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, Language, CategoryPath, OnSuccess, OnError);
+}
+
+void UAccelByteBlueprintsCategory::GetDescendantCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FBlueprintError OnError)
+{
+	Category::GetDescendantCategories(ServerBaseUrl, AccessToken, Namespace, Language, CategoryPath,
+		Category::FGetDescendantCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}),
+		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsCategory::GetDescendantCategoriesEasy(FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FBlueprintError OnError)
+{
+	GetDescendantCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, Language, CategoryPath, OnSuccess, OnError);
 }

@@ -2,14 +2,12 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelbyteCredentials.h"
+#include "AccelByteCredentials.h"
 #include "AccelByteModelsIdentity.h"
 
 namespace AccelByte
 {
 
-Credentials UserCredentials;
-	
 Credentials::Credentials()
 {
 }
@@ -33,11 +31,6 @@ void Credentials::SetClientToken(const FString & AccessToken, const FDateTime & 
 	ClientAccessToken = AccessToken;
 	ClientAccessTokenExpirationUtc = ExpirationUtc;
 	ClientNamespace = Namespace;
-}
-
-Credentials Credentials::operator=(const Credentials& Other)
-{
-	return *this;
 }
 
 FString Credentials::GetUserAccessToken() const
@@ -85,5 +78,6 @@ FString Credentials::GetUserDisplayName() const
 	return UserDisplayName;
 }
 
+Credentials CredentialStore;
 
 } // Namespace AccelByte

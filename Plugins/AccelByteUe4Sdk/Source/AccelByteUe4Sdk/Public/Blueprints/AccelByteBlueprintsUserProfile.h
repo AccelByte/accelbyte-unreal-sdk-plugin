@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteModelsUserProfile.h"
-#include "AccelByteServicesUserProfile.h"
+#include "AccelByteApiUserProfile.h"
 #include "AccelByteBlueprintsUserProfile.generated.h"
 
 #pragma once

@@ -11,16 +11,15 @@ namespace AccelByte
 {
 
 /**
- * @brief Class for storing user's credentials.
+ * @brief Class for storing  credentials.
  */
 class Credentials
 {
 public:
-	Credentials(); 
+	Credentials();
 	~Credentials();
 	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace);
 	void SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace);
-	Credentials operator=(const Credentials& Other);
 	FString GetUserAccessToken() const;
 	FString GetUserRefreshToken() const;
 	FDateTime GetUserAccessTokenExpirationUtc() const;
@@ -42,6 +41,6 @@ private:
 	FString ClientNamespace;
 };
 
-extern Credentials UserCredentials;
+extern Credentials CredentialStore;
 
 } // Namespace AccelByte

@@ -2,14 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesIdentity.h"
+#include "AccelByteApiIdentity.h"
 #include "JsonUtilities.h"
 #include "Base64.h"
 #include "AccelByteHttpRetrySystem.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 #pragma region OAuth
@@ -643,5 +643,5 @@ void Identity::GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr 
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

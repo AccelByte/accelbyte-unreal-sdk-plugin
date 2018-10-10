@@ -7,11 +7,11 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteServicesOrder.h"
-#include "AccelByteServicesCategory.h"
-#include "AccelByteServicesItem.h"
-#include "AccelByteServicesUser.h"
-#include "AccelByteServicesWallet.h"
+#include "AccelByteApiOrder.h"
+#include "AccelByteApiCategory.h"
+#include "AccelByteApiItem.h"
+#include "AccelByteApiUser.h"
+#include "AccelByteApiWallet.h"
 #include "AccelByteSettings.h"
 #include "AccelByteHttpRetrySystem.h"
 #include "AccelByteCredentials.h"
@@ -31,7 +31,7 @@ const FString ExpectedChildItemTitle = TEXT("5 DogeCoinSDK");// Publisher's Curr
 const FString ExpectedCurrencyCode = TEXT("DOGECOIN");
 
 using namespace AccelByte;
-using namespace AccelByte::Services;
+using namespace AccelByte::Api;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceGetCategorySuccess, "LogAccelByteECommerceTest.B.GetCategory.Success", AutomationFlagMaskECommerce);
 bool ECommerceGetCategorySuccess::RunTest(const FString& Parameters)
@@ -45,7 +45,7 @@ bool ECommerceGetCategorySuccess::RunTest(const FString& Parameters)
 	bool bHasDone = false;
 	bool bGetCategorySuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetCategory"));
-	Category::GetCategory(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([&](FAccelByteModelsFullCategoryInfo Result)
+	Category::GetCategory(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([&](FAccelByteModelsFullCategoryInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetCategorySuccess = true;
@@ -84,7 +84,7 @@ bool ECommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 	bool bGetRootCategoriesSuccess = false;
 	bool bExpectedRootCategoryFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetRootCategories"));
-	Category::GetRootCategories(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), Language, Category::FGetRootCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+	Category::GetRootCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Category::FGetRootCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		for (int i = 0; i < Results.Num(); i++)
@@ -131,7 +131,7 @@ bool ECommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 	bool bGetChildCategoriesSuccess = false;
 	bool bExpectedChildCategoryFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetChildCategory"));
-	Category::GetChildCategories(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), Language, ExpectedRootCategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+	Category::GetChildCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, ExpectedRootCategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		for (int i = 0; i < Results.Num(); i++)
@@ -179,7 +179,7 @@ bool ECommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 	bool bExpectedDescendantCategoryFound1 = false;
 	bool bExpectedDescendantCategoryFound2 = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetDescendantCategories"));
-	Category::GetDescendantCategories(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), Language, ExpectedRootCategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+	Category::GetDescendantCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, ExpectedRootCategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		for (int i = 0; i < Results.Num(); i++)
@@ -234,7 +234,7 @@ bool ECommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedRootCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedRootCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -285,7 +285,7 @@ bool ECommerceGetItemSuccess::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedRootCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedRootCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -322,7 +322,7 @@ bool ECommerceGetItemSuccess::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bGetItemByIdSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemById"));
-	Item::GetItemById(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), ItemId, Region, Language, Item::FGetItemByIdSuccess::CreateLambda([&](FAccelByteModelsItemInfo Result)
+	Item::GetItemById(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetItemByIdSuccess = true;
@@ -367,7 +367,7 @@ bool ECommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria_VirtualCurrency"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedChildCategoryPath, TypeCoin, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedChildCategoryPath, TypeCoin, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -414,7 +414,7 @@ bool ECommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("CreateNewOrder"));
-	Purchase::CreateNewOrder(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderCreate, Purchase::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bHasDone = true;
@@ -444,7 +444,7 @@ bool ECommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess2 = false;
 	bool bExpectedItemFound2 = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria_InGameItem"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedRootCategoryPath, TypeInGameItem, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedRootCategoryPath, TypeInGameItem, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -489,7 +489,7 @@ bool ECommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bCreateNewOrderSuccess2 = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("CreateNewOrder2"));
-	Purchase::CreateNewOrder(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderCreate, Purchase::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserNamespace(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bHasDone = true;
@@ -538,7 +538,7 @@ bool ECommerceGetUserOrder::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedChildCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedChildCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -585,7 +585,7 @@ bool ECommerceGetUserOrder::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("CreateNewOrder"));
-	Purchase::CreateNewOrder(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderCreate, Purchase::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		OrderNo = Result.OrderNo;
@@ -614,7 +614,7 @@ bool ECommerceGetUserOrder::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bGetUserOrderSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetUserOrder"));
-	Purchase::GetUserOrder(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderNo, Purchase::FGetUserOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::GetUserOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderNo, Order::FGetUserOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderSuccess = true;
@@ -661,7 +661,7 @@ bool ECommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetItemsByCriteria"));
-	Item::GetItemsByCriteria(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), Language, Region, ExpectedChildCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](FAccelByteModelsItemPagingSlicedResult Result)
+	Item::GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, Region, ExpectedChildCategoryPath, Type, Status, 0, 20, Item::FGetItemsByCriteriaSuccess::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
 		for (int i = 0; i < Result.Data.Num(); i++)
@@ -708,7 +708,7 @@ bool ECommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("CreateNewOrder"));
-	Purchase::CreateNewOrder(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderCreate, Purchase::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		OrderNo = Result.OrderNo;
@@ -737,7 +737,7 @@ bool ECommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bGetUserOrderHistorySuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetUserOrder"));
-	Purchase::GetUserOrderHistory(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), OrderNo, Purchase::FGetUserOrderHistorySuccess::CreateLambda([&](TArray<FAccelByteModelsOrderHistoryInfo> Result)
+	Order::GetUserOrderHistory(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([&](TArray<FAccelByteModelsOrderHistoryInfo> Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderHistorySuccess = true;
@@ -776,7 +776,7 @@ bool ECommerceGetUserOrders::RunTest(const FString& Parameters)
 	bool bHasDone = false;
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetUserOrders"));
-	Purchase::GetUserOrders(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), 0, 20, Purchase::FGetUserOrdersSuccess::CreateLambda([&](FAccelByteModelsOrderInfoPaging Result)
+	Order::GetUserOrders(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), 0, 20, Order::FGetUserOrdersSuccess::CreateLambda([&](FAccelByteModelsOrderInfoPaging Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;
@@ -810,7 +810,7 @@ bool ECommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 	bool bHasDone = false;
 	bool bGetWalletSuccess = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
-	Wallet::GetWalletInfoByCurrencyCode(Settings::ServerBaseUrl, UserCredentials.GetUserAccessToken(), UserCredentials.GetUserNamespace(), UserCredentials.GetUserId(), ExpectedCurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([&](FAccelByteModelsWalletInfo Result)
+	Wallet::GetWalletInfoByCurrencyCode(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), ExpectedCurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([&](FAccelByteModelsWalletInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bGetWalletSuccess = true;
@@ -937,7 +937,7 @@ bool ECommerceTearDown::RunTest(const FString& Parameters)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;

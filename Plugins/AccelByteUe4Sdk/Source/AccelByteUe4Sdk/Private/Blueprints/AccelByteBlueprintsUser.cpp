@@ -3,12 +3,14 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteBlueprintsUser.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 
-using namespace AccelByte::Services;
-using namespace AccelByte;
+using AccelByte::Api::User;
+using AccelByte::ErrorDelegate;
+using AccelByte::Settings;
+using AccelByte::CredentialStore;
 
 void UAccelByteBlueprintsUser::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, FBlueprintError OnError)
 {
@@ -238,32 +240,32 @@ void UAccelByteBlueprintsUser::UpdateProfileEasy(const FAccelByteModelsUserProfi
 
 FString UAccelByteBlueprintsUser::GetUserAccessToken()
 {
-	return UserCredentials.GetUserAccessToken();
+	return CredentialStore.GetUserAccessToken();
 }
 
 FString UAccelByteBlueprintsUser::GetUserRefreshToken()
 {
-	return UserCredentials.GetUserRefreshToken();
+	return CredentialStore.GetUserRefreshToken();
 }
 
 FDateTime UAccelByteBlueprintsUser::GetUserAccessTokenExpirationUtc()
 {
-	return UserCredentials.GetUserAccessTokenExpirationUtc();
+	return CredentialStore.GetUserAccessTokenExpirationUtc();
 }
 
 FString UAccelByteBlueprintsUser::GetUserId()
 {
-	return UserCredentials.GetUserId();
+	return CredentialStore.GetUserId();
 }
 
 FString UAccelByteBlueprintsUser::GetUserDisplayName()
 {
-	return UserCredentials.GetUserDisplayName();
+	return CredentialStore.GetUserDisplayName();
 }
 
 FString UAccelByteBlueprintsUser::GetUserNamespace()
 {
-	return UserCredentials.GetUserNamespace();
+	return CredentialStore.GetUserNamespace();
 }
 
 FString UAccelByteBlueprintsUser::GetSettingsServerBaseUrl()

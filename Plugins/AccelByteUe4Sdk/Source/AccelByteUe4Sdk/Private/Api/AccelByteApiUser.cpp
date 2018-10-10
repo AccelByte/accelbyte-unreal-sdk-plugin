@@ -2,16 +2,16 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesUser.h"
-#include "AccelByteServicesIdentity.h"
+#include "AccelByteApiUser.h"
+#include "AccelByteApiIdentity.h"
 #include "AccelByteModelsIdentity.h"
-#include "AccelByteServicesUserProfile.h"
-#include "AccelByteSettings.h"
+#include "AccelByteApiUserProfile.h"
 #include "AccelByteCredentials.h"
+#include "AccelByteModelsUserProfile.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 static FString PlatformStrings[] = {
@@ -30,7 +30,7 @@ void User::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSe
 {
 	Identity::GetAccessTokenWithClientCredentialsGrant(ServerBaseUrl, ClientId, ClientSecret, Identity::FGetAccessTokenWithPlatformGrantSuccess::CreateLambda([OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
-		UserCredentials.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.Namespace);
+		CredentialStore.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.Namespace);
 		OnSuccess.ExecuteIfBound();
 	}),
 		ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -43,7 +43,7 @@ void User::LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId
 {
 	Identity::GetAccessTokenWithPlatformGrant(ServerBaseUrl, ClientId, ClientSecret, Namespace, PlatformStrings[static_cast<std::underlying_type<EPlatformType>::type>(PlatformId)], Token, Identity::FGetAccessTokenWithPlatformGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
-		UserCredentials.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
+		CredentialStore.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		User::InitializeProfile(ServerBaseUrl, OnSuccess, OnError);
 	}),
 		ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -56,7 +56,7 @@ void User::LoginWithEmailAccount(FString ServerBaseUrl, FString ClientId, FStrin
 {
 	Identity::GetUserAccessTokenWithPasswordGrant(ServerBaseUrl, ClientId, ClientSecret, Namespace, Email, Password, Identity::FGetUserAccessTokenWithPasswordGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
-		UserCredentials.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
+		CredentialStore.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		User::InitializeProfile(ServerBaseUrl, OnSuccess, OnError);
 	}),
 		ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -71,7 +71,7 @@ void User::LoginFromLauncher(FString ServerBaseUrl, FString ClientId, FString Cl
 	FGenericPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode.Get(), 512);
 	Identity::GetAccessTokenWithAuthorizationCodeGrant(ServerBaseUrl, ClientId, ClientSecret, FString(AuthorizationCode.Get()), RedirectUri, Identity::FGetUserAccessTokenWithAuthorizationCodeGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
-		UserCredentials.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
+		CredentialStore.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		User::InitializeProfile(ServerBaseUrl, OnSuccess, OnError);
 	}),
 		ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -84,7 +84,7 @@ void User::LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString Cl
 {
 	Identity::GetAccessTokenWithDeviceGrant(ServerBaseUrl, ClientId, ClientSecret, Namespace, Identity::FGetAccessTokenWithDeviceGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
-		UserCredentials.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
+		CredentialStore.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		User::InitializeProfile(ServerBaseUrl, OnSuccess, OnError);
 	}),
 		ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
@@ -95,12 +95,12 @@ void User::LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString Cl
 
 void User::ResetCredentials()
 {
-	UserCredentials = Credentials();
+	CredentialStore = Credentials();
 }
 
 void User::UpgradeHeadlessAccount(FString ServerBaseUrl, FString Email, FString Password, FUpgradeHeadlessAccountSuccess OnSuccess, ErrorDelegate OnError)
 {
-	Credentials Cred = UserCredentials;
+	Credentials Cred = CredentialStore;
 	Identity::UpgradeHeadlessUserAccount(ServerBaseUrl, Cred.GetClientAccessToken(), Cred.GetClientNamespace(), Cred.GetUserId(), Email, Password,
 		Identity::FUpgradeHeadlessAccountSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError, Email, Cred]()
 	{
@@ -120,11 +120,11 @@ void User::UpgradeHeadlessAccount(FString ServerBaseUrl, FString Email, FString 
 
 void User::CreateEmailAccount(FString ServerBaseUrl, FString Email, FString Password, FString DisplayName, FCreateEmailAccountSuccess OnSuccess, ErrorDelegate OnError)
 {
-	const Credentials Cred = UserCredentials;
-	Identity::CreateUserAccount(ServerBaseUrl, UserCredentials.GetClientAccessToken(), UserCredentials.GetClientNamespace(), Email, Password, DisplayName, EUserAuthType::Email,
+	const Credentials Cred = CredentialStore;
+	Identity::CreateUserAccount(ServerBaseUrl, CredentialStore.GetClientAccessToken(), CredentialStore.GetClientNamespace(), Email, Password, DisplayName, EUserAuthType::Email,
 		Identity::FCreateUserAccountSuccess::CreateLambda([OnSuccess, OnError, Cred, ServerBaseUrl, Email](FAccelByteModelsUserCreateResponse Result)
 	{
-		Identity::SendVerificationCodeForUserAccountCreation(ServerBaseUrl, UserCredentials.GetClientAccessToken(), UserCredentials.GetClientNamespace(), Result.UserId, Email,
+		Identity::SendVerificationCodeForUserAccountCreation(ServerBaseUrl, CredentialStore.GetClientAccessToken(), CredentialStore.GetClientNamespace(), Result.UserId, Email,
 			Identity::FSendVerificationCodeForUserAccountCreationSuccess::CreateLambda([OnSuccess, OnError, Result]()
 		{
 			OnSuccess.ExecuteIfBound(Result);
@@ -140,7 +140,7 @@ void User::CreateEmailAccount(FString ServerBaseUrl, FString Email, FString Pass
 
 void User::VerifyEmailAccount(FString ServerBaseUrl, FString UserId, FString VerificationCode, FVerifyEmailAccountSuccess OnSuccess, ErrorDelegate OnError)
 {
-	Identity::VerifyUserAccountCreation(ServerBaseUrl, UserCredentials.GetClientAccessToken(), UserCredentials.GetClientNamespace(), UserId, VerificationCode, EUserAuthType::Email, OnSuccess, OnError);
+	Identity::VerifyUserAccountCreation(ServerBaseUrl, CredentialStore.GetClientAccessToken(), CredentialStore.GetClientNamespace(), UserId, VerificationCode, EUserAuthType::Email, OnSuccess, OnError);
 }
 
 void User::RequestPasswordReset(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString LoginId, FRequestPasswordResetSuccess OnSuccess, ErrorDelegate OnError)
@@ -168,7 +168,7 @@ void User::VerifyPasswordReset(FString ServerBaseUrl, FString ClientId, FString 
 
 void User::GetProfile(FString ServerBaseUrl, FGetProfileSuccess OnSuccess, ErrorDelegate OnError)
 {
-	const Credentials Cred = UserCredentials;
+	const Credentials Cred = CredentialStore;
 	UserProfile::GetUserProfile(ServerBaseUrl, Cred.GetUserAccessToken(), Cred.GetUserNamespace(), Cred.GetUserId(), UserProfile::FGetUserProfileSuccess::CreateLambda([OnSuccess, OnError](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
@@ -180,7 +180,7 @@ void User::GetProfile(FString ServerBaseUrl, FGetProfileSuccess OnSuccess, Error
 
 void User::UpdateProfile(FString ServerBaseUrl, const FAccelByteModelsUserProfileInfoUpdate& UpdateProfile, FUpdateProfileSuccess OnSuccess, ErrorDelegate OnError)
 {
-	const Credentials Cred = UserCredentials;
+	const Credentials Cred = CredentialStore;
 	UserProfile::UpdateUserProfile(ServerBaseUrl, Cred.GetUserAccessToken(), Cred.GetUserNamespace(), Cred.GetUserId(),
 		UpdateProfile, UserProfile::FUpdateUserProfileSuccess::CreateLambda([OnSuccess, OnError]()
 	{
@@ -193,7 +193,7 @@ void User::UpdateProfile(FString ServerBaseUrl, const FAccelByteModelsUserProfil
 
 void User::InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess OnSuccess, ErrorDelegate OnError)
 {
-	Credentials Cred = UserCredentials;
+	Credentials Cred = CredentialStore;
 	UserProfile::GetUserProfile(ServerBaseUrl, Cred.GetUserAccessToken(), Cred.GetUserNamespace(), Cred.GetUserId(), UserProfile::FGetUserProfileSuccess::CreateLambda([OnSuccess, OnError, Cred](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound();
@@ -218,5 +218,5 @@ void User::InitializeProfile(FString ServerBaseUrl, FInitializeProfileSuccess On
 	}));
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

@@ -3,10 +3,10 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteBlueprintsIdentity.h"
-#include "AccelByteServicesIdentity.h"
+#include "AccelByteApiIdentity.h"
 
-using namespace AccelByte;
-using namespace Services;
+using AccelByte::Api::Identity;
+using AccelByte::ErrorDelegate;
 
 void UAccelByteBlueprintsIdentity::GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FBlueprintError OnError)
 {

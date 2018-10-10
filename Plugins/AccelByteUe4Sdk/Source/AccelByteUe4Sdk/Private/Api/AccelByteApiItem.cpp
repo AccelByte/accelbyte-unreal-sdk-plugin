@@ -2,17 +2,17 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteServicesItem.h"
+#include "AccelByteApiItem.h"
 #include "AccelByteError.h"
 #include "AccelByteHttpRetrySystem.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
-void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError)
+void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/%s/locale"), *ServerBaseUrl, *Namespace, *ItemId);
@@ -52,7 +52,7 @@ void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Names
 	Request->ProcessRequest();
 }
 
-void Item::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError)
+void Item::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
@@ -140,5 +140,5 @@ void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr 
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

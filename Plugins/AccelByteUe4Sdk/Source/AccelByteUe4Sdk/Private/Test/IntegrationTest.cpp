@@ -6,10 +6,10 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteServicesOrder.h"
-#include "AccelByteServicesCategory.h"
-#include "AccelByteServicesItem.h"
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiOrder.h"
+#include "AccelByteApiCategory.h"
+#include "AccelByteApiItem.h"
+#include "AccelByteApiUser.h"
 #include "AccelByteModelsIdentity.h"
 #include "AccelByteModelsUserProfile.h"
 #include "AccelByteSettings.h"
@@ -22,7 +22,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteTest);
 const int32 AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 using namespace AccelByte;
-using namespace AccelByte::Services;
+using namespace AccelByte::Api;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClientSuccess", AutomationFlagMask);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
@@ -38,7 +38,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-		UserCredentials.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
+		CredentialStore.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
 	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
@@ -76,7 +76,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-		UserCredentials.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
+		CredentialStore.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
 	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
@@ -148,7 +148,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -194,7 +194,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-		UserCredentials.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
+		CredentialStore.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
 	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
@@ -267,7 +267,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	bool bVerifySuccessful = false;
 	bHasDone = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("VerifyEmailAccount"));
-	User::VerifyEmailAccount(Settings::ServerBaseUrl, UserCredentials.GetUserId(), VerificationCode, User::FVerifyEmailAccountSuccess::CreateLambda([&bHasDone, &bVerifySuccessful]()
+	User::VerifyEmailAccount(Settings::ServerBaseUrl, CredentialStore.GetUserId(), VerificationCode, User::FVerifyEmailAccountSuccess::CreateLambda([&bHasDone, &bVerifySuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bVerifySuccessful = true;
@@ -292,7 +292,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -338,7 +338,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-		UserCredentials.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
+		CredentialStore.SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan(Result.Expires_in), Result.Namespace);
 	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
@@ -464,7 +464,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -528,7 +528,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 
 	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
@@ -555,14 +555,14 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	SecondUserId = UserCredentials.GetUserId();
+	SecondUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -626,14 +626,14 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
@@ -684,14 +684,14 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	SecondUserId = UserCredentials.GetUserId();
+	SecondUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone2 = false;
 	bool bDeleteSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
@@ -762,7 +762,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 
 	bHasDone = false;
 	bool bUpgradeSuccessful = false;
@@ -816,7 +816,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	bUpgradedHeadlessAccountUserIdRemain = (FirstUserId == UserCredentials.GetUserId() && UserCredentials.GetUserId() != "");
+	bUpgradedHeadlessAccountUserIdRemain = (FirstUserId == CredentialStore.GetUserId() && CredentialStore.GetUserId() != "");
 	User::ResetCredentials();
 	
 	bHasDone = false;
@@ -844,7 +844,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	SecondUserId = UserCredentials.GetUserId();
+	SecondUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser1
 
@@ -949,7 +949,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 	User::ResetCredentials();
 	
 	bHasDone = false;
@@ -977,14 +977,14 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	SecondUserId = UserCredentials.GetUserId();
+	SecondUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -1048,14 +1048,14 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -1106,14 +1106,14 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	SecondUserId = UserCredentials.GetUserId();
+	SecondUserId = CredentialStore.GetUserId();
 
 #pragma region DeleteUser
 
 	bool bDeleteDone2 = false;
 	bool bDeleteSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
@@ -1177,7 +1177,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		LastTime = AppTime;
 		FPlatformProcess::Sleep(0.5f);
 	}
-	FirstUserId = UserCredentials.GetUserId();
+	FirstUserId = CredentialStore.GetUserId();
 
 	bHasDone = false;
 	bool bUpgradeSuccessful = false;
@@ -1234,7 +1234,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser1"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
@@ -1258,7 +1258,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser1
 
-	check(FirstUserId == UserCredentials.GetUserId());
+	check(FirstUserId == CredentialStore.GetUserId());
 	check(bLoginPlatformSuccessful);
 	check(bUpgradeSuccessful);
 	check(bLoginEmailSuccessful);
@@ -1388,7 +1388,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(UserCredentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	FIntegrationTestModule::DeleteUser(CredentialStore.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;

@@ -11,7 +11,7 @@
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 /**
@@ -25,8 +25,8 @@ enum class EUserAuthType : uint8
 
 
 /**
- * @brief Justice Identity is the first service The service.before we can proceed to other service such as platform service.
- * There are 2 types of access tokens: user access token and client access token. Most of the functions in this class use client token.
+ * @brief The API for user authentication and identity provider.
+ * There are 2 types of access tokens: user access token and client access token. 
  */
 class ACCELBYTEUE4SDK_API Identity
 {
@@ -35,10 +35,7 @@ public:
 
 	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**
-	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
-	 * WARNING: THIS DOESN'T ACTUALLY WORK!!!
+	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! DO NOT USE!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
 	 * Also missing state parameter. Do not use this!!! You (user) will be susceptible to Cross-Site Request Forgery attack!!!
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
@@ -59,7 +56,7 @@ public:
 	 * @param ClientId The issued OAuth2 client credentials.
 	 * @param ClientSecret The issued OAuth2 client credentials.
 	 * @param Namespace The namespace.
-	 * @param LoginId The email address. Dunno why it's called Login ID instead of username.
+	 * @param LoginId The email address. Dunno why it's called Login ID instead of username or something.
 	 * @param Password The password.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOAuthToken.
 	 * @param OnError This will be called when the operation failed.
@@ -135,7 +132,7 @@ public:
 	 * @brief This function will register a new user with email-based account.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
-	 * @param AccessToken Client token. Required.
+	 * @param AccessToken Access token from client credentials grant.
 	 * @param Namespace The Namespace.
 	 * @param UserId The UserId.
 	 * @param Password The Password.
@@ -154,7 +151,7 @@ public:
 	 * Therefore, the function requests user’s Email and Password for parameters.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
-	 * @param AccessToken Client token. Required.
+	 * @param AccessToken Access token from client credentials grant.
 	 * @param Namespace The Namespace.
 	 * @param UserId The UserId.
 	 * @param Email The Email.
@@ -169,10 +166,10 @@ public:
 	 * @brief This function shall be called after registering a new user account.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
-	 * @param AccessToken Client token. Required.
+	 * @param AccessToken Access token from client credentials grant.
 	 * @param Namespace The Namespace.
 	 * @param UserId Obtained from token response obtained after user login. 
-	 * @param LoginId The LoginId.
+	 * @param LoginId The login ID. I don't know why it's called "login ID".
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -183,23 +180,25 @@ public:
 	 * @brief This function will verify the registered email **after** user receives verification code sent with Identity::::SendVerificationCodeForUserAccountCreation() to their email.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
-	 * @param AccessToken Client token. Required.
+	 * @param AccessToken Access token from client credentials grant.
 	 * @param Namespace The Namespace.
-	 * @param UserId The UserId.
+	 * @param UserId The user ID.
 	 * @param VerificationCode The VerificationCode.
 	 * @param AuthType Either EUserAuthType::Email or EUserAuthType::Phone.
-	 * @param OnSuccess This will be called when response has been received.
+	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void VerifyUserAccountCreation(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, EUserAuthType AuthType, FVerifyUserAccountCreation OnSuccess, ErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FSendVerificationCodeForPasswordResetSuccess);
     /**
-	 * @brief Send a request to reset user's password.
+	 * @brief Send a request to reset user's password. For some reason the endpoint uses HTTP basic authentication instead of bearer, because you know... our IAM is very inconsistent.
 	 * 
 	 * @param ServerBaseUrl Your server's base URL.
+	 * @param ClientId Client credentials. For some reason the endpoint uses HTTP basic authentication instead of bearer, because you know... our IAM is very inconsistent.
+	 * @param ClientSecret Client credentials. For some reason the endpoint uses HTTP basic authentication instead of bearer, because you know... our IAM is very inconsistent.
 	 * @param Namespace The Namespace.
-	 * @param LoginId User's email address.
+	 * @param LoginId User's email address. I don't know why it's called "login ID".
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -213,7 +212,7 @@ public:
 	 * @param Namespace The Namespace.
 	 * @param UserId The UserId.
 	 * @param VerificationCode Code sent to the email address.
-	 * @param NewPassword The NewPassword.
+	 * @param NewPassword The new password.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -289,5 +288,5 @@ private:
 #pragma endregion Users
 };
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

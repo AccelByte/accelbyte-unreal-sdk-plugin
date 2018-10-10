@@ -10,18 +10,18 @@
 
 namespace AccelByte
 {
-namespace Services
+namespace Api
 {
 
 class ACCELBYTEUE4SDK_API Telemetry 
 {
 	DECLARE_DELEGATE(FDefaultCompleteDelegate);
 public:
-	static void SendTelemetryEvent(FAccelByteModelsTelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnComplete);
+	static void SendTelemetryEvent(FAccelByteModelsTelemetryEvent TelemetryEvent, FDefaultCompleteDelegate OnSuccess);
 	
 private:
-	static void SendTelemetryEventResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FDefaultCompleteDelegate OnComplete);
+	static void SendTelemetryEventResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FDefaultCompleteDelegate OnSuccess);
 };
 
-} // Namespace Services
+} // Namespace Api
 } // Namespace AccelByte

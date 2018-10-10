@@ -11,6 +11,18 @@
 namespace AccelByte
 {
 
+/**
+ * @brief HTTP retry system using Unreal Engine 4 FHttpRetrySystem defined in HTTP module.
+ * If you don't want to use retry system, replace all
+ * ```
+ *     FHttpRequestPtr Request = RetrySystem.Manager.CreateRequest(RetrySystem.RetryLimitCount, RetrySystem.RetryTimeoutRelativeSeconds, RetrySystem.RetryResponseCodes);
+ * ```
+ * with
+ * ```
+ *     FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+ * ```
+ *     
+ */
 class FRetrySystemTicker : public FTickerObjectBase
 {
 public:
@@ -29,6 +41,6 @@ public:
 	bool Tick(float DeltaTime) override;
 };
 
-static FRetrySystemTicker RetrySystem;
+extern FRetrySystemTicker RetrySystem;
 
 }

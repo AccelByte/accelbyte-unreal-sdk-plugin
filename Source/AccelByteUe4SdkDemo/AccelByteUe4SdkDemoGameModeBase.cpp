@@ -8,7 +8,7 @@ THIRD_PARTY_INCLUDES_START
 #include "steam/steam_api.h"
 THIRD_PARTY_INCLUDES_END
 
-#include "AccelByteServicesUser.h"
+#include "AccelByteApiUser.h"
 
 #include "AccelByteModelsWallet.h"
 AAccelByteUe4SdkDemoGameModeBase::AAccelByteUe4SdkDemoGameModeBase()
