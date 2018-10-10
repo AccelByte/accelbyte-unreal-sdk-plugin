@@ -24,7 +24,7 @@ const int32 AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomat
 using namespace AccelByte;
 using namespace AccelByte::Api;
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClientSuccess", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClient.Success", AutomationFlagMask);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 {
 	User::ResetCredentials();
@@ -59,7 +59,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "LogAccelByteTest.RegisterEmail_ThenLogin_Successful", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "LogAccelByteTest.RegisterEmail_ThenLogin.Success", AutomationFlagMask);
 bool FUserRegisterTest::RunTest(const FString & Parameter)
 {
 	User::ResetCredentials();
@@ -177,7 +177,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "LogAccelByteTest.LoginEmail_ThenVerify_Successful", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "LogAccelByteTest.LoginEmail_ThenVerify.Success", AutomationFlagMask);
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {
 	User::ResetCredentials();
@@ -321,7 +321,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "LogAccelByteTest.RegisterEmail_ThenResetPassword_Successful", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "LogAccelByteTest.RegisterEmail_ThenResetPassword.Success", AutomationFlagMask);
 bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 {
 	User::ResetCredentials();
@@ -725,7 +725,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "LogAccelByteTest.UpgradeHeadlessDeviceAccount", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "LogAccelByteTest.UpgradeHeadlessDeviceAccount.Success", AutomationFlagMask);
 bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	User::ResetCredentials();
@@ -738,6 +738,32 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bHasDone = false;
+	bool bClientLoginSuccessful = false;
+	UE_LOG(LogAccelByteTest, Log, TEXT("ClientLogin"));
+	User::ClientLogin(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, User::FClientLoginSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
+		bClientLoginSuccessful = true;
+		bHasDone = true;
+	}),
+		ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+		bClientLoginSuccessful = false;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		RetrySystem.Manager.Update();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId // First attempt"));
 	User::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, User::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
@@ -1155,6 +1181,32 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	FString FirstUserId = TEXT("");
 
 	bool bHasDone = false;
+	bool bClientLoginSuccessful = false;
+	UE_LOG(LogAccelByteTest, Log, TEXT("ClientLogin"));
+	User::ClientLogin(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, User::FClientLoginSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
+		bClientLoginSuccessful = true;
+		bHasDone = true;
+	}),
+		ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+		bClientLoginSuccessful = false;
+		bHasDone = true;
+	}));
+
+	LastTime = FPlatformTime::Seconds();
+	while (!bHasDone)
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		RetrySystem.Manager.Update();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.5f);
+	}
+
+	bHasDone = false;
 	bool bLoginPlatformSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount"));
 	User::LoginWithOtherPlatformAccount(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::Namespace, static_cast<uint8>(User::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), User::FLoginWithEmailAccountSuccess::CreateLambda([&bLoginPlatformSuccessful, &bHasDone]()
@@ -1484,7 +1536,9 @@ FString FIntegrationTestModule::GetVerificationCode(FString Email)
 	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
 	UE_LOG(LogAccelByteTest, Log, TEXT("%s"), *CurrentDirectory);
 	FString args = TEXT("verificationcode -a " + Email);
+#ifdef _WIN32
 	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
+#endif
 	return VerificationCodeOutput;
 }
 
@@ -1494,10 +1548,9 @@ FString FIntegrationTestModule::GetSteamTicket()
 	FString SteamHelperOutput = TEXT("");
 	FString CurrentDirectory = TEXT("");
 	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("SteamHelper/SteamTicketHelper.exe"));
+	CurrentDirectory.Append(TEXT("SteamHelper/steamticket.txt"));
 	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), nullptr, nullptr, &SteamHelperOutput, nullptr);
-	SteamHelperOutput.Split(TEXT("STEAMTICKET\r\n"), nullptr, &SteamTicket);
-	UE_LOG(LogAccelByteTest, Log, TEXT("%s"), *SteamTicket);
+	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);
+
 	return SteamTicket;
 }

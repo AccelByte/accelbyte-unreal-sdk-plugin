@@ -51,29 +51,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -game -rocket -progress'
-                powershell '''
-                    $CONFIG_FILE = "$Env:WORKSPACE\\Config\\DefaultEngine.ini"
-                    $CONFIG_FIELD = 
-                    "[JusticeSDK]" + 
-                    "`r`nbEnabled=true" + 
-                    "`r`nAppId=" + $Env:UE4_APP_ID + 
-                    "`r`nBaseURL=`"" + $Env:BaseURL + '"' +
-                    "`r`nClientID=" + $Env:UE4_CLIENT_ID + 
-                    "`r`nClientSecret=" + $Env:UE4_CLIENT_SECRET + 
-                    "`r`nNamespace=" + $Env:UE4_NAMESPACE + 
-                    "`r`nRedirectURI=`"" + $Env:UE4_RedirectURI + '"' + 
-                    "`r`nPublisherNamespace=" + $Env:UE4_PublisherNamespace + 
-                    "`r`n`r`n[Platform]"
-                    (get-content -raw $CONFIG_FILE) -replace "(?ms)^\\[JusticeSDK\\]+.+(\\[Platform\\])", $CONFIG_FIELD | out-file $CONFIG_FILE
-                    foreach ($LINE in get-content $CONFIG_FILE)
-                    {
-                        if (($LINE -match "ClientId" -or $LINE -match "ClientSecret" ) -eq $false)
-                        {
-                            echo $LINE
-                        }
-                    }
-                '''
+                bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -game -rocket -progress'
             }
             post {
                 failure {
@@ -88,7 +66,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
+                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
             }
             post {
                 failure {
@@ -103,7 +81,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\JusticeSDKDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
+                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
             }
             post {
                 failure {
@@ -118,8 +96,47 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat 'echo "%WORKSPACE%\\JusticeSDKDemo.uproject"'
-                bat '"%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\JusticeSDKDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests JusticeTest;Quit" -log'
+                bat 'echo "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject"'
+                powershell '''
+                    $CONFIG_FILE = "$Env:WORKSPACE\\Plugins\\AccelByteUe4Sdk\\Source\\AccelByteUe4Sdk\\Private\\Core\\AccelByteSettings.cpp"
+                    $CONFIG_FIELD =
+                    "namespace AccelByte`r`n{`r`n`r`n" + 
+                    "const FString Settings::ServerBaseUrl = TEXT(`"$Env:UE4_BASE_URL`");`r`n" +
+                    "const FString Settings::ClientId = TEXT(`"$Env:UE4_CLIENT_ID`");`r`n" +
+                    "const FString Settings::ClientSecret = TEXT(`"$Env:UE4_CLIENT_SECRET`");`r`n" +
+                    "const FString Settings::Namespace = TEXT(`"$Env:NAMESPACE`");`r`n`r`n} // Namespace AccelByte"
+
+                    (get-content -raw $CONFIG_FILE) -replace "(?ms)^namespace AccelByte+.+} // Namespace AccelByte", $CONFIG_FIELD | out-file $CONFIG_FILE
+
+                    foreach ($LINE in get-content $CONFIG_FILE)
+                    {
+                        if (($LINE -match "ClientId" -or $LINE -match "ClientSecret" ) -eq $false)
+                        {
+                            echo $LINE
+                        }
+                    }
+                '''
+                bat '''
+                cls
+                SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
+                SET NAMESPACE = %NAMESPACE%
+                SET TABLE_PREFIX = %TABLE_PREFIX%
+                SET AWS_ACCESS_KEY_ID = %AWS_ACCESS_KEY_ID%
+                SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
+                SET AWS_REGION = %AWS_REGION%
+
+                pushd SteamHelper
+                SteamTicketHelper.exe login
+                popd
+
+                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests LogAccelByteECommerceTest; Quit" -log
+
+                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests LogAccelByteTest; Quit" -log
+
+                pushd SteamHelper
+                SteamTicketHelper.exe logout
+                popd
+                '''
             }
             post {
                 failure {
@@ -134,7 +151,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\JusticeSDKDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\JusticeSDKDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -JusticeSDKDemo -utf8output'
+                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -AccelByteUe4SdkDemo -utf8output'
             }
             post {
                 failure {
@@ -151,14 +168,14 @@ pipeline {
             steps {				
                 bat '''        
                     mkdir "%WORKSPACE%\\artifacts"
-                    IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries" (
-                    rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Binaries"
+                    IF EXIST "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Binaries" (
+                    rd /s /q "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Binaries"
                     )        
-                    IF EXIST "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate" (
-                    rd /s /q "%WORKSPACE%\\Plugins\\JusticeSDK\\Intermediate"
+                    IF EXIST "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Intermediate" (
+                    rd /s /q "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Intermediate"
                     )    
                     "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\temp"
-                    "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\JusticeSDK"
+                    "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\AccelByteUe4Sdk-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk"
                 '''
             }
             post {
@@ -176,33 +193,13 @@ pipeline {
             steps {
                 bat '''
                     aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
-                    aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
+                    aws s3 cp "%WORKSPACE%\\artifacts\\AccelByteUe4Sdk-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
                 '''
             }
             post {
                 failure {
                     script{ 
                         FAILED_STAGE = "upload";
-                    }
-                }
-            }
-        }
-        stage('automerge'){
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '''
-                    cd ..
-                    git clone git@bitbucket.org:accelbyte/justice-customer-automerge.git
-                    cd justice-customer-automerge
-                    automerge.bat justice-ue4-sdk
-                '''
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "automerge";
                     }
                 }
             }
@@ -217,8 +214,14 @@ pipeline {
 
                 def turnOff = true       
                 Jenkins.instance.getItems().each { job->
-                    if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){
-                        turnOff = false
+                    if (job.getName() != JOB_NAME){
+                        Jenkins.instance.getLabels().each{ label ->
+                            if(label=="windows-sdk"){
+                                if(job.getLastBuild.getResult().equals(null)){
+                                    turnOff = false
+                                }
+                            }
+                        }
                     }
                 }
                 if (turnOff){
@@ -247,8 +250,14 @@ pipeline {
                 slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
                 def turnOff = true
                 Jenkins.instance.getItems().each { job->
-                    if (job.getAssignedLabel()=="windows-sdk" && job.getName() != JOB_NAME && job.getLastBuild.getResult().equals(null)){
-                        turnOff = false
+                    if (job.getName() != JOB_NAME){
+                        Jenkins.instance.getLabels().each{ label ->
+                            if(label=="windows-sdk"){
+                                if(job.getLastBuild.getResult().equals(null)){
+                                    turnOff = false
+                                }
+                            }
+                        }
                     }
                 }
                 if (turnOff){

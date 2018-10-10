@@ -5,8 +5,8 @@
 #include "AccelByteUe4Sdk.h"
 #include "AccelByteApiIdentity.h"
 #include "AccelByteApiUser.h"
-#include "AccelbyteSettings.h"
-#include "AccelbyteCredentials.h"
+#include "AccelByteSettings.h"
+#include "AccelByteCredentials.h"
 
 void AccelByteUe4SdkModule::StartupModule()
 {

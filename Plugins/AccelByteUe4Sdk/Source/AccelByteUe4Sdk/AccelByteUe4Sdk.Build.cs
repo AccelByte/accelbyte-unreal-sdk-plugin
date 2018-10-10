@@ -57,7 +57,7 @@ public class AccelByteUe4Sdk : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-                "OnlineSubsystemSteam",
+
             }
 			);
 	}
