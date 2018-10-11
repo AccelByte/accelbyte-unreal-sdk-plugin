@@ -26,7 +26,7 @@ static FString PlatformStrings[] = {
 	TEXT("twitter"),
 };
 
-void User::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, AccelByte::ErrorDelegate OnError)
+void User::ClientLogin(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FClientLoginSuccess OnSuccess, ErrorDelegate OnError)
 {
 	Identity::GetAccessTokenWithClientCredentialsGrant(ServerBaseUrl, ClientId, ClientSecret, Identity::FGetAccessTokenWithPlatformGrantSuccess::CreateLambda([OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{

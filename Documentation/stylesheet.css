@@ -1,0 +1,46 @@
+/*
+ * Stylesheet for Doxygen by Samuel <samuel@accelbyte.net>
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Inconsolata');
+
+@import url('https://fonts.googleapis.com/css?family=Roboto+Slab');
+
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+#projectname {
+    font-family: "Roboto Slab", "Cambria", serif;
+}
+
+#projectbrief {
+    font-family: "Roboto Slab", "Cambria", serif;
+    font-size: 120%;
+    margin: 0px;
+    padding: 0px;
+}
+
+#projectnumber {
+    font-family: "Roboto Slab", "Cambria", serif;
+    font-size: 60%;
+    margin: 0px;
+    padding: 0px;
+}
+
+pre, code, div.line {
+    font-family: "PragmataPro", "Inconsolata", "Consolas", "Fira Code", "Source Code Pro", "SF Mono", "Menlo", "Monaco", "Ubuntu Mono", "Liberation Mono", "DejaVu Mono", "Droid Sans Mono", monospace;
+}
+
+a, .contents a {
+    color: #2828ff;
+    font-weight: normal;
+    text-decoration: none;
+}
+
+a:visited, .contents a:visited {
+    color: #2828ff;
+}
+
+a:hover, .contents a:hover {
+    text-decoration: underline;
+    color: #3e3ed6;
+}

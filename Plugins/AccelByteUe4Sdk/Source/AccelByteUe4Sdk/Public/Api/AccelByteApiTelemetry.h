@@ -13,6 +13,9 @@ namespace AccelByte
 namespace Api
 {
 
+/**
+ * @brief Does not work. Do not use.
+ */
 class ACCELBYTEUE4SDK_API Telemetry 
 {
 	DECLARE_DELEGATE(FDefaultCompleteDelegate);
