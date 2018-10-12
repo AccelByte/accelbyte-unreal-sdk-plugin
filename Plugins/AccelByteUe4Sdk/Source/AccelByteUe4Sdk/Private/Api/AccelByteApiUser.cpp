@@ -68,7 +68,13 @@ void User::LoginWithEmailAccount(FString ServerBaseUrl, FString ClientId, FStrin
 void User::LoginFromLauncher(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RedirectUri, FLoginFromLauncherSuccess OnSuccess, ErrorDelegate OnError)
 {
 	TSharedPtr<TCHAR> AuthorizationCode;
-	FGenericPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode.Get(), 512);
+
+#ifdef _WIN32
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode.Get(), 512);
+#elif __linux__ || __clang__
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode.Get(), 512);
+#endif
+	
 	Identity::GetAccessTokenWithAuthorizationCodeGrant(ServerBaseUrl, ClientId, ClientSecret, FString(AuthorizationCode.Get()), RedirectUri, Identity::FGetUserAccessTokenWithAuthorizationCodeGrantSuccess::CreateLambda([ServerBaseUrl, OnSuccess, OnError](FAccelByteModelsOAuthToken Result)
 	{
 		CredentialStore.SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);

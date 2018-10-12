@@ -489,7 +489,7 @@ bool ECommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	bHasDone = false;
 	bool bCreateNewOrderSuccess2 = false;
 	UE_LOG(LogAccelByteECommerceTest, Log, TEXT("CreateNewOrder2"));
-	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserNamespace(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+	Order::CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteECommerceTest, Log, TEXT("    Success"));
 		bHasDone = true;
