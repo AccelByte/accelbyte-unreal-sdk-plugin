@@ -11,6 +11,10 @@
 
 namespace AccelByte
 {
+
+/**
+ * @brief Contains interface to C++ functions.
+ */
 namespace Api
 {
 
@@ -23,7 +27,6 @@ enum class EUserAuthType : uint8
 	Phone = 1,
 };
 
-
 /**
  * @brief The API for user authentication and identity provider.
  * There are 2 types of access tokens: user access token and client access token. 
@@ -32,6 +35,7 @@ class ACCELBYTEUE4SDK_API Identity
 {
 public:
 #pragma region OAuth
+
 
 	DECLARE_DELEGATE_OneParam(FGetUserAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOAuthToken&);
 	/**

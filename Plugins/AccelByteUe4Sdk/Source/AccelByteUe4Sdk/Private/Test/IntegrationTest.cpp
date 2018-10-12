@@ -1273,8 +1273,8 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	FAccelByteModelsUserProfileInfoUpdate ProfileUpdate;
 	ProfileUpdate.Country = "US";
 	ProfileUpdate.Language = "en";
-	ProfileUpdate.Timezone = "Asia/Shanghai";
-	ProfileUpdate.DateOfBirth = "1999-09-09";
+	ProfileUpdate.Timezone = "Etc/UTC";
+	ProfileUpdate.DateOfBirth = "2000-01-01";
 	ProfileUpdate.Email = "test@example.com";
 	ProfileUpdate.DisplayName = "TestProfile";
 	FString UpdatedDisplayName = TEXT("");
