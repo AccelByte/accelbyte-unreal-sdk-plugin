@@ -36,10 +36,10 @@ void UAccelByteBlueprintsItem::GetItemsByCriteria(FString ServerBaseUrl, FString
 
 void UAccelByteBlueprintsItem::GetItemByIdEasy(FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetItemById(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), ItemId, Region, Language, OnSuccess, OnError);
+	GetItemById(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), ItemId, Region, Language, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsItem::GetItemsByCriteriaEasy(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
+	GetItemsByCriteria(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
 }

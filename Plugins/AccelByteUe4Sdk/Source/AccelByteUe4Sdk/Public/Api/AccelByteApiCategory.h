@@ -13,7 +13,8 @@ namespace Api
 {
 
 /**
- * @brief AccelByte catalog API. Items are grouped into category. The category path is like this "/blah/igotyou/haha". The root category is supposed to be "/".
+ * @brief The category has tree data structure.
+ * Each category has path, for example "/equipments/armor/legs". Items are grouped into a category. The root is equivalent to "/".
  *
  */
 class ACCELBYTEUE4SDK_API Category

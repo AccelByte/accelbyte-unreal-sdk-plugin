@@ -18,7 +18,7 @@ namespace Api
 {
 
 /**
- * @brief AccelByte user prfoile service
+ * @brief API to get user's profile.
  * User should log in before using this. See AccelByteServicesUser to see how to log user in.
  */
 class ACCELBYTEUE4SDK_API UserProfile

@@ -12,7 +12,7 @@ namespace AccelByte
 {
 namespace Api
 {
-
+#if 0
 /**
  * @brief Does not work. Do not use.
  */
@@ -25,6 +25,6 @@ public:
 private:
 	static void SendTelemetryEventResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FDefaultCompleteDelegate OnSuccess);
 };
-
+#endif
 } // Namespace Api
 } // Namespace AccelByte

@@ -12,16 +12,14 @@ namespace Api
 {
 
 /**
- * @brief AccelByte item service.
- *
- * User should log in before using this. See AccelByteServicesUser to see how to log user in.
+ * @brief An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
  */
 class ACCELBYTEUE4SDK_API Item
 {
 public:
 	DECLARE_DELEGATE_OneParam(FGetItemByIdSuccess, const FAccelByteModelsItemInfo&);
 	/**
-	 * @brief Get an item information from a store within the user's namespace.
+	 * @brief Get one item information from an online store.
 	 *
 	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
@@ -36,7 +34,7 @@ public:
 
 	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
-	 * @brief Get an array of items with specific criteria/filter from a store within user's namespace.
+	 * @brief Get an array of items with specific criteria/filter from online store.
 	 *
 	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
