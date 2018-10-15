@@ -32,6 +32,10 @@ public:
 	static void GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError);
 
 private:
+	Wallet() = delete; // static class can't have instance
+	Wallet(Wallet const&) = delete;
+	Wallet(Wallet&&) = delete;
+
 	static void GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError);
 };
 

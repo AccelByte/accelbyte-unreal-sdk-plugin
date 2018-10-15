@@ -78,6 +78,10 @@ public:
 	 */
 	static void GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, ErrorDelegate OnError);
 private:
+	Order() = delete; // static class can't have instance
+	Order(Order const&) = delete;
+	Order(Order&&) = delete;
+
 	static void CreateNewOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateNewOrderSuccess OnSuccess, ErrorDelegate OnError);
 	static void GetUserOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrderSuccess OnSuccess, ErrorDelegate OnError);
 	static void GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserOrdersSuccess OnSuccess, ErrorDelegate OnError);

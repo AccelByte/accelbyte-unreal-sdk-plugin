@@ -52,6 +52,10 @@ public:
 	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
 
 private:
+	Item() = delete; // static class can't have instance
+	Item(Item const&) = delete;
+	Item(Item&&) = delete;
+
 	static void GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetItemByIdSuccess OnSuccess, ErrorDelegate OnError);
 	static void GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetItemsByCriteriaSuccess OnSuccess, ErrorDelegate OnError);
 };

@@ -197,6 +197,10 @@ public:
 	static void UpdateProfile(FString ServerBaseUrl, const FAccelByteModelsUserProfileInfoUpdate& UpdateProfile, FUpdateProfileSuccess OnSuccess, ErrorDelegate OnError);
 
 private:
+	User() = delete; // static class can't have instance
+	User(User const&) = delete;
+	User(User&&) = delete;
+
 	DECLARE_DELEGATE(FInitializeProfileSuccess);
 	/**
 	 * @brief Create default user profile when user doesn't have one yet.
