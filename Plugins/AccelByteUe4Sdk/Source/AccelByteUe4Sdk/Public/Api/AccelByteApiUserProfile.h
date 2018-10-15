@@ -9,15 +9,15 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Http.h"
 #include "AccelByteModelsUserProfile.h"
-#include "AccelByteModelsIdentity.h"
 #include "AccelByteError.h"
 
 namespace AccelByte
 {
 namespace Api
 {
+	class User;
 
-/**
+	/**
  * @brief API to get user's profile.
  * User should log in before using this. See AccelByteServicesUser to see how to log user in.
  */
@@ -76,6 +76,10 @@ public:
 	static void CreateCompleteUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileRequest& ProfileRequest, FCreateCompleteUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 
 private:
+	UserProfile() = delete; // static class can't have instance
+	UserProfile(User const&) = delete;
+	UserProfile(UserProfile&&) = delete;
+
 	static void GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 	static void UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
 	static void CreateDefaultUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateDefaultUserProfileSuccess OnSuccess, ErrorDelegate OnError);

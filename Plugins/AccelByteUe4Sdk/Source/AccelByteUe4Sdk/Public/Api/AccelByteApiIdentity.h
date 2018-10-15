@@ -266,6 +266,10 @@ public:
 #pragma endregion Users
 
 private:
+	Identity() = delete; // static class can't have instance
+	Identity(Identity const&) = delete;
+	Identity(Identity&&) = delete;
+
 #pragma region OAuth
 
 	static void GetUserAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError);
