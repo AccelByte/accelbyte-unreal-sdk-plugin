@@ -27,7 +27,7 @@ void UAccelByteBlueprintsCategory::GetRootCategories(FString ServerBaseUrl, FStr
 
 void UAccelByteBlueprintsCategory::GetRootCategoriesEasy(FString Language, FGetRootCategoriesSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetRootCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, Language, OnSuccess, OnError);
+	GetRootCategories(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), Language, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsCategory::GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FBlueprintError OnError)
@@ -45,7 +45,7 @@ void UAccelByteBlueprintsCategory::GetCategory(FString ServerBaseUrl, FString Ac
 
 void UAccelByteBlueprintsCategory::GetCategoryEasy(FString ParentPath, FString Language, FGetCategorySuccess OnSuccess, FBlueprintError OnError)
 {
-	GetCategory(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, ParentPath, Language, OnSuccess, OnError);
+	GetCategory(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::CredentialStore.GetUserNamespace(), ParentPath, Language, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsCategory::GetChildCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FBlueprintError OnError)
@@ -63,7 +63,7 @@ void UAccelByteBlueprintsCategory::GetChildCategories(FString ServerBaseUrl, FSt
 
 void UAccelByteBlueprintsCategory::GetChildCategoriesEasy(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FBlueprintError OnError)
 {
-	 GetChildCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, Language, CategoryPath, OnSuccess, OnError);
+	 GetChildCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::CredentialStore.GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsCategory::GetDescendantCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FBlueprintError OnError)
@@ -81,5 +81,5 @@ void UAccelByteBlueprintsCategory::GetDescendantCategories(FString ServerBaseUrl
 
 void UAccelByteBlueprintsCategory::GetDescendantCategoriesEasy(FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetDescendantCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::Settings::Namespace, Language, CategoryPath, OnSuccess, OnError);
+	GetDescendantCategories(AccelByte::Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), AccelByte::CredentialStore.GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
 }

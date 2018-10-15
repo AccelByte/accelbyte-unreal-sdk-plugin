@@ -194,5 +194,49 @@ AccelByte::Api::User::UpdateProfile("https://api.gamepublisher.example", Profile
 See AccelByte::Api::User::UpdateProfile().
 
 ## Ecommerce
+API related to Ecommerce.
 
-Coming soon(tm).
+### Categories
+The category has [tree data structure](https://en.wikipedia.org/wiki/Tree_(data_structure)). Each category has path, for example "/equipments/armor/legs". Each category has items inside it. You can get a list of items by criteria or by its ID.
+
+#### Get root categories
+This is equivalent of getting categories in "/". This will yield, for example, "/equipments", "/consumables", "/pay2win", "/boosts".
+
+#### Get category
+This is to get one category with the specified path, for example, "/equipments/armor/torso".
+
+#### Get child categories
+This is to get the children of a category by category path.
+
+#### Get descendant categories
+This is to get the descendants of a category by category path.
+
+### Items
+An item represents a single product sold in the online store.
+
+#### Get item ID
+Get one item by its ID.
+
+#### Get items by criteria
+Get a list of item matching the criteria. You can think of it like a SQL query.
+
+### Order
+Order is used to purchase something from the online store.
+
+#### Get order
+Get a single order with order number.
+
+#### Get orders
+Get user's orders.
+
+#### Get order history
+Get order history of a specified user.
+
+#### Fulfill order
+Fulfill an order if the order is charged but the fulfillment fail.
+
+### Wallet
+A wallet can be virtual or real curreny.
+
+#### Get wallet by currency code
+This is to get wallet by its currency code.

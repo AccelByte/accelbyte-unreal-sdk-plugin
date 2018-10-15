@@ -16,11 +16,11 @@ USTRUCT(BlueprintType)
 struct FAccelByteModelsErrorEntity
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		int32 NumericErrorCode;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString ErrorCode;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Category | FullCategoryInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString ErrorMessage;
 };
 

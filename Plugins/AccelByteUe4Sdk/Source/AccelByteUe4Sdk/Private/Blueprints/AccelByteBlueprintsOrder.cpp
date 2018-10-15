@@ -25,7 +25,7 @@ void UAccelByteBlueprintsOrder::CreateNewOrder(FString ServerBaseUrl, FString Ac
 
 void UAccelByteBlueprintsOrder::CreateNewOrderEasy(const FAccelByteModelsOrderCreate & OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError)
 {
-	CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), OrderCreate, OnSuccess, OnError);
+	CreateNewOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderCreate, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsOrder::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError)
@@ -41,7 +41,7 @@ void UAccelByteBlueprintsOrder::GetUserOrder(FString ServerBaseUrl, FString Acce
 
 void UAccelByteBlueprintsOrder::GetUserOrderEasy(FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetUserOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
+	GetUserOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsOrder::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError)
@@ -57,7 +57,7 @@ void UAccelByteBlueprintsOrder::GetUserOrders(FString ServerBaseUrl, FString Acc
 
 void UAccelByteBlueprintsOrder::GetUserOrdersEasy(int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError)
 {
-	GetUserOrders(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), Page, Size, OnSuccess, OnError);
+	GetUserOrders(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), Page, Size, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsOrder::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError)
@@ -73,7 +73,7 @@ void UAccelByteBlueprintsOrder::FulfillOrder(FString ServerBaseUrl, FString Acce
 
 void UAccelByteBlueprintsOrder::FulfillOrderEasy(FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError)
 {
-	FulfillOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
+	FulfillOrder(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
 }
 
 void UAccelByteBlueprintsOrder::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError)
@@ -89,5 +89,5 @@ void UAccelByteBlueprintsOrder::GetUserOrderHistory(FString ServerBaseUrl, FStri
 
 void UAccelByteBlueprintsOrder::GetUserOrderHistoryEasy(FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError)
 {
-	GetUserOrderHistory(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), Settings::Namespace, CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
+	GetUserOrderHistory(Settings::ServerBaseUrl, CredentialStore.GetUserAccessToken(), CredentialStore.GetUserNamespace(), CredentialStore.GetUserId(), OrderNo, OnSuccess, OnError);
 }

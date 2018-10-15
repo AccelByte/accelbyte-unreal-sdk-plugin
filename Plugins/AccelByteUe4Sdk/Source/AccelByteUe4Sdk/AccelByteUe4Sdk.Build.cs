@@ -33,9 +33,6 @@ public class AccelByteUe4Sdk : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
-                "OnlineSubsystem",
-                "OnlineSubsystemUtils",
-                "WebBrowser",
             }
 			);
 			
@@ -49,7 +46,6 @@ public class AccelByteUe4Sdk : ModuleRules
                 "Json",
                 "JsonUtilities",
                 "Http",
-                "OnlineSubsystem",
             }
 			);
 		
