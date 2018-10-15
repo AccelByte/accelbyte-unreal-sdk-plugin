@@ -4,8 +4,8 @@
 
 #include "AccelByteUe4SdkDemoGameModeBase.h"
 #include "Misc/ConfigCacheIni.h"
-#include "AccelByteApiUser.h"
-#include "AccelByteModelsWallet.h"
+#include "AccelByteUserManagementApi.h"
+#include "AccelByteWalletModels.h"
 
 AAccelByteUe4SdkDemoGameModeBase::AAccelByteUe4SdkDemoGameModeBase()
 {

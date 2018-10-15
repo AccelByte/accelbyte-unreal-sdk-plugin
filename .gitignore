@@ -84,3 +84,7 @@ Plugins/AccelByteCustomWebBrowserWidget/Intermediate/Build/
 
 # Doxygen generated files
 Doxygen/*
+
+# Test
+SteamHelper/steamticket.txt
+SteamHelper/SteamTicketHelper.pid

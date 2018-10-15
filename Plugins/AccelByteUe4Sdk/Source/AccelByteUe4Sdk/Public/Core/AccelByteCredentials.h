@@ -5,19 +5,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteModelsIdentity.h"
+#include "AccelByteOauth2Models.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "AccelByteCredentials.generated.h"
 
 namespace AccelByte
 {
 
 /**
- * @brief Class for storing  credentials.
+ * @brief Singleston class for storing credentials.
  */
-class Credentials
+class ACCELBYTEUE4SDK_API Credentials
 {
 public:
-	Credentials();
-	~Credentials();
+	static Credentials& Get();
+	void ForgetAll();
 	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace);
 	void SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace);
 	FString GetUserAccessToken() const;
@@ -30,6 +32,11 @@ public:
 	FDateTime GetClientAccessTokenExpirationUtc() const;
 	FString GetClientNamespace() const;
 private:
+	Credentials(Credentials const&) = delete; // Copy constructor
+	Credentials(Credentials&&) = delete; // Move constructor
+	Credentials& operator=(Credentials const&) = delete; // Copy assignment operator
+	Credentials& operator=(Credentials &&) = delete; // Move assignment operator
+
 	FString UserAccessToken;
 	FString UserRefreshToken;
 	FDateTime UserAccessTokenExpirationUtc;
@@ -39,8 +46,30 @@ private:
 	FString ClientAccessToken;
 	FDateTime ClientAccessTokenExpirationUtc;
 	FString ClientNamespace;
+protected:
+	Credentials();
+	~Credentials();
 };
 
-extern Credentials CredentialStore;
-
 } // Namespace AccelByte
+
+
+UCLASS(Blueprintable, BlueprintType)
+class UAccelByteBlueprintsCredentials : public UBlueprintFunctionLibrary
+{
+public:
+	GENERATED_BODY()
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserAccessToken();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserRefreshToken();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FDateTime GetUserAccessTokenExpirationUtc();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserId();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserDisplayName();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserNamespace();
+};
+

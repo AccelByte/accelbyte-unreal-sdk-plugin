@@ -10,6 +10,28 @@ namespace AccelByte
 const FString Settings::ServerBaseUrl = TEXT("");
 const FString Settings::ClientId = TEXT("");
 const FString Settings::ClientSecret = TEXT(""); // IETF does not recommend that you put your client secrets in "the the source code of the application or an associated resource bundle". Reference: RFC 6819 Section 5.2.3.1.
-const FString Settings::Namespace = TEXT("");
+const FString Settings::GameId = TEXT("");
 
 } // Namespace AccelByte
+
+using AccelByte::Settings;
+
+FString UAccelByteBlueprintsSettings::GetSettingsServerBaseUrl()
+{
+	return Settings::ServerBaseUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetSettingsClientId()
+{
+	return Settings::ClientId;
+}
+
+FString UAccelByteBlueprintsSettings::GetSettingsClientSecret()
+{
+	return Settings::ClientSecret;
+}
+
+FString UAccelByteBlueprintsSettings::GetSettingsGameId()
+{
+	return Settings::GameId;
+}

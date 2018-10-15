@@ -23,7 +23,7 @@ namespace AccelByte
  * ```
  *     
  */
-class FRetrySystemTicker : public FTickerObjectBase
+class RetrySystemTicker : public FTickerObjectBase
 {
 public:
 	// Samuel's note: transient faults
@@ -41,6 +41,7 @@ public:
 	bool Tick(float DeltaTime) override;
 };
 
-extern FRetrySystemTicker RetrySystem;
+extern RetrySystemTicker RetrySystem;
 
-}
+} // Namespace AccelByte
+

@@ -11,10 +11,10 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 AccelByte UE4 SDK features:
 
 - Access the API from C++ and blueprint. C++ 
-- Provides easy to use API for:
-    - User authentication (access tokens, stored in memory)
-    - User management (create user, reset password, etc.)
-    - Identity provider (user profile)
+- Provides easy to use client API for:
+    - User authentication (access tokens stored in memory)
+    - User management (create user, reset password, verify user.)
+    - User profile (create, update, view).
     - Ecommerce (online store, view item catalog, create order, etc.)
 
 ## Architecture
@@ -39,15 +39,15 @@ The classes are categorized as follow:
 
 ### Namespace
 
-Namespace is like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. Since namespace can be many things, let's just call it game ID.
+Namespace is like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. Since namespace can be many things, just think of it like game ID or publisher ID.
 
-### `UserId` vs `LoginId` vs `Username` vs `Email`
+### `UserId` vs `LoginId` vs `Username`
 
-`LoginId` is like username, this can be email or phone, though phone is actually unused. Note that in the future, `LoginId` will be renamed to `Username`, because people are familiar with `Username` so it will be less confusing. `UserId` is the user unique ID.
+The backend call it `LoginId`, but in here it's called username. It can be email address or phone number. `UserId` is the user unique ID.
 
 ### AccelByte IAM
 
-The AccelByte IAM is an identity provider, user management, and access management for online video games, so game studios and game publisher publishers can have their own IAM service.
+The AccelByte IAM is an identity and access management service for online video games.
 
 It is written in Go.
 

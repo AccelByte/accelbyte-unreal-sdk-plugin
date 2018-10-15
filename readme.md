@@ -11,10 +11,10 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 AccelByte UE4 SDK features:
 
 - Access the API from C++ and blueprint. C++ 
-- Provides easy to use API for:
-    - User authentication (access tokens, stored in memory)
-    - User management (create user, reset password, etc.)
-    - Identity provider (user profile)
+- Provides easy to use client API for:
+    - User authentication (access tokens stored in memory)
+    - User management (create user, reset password, verify user.)
+    - User profile (create, update, view).
     - Ecommerce (online store, view item catalog, create order, etc.)
 
 ## Architecture
@@ -32,6 +32,32 @@ The classes are categorized as follow:
 - `/Content` This contains example widget blueprints and other asset.
 - `/Source` This contains C++ source code for the examples.
 - `/Documentation` This contains Doxyfile and this documentation.
+  
+## Terminology
+
+> There are only two hard things in Computer Science: cache invalidation and naming things. ―Phil Karlton
+
+### Namespace
+
+Namespace is like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. Since namespace can be many things, just think of it like game ID or publisher ID.
+
+### `UserId` vs `LoginId` vs `Username`
+
+The backend call it `LoginId`, but in here it's called username. It can be email address or phone number. `UserId` is the user unique ID.
+
+### AccelByte IAM
+
+The AccelByte IAM is an identity and access management service for online video games.
+
+It is written in Go.
+
+### AccelByte Platform
+
+AccelByte Platform is a collection of modules providing backend for games.
+
+These modules are written in Java to take advantage of the rich eco-system of libraries, mature development environment and tools, and rapid development and flexibility and customization that Java allows.
+
+Modules are combined into services allowing for cost effective deployments, where a small service may have multiple modules in a single JVM, and a large service may choose to break out a module into its own JVM to independently scale it without the overhead of having to scale the other modules that are not heavily used.
 
 # Quickstart Guide
 Here's how to get it up and running quickly.

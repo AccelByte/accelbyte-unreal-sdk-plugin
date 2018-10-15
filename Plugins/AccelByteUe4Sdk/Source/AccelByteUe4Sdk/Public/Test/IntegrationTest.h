@@ -17,6 +17,4 @@ public:
 	static void DeleteUser(FString UserID, FDeleteUserByIdSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
 	static FString GetSteamTicket();
 	static FString GetVerificationCode(FString Email);
-private:
-	static void OnDeleteUserComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, FDeleteUserByIdSuccess OnSuccess,  AccelByte::ErrorDelegate OnError);
 };
