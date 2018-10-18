@@ -7,12 +7,10 @@
 namespace AccelByte
 {
 
-bool FRetrySystemTicker::Tick(float DeltaTime)
+bool RetrySystemTicker::Tick(float DeltaTime)
 {
 	Manager.Update();
 	return true;
 }
-
-FRetrySystemTicker RetrySystem;
 
 }

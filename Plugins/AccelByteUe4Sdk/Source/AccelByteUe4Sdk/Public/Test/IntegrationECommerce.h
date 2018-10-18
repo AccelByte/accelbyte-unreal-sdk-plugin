@@ -9,11 +9,11 @@
 #include "TelemetryEventDataExample.h"
 #include "AccelByteError.h"
 
-DECLARE_DELEGATE(FECommerceUserInitializationSuccess);
-DECLARE_DELEGATE(FECommerceUserInitializationFail);
+DECLARE_DELEGATE(FEcommerceUserInitializationSuccess);
+DECLARE_DELEGATE(FEcommerceUserInitializationFail);
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteECommerceTest, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteEcommerceTest, Log, All);
 
-class AccelByteIntegrationTestECommerce
+class AccelByteIntegrationTestEcommerce
 {
 };

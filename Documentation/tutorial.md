@@ -1,13 +1,15 @@
 # Tutorial
 
 ## User authentication
-See AccelByte::Api::User.
+See AccelByte::Api::UserAuthentication, AccelByte::Api::Oauth2, and AccelByte::Credentials, 
 
-### Client login
-This is to get access token from `client_credentials` grant type, then store the access token in memory. It is "required" for user management (create new user, reset password, etc). See AccelByte IAM documentation for how this OAuth2 token endpoint works.
+### Login with client credentials
+This is to get access token from `client_credentials` grant type, then store the access token in memory. 
+
+It is "required" for user management (create new user, reset password, etc). See AccelByte IAM documentation for how this OAuth2 token endpoint works. We plan to remove this for public clients in the future. It is for servers/confidential clients only.
 
 ```cpp
-AccelByte::Api::User::ClientLogin("https://api.gamepublisher.example", "my_client_id", "my_client_secret", AccelByte::Api::User::FClientLoginSuccess::CreateLambda([]()
+AccelByte::Api::UserAuthentication::LoginWithClientCredentialsEasy(AccelByte::Api::UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([]()
 {
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -16,8 +18,37 @@ AccelByte::Api::User::ClientLogin("https://api.gamepublisher.example", "my_clien
 }));
 ```
 
-See AccelByte::Api::User::ClientLogin().
-See AccelByte::Credentials.
+See AccelByte::Api::UserAuthentication::LoginWithClientCredentials().
+
+### Login with username and password
+This is to get access token with Resource Owner Password Credentials (ROPC)/`password` `grant_type` and store it to memory.
+
+Example:
+```cpp
+AccelByte::Api::UserAuthentication::LoginWithUsernameAndPasswordEasy("my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", AccelByte::Api::UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
+}));
+```
+See AccelByte::Api::UserAuthentication::LoginWithUsernameAndPassword().
+
+### Login with Steam session ticket
+This is to get access token with Steam session ticket. See AccelByte IAM documentation for how this OAuth2 token endpoint works.
+
+Example:
+```cpp
+AccelByte::Api::UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<AccelByte::Api::UserAuthentication::EPlatformType>>::type>(AccelByte::Api::UserAuthentication::EPlatformType::Steam), "my_steam_session_ticket_blah_blah", AccelByte::Api::UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
+}));
+```
+See AccelByte::Api::UserAuthentication::LoginWithOtherPlatformAccount().
 
 ### Login with device ID
 This is to get access token with device ID and store it, though the device ID defined here is only a call to Unreal Engine 4 [FGenericPlatformMisc::GetDeviceId()](https://api.unrealengine.com/INT/API/Runtime/Core/GenericPlatform/FGenericPlatformMisc/GetDeviceId/index.html) (is this secure?). See AccelByte IAM documentation for how this OAuth2 token endpoint works.
@@ -25,7 +56,7 @@ This is to get access token with device ID and store it, though the device ID de
 Example:
 
 ```cpp
-AccelByte::Api::User::LoginWithDeviceId("https://api.gamepublisher.example", "my_client_id", "my_client_secret", "game_1001", AccelByte::Api::User::FLoginWithDeviceIdSuccess::CreateLambda([]()
+AccelByte::Api::UserAuthentication::LoginWithDeviceIdEasy(AccelByte::Api::UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([]()
 {
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -33,44 +64,10 @@ AccelByte::Api::User::LoginWithDeviceId("https://api.gamepublisher.example", "my
     UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
 }));
 ```
-
-See AccelByte::Api::User::LoginWithDeviceId().
-See AccelByte::Credentials.
-
-### Login with email and password
-This is to get access token with `password` `grant_type` and store it to memory.
-
-Example:
-```cpp
-AccelByte::Api::User::LoginWithEmailAccount("https://api.gamepublisher.example", "my_client_id", "my_client_secret", "game_1001", "my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", AccelByte::Api::User::FLoginWithEmailAccountSuccess::CreateLambda([]()
-{
-    UE_LOG(LogTemp, Log, TEXT("Success"));
-}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
-{
-    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
-}));
-```
-See AccelByte::Api::User::LoginWithEmailAccount().
-See AccelByte::Credentials.
-
-### Login with Steam session ticket
-This is to get access token with Steam session ticket. See AccelByte IAM documentation for how this OAuth2 token endpoint works.
-
-Example:
-```cpp
-AccelByte::Api::User::LoginWithOtherPlatformAccount("https://api.gamepublisher.example", "my_client_id", "my_client_secret", "game_1001", static_cast<std::underlying_type<AccelByte::Api::User::EPlatformType>>::type>(AccelByte::Api::User::EPlatformType::Steam), "my_steam_session_ticket", AccelByte::Api::User::FLoginWithOtherPlatformAccountSuccess::CreateLambda([]()
-{
-    UE_LOG(LogTemp, Log, TEXT("Success"));
-}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
-{
-    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
-}));
-```
-See AccelByte::Api::User::LoginWithOtherPlatformAccount().
-See AccelByte::Credentials.
+See AccelByte::Api::UserAuthentication::LoginWithDeviceId().
 
 ### Login with launcher
-This doesn't work (yet). Do not use.
+The `authorization_code grant_type` in IAM doesn't work yet. Do not use.
 
 ### Logout
 This simply remove the stored access tokens and user ID from memory.
@@ -78,53 +75,37 @@ This simply remove the stored access tokens and user ID from memory.
 Example:
 
 ```cpp
-AccelByte::Api::User::ResetCredentials();
+AccelByte::Api::UserAuthentication::ForgetAllCredentials();
 ```
 
-See AccelByte::Api::User::ResetCredentials().
+See AccelByte::Api::UserAuthentication::ForgetAllCredentials().
 See AccelByte::Credentials.
 
 ## User management
-See AccelByte::Api::User.
+See AccelByte::Api::UserManagement.
 
 ### Create email account
-Create a new user with email based account, then send a verification code to that email.
+Create a new user account.
 
 Example:
 ```cpp
-AccelByte::Api::User::CreateEmailAccount("https://api.gamepublisher.example", "my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", "Example", AccelByte::Api::User::FCreateEmailAccountSuccess::CreateLambda([](const FAccelByteModelsUserCreateResponse& Result)
+AccelByte::Api::UserManagement::CreateUserAccountEasy("my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", "Example", AccelByte::Api::UserManagement::FCreateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserCreateResponse& Result)
 {
-    MyUserId = Result.UserId;
+    MyUser = Result.UserId;
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
     UE_LOG(LogTemp, Log, TEXT("Fail: %d %s"), ErrorCode, *ErrorMessage);
 }));
 ```
-See AccelByte::Api::User::CreateEmailAccount().
+See AccelByte::Api::UserManagement::CreateUserAccount().
 
-### Verify email account
-Verify the email after creating an email account. The user ID is from AccelByte::Api::User::FCreateEmailAccountSuccess.
-
-Example:
-```cpp
-AccelByte::Api::User::VerifyEmailAccount("https://api.gamepublisher.example", MyUserId, "123456", AccelByte::Api::User::FVerifyEmailAccountSuccess::CreateLambda([]()
-{
-    UE_LOG(LogAccelByteTest, Log, TEXT("Success"));
-}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
-{
-    UE_LOG(LogAccelByteTest, Log, TEXT("Fail: %d %s"), ErrorCode, *ErrorMessage);
-}));
-```
-
-See AccelByte::Api::User::VerifyEmailAccount().
-
-### Request password reset
-Request for a password reset. Verification code is sent to the email.
+### Send email verification code 
+Send a verification code to user email address.
 
 Example:
 ```cpp
-AccelByte::Api::User::RequestPasswordReset("https://api.gamepublisher.example", "my_client_id", "my_client_secret", "game_1001", "my.email@gamepublisher.example", AccelByte::Api::User::FRequestPasswordResetSuccess::CreateLambda([]()
+AccelByte::Api::UserManagement::SendUserAccountVerificationCodeEasy("my.email@gamepublisher.example", AccelByte::Api::UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([]()
 {
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
@@ -133,14 +114,46 @@ AccelByte::Api::User::RequestPasswordReset("https://api.gamepublisher.example", 
 }));
 ```
 
-See AccelByte::Api::User::RequestPasswordReset().
+See AccelByte::Api::UserManagement::SendUserAccountVerificationCode().
 
-### Verify password reset
+### Verify email account
+Verify the email address using the verification code sent to user's email address. User must log in first to get a access token.
+
+Example:
+```cpp
+AccelByte::Api::UserManagement::VerifyUserAccountEasy("123456", AccelByte::Api::UserManagement::FVerifyUserAccountSuccess::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Fail: %d %s"), ErrorCode, *ErrorMessage);
+}));
+```
+
+See AccelByte::Api::UserManagement::VerifyUserAccount().
+
+### Send password reset code 
+For a password reset, verification code is sent to the email.
+
+Example:
+```cpp
+AccelByte::Api::UserManagement::SendPasswordResetCodeEasy("my.email@gamepublisher.example", AccelByte::Api::UserManagement::FSendPasswordResetCodeSuccess::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}), AccelByte::ErrorDelegate::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
+}));
+```
+
+See AccelByte::Api::UserManagement::SendPasswordResetCode().
+
+### Reset password
 Verify the password reset request with the verification code sent to email.
 
 Example:
 ```cpp
-AccelByte::Api::User::VerifyPasswordReset("https://api.gamepublisher.example", "my_client_id", "my_client_secret", "game_1001", "my.email@gamepublisher.example", "123456", "MY NEW PASSwORD IS MORE TOP SECRET 123", AccelByte::Api::User::FVerifyPasswordResetSuccess::CreateLambda([]()
+AccelByte::Api::UserManagement::ResetPasswordEasy("my.email@gamepublisher.example", "123456", "MY NEW PASSwORD IS MORE TOP SECRET 123", AccelByte::Api::UserManagement::FResetPasswordSuccess::CreateLambda([]()
 {
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -149,28 +162,29 @@ AccelByte::Api::User::VerifyPasswordReset("https://api.gamepublisher.example", "
 }));
 ```
 
-See AccelByte::Api::User::VerifyPasswordReset().
+See AccelByte::Api::UserManagement::ResetPassword().
 
 ## Identity provider
 
-### Get identity information (get profile)
+### Get user profile
 Get profile from specified user. The result is FAccelByteModelsUserProfileInfo.
 
 Example:
 ```cpp
-AccelByte::Api::User::GetProfile("https://api.gamepublisher.example", AccelByte::Api::User::FGetProfileSuccess::CreateLambda([](const FAccelByteModelsUserProfileInfo& Result)
+AccelByte::Api::UserProfile::GetUserProfileEasy(AccelByte::Api::UserProfile::FGetUserProfileSuccess::CreateLambda([](const FAccelByteModelsUserProfileInfo& Result)
 {
-    UE_LOG(LogTemp, Log, TEXT("Success; welcome, %s %s"), *Result.FirstName, *Result.LastName);
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+    UE_LOG(LogTemp, Log, TEXT("Welcome, %s %s"), *Result.FirstName, *Result.LastName);
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
     UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
 }));
 ```
 
-See AccelByte::Api::User::GetProfile().
+See AccelByte::Api::UserProfile::GetUserProfile().
 
-### Update identity information (update profile)
-Update profile from specified user. The parameter is FAccelByteModelsUserProfileInfo.
+### Update user profile
+Update profile for a specified user. The parameter is FAccelByteModelsProfileUpdateRequest.
 
 Example:
 ```cpp
@@ -182,7 +196,32 @@ ProfileUpdateRequest.DateOfBirth = "2000-01-01";
 ProfileUpdateRequest.Email = "new.my.email@gamepublisher.example";
 ProfileUpdateRequest.DisplayName = "My New Display Name Example";
 
-AccelByte::Api::User::UpdateProfile("https://api.gamepublisher.example", ProfileUpdateRequest, AccelByte::Api::User::FUpdateProfileSuccess::CreateLambda([]()
+AccelByte::Api::UserProfile::UpdateUserProfileEasy(ProfileUpdateRequest, AccelByte::Api::UserProfile::FUpdateUserProfileEasySuccess::CreateLambda([]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
+}));
+
+See AccelByte::Api::UserProfile::UpdateUserProfile().
+
+```
+
+### Create user profile
+Create profile for a specified user. The parameter is FAccelByteModelsProfileCreateRequest.
+
+Example:
+```cpp
+FAccelByteModelsProfileCreateRequest ProfileCreateRequest;
+ProfileCreateRequest.Country = "US";
+ProfileCreateRequest.Language = "en";
+ProfileCreateRequest.Timezone = "Etc/UTC";
+ProfileCreateRequest.DateOfBirth = "2000-01-01";
+ProfileCreateRequest.Email = "new.my.email@gamepublisher.example";
+ProfileCreateRequest.DisplayName = "My New Display Name Example";
+
+AccelByte::Api::UserProfile::CreateUserProfileEasy(ProfileCreateRequest, AccelByte::Api::UserProfile::FCreateUserProfileEasySuccess::CreateLambda([]()
 {
     UE_LOG(LogTemp, Log, TEXT("Success"));
 }), AccelByte::ErrorDelegate::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -191,10 +230,12 @@ AccelByte::Api::User::UpdateProfile("https://api.gamepublisher.example", Profile
 }));
 ```
 
-See AccelByte::Api::User::UpdateProfile().
+See AccelByte::Api::UserProfile::CreateUserProfile().
 
 ## Ecommerce
 API related to Ecommerce.
+
+**Examples coming soon™® (tm). "Coming soon" is a registered trademark of AccelByte, Inc.**
 
 ### Categories
 The category has [tree data structure](https://en.wikipedia.org/wiki/Tree_(data_structure)). Each category has path, for example "/equipments/armor/legs". Each category has items inside it. You can get a list of items by criteria or by its ID.

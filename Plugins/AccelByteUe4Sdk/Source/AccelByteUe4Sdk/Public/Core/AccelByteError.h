@@ -105,7 +105,7 @@ enum class ErrorCodes : int32
 	ServiceUnavailableException,
 	UnsupportedMediaTypeException,
 	OptimisticLockException,
-	// Namespace Error Code List
+	// GameId Error Code List
 	NamespaceNotFoundException = 2141,
 	NamespaceAlreadyExistsException = 2171,
 	// Profile Error Code List
