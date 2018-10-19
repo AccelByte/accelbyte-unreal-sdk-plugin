@@ -5,14 +5,14 @@
 #include "AccelByteUserProfileBlueprints.h"
 
 using AccelByte::Api::UserProfile;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 
 void UAccelByteBlueprintsUserProfile::GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FBlueprintError OnError)
 {
 	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -23,7 +23,7 @@ void UAccelByteBlueprintsUserProfile::UpdateUserProfileEasy(const FAccelByteMode
 	UserProfile::UpdateUserProfileEasy(ProfileUpdateRequest, UserProfile::FUpdateUserProfileSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -35,7 +35,7 @@ void UAccelByteBlueprintsUserProfile::CreateUserProfileEasy(const FAccelByteMode
 	UserProfile::CreateUserProfileEasy(ProfileCreateRequest, UserProfile::FCreateUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

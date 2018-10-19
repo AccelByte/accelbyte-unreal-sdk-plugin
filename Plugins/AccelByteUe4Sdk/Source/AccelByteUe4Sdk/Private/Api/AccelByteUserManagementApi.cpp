@@ -13,7 +13,7 @@ namespace AccelByte
 namespace Api
 {
 
-void UserManagement::CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FAccelByteModelsUserCreateRequest NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
@@ -36,20 +36,17 @@ void UserManagement::CreateUserAccount(FString ServerBaseUrl, FString AccessToke
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		CreateUserAccountResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(CreateUserAccountResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
 
-void UserManagement::CreateUserAccountEasy(FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::CreateUserAccountEasy(FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	CreateUserAccount(Settings::ServerBaseUrl, Credentials::Get().GetClientAccessToken(), Credentials::Get().GetClientNamespace(), Username, Password, DisplayName, OnSuccess, OnError);
 }
 
-void UserManagement::AddUsernameAndPassword(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::AddUsernameAndPassword(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/upgradeHeadlessAccount"), *ServerBaseUrl, *Namespace, *UserId);
@@ -65,19 +62,15 @@ void UserManagement::AddUsernameAndPassword(FString ServerBaseUrl, FString Acces
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		UpgradeHeadlessUserAccountResponse(Request, Response, OnSuccess, OnError);
-	});
-	Request->ProcessRequest();
+	Request->OnProcessRequestComplete().BindStatic(AddUsernameAndPasswordResponse, OnSuccess, OnError);
 }
 
-void UserManagement::AddUsernameAndPasswordEasy(FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::AddUsernameAndPasswordEasy(FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	AddUsernameAndPassword(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Username, Password, OnSuccess, OnError);
 }
 
-void UserManagement::SendUserAccountVerificationCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendUserAccountVerificationCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/verificationcode"), *ServerBaseUrl, *Namespace, *UserId);
@@ -93,19 +86,16 @@ void UserManagement::SendUserAccountVerificationCode(FString ServerBaseUrl, FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		SendVerificationCodeForUserAccountCreationResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(SendUserAccountVerificationCodeResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::SendUserAccountVerificationCodeEasy(FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendUserAccountVerificationCodeEasy(FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	SendUserAccountVerificationCode(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Username, OnSuccess, OnError);
 }
 
-void UserManagement::VerifyUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::VerifyUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString ContactType = TEXT("email");
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
@@ -122,19 +112,16 @@ void UserManagement::VerifyUserAccount(FString ServerBaseUrl, FString AccessToke
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		VerifyUserAccountCreationResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(VerifyUserAccountResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::VerifyUserAccountEasy(FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::VerifyUserAccountEasy(FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	VerifyUserAccount(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), VerificationCode, OnSuccess, OnError);
 }
 
-void UserManagement::SendPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString ClientNamespace, FString Username, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString ClientNamespace, FString Username, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/forgotPassword"), *ServerBaseUrl, *ClientNamespace);
@@ -150,19 +137,16 @@ void UserManagement::SendPasswordResetCode(FString ServerBaseUrl, FString Client
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		SendVerificationCodeForPasswordResetResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(SendPasswordResetCodeResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::SendPasswordResetCodeEasy(FString Username, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendPasswordResetCodeEasy(FString Username, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	SendPasswordResetCode(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::GameId, Username, OnSuccess, OnError);
 }
 
-void UserManagement::ResetPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::ResetPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FAccelByteModelsPasswordResetRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code = VerificationCode;
@@ -183,19 +167,16 @@ void UserManagement::ResetPassword(FString ServerBaseUrl, FString ClientId, FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		VerifyPasswordResetResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(ResetPasswordResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::ResetPasswordEasy(FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::ResetPasswordEasy(FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	ResetPassword(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, Settings::GameId, Username, VerificationCode, NewPassword, OnSuccess, OnError);
 }
 
-void UserManagement::GetLinkedUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::GetLinkedUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms"), *ServerBaseUrl, *Namespace, *UserId);
@@ -211,19 +192,16 @@ void UserManagement::GetLinkedUserAccounts(FString ServerBaseUrl, FString Access
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetLinkedUserAccountsResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetLinkedUserAccountsResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetLinkedUserAccounts(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OnSuccess, OnError);
 }
 
-void UserManagement::LinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::LinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/link"), *ServerBaseUrl, *Namespace, *UserId, *PlatformId);
@@ -239,19 +217,16 @@ void UserManagement::LinkUserAccounts(FString ServerBaseUrl, FString AccessToken
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		LinkUserAccountsResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(LinkUserAccountsResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::LinkUserAccountsEasy(FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::LinkUserAccountsEasy(FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	LinkUserAccounts(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), PlatformId, Ticket, OnSuccess, OnError);
 }
 
-void UserManagement::UnlinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::UnlinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/%s/unlink"), *ServerBaseUrl, *Namespace, *UserId, *PlatformId);
@@ -267,14 +242,11 @@ void UserManagement::UnlinkUserAccounts(FString ServerBaseUrl, FString AccessTok
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		UnlinkUserAccountsResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(UnlinkUserAccountsResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserManagement::UnlinkUserAccountsEasy(FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::UnlinkUserAccountsEasy(FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	UnlinkUserAccounts(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), PlatformId, OnSuccess, OnError);
 }
@@ -283,7 +255,7 @@ void UserManagement::UnlinkUserAccountsEasy(FString PlatformId, FUnlinkUserAccou
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void UserManagement::CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -298,7 +270,7 @@ void UserManagement::CreateUserAccountResponse(FHttpRequestPtr Request, FHttpRes
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::UpgradeHeadlessUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -311,7 +283,7 @@ void UserManagement::UpgradeHeadlessUserAccountResponse(FHttpRequestPtr Request,
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::SendVerificationCodeForUserAccountCreationResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendUserAccountVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -324,7 +296,7 @@ void UserManagement::SendVerificationCodeForUserAccountCreationResponse(FHttpReq
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::VerifyUserAccountCreationResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::VerifyUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -337,7 +309,7 @@ void UserManagement::VerifyUserAccountCreationResponse(FHttpRequestPtr Request, 
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::SendVerificationCodeForPasswordResetResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::SendPasswordResetCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -350,7 +322,7 @@ void UserManagement::SendVerificationCodeForPasswordResetResponse(FHttpRequestPt
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::VerifyPasswordResetResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::ResetPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -363,7 +335,7 @@ void UserManagement::VerifyPasswordResetResponse(FHttpRequestPtr Request, FHttpR
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -378,7 +350,7 @@ void UserManagement::GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHtt
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -391,7 +363,7 @@ void UserManagement::LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResp
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError)
+void UserManagement::UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;

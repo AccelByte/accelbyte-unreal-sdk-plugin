@@ -27,7 +27,7 @@ struct FAccelByteModelsErrorEntity
 namespace AccelByte
 {
 
-DECLARE_DELEGATE_TwoParams(ErrorDelegate, int32, FString);
+DECLARE_DELEGATE_TwoParams(FErrorDelegate, int32, FString);
 
 enum class ErrorCodes : int32
 {
@@ -258,6 +258,7 @@ enum class ErrorCodes : int32
 		
 	UnknownError = 14000,
 	JsonDeserializationFailed = 14001,
+	WebSocketConnectFailed = 14201,
 };
 
 class ErrorMessages
@@ -266,7 +267,7 @@ public:
 	/**
 	 * @brief Contains dictionary for default error messages (English).
 	 */
-	const static std::unordered_map<int32, FString> Default;
+	const static std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> Default;
 };
 
 void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);

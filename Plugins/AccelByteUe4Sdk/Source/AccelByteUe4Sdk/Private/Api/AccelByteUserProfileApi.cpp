@@ -14,7 +14,7 @@ namespace AccelByte
 namespace Api
 {
 
-void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
@@ -30,19 +30,16 @@ void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FSt
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetUserProfileResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetUserProfileResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserProfile::GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OnSuccess, OnError);
 }
 
-void UserProfile::UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
@@ -59,19 +56,16 @@ void UserProfile::UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		UpdateUserProfileResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(UpdateUserProfileResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	UpdateUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileUpdateRequest, OnSuccess, OnError);
 }
 
-void UserProfile::CreateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::CreateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
@@ -88,14 +82,11 @@ void UserProfile::CreateUserProfile(FString ServerBaseUrl, FString AccessToken, 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		CreateUserProfileResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(CreateUserProfileResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void UserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	CreateUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileCreateRequest, OnSuccess, OnError);
 }
@@ -104,7 +95,7 @@ void UserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateR
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -119,7 +110,7 @@ void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponseP
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -132,7 +123,7 @@ void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpRespon
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserProfile::CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError)
+void UserProfile::CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;

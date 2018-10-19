@@ -8,7 +8,7 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Item;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
@@ -17,7 +17,7 @@ void UAccelByteBlueprintsItem::GetItemById(FString ServerBaseUrl, FString Access
 	Item::GetItemById(ServerBaseUrl, AccessToken, Namespace, ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -34,7 +34,7 @@ void UAccelByteBlueprintsItem::GetItemsByCriteria(FString ServerBaseUrl, FString
 	Item::GetItemsByCriteria(ServerBaseUrl, AccessToken, Namespace, Language, Region, CategoryPath, ItemType, Status, Page, Size, Item::FGetItemsByCriteriaSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

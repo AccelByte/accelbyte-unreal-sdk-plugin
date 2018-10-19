@@ -14,7 +14,7 @@ namespace AccelByte
 namespace Api
 {
 
-void Category::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories?language=%s"), *ServerBaseUrl, *Namespace, *Language);
@@ -30,19 +30,16 @@ void Category::GetRootCategories(FString ServerBaseUrl, FString AccessToken, FSt
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetRootCategoriesResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetRootCategoriesResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Category::GetRootCategoriesEasy(FString Language, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetRootCategoriesEasy(FString Language, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetRootCategories(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, OnSuccess, OnError);
 }
 
-void Category::GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s?language=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -58,19 +55,16 @@ void Category::GetCategory(FString ServerBaseUrl, FString AccessToken, FString N
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetCategoryResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetCategoryResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Category::GetCategoryEasy(FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetCategoryEasy(FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetCategory(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), CategoryPath, Language, OnSuccess, OnError);
 }
 
-void Category::GetChildCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetChildCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/children?language=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -86,19 +80,16 @@ void Category::GetChildCategories(FString ServerBaseUrl, FString AccessToken, FS
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetChildCategoriesResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(&Category::GetChildCategoriesResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Category::GetChildCategoriesEasy(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetChildCategoriesEasy(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetChildCategories(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
 }
 
-void Category::GetDescendantCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetDescendantCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/categories/%s/descendants?language=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
@@ -114,14 +105,11 @@ void Category::GetDescendantCategories(FString ServerBaseUrl, FString AccessToke
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetDescendantCategoriesResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(&Category::GetDescendantCategoriesResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Category::GetDescendantCategoriesEasy(FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetDescendantCategoriesEasy(FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetDescendantCategories(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
 }
@@ -130,7 +118,7 @@ void Category::GetDescendantCategoriesEasy(FString Language, FString CategoryPat
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void Category::GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetRootCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -148,7 +136,7 @@ void Category::GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponseP
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Category::GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetCategorySuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetCategorySuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -166,7 +154,7 @@ void Category::GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Res
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Category::GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetChildCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -184,7 +172,7 @@ void Category::GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponse
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Category::GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetDescendantCategoriesSuccess OnSuccess, ErrorDelegate OnError)
+void Category::GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;

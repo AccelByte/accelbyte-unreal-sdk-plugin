@@ -7,7 +7,7 @@
 namespace AccelByte
 {
 
-const std::unordered_map<int32, FString> ErrorMessages::Default
+const std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> ErrorMessages::Default
 {
 	// HTTP 1xx
 	{ static_cast<int32>(ErrorCodes::StatusContinue), TEXT("StatusContinue Reference: RFC 7231, Section 6.2.1") },
@@ -240,6 +240,7 @@ const std::unordered_map<int32, FString> ErrorMessages::Default
 		
 	{ static_cast<int32>(ErrorCodes::UnknownError), TEXT("Unknown error.") },
 	{ static_cast<int32>(ErrorCodes::JsonDeserializationFailed), TEXT("JSON deserialization failed.") },
+	{ static_cast<int32>(ErrorCodes::WebSocketConnectFailed), TEXT("WebSocket connect failed.") },
 
 
 };

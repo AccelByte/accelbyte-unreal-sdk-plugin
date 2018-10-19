@@ -14,10 +14,16 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Settings
 {
 public:
-	const static FString ServerBaseUrl;
 	const static FString ClientId;
 	const static FString ClientSecret;
 	const static FString GameId;
+	
+	const static FString ServerBaseUrl;
+	
+	const static FString LobbyServerScheme;
+	const static FString LobbyServerHost;
+	const static uint16 LobbyServerPort;
+	const static FString LobbyServerPath;
 private:
 	Settings() = delete; // static class can't have instance
 	Settings(Settings const&) = delete;

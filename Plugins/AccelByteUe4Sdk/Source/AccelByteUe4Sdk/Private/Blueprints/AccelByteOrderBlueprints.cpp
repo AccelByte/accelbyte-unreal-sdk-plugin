@@ -8,7 +8,7 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Order;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
@@ -17,7 +17,7 @@ void UAccelByteBlueprintsOrder::CreateNewOrder(FString ServerBaseUrl, FString Ac
 	Order::CreateNewOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -33,7 +33,7 @@ void UAccelByteBlueprintsOrder::GetUserOrder(FString ServerBaseUrl, FString Acce
 	Order::GetUserOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -49,7 +49,7 @@ void UAccelByteBlueprintsOrder::GetUserOrders(FString ServerBaseUrl, FString Acc
 	Order::GetUserOrders(ServerBaseUrl, AccessToken, Namespace, UserId, Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -65,7 +65,7 @@ void UAccelByteBlueprintsOrder::FulfillOrder(FString ServerBaseUrl, FString Acce
 	Order::FulfillOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FFulfillOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -81,7 +81,7 @@ void UAccelByteBlueprintsOrder::GetUserOrderHistory(FString ServerBaseUrl, FStri
 	Order::GetUserOrderHistory(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

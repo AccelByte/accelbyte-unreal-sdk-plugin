@@ -34,8 +34,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError);
-	static void CreateUserAccountEasy(FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError);
+	static void CreateUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError);
+	static void CreateUserAccountEasy(FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FAddUsernameAndPasswordSuccess);
 	/**
@@ -53,8 +53,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void AddUsernameAndPassword(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError);
-	static void AddUsernameAndPasswordEasy(FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError);
+	static void AddUsernameAndPassword(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void AddUsernameAndPasswordEasy(FString Username, FString Password, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FSendUserAccountVerificationCodeSuccess);
 	/**
@@ -68,8 +68,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SendUserAccountVerificationCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError);
-	static void SendUserAccountVerificationCodeEasy(FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError);
+	static void SendUserAccountVerificationCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError);
+	static void SendUserAccountVerificationCodeEasy(FString Username, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FVerifyUserAccountSuccess);
 	/**
@@ -83,8 +83,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void VerifyUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError);
-	static void VerifyUserAccountEasy(FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError);
+	static void VerifyUserAccount(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError);
+	static void VerifyUserAccountEasy(FString VerificationCode, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FSendPasswordResetCodeSuccess);
     /**
@@ -98,8 +98,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SendPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString ClientNamespace, FString Username, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError);
-	static void SendPasswordResetCodeEasy(FString Username, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError);
+	static void SendPasswordResetCode(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString ClientNamespace, FString Username, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError);
+	static void SendPasswordResetCodeEasy(FString Username, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FResetPasswordSuccess);
 	/**
@@ -113,8 +113,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void ResetPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
-	static void ResetPasswordEasy(FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
+	static void ResetPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Namespace, FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void ResetPasswordEasy(FString Username, FString VerificationCode, FString NewPassword, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetLinkedUserAccountsSuccess, const TArray<FAccelByteModelsLinkedPlatform>&)
 	/**
@@ -125,8 +125,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsLinkedPlatform>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetLinkedUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetLinkedUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLinkUserAccountsSuccess);
     /**
@@ -142,8 +142,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
-	static void LinkUserAccountsEasy(FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
+	static void LinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
+	static void LinkUserAccountsEasy(FString PlatformId, FString Ticket, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FUnlinkUserAccountsSuccess);
 	/**
@@ -158,23 +158,23 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void UnlinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
-	static void UnlinkUserAccountsEasy(FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
+	static void UnlinkUserAccounts(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
+	static void UnlinkUserAccountsEasy(FString PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
 
 private:
 	UserManagement() = delete; // static class can't have instance
 	UserManagement(UserManagement const&) = delete;
 	UserManagement(UserManagement&&) = delete;
 
-	static void CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateUserAccountSuccess OnSuccess, ErrorDelegate OnError);
-	static void UpgradeHeadlessUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FAddUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError);
-	static void SendVerificationCodeForUserAccountCreationResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FSendUserAccountVerificationCodeSuccess OnSuccess, ErrorDelegate OnError);
-	static void VerifyUserAccountCreationResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FVerifyUserAccountSuccess OnSuccess, ErrorDelegate OnError);
-	static void SendVerificationCodeForPasswordResetResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FSendPasswordResetCodeSuccess OnSuccess, ErrorDelegate OnError);
-	static void VerifyPasswordResetResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FResetPasswordSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetLinkedUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
-	static void LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FLinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
-	static void UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FUnlinkUserAccountsSuccess OnSuccess, ErrorDelegate OnError);
+	static void CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserAccountSuccess OnSuccess, FErrorDelegate OnError);
+	static void AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FAddUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void SendUserAccountVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorDelegate OnError);
+	static void VerifyUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FVerifyUserAccountSuccess OnSuccess, FErrorDelegate OnError);
+	static void SendPasswordResetCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendPasswordResetCodeSuccess OnSuccess, FErrorDelegate OnError);
+	static void ResetPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FResetPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetLinkedUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
+	static void LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FLinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
+	static void UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUnlinkUserAccountsSuccess OnSuccess, FErrorDelegate OnError);
 
 };
 

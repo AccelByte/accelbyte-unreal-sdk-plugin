@@ -32,8 +32,8 @@ public:
 	 * @param UserId User ID.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 */
-	static void GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FUpdateUserProfileSuccess);
 	/**
@@ -47,8 +47,8 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 * @param OnError 
 	 */
-    static void UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
-	static void UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
+    static void UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
+	static void UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FCreateUserProfileSuccess, const FAccelByteModelsUserProfileInfo&);
 	/**
@@ -61,16 +61,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
-	static void CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
+	static void CreateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
+	static void CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
 private:
 	UserProfile() = delete; // static class can't have instance
 	UserProfile(UserProfile const&) = delete;
 	UserProfile(UserProfile&&) = delete;
 
-	static void GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetUserProfileSuccess OnSuccess, ErrorDelegate OnError);
-	static void UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FUpdateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
-	static void CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FCreateUserProfileSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError);
+	static void UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
+	static void CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError);
 	
 };
 

@@ -51,7 +51,7 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetCategorySuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetCategorySuccess = false;
@@ -96,7 +96,7 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetRootCategoriesSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetRootCategoriesSuccess = false;
@@ -142,7 +142,7 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetChildCategoriesSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetChildCategoriesSuccess = false;
@@ -193,7 +193,7 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetDescendantCategoriesSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetDescendantCategoriesSuccess = false;
@@ -243,7 +243,7 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 		}
 		bGetItemByCriteriaSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess = false;
@@ -295,7 +295,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		}
 		bGetItemByCriteriaSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess = false;
@@ -322,7 +322,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetItemByIdSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByIdSuccess = false;
@@ -376,7 +376,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess = false;
@@ -412,7 +412,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bCreateNewOrderSuccess = false;
@@ -451,7 +451,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess2 = false;
@@ -485,7 +485,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bCreateNewOrderSuccess2 = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bCreateNewOrderSuccess2 = false;
@@ -543,7 +543,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 			}
 		}
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess = false;
@@ -580,7 +580,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		OrderNo = Result.OrderNo;
 		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bCreateNewOrderSuccess = false;
@@ -607,7 +607,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetUserOrderSuccess = false;
@@ -663,7 +663,7 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 			}
 		}
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetItemByCriteriaSuccess = false;
@@ -700,7 +700,7 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		OrderNo = Result.OrderNo;
 		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bCreateNewOrderSuccess = false;
@@ -727,7 +727,7 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderHistorySuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetUserOrderHistorySuccess = false;
@@ -765,7 +765,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetUserOrdersSuccess = false;
@@ -798,7 +798,7 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetWalletSuccess = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bGetWalletSuccess = false;
@@ -829,7 +829,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -852,7 +852,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -876,7 +876,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bLoginSuccessful = false;
@@ -918,7 +918,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bDeleteSuccessful = false;

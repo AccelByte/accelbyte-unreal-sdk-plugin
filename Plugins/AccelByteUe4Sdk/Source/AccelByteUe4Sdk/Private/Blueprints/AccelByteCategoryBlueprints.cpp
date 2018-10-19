@@ -8,7 +8,7 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Category;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
@@ -19,7 +19,7 @@ void UAccelByteBlueprintsCategory::GetRootCategories(FString ServerBaseUrl, FStr
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -37,7 +37,7 @@ void UAccelByteBlueprintsCategory::GetCategory(FString ServerBaseUrl, FString Ac
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -55,7 +55,7 @@ void UAccelByteBlueprintsCategory::GetChildCategories(FString ServerBaseUrl, FSt
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -73,7 +73,7 @@ void UAccelByteBlueprintsCategory::GetDescendantCategories(FString ServerBaseUrl
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

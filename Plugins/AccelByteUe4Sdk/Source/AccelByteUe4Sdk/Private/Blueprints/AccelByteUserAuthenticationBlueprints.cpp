@@ -6,7 +6,7 @@
 #include "AccelByteUserAuthenticationApi.h"
 
 using AccelByte::Api::UserAuthentication;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 
 void UAccelByteBlueprintsUserAuthentication::LoginWithClientCredentialsEasy(FLoginWithClientCredentialsSuccess OnSuccess, FBlueprintError OnError)
 {
@@ -14,7 +14,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithClientCredentialsEasy(FLog
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -26,7 +26,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithUsernameAndPasswordEasy(FS
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -38,7 +38,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithOtherPlatformAccountEasy(E
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -50,7 +50,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithDeviceIdEasy(FLoginWithDev
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

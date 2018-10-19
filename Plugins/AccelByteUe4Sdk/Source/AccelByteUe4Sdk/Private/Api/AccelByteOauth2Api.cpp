@@ -13,7 +13,7 @@ namespace Api
 {
 #if 0
 // WARNING: THIS DOESN'T ACTUALLY WORK!!!
-void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *ServerBaseUrl);
@@ -30,15 +30,12 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FSt
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithAuthorizationCodeGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithAuthorizationCodeGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 #endif
 
-void Oauth2::GetAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *ServerBaseUrl);
@@ -54,14 +51,11 @@ void Oauth2::GetAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString Clie
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithPasswordGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithPasswordGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *ServerBaseUrl);
@@ -77,14 +71,11 @@ void Oauth2::GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FSt
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithClientCredentialsGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithClientCredentialsGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RefreshToken, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RefreshToken, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *ServerBaseUrl);
@@ -100,10 +91,7 @@ void Oauth2::GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithRefreshTokenGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithRefreshTokenGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
@@ -111,7 +99,7 @@ void Oauth2::GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString 
 // Custom grant types 
 //
 
-void Oauth2::GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString DeviceId = FGenericPlatformMisc::GetDeviceId();
 
@@ -129,14 +117,11 @@ void Oauth2::GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString Client
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithDeviceGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithDeviceGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString PlatformId, FString PlatformToken, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString PlatformId, FString PlatformToken, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
     FString Url = FString::Printf(TEXT("%s/iam/oauth/platforms/%s/token"), *ServerBaseUrl, *PlatformId);
@@ -152,10 +137,7 @@ void Oauth2::GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString Clie
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetAccessTokenWithPlatformGrantResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithPlatformGrantResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
@@ -164,7 +146,7 @@ void Oauth2::GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString Clie
 // =============================================================================================================================
 
 #if 0
-void Oauth2::GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -180,7 +162,7 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Re
 }
 #endif
 
-void Oauth2::GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -195,7 +177,7 @@ void Oauth2::GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FH
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Oauth2::GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -210,7 +192,7 @@ void Oauth2::GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHtt
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Oauth2::GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -225,7 +207,7 @@ void Oauth2::GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FH
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Oauth2::GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;
@@ -240,7 +222,7 @@ void Oauth2::GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Oauth2::GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, ErrorDelegate OnError)
+void Oauth2::GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;

@@ -14,7 +14,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
 
 class FIntegrationTestModule : public IModuleInterface {
 public:
-	static void DeleteUser(FString UserID, FDeleteUserByIdSuccess OnSuccess, AccelByte::ErrorDelegate OnError);
+	static void DeleteUser(FString UserID, FDeleteUserByIdSuccess OnSuccess, AccelByte::FErrorDelegate OnError);
 	static FString GetSteamTicket();
 	static FString GetVerificationCode(FString Email);
 };

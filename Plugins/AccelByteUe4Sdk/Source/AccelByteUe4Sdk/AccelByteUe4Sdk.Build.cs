@@ -21,28 +21,30 @@ public class AccelByteUe4Sdk : ModuleRules
 				// ... add other private include paths required here ...
 			});
 
-
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
                 "Core",
                 "CoreUObject",
                 "Engine",
+                "Sockets",
                 "Json",
                 "JsonUtilities",
                 "Http",
+                "WebSockets",
             });
-
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "Core",
                 "CoreUObject",
                 "Engine",
                 "Sockets",
                 "Json",
                 "JsonUtilities",
                 "Http",
+                "WebSockets",
             });
 
 
