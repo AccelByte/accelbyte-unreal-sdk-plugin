@@ -8,23 +8,22 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Wallet;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
-void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Wallet::GetWalletInfoByCurrencyCode(ServerBaseUrl, AccessToken, Namespace, UserId, CurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfo& Result)
+	Wallet::GetWalletInfoByCurrencyCode(AccessToken, Namespace, UserId, CurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCodeEasy(FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCodeEasy(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetWalletInfoByCurrencyCode(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), CurrencyCode, OnSuccess, OnError);
+	GetWalletInfoByCurrencyCode(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), CurrencyCode, OnSuccess, OnError);
 }

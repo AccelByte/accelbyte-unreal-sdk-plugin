@@ -6,51 +6,51 @@
 #include "AccelByteUserAuthenticationApi.h"
 
 using AccelByte::Api::UserAuthentication;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 
-void UAccelByteBlueprintsUserAuthentication::LoginWithClientCredentialsEasy(FLoginWithClientCredentialsSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserAuthentication::LoginWithClientCredentialsEasy(const FLoginWithClientCredentialsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsUserAuthentication::LoginWithUsernameAndPasswordEasy(FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserAuthentication::LoginWithUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FLoginWithUsernameAndPasswordSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserAuthentication::LoginWithUsernameAndPasswordEasy(Username, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsUserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, FString Token, FLoginWithOtherPlatformAccountSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, const FString& Token, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformId), Token, UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([OnSuccess]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(PlatformId, Token, UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsUserAuthentication::LoginWithDeviceIdEasy(FLoginWithDeviceIdSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserAuthentication::LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserAuthentication::LoginWithDeviceIdEasy(UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

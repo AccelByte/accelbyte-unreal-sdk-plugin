@@ -15,17 +15,17 @@ class UAccelByteBlueprintsUserProfile : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintError, int32, ErrorCode, FString, ErrorMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, FString, ErrorMessage);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserProfileSuccess, const FAccelByteModelsUserProfileInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
-	static void GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserProfileEasy(const FGetUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FUpdateUserProfileSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
-	static void UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FBlueprintError OnError);
+	static void UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateUserProfileSuccess, const FAccelByteModelsUserProfileInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
-	static void CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FBlueprintError OnError);
+	static void CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };

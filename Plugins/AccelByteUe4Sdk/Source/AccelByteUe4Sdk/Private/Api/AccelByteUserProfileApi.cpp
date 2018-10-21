@@ -4,7 +4,6 @@
 
 #include "AccelByteUserProfileApi.h"
 #include "AccelByteOauth2Api.h"
-#include "AccelByteHttpRetrySystem.h"
 #include "JsonUtilities.h"
 #include "AccelByteCredentials.h"
 #include "AccelByteSettings.h"
@@ -14,10 +13,10 @@ namespace AccelByte
 namespace Api
 {
 
-void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::GetUserProfile(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FGetUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings::PlatformServerUrl, *Namespace, *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -34,15 +33,15 @@ void UserProfile::GetUserProfile(FString ServerBaseUrl, FString AccessToken, FSt
 	Request->ProcessRequest();
 }
 
-void UserProfile::GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::GetUserProfileEasy(const FGetUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OnSuccess, OnError);
+	GetUserProfile(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OnSuccess, OnError);
 }
 
-void UserProfile::UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::UpdateUserProfile(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings::PlatformServerUrl, *Namespace, *UserId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -60,15 +59,15 @@ void UserProfile::UpdateUserProfile(FString ServerBaseUrl, FString AccessToken, 
 	Request->ProcessRequest();
 }
 
-void UserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	UpdateUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileUpdateRequest, OnSuccess, OnError);
+	UpdateUserProfile(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileUpdateRequest, OnSuccess, OnError);
 }
 
-void UserProfile::CreateUserProfile(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::CreateUserProfile(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/profiles"), *ServerBaseUrl, *Namespace, *UserId);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings::PlatformServerUrl, *Namespace, *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -86,16 +85,16 @@ void UserProfile::CreateUserProfile(FString ServerBaseUrl, FString AccessToken, 
 	Request->ProcessRequest();
 }
 
-void UserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	CreateUserProfile(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileCreateRequest, OnSuccess, OnError);
+	CreateUserProfile(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ProfileCreateRequest, OnSuccess, OnError);
 }
 
 // =============================================================================================================================
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserProfileSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;
@@ -110,7 +109,7 @@ void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponseP
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserProfileSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;
@@ -123,7 +122,7 @@ void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpRespon
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserProfile::CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserProfileSuccess OnSuccess, FErrorDelegate OnError)
+void UserProfile::CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserProfileSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;

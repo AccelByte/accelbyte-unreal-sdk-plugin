@@ -22,24 +22,23 @@ Lobby & Lobby::Get()
     return Instance;
 }
 
-void Lobby::Connect(const FConnectSuccess& OnSuccess, const FErrorDelegate& OnError, const FConnectionClosed& OnConnectionClosed)
+void Lobby::Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed)
 {
 	ConnectionClosed = OnConnectionClosed;
 	ConnectSuccess = OnSuccess;
 	ConnectError = OnError;
 
-	const FString Url = FString::Printf(TEXT("%s://%s:%s%s"), *Settings::LobbyServerScheme, *Settings::LobbyServerHost, *FString::FromInt(Settings::LobbyServerPort), *Settings::LobbyServerPath);
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials::Get().GetUserAccessToken());
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	WebSocket = FWebSocketsModule::Get().CreateWebSocket(Url, Settings::LobbyServerScheme, Headers);
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings::LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	WebSocket->Connect();
 	
-	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Url);
+	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Settings::LobbyServerUrl);
 }
 
 void Lobby::Disconnect()

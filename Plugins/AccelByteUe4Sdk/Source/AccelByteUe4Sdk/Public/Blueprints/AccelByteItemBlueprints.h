@@ -14,17 +14,17 @@ class UAccelByteBlueprintsItem : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintError, int32, ErrorCode, FString, ErrorMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, FString, ErrorMessage);
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemByIdSuccess, const FAccelByteModelsItemInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
-	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError);
+	static void GetItemById(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
-	static void GetItemByIdEasy(FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError);
+	static void GetItemByIdEasy(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
-	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FBlueprintError OnError);
+	static void GetItemsByCriteria(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
-	static void GetItemsByCriteriaEasy(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FBlueprintError OnError);
+	static void GetItemsByCriteriaEasy(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 };

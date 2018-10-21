@@ -24,21 +24,19 @@ public:
 	/**
 	 * @brief This function gets root categories that exist in the specified namespace.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param Language ISO 639-1 language tag, e.g., "en", "zh".
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetRootCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetRootCategoriesEasy(FString Language, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetRootCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetRootCategoriesEasy(const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetCategorySuccess, const FAccelByteModelsFullCategoryInfo&);
 	/**
 	 * @brief This function gets the category from a store in the specified namespace.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param CategoryPath Category path, e.g., "/equipments/pay2win/super_badass_armor/chest".
@@ -46,14 +44,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsFullCategoryInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetCategory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FErrorDelegate OnError);
-	static void GetCategoryEasy(FString CategoryPath, FString Language, FGetCategorySuccess OnSuccess, FErrorDelegate OnError);
+	static void GetCategory(const FString& AccessToken, const FString& Namespace, const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetCategoryEasy(const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetChildCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
 	 * @brief This function gets the subcategories from a category in the specified namespace.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param Language ISO 639-1 language tag, e.g., "en", "zh".
@@ -61,14 +58,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetChildCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetChildCategoriesEasy(FString Language, FString CategoryPath, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetChildCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetChildCategoriesEasy(const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetDescendantCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
 	 * @brief Get every subcategories from a category in the specified namespace.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param Language ISO 639-1 language tag, e.g., "en", "zh".
@@ -76,17 +72,17 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetDescendantCategories(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetDescendantCategoriesEasy(FString Language, FString CategoryPath, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetDescendantCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetDescendantCategoriesEasy(const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
 private:
 	Category() = delete; // static class can't have instance
 	Category(Category const&) = delete;
 	Category(Category&&) = delete;
 
-	static void GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetRootCategoriesSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetCategorySuccess OnSuccess, FErrorDelegate OnError);
-	static void GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetChildCategoriesSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetDescendantCategoriesSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetRootCategoriesSuccess OnSuccess, FErrorHandler OnError);
+	static void GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetCategorySuccess OnSuccess, FErrorHandler OnError);
+	static void GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetChildCategoriesSuccess OnSuccess, FErrorHandler OnError);
+	static void GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetDescendantCategoriesSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

@@ -6,8 +6,24 @@
 
 #include "CoreMinimal.h"
 #include "AccelByteOauth2Api.h"
+#include "AccelByteUserAuthenticationApi.generated.h"
 
-
+UENUM(BlueprintType)
+/**
+ *  @brief Supported platforms by AccelByte IAM.
+ */
+enum class EAccelBytePlatformType : uint8
+{
+	Steam,
+	Google,
+	Facebook,
+	Android,
+	iOS,
+	Device,
+	Twitch,
+	Oculus,
+	Twitter
+};
 
 namespace AccelByte
 {
@@ -20,24 +36,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserAuthentication
 {
 public:
-#pragma once
 
-	/**
-	 *  @brief Supported platforms by AccelByte IAM.
-	 */
-	enum class EPlatformType : uint8
-	{
-		Steam,
-		Google,
-		Facebook,
-		Android,
-		iOS,
-		Device,
-		Twitch,
-		Oculus,
-		Twitter
-	};
-	
 	DECLARE_DELEGATE(FLoginWithClientCredentialsSuccess);
 	/**
 	 * @brief This is to get access token from `client_credentials` grant, then store the access token in memory.
@@ -45,20 +44,18 @@ public:
 	 * It is "required" for user management (create new user, reset password, etc).
 	 * @todo IAM, PLEASE remove this requirement.
 	 * 
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param ClientId Client credentials.
 	 * @param ClientSecret Client credentials.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    static void LoginWithClientCredentials(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithClientCredentialsSuccess OnSuccess, FErrorDelegate OnError);
-    static void LoginWithClientCredentialsEasy(FLoginWithClientCredentialsSuccess OnSuccess, FErrorDelegate OnError);
+    static void LoginWithClientCredentials(const FString& ClientId, const FString& ClientSecret, const FLoginWithClientCredentialsSuccess& OnSuccess, const FErrorHandler& OnError);
+    static void LoginWithClientCredentialsEasy(const FLoginWithClientCredentialsSuccess& OnSuccess, const FErrorHandler& OnError);
 	
 	DECLARE_DELEGATE(FLoginWithUsernameAndPasswordSuccess);
 	/**
 	 * @brief Log in with email account.
 	 * 
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param ClientId Client credentials.
 	 * @param ClientSecret Client credentials.
 	 * @param Username User email address.
@@ -66,14 +63,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithUsernameAndPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
-	static void LoginWithUsernameAndPasswordEasy(FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void LoginWithUsernameAndPassword(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FLoginWithUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void LoginWithUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FLoginWithUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE(FLoginWithOtherPlatformAccountSuccess);
 	/**
 	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
 	 * 
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param ClientId Client credentials.
 	 * @param ClientSecret Client credentials.
 	 * @param PlatformId Specify platform type that chosen by user to log in.
@@ -81,21 +77,20 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, FErrorDelegate OnError);
-    static void LoginWithOtherPlatformAccountEasy(std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, FErrorDelegate OnError);
+    static void LoginWithOtherPlatformAccount(const FString& ClientId, const FString& ClientSecret, EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FErrorHandler& OnError);
+    static void LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE(FLoginWithDeviceIdSuccess);
 	/**
 	 * @brief Log in with device ID (anonymous log in).
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param ClientId Client credentials.
 	 * @param ClientSecret Client credentials.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithDeviceIdSuccess OnSuccess, FErrorDelegate OnError);
-	static void LoginWithDeviceIdEasy(FLoginWithDeviceIdSuccess OnSuccess, FErrorDelegate OnError);
+	static void LoginWithDeviceId(const FString& ClientId, const FString& ClientSecret, const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Remove access tokens, user ID, and other credentials from memory.

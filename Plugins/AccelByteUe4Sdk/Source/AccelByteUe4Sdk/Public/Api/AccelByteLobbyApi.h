@@ -29,7 +29,7 @@ DECLARE_DELEGATE(FConnectSuccess);
 	static Lobby& Get();
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32, const FString&, bool);
 	DECLARE_DELEGATE(FConnectSuccess);
-	void Connect(const FConnectSuccess& OnSuccess, const FErrorDelegate& OnError, const FConnectionClosed& OnConnectionClosed);
+	void Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed);
 	void Disconnect();
 	bool IsConnected() const;
 
@@ -78,7 +78,7 @@ private:
 
 	TSharedPtr<IWebSocket> WebSocket;
 	FConnectSuccess ConnectSuccess;
-	FErrorDelegate ConnectError;
+	FErrorHandler ConnectError;
 	FConnectionClosed ConnectionClosed;
 	
 	FPrivateMessageNotice PrivateMessageNotice;

@@ -6,15 +6,15 @@
 #include "AccelByteLobbyApi.h"
 
 using AccelByte::Api::Lobby;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 
-void UAccelByteBlueprintsLobby::Connect(const FConnectSuccess& OnSuccess, const FBlueprintError& OnError, const FConnectionClosed& OnConnectionClosed)
+void UAccelByteBlueprintsLobby::Connect(const FConnectSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed)
 {
 	Lobby::Get().Connect(Lobby::FConnectSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}),
