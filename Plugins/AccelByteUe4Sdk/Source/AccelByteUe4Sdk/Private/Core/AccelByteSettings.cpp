@@ -12,6 +12,11 @@ const FString Settings::ClientId = TEXT("");
 const FString Settings::ClientSecret = TEXT(""); // IETF does not recommend that you put your client secrets in "the the source code of the application or an associated resource bundle". Reference: RFC 6819 Section 5.2.3.1.
 const FString Settings::GameId = TEXT("");
 
+const FString Settings::LobbyServerScheme = TEXT("");
+const FString Settings::LobbyServerHost = TEXT("");
+const uint16 Settings::LobbyServerPort = 443;
+const FString Settings::LobbyServerPath = TEXT("");
+
 } // Namespace AccelByte
 
 using AccelByte::Settings;

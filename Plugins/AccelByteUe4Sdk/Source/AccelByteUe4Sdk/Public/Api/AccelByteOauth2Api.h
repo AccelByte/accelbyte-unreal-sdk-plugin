@@ -5,7 +5,6 @@
 #pragma once
 
 #include "AccelByteOauth2Models.h"
-#include "AccelByteUserProfileModels.h"
 #include "AccelByteError.h"
 #include "Http.h"
 
@@ -38,7 +37,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithAuthorizationCodeGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString AuthorizationCode, FString RedirectUri, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorDelegate OnError);
 #endif
 
 	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPasswordGrantSuccess, const FAccelByteModelsOauth2Token&);
@@ -53,7 +52,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithPasswordGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithClientCredentialsGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
@@ -66,7 +65,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithClientCredentialsGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithRefreshTokenGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
@@ -79,7 +78,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RefreshToken, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithRefreshTokenGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString RefreshToken, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorDelegate OnError);
 
 	//
 	// Custom grant types
@@ -98,7 +97,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithDeviceGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorDelegate OnError);
 	
 	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPlatformGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
@@ -111,7 +110,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString PlatformId, FString PlatformToken, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithPlatformGrant(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString PlatformId, FString PlatformToken, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorDelegate OnError);
 
 private:
 	Oauth2() = delete; // static class can't have instance
@@ -119,13 +118,13 @@ private:
 	Oauth2(Oauth2&&) = delete;
 
 #if 0
-	static void GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorDelegate OnError);
 #endif
-	static void GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, ErrorDelegate OnError);
-	static void GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, ErrorDelegate OnError);
-    static void GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, ErrorDelegate OnError);
+	static void GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorDelegate OnError);
+    static void GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorDelegate OnError);
 };
 
 } // Namespace Api

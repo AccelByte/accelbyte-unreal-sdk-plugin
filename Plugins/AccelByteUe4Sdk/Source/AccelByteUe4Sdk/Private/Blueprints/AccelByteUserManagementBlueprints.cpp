@@ -6,7 +6,7 @@
 #include "AccelByteUserManagementApi.h"
 
 using AccelByte::Api::UserManagement;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 
 void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(FString Username, FString Password, FString DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintError OnError)
 {
@@ -14,7 +14,7 @@ void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(FString Username,
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -27,7 +27,7 @@ void UAccelByteBlueprintsUserManagement::AddUsernameAndPasswordEasy(FString User
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -39,7 +39,7 @@ void UAccelByteBlueprintsUserManagement::SendUserAccountVerificationCode(FString
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -52,7 +52,7 @@ void UAccelByteBlueprintsUserManagement::VerifyUserAccountEasy(FString Verificat
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -64,7 +64,7 @@ void UAccelByteBlueprintsUserManagement::SendPasswordResetCodeEasy(FString Usern
 	UserManagement::SendPasswordResetCodeEasy(Username, UserManagement::FSendPasswordResetCodeSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -75,7 +75,7 @@ void UAccelByteBlueprintsUserManagement::ResetPasswordEasy(FString Username, FSt
 	UserManagement::ResetPasswordEasy(Username, VerificationCode, NewPassword, UserManagement::FResetPasswordSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -86,7 +86,7 @@ void UAccelByteBlueprintsUserManagement::GetLinkedUserAccountsEasy(FGetLinkedUse
 	UserManagement::GetLinkedUserAccountsEasy(UserManagement::FGetLinkedUserAccountsSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsLinkedPlatform>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -97,7 +97,7 @@ void UAccelByteBlueprintsUserManagement::LinkUserAccountsEasy(FString PlatformId
 	UserManagement::LinkUserAccountsEasy(PlatformId, Ticket, UserManagement::FLinkUserAccountsSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -109,7 +109,7 @@ void UAccelByteBlueprintsUserManagement::UnlinkUserAccountsEasy(FString Platform
 	UserManagement::UnlinkUserAccountsEasy(PlatformId, UserManagement::FUnlinkUserAccountsSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

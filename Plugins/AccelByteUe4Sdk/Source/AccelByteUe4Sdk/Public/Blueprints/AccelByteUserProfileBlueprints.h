@@ -10,8 +10,6 @@
 #include "AccelByteUserProfileApi.h"
 #include "AccelByteUserProfileBlueprints.generated.h"
 
-#pragma once
-
 UCLASS(Blueprintable, BlueprintType)
 class UAccelByteBlueprintsUserProfile : public UBlueprintFunctionLibrary
 {

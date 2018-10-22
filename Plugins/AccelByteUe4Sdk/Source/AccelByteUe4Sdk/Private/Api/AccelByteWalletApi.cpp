@@ -13,7 +13,7 @@ namespace AccelByte
 namespace Api
 {
 
-void Wallet::GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError)
+void Wallet::GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url				= FString::Printf(TEXT("%s/platform/public/namespaces/%s/users/%s/wallets/%s"), *ServerBaseUrl, *Namespace, *UserId, *CurrencyCode);
@@ -29,14 +29,11 @@ void Wallet::GetWalletInfoByCurrencyCode(FString ServerBaseUrl, FString AccessTo
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		GetWalletInfoByCurrencyCodeResponse(Request, Response, OnSuccess, OnError);
-	});
+	Request->OnProcessRequestComplete().BindStatic(GetWalletInfoByCurrencyCodeResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Wallet::GetWalletInfoByCurrencyCodeEasy(FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError)
+void Wallet::GetWalletInfoByCurrencyCodeEasy(FString CurrencyCode, FGetWalletByCurrencyCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	GetWalletInfoByCurrencyCode(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), CurrencyCode, OnSuccess, OnError);
 }
@@ -45,7 +42,7 @@ void Wallet::GetWalletInfoByCurrencyCodeEasy(FString CurrencyCode, FGetWalletByC
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void Wallet::GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, FGetWalletByCurrencyCodeSuccess OnSuccess, ErrorDelegate OnError)
+void Wallet::GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetWalletByCurrencyCodeSuccess OnSuccess, FErrorDelegate OnError)
 {
 	int32 Code;
 	FString Message;

@@ -51,8 +51,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    static void LoginWithClientCredentials(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithClientCredentialsSuccess OnSuccess, ErrorDelegate OnError);
-    static void LoginWithClientCredentialsEasy(FLoginWithClientCredentialsSuccess OnSuccess, ErrorDelegate OnError);
+    static void LoginWithClientCredentials(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithClientCredentialsSuccess OnSuccess, FErrorDelegate OnError);
+    static void LoginWithClientCredentialsEasy(FLoginWithClientCredentialsSuccess OnSuccess, FErrorDelegate OnError);
 	
 	DECLARE_DELEGATE(FLoginWithUsernameAndPasswordSuccess);
 	/**
@@ -66,8 +66,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithUsernameAndPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError);
-	static void LoginWithUsernameAndPasswordEasy(FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, ErrorDelegate OnError);
+	static void LoginWithUsernameAndPassword(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
+	static void LoginWithUsernameAndPasswordEasy(FString Username, FString Password, FLoginWithUsernameAndPasswordSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLoginWithOtherPlatformAccountSuccess);
 	/**
@@ -81,8 +81,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, ErrorDelegate OnError);
-    static void LoginWithOtherPlatformAccountEasy(std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, ErrorDelegate OnError);
+    static void LoginWithOtherPlatformAccount(FString ServerBaseUrl, FString ClientId, FString ClientSecret, std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, FErrorDelegate OnError);
+    static void LoginWithOtherPlatformAccountEasy(std::underlying_type<EPlatformType>::type PlatformId, FString PlatformToken, FLoginWithOtherPlatformAccountSuccess OnSuccess, FErrorDelegate OnError);
 
 	DECLARE_DELEGATE(FLoginWithDeviceIdSuccess);
 	/**
@@ -94,8 +94,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithDeviceIdSuccess OnSuccess, ErrorDelegate OnError);
-	static void LoginWithDeviceIdEasy(FLoginWithDeviceIdSuccess OnSuccess, ErrorDelegate OnError);
+	static void LoginWithDeviceId(FString ServerBaseUrl, FString ClientId, FString ClientSecret, FLoginWithDeviceIdSuccess OnSuccess, FErrorDelegate OnError);
+	static void LoginWithDeviceIdEasy(FLoginWithDeviceIdSuccess OnSuccess, FErrorDelegate OnError);
 
 	/**
 	 * @brief Remove access tokens, user ID, and other credentials from memory.

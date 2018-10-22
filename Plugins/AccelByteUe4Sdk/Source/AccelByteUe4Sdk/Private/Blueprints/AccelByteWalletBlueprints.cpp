@@ -8,7 +8,7 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Wallet;
-using AccelByte::ErrorDelegate;
+using AccelByte::FErrorDelegate;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
@@ -18,7 +18,7 @@ void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(FString ServerBaseU
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		ErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

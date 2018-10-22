@@ -36,7 +36,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -74,7 +74,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -97,7 +97,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -121,7 +121,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -147,7 +147,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -187,7 +187,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -210,7 +210,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -234,7 +234,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -258,7 +258,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSendSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bSendSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bSendSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSendSuccessful = false;
@@ -287,7 +287,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	//	UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 	//	bVerifySuccessful = true;
 	//	bHasDone = true;
-	//}), ErrorDelegate::CreateLambda([&bHasDone, &bVerifySuccessful](int32 Code, FString Message)
+	//}), FErrorDelegate::CreateLambda([&bHasDone, &bVerifySuccessful](int32 Code, FString Message)
 	//{
 	//	UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 	//	bVerifySuccessful = false;
@@ -311,7 +311,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -352,7 +352,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -375,7 +375,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -399,7 +399,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bForgotPaswordSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bForgotPaswordSuccessful = false;
@@ -427,7 +427,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bResetPasswordSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bResetPasswordSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bResetPasswordSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bResetPasswordSuccessful = false;
@@ -451,7 +451,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -477,7 +477,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -518,7 +518,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bDeviceLoginSuccessful1 = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -544,7 +544,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful2 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful2 = false;
@@ -572,7 +572,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -613,7 +613,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -641,7 +641,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -669,7 +669,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful2 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful2 = true;
@@ -697,7 +697,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -746,7 +746,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		bClientLoginSuccessful = true;
 		bHasDone = true;
 	}),
-		ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+		FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bClientLoginSuccessful = false;
@@ -770,7 +770,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -796,7 +796,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpgradeSuccessful = false;
@@ -822,7 +822,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bEmailLoginSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bEmailLoginSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bEmailLoginSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bEmailLoginSuccessful = false;
@@ -849,7 +849,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful2 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful2 = false;
@@ -877,7 +877,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -905,7 +905,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -950,7 +950,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful1 = false;
@@ -978,7 +978,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful2 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful2 = false;
@@ -1006,7 +1006,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1047,7 +1047,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful1 = false;
@@ -1075,7 +1075,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1103,7 +1103,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bSteamLoginSuccessful2 = true;
-	}), ErrorDelegate::CreateLambda([&bHasDone, &bSteamLoginSuccessful2](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bHasDone, &bSteamLoginSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -1131,7 +1131,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -1175,7 +1175,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		bClientLoginSuccessful = true;
 		bHasDone = true;
 	}),
-		ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+		FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bClientLoginSuccessful = false;
@@ -1199,7 +1199,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginPlatformSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginPlatformSuccessful = false;
@@ -1223,7 +1223,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpgradeSuccessful = false;
@@ -1248,7 +1248,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginEmailSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&bLoginEmailSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bLoginEmailSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginEmailSuccessful = false;
@@ -1273,7 +1273,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -1321,7 +1321,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -1354,7 +1354,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bCreateProfileSuccessful1 = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		if (Code != 2271)
 		{
@@ -1388,7 +1388,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bGetProfileSuccessful1 = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -1412,7 +1412,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpdateProfileSuccessful = true;
 		bHasDone = true;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpdateProfileSuccessful = false;
@@ -1438,7 +1438,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		bGetProfileSuccessful2 = true;
 		bHasDone = true;
 		UpdatedDisplayName = Result.DisplayName;
-	}), ErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bGetProfileSuccessful2 = false;
@@ -1465,7 +1465,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), ErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1501,7 +1501,7 @@ bool FGetSteamTicket::RunTest(const FString & Parameter)
 		return true;
 }
 
-void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess OnSuccess, ErrorDelegate OnError)
+void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess OnSuccess, FErrorDelegate OnError)
 {
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
 	{
@@ -1573,7 +1573,7 @@ void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess O
 			}
 		});
 		Request->ProcessRequest();
-	}), ErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
 	{
 		OnError.ExecuteIfBound(Code, Message);
 	}));
