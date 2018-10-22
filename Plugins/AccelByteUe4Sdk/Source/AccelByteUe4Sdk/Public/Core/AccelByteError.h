@@ -13,7 +13,7 @@
 #include "AccelByteError.generated.h"
 
 USTRUCT(BlueprintType)
-struct FAccelByteModelsErrorEntity
+struct ACCELBYTEUE4SDK_API FAccelByteModelsErrorEntity
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
@@ -27,10 +27,12 @@ struct FAccelByteModelsErrorEntity
 namespace AccelByte
 {
 
-DECLARE_DELEGATE_TwoParams(FErrorDelegate, int32, FString);
+DECLARE_DELEGATE_TwoParams(FErrorHandler, int32, FString);
 
+UENUM(BlueprintType)
 enum class ErrorCodes : int32
 {
+	// If there are no error models, then we just use these HTTP codes
 	StatusContinue = 100, // Reference: RFC 7231, Section 6.2.1
 	StatusSwitchingProtocols = 101, // Reference: RFC 7231, Section 6.2.2
 	StatusProcessing = 102, // Reference: RFC 2518, Section 10.1
@@ -270,7 +272,7 @@ public:
 	const static std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> Default;
 };
 
-void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
+ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
 
 } // Namespace AccelByte
 

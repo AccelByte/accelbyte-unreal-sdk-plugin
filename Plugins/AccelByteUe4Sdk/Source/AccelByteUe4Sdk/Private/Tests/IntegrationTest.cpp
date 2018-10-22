@@ -2,7 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Public/Test/IntegrationTest.h"
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
@@ -14,13 +13,25 @@
 #include "FileManager.h"
 #include "AccelByteUserAuthenticationApi.h"
 #include "AccelByteUserProfileApi.h"
-#include <ctime>
-#include <cstdlib>
+
+using AccelByte::FErrorHandler;
+using AccelByte::Credentials;
+using AccelByte::Settings;
+using AccelByte::HandleHttpError;
+using AccelByte::Api::UserAuthentication;
+using AccelByte::Api::UserManagement;
+using AccelByte::Api::UserProfile;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteTest);
+
 const int32 AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
+DECLARE_DELEGATE(FDeleteUserByIdSuccess);
+static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+
+static FString GetVerificationCode(const FString& Email);
+static FString GetSteamTicket();
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClient.Success", AutomationFlagMask);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
@@ -36,7 +47,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -58,10 +69,8 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "LogAccelByteTest.RegisterEmail_ThenLogin.Success", AutomationFlagMask);
 bool FUserRegisterTest::RunTest(const FString & Parameter)
 {
-	std::srand(std::time(NULL));
-
 	UserAuthentication::ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+ue4sdk" + FString::FromInt(rand() % 1000000000) + "@gmail.com";
+	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
@@ -74,7 +83,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -97,7 +106,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -121,7 +130,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -137,17 +146,17 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -163,7 +172,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteTest, Log, TEXT("Assert.."));
 	check(bLoginSuccessful);
@@ -174,7 +183,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "LogAccelByteTest.LoginEmail_Th
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@gmail.com";
+	FString LoginId = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
 	FString Password = "testtest";
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
@@ -187,7 +196,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -210,7 +219,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -234,7 +243,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -258,7 +267,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSendSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bSendSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bSendSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSendSuccessful = false;
@@ -287,7 +296,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	//	UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 	//	bVerifySuccessful = true;
 	//	bHasDone = true;
-	//}), FErrorDelegate::CreateLambda([&bHasDone, &bVerifySuccessful](int32 Code, FString Message)
+	//}), FBlueprintErrorHandler::CreateLambda([&bHasDone, &bVerifySuccessful](int32 Code, FString Message)
 	//{
 	//	UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 	//	bVerifySuccessful = false;
@@ -305,13 +314,13 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -337,9 +346,8 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "LogAccelByteTest.RegisterEmail_ThenResetPassword.Success", AutomationFlagMask);
 bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 {
-	std::srand(std::time(NULL));
 	UserAuthentication::ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+" + FString::FromInt(rand() % 1000000000) + "@gmail.com";
+	FString LoginId = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
 	FString Password = "old_password";
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
@@ -352,7 +360,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
 		bClientTokenObtained = false;
@@ -375,7 +383,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bRegisterSuccessful = false;
@@ -399,7 +407,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bForgotPaswordSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bForgotPaswordSuccessful = false;
@@ -415,7 +423,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-	FString VerificationCode = FIntegrationTestModule::GetVerificationCode(LoginId);
+	FString VerificationCode = GetVerificationCode(LoginId);
 	UE_LOG(LogAccelByteTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
@@ -427,7 +435,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bResetPasswordSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bResetPasswordSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bResetPasswordSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bResetPasswordSuccessful = false;
@@ -451,7 +459,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginSuccessful = false;
@@ -467,17 +475,17 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -493,7 +501,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 #if 0
 	check(bForgotPaswordSuccessful);
@@ -513,12 +521,12 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	bool bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId"));
-	UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bDeviceLoginSuccessful1 = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -539,17 +547,17 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId //Second attempt"))
-		UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
-	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
-		bDeviceLoginSuccessful2 = true;
-		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful2 = false;
-		bHasDone = true;
-	}));
+		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+		{
+			UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
+			bDeviceLoginSuccessful2 = true;
+			bHasDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+		{
+			UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+			bDeviceLoginSuccessful2 = false;
+			bHasDone = true;
+		}));
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bHasDone)
@@ -562,17 +570,17 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 
 	SecondUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -588,7 +596,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	check(bDeviceLoginSuccessful1)
 	check(bDeviceLoginSuccessful2)
@@ -608,12 +616,12 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 	bool bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId // First attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -631,17 +639,17 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 
 	FirstUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -657,24 +665,24 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	UserAuthentication::ForgetAllCredentials();
 
 	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId // Second attempt"))
-		UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
-	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
-		bDeviceLoginSuccessful2 = true;
-		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful2 = true;
-		bHasDone = true;
-	}));
+		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+		{
+			UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
+			bDeviceLoginSuccessful2 = true;
+			bHasDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+		{
+			UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+			bDeviceLoginSuccessful2 = true;
+			bHasDone = true;
+		}));
 
 	LastTime = FPlatformTime::Seconds();
 	while (!bHasDone)
@@ -687,17 +695,17 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 
 	SecondUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone2 = false;
 	bool bDeleteSuccessful2 = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -714,7 +722,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteTest, Log, TEXT("Asserting..."))
 		check(bDeviceLoginSuccessful1)
@@ -729,7 +737,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "LogAccelByteTest
 bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
-	FString Email = TEXT("testSDK@example.com");
+	FString Email = TEXT("testSDK@game.test");
 	FString Password = TEXT("password");
 	bool bUpgradedHeadlessAccountUserIdRemain = false;
 	FString FirstUserId = "";
@@ -746,7 +754,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		bClientLoginSuccessful = true;
 		bHasDone = true;
 	}),
-		FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bClientLoginSuccessful = false;
@@ -765,12 +773,12 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId // First attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -796,7 +804,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpgradeSuccessful = false;
@@ -822,7 +830,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bEmailLoginSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bEmailLoginSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bEmailLoginSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bEmailLoginSuccessful = false;
@@ -844,12 +852,12 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithDeviceId // Second attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ServerBaseUrl, Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful2 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful2 = false;
@@ -872,12 +880,12 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser1"));
-	FIntegrationTestModule::DeleteUser(FirstUserId, FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	DeleteUserById(FirstUserId, FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -900,12 +908,12 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	bool bDeleteDone2 = false;
 	bool bDeleteSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser2"));
-	FIntegrationTestModule::DeleteUser(SecondUserId, FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
+	DeleteUserById(SecondUserId, FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -945,12 +953,12 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 	bool bHasDone = false;
 	bool bSteamLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<UserAuthentication::EPlatformType>::type>(UserAuthentication::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful1, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful1 = false;
@@ -973,12 +981,12 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 	bHasDone = false;
 	bool bSteamLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount // Second attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<UserAuthentication::EPlatformType>::type>(UserAuthentication::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful2, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful2, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful2 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful2 = false;
@@ -996,17 +1004,17 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 
 	SecondUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1022,7 +1030,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	check(bSteamLoginSuccessful1)
 		check(bSteamLoginSuccessful2)
@@ -1042,12 +1050,12 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	bool bHasDone = false;
 	bool bSteamLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<UserAuthentication::EPlatformType>::type>(UserAuthentication::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful1]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bSteamLoginSuccessful1 = false;
@@ -1065,17 +1073,17 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 
 	FirstUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1091,19 +1099,19 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	UserAuthentication::ForgetAllCredentials();
 
 	bHasDone = false;
 	bool bSteamLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount // Second Attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<UserAuthentication::EPlatformType>::type>(UserAuthentication::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful2]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bSteamLoginSuccessful2 = true;
-	}), FErrorDelegate::CreateLambda([&bHasDone, &bSteamLoginSuccessful2](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bHasDone, &bSteamLoginSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -1121,17 +1129,17 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 
 	SecondUserId = Credentials::Get().GetUserId();
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone2 = false;
 	bool bDeleteSuccessful2 = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful2 = false;
@@ -1147,7 +1155,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	check(bSteamLoginSuccessful1);
 	check(bSteamLoginSuccessful2);
@@ -1161,7 +1169,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "LogAccelByteTest.
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
-	FString Email = TEXT("testSDK@example.com");
+	FString Email = TEXT("testSDK@game.test");
 	FString Password = TEXT("password");
 	double LastTime = 0;
 	FString FirstUserId = TEXT("");
@@ -1175,7 +1183,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		bClientLoginSuccessful = true;
 		bHasDone = true;
 	}),
-		FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bClientLoginSuccessful = false;
@@ -1194,12 +1202,12 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	bHasDone = false;
 	bool bLoginPlatformSuccessful = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("LoginWithSteamAccount"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<UserAuthentication::EPlatformType>::type>(UserAuthentication::EPlatformType::Steam), FIntegrationTestModule::GetSteamTicket(), UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bLoginPlatformSuccessful, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bLoginPlatformSuccessful, &bHasDone]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginPlatformSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginPlatformSuccessful = false;
@@ -1223,7 +1231,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpgradeSuccessful = false;
@@ -1248,7 +1256,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bLoginEmailSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&bLoginEmailSuccessful, &bHasDone](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bLoginEmailSuccessful, &bHasDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bLoginEmailSuccessful = false;
@@ -1268,12 +1276,12 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser1"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful1 = false;
@@ -1308,7 +1316,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileUpdate.Language = "en";
 	ProfileUpdate.Timezone = "Etc/UTC";
 	ProfileUpdate.DateOfBirth = "2000-01-01";
-	ProfileUpdate.Email = "test@example.com";
+	ProfileUpdate.Email = "test@game.test";
 	ProfileUpdate.DisplayName = "TestProfile";
 	FString UpdatedDisplayName = TEXT("");
 	double LastTime = 0;
@@ -1321,7 +1329,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeviceLoginSuccessful1 = false;
@@ -1346,7 +1354,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileCreate.Language = "en";
 	ProfileCreate.Timezone = "Etc/UTC";
 	ProfileCreate.DateOfBirth = "1970-01-01";
-	ProfileCreate.Email = "test@example.com";
+	ProfileCreate.Email = "test@game.test";
 	ProfileCreate.DisplayName = "CreateProfile";
 
 	UserProfile::CreateUserProfileEasy(ProfileCreate, UserProfile::FCreateUserProfileSuccess::CreateLambda([&bCreateProfileSuccessful1, &bHasDone](FAccelByteModelsUserProfileInfo Result)
@@ -1354,7 +1362,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bCreateProfileSuccessful1 = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		if (Code != 2271)
 		{
@@ -1388,7 +1396,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bHasDone = true;
 		bGetProfileSuccessful1 = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bHasDone = true;
@@ -1412,7 +1420,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bUpdateProfileSuccessful = true;
 		bHasDone = true;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bUpdateProfileSuccessful = false;
@@ -1438,7 +1446,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		bGetProfileSuccessful2 = true;
 		bHasDone = true;
 		UpdatedDisplayName = Result.DisplayName;
-	}), FErrorDelegate::CreateLambda([&](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bGetProfileSuccessful2 = false;
@@ -1455,17 +1463,17 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma region DeleteUser
+#pragma region DeleteUserById
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUser"));
-	FIntegrationTestModule::DeleteUser(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	UE_LOG(LogAccelByteTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
 		bDeleteSuccessful = false;
@@ -1481,7 +1489,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		FPlatformProcess::Sleep(0.5f);
 	}
 
-#pragma endregion DeleteUser
+#pragma endregion DeleteUserById
 
 	check(bDeviceLoginSuccessful1);
 	check(bGetProfileSuccessful2);
@@ -1495,18 +1503,19 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "LogAccelByteTest.SteamTicket.Success", AutomationFlagMask);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
-	FString Ticket = FIntegrationTestModule::GetSteamTicket();
+	FString Ticket = GetSteamTicket();
 	UE_LOG(LogAccelByteTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
 	check(Ticket != TEXT(""))
 		return true;
 }
 
-void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess OnSuccess, FErrorDelegate OnError)
+void DeleteUserById(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
+	using AccelByte::Settings;
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *Settings::ServerBaseUrl, *Settings::GameId, *UserId, TEXT("accelbyte"));
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *Settings::IamServerUrl, *Settings::GameId, *UserId, *Settings::PublisherId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -1521,7 +1530,7 @@ void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess O
 		Request->SetContentAsString(Content);
 		Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 		{
-			int32 Code=0;
+			int32 Code = 0;
 			FString Message;
 			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
@@ -1532,7 +1541,7 @@ void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess O
 					FString RealUserId = JsonParsed->GetStringField("UserId");
 
 					FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetClientAccessToken());
-					FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *Settings::ServerBaseUrl, TEXT("accelbyte"), *RealUserId);
+					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *Settings::IamServerUrl, *Settings::PublisherId, *RealUserId);
 					FString Verb = TEXT("DELETE");
 					FString ContentType = TEXT("application/json");
 					FString Accept = TEXT("application/json");
@@ -1573,13 +1582,15 @@ void FIntegrationTestModule::DeleteUser(FString UserId, FDeleteUserByIdSuccess O
 			}
 		});
 		Request->ProcessRequest();
-	}), FErrorDelegate::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
 	{
 		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
 
-FString FIntegrationTestModule::GetVerificationCode(FString Email)
+
+
+FString GetVerificationCode(const FString& Email)
 {
 	FString VerificationCodeOutput = TEXT("");
 	FString CurrentDirectory = TEXT("");
@@ -1594,12 +1605,11 @@ FString FIntegrationTestModule::GetVerificationCode(FString Email)
 	return VerificationCodeOutput;
 }
 
-FString FIntegrationTestModule::GetSteamTicket()
+FString GetSteamTicket()
 {
 	FString SteamTicket = TEXT("");
 	FString SteamHelperOutput = TEXT("");
-	FString CurrentDirectory = TEXT("");
-	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
 	CurrentDirectory.Append(TEXT("SteamHelper/steamticket.txt"));
 	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
 	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);

@@ -5,7 +5,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteLobbyBlueprints.h"
 #include "AccelByteLobbyModels.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteLobbyBlueprints.generated.h"
@@ -19,9 +18,9 @@ class UAccelByteBlueprintsLobby : public UBlueprintFunctionLibrary
 public:
 	DECLARE_DYNAMIC_DELEGATE_ThreeParams(FConnectionClosed, int32, StatusCode, const FString&, Reason, bool, WasClean);
 	DECLARE_DYNAMIC_DELEGATE(FConnectSuccess);
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintError, int32, ErrorCode, const FString&, ErrorMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void Connect(const FConnectSuccess& OnSuccess, const FBlueprintError& OnError, const FConnectionClosed& OnConnectionClosed);
+	static void Connect(const FConnectSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void Disconnect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")

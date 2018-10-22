@@ -5,37 +5,37 @@
 #include "AccelByteUserProfileBlueprints.h"
 
 using AccelByte::Api::UserProfile;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 
-void UAccelByteBlueprintsUserProfile::GetUserProfileEasy(FGetUserProfileSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserProfile::GetUserProfileEasy(const FGetUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsUserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, FUpdateUserProfileSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserProfile::UpdateUserProfileEasy(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserProfile::UpdateUserProfileEasy(ProfileUpdateRequest, UserProfile::FUpdateUserProfileSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
 
-void UAccelByteBlueprintsUserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, FCreateUserProfileSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsUserProfile::CreateUserProfileEasy(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	UserProfile::CreateUserProfileEasy(ProfileCreateRequest, UserProfile::FCreateUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

@@ -16,6 +16,7 @@ AccelByte UE4 SDK features:
     - User management (create user, reset password, verify user.)
     - User profile (create, update, view).
     - Ecommerce (online store, view item catalog, create order, etc.)
+- Server API in the future.
 
 ## Architecture
 
@@ -37,9 +38,9 @@ The classes are categorized as follow:
 
 > There are only two hard things in Computer Science: cache invalidation and naming things. ―Phil Karlton
 
-### Namespace
+### `Namespace` vs `GameId` vs `PublisherId`
 
-Namespace is like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. Since namespace can be many things, just think of it like game ID or publisher ID.
+The backend call it `namespace`, but since namespace can be many things, in here it's called `GameId` and `PublisherId`. They are like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. 
 
 ### `UserId` vs `LoginId` vs `Username`
 
@@ -64,17 +65,17 @@ Here's how to get it up and running quickly.
 
 ## Setup
 
-1. The first step is to download and install [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/).
+`1.` The first step is to download and install [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/).
 
-2. Download and install [Unreal Engine 4.18](https://www.unrealengine.com).
+`2.` Download and install [Unreal Engine 4.18](https://www.unrealengine.com).
 
-3. If you want to run the examples, skip to step 7.
+`3.` If you want to run the examples, skip to step 7.
 
-4. Create or open existing Unreal Engine 4 project.
+`4.` Create or open existing Unreal Engine 4 project.
 
-5. Copy the plugin folder `Plugins/AccelByteUe4Sdk` to your game's plugins folder. 
+`5.` Copy the plugin folder `Plugins/AccelByteUe4Sdk` to your game's plugins folder. 
 
-6. Add the plugin to your `/MyAwesomeGame.uproject` file,
+`6.` Add the plugin to your `/MyAwesomeGame.uproject` file,
 ```java
 "Plugins": [
 ...
@@ -93,7 +94,14 @@ ExtraModuleNames.AddRange(new string[]
     ...
 }
 ```
-7. And finally, fill out the settings in `/Plugins/AccelByteUe4Sdk/Source/AccelByteUe4Sdk/Private/Core/AccelByteSettings`.cpp if you want to use the _easy_ API. AccelByteSettings.h and AccelByteCredentials.h. The settings are `Namespace`, `ClientId`, `ClientSecret`, `Namespace`. There are 2 types of API, the _normal_ one and the _easy_ one. The _easy_ one fill out the parameters with the one in `AccelByteSettings.h` and `AccelByteCredentials.h`. The reason for this is because the backend services are not yet stable and that client secret shouldn't be in the game client ([RFC 6819 Section 5.2.3.1](https://tools.ietf.org/html/rfc6819#section-5.2.3.1)). In the future, this issue might be resolved with replacing OAuth2 with JWT or `authorization_code` `grant_type` with public client.
+`7.` Open the editor, click File -> Project Settings.
+
+![](images/setup_001.png)
+
+`8.` Fill out the settings then click on set as default.
+
+![](images/setup_002.png)
+
 
 ## How to run the examples
 
@@ -108,13 +116,13 @@ Play in standalone game mode.
 The examples include how to implement the following functionalities in blueprint:
 
 **General**
-- Error screen based on error code
+- Error screen based on numeric error code
 - Loading screen
 
 **User authentication**
-- Client login
-- Login with device ID
-- Login with email and password
+- Login with client credentials **We are planning to change this. This is for server only!**
+- Login with device ID (anonymous login)
+- Login with username and password
 - Login with Steam session ticket
 
 ![](./images/qsg_003.png)
@@ -127,9 +135,10 @@ The examples include how to implement the following functionalities in blueprint
 
 ![](./images/qsg_004.png)
 
-**Identity provider**
-- Get identity information (get profile)
-- Update identity information (set profile)
+**User profile**
+- Get user profile
+- Update user profile
+- Create user profile
 
 **Ecommerce**
 - List all categories in an online store
@@ -139,7 +148,8 @@ The examples include how to implement the following functionalities in blueprint
 
 ![](./images/qsg_005.png)
 
-## Build Documentation
+
+# Build Documentation
 
 Install [Doxygen](http://www.doxygen.nl/), go to `/Documentation` folder, and run Doxygen.
 

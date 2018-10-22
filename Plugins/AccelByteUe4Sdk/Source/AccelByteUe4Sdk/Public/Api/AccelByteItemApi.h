@@ -21,7 +21,6 @@ public:
 	/**
 	 * @brief Get one item information from an online store.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param ItemId The item ID.
@@ -30,14 +29,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetItemByIdEasy(FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetItemById(const FString& AccessToken, const FString& Namespace, const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemByIdEasy(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
 	 *
-	 * @param ServerBaseUrl Your server's base URL.
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
 	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
@@ -50,16 +48,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsItemInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetItemsByCriteriaEasy(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetItemsByCriteria(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemsByCriteriaEasy(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Item() = delete; // static class can't have instance
 	Item(Item const&) = delete;
 	Item(Item&&) = delete;
 
-	static void GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError);
-	static void GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError);
+	static void GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorHandler OnError);
+	static void GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

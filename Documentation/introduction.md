@@ -16,6 +16,7 @@ AccelByte UE4 SDK features:
     - User management (create user, reset password, verify user.)
     - User profile (create, update, view).
     - Ecommerce (online store, view item catalog, create order, etc.)
+- Server API in the future.
 
 ## Architecture
 
@@ -37,9 +38,9 @@ The classes are categorized as follow:
 
 > There are only two hard things in Computer Science: cache invalidation and naming things. ―Phil Karlton
 
-### Namespace
+### `Namespace` vs `GameId` vs `PublisherId`
 
-Namespace is like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. Since namespace can be many things, just think of it like game ID or publisher ID.
+The backend call it `namespace`, but since namespace can be many things, in here it's called `GameId` and `PublisherId`. They are like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. 
 
 ### `UserId` vs `LoginId` vs `Username`
 

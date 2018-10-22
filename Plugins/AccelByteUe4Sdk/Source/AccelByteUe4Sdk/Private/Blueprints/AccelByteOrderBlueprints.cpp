@@ -8,86 +8,86 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Order;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
-void UAccelByteBlueprintsOrder::CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::CreateNewOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::CreateNewOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::CreateNewOrder(AccessToken, Namespace, UserId, OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsOrder::CreateNewOrderEasy(const FAccelByteModelsOrderCreate & OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::CreateNewOrderEasy(const FAccelByteModelsOrderCreate & OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	CreateNewOrder(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderCreate, OnSuccess, OnError);
+	CreateNewOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderCreate, OnSuccess, OnError);
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::GetUserOrder(AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrderEasy(FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrderEasy(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetUserOrder(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
+	GetUserOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrders(const FString& AccessToken, const FString& Namespace, const FString& UserId, int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrders(ServerBaseUrl, AccessToken, Namespace, UserId, Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
+	Order::GetUserOrders(AccessToken, Namespace, UserId, Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrdersEasy(int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrdersEasy(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetUserOrders(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Page, Size, OnSuccess, OnError);
+	GetUserOrders(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Page, Size, OnSuccess, OnError);
 }
 
-void UAccelByteBlueprintsOrder::FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::FulfillOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::FulfillOrder(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FFulfillOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::FulfillOrder(AccessToken, Namespace, UserId, OrderNo, Order::FFulfillOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsOrder::FulfillOrderEasy(FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::FulfillOrderEasy(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FulfillOrder(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
+	FulfillOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrderHistory(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrderHistory(ServerBaseUrl, AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
+	Order::GetUserOrderHistory(AccessToken, Namespace, UserId, OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsOrder::GetUserOrderHistoryEasy(FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsOrder::GetUserOrderHistoryEasy(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetUserOrderHistory(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
+	GetUserOrderHistory(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
 }

@@ -14,36 +14,36 @@ class UAccelByteBlueprintsOrder : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintError, int32, ErrorCode, FString, ErrorMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, FString, ErrorMessage);
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateNewOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void CreateNewOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void CreateNewOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void CreateNewOrderEasy(const FAccelByteModelsOrderCreate& OrderCreate, FCreateNewOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void CreateNewOrderEasy(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrderEasy(FString OrderNo, FGetUserOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrderEasy(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrders(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrders(const FString& AccessToken, const FString& Namespace, const FString& UserId, int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrdersEasy(int32 Page, int32 Size, FGetUserOrdersSuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrdersEasy(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFulfillOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void FulfillOrder(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void FulfillOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void FulfillOrderEasy(FString OrderNo, FFulfillOrderSuccess OnSuccess, FBlueprintError OnError);
+	static void FulfillOrderEasy(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrderHistorySuccess, const TArray<FAccelByteModelsOrderHistoryInfo>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrderHistory(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrderHistory(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void GetUserOrderHistoryEasy(FString OrderNo, FGetUserOrderHistorySuccess OnSuccess, FBlueprintError OnError);
+	static void GetUserOrderHistoryEasy(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 };

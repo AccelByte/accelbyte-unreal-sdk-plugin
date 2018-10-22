@@ -4,7 +4,6 @@
 
 #include "AccelByteItemApi.h"
 #include "AccelByteError.h"
-#include "AccelByteHttpRetrySystem.h"
 #include "JsonUtilities.h"
 #include "AccelByteCredentials.h"
 #include "AccelByteSettings.h"
@@ -14,10 +13,10 @@ namespace AccelByte
 namespace Api
 {
 
-void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemById(const FString& AccessToken, const FString& Namespace, const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/%s/locale"), *ServerBaseUrl, *Namespace, *ItemId);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings::PlatformServerUrl, *Namespace, *ItemId);
 	if (!Region.IsEmpty() || !Language.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("?")));
@@ -51,15 +50,15 @@ void Item::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Names
 	Request->ProcessRequest();
 }
 
-void Item::GetItemByIdEasy(FString ItemId, FString Language, FString Region, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemByIdEasy(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetItemById(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), ItemId, Language, Region, OnSuccess, OnError);
+	GetItemById(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), ItemId, Language, Region, OnSuccess, OnError);
 }
 
-void Item::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemsByCriteria(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/platform/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *ServerBaseUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *Settings::PlatformServerUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
 	if (!ItemType.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
@@ -89,16 +88,16 @@ void Item::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FStrin
 	Request->ProcessRequest();
 }
 
-void Item::GetItemsByCriteriaEasy(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemsByCriteriaEasy(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetItemsByCriteria(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
+	GetItemsByCriteria(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
 }
 
 // =============================================================================================================================
 // ========================================================= Responses =========================================================
 // =============================================================================================================================
 
-void Item::GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;
@@ -116,7 +115,7 @@ void Item::GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Respons
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorDelegate OnError)
+void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;

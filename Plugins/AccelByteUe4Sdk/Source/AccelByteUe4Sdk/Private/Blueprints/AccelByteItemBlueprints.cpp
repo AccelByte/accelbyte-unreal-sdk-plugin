@@ -8,39 +8,39 @@
 #include "AccelByteCredentials.h"
 
 using AccelByte::Api::Item;
-using AccelByte::FErrorDelegate;
+using AccelByte::FErrorHandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
-void UAccelByteBlueprintsItem::GetItemById(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsItem::GetItemById(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Item::GetItemById(ServerBaseUrl, AccessToken, Namespace, ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
+	Item::GetItemById(AccessToken, Namespace, ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsItem::GetItemByIdEasy(FString ItemId, FString Region, FString Language, FGetItemByIdSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsItem::GetItemByIdEasy(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetItemById(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ItemId, Region, Language, OnSuccess, OnError);
+	GetItemById(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), ItemId, Region, Language, OnSuccess, OnError);
 }
 
 
-void UAccelByteBlueprintsItem::GetItemsByCriteria(FString ServerBaseUrl, FString AccessToken, FString Namespace, FString UserId, FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsItem::GetItemsByCriteria(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Item::GetItemsByCriteria(ServerBaseUrl, AccessToken, Namespace, Language, Region, CategoryPath, ItemType, Status, Page, Size, Item::FGetItemsByCriteriaSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
+	Item::GetItemsByCriteria(AccessToken, Namespace, Language, Region, CategoryPath, ItemType, Status, Page, Size, Item::FGetItemsByCriteriaSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorDelegate::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
-void UAccelByteBlueprintsItem::GetItemsByCriteriaEasy(FString Language, FString Region, FString CategoryPath, FString ItemType, FString Status, int32 Page, int32 Size, FGetItemsByCriteriaSuccess OnSuccess, FBlueprintError OnError)
+void UAccelByteBlueprintsItem::GetItemsByCriteriaEasy(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	GetItemsByCriteria(Settings::ServerBaseUrl, Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
+	GetItemsByCriteria(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Language, Region, CategoryPath, ItemType, Status, Page, Size, OnSuccess, OnError);
 }
