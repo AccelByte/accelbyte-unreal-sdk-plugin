@@ -96,22 +96,22 @@ ExtraModuleNames.AddRange(new string[]
 ```
 `7.` Open the editor, click File -> Project Settings.
 
-![](images/setup_001.png)
+![](Documentation/images/setup_001.png)
 
 `8.` Fill out the settings then click on set as default.
 
-![](images/setup_002.png)
+![](Documentation/images/setup_002.png)
 
 
 ## How to run the examples
 
 Open the `/AccelByteUe4SdkDemo.uproject` in Unreal Engine 4 Editor. 
 
-![](./images/qsg_001.png)
+![](Documentation/images/qsg_001.png)
 
 Play in standalone game mode.
 
-![](./images/qsg_002.png)
+![](Documentation/images/qsg_002.png)
 
 The examples include how to implement the following functionalities in blueprint:
 
@@ -125,7 +125,7 @@ The examples include how to implement the following functionalities in blueprint
 - Login with username and password
 - Login with Steam session ticket
 
-![](./images/qsg_003.png)
+![](Documentation/images/qsg_003.png)
 
 **User management**
 - Create email account
@@ -133,7 +133,7 @@ The examples include how to implement the following functionalities in blueprint
 - Request password reset
 - Verify password reset
 
-![](./images/qsg_004.png)
+![](Documentation/images/qsg_004.png)
 
 **User profile**
 - Get user profile
@@ -146,7 +146,7 @@ The examples include how to implement the following functionalities in blueprint
 - View item information
 - Create order
 
-![](./images/qsg_005.png)
+![](Documentation/images/qsg_005.png)
 
 
 # Build Documentation

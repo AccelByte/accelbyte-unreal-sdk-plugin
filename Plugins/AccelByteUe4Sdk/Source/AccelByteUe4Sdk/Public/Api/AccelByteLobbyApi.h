@@ -23,17 +23,13 @@ namespace Api
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32, const FString&, bool);
-DECLARE_DELEGATE(FConnectSuccess);
-
 	static Lobby& Get();
-	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32, const FString&, bool);
 	DECLARE_DELEGATE(FConnectSuccess);
+	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	void Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed);
 	void Disconnect();
 	bool IsConnected() const;
 
-	
 	void SendPrivateMessage(const FString& UserId, const FString& Message);
 	void SendPartyMessage(const FString& Message);
 	void SendInfoPartyRequest();
@@ -41,6 +37,7 @@ DECLARE_DELEGATE(FConnectSuccess);
 	void SendLeavePartyRequest();
 	void SendInviteToPartyRequest(const FString& UserId);
 	void SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken);
+	void SendGetOnlineUsersRequest();
 
 	DECLARE_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPrivateMessageNotice&);
 	DECLARE_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&);
@@ -51,21 +48,24 @@ DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FPartyInvitationNotice, const FAccelByteModelsPartyInvitationNotice&);
 	DECLARE_DELEGATE_OneParam(FAcceptInvitationResponse, const FAccelByteModelsAcceptInvitationReponse&);
 	DECLARE_DELEGATE_OneParam(FPartyInvitationAcceptanceNotice, const FAccelByteModelsPartyInvitationAcceptanceNotice&);
-
+	DECLARE_DELEGATE_OneParam(FGetOnlineUsersResponse, const FAccelByteModelsGetOnlineUsersResponse&);
+	
 	void BindDelegates(
-		const FPrivateMessageNotice& PrivateMessageNotice,
-		const FPartyMessageNotice& PartyMessageNotice,
-		const FInfoPartyResponse& InfoPartyResponse,
-		const FCreatePartyResponse& CreatePartyResponse,
-		const FLeavePartyResponse& LeavePartyResponse,
-		const FInviteToPartyResponse& InviteToPartyResponse,
-		const FPartyInvitationNotice& PartyInvitationNotice,
-		const FAcceptInvitationResponse& AcceptInvitationResponse,
-		const FPartyInvitationAcceptanceNotice& PartyInvitationAcceptanceNotice
+		const FPrivateMessageNotice& OnPrivateMessageNotice,
+		const FPartyMessageNotice& OnPartyMessageNotice,
+		const FInfoPartyResponse& OnInfoPartyResponse,
+		const FCreatePartyResponse& OnCreatePartyResponse,
+		const FLeavePartyResponse& OnLeavePartyResponse,
+		const FInviteToPartyResponse& OnInviteToPartyResponse,
+		const FPartyInvitationNotice& OnPartyInvitationNotice,
+		const FAcceptInvitationResponse& OnAcceptInvitationResponse,
+		const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
+		const FGetOnlineUsersResponse& OnGetOnlineUsersResponse
 	);
 	void UnbindDelegates();
-
 private:
+	Lobby();
+	~Lobby();
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
 	Lobby& operator=(Lobby const&) = delete; // Copy assignment operator
@@ -90,9 +90,7 @@ private:
 	FPartyInvitationNotice PartyInvitationNotice;
 	FAcceptInvitationResponse AcceptInvitationResponse;
 	FPartyInvitationAcceptanceNotice PartyInvitationAcceptanceNotice;
-protected:
-	Lobby();
-	~Lobby();
+	FGetOnlineUsersResponse GetOnlineUsersResponse;
 };
 
 } // Namespace Api

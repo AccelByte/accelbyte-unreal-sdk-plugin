@@ -7,25 +7,16 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 
-class FAccelByteUe4SdkModule : public IModuleInterface
+class IAccelByteUe4SdkModuleInterface : public IModuleInterface
 {
 public:
-	static FAccelByteUe4SdkModule& Get()
+	static IAccelByteUe4SdkModuleInterface& Get()
 	{
-		return FModuleManager::LoadModuleChecked<FAccelByteUe4SdkModule>("AccelByteUe4Sdk");
+		return FModuleManager::LoadModuleChecked<IAccelByteUe4SdkModuleInterface>("AccelByteUe4Sdk");
 	}
 
 	static bool IsAvailable()
 	{
 		return FModuleManager::Get().IsModuleLoaded("AccelByteUe4Sdk");
 	}
-
-	void StartupModule() override;
-	void ShutdownModule() override;
-
-	// For registering settings in UE4 editor
-	void RegisterSettings();
-	void UnregisterSettings();
-
-	bool LoadSettingsFromConfigUobject();
 };

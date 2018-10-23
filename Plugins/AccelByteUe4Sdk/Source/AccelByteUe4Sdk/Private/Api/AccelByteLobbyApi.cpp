@@ -30,6 +30,7 @@ void Lobby::Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnErr
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials::Get().GetUserAccessToken());
+	// Samuel's note: Module have to be loaded first or else it will crash, damn it.
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings::LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
@@ -52,7 +53,6 @@ void Lobby::Disconnect()
 		WebSocket->Close();
 		WebSocket = nullptr;
 	}
-
 	UE_LOG(LogTemp, Display, TEXT("Disconnected"))
 }
 
@@ -67,7 +67,6 @@ void Lobby::SendPrivateMessage(const FString & UserId, const FString& Message)
 	{
 		FString Content = FString::Printf(TEXT("type:1to1Chat\nid:%s\nto:%s\npayload:%s\n"), *FGuid::NewGuid().ToString(EGuidFormats::Digits), *UserId, *Message);
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -78,7 +77,6 @@ void Lobby::SendPartyMessage(const FString & Message)
 	{
 		FString Content = FString::Printf(TEXT("type:partyChat\nid:%s\npayload:%s\n"), *FGuid::NewGuid().ToString(EGuidFormats::Digits), *Message);
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -89,7 +87,6 @@ void Lobby::SendInfoPartyRequest()
 	{
 		FString Content = FString::Printf(TEXT("type:info\n"));
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -100,7 +97,6 @@ void Lobby::SendCreatePartyRequest()
 	{
 		FString Content = FString::Printf(TEXT("type:create\n"));
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -111,7 +107,6 @@ void Lobby::SendLeavePartyRequest()
 	{
 		FString Content = FString::Printf(TEXT("type:leave\n"));
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -122,19 +117,26 @@ void Lobby::SendInviteToPartyRequest(const FString& UserId)
 	{
 		FString Content = FString::Printf(TEXT("type:invite\nfriendID:%s\n"), *UserId);
 		WebSocket->Send(Content);
-
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
 
 void Lobby::SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken)
 {
-	
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		FString Content = FString::Printf(TEXT("type:join\npartyID:%s\ninvitationToken:%s\n"), *PartyId, *InvitationToken);
 		WebSocket->Send(Content);
+		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
+	}
+}
 
+void Lobby::SendGetOnlineUsersRequest()
+{
+	if (WebSocket.IsValid() && WebSocket->IsConnected())
+	{
+		FString Content = FString::Printf(TEXT("type:listOnlineFriends\n"));
+		WebSocket->Send(Content);
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
 }
@@ -147,7 +149,8 @@ void Lobby::BindDelegates(const FPrivateMessageNotice& OnPrivateMessageReceived,
 	const FInviteToPartyResponse& OnInviteToPartyResponse,
 	const FPartyInvitationNotice& OnPartyInvitationReceived,
 	const FAcceptInvitationResponse& OnAcceptInvitationResponse,
-	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceReceived)
+	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceReceived,
+	const FGetOnlineUsersResponse& OnGetOnlineUsersResponse)
 {
 	PrivateMessageNotice = OnPrivateMessageReceived;
 	PartyMessageNotice = OnPartyMessageReceived;
@@ -158,6 +161,7 @@ void Lobby::BindDelegates(const FPrivateMessageNotice& OnPrivateMessageReceived,
 	PartyInvitationNotice = OnPartyInvitationReceived;
 	AcceptInvitationResponse = OnAcceptInvitationResponse;
 	PartyInvitationAcceptanceNotice = OnPartyInvitationAcceptanceReceived;
+	GetOnlineUsersResponse = OnGetOnlineUsersResponse;
 }
 
 
@@ -172,6 +176,7 @@ void Lobby::UnbindDelegates()
 	PartyInvitationNotice.Unbind();
 	AcceptInvitationResponse.Unbind();
 	PartyInvitationAcceptanceNotice.Unbind();
+	GetOnlineUsersResponse.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -265,8 +270,12 @@ void Lobby::OnMessage(const FString& Message)
 		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
 		PartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
 	}
-
-	
+	else if (ResponseType.Compare(TEXT("onlineFriends")) == 0)
+	{
+		FAccelByteModelsGetOnlineUsersResponse Result;
+		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		GetOnlineUsersResponse.ExecuteIfBound(Result);
+	}
 }
 
 Lobby::Lobby()

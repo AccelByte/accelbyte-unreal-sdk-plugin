@@ -69,6 +69,11 @@ void UAccelByteBlueprintsLobby::SendAcceptInvitationRequest(const FString& Party
 	Lobby::Get().SendAcceptInvitationRequest(PartyId, InvitationToken);
 }
 
+void UAccelByteBlueprintsLobby::SendGetOnlineUsersRequest()
+{
+	Lobby::Get().SendGetOnlineUsersRequest();
+}
+
 void UAccelByteBlueprintsLobby::BindDelegates(
 	const FPrivateMessageNotice& PrivateMessageNotice,
 	const FPartyMessageNotice& PartyMessageNotice,
@@ -78,7 +83,8 @@ void UAccelByteBlueprintsLobby::BindDelegates(
 	const FInviteToPartyResponse& InviteToPartyResponse,
 	const FPartyInvitationNotice& PartyInvitationNotice,
 	const FAcceptInvitationResponse& AcceptInvitationResponse,
-	const FPartyInvitationAcceptanceNotice& PartyInvitationAcceptanceNotice)
+	const FPartyInvitationAcceptanceNotice& PartyInvitationAcceptanceNotice,
+	const FGetOnlineUsersResponse& GetOnlineUsersResponse)
 {
 	Lobby::Get().BindDelegates(Lobby::FPrivateMessageNotice::CreateLambda([PrivateMessageNotice](const FAccelByteModelsPrivateMessageNotice& Result)
 	{
@@ -115,6 +121,10 @@ void UAccelByteBlueprintsLobby::BindDelegates(
 	Lobby::FPartyInvitationAcceptanceNotice::CreateLambda([PartyInvitationAcceptanceNotice](const FAccelByteModelsPartyInvitationAcceptanceNotice& Result)
 	{
 		PartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
+	}),
+	Lobby::FGetOnlineUsersResponse::CreateLambda([GetOnlineUsersResponse](const FAccelByteModelsGetOnlineUsersResponse& Result)
+	{
+		GetOnlineUsersResponse.ExecuteIfBound(Result);
 	}));
 }
 

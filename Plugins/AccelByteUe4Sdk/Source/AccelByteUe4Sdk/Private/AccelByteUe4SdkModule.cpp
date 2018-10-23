@@ -3,10 +3,25 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
+#if WITH_EDITOR
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
+#endif
 #include "CoreUObject.h"
 #include "AccelByteSettings.h"
+
+
+class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
+{
+    virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+
+	// For registering settings in UE4 editor
+	void RegisterSettings();
+	void UnregisterSettings();
+
+	bool LoadSettingsFromConfigUobject();
+};
 
 void FAccelByteUe4SdkModule::StartupModule()
 {

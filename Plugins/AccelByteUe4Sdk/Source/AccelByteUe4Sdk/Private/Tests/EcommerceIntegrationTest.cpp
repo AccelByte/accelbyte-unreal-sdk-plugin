@@ -31,7 +31,7 @@ DECLARE_DELEGATE(FEcommerceUserInitializationSuccess);
 DECLARE_DELEGATE(FEcommerceUserInitializationFail);
 
 DECLARE_DELEGATE(FDeleteUserByIdSuccess);
-static void DeleteUserByIdEcommerce(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 const FString EcommerceUserEmail = TEXT("EcommerceUser@example.com");
@@ -45,7 +45,7 @@ const FString ExpectedChildItemTitle = TEXT("5 DogeCoinSDK");// Publisher's Curr
 const FString ExpectedCurrencyCode = TEXT("DOGECOIN");
 
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetCategorySuccess, "LogAccelByteEcommerceTest.B.GetCategory.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetCategorySuccess, "AccelByte.Tests.Ecommerce.B.GetCategory", AutomationFlagMaskEcommerce);
 bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -83,7 +83,7 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetRootCategoriesSuccess, "LogAccelByteEcommerceTest.B.GetRootCategories.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetRootCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetRootCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -129,7 +129,7 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetChildCategoriesSuccess, "LogAccelByteEcommerceTest.B.GetChildCategories.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetChildCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetChildCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -175,7 +175,7 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetDescendantCategoriesSuccess, "LogAccelByteEcommerceTest.B.GetDescendantCategories.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetDescendantCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetDescendantCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -226,7 +226,7 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemsByCriteriaSuccess, "LogAccelByteEcommerceTest.C.GetItemsByCriteria.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemsByCriteriaSuccess, "AccelByte.Tests.Ecommerce.C.GetItemsByCriteria", AutomationFlagMaskEcommerce);
 bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -275,7 +275,7 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemSuccess, "LogAccelByteEcommerceTest.C.GetItem.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemSuccess, "AccelByte.Tests.Ecommerce.C.GetItem", AutomationFlagMaskEcommerce);
 bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -355,7 +355,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateOrderSuccess, "LogAccelByteEcommerceTest.D1.CreateOrder.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateOrderSuccess, "AccelByte.Tests.Ecommerce.D1.CreateOrder", AutomationFlagMaskEcommerce);
 bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -521,7 +521,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrder, "LogAccelByteEcommerceTest.D2.GetUserOrder.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrder, "AccelByte.Tests.Ecommerce.D2.GetUserOrder", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -641,7 +641,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrderHistory, "LogAccelByteEcommerceTest.D3.GetUserOrderHistory.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrderHistory, "AccelByte.Tests.Ecommerce.D3.GetUserOrderHistory", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -761,7 +761,7 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrders, "LogAccelByteEcommerceTest.D4.GetUserOrders.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrders, "AccelByte.Tests.Ecommerce.D4.GetUserOrders", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -796,7 +796,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "LogAccelByteEcommerceTest.E.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
 bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
@@ -827,7 +827,7 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSetup, "LogAccelByteEcommerceTest.A.Setup.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool EcommerceSetup::RunTest(const FString& Parameters)
 {
 	double LastTime = 0;
@@ -910,7 +910,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 	return false;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceTearDown, "LogAccelByteEcommerceTest.Z.Teardown.Success", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceTearDown, "AccelByte.Tests.Ecommerce.Z.Teardown", AutomationFlagMaskEcommerce);
 bool EcommerceTearDown::RunTest(const FString& Parameters)
 {
 
@@ -923,7 +923,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("DeleteUserById"));
-	DeleteUserByIdEcommerce(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	DeleteUserByIdLobby(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -950,7 +950,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 }
 
 
-void DeleteUserByIdEcommerce(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
+void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	using AccelByte::Settings;
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()

@@ -131,7 +131,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptInvitationReponse
 	FString InvitationToken;
 };
 
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyInvitationAcceptanceNotice
 {
@@ -141,7 +140,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyInvitationAcceptanceNotice
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineFriendsResponse
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
