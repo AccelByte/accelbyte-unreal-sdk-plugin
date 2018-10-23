@@ -111,7 +111,7 @@ public:
 	static void ResetPassword(const FString& ClientId, const FString& ClientSecret, const FString& Namespace, const FString& Username, const FString& VerificationCode, const FString& NewPassword, const FResetPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
 	static void ResetPasswordEasy(const FString& Username, const FString& VerificationCode, const FString& NewPassword, const FResetPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetLinkedUserAccountsSuccess, const TArray<FAccelByteModelsLinkedPlatform>&)
+	DECLARE_DELEGATE_OneParam(FGetLinkedUserAccountsSuccess, const TArray<FAccelByteModelsLinkedPlatform>&);
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.
 	 * 

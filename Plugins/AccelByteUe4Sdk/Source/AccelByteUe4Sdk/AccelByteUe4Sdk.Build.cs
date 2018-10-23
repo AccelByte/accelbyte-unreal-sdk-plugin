@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class AccelByteUe4Sdk : ModuleRules
 {
@@ -10,50 +11,27 @@ public class AccelByteUe4Sdk : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicIncludePaths.AddRange(
-            new string[] {
-                "AccelByteUe4Sdk/Public",
-				// ... add public include paths required here ...
-			});
+        PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
+        PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 
+        PublicDependencyModuleNames.AddRange(new string[]
+        {
+            "Core",
+            "CoreUObject",
+            "Engine",
+            "Sockets",
+            "Json",
+            "JsonUtilities",
+            "Http",
+            "WebSockets",
+        });
 
-        PrivateIncludePaths.AddRange(
-            new string[] {
-                "AccelByteUe4Sdk/Private",
-				// ... add other private include paths required here ...
-			});
-
-        PublicDependencyModuleNames.AddRange(
-            new string[]
+        if (Target.bBuildEditor == true)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[]
             {
-                "Core",
-                "CoreUObject",
-                "Engine",
-                "Sockets",
-                "Json",
-                "JsonUtilities",
-                "Http",
-                "WebSockets",
+                "Settings"
             });
-
-        PrivateDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core",
-                "CoreUObject",
-                "Engine",
-                "Sockets",
-                "Json",
-                "JsonUtilities",
-                "Http",
-                "WebSockets",
-            });
-
-
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-
-            });
+        }
     }
 }

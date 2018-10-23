@@ -10,20 +10,10 @@ public class AccelByteUe4SdkDemo : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk",  "Json", "JsonUtilities", });
-
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk", "OnlineSubsystem",
-                "OnlineSubsystemUtils", "Steamworks" });
-
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk",  "Json", "JsonUtilities", "Http", "WebSockets",});
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-                "OnlineSubsystemSteam",
-            }
+        DynamicallyLoadedModuleNames.AddRange(new string[] { "OnlineSubsystemSteam", }
             );
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

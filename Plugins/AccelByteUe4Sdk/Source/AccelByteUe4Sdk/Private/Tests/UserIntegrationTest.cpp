@@ -33,7 +33,7 @@ static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& 
 static FString GetVerificationCode(const FString& Email);
 static FString GetSteamTicket();
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "LogAccelByteTest.LoginGameClient.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "AccelByte.Tests.User.LoginGameClient.Success", AutomationFlagMask);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -66,7 +66,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "LogAccelByteTest.RegisterEmail_ThenLogin.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "AccelByte.Tests.User.RegisterEmail_ThenLogin.Success", AutomationFlagMask);
 bool FUserRegisterTest::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -179,7 +179,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "LogAccelByteTest.LoginEmail_ThenVerify.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "AccelByte.Tests.User.LoginEmail_ThenVerify.Success", AutomationFlagMask);
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -343,7 +343,7 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "LogAccelByteTest.RegisterEmail_ThenResetPassword.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "AccelByte.Tests.User.RegisterEmail_ThenResetPassword.Success", AutomationFlagMask);
 bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -510,7 +510,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "LogAccelByteTest.LoginWithDeviceId.LoginTwiceGetSameUserId", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "AccelByte.Tests.User.LoginWithDeviceId.LoginTwiceGetSameUserId", AutomationFlagMask);
 bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -605,7 +605,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdUniqueIdCreated, "LogAccelByteTest.LoginWithDeviceId.UniqueUserIdCreatedForEachDevice", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdUniqueIdCreated, "AccelByte.Tests.User.LoginWithDeviceId.UniqueUserIdCreatedForEachDevice", AutomationFlagMask);
 bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -733,7 +733,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "LogAccelByteTest.UpgradeHeadlessDeviceAccount.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessDeviceAccount.Success", AutomationFlagMask);
 bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -942,7 +942,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "LogAccelByteTest.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.User.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMask);
 bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -1039,7 +1039,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamUniqueIdCreated, "LogAccelByteTest.LoginWithSteam.UniqueUserIdCreatedForSteamAccount", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamUniqueIdCreated, "AccelByte.Tests.User.LoginWithSteam.UniqueUserIdCreatedForSteamAccount", AutomationFlagMask);
 bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -1165,7 +1165,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "LogAccelByteTest.UpgradeHeadlessSteamAccount.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessSteamAccount.Success", AutomationFlagMask);
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -1307,7 +1307,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfileUtilitiesSuccess, "LogAccelByteTest.GetAndUpdateProfile.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfileUtilitiesSuccess, "AccelByte.Tests.User.GetAndUpdateProfile.Success", AutomationFlagMask);
 bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -1500,7 +1500,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "LogAccelByteTest.SteamTicket.Success", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.User.SteamTicket.Success", AutomationFlagMask);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
 	FString Ticket = GetSteamTicket();
