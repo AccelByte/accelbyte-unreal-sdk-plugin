@@ -85,3 +85,24 @@ The examples include how to implement the following functionalities in blueprint
 - Create order
 
 ![](./images/qsg_005.png)
+
+**Lobby**
+- Chat
+    - Party chat
+    - Private message (PM)
+- Party
+    - Get information about current party
+    - Create a party
+    - Leave current party
+    - Invite someone to party
+    - Accept a party invitation
+- Notification
+    - Party invitation notice (Someone has invited you to party)
+    - Party invitation acceptance notice (someone has accepted your invitation to the party)
+Presence
+    - Get all online users
+    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
+Friends
+    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
+
+![](./images/qsg_006.png)

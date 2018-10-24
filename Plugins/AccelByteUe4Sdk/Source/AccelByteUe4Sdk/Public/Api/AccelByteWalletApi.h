@@ -15,7 +15,7 @@ namespace Api
 {
 
 /**
- * @brief Wallet API; a wallet can be a virtual or real currency.
+ * @brief Wallet API for buying things from the online store; a wallet can be a virtual or real currency.
  */
 class ACCELBYTEUE4SDK_API Wallet
 {

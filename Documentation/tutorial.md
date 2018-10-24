@@ -164,7 +164,7 @@ AccelByte::Api::UserManagement::ResetPasswordEasy("my.email@gamepublisher.exampl
 
 See AccelByte::Api::UserManagement::ResetPassword().
 
-## Identity provider
+## User profile
 
 ### Get user profile
 Get profile from specified user. The result is FAccelByteModelsUserProfileInfo.
@@ -203,10 +203,9 @@ AccelByte::Api::UserProfile::UpdateUserProfileEasy(ProfileUpdateRequest, AccelBy
 {
     UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
 }));
+```
 
 See AccelByte::Api::UserProfile::UpdateUserProfile().
-
-```
 
 ### Create user profile
 Create profile for a specified user. The parameter is FAccelByteModelsProfileCreateRequest.
@@ -281,3 +280,103 @@ A wallet can be virtual or real curreny.
 
 #### Get wallet by currency code
 This is to get wallet by its currency code.
+
+## Lobby
+Lobby is for chatting and party management. Unlike other servers which use HTTP, Lobby server uses WebSocket ([RFC 6455](https://tools.ietf.org/html/rfc6455)).
+
+### Connect to server
+You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
+
+```cpp
+AccelByte::Api::Lobby::Connect(OnSuccess, OnError, OnConnectionClosed);
+```
+
+### Disconnect from server
+Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
+```cpp
+AccelByte::Api::Lobby::Disconnect();
+```
+
+### Check if connected
+Check whether the connection has been established with the server.
+```cpp
+if (AccelByte::Api::Lobby::IsConnected())
+{
+    UE_LOG(LogTemp, Log, TEXT("Yay."));
+}
+else
+{
+    UE_LOG(LogTemp, Log, TEXT("Nay."));
+}
+```
+
+### Bind delegates
+ You must bind delegates/callbacks first to handle the events. For example when a user received a private message or a response to create party request. A delegate which ends with Notice means that it's like a notification, while one which ends with Response means it's like a response to a request. The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
+```cpp
+AccelByte::Api::Lobby::BindDelegates(
+    OnPrivateMessageNotice, // Called when a private message was received.
+    OnPartyMessageNotice, // Called when a party message was received
+    OnInfoPartyResponse, // Called when server has responsed to "get party information"
+    OnCreatePartyResponse, //  Called when server has responsed to "create party"
+    OnLeavePartyResponse, // Called when server has responsed to "leave party" 
+    OnInviteToPartyResponse, // Called when server has responded to "accept a party invitation"
+    OnPartyInvitationNotice, // Called when you receive an invitation to join other's party.
+    OnAcceptInvitationResponse,  // Called when server has responsed to "accept a party invitation".
+    OnPartyInvitationAcceptanceNotice, //  Called when your party invitation has been accepted.
+    OnGetOnlineUsersResponse // Called when server has responsed to "get online users".
+);
+```
+
+### Unbind delegates
+Unbind all callbacks.
+```cpp
+AccelByte::Api::Lobby::UnbindDelegates();
+```
+
+### Party chat
+Send a party chat.
+```cpp
+AccelByte::Api::Lobby::SendPartyMessage(TEXT("Hello, my party."));
+```
+
+### Private message (PM)
+Send a private message. Note that the `UserId` format in IAM is just a GUID without hyphens. The `UserId` used here is just for examples.
+```cpp
+AccelByte::Api::Lobby::SendPrivateMessage(TEXT("Bahamut"), TEXT("Hello, Bahamut."));
+```
+
+### Get party information
+Get information about current party.
+```cpp
+AccelByte::Api::Lobby::SendInfoPartyRequest();
+```
+
+### Create a party
+Create a party. You can't create a party when you're already in one.
+```cpp
+AccelByte::Api::Lobby::SendCreatePartyRequest();
+```
+
+### Leave current party
+Leave current a party. You can't leave party when you're not in one.
+```cpp
+AccelByte::Api::Lobby::SendLeavePartyRequest();
+```
+
+### Invite someone to party
+Invite someone to party.
+```cpp
+AccelByte::Api::Lobby::SendInviteToPartyRequest(TEXT("Bahamut"));
+```
+
+### Accept a party invitation
+Invite someone to party. `PartyId` and `InvitationToken` are from the invitation notice.
+```cpp
+AccelByte::Api::Lobby::SendAcceptInvitationRequest(TEXT("Bahamut's Party"), TEXT("Random text from the invitation notice"));
+```
+
+### Get all online users
+Get a list of all online users in the Lobby server.
+```cpp
+AccelByte::Api::Lobby::SendGetOnlineUsersRequest();
+```

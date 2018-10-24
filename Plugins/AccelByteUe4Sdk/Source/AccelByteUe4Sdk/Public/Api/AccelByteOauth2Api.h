@@ -18,7 +18,7 @@ namespace Api
 {
 
 /**
- * @brief The API for getting OAuth2 access token. You should not use directly; use UserAuthentication instead.
+ * @brief The API for getting OAuth2 access token. You should not use this directly; use UserAuthentication instead. Where the tokens are stored in memory for convenience.
  */
 class ACCELBYTEUE4SDK_API Oauth2
 {

@@ -12,7 +12,7 @@ namespace Api
 {
 
 /**
- * @brief An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
+ * @brief Item API for buying things from the online store. An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
  */
 class ACCELBYTEUE4SDK_API Item
 {
