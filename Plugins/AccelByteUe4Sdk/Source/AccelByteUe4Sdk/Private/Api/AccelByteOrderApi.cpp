@@ -20,7 +20,7 @@ void Order::CreateNewOrder(const FString& AccessToken, const FString& Namespace,
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(OrderCreate, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -46,7 +46,7 @@ void Order::GetUserOrder(const FString& AccessToken, const FString& Namespace, c
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -71,7 +71,7 @@ void Order::GetUserOrders(const FString& AccessToken, const FString& Namespace, 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	Url.Append(FString::Printf(TEXT("?page=%d"), Page));
 	Url.Append(FString::Printf(TEXT("&size=%d"), Size));
 
@@ -98,7 +98,7 @@ void Order::FulfillOrder(const FString& AccessToken, const FString& Namespace, c
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -123,7 +123,7 @@ void Order::GetUserOrderHistory(const FString& AccessToken, const FString& Names
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

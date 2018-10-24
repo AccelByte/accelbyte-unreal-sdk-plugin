@@ -35,6 +35,10 @@ public:
 	 */
 	static void CreateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 	static void CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
+	
+	DECLARE_DELEGATE(FUpdateUserAccountSuccess);
+	static void UpdateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE(FAddUsernameAndPasswordSuccess);
 	/**
@@ -159,6 +163,7 @@ private:
 	UserManagement(UserManagement&&) = delete;
 
 	static void CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserAccountSuccess OnSuccess, FErrorHandler OnError);
+	static void UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserAccountSuccess OnSuccess, FErrorHandler OnError);
 	static void AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FAddUsernameAndPasswordSuccess OnSuccess, FErrorHandler OnError);
 	static void SendUserAccountVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorHandler OnError);
 	static void VerifyUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FVerifyUserAccountSuccess OnSuccess, FErrorHandler OnError);

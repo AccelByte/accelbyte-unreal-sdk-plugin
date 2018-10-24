@@ -20,7 +20,7 @@ void UserProfile::GetUserProfile(const FString& AccessToken, const FString& Name
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -45,7 +45,7 @@ void UserProfile::UpdateUserProfile(const FString& AccessToken, const FString& N
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(ProfileUpdateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -71,7 +71,7 @@ void UserProfile::CreateUserProfile(const FString& AccessToken, const FString& N
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(ProfileCreateRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();

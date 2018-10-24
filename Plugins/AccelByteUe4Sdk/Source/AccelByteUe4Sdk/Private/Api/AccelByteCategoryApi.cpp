@@ -70,7 +70,7 @@ void Category::GetChildCategories(const FString& AccessToken, const FString& Nam
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -95,7 +95,7 @@ void Category::GetDescendantCategories(const FString& AccessToken, const FString
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

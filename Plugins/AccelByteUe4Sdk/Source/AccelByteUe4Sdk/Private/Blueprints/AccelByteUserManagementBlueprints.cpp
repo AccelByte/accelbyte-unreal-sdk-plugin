@@ -20,6 +20,18 @@ void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(const FString& Us
 	}));
 }
 
+void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler & OnError)
+{
+	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
 
 void UAccelByteBlueprintsUserManagement::AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, FAddUsernameAndPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {

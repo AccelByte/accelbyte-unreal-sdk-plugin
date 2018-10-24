@@ -25,7 +25,7 @@ void UserManagement::CreateUserAccount(const FString& AccessToken, const FString
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -43,6 +43,32 @@ void UserManagement::CreateUserAccount(const FString& AccessToken, const FString
 void UserManagement::CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	CreateUserAccount(Credentials::Get().GetClientAccessToken(), Credentials::Get().GetClientNamespace(), Username, Password, DisplayName, OnSuccess, OnError);
+}
+
+void UserManagement::UpdateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *Settings::IamServerUrl, *Namespace, *UserId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(UpdateRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+	Request->OnProcessRequestComplete().BindStatic(UpdateUserAccountResponse, OnSuccess, OnError);
+	Request->ProcessRequest();
+}
+
+void UserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)
+{
+	UpdateUserAccount(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), UpdateRequest, OnSuccess, OnError);
 }
 
 void UserManagement::AddUsernameAndPassword(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError)
@@ -156,7 +182,7 @@ void UserManagement::ResetPassword(const FString& ClientId, const FString& Clien
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(ResetPasswordRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -182,7 +208,7 @@ void UserManagement::GetLinkedUserAccounts(const FString& AccessToken, const FSt
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -232,7 +258,7 @@ void UserManagement::UnlinkUserAccounts(const FString& AccessToken, const FStrin
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -263,6 +289,19 @@ void UserManagement::CreateUserAccountResponse(FHttpRequestPtr Request, FHttpRes
 		FAccelByteModelsUserCreateResponse Result;
 		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
 		OnSuccess.ExecuteIfBound(Result);
+		return;
+	}
+	HandleHttpError(Request, Response, Code, Message);
+	OnError.ExecuteIfBound(Code, Message);
+}
+
+void UserManagement::UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserAccountSuccess OnSuccess, FErrorHandler OnError)
+{
+	int32 Code;
+	FString Message;
+	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	{
+		OnSuccess.ExecuteIfBound();
 		return;
 	}
 	HandleHttpError(Request, Response, Code, Message);
