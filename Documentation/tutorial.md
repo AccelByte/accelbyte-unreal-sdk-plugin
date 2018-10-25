@@ -316,6 +316,13 @@ else
 }
 ```
 
+### Sending ping
+You should send ping every some time (for example every 4 seconds) so that the server doesn't close the connection.
+
+```
+AccelByte::Api::Lobby::SendPing();
+```
+
 ### Bind delegates
  You must bind delegates/callbacks first to handle the events. For example when a user received a private message or a response to create party request. A delegate which ends with Notice means that it's like a notification, while one which ends with Response means it's like a response to a request. The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
 ```cpp

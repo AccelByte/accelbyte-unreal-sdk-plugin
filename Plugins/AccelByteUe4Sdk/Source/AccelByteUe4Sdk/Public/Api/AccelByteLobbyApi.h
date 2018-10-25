@@ -50,6 +50,13 @@ public:
 	 * @return true if it's connected, false otherwise.
 	 */
 	bool IsConnected() const;
+	
+	/**
+	 * @brief Send ping; you should call this every some time (for example every 4 seconds) so that the server doesn't close the connection.
+	 * Note that the UE4 WebSocket library (which is just a simple implementation of libwebsockets.org) doesn't support sending ping control frame (RFC 6455 Section 5.5.2). This is LWS_WRITE_PING in libwebsockets.org.
+	 * So we just send a text data frame (RFC 6455 Section 5.6) containing empty text. This is LWS_WRITE_TEXT in libwebsockets.org.
+	 */
+	void SendPing();
 
 	/**
 	 * @brief Send a private message to another user.

@@ -34,6 +34,11 @@ bool UAccelByteBlueprintsLobby::IsConnected()
 	return Lobby::Get().IsConnected();
 }
 
+void UAccelByteBlueprintsLobby::SendPing()
+{
+	Lobby::Get().SendPing();
+}
+
 void UAccelByteBlueprintsLobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 {
 	Lobby::Get().SendPrivateMessage(UserId, Message);

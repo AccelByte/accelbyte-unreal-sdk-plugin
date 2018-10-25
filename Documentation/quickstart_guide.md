@@ -89,6 +89,8 @@ The examples include how to implement the following functionalities in blueprint
 ![](images/qsg_005.png)
 
 **Lobby**
+- Connect to and disconnect from lobby server
+- Send ping regularly
 - Chat
     - Party chat
     - Private message (PM)

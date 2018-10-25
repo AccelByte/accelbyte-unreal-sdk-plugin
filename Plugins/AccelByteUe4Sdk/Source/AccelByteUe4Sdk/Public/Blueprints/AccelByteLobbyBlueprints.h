@@ -25,7 +25,10 @@ public:
 	static void Disconnect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static bool IsConnected();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	static void SendPing();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendPrivateMessage(const FString& UserId, const FString& Message);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
@@ -69,6 +72,5 @@ public:
 	);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void UnbindDelegates();
-
 };
 

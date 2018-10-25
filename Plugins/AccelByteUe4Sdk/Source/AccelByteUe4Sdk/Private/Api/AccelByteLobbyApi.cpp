@@ -61,7 +61,16 @@ bool Lobby::IsConnected() const
 	return WebSocket.IsValid() && WebSocket->IsConnected();
 }
 
-void Lobby::SendPrivateMessage(const FString & UserId, const FString& Message)
+void Lobby::SendPing()
+{
+	if (WebSocket.IsValid() && WebSocket->IsConnected())
+	{
+		WebSocket->Send(FString());
+		UE_LOG(LogTemp, Display, TEXT("Sending ping"))
+	}
+}
+
+void Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -71,7 +80,7 @@ void Lobby::SendPrivateMessage(const FString & UserId, const FString& Message)
 	}
 }
 
-void Lobby::SendPartyMessage(const FString & Message)
+void Lobby::SendPartyMessage(const FString& Message)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
