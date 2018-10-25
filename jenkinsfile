@@ -135,6 +135,40 @@ pipeline {
             }
             steps {
                 bat 'echo "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject"'
+
+                bat '''
+                    SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
+                    SET NAMESPACE = %NAMESPACE%
+                    SET TABLE_PREFIX = %TABLE_PREFIX%
+                    SET AWS_ACCESS_KEY_ID = %AWS_ACCESS_KEY_ID%
+                    SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
+                    SET AWS_REGION = %AWS_REGION%
+
+                    set IAM_BASE_URL=%IAM_DATABASE_URL%
+                    set ADMIN_CLIENT_ID=%ADMIN_CLIENT_ID%
+                    set ADMIN_CLIENT_SECRET=%ADMIN_CLIENT_SECRET%
+                    set ADMIN_NAMESPACE=%ADMIN_NAMESPACE%
+                    set ADMIN_USER=%ADMIN_USER%
+                    set ADMIN_PASSWORD=%ADMIN_PASSWORD%
+
+                    set UTILITIES_PATH=%WORKSPACE%\\TestUtilities
+                    set VARIABLE_FILE_PATH=%WORKSPACE%\\TestUtilities\\EcommerceVariables.txt
+
+                    set ROOT_CATEGORY_PATH=/EcommRoot
+                    set CHILD_CATEGORY_PATH=/EcommRoot/SubPath
+                    set GRANDCHILD_CATEGORY_PATH=/EcommRoot/SubPath/Children
+                    set TEST_EMAIL=ecommuser@example.com
+                    set TEST_PASSWORD=123456
+                    set CURRENCY_CODE=ECOMMCOIN
+                    set INGAME_ITEM_TITLE=In Game E-Commerce Item
+                    set CURRENCY_ITEM_TITLE=In Game Currency Item
+
+                    set VARIABLES_FILE_CONTENT=%ROOT_CATEGORY_PATH%___%CHILD_CATEGORY_PATH%___%GRANDCHILD_CATEGORY_PATH%___%TEST_EMAIL%___%TEST_PASSWORD%___%CURRENCY_CODE%___%INGAME_ITEM_TITLE%___%CURRENCY_ITEM_TITLE%
+                    echo %VARIABLES_FILE_CONTENT%> "%VARIABLE_FILE_PATH%"
+
+                    "%UTILITIES_PATH%\\justice-test-utilities-windows_amd64.exe" ecommerce --setup --rootcategorypath %ROOT_CATEGORY_PATH% --childcategorypath %CHILD_CATEGORY_PATH% --grandchildcategorypath %GRANDCHILD_CATEGORY_PATH% --testemail %TEST_EMAIL% --testpassword %TEST_PASSWORD% --currencycode %CURRENCY_CODE% --ingameitemtitle "%INGAME_ITEM_TITLE%" --currencyitemtitle "%CURRENCY_ITEM_TITLE%"
+                '''
+
                 bat '''
                 cls
                 SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
@@ -148,13 +182,23 @@ pipeline {
                 SteamTicketHelper.exe login
                 popd
 
-                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests LogAccelByteECommerceTest; Quit" -log
-
-                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests LogAccelByteTest; Quit" -log
+                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log
 
                 pushd SteamHelper
                 SteamTicketHelper.exe logout
                 popd
+                '''
+                bat '''
+                    set IAM_BASE_URL=%IAM_DATABASE_URL%
+                    set ADMIN_CLIENT_ID=%ADMIN_CLIENT_ID%
+                    set ADMIN_CLIENT_SECRET=%ADMIN_CLIENT_SECRET%
+                    set ADMIN_NAMESPACE=%ADMIN_NAMESPACE%
+                    set ADMIN_USER=%ADMIN_USER%
+                    set ADMIN_PASSWORD=%ADMIN_PASSWORD%
+
+                    set UTILITIES_PATH=%WORKSPACE%\\TestUtilities
+
+                    "%UTILITIES_PATH%\\justice-test-utilities-windows_amd64.exe" ecommerce --teardown
                 '''
             }
             post {

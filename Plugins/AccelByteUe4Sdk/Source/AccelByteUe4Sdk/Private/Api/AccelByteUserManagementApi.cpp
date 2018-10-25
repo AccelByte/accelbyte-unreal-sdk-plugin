@@ -88,6 +88,7 @@ void UserManagement::AddUsernameAndPassword(const FString& AccessToken, const FS
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 	Request->OnProcessRequestComplete().BindStatic(AddUsernameAndPasswordResponse, OnSuccess, OnError);
+	Request->ProcessRequest();
 }
 
 void UserManagement::AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError)

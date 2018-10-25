@@ -32,8 +32,12 @@ static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& 
 
 static FString GetVerificationCode(const FString& Email);
 static FString GetSteamTicket();
+const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+{
+	UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+});
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(UpdateUserAccountTest, "AccelByte.Tests.User.UpdateUserAccount", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UpdateUserAccountTest, "Ignored.Tests.User.UpdateUserAccount", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter);
 bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("Settings"))
@@ -44,11 +48,8 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("  IamServerUrl: %s"), *Settings::IamServerUrl)
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("  PlatformServerUrl: %s"), *Settings::PlatformServerUrl)
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("  LobbyServerUrl: %s"), *Settings::LobbyServerUrl)
-    const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
-    {
-        UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
-    });
-	const FString Username = FString::Printf(TEXT("bahamut+%s@bahamut.test"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+
+		const FString Username = FString::Printf(TEXT("bahamut+%s@bahamut.test"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
 	const FString Password = TEXT("My super top secret password 1");
 	const FString DisplayName = TEXT("Bahamut");
 
@@ -79,30 +80,16 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "AccelByte.Tests.User.L
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 {
 	UserAuthentication::ForgetAllCredentials();
-	bool bHasDone = false;
 	bool bClientTokenObtained = false;
 	double LastTime = 0;
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&bHasDone, &bClientTokenObtained]()
+	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bClientTokenObtained = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	check(bClientTokenObtained);
 	return true;
@@ -117,76 +104,32 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&bHasDone, &bClientTokenObtained]()
+	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bClientTokenObtained = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccountEasy"));
-	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&bHasDone, &bRegisterSuccessful](FAccelByteModelsUserCreateResponse Result)
+	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&](FAccelByteModelsUserCreateResponse Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bRegisterSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bLoginSuccessful = false;
-	bHasDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bHasDone, &bLoginSuccessful]()
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bLoginSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma region DeleteUserById
 
@@ -198,21 +141,8 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -230,100 +160,41 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&bHasDone, &bClientTokenObtained]()
+	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bClientTokenObtained = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccountEasy"));
-	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&bHasDone, &bRegisterSuccessful](FAccelByteModelsUserCreateResponse Result)
+	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&](FAccelByteModelsUserCreateResponse Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bRegisterSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bLoginSuccessful = false;
-	bHasDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bHasDone, &bLoginSuccessful]()
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bLoginSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bSendSuccessful = false;
-	bHasDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendEmailVerificationCode"));
-	UserManagement::SendUserAccountVerificationCodeEasy(LoginId, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&bHasDone, &bSendSuccessful]()
+	UserManagement::SendUserAccountVerificationCodeEasy(LoginId, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSendSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bSendSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bSendSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	///////////////////
 	//FString VerificationCode = FIntegrationTestModule::GetVerificationCode(LoginId);
@@ -331,28 +202,13 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	///////////////////
 
 	//bool bVerifySuccessful = false;
-	//bHasDone = false;
 	//UE_LOG(LogAccelByteUserTest, Log, TEXT("VerifyEmailAccount"));
-	//UserManagement::VerifyUserAccountEasy(VerificationCode, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&bHasDone, &bVerifySuccessful]()
+	//UserManagement::VerifyUserAccountEasy(VerificationCode, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&]()
 	//{
 	//	UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 	//	bVerifySuccessful = true;
-	//	bHasDone = true;
-	//}), FBlueprintErrorHandler::CreateLambda([&bHasDone, &bVerifySuccessful](int32 Code, FString Message)
-	//{
-	//	UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-	//	bVerifySuccessful = false;
-	//	bHasDone = true;
-	//}));
-
-	//LastTime = FPlatformTime::Seconds();
-	//while (!bHasDone)
-	//{
-	//	const double AppTime = FPlatformTime::Seconds();
-	//	FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-	//	LastTime = AppTime;
-	//	FPlatformProcess::Sleep(0.5f);
-	//}
+	//}), GlobalErrorHandler);
+	//FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
@@ -362,21 +218,8 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	check(bLoginSuccessful);
 	check(bSendSuccessful);
@@ -394,128 +237,54 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FString DisplayName = "testSDK";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&bHasDone, &bClientTokenObtained]()
+	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bClientTokenObtained = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccountEasy"));
-	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&bHasDone, &bRegisterSuccessful](FAccelByteModelsUserCreateResponse Result)
+	UserManagement::CreateUserAccountEasy(LoginId, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&](FAccelByteModelsUserCreateResponse Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bRegisterSuccessful = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bForgotPaswordSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("RequestPasswordReset"));
-	UserManagement::SendPasswordResetCodeEasy(LoginId, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([&bHasDone, &bForgotPaswordSuccessful]()
+	UserManagement::SendPasswordResetCodeEasy(LoginId, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bForgotPaswordSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bForgotPaswordSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FString VerificationCode = GetVerificationCode(LoginId);
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
-	bHasDone = false;
 	Password = "new_password";
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("ResetPassword"));
-	UserManagement::ResetPasswordEasy(LoginId, VerificationCode, Password, UserManagement::FResetPasswordSuccess::CreateLambda([&bHasDone, &bResetPasswordSuccessful]()
+	UserManagement::ResetPasswordEasy(LoginId, VerificationCode, Password, UserManagement::FResetPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bResetPasswordSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bResetPasswordSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bResetPasswordSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bLoginSuccessful = false;
-	bHasDone = false;
 	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bHasDone, &bLoginSuccessful]()
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(LoginId, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bLoginSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma region DeleteUserById
 
@@ -527,21 +296,8 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -560,55 +316,25 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	FString SecondUserId = "";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
-	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bDeviceLoginSuccessful1 = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bHasDone = true;
-		bDeviceLoginSuccessful1 = false;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FirstUserId = Credentials::Get().GetUserId();
 
-	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId //Second attempt"))
-		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeviceLoginSuccessful2 = true;
-			bHasDone = true;
-		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-			bDeviceLoginSuccessful2 = false;
-			bHasDone = true;
-		}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+		}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SecondUserId = Credentials::Get().GetUserId();
 
@@ -622,21 +348,8 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -655,29 +368,14 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 	FString SecondUserId = "";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // First attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful1 = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FirstUserId = Credentials::Get().GetUserId();
 
@@ -691,49 +389,21 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful1 = false;
-		bDeleteDone1 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone1)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // Second attempt"))
-		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+		UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeviceLoginSuccessful2 = true;
-			bHasDone = true;
-		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-			bDeviceLoginSuccessful2 = true;
-			bHasDone = true;
-		}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+		}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SecondUserId = Credentials::Get().GetUserId();
 
@@ -747,22 +417,8 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful2 = false;
-		bDeleteDone2 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone2)
-	{
-		if (bDeleteDone2) { UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteDone")); }
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -775,7 +431,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessDeviceAccount", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessDeviceAccount", AutomationFlagMask);//backend isn't ready yet
 bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -787,133 +443,57 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	FString ThirdUserId = "";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bClientLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientLoginSuccessful = true;
-		bHasDone = true;
-	}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bClientLoginSuccessful = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // First attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful1 = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FirstUserId = Credentials::Get().GetUserId();
 
-	bHasDone = false;
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&bUpgradeSuccessful, &bHasDone]()
+	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bUpgradeSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bEmailLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(Email, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bEmailLoginSuccessful, &bHasDone]()
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(Email, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bEmailLoginSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bEmailLoginSuccessful, &bHasDone](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bEmailLoginSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bUpgradedHeadlessAccountUserIdRemain = (FirstUserId == Credentials::Get().GetUserId() && Credentials::Get().GetUserId() != "");
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // Second attempt"));
-	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful2, &bHasDone]()
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful2 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful2 = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SecondUserId = Credentials::Get().GetUserId();
 
@@ -927,21 +507,8 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful1 = false;
-		bDeleteDone1 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone1)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUser1
 
@@ -955,21 +522,8 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful2 = false;
-		bDeleteDone2 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone2)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUser2
 
@@ -992,57 +546,26 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 	FString SecondUserId = "";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bSteamLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bSteamLoginSuccessful1 = false;
-		bHasDone = true;
-
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FirstUserId = Credentials::Get().GetUserId();
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bSteamLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // Second attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bSteamLoginSuccessful2, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful2 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bSteamLoginSuccessful2 = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SecondUserId = Credentials::Get().GetUserId();
 
@@ -1056,21 +579,8 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -1089,29 +599,14 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	FString SecondUserId = "";
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bSteamLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful1]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bSteamLoginSuccessful1 = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	FirstUserId = Credentials::Get().GetUserId();
 
@@ -1125,49 +620,21 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bSteamLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // Second Attempt"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&bHasDone, &bSteamLoginSuccessful2]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bSteamLoginSuccessful2 = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bSteamLoginSuccessful2](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bHasDone = true;
-		bSteamLoginSuccessful2 = false;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SecondUserId = Credentials::Get().GetUserId();
 
@@ -1181,21 +648,8 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful2 = true;
 		bDeleteDone2 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful2 = false;
-		bDeleteDone2 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone2)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
@@ -1207,111 +661,54 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessSteamAccount", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessSteamAccount", AutomationFlagMask);//backend isn't ready yet
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
-	FString Email = TEXT("testSDK@game.test");
+	FString Email = TEXT("testSDKsteam@game.test");
 	FString Password = TEXT("password");
 	double LastTime = 0;
 	FString FirstUserId = TEXT("");
 
-	bool bHasDone = false;
 	bool bClientLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bClientLoginSuccessful = true;
-		bHasDone = true;
-	}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bClientLoginSuccessful = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bLoginPlatformSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bLoginPlatformSuccessful, &bHasDone]()
+	UserAuthentication::LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType::Steam, GetSteamTicket(), UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginPlatformSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bLoginPlatformSuccessful = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
 	FirstUserId = Credentials::Get().GetUserId();
 
-	bHasDone = false;
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&bUpgradeSuccessful, &bHasDone]()
+	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bUpgradeSuccessful, &bHasDone](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bUpgradeSuccessful = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	UserAuthentication::ForgetAllCredentials();
 
-	bHasDone = false;
 	bool bLoginEmailSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(Email, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bLoginEmailSuccessful, &bHasDone]()
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(Email, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginEmailSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bLoginEmailSuccessful, &bHasDone](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bLoginEmailSuccessful = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma region DeleteUser1
 
@@ -1323,21 +720,8 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful1 = true;
 		bDeleteDone1 = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful1 = false;
-		bDeleteDone1 = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone1)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUser1
 
@@ -1363,31 +747,15 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	FString UpdatedDisplayName = TEXT("");
 	double LastTime = 0;
 
-	bool bHasDone = false;
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
-	UserAuthentication::LoginWithDeviceIdEasy(UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bDeviceLoginSuccessful1, &bHasDone]()
+	UserAuthentication::LoginWithDeviceIdEasy(UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeviceLoginSuccessful1 = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeviceLoginSuccessful1 = false;
-		bHasDone = true;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bCreateProfileSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
 
@@ -1399,111 +767,54 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileCreate.Email = "test@game.test";
 	ProfileCreate.DisplayName = "CreateProfile";
 
-	UserProfile::CreateUserProfileEasy(ProfileCreate, UserProfile::FCreateUserProfileSuccess::CreateLambda([&bCreateProfileSuccessful1, &bHasDone](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::CreateUserProfileEasy(ProfileCreate, UserProfile::FCreateUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bCreateProfileSuccessful1 = true;
 	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		if (Code != 2271)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-			bHasDone = true;
 			bCreateProfileSuccessful1 = false;
 		}
 		else
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bHasDone = true;
 			bCreateProfileSuccessful1 = true;
 		}
 	}));
+	
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 
 	bool bGetProfileSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile"));
-	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([&bGetProfileSuccessful1, &bHasDone](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bGetProfileSuccessful1 = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bHasDone = true;
-		bGetProfileSuccessful1 = false;
-	}));
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bUpdateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateProfile"));
-	UserProfile::UpdateUserProfileEasy(ProfileUpdate, UserProfile::FUpdateUserProfileSuccess::CreateLambda([&bUpdateProfileSuccessful, &bHasDone]()
+	UserProfile::UpdateUserProfileEasy(ProfileUpdate, UserProfile::FUpdateUserProfileSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpdateProfileSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bUpdateProfileSuccessful = false;
-		bHasDone = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bGetProfileSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile // Second attempt"));
-	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([&bGetProfileSuccessful2, &bHasDone, &UpdatedDisplayName](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::GetUserProfileEasy(UserProfile::FGetUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bGetProfileSuccessful2 = true;
-		bHasDone = true;
 		UpdatedDisplayName = Result.DisplayName;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bGetProfileSuccessful2 = false;
-		bHasDone = true;
-
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma region DeleteUserById
 
@@ -1515,21 +826,8 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUserById
 
