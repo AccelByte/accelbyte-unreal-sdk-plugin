@@ -36,7 +36,7 @@ ExtraModuleNames.AddRange(new string[]
 
 ![](images/setup_001.png)
 
-`8.` Fill out the settings then click on set as default.
+`8.` Fill out the settings then click on set as default. The settings will be saved to `DefaultEngine.ini`.
 
 ![](images/setup_002.png)
 
@@ -45,11 +45,11 @@ ExtraModuleNames.AddRange(new string[]
 
 Open the `/AccelByteUe4SdkDemo.uproject` in Unreal Engine 4 Editor. 
 
-![](./images/qsg_001.png)
+![](images/qsg_001.png)
 
 Play in standalone game mode.
 
-![](./images/qsg_002.png)
+![](images/qsg_002.png)
 
 The examples include how to implement the following functionalities in blueprint:
 
@@ -62,16 +62,18 @@ The examples include how to implement the following functionalities in blueprint
 - Login with device ID (anonymous login)
 - Login with username and password
 - Login with Steam session ticket
+- Refresh token
+- Logout
 
-![](./images/qsg_003.png)
+![](images/qsg_003.png)
 
 **User management**
-- Create email account
-- Verify email account
+- Create user account
+- Verify user account
 - Request password reset
 - Verify password reset
 
-![](./images/qsg_004.png)
+![](images/qsg_004.png)
 
 **User profile**
 - Get user profile
@@ -84,7 +86,7 @@ The examples include how to implement the following functionalities in blueprint
 - View item information
 - Create order
 
-![](./images/qsg_005.png)
+![](images/qsg_005.png)
 
 **Lobby**
 - Chat
@@ -105,4 +107,4 @@ Presence
 Friends
     - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
 
-![](./images/qsg_006.png)
+![](images/qsg_006.png)

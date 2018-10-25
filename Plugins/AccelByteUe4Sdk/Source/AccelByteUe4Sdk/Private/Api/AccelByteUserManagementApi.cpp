@@ -42,7 +42,7 @@ void UserManagement::CreateUserAccount(const FString& AccessToken, const FString
 
 void UserManagement::CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	CreateUserAccount(Credentials::Get().GetClientAccessToken(), Credentials::Get().GetClientNamespace(), Username, Password, DisplayName, OnSuccess, OnError);
+	CreateUserAccount(Credentials::Get().GetUserAccessToken(), Settings::GameId, Username, Password, DisplayName, OnSuccess, OnError);
 }
 
 void UserManagement::UpdateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)

@@ -27,7 +27,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsErrorEntity
 namespace AccelByte
 {
 
-DECLARE_DELEGATE_TwoParams(FErrorHandler, int32, FString);
+DECLARE_DELEGATE_TwoParams(FErrorHandler, int32 /* ErrorCode */, const FString& /* ErrorMessage */);
 
 UENUM(BlueprintType)
 enum class ErrorCodes : int32

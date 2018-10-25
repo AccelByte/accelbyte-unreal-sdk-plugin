@@ -14,7 +14,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithClientCredentialsEasy(cons
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -26,7 +26,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithUsernameAndPasswordEasy(co
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -38,7 +38,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithOtherPlatformAccountEasy(E
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -50,7 +50,19 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithDeviceIdEasy(const FLoginW
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUserAuthentication::RefreshTokenEasy(const FRefreshTokenSuccess & OnSuccess, const FBlueprintErrorHandler & OnError)
+{
+	UserAuthentication::RefreshTokenEasy(UserAuthentication::FRefreshTokenSuccess::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

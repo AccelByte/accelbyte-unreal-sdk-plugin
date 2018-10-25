@@ -14,7 +14,7 @@ class UAccelByteBlueprintsUserAuthentication : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, FString, ErrorMessage);
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 	
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithClientCredentialsSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
@@ -27,10 +27,14 @@ public:
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithOtherPlatformAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
     static void LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, const FString& Token, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-
+	
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithDeviceIdSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
 	static void LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	
+	DECLARE_DYNAMIC_DELEGATE(FRefreshTokenSuccess);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
+	static void RefreshTokenEasy(const FRefreshTokenSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
 	static void ForgetAllCredentials();

@@ -31,9 +31,9 @@ void UserAuthentication::LoginWithClientCredentials(const FString& ClientId, con
 	{
 		Credentials::Get().SetClientToken(Result.Access_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.Namespace);
 		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		OnError.ExecuteIfBound(Code, Message);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
@@ -48,9 +48,9 @@ void UserAuthentication::LoginWithOtherPlatformAccount(const FString& ClientId, 
 	{
 		Credentials::Get().SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		OnError.ExecuteIfBound(Code, Message);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
@@ -65,9 +65,9 @@ void UserAuthentication::LoginWithUsernameAndPassword(const FString& ClientId, c
 	{
 		Credentials::Get().SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		OnError.ExecuteIfBound(Code, Message);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
@@ -83,15 +83,32 @@ void UserAuthentication::LoginWithDeviceId(const FString& ClientId, const FStrin
 	{
 		Credentials::Get().SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
 		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		OnError.ExecuteIfBound(Code, Message);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
 
 void UserAuthentication::LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, OnSuccess, OnError);
+}
+
+void UserAuthentication::RefreshToken(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError)
+{
+	Oauth2::GetAccessTokenWithRefreshTokenGrant(ClientId, ClientSecret, RefreshToken, Oauth2::FGetAccessTokenWithRefreshTokenGrantSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOauth2Token& Result)
+	{
+		Credentials::Get().SetUserToken(Result.Access_token, Result.Refresh_token, FDateTime::UtcNow() + FTimespan::FromSeconds(Result.Expires_in), Result.User_id, Result.Display_name, Result.Namespace);
+		OnSuccess.ExecuteIfBound();
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UserAuthentication::RefreshTokenEasy(const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError)
+{
+	RefreshToken(Settings::ClientId, Settings::ClientSecret, Credentials::Get().GetUserRefreshToken(), OnSuccess, OnError);
 }
 
 void UserAuthentication::ForgetAllCredentials()

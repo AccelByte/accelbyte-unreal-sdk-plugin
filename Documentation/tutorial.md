@@ -23,7 +23,6 @@ See AccelByte::Api::UserAuthentication::LoginWithClientCredentials().
 ### Login with username and password
 This is to get access token with Resource Owner Password Credentials (ROPC)/`password` `grant_type` and store it to memory.
 
-Example:
 ```cpp
 AccelByte::Api::UserAuthentication::LoginWithUsernameAndPasswordEasy("my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", AccelByte::Api::UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([]()
 {
@@ -38,7 +37,6 @@ See AccelByte::Api::UserAuthentication::LoginWithUsernameAndPassword().
 ### Login with Steam session ticket
 This is to get access token with Steam session ticket. See AccelByte IAM documentation for how this OAuth2 token endpoint works.
 
-Example:
 ```cpp
 AccelByte::Api::UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cast<std::underlying_type<AccelByte::Api::UserAuthentication::EPlatformType>>::type>(AccelByte::Api::UserAuthentication::EPlatformType::Steam), "my_steam_session_ticket_blah_blah", AccelByte::Api::UserAuthentication::FLoginWithOtherPlatformAccountSuccess::CreateLambda([]()
 {
@@ -51,9 +49,8 @@ AccelByte::Api::UserAuthentication::LoginWithOtherPlatformAccountEasy(static_cas
 See AccelByte::Api::UserAuthentication::LoginWithOtherPlatformAccount().
 
 ### Login with device ID
-This is to get access token with device ID and store it, though the device ID defined here is only a call to Unreal Engine 4 [FGenericPlatformMisc::GetDeviceId()](https://api.unrealengine.com/INT/API/Runtime/Core/GenericPlatform/FGenericPlatformMisc/GetDeviceId/index.html) (is this secure?). See AccelByte IAM documentation for how this OAuth2 token endpoint works.
+This is to get access token with device ID and store it, though the device ID defined here is only a call to Unreal Engine 4 [FGenericPlatformMisc::GetDeviceId()](https://api.unrealengine.com/INT/API/Runtime/Core/GenericPlatform/FGenericPlatformMisc/GetDeviceId/index.html). See AccelByte IAM documentation for how this OAuth2 token endpoint works.
 
-Example:
 
 ```cpp
 AccelByte::Api::UserAuthentication::LoginWithDeviceIdEasy(AccelByte::Api::UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([]()
@@ -69,25 +66,41 @@ See AccelByte::Api::UserAuthentication::LoginWithDeviceId().
 ### Login with launcher
 The `authorization_code grant_type` in IAM doesn't work yet. Do not use.
 
+### Refresh token
+ The access token expires after some time; you need to get new access token with refresh token.
+ 
+```cpp
+UserAuthentication::RefreshTokenEasy(UserAuthentication::FRefreshTokenSuccess::CreateLambda([OnSuccess]()
+{
+    UE_LOG(LogTemp, Log, TEXT("Success"));
+}),
+	FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+{
+    UE_LOG(LogTemp, Log, TEXT("Error: %d %s"), ErrorCode, *ErrorMessage);
+}));
+```
+
+See AccelByte::Api::UserAuthentication::RefreshToken().
+
+You can refresh token automatically before it expired with AccelByte::Credentials::GetUserAccessTokenExpirationUtc(). For example, see below.
+
+![](images/schedule_refresh.png)
+
 ### Logout
 This simply remove the stored access tokens and user ID from memory.
-
-Example:
 
 ```cpp
 AccelByte::Api::UserAuthentication::ForgetAllCredentials();
 ```
 
 See AccelByte::Api::UserAuthentication::ForgetAllCredentials().
-See AccelByte::Credentials.
 
 ## User management
 See AccelByte::Api::UserManagement.
 
-### Create email account
+### Create user account
 Create a new user account.
 
-Example:
 ```cpp
 AccelByte::Api::UserManagement::CreateUserAccountEasy("my.email@gamepublisher.example", "MY SUPER TOP SECRET PASSWORD 123", "Example", AccelByte::Api::UserManagement::FCreateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserCreateResponse& Result)
 {
@@ -103,7 +116,6 @@ See AccelByte::Api::UserManagement::CreateUserAccount().
 ### Send email verification code 
 Send a verification code to user email address.
 
-Example:
 ```cpp
 AccelByte::Api::UserManagement::SendUserAccountVerificationCodeEasy("my.email@gamepublisher.example", AccelByte::Api::UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([]()
 {
@@ -116,10 +128,9 @@ AccelByte::Api::UserManagement::SendUserAccountVerificationCodeEasy("my.email@ga
 
 See AccelByte::Api::UserManagement::SendUserAccountVerificationCode().
 
-### Verify email account
+### Verify user account
 Verify the email address using the verification code sent to user's email address. User must log in first to get a access token.
 
-Example:
 ```cpp
 AccelByte::Api::UserManagement::VerifyUserAccountEasy("123456", AccelByte::Api::UserManagement::FVerifyUserAccountSuccess::CreateLambda([]()
 {
@@ -135,7 +146,6 @@ See AccelByte::Api::UserManagement::VerifyUserAccount().
 ### Send password reset code 
 For a password reset, verification code is sent to the email.
 
-Example:
 ```cpp
 AccelByte::Api::UserManagement::SendPasswordResetCodeEasy("my.email@gamepublisher.example", AccelByte::Api::UserManagement::FSendPasswordResetCodeSuccess::CreateLambda([]()
 {
@@ -151,7 +161,6 @@ See AccelByte::Api::UserManagement::SendPasswordResetCode().
 ### Reset password
 Verify the password reset request with the verification code sent to email.
 
-Example:
 ```cpp
 AccelByte::Api::UserManagement::ResetPasswordEasy("my.email@gamepublisher.example", "123456", "MY NEW PASSwORD IS MORE TOP SECRET 123", AccelByte::Api::UserManagement::FResetPasswordSuccess::CreateLambda([]()
 {
@@ -169,7 +178,6 @@ See AccelByte::Api::UserManagement::ResetPassword().
 ### Get user profile
 Get profile from specified user. The result is FAccelByteModelsUserProfileInfo.
 
-Example:
 ```cpp
 AccelByte::Api::UserProfile::GetUserProfileEasy(AccelByte::Api::UserProfile::FGetUserProfileSuccess::CreateLambda([](const FAccelByteModelsUserProfileInfo& Result)
 {
@@ -186,7 +194,6 @@ See AccelByte::Api::UserProfile::GetUserProfile().
 ### Update user profile
 Update profile for a specified user. The parameter is FAccelByteModelsProfileUpdateRequest.
 
-Example:
 ```cpp
 FAccelByteModelsUserProfileInfoUpdate ProfileUpdateRequest;
 ProfileUpdateRequest.Country = "US";
@@ -210,7 +217,6 @@ See AccelByte::Api::UserProfile::UpdateUserProfile().
 ### Create user profile
 Create profile for a specified user. The parameter is FAccelByteModelsProfileCreateRequest.
 
-Example:
 ```cpp
 FAccelByteModelsProfileCreateRequest ProfileCreateRequest;
 ProfileCreateRequest.Country = "US";
