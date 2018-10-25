@@ -960,7 +960,7 @@ void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& On
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
-		FString Content = TEXT("");
+		FString Content;
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
 		Request->SetURL(Url);
@@ -986,7 +986,7 @@ void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& On
 					FString Verb = TEXT("DELETE");
 					FString ContentType = TEXT("application/json");
 					FString Accept = TEXT("application/json");
-					FString Content = TEXT("");
+					FString Content;
 					FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
 					Request2->SetURL(Url);
 					Request2->SetHeader(TEXT("Authorization"), Authorization);

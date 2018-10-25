@@ -19,6 +19,10 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateUserAccountSuccess, const FAccelByteModelsUserCreateResponse&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
 	static void CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	
+	DECLARE_DYNAMIC_DELEGATE(FUpdateUserAccountSuccess);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
+	static void UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FAddUsernameAndPasswordSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
