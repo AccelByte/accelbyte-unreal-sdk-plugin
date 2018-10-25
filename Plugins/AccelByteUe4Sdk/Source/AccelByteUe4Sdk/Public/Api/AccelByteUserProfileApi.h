@@ -17,15 +17,14 @@ namespace Api
 {
 
 /**
- * @brief API to get user's profile.
- * User should log in before using this. See AccelByteServicesUser to see how to log user in.
+ * @brief API to create, update, and get user's profile.
  */
 class ACCELBYTEUE4SDK_API UserProfile
 {
 public:
 	DECLARE_DELEGATE_OneParam(FGetUserProfileSuccess, const FAccelByteModelsUserProfileInfo&);
 	/**
-	 * @brief Get user's profile information, if it exists.
+	 * @brief Get user's profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
@@ -37,7 +36,7 @@ public:
 
 	DECLARE_DELEGATE(FUpdateUserProfileSuccess);
 	/**
-	 * @brief Update user's current profile information, if it exists.
+	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.
@@ -52,7 +51,7 @@ public:
 
 	DECLARE_DELEGATE_OneParam(FCreateUserProfileSuccess, const FAccelByteModelsUserProfileInfo&);
 	/**
-	 * @brief Create complete player profile.
+	 * @brief Create complete player profile. If it already exist, that will be an error.
 	 *
 	 * @param AccessToken Access token.
 	 * @param Namespace Target.

@@ -15,7 +15,7 @@ namespace Api
 {
 
 /**
- * @brief User management API for creating user, verifying user, reset password.
+ * @brief User management API for creating user, verifying user, and resetting password.
  */
 class ACCELBYTEUE4SDK_API UserManagement
 {

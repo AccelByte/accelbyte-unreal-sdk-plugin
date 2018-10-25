@@ -24,6 +24,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "JsonUtilities",
             "Http",
             "WebSockets",
+            "SSL",
         });
 
         if (Target.bBuildEditor == true)

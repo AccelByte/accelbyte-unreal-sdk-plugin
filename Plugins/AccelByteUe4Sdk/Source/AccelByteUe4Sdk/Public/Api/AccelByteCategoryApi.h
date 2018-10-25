@@ -13,9 +13,9 @@ namespace Api
 {
 
 /**
- * @brief The category has tree data structure.
+ * @brief Category API for buying things from the online store.
+ * The category has tree data structure.
  * Each category has path, for example "/equipments/armor/legs". Items are grouped into a category. The root is equivalent to "/".
- *
  */
 class ACCELBYTEUE4SDK_API Category
 {
