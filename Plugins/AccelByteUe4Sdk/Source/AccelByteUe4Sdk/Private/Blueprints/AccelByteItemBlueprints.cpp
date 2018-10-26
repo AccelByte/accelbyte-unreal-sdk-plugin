@@ -17,7 +17,7 @@ void UAccelByteBlueprintsItem::GetItemById(const FString& AccessToken, const FSt
 	Item::GetItemById(AccessToken, Namespace, ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -34,7 +34,7 @@ void UAccelByteBlueprintsItem::GetItemsByCriteria(const FString& AccessToken, co
 	Item::GetItemsByCriteria(AccessToken, Namespace, Language, Region, CategoryPath, ItemType, Status, Page, Size, Item::FGetItemsByCriteriaSuccess::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

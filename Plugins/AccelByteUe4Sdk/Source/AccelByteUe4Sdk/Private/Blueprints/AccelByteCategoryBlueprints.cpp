@@ -18,7 +18,7 @@ void UAccelByteBlueprintsCategory::GetRootCategories(const FString& AccessToken,
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -35,7 +35,7 @@ void UAccelByteBlueprintsCategory::GetCategory(const FString& AccessToken, const
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -52,7 +52,7 @@ void UAccelByteBlueprintsCategory::GetChildCategories(const FString& AccessToken
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -69,7 +69,7 @@ void UAccelByteBlueprintsCategory::GetDescendantCategories(const FString& Access
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

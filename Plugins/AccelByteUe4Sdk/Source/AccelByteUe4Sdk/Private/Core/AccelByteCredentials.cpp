@@ -32,9 +32,6 @@ void Credentials::ForgetAll()
 	UserNamespace = FString();
 	UserId = FString();
 	UserDisplayName = FString();
-	ClientAccessToken = FString();
-	ClientAccessTokenExpirationUtc = FDateTime();
-	ClientNamespace = FString();
 }
 
 void Credentials::SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace)
@@ -49,9 +46,9 @@ void Credentials::SetUserToken(const FString& AccessToken, const FString& Refres
 
 void Credentials::SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace)
 {
-	ClientAccessToken = AccessToken;
-	ClientAccessTokenExpirationUtc = ExpirationUtc;
-	ClientNamespace = Namespace;
+	UserAccessToken = AccessToken;
+	UserAccessTokenExpirationUtc = ExpirationUtc;
+	UserNamespace = Namespace;
 }
 
 FString Credentials::GetUserAccessToken() const
@@ -72,21 +69,6 @@ FDateTime Credentials::GetUserAccessTokenExpirationUtc() const
 FString Credentials::GetUserNamespace() const
 {
 	return UserNamespace;
-}
-
-FString Credentials::GetClientAccessToken() const
-{
-	return ClientAccessToken;
-}
-
-FDateTime Credentials::GetClientAccessTokenExpirationUtc() const
-{
-	return ClientAccessTokenExpirationUtc;
-}
-
-FString Credentials::GetClientNamespace() const
-{
-	return ClientNamespace;
 }
 
 FString Credentials::GetUserId() const

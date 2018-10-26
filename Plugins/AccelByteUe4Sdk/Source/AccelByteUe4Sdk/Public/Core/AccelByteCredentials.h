@@ -22,15 +22,21 @@ public:
 	void ForgetAll();
 	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace);
 	void SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace);
+	/**
+	 * @brief Get stored access token.
+	 */
 	FString GetUserAccessToken() const;
+	/**
+	 * @brief Get stored refresh token; this is not set if you logged in with client credentials and you simply have to login with client credentials again to get new access token.
+	 */
 	FString GetUserRefreshToken() const;
+	/**
+	 * @brief Get access token expiration in UTC.
+	 */
 	FDateTime GetUserAccessTokenExpirationUtc() const;
 	FString GetUserId() const;
 	FString GetUserDisplayName() const;
 	FString GetUserNamespace() const;
-	FString GetClientAccessToken() const;
-	FDateTime GetClientAccessTokenExpirationUtc() const;
-	FString GetClientNamespace() const;
 private:
 	Credentials(Credentials const&) = delete; // Copy constructor
 	Credentials(Credentials&&) = delete; // Move constructor
@@ -43,9 +49,6 @@ private:
 	FString UserNamespace;
 	FString UserId;
 	FString UserDisplayName;
-	FString ClientAccessToken;
-	FDateTime ClientAccessTokenExpirationUtc;
-	FString ClientNamespace;
 protected:
 	Credentials();
 	~Credentials();

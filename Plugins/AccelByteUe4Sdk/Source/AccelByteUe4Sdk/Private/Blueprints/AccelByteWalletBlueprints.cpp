@@ -17,7 +17,7 @@ void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(const FString& Acce
 	Wallet::GetWalletInfoByCurrencyCode(AccessToken, Namespace, UserId, CurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));

@@ -91,6 +91,20 @@ public:
 	 */
 	static void LoginWithDeviceId(const FString& ClientId, const FString& ClientSecret, const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError);
 	static void LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError);
+	
+	DECLARE_DELEGATE(FRefreshTokenSuccess);
+	/**
+	 * @brief The access token expires after some time; you need to get new access token with refresh token.
+	 * 
+	 * @ref AccelByte::Credentials::GetUserAccessTokenExpirationUtc()
+	 * @param ClientId Client credentials.
+	 * @param ClientSecret Client credentials.
+	 * @param RefreshToken The refresh token.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void RefreshToken(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void RefreshTokenEasy(const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Remove access tokens, user ID, and other credentials from memory.

@@ -1,22 +1,23 @@
-# AccelByte UE4 SDK
+# Introduction
 
 AccelByte UE4 SDK is a plugin for Unreal Engine 4. 
 
 ## Assumptions
 
-This documentation assumes that you are already familiar with modern C++, Unreal Engine 4 (including Blueprint), HTTP, REST API, microservice architecture, OAuth2, OpenID Connect, JWT.
+This documentation assumes that you are already familiar with modern C++, Unreal Engine 4 (including Blueprint), HTTP, REST API, microservice architecture, OAuth2, OpenID Connect, JWT, WebSocket.
 
 ## Features
 
 AccelByte UE4 SDK features:
 
 - Access the API from C++ and blueprint. C++ 
-- Provides easy to use client API for:
+- Provides easy-to-use client APIs for:
     - User authentication (access tokens stored in memory)
     - User management (create user, reset password, verify user.)
     - User profile (create, update, view).
     - Ecommerce (online store, view item catalog, create order, etc.)
-- Server API in the future.
+    - Lobby (chatting, party management)
+- Maybe server API in the future.
 
 ## Architecture
 
@@ -54,11 +55,17 @@ It is written in Go.
 
 ### AccelByte Platform
 
-AccelByte Platform is a collection of modules providing backend for games.
+AccelByte Platform is a platform service for online video games.
 
-These modules are written in Java to take advantage of the rich eco-system of libraries, mature development environment and tools, and rapid development and flexibility and customization that Java allows.
+These modules are written in Java to take advantage of the rich eco-system of libraries, mature development environment and tools, and rapid development and flexibility and customization.
 
 Modules are combined into services allowing for cost effective deployments, where a small service may have multiple modules in a single JVM, and a large service may choose to break out a module into its own JVM to independently scale it without the overhead of having to scale the other modules that are not heavily used.
+
+### AccelByte Lobby
+
+AccelByte Lobby is for chatting and party management. Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
+
+It is also written in Go.
 
 # Quickstart Guide
 Here's how to get it up and running quickly.
@@ -98,7 +105,7 @@ ExtraModuleNames.AddRange(new string[]
 
 ![](Documentation/images/setup_001.png)
 
-`8.` Fill out the settings then click on set as default.
+`8.` Fill out the settings then click on set as default. The settings will be saved to `DefaultEngine.ini`.
 
 ![](Documentation/images/setup_002.png)
 
@@ -120,16 +127,18 @@ The examples include how to implement the following functionalities in blueprint
 - Loading screen
 
 **User authentication**
-- Login with client credentials **We are planning to change this. This is for server only!**
+- Login with client credentials **We are planning to remove this. This is for server only!**
 - Login with device ID (anonymous login)
 - Login with username and password
 - Login with Steam session ticket
+- Refresh token
+- Logout
 
 ![](Documentation/images/qsg_003.png)
 
 **User management**
-- Create email account
-- Verify email account
+- Create user account
+- Verify user account
 - Request password reset
 - Verify password reset
 
@@ -148,6 +157,26 @@ The examples include how to implement the following functionalities in blueprint
 
 ![](Documentation/images/qsg_005.png)
 
+**Lobby**
+- Chat
+    - Party chat
+    - Private message (PM)
+- Party
+    - Get information about current party
+    - Create a party
+    - Leave current party
+    - Invite someone to party
+    - Accept a party invitation
+- Notification
+    - Party invitation notice (Someone has invited you to party)
+    - Party invitation acceptance notice (someone has accepted your invitation to the party)
+Presence
+    - Get all online users
+    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
+Friends
+    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
+
+![](Documentation/images/qsg_006.png)
 
 # Build Documentation
 
