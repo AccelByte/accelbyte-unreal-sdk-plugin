@@ -100,6 +100,7 @@ The examples include how to implement the following functionalities in blueprint
     - Leave current party
     - Invite someone to party
     - Accept a party invitation
+    - Kick a party member
 - Notification
     - Party invitation notice (Someone has invited you to party)
     - Party invitation acceptance notice (someone has accepted your invitation to the party)

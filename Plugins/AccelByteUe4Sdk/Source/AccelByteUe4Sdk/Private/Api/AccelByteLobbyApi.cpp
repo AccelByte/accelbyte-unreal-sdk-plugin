@@ -130,11 +130,21 @@ void Lobby::SendInviteToPartyRequest(const FString& UserId)
 	}
 }
 
-void Lobby::SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken)
+void Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		FString Content = FString::Printf(TEXT("type:join\npartyID:%s\ninvitationToken:%s\n"), *PartyId, *InvitationToken);
+		WebSocket->Send(Content);
+		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
+	}
+}
+
+void Lobby::SendKickPartyMemberRequest(const FString& UserId)
+{
+	if (WebSocket.IsValid() && WebSocket->IsConnected())
+	{
+		FString Content = FString::Printf(TEXT("type:kick\nmemberID:%s\n"), *UserId);
 		WebSocket->Send(Content);
 		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
 	}
@@ -159,6 +169,8 @@ void Lobby::BindDelegates(const FPrivateMessageNotice& OnPrivateMessageReceived,
 	const FPartyInvitationNotice& OnPartyInvitationReceived,
 	const FAcceptInvitationResponse& OnAcceptInvitationResponse,
 	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceReceived,
+	const FKickPartyMemberResponse& OnKickPartyMemberResponse,
+	const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
 	const FGetOnlineUsersResponse& OnGetOnlineUsersResponse)
 {
 	PrivateMessageNotice = OnPrivateMessageReceived;
@@ -170,6 +182,8 @@ void Lobby::BindDelegates(const FPrivateMessageNotice& OnPrivateMessageReceived,
 	PartyInvitationNotice = OnPartyInvitationReceived;
 	AcceptInvitationResponse = OnAcceptInvitationResponse;
 	PartyInvitationAcceptanceNotice = OnPartyInvitationAcceptanceReceived;
+	KickPartyMemberResponse = OnKickPartyMemberResponse,
+	GotKickedFromPartyNotice = OnGotKickedNoticeFromParty,
 	GetOnlineUsersResponse = OnGetOnlineUsersResponse;
 }
 
@@ -185,6 +199,8 @@ void Lobby::UnbindDelegates()
 	PartyInvitationNotice.Unbind();
 	AcceptInvitationResponse.Unbind();
 	PartyInvitationAcceptanceNotice.Unbind();
+	KickPartyMemberResponse.Unbind();
+	GotKickedFromPartyNotice.Unbind();
 	GetOnlineUsersResponse.Unbind();
 }
 
@@ -217,7 +233,7 @@ void Lobby::OnMessage(const FString& Message)
 	ParsedJson.ReplaceInline(TEXT(":"), TEXT("\":\""));
 	ParsedJson.ReplaceInline(TEXT("\n"), TEXT("\",\""));
 	
-	UE_LOG(LogTemp, Display, TEXT("Parsed: %s"), *ParsedJson)
+	UE_LOG(LogTemp, Display, TEXT("CONVERTED TO JSON: %s"), *ParsedJson)
 
 	FAccelByteModelsLobbyType Type;
 	FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Type, 0, 0);
@@ -278,6 +294,18 @@ void Lobby::OnMessage(const FString& Message)
 		FAccelByteModelsPartyInvitationAcceptanceNotice Result;
 		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
 		PartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
+	}
+	else if (ResponseType.Compare(TEXT("kick")) == 0)
+	{
+		FAccelByteModelsKickPartyMemberResponse Result;
+		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		KickPartyMemberResponse.ExecuteIfBound(Result);
+	}
+	else if (ResponseType.Compare(TEXT("kickNotice")) == 0)
+	{
+		FAccelByteModelsGotKickedFromPartyNotice Result;
+		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		GotKickedFromPartyNotice.ExecuteIfBound(Result);
 	}
 	else if (ResponseType.Compare(TEXT("onlineFriends")) == 0)
 	{

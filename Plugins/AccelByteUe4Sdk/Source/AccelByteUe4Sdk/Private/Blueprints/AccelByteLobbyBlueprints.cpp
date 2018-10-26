@@ -69,9 +69,14 @@ void UAccelByteBlueprintsLobby::SendInviteToPartyRequest(const FString& UserId)
 	Lobby::Get().SendInviteToPartyRequest(UserId);
 }
 
-void UAccelByteBlueprintsLobby::SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken)
+void UAccelByteBlueprintsLobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
 	Lobby::Get().SendAcceptInvitationRequest(PartyId, InvitationToken);
+}
+
+void UAccelByteBlueprintsLobby::SendKickPartyMemberRequest(const FString& UserId)
+{
+	Lobby::Get().SendKickPartyMemberRequest(UserId);
 }
 
 void UAccelByteBlueprintsLobby::SendGetOnlineUsersRequest()
@@ -80,56 +85,66 @@ void UAccelByteBlueprintsLobby::SendGetOnlineUsersRequest()
 }
 
 void UAccelByteBlueprintsLobby::BindDelegates(
-	const FPrivateMessageNotice& PrivateMessageNotice,
-	const FPartyMessageNotice& PartyMessageNotice,
-	const FInfoPartyResponse& InfoPartyResponse,
-	const FCreatePartyResponse& CreatePartyResponse,
-	const FLeavePartyResponse& LeavePartyResponse,
-	const FInviteToPartyResponse& InviteToPartyResponse,
-	const FPartyInvitationNotice& PartyInvitationNotice,
-	const FAcceptInvitationResponse& AcceptInvitationResponse,
-	const FPartyInvitationAcceptanceNotice& PartyInvitationAcceptanceNotice,
-	const FGetOnlineUsersResponse& GetOnlineUsersResponse)
+	const FPrivateMessageNotice& OnPrivateMessageNotice,
+	const FPartyMessageNotice& OnPartyMessageNotice,
+	const FInfoPartyResponse& OnInfoPartyResponse,
+	const FCreatePartyResponse& OnCreatePartyResponse,
+	const FLeavePartyResponse& OnLeavePartyResponse,
+	const FInviteToPartyResponse& OnInviteToPartyResponse,
+	const FPartyInvitationNotice& OnPartyInvitationNotice,
+	const FAcceptInvitationResponse& OnAcceptInvitationResponse,
+	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
+	const FKickPartyMemberResponse& OnKickPartyMemberResponse,
+	const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
+	const FGetOnlineUsersResponse& OnGetOnlineUsersResponse)
 {
-	Lobby::Get().BindDelegates(Lobby::FPrivateMessageNotice::CreateLambda([PrivateMessageNotice](const FAccelByteModelsPrivateMessageNotice& Result)
+	Lobby::Get().BindDelegates(Lobby::FPrivateMessageNotice::CreateLambda([OnPrivateMessageNotice](const FAccelByteModelsPrivateMessageNotice& Result)
 	{
-		PrivateMessageNotice.ExecuteIfBound(Result);
+		OnPrivateMessageNotice.ExecuteIfBound(Result);
 	}),
-	Lobby::FPartyMessageNotice::CreateLambda([PartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result)
+	Lobby::FPartyMessageNotice::CreateLambda([OnPartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result)
 	{
-		PartyMessageNotice.ExecuteIfBound(Result);
+		OnPartyMessageNotice.ExecuteIfBound(Result);
 	}),
-	Lobby::FInfoPartyResponse::CreateLambda([InfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result)
+	Lobby::FInfoPartyResponse::CreateLambda([OnInfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result)
 	{
-		InfoPartyResponse.ExecuteIfBound(Result);
+		OnInfoPartyResponse.ExecuteIfBound(Result);
 	}),
-	Lobby::FCreatePartyResponse::CreateLambda([CreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result)
+	Lobby::FCreatePartyResponse::CreateLambda([OnCreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result)
 	{
-		CreatePartyResponse.ExecuteIfBound(Result);
+		OnCreatePartyResponse.ExecuteIfBound(Result);
 	}),
-	Lobby::FLeavePartyResponse::CreateLambda([LeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result)
+	Lobby::FLeavePartyResponse::CreateLambda([OnLeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result)
 	{
-		LeavePartyResponse.ExecuteIfBound(Result);
+		OnLeavePartyResponse.ExecuteIfBound(Result);
 	}),
-	Lobby::FInviteToPartyResponse::CreateLambda([InviteToPartyResponse](const FAccelByteModelsInviteToPartyResponse& Result)
+	Lobby::FInviteToPartyResponse::CreateLambda([OnInviteToPartyResponse](const FAccelByteModelsInviteToPartyResponse& Result)
 	{
-		InviteToPartyResponse.ExecuteIfBound(Result);
+		OnInviteToPartyResponse.ExecuteIfBound(Result);
 	}),
-	Lobby::FPartyInvitationNotice::CreateLambda([PartyInvitationNotice](const FAccelByteModelsPartyInvitationNotice& Result)
+	Lobby::FPartyInvitationNotice::CreateLambda([OnPartyInvitationNotice](const FAccelByteModelsPartyInvitationNotice& Result)
 	{
-		PartyInvitationNotice.ExecuteIfBound(Result);
+		OnPartyInvitationNotice.ExecuteIfBound(Result);
 	}),
-	Lobby::FAcceptInvitationResponse::CreateLambda([AcceptInvitationResponse](const FAccelByteModelsAcceptInvitationReponse& Result)
+	Lobby::FAcceptInvitationResponse::CreateLambda([OnAcceptInvitationResponse](const FAccelByteModelsAcceptInvitationReponse& Result)
 	{
-		AcceptInvitationResponse.ExecuteIfBound(Result);
+		OnAcceptInvitationResponse.ExecuteIfBound(Result);
 	}),
-	Lobby::FPartyInvitationAcceptanceNotice::CreateLambda([PartyInvitationAcceptanceNotice](const FAccelByteModelsPartyInvitationAcceptanceNotice& Result)
+	Lobby::FPartyInvitationAcceptanceNotice::CreateLambda([OnPartyInvitationAcceptanceNotice](const FAccelByteModelsPartyInvitationAcceptanceNotice& Result)
 	{
-		PartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
+		OnPartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
 	}),
-	Lobby::FGetOnlineUsersResponse::CreateLambda([GetOnlineUsersResponse](const FAccelByteModelsGetOnlineUsersResponse& Result)
+	Lobby::FKickPartyMemberResponse::CreateLambda([OnKickPartyMemberResponse](const FAccelByteModelsKickPartyMemberResponse& Result)
 	{
-		GetOnlineUsersResponse.ExecuteIfBound(Result);
+		OnKickPartyMemberResponse.ExecuteIfBound(Result);
+	}),
+	Lobby::FGotKickedNoticeFromParty::CreateLambda([OnGotKickedNoticeFromParty](const FAccelByteModelsGotKickedFromPartyNotice& Result)
+	{
+		OnGotKickedNoticeFromParty.ExecuteIfBound(Result);
+	}),
+	Lobby::FGetOnlineUsersResponse::CreateLambda([OnGetOnlineUsersResponse](const FAccelByteModelsGetOnlineUsersResponse& Result)
+	{
+		OnGetOnlineUsersResponse.ExecuteIfBound(Result);
 	}));
 }
 

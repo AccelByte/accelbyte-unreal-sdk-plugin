@@ -84,6 +84,10 @@ See AccelByte::Api::UserAuthentication::RefreshToken().
 
 You can refresh token automatically before it expired with AccelByte::Credentials::GetUserAccessTokenExpirationUtc(). For example, see below.
 
+**Auto refresh token with timer**
+![](images/schedule_refresh_timer.png)
+
+**Auto refresh token with delay**
 ![](images/schedule_refresh.png)
 
 ### Logout
@@ -336,6 +340,8 @@ AccelByte::Api::Lobby::BindDelegates(
     OnPartyInvitationNotice, // Called when you receive an invitation to join other's party.
     OnAcceptInvitationResponse,  // Called when server has responsed to "accept a party invitation".
     OnPartyInvitationAcceptanceNotice, //  Called when your party invitation has been accepted.
+    OnKickPartyMemberResponse, // Called when server has responded to "kick a party member".
+    OnGotKickedNoticeFromParty, // Called when you got kicked from party.
     OnGetOnlineUsersResponse // Called when server has responsed to "get online users".
 );
 ```
@@ -386,6 +392,12 @@ AccelByte::Api::Lobby::SendInviteToPartyRequest(TEXT("Bahamut"));
 Invite someone to party. `PartyId` and `InvitationToken` are from the invitation notice.
 ```cpp
 AccelByte::Api::Lobby::SendAcceptInvitationRequest(TEXT("Bahamut's Party"), TEXT("Random text from the invitation notice"));
+```
+
+### Kick a party member
+Only party leader can kick a party member.
+```cpp
+AccelByte::Api::Lobby::SendKickPartyMemberRequest(TEXT("Behemoth"));
 ```
 
 ### Get all online users
