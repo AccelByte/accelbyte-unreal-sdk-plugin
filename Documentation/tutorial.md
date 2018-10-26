@@ -84,6 +84,10 @@ See AccelByte::Api::UserAuthentication::RefreshToken().
 
 You can refresh token automatically before it expired with AccelByte::Credentials::GetUserAccessTokenExpirationUtc(). For example, see below.
 
+**Auto refresh token with timer**
+![](images/schedule_refresh_timer.png)
+
+**Auto refresh token with delay**
 ![](images/schedule_refresh.png)
 
 ### Logout
@@ -316,6 +320,13 @@ else
 }
 ```
 
+### Sending ping
+You should send ping every some time (for example every 4 seconds) so that the server doesn't close the connection.
+
+```
+AccelByte::Api::Lobby::SendPing();
+```
+
 ### Bind delegates
  You must bind delegates/callbacks first to handle the events. For example when a user received a private message or a response to create party request. A delegate which ends with Notice means that it's like a notification, while one which ends with Response means it's like a response to a request. The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
 ```cpp
@@ -329,6 +340,8 @@ AccelByte::Api::Lobby::BindDelegates(
     OnPartyInvitationNotice, // Called when you receive an invitation to join other's party.
     OnAcceptInvitationResponse,  // Called when server has responsed to "accept a party invitation".
     OnPartyInvitationAcceptanceNotice, //  Called when your party invitation has been accepted.
+    OnKickPartyMemberResponse, // Called when server has responded to "kick a party member".
+    OnGotKickedNoticeFromParty, // Called when you got kicked from party.
     OnGetOnlineUsersResponse // Called when server has responsed to "get online users".
 );
 ```
@@ -379,6 +392,12 @@ AccelByte::Api::Lobby::SendInviteToPartyRequest(TEXT("Bahamut"));
 Invite someone to party. `PartyId` and `InvitationToken` are from the invitation notice.
 ```cpp
 AccelByte::Api::Lobby::SendAcceptInvitationRequest(TEXT("Bahamut's Party"), TEXT("Random text from the invitation notice"));
+```
+
+### Kick a party member
+Only party leader can kick a party member.
+```cpp
+AccelByte::Api::Lobby::SendKickPartyMemberRequest(TEXT("Behemoth"));
 ```
 
 ### Get all online users

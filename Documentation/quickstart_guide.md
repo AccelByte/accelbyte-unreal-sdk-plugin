@@ -89,6 +89,8 @@ The examples include how to implement the following functionalities in blueprint
 ![](images/qsg_005.png)
 
 **Lobby**
+- Connect to and disconnect from lobby server
+- Send ping regularly
 - Chat
     - Party chat
     - Private message (PM)
@@ -98,6 +100,7 @@ The examples include how to implement the following functionalities in blueprint
     - Leave current party
     - Invite someone to party
     - Accept a party invitation
+    - Kick a party member
 - Notification
     - Party invitation notice (Someone has invited you to party)
     - Party invitation acceptance notice (someone has accepted your invitation to the party)

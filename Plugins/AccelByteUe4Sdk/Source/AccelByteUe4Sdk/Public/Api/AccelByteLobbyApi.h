@@ -50,6 +50,13 @@ public:
 	 * @return true if it's connected, false otherwise.
 	 */
 	bool IsConnected() const;
+	
+	/**
+	 * @brief Send ping; you should call this every some time (for example every 4 seconds) so that the server doesn't close the connection.
+	 * Note that the UE4 WebSocket library (which is just a simple implementation of libwebsockets.org) doesn't support sending ping control frame (RFC 6455 Section 5.5.2). This is LWS_WRITE_PING in libwebsockets.org.
+	 * So we just send a text data frame (RFC 6455 Section 5.6) containing empty text. This is LWS_WRITE_TEXT in libwebsockets.org.
+	 */
+	void SendPing();
 
 	/**
 	 * @brief Send a private message to another user.
@@ -94,8 +101,14 @@ public:
 	 * @param PartyId Party ID from the invitation notice.
 	 * @param InvitationToken Random string from the invitation notice.
 	 */
-	void SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken);
-
+	void SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken);
+	
+	/**
+	 * @brief Kick a party member.
+	 * 
+	 * @param UserId The target user ID to be kicked.
+	 */
+	void SendKickPartyMemberRequest(const FString& UserId);
 	/**
 	 * @brief Get a list of online users in the Lobby server.
 	 */
@@ -110,6 +123,8 @@ public:
 	DECLARE_DELEGATE_OneParam(FPartyInvitationNotice, const FAccelByteModelsPartyInvitationNotice&);
 	DECLARE_DELEGATE_OneParam(FAcceptInvitationResponse, const FAccelByteModelsAcceptInvitationReponse&);
 	DECLARE_DELEGATE_OneParam(FPartyInvitationAcceptanceNotice, const FAccelByteModelsPartyInvitationAcceptanceNotice&);
+	DECLARE_DELEGATE_OneParam(FKickPartyMemberResponse, const FAccelByteModelsKickPartyMemberResponse&);
+	DECLARE_DELEGATE_OneParam(FGotKickedNoticeFromParty, const FAccelByteModelsGotKickedFromPartyNotice&);
 	DECLARE_DELEGATE_OneParam(FGetOnlineUsersResponse, const FAccelByteModelsGetOnlineUsersResponse&);
 
 	/**
@@ -120,14 +135,16 @@ public:
 	 * 
 	 * @param OnPrivateMessageNotice Called when a private message was received.
 	 * @param OnPartyMessageNotice Called when a party message was received.
-	 * @param OnInfoPartyResponse Called when server has responsed to "get party information".
-	 * @param OnCreatePartyResponse Called when server has responsed to "create party".
-	 * @param OnLeavePartyResponse Called when server has responsed to "leave party".
-	 * @param OnInviteToPartyResponse Called when server has responsed to "invite a user to party".
+	 * @param OnInfoPartyResponse Called when server has responded to "get party information".
+	 * @param OnCreatePartyResponse Called when server has responded to "create party".
+	 * @param OnLeavePartyResponse Called when server has responded to "leave party".
+	 * @param OnInviteToPartyResponse Called when server has responded to "invite a user to party".
 	 * @param OnPartyInvitationNotice Called when you receive an invitation to join other's party.
-	 * @param OnAcceptInvitationResponse Called when server has responsed to "accept a party invitation".
+	 * @param OnAcceptInvitationResponse Called when server has responded to "accept a party invitation".
 	 * @param OnPartyInvitationAcceptanceNotice Called when your party invitation has been accepted.
-	 * @param OnGetOnlineUsersResponse Called when server has responsed to "get online users".
+	 * @param OnKickPartyMemberResponse Called when server has responded to "kick a party member".
+	 * @param OnGotKickedNoticeFromParty Called when you got kicked from party.
+	 * @param OnGetOnlineUsersResponse Called when server has responded to "get online users".
 	 */
 	void BindDelegates(
 		const FPrivateMessageNotice& OnPrivateMessageNotice,
@@ -139,6 +156,8 @@ public:
 		const FPartyInvitationNotice& OnPartyInvitationNotice,
 		const FAcceptInvitationResponse& OnAcceptInvitationResponse,
 		const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
+		const FKickPartyMemberResponse& OnKickPartyMemberResponse,
+		const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
 		const FGetOnlineUsersResponse& OnGetOnlineUsersResponse
 	);
 	/**
@@ -172,6 +191,8 @@ private:
 	FPartyInvitationNotice PartyInvitationNotice;
 	FAcceptInvitationResponse AcceptInvitationResponse;
 	FPartyInvitationAcceptanceNotice PartyInvitationAcceptanceNotice;
+	FKickPartyMemberResponse KickPartyMemberResponse;
+	FGotKickedNoticeFromParty GotKickedFromPartyNotice;
 	FGetOnlineUsersResponse GetOnlineUsersResponse;
 };
 

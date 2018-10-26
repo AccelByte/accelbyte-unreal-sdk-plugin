@@ -25,7 +25,10 @@ public:
 	static void Disconnect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static bool IsConnected();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	static void SendPing();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendPrivateMessage(const FString& UserId, const FString& Message);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
@@ -39,7 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendInviteToPartyRequest(const FString& UserId);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void SendAcceptInvitationRequest(const FString& PartyId, FString InvitationToken);
+	static void SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	static void SendKickPartyMemberRequest(const FString& UserId);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendGetOnlineUsersRequest();
 
@@ -52,23 +57,26 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyInvitationNotice, const FAccelByteModelsPartyInvitationNotice&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptInvitationResponse, const FAccelByteModelsAcceptInvitationReponse&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyInvitationAcceptanceNotice, const FAccelByteModelsPartyInvitationAcceptanceNotice&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FKickPartyMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGotKickedNoticeFromParty, const FAccelByteModelsGotKickedFromPartyNotice&, Result);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetOnlineUsersResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void BindDelegates(
-		const FPrivateMessageNotice& PrivateMessageNotice,
-		const FPartyMessageNotice& PartyMessageNotice,
-		const FInfoPartyResponse& InfoPartyResponse,
-		const FCreatePartyResponse& CreatePartyResponse,
-		const FLeavePartyResponse& LeavePartyResponse,
-		const FInviteToPartyResponse& InviteToPartyResponse,
-		const FPartyInvitationNotice& PartyInvitationNotice,
-		const FAcceptInvitationResponse& AcceptInvitationResponse,
-		const FPartyInvitationAcceptanceNotice& PartyInvitationAcceptanceNotice,
-		const FGetOnlineUsersResponse& GetOnlineUsersResponse
+		const FPrivateMessageNotice& OnPrivateMessageNotice,
+		const FPartyMessageNotice& OnPartyMessageNotice,
+		const FInfoPartyResponse& OnInfoPartyResponse,
+		const FCreatePartyResponse& OnCreatePartyResponse,
+		const FLeavePartyResponse& OnLeavePartyResponse,
+		const FInviteToPartyResponse& OnInviteToPartyResponse,
+		const FPartyInvitationNotice& OnPartyInvitationNotice,
+		const FAcceptInvitationResponse& OnAcceptInvitationResponse,
+		const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
+		const FKickPartyMemberResponse& OnKickPartyMemberResponse,
+		const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
+		const FGetOnlineUsersResponse& OnGetOnlineUsersResponse
 	);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void UnbindDelegates();
-
 };
 
