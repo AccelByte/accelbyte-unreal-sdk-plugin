@@ -1,4 +1,4 @@
-# Introduction
+# AccelByte UE4 SDK
 
 AccelByte UE4 SDK is a plugin for Unreal Engine 4. 
 
@@ -15,7 +15,7 @@ AccelByte UE4 SDK features:
     - User authentication (access tokens stored in memory)
     - User management (create user, reset password, verify user.)
     - User profile (create, update, view).
-    - Ecommerce (online store, view item catalog, create order, etc.)
+    - Ecommerce (get item categories, get items, create orders, etc.)
     - Lobby (chatting, party management)
 - Maybe server API in the future.
 
@@ -58,8 +58,6 @@ It is written in Go.
 AccelByte Platform is a platform service for online video games.
 
 These modules are written in Java to take advantage of the rich eco-system of libraries, mature development environment and tools, and rapid development and flexibility and customization.
-
-Modules are combined into services allowing for cost effective deployments, where a small service may have multiple modules in a single JVM, and a large service may choose to break out a module into its own JVM to independently scale it without the overhead of having to scale the other modules that are not heavily used.
 
 ### AccelByte Lobby
 
@@ -127,7 +125,7 @@ The examples include how to implement the following functionalities in blueprint
 - Loading screen
 
 **User authentication**
-- Login with client credentials **We are planning to remove this. This is for server only!**
+- Login with client credentials **We are planning to remove this. This is for game server/confidential client only!**
 - Login with device ID (anonymous login)
 - Login with username and password
 - Login with Steam session ticket
@@ -158,6 +156,8 @@ The examples include how to implement the following functionalities in blueprint
 ![](Documentation/images/qsg_005.png)
 
 **Lobby**
+- Connect to and disconnect from lobby server
+- Send ping regularly
 - Chat
     - Party chat
     - Private message (PM)
@@ -167,14 +167,12 @@ The examples include how to implement the following functionalities in blueprint
     - Leave current party
     - Invite someone to party
     - Accept a party invitation
+    - Kick a party member
 - Notification
     - Party invitation notice (Someone has invited you to party)
     - Party invitation acceptance notice (someone has accepted your invitation to the party)
 Presence
     - Get all online users
-    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
-Friends
-    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
 
 ![](Documentation/images/qsg_006.png)
 

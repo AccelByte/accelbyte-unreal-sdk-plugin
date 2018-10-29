@@ -58,7 +58,7 @@ The examples include how to implement the following functionalities in blueprint
 - Loading screen
 
 **User authentication**
-- Login with client credentials **We are planning to remove this. This is for server only!**
+- Login with client credentials **We are planning to remove this. This is for game server/confidential client only!**
 - Login with device ID (anonymous login)
 - Login with username and password
 - Login with Steam session ticket
@@ -106,8 +106,7 @@ The examples include how to implement the following functionalities in blueprint
     - Party invitation acceptance notice (someone has accepted your invitation to the party)
 Presence
     - Get all online users
-    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
-Friends
-    - **Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
+
+**Coming soon(tm)™® by the Social server team(tm)™®. "Coming soon" is a registered trademark of AccelByte, Inc.**
 
 ![](images/qsg_006.png)
