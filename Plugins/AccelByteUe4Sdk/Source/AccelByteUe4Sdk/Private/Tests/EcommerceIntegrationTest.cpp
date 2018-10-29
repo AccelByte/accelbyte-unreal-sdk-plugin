@@ -34,16 +34,20 @@ DECLARE_DELEGATE(FDeleteUserByIdSuccess);
 static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-const FString EcommerceUserEmail = TEXT("EcommerceUser@example.com");
-const FString EcommerceUserPassword = TEXT("password");
-const FString EcommerceUserDisplayName = TEXT("EcommerceUser");
-const FString ExpectedRootCategoryPath = TEXT("/currencySDK");
-const FString ExpectedChildCategoryPath = TEXT("/currencySDK/DogeCoin");
-const FString ExpectedGrandChildCategoryPath = TEXT("/currencySDK/DogeCoin/Secret");
-const FString ExpectedRootItemTitle = TEXT("Weapon");// "INGAMEITEM", 2 DOGECOIN, 0 Discount
-const FString ExpectedChildItemTitle = TEXT("5 DogeCoinSDK");// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
-const FString ExpectedCurrencyCode = TEXT("DOGECOIN");
+FString EcommerceUserEmail;
+FString EcommerceUserPassword;
+FString EcommerceUserDisplayName;
+FString ExpectedRootCategoryPath;
+FString ExpectedChildCategoryPath;
+FString ExpectedGrandChildCategoryPath;
+FString ExpectedRootItemTitle; //"INGAMEITEM", 2 DOGECOIN, 0 Discount
+FString ExpectedChildItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
+FString ExpectedCurrencyCode;
 
+const auto EcommerceErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+{
+	UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+});
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetCategorySuccess, "AccelByte.Tests.Ecommerce.B.GetCategory", AutomationFlagMaskEcommerce);
 bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
@@ -54,28 +58,14 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 
 	FString CategoryPath = ExpectedChildCategoryPath;
 	FString Language = TEXT("en");
-	bool bHasDone = false;
 	bool bGetCategorySuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetCategory"));
 	Category::GetCategoryEasy(CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([&](FAccelByteModelsFullCategoryInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetCategorySuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetCategorySuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetCategory
 
@@ -91,7 +81,6 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 #pragma region GetRootCategories
 
 	FString Language = TEXT("en");
-	bool bHasDone = false;
 	bool bGetRootCategoriesSuccess = false;
 	bool bExpectedRootCategoryFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetRootCategories"));
@@ -106,21 +95,8 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bGetRootCategoriesSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetRootCategoriesSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetRootCategories
 
@@ -137,7 +113,6 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 #pragma region GetChildCategories
 
 	FString Language = TEXT("en");
-	bool bHasDone = false;
 	bool bGetChildCategoriesSuccess = false;
 	bool bExpectedChildCategoryFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetChildCategory"));
@@ -152,21 +127,8 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bGetChildCategoriesSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetChildCategoriesSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetChildCategories
 
@@ -182,7 +144,6 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 
 #pragma region GetDescendantCategories
 	FString Language = TEXT("en");
-	bool bHasDone = false;
 	bool bGetDescendantCategoriesSuccess = false;
 	bool bExpectedDescendantCategoryFound1 = false;
 	bool bExpectedDescendantCategoryFound2 = false;
@@ -202,21 +163,8 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bGetDescendantCategoriesSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetDescendantCategoriesSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetDescendantCategories
 
@@ -237,7 +185,6 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 	FString Region = TEXT("US");
 	FString Status = TEXT("ACTIVE");
 	FString Type = TEXT("INGAMEITEM");
-	bool bHasDone = false;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -252,21 +199,8 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bGetItemByCriteriaSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria
 
@@ -287,7 +221,6 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 	FString Region = TEXT("US");
 	FString Status = TEXT("ACTIVE");
 	FString Type = TEXT("INGAMEITEM");
-	bool bHasDone = false;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -304,48 +237,21 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 			}
 		}
 		bGetItemByCriteriaSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria
 
 #pragma region GetItem
 
-	bHasDone = false;
 	bool bGetItemByIdSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemById"));
 	Item::GetItemByIdEasy(ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetItemByIdSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByIdSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItem
 
@@ -367,7 +273,6 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	FString Region = TEXT("US");
 	FString Status = TEXT("ACTIVE");
 	FString TypeCoin = TEXT("COINS");
-	bool bHasDone = false;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_VirtualCurrency"));
@@ -376,8 +281,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
 		for (int i = 0; i < Result.Data.Num(); i++)
 		{
-			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-			if (Result.Data[i].Title == ExpectedChildItemTitle)
+			if (ExpectedChildItemTitle.Contains(Result.Data[i].Title))
 			{
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("        Found"));
 				Item = Result.Data[i];
@@ -385,21 +289,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 				bGetItemByCriteriaSuccess = true;
 			}
 		}
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria
 
@@ -414,35 +305,20 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	OrderCreate.ReturnUrl = TEXT("https://sdk.example.com");
 	OrderCreate.ItemId = Item.ItemId;
 
-	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder"));
 	Order::CreateNewOrderEasy(OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bCreateNewOrderSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion CreateOrder
 
 #pragma region GetItemByCriteria_InGameItem
 
 	FString TypeInGameItem = TEXT("INGAMEITEM");
-	bHasDone = false;
 	bool bGetItemByCriteriaSuccess2 = false;
 	bool bExpectedItemFound2 = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_InGameItem"));
@@ -460,21 +336,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 				bGetItemByCriteriaSuccess2 = true;
 			}
 		}
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess2 = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria_InGameItem
 
@@ -487,28 +350,14 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 	OrderCreate.ReturnUrl = TEXT("https://sdk.example.com");
 	OrderCreate.ItemId = Item.ItemId;
 
-	bHasDone = false;
 	bool bCreateNewOrderSuccess2 = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder2"));
 	Order::CreateNewOrderEasy(OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-		bHasDone = true;
 		bCreateNewOrderSuccess2 = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bCreateNewOrderSuccess2 = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion CreateOrder_InGameItem
 
@@ -534,7 +383,6 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 	FString Region = TEXT("US");
 	FString Status = TEXT("ACTIVE");
 	FString Type = TEXT("COINS");
-	bool bHasDone = false;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -544,7 +392,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		for (int i = 0; i < Result.Data.Num(); i++)
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-			if (Result.Data[i].Title == ExpectedChildItemTitle)
+			if (ExpectedChildItemTitle.Contains(Result.Data[i].Title))
 			{
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("        Found"));
 				Item = Result.Data[i];
@@ -552,21 +400,8 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 				bGetItemByCriteriaSuccess = true;
 			}
 		}
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria
 
@@ -581,56 +416,28 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 	OrderCreate.ReturnUrl = TEXT("https://sdk.example.com");
 	OrderCreate.ItemId = Item.ItemId;
 
-	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder"));
 	Order::CreateNewOrderEasy(OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		OrderNo = Result.OrderNo;
-		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bCreateNewOrderSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion CreateOrder
 
 #pragma region GetUserOrder
 
-	bHasDone = false;
 	bool bGetUserOrderSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrder"));
 	Order::GetUserOrderEasy(OrderNo, Order::FGetUserOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetUserOrderSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetUserOrder
 
@@ -654,7 +461,6 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	FString Region = TEXT("US");
 	FString Status = TEXT("ACTIVE");
 	FString Type = TEXT("COINS");
-	bool bHasDone = false;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -664,7 +470,7 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		for (int i = 0; i < Result.Data.Num(); i++)
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-			if (Result.Data[i].Title == ExpectedChildItemTitle)
+			if (ExpectedChildItemTitle.Contains(Result.Data[i].Title))
 			{
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("        Found"));
 				Item = Result.Data[i];
@@ -672,21 +478,8 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 				bGetItemByCriteriaSuccess = true;
 			}
 		}
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetItemByCriteriaSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetItemByCriteria
 
@@ -701,56 +494,28 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 	OrderCreate.ReturnUrl = TEXT("https://sdk.example.com");
 	OrderCreate.ItemId = Item.ItemId;
 
-	bHasDone = false;
 	bool bCreateNewOrderSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder"));
 	Order::CreateNewOrderEasy(OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([&](FAccelByteModelsOrderInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		OrderNo = Result.OrderNo;
-		bHasDone = true;
 		bCreateNewOrderSuccess = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bCreateNewOrderSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion CreateOrder
 
 #pragma region GetUserOrderHistory
 
-	bHasDone = false;
 	bool bGetUserOrderHistorySuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrder"));
 	Order::GetUserOrderHistoryEasy(OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([&](TArray<FAccelByteModelsOrderHistoryInfo> Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderHistorySuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetUserOrderHistorySuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion GetUserOrderHistory
 
@@ -767,28 +532,14 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	float LastTime = FPlatformTime::Seconds();
 
 #pragma region GetUserOrders
-	bool bHasDone = false;
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrders"));
 	Order::GetUserOrdersEasy(0, 20, Order::FGetUserOrdersSuccess::CreateLambda([&](FAccelByteModelsOrderInfoPaging Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetUserOrdersSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma region GetUserOrders
 
@@ -800,28 +551,14 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "AccelByt
 bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 {
 	float LastTime = FPlatformTime::Seconds();
-	bool bHasDone = false;
 	bool bGetWalletSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
 	Wallet::GetWalletInfoByCurrencyCodeEasy(ExpectedCurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([&](FAccelByteModelsWalletInfo Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetWalletSuccess = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bGetWalletSuccess = false;
-		bHasDone = true;
-	}));
-
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	check(bGetWalletSuccess);
 	return true;
@@ -830,77 +567,40 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool EcommerceSetup::RunTest(const FString& Parameters)
 {
+	FString TestVariableFileContent = TEXT("");
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("TestUtilities/EcommerceVariables.txt"));
+	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
+	FFileHelper::LoadFileToString(TestVariableFileContent, *CurrentDirectory);
+	TArray<FString> TestVariables;
+	TestVariableFileContent.ParseIntoArray(TestVariables, TEXT("___"), false);
+	ExpectedRootCategoryPath = TestVariables[0];
+	ExpectedChildCategoryPath = TestVariables[1];
+	ExpectedGrandChildCategoryPath = TestVariables[2];
+	EcommerceUserEmail = TestVariables[3];
+	EcommerceUserPassword = TestVariables[4];
+	ExpectedCurrencyCode = TestVariables[5];
+	ExpectedRootItemTitle = TestVariables[6];
+	ExpectedChildItemTitle = TestVariables[7];
+
 	double LastTime = 0;
-	bool bHasDone = false;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ClientLogin"));
 	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bClientTokenObtained](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bClientTokenObtained = false;
-		bHasDone = true;
-	}));
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
-	bool bRegisterSuccessful = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateEmailAccountEasy"));
-	UserManagement::CreateUserAccountEasy(EcommerceUserEmail, EcommerceUserPassword, EcommerceUserDisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&bHasDone, &bRegisterSuccessful](FAccelByteModelsUserCreateResponse Result)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-		bRegisterSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bRegisterSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bRegisterSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
-
-	bHasDone = false;
 	bool bLoginSuccessful = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	UserAuthentication::LoginWithUsernameAndPasswordEasy(EcommerceUserEmail, EcommerceUserPassword, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&bHasDone, &bLoginSuccessful]()
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithDeviceAccount"));
+	UserAuthentication::LoginWithDeviceId(AccelByte::Settings::ClientId, AccelByte::Settings::ClientSecret , UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
-		bHasDone = true;
-	}), FErrorHandler::CreateLambda([&bHasDone, &bLoginSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bLoginSuccessful = false;
-		bHasDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bHasDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	if (bLoginSuccessful)
 	{
@@ -928,21 +628,8 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Fail\n%d\n%s\n"), Code, *Message);
-		bDeleteSuccessful = false;
-		bDeleteDone = true;
-	}));
-
-	LastTime = FPlatformTime::Seconds();
-	while (!bDeleteDone)
-	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.5f);
-	}
+	}), EcommerceErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 #pragma endregion DeleteUser
 
@@ -1028,4 +715,3 @@ void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& On
 		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
-
