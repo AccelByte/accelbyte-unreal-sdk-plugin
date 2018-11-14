@@ -22,7 +22,7 @@ void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(const FString& Us
 
 void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler & OnError)
 {
-	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess]()
+	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserUpdateResponse& Result)
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
