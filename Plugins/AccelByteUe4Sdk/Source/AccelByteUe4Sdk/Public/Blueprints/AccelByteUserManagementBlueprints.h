@@ -24,9 +24,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
 	static void UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE(FAddUsernameAndPasswordSuccess);
+	DECLARE_DYNAMIC_DELEGATE(FUpgradeHeadlessAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, FAddUsernameAndPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void UpgradeHeadlessAccount(const FString& Username, const FString& Password, FUpgradeHeadlessAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
+
+	DECLARE_DYNAMIC_DELEGATE(FSendUserUpgradeAccountVerificationCodeSuccess);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
+	static void SendUserUpgradeAccountVerificationCode(const FString& Email, const FString& LanguageTag, FSendUserUpgradeAccountVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpgradeHeadlessAccountWithVerificationCodeSuccess, const FAccelByteModelsUserResponse&, UserResponse);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
+	static void UpgradeHeadlessAccountWithVerificationCode(const FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest& RequestObject, FUpgradeHeadlessAccountWithVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FSendUserAccountVerificationCodeSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")

@@ -71,7 +71,39 @@ void UserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateReque
 	UpdateUserAccount(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), UpdateRequest, OnSuccess, OnError);
 }
 
-void UserManagement::AddUsernameAndPassword(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserManagement::SendUserUpgradeVerificationCode(const FString & LoginId, const FSendUserUpgradeVerificationCodeSuccess & OnSuccess, const FErrorHandler & OnError, const FString& LanguageTag)
+{
+	FAccelByteModelsSendVerificationCodeRequest Request
+	{
+		EAccelByteVerificationCodeContext::UpgradeHeadlessAccount,
+		LanguageTag,
+		LoginId
+	};
+	SendUserAccountVerificationCodeEasy(Request, OnSuccess, OnError);
+}
+
+void UserManagement::UpgradeHeadlessAccountWithVerificationCode(const FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest& RequestObject, const FUpgradeHeadlessAccountWithVerificationCodeSuccess & OnSuccess, const FErrorHandler & OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/upgradeHeadlessAccountWithVerificationCode"), *Settings::IamServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString<FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest>(RequestObject, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+	Request->OnProcessRequestComplete().BindStatic(UpgradeHeadlessAccountWithVerificationCodeResponse, OnSuccess, OnError);
+	Request->ProcessRequest();
+}
+
+void UserManagement::UpgradeHeadlessAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FString& Password, const FUpgradeHeadlessAccountSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/upgradeHeadlessAccount"), *Settings::IamServerUrl, *Namespace, *UserId);
@@ -91,19 +123,20 @@ void UserManagement::AddUsernameAndPassword(const FString& AccessToken, const FS
 	Request->ProcessRequest();
 }
 
-void UserManagement::AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserManagement::UpgradeHeadlessAccountEasy(const FString& Username, const FString& Password, const FUpgradeHeadlessAccountSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	AddUsernameAndPassword(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Username, Password, OnSuccess, OnError);
+	UpgradeHeadlessAccount(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Username, Password, OnSuccess, OnError);
 }
 
-void UserManagement::SendUserAccountVerificationCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserManagement::SendUserAccountVerificationCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsSendVerificationCodeRequest& SendVerificationCodeRequest, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/verificationcode"), *Settings::IamServerUrl, *Namespace, *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{ \"LoginId\": \"%s\"}"), *Username);
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString<FAccelByteModelsSendVerificationCodeRequest>(SendVerificationCodeRequest, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -116,9 +149,9 @@ void UserManagement::SendUserAccountVerificationCode(const FString& AccessToken,
 	Request->ProcessRequest();
 }
 
-void UserManagement::SendUserAccountVerificationCodeEasy(const FString& Username, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserManagement::SendUserAccountVerificationCodeEasy(const FAccelByteModelsSendVerificationCodeRequest& Request, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	SendUserAccountVerificationCode(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Username, OnSuccess, OnError);
+	SendUserAccountVerificationCode(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Request, OnSuccess, OnError);
 }
 
 void UserManagement::VerifyUserAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& VerificationCode, const FVerifyUserAccountSuccess& OnSuccess, const FErrorHandler& OnError)
@@ -302,7 +335,7 @@ void UserManagement::UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpRes
 	FString Message;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		FAccelByteModelsUserUpdateResponse Result;
+		FAccelByteModelsUserResponse Result;
 		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
 		OnSuccess.ExecuteIfBound(Result);
 		return;
@@ -311,7 +344,7 @@ void UserManagement::UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpRes
 	OnError.ExecuteIfBound(Code, Message);
 }
 
-void UserManagement::AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FAddUsernameAndPasswordSuccess OnSuccess, FErrorHandler OnError)
+void UserManagement::AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpgradeHeadlessAccountSuccess OnSuccess, FErrorHandler OnError)
 {
 	int32 Code;
 	FString Message;
@@ -411,6 +444,21 @@ void UserManagement::UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpRe
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
 		OnSuccess.ExecuteIfBound();
+		return;
+	}
+	HandleHttpError(Request, Response, Code, Message);
+	OnError.ExecuteIfBound(Code, Message);
+}
+
+void UserManagement::UpgradeHeadlessAccountWithVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpgradeHeadlessAccountWithVerificationCodeSuccess OnSuccess, FErrorHandler OnError)
+{
+	int32 Code;
+	FString Message;
+	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+	{
+		FAccelByteModelsUserResponse Result;
+		FJsonObjectConverter::JsonObjectStringToUStruct<FAccelByteModelsUserResponse>(Response->GetContentAsString(), &Result, 0, 0);
+		OnSuccess.ExecuteIfBound(Result);
 		return;
 	}
 	HandleHttpError(Request, Response, Code, Message);

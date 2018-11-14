@@ -65,7 +65,7 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 		FString(UpdatedEmail),
 		FString()
 	};
-    UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserUpdateResponse& Result){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
+    UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserResponse& Result){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
     FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bLoginWithUpdatedAccount = false;
@@ -209,7 +209,13 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	bool bSendSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendEmailVerificationCode"));
-	UserManagement::SendUserAccountVerificationCodeEasy(LoginId, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&]()
+	const FAccelByteModelsSendVerificationCodeRequest& Request = FAccelByteModelsSendVerificationCodeRequest
+	{
+		EAccelByteVerificationCodeContext::UserAccountRegistration,
+		"",
+		LoginId
+	};
+	UserManagement::SendUserAccountVerificationCodeEasy(Request, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSendSuccessful = true;
@@ -451,7 +457,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessDeviceAccount", AutomationFlagMask);//backend isn't ready yet
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessDeviceAccount", AutomationFlagMask);
 bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -485,7 +491,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&]()
+	UserManagement::UpgradeHeadlessAccountEasy(Email, Password, UserManagement::FUpgradeHeadlessAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
@@ -681,7 +687,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessSteamAccount", AutomationFlagMask);//backend isn't ready yet
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.User.UpgradeHeadlessSteamAccount", AutomationFlagMask);
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -712,7 +718,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	UserManagement::AddUsernameAndPasswordEasy(Email, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([&]()
+	UserManagement::UpgradeHeadlessAccountEasy(Email, Password, UserManagement::FUpgradeHeadlessAccountSuccess::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
@@ -860,6 +866,91 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	return true;
 }
 
+//Disable test, can't access the verification code from the table.
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeAndVerifyHeadlessDeviceAccountSuccess, "Disabled.Tests.User.UpgradeAndVerifyHeadlessDeviceAccount", AutomationFlagMask);
+bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Parameter)
+{
+	UserAuthentication::ForgetAllCredentials();
+	FString Email = FString::Printf(TEXT("upgradeAndVerify+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	FString Password = TEXT("password");
+	FString FirstUserId = "";
+	double LastTime = 0;
+
+	bool bClientLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
+	UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bClientLoginSuccessful = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	bool bDeviceLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
+	UserAuthentication::LoginWithDeviceId(Settings::ClientId, Settings::ClientSecret, UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeviceLoginSuccessful = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FirstUserId = Credentials::Get().GetUserId();
+
+	bool bSendUserUpgradeVerificationCode = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendUserUpgradeVerificationCode"));
+	UserManagement::SendUserUpgradeVerificationCode(Email, UserManagement::FSendUserUpgradeVerificationCodeSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bSendUserUpgradeVerificationCode = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	bool bGetVerificationCode = false;
+	FString VerificationCode = GetVerificationCode(Email);
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccountWithVerificationCode"));
+	FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest Request;
+	Request.Code = VerificationCode;
+	Request.loginId = Email;
+	Request.Password = Password;
+	UserManagement::UpgradeHeadlessAccountWithVerificationCode(Request, UserManagement::FUpgradeHeadlessAccountWithVerificationCodeSuccess::CreateLambda([&](const FAccelByteModelsUserResponse& Resposne) 
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetVerificationCode = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	bool bEmailLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(Email, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bEmailLoginSuccessful = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+#pragma region DeleteUser1
+
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	DeleteUserById(FirstUserId, FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful1 = true;
+		bDeleteDone1 = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+#pragma endregion DeleteUser1
+
+	check(bDeviceLoginSuccessful)
+	check(bSendUserUpgradeVerificationCode)
+	check(bGetVerificationCode)
+	check(bEmailLoginSuccessful)
+	check(bDeleteSuccessful1)
+		return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.User.SteamTicket", AutomationFlagMask);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
@@ -947,8 +1038,6 @@ void DeleteUserById(const FString& UserId, const FDeleteUserByIdSuccess& OnSucce
 		OnError.ExecuteIfBound(Code, Message);
 	}));
 }
-
-
 
 FString GetVerificationCode(const FString& Email)
 {

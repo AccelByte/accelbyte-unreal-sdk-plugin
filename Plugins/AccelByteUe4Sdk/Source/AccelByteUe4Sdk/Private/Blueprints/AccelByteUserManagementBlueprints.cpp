@@ -22,7 +22,7 @@ void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(const FString& Us
 
 void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler & OnError)
 {
-	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserUpdateResponse& Result)
+	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserResponse& Result)
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -33,9 +33,9 @@ void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteM
 }
 
 
-void UAccelByteBlueprintsUserManagement::AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, FAddUsernameAndPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::UpgradeHeadlessAccount(const FString& Username, const FString& Password, FUpgradeHeadlessAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::AddUsernameAndPasswordEasy(Username, Password, UserManagement::FAddUsernameAndPasswordSuccess::CreateLambda([OnSuccess]()
+	UserManagement::UpgradeHeadlessAccountEasy(Username, Password, UserManagement::FUpgradeHeadlessAccountSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -45,9 +45,40 @@ void UAccelByteBlueprintsUserManagement::AddUsernameAndPasswordEasy(const FStrin
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::SendUserAccountVerificationCode(const FString& Username, FSendUserAccountVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::SendUserUpgradeAccountVerificationCode(const FString & Email, const FString& LanguageTag, FSendUserUpgradeAccountVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::SendUserAccountVerificationCodeEasy(Username, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([OnSuccess]()
+	UserManagement::SendUserUpgradeVerificationCode(Email, UserManagement::FSendUserUpgradeVerificationCodeSuccess::CreateLambda([OnSuccess]() 
+	{
+		OnSuccess.ExecuteIfBound();
+	}), 
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}), LanguageTag);
+}
+
+void UAccelByteBlueprintsUserManagement::UpgradeHeadlessAccountWithVerificationCode(const FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest & RequestObject, FUpgradeHeadlessAccountWithVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
+{
+	UserManagement::UpgradeHeadlessAccountWithVerificationCode(RequestObject, UserManagement::FUpgradeHeadlessAccountWithVerificationCodeSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserResponse& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsUserManagement::SendUserAccountVerificationCode(const FString& LoginID, FSendUserAccountVerificationCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
+{
+	FAccelByteModelsSendVerificationCodeRequest Request
+	{
+		EAccelByteVerificationCodeContext::UserAccountRegistration,
+		FString(),
+		LoginID
+	};
+	
+	UserManagement::SendUserAccountVerificationCodeEasy(Request, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
