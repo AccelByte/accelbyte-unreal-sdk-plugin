@@ -12,10 +12,10 @@ namespace AccelByte
 namespace Api
 {
 
-void Wallet::GetWalletInfoByCurrencyCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FErrorHandler& OnError)
+void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings::PlatformServerUrl, *Namespace, *UserId, *CurrencyCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *CurrencyCode);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -30,11 +30,6 @@ void Wallet::GetWalletInfoByCurrencyCode(const FString& AccessToken, const FStri
 	Request->SetContentAsString(Content);
 	Request->OnProcessRequestComplete().BindStatic(GetWalletInfoByCurrencyCodeResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
-}
-
-void Wallet::GetWalletInfoByCurrencyCodeEasy(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	GetWalletInfoByCurrencyCode(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), CurrencyCode, OnSuccess, OnError);
 }
 
 // =============================================================================================================================

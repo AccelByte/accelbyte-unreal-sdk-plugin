@@ -46,9 +46,8 @@ void Credentials::SetUserToken(const FString& AccessToken, const FString& Refres
 
 void Credentials::SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace)
 {
-	UserAccessToken = AccessToken;
-	UserAccessTokenExpirationUtc = ExpirationUtc;
-	UserNamespace = Namespace;
+	ClientAccessToken = AccessToken;
+	ClientNamespace = Namespace;
 }
 
 FString Credentials::GetUserAccessToken() const
@@ -79,6 +78,16 @@ FString Credentials::GetUserId() const
 FString Credentials::GetUserDisplayName() const
 {
 	return UserDisplayName;
+}
+
+FString Credentials::GetClientAccessToken() const
+{
+	return ClientAccessToken;
+}
+
+FString Credentials::GetClientNamespace() const
+{
+	return ClientNamespace;
 }
 
 } // Namespace AccelByte

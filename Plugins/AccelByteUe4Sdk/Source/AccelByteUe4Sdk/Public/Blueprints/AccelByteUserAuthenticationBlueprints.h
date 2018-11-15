@@ -18,23 +18,23 @@ public:
 	
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithClientCredentialsSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-    static void LoginWithClientCredentialsEasy(const FLoginWithClientCredentialsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+    static void LoginWithClientCredentials(const FLoginWithClientCredentialsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithUsernameAndPasswordSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-	static void LoginWithUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FLoginWithUsernameAndPasswordSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void LoginWithUsernameAndPassword(const FString& Username, const FString& Password, const FLoginWithUsernameAndPasswordSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithOtherPlatformAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-    static void LoginWithOtherPlatformAccountEasy(EAccelBytePlatformType PlatformId, const FString& Token, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+    static void LoginWithOtherPlatformAccount(EAccelBytePlatformType PlatformId, const FString& Token, const FLoginWithOtherPlatformAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithDeviceIdSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-	static void LoginWithDeviceIdEasy(const FLoginWithDeviceIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void LoginWithDeviceId(const FLoginWithDeviceIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	DECLARE_DYNAMIC_DELEGATE(FRefreshTokenSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-	static void RefreshTokenEasy(const FRefreshTokenSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void RefreshToken(const FRefreshTokenSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
 	static void ForgetAllCredentials();

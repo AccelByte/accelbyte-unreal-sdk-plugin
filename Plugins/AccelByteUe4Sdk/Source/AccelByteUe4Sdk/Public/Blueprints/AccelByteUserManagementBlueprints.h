@@ -18,11 +18,11 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateUserAccountSuccess, const FAccelByteModelsUserCreateResponse&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void CreateUserAccount(const FString& Username, const FString& Password, const FString& DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
 	
 	DECLARE_DYNAMIC_DELEGATE(FUpdateUserAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void UpdateUserAccount(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FUpgradeHeadlessAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
@@ -42,25 +42,25 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE(FVerifyUserAccountSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void VerifyUserAccountEasy(const FString& VerificationCode, FVerifyUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void VerifyUserAccount(const FString& VerificationCode, FVerifyUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FSendPasswordResetCodeSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void SendPasswordResetCodeEasy(const FString& Username, FSendPasswordResetCodeSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void SendPasswordResetCode(const FString& Username, FSendPasswordResetCodeSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FResetPasswordSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void ResetPasswordEasy(const FString& Username, const FString& VerificationCode, const FString& NewPassword, FResetPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void ResetPassword(const FString& Username, const FString& VerificationCode, const FString& NewPassword, FResetPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetLinkedUserAccountsSuccess, const TArray<FAccelByteModelsLinkedPlatform>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void GetLinkedUserAccounts(FGetLinkedUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FLinkUserAccountsSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void LinkUserAccountsEasy(const FString& PlatformId, const FString& Ticket, FLinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void LinkUserAccounts(const FString& PlatformId, const FString& Ticket, FLinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FUnlinkUserAccountsSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserManagement | Api")
-	static void UnlinkUserAccountsEasy(const FString& PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
+	static void UnlinkUserAccounts(const FString& PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError);
 };

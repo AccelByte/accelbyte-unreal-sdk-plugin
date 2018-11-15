@@ -13,10 +13,10 @@ namespace AccelByte
 namespace Api
 {
 
-void Category::GetRootCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
+void Category::GetRootCategories(const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings::PlatformServerUrl, *Namespace, *Language);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Language);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -33,15 +33,10 @@ void Category::GetRootCategories(const FString& AccessToken, const FString& Name
 	Request->ProcessRequest();
 }
 
-void Category::GetRootCategoriesEasy(const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
+void Category::GetCategory(const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetRootCategories(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, OnSuccess, OnError);
-}
-
-void Category::GetCategory(const FString& AccessToken, const FString& Namespace, const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings::PlatformServerUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -58,15 +53,10 @@ void Category::GetCategory(const FString& AccessToken, const FString& Namespace,
 	Request->ProcessRequest();
 }
 
-void Category::GetCategoryEasy(const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError)
+void Category::GetChildCategories(const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetCategory(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), CategoryPath, Language, OnSuccess, OnError);
-}
-
-void Category::GetChildCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings::PlatformServerUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -83,15 +73,10 @@ void Category::GetChildCategories(const FString& AccessToken, const FString& Nam
 	Request->ProcessRequest();
 }
 
-void Category::GetChildCategoriesEasy(const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
+void Category::GetDescendantCategories(const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetChildCategories(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
-}
-
-void Category::GetDescendantCategories(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings::PlatformServerUrl, *Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -106,11 +91,6 @@ void Category::GetDescendantCategories(const FString& AccessToken, const FString
 	Request->SetContentAsString(Content);
 	Request->OnProcessRequestComplete().BindStatic(GetDescendantCategoriesResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
-}
-
-void Category::GetDescendantCategoriesEasy(const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	GetDescendantCategories(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Language, CategoryPath, OnSuccess, OnError);
 }
 
 // =============================================================================================================================

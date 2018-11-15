@@ -8,9 +8,9 @@
 using AccelByte::Api::UserManagement;
 using AccelByte::FErrorHandler;
 
-void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::CreateUserAccount(const FString& Username, const FString& Password, const FString& DisplayName, FCreateUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::CreateUserAccountEasy(Username, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserCreateResponse& Result)
+	UserManagement::CreateUserAccount(Username, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserCreateResponse& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
@@ -20,9 +20,9 @@ void UAccelByteBlueprintsUserManagement::CreateUserAccountEasy(const FString& Us
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler & OnError)
+void UAccelByteBlueprintsUserManagement::UpdateUserAccount(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FBlueprintErrorHandler & OnError)
 {
-	UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserResponse& Result)
+	UserManagement::UpdateUserAccount(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserResponse& Result)
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -35,7 +35,7 @@ void UAccelByteBlueprintsUserManagement::UpdateUserAccountEasy(const FAccelByteM
 
 void UAccelByteBlueprintsUserManagement::UpgradeHeadlessAccount(const FString& Username, const FString& Password, FUpgradeHeadlessAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::UpgradeHeadlessAccountEasy(Username, Password, UserManagement::FUpgradeHeadlessAccountSuccess::CreateLambda([OnSuccess]()
+	UserManagement::UpgradeHeadlessAccount(Username, Password, UserManagement::FUpgradeHeadlessAccountSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -78,7 +78,7 @@ void UAccelByteBlueprintsUserManagement::SendUserAccountVerificationCode(const F
 		LoginID
 	};
 	
-	UserManagement::SendUserAccountVerificationCodeEasy(Request, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([OnSuccess]()
+	UserManagement::SendUserAccountVerificationCode(Request, UserManagement::FSendUserAccountVerificationCodeSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -88,10 +88,10 @@ void UAccelByteBlueprintsUserManagement::SendUserAccountVerificationCode(const F
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::VerifyUserAccountEasy(const FString& VerificationCode, FVerifyUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::VerifyUserAccount(const FString& VerificationCode, FVerifyUserAccountSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
 	
-	UserManagement::VerifyUserAccountEasy(VerificationCode, UserManagement::FVerifyUserAccountSuccess::CreateLambda([OnSuccess]()
+	UserManagement::VerifyUserAccount(VerificationCode, UserManagement::FVerifyUserAccountSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -101,10 +101,10 @@ void UAccelByteBlueprintsUserManagement::VerifyUserAccountEasy(const FString& Ve
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::SendPasswordResetCodeEasy(const FString& Username, FSendPasswordResetCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::SendPasswordResetCode(const FString& Username, FSendPasswordResetCodeSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
 	
-	UserManagement::SendPasswordResetCodeEasy(Username, UserManagement::FSendPasswordResetCodeSuccess::CreateLambda([OnSuccess]()
+	UserManagement::SendPasswordResetCode(Username, UserManagement::FSendPasswordResetCodeSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -113,9 +113,9 @@ void UAccelByteBlueprintsUserManagement::SendPasswordResetCodeEasy(const FString
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::ResetPasswordEasy(const FString& Username, const FString& VerificationCode, const FString& NewPassword, FResetPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::ResetPassword(const FString& Username, const FString& VerificationCode, const FString& NewPassword, FResetPasswordSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::ResetPasswordEasy(Username, VerificationCode, NewPassword, UserManagement::FResetPasswordSuccess::CreateLambda([OnSuccess]()
+	UserManagement::ResetPassword(Username, VerificationCode, NewPassword, UserManagement::FResetPasswordSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -124,9 +124,9 @@ void UAccelByteBlueprintsUserManagement::ResetPasswordEasy(const FString& Userna
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::GetLinkedUserAccountsEasy(FGetLinkedUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::GetLinkedUserAccounts(FGetLinkedUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::GetLinkedUserAccountsEasy(UserManagement::FGetLinkedUserAccountsSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsLinkedPlatform>& Result)
+	UserManagement::GetLinkedUserAccounts(UserManagement::FGetLinkedUserAccountsSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsLinkedPlatform>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -135,9 +135,9 @@ void UAccelByteBlueprintsUserManagement::GetLinkedUserAccountsEasy(FGetLinkedUse
 	}));
 }
 
-void UAccelByteBlueprintsUserManagement::LinkUserAccountsEasy(const FString& PlatformId, const FString& Ticket, FLinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::LinkUserAccounts(const FString& PlatformId, const FString& Ticket, FLinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
-	UserManagement::LinkUserAccountsEasy(PlatformId, Ticket, UserManagement::FLinkUserAccountsSuccess::CreateLambda([OnSuccess]()
+	UserManagement::LinkUserAccounts(PlatformId, Ticket, UserManagement::FLinkUserAccountsSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -146,10 +146,10 @@ void UAccelByteBlueprintsUserManagement::LinkUserAccountsEasy(const FString& Pla
 	}));
 }
 	
-void UAccelByteBlueprintsUserManagement::UnlinkUserAccountsEasy(const FString& PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
+void UAccelByteBlueprintsUserManagement::UnlinkUserAccounts(const FString& PlatformId, FUnlinkUserAccountsSuccess OnSuccess, FBlueprintErrorHandler OnError)
 {
 	
-	UserManagement::UnlinkUserAccountsEasy(PlatformId, UserManagement::FUnlinkUserAccountsSuccess::CreateLambda([OnSuccess]()
+	UserManagement::UnlinkUserAccounts(PlatformId, UserManagement::FUnlinkUserAccountsSuccess::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

@@ -33,6 +33,8 @@ public:
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */
+	FString GetClientAccessToken() const;
+	FString GetClientNamespace() const;
 	FDateTime GetUserAccessTokenExpirationUtc() const;
 	FString GetUserId() const;
 	FString GetUserDisplayName() const;
@@ -43,6 +45,8 @@ private:
 	Credentials& operator=(Credentials const&) = delete; // Copy assignment operator
 	Credentials& operator=(Credentials &&) = delete; // Move assignment operator
 
+	FString ClientAccessToken;
+	FString ClientNamespace;
 	FString UserAccessToken;
 	FString UserRefreshToken;
 	FDateTime UserAccessTokenExpirationUtc;

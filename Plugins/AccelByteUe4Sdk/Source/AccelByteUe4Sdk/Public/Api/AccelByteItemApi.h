@@ -21,23 +21,18 @@ public:
 	/**
 	 * @brief Get one item information from an online store.
 	 *
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
 	 * @param ItemId The item ID.
 	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN". 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemById(const FString& AccessToken, const FString& Namespace, const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void GetItemByIdEasy(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
 	 *
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
 	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
 	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN". 
 	 * @param CategoryPath Item's category path.
@@ -48,8 +43,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsItemInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemsByCriteria(const FString& AccessToken, const FString& Namespace, const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void GetItemsByCriteriaEasy(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Item() = delete; // static class can't have instance
