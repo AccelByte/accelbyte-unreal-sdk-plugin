@@ -302,7 +302,9 @@ void UserManagement::UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpRes
 	FString Message;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
-		OnSuccess.ExecuteIfBound();
+		FAccelByteModelsUserUpdateResponse Result;
+		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+		OnSuccess.ExecuteIfBound(Result);
 		return;
 	}
 	HandleHttpError(Request, Response, Code, Message);

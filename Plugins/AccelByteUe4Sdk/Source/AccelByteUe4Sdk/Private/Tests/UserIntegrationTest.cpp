@@ -37,45 +37,62 @@ const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, 
 	UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
 });
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(UpdateUserAccountTest, "Ignored.Tests.User.UpdateUserAccount", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UpdateUserAccountTest, "AccelByte.Tests.User.UpdateUserAccount", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter);
 bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 {
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("Settings"))
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  ClientId: %s"), *Settings::ClientId)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  ClientSecret: %s"), *Settings::ClientSecret)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  GameId: %s"), *Settings::GameId)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  PublisherId: %s"), *Settings::PublisherId)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  IamServerUrl: %s"), *Settings::IamServerUrl)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  PlatformServerUrl: %s"), *Settings::PlatformServerUrl)
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("  LobbyServerUrl: %s"), *Settings::LobbyServerUrl)
-
-		const FString Username = FString::Printf(TEXT("bahamut+%s@bahamut.test"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
-	const FString Password = TEXT("My super top secret password 1");
-	const FString DisplayName = TEXT("Bahamut");
+	const FString OriginalEmail = FString::Printf(TEXT("originalEmail+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	const FString UpdatedEmail = FString::Printf(TEXT("updatedEmail+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	const FString Password = TEXT("password");
+	const FString DisplayName = TEXT("testName");
 
     UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithClientCredentialsEasy"))
     UserAuthentication::LoginWithClientCredentialsEasy(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([](){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
     FHttpModule::Get().GetHttpManager().Flush(false);
     
     UE_LOG(LogAccelByteUserTest, Display, TEXT("CreateUserAccountEasy"))
-    UserManagement::CreateUserAccountEasy(Username, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserCreateResponse& Result){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
+    UserManagement::CreateUserAccountEasy(OriginalEmail, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserCreateResponse& Result){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
     FHttpModule::Get().GetHttpManager().Flush(false);
 	
     UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPasswordEasy"))
-    UserAuthentication::LoginWithUsernameAndPasswordEasy(Username, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([](){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
+    UserAuthentication::LoginWithUsernameAndPasswordEasy(OriginalEmail, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([](){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
     FHttpModule::Get().GetHttpManager().Flush(false);
 
     UE_LOG(LogAccelByteUserTest, Display, TEXT("UpdateUserAccountEasy"))
 	FAccelByteModelsUserUpdateRequest UpdateRequest
 	{
 		TEXT("US"),
-		TEXT("Bahamut2"),
-		FString(),
+		TEXT("UpdateName"),
+		FString(UpdatedEmail),
 		FString()
 	};
-    UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([](){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
+    UserManagement::UpdateUserAccountEasy(UpdateRequest, UserManagement::FUpdateUserAccountSuccess::CreateLambda([](const FAccelByteModelsUserUpdateResponse& Result){UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."))}), GlobalErrorHandler);
     FHttpModule::Get().GetHttpManager().Flush(false);
 
+	bool bLoginWithUpdatedAccount = false;
+	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPasswordEasy (Updated Email)"))
+	UserAuthentication::LoginWithUsernameAndPasswordEasy(UpdatedEmail, Password, UserAuthentication::FLoginWithUsernameAndPasswordSuccess::CreateLambda([&]() {
+		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
+		bLoginWithUpdatedAccount = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), GlobalErrorHandler);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+#pragma endregion DeleteUserById
+
+	check(bLoginWithUpdatedAccount);
+	check(bDeleteDone);
 	return true;
 };
 
