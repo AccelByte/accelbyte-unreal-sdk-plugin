@@ -36,11 +36,33 @@ public:
 	static void CreateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 	static void CreateUserAccountEasy(const FString& Username, const FString& Password, const FString& DisplayName, const FCreateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 	
-	DECLARE_DELEGATE_OneParam(FUpdateUserAccountSuccess, const FAccelByteModelsUserUpdateResponse&);
+	DECLARE_DELEGATE_OneParam(FUpdateUserAccountSuccess, const FAccelByteModelsUserResponse&);
 	static void UpdateUserAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 	static void UpdateUserAccountEasy(const FAccelByteModelsUserUpdateRequest& UpdateRequest, const FUpdateUserAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE(FAddUsernameAndPasswordSuccess);
+	DECLARE_DELEGATE(FSendUserUpgradeVerificationCodeSuccess)
+	/**
+	 * @brief This function should be done before user upgrade their headless account. After this function successfully called, obtain the verification code from the submitted email. Then call UpgradeHeadlessAccountWithVerificationCode function afterwards.
+	 * 
+	 * @param LoginId Email or phone number that will be used to upgrade the headless account.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	*/
+	static void SendUserUpgradeVerificationCode(const FString & LoginId, const FSendUserUpgradeVerificationCodeSuccess & OnSuccess, const FErrorHandler & OnError, const FString& LanguageTag = TEXT(""));
+
+	DECLARE_DELEGATE_OneParam(FUpgradeHeadlessAccountWithVerificationCodeSuccess, const FAccelByteModelsUserResponse&)
+	/**
+	 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
+	 *
+	 * @param LoginId Email or phone number that will be used to upgrade the headless account.
+	 * @param Password User's password.
+	 * @param VerificationCode User's verification code that obtained from email.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void UpgradeHeadlessAccountWithVerificationCode(const FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest & RequestObject, const FUpgradeHeadlessAccountWithVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError);
+	
+	DECLARE_DELEGATE(FUpgradeHeadlessAccountSuccess);
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
 	 * Headless account is an account that doesn't have an email and password.
@@ -55,8 +77,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void AddUsernameAndPassword(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void AddUsernameAndPasswordEasy(const FString& Username, const FString& Password, const FAddUsernameAndPasswordSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void UpgradeHeadlessAccount(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FString& Password, const FUpgradeHeadlessAccountSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void UpgradeHeadlessAccountEasy(const FString& Username, const FString& Password, const FUpgradeHeadlessAccountSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE(FSendUserAccountVerificationCodeSuccess);
 	/**
@@ -69,8 +91,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SendUserAccountVerificationCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& Username, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void SendUserAccountVerificationCodeEasy(const FString& Username, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void SendUserAccountVerificationCode(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsSendVerificationCodeRequest& Request, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void SendUserAccountVerificationCodeEasy(const FAccelByteModelsSendVerificationCodeRequest& Request, const FSendUserAccountVerificationCodeSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE(FVerifyUserAccountSuccess);
 	/**
@@ -164,7 +186,7 @@ private:
 
 	static void CreateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserAccountSuccess OnSuccess, FErrorHandler OnError);
 	static void UpdateUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserAccountSuccess OnSuccess, FErrorHandler OnError);
-	static void AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FAddUsernameAndPasswordSuccess OnSuccess, FErrorHandler OnError);
+	static void AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpgradeHeadlessAccountSuccess OnSuccess, FErrorHandler OnError);
 	static void SendUserAccountVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendUserAccountVerificationCodeSuccess OnSuccess, FErrorHandler OnError);
 	static void VerifyUserAccountResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FVerifyUserAccountSuccess OnSuccess, FErrorHandler OnError);
 	static void SendPasswordResetCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FSendPasswordResetCodeSuccess OnSuccess, FErrorHandler OnError);
@@ -172,6 +194,7 @@ private:
 	static void GetLinkedUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetLinkedUserAccountsSuccess OnSuccess, FErrorHandler OnError);
 	static void LinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FLinkUserAccountsSuccess OnSuccess, FErrorHandler OnError);
 	static void UnlinkUserAccountsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUnlinkUserAccountsSuccess OnSuccess, FErrorHandler OnError);
+	static void UpgradeHeadlessAccountWithVerificationCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpgradeHeadlessAccountWithVerificationCodeSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api
