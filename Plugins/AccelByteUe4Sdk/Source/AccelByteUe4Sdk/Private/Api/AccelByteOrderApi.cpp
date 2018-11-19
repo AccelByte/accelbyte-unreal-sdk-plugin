@@ -13,10 +13,10 @@ namespace AccelByte
 namespace Api
 {
 
-void Order::CreateNewOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError)
+void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Namespace,  *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(),  *Credentials::Get().GetUserId());
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -34,15 +34,10 @@ void Order::CreateNewOrder(const FString& AccessToken, const FString& Namespace,
 	Request->ProcessRequest();
 }
 
-void Order::CreateNewOrderEasy(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError)
+void Order::GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	CreateNewOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderCreate, OnSuccess, OnError);
-}
-
-void Order::GetUserOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings::PlatformServerUrl, *Namespace, *UserId, *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -59,15 +54,10 @@ void Order::GetUserOrder(const FString& AccessToken, const FString& Namespace, c
 	Request->ProcessRequest();
 }
 
-void Order::GetUserOrderEasy(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError)
+void Order::GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetUserOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
-}
-
-void Order::GetUserOrders(const FString& AccessToken, const FString& Namespace, const FString& UserId, int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Namespace, *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -86,15 +76,10 @@ void Order::GetUserOrders(const FString& AccessToken, const FString& Namespace, 
 	Request->ProcessRequest();
 }
 
-void Order::GetUserOrdersEasy(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError)
+void Order::FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	GetUserOrders(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), Page, Size, OnSuccess, OnError);
-}
-
-void Order::FulfillOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *Settings::PlatformServerUrl, *Namespace, *UserId, *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -111,15 +96,10 @@ void Order::FulfillOrder(const FString& AccessToken, const FString& Namespace, c
 	Request->ProcessRequest();
 }
 
-void Order::FulfillOrderEasy(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError)
+void Order::GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FulfillOrder(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
-}
-
-void Order::GetUserOrderHistory(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings::PlatformServerUrl, *Namespace, *UserId, *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -134,11 +114,6 @@ void Order::GetUserOrderHistory(const FString& AccessToken, const FString& Names
 	Request->SetContentAsString(Content);
 	Request->OnProcessRequestComplete().BindStatic(GetUserOrderHistoryResponse, OnSuccess, OnError);
 	Request->ProcessRequest();
-}
-
-void Order::GetUserOrderHistoryEasy(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	GetUserOrderHistory(Credentials::Get().GetUserAccessToken(), Credentials::Get().GetUserNamespace(), Credentials::Get().GetUserId(), OrderNo, OnSuccess, OnError);
 }
 
 // =============================================================================================================================

@@ -28,8 +28,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void CreateNewOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FAccelByteModelsOrderCreate& OrderCreateRequest, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void CreateNewOrderEasy(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetUserOrderSuccess, const FAccelByteModelsOrderInfo&);
 	/**
@@ -39,8 +38,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void GetUserOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void GetUserOrderEasy(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&);
 	/**
@@ -50,8 +48,7 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
-	static void GetUserOrders(const FString& AccessToken, const FString& Namespace, const FString& UserId, int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void GetUserOrdersEasy(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FFulfillOrderSuccess, const FAccelByteModelsOrderInfo&);
 	/**
@@ -60,8 +57,7 @@ public:
 	 * @param OrderNo Order number.
 	 * @param OnSuccess OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsOrderInfo&.
 	 */
-	static void FulfillOrder(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError);
-	static void FulfillOrderEasy(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetUserOrderHistorySuccess, const TArray<FAccelByteModelsOrderHistoryInfo>&);
 	/**
@@ -72,8 +68,7 @@ public:
 	 * The result is TArray<FAccelByteModelsOrderHistoryInfo>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetUserOrderHistory(const FString& AccessToken, const FString& Namespace, const FString& UserId, const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError);
-	static void GetUserOrderHistoryEasy(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError);
 private:
 	Order() = delete; // static class can't have instance
 	Order(Order const&) = delete;
