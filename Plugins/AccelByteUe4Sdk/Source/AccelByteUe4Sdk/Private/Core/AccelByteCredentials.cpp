@@ -10,6 +10,14 @@ namespace AccelByte
 
 Credentials::Credentials()
 {
+	OnRefreshSuccess.BindLambda([this]()
+	{
+		RefreshAttempt = 0;
+		UE_LOG(LogTemp, Log, TEXT("OnRefreshSuccess.BindLambda"));
+		FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate(), Credentials::Get().GetRefreshTokenDuration());
+	});
+
+	RefreshTokenTickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByte::Credentials::RefreshTokenTick);
 }
 
 Credentials::~Credentials()
@@ -32,6 +40,7 @@ void Credentials::ForgetAll()
 	UserNamespace = FString();
 	UserId = FString();
 	UserDisplayName = FString();
+	FTicker::GetCoreTicker().RemoveTicker(FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate()));
 }
 
 void Credentials::SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace)
@@ -68,6 +77,40 @@ FDateTime Credentials::GetUserAccessTokenExpirationUtc() const
 FString Credentials::GetUserNamespace() const
 {
 	return UserNamespace;
+}
+
+float Credentials::GetRefreshTokenDuration() const
+{
+	auto Duration = Credentials::Get().GetUserAccessTokenExpirationUtc() - FDateTime::UtcNow();
+	float Result = (Duration.GetTotalSeconds() * 0.8f) + (FMath::RandRange(1, 60));	
+	return Result;
+}
+
+FTickerDelegate & Credentials::GetRefreshTokenTickerDelegate()
+{
+	return RefreshTokenTickerDelegate;
+}
+
+bool Credentials::RefreshTokenTick(float NextTickInSecond)
+{
+	float NextRefreshIn = FMath::Pow(2, RefreshAttempt);
+	if (NextRefreshIn < 60.0f) // next retry is not more than 60 second
+	{
+		RefreshAttempt += 1;
+		UE_LOG(LogTemp, Log, TEXT("Retry, attempt number: %d, retrying in %.4f second"), RefreshAttempt, NextRefreshIn);
+		AccelByte::Api::UserAuthentication::RefreshToken(Credentials::GetOnRefreshSuccess(),
+			FErrorHandler::CreateLambda([&, NextRefreshIn](int32 Code, FString Message)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Retrying..."));
+			FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate(), NextRefreshIn);
+		}));
+	}
+	return false;
+}
+
+AccelByte::Api::UserAuthentication::FRefreshTokenSuccess Credentials::GetOnRefreshSuccess() const
+{
+	return OnRefreshSuccess;
 }
 
 FString Credentials::GetUserId() const
