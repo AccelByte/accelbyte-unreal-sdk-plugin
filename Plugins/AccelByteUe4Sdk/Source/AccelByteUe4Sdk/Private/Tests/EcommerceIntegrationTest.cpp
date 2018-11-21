@@ -10,6 +10,7 @@
 #include "AccelByteItemApi.h"
 #include "AccelByteUserManagementApi.h"
 #include "AccelByteWalletApi.h"
+#include "AccelByteEntitlementApi.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 #include "FileManager.h"
@@ -24,6 +25,7 @@ using AccelByte::Api::Category;
 using AccelByte::Api::Item;
 using AccelByte::Api::Order;
 using AccelByte::Api::Wallet;
+using AccelByte::Api::Entitlement;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteEcommerceTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteEcommerceTest);
@@ -550,7 +552,6 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
 bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
 	bool bGetWalletSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
 	Wallet::GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([&](FAccelByteModelsWalletInfo Result)
@@ -561,6 +562,27 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	check(bGetWalletSuccess);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceQueryUserEntitlement, "AccelByte.Tests.Ecommerce.F.QueryUserEntitlementSuccess", AutomationFlagMaskEcommerce);
+bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
+{
+	bool bQueryEntitlementSuccess = false;
+	bool bQueryResultTrue = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
+
+	Entitlement::QueryUserEntitlement("", "", 0, 20,
+ Entitlement::FQueryUserEntitlementSuccess::CreateLambda([&](FAccelByteModelsEntitlementPagingSlicedResult Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bQueryEntitlementSuccess = true;
+		bQueryResultTrue = (Result.Data.Num() > 0);
+	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
+	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	check(bQueryEntitlementSuccess);
+	check(bQueryResultTrue);
 	return true;
 }
 
