@@ -31,6 +31,7 @@ DECLARE_DELEGATE(FDeleteUserByIdSuccess);
 static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 static FString GetVerificationCode(const FString& Email);
+FString GetVerificationCodeFromUserId(const FString& UserId);
 static FString GetSteamTicket();
 const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
@@ -860,8 +861,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	return true;
 }
 
-//Disable test, can't access the verification code from the table.
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeAndVerifyHeadlessDeviceAccountSuccess, "Disabled.Tests.User.UpgradeAndVerifyHeadlessDeviceAccount", AutomationFlagMask);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeAndVerifyHeadlessDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeAndVerifyHeadlessDeviceAccount", AutomationFlagMask);
 bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	UserAuthentication::ForgetAllCredentials();
@@ -900,7 +900,7 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bGetVerificationCode = false;
-	FString VerificationCode = GetVerificationCode(Email);
+	FString VerificationCode = GetVerificationCodeFromUserId(Credentials::Get().GetUserId());
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccountWithVerificationCode"));
 	FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest Request;
 	Request.Code = VerificationCode;
@@ -1042,6 +1042,21 @@ FString GetVerificationCode(const FString& Email)
 	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
 	FString args = TEXT("verificationcode -a " + Email);
+#ifdef _WIN32
+	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
+#endif
+	return VerificationCodeOutput;
+}
+
+FString GetVerificationCodeFromUserId(const FString& UserId)
+{
+	FString VerificationCodeOutput = TEXT("");
+	FString CurrentDirectory = TEXT("");
+	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
+	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
+	FString args = TEXT("verificationcode -p " + UserId);
 #ifdef _WIN32
 	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
 #endif
