@@ -66,25 +66,6 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                powershell '''
-                    $CONFIG_FILE = "$Env:WORKSPACE\\Plugins\\AccelByteUe4Sdk\\Source\\AccelByteUe4Sdk\\Private\\Core\\AccelByteSettings.cpp"
-                    $CONFIG_FIELD =
-                    "namespace AccelByte`r`n{`r`n`r`n" + 
-                    "const FString Settings::ServerBaseUrl = TEXT(`"$Env:UE4_BASE_URL`");`r`n" +
-                    "const FString Settings::ClientId = TEXT(`"$Env:UE4_CLIENT_ID`");`r`n" +
-                    "const FString Settings::ClientSecret = TEXT(`"$Env:UE4_CLIENT_SECRET`");`r`n" +
-                    "const FString Settings::Namespace = TEXT(`"$Env:NAMESPACE`");`r`n`r`n} // Namespace AccelByte"
-
-                    (get-content -raw $CONFIG_FILE) -replace "(?ms)^namespace AccelByte+.+} // Namespace AccelByte", $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
-
-                    foreach ($LINE in get-content $CONFIG_FILE)
-                    {
-                        if (($LINE -match "ClientId" -or $LINE -match "ClientSecret" ) -eq $false)
-                        {
-                            echo $LINE
-                        }
-                    }
-                '''
                 bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
             }
             post {
@@ -101,15 +82,18 @@ pipeline {
             }
             steps {
                 powershell '''
-                    $CONFIG_FILE = "$Env:WORKSPACE\\Plugins\\AccelByteUe4Sdk\\Source\\AccelByteUe4Sdk\\Private\\Core\\AccelByteSettings.cpp"
+                    $CONFIG_FILE="$Env:WORKSPACE\\Config\\DefaultEngine.ini"
                     $CONFIG_FIELD =
-                    "namespace AccelByte`r`n{`r`n`r`n" + 
-                    "const FString Settings::ServerBaseUrl = TEXT(`"$Env:UE4_BASE_URL`");`r`n" +
-                    "const FString Settings::ClientId = TEXT(`"$Env:UE4_CLIENT_ID`");`r`n" +
-                    "const FString Settings::ClientSecret = TEXT(`"$Env:UE4_CLIENT_SECRET`");`r`n" +
-                    "const FString Settings::Namespace = TEXT(`"$Env:NAMESPACE`");`r`n`r`n} // Namespace AccelByte"
+                    "[/Script/AccelByteUe4Sdk.AccelByteSettings]`r`n" + 
+                    "ClientId=$Env:UE4_CLIENT_ID`r`n" +
+                    "ClientSecret=$Env:UE4_CLIENT_SECRET`r`n" +
+                    "GameId=$Env:NAMESPACE`r`n" +
+                    "PublisherId=$Env:UE4_PublisherNamespace`r`n" +
+                    "IamServerUrl=`"$Env:UE4_BASE_URL`/iam`"`r`n" +
+                    "PlatformServerUrl=`"$Env:UE4_BASE_URL`/platform`"`r`n" +
+                    "LobbyServerUrl=`"$Env:UE4_BASE_URL`/lobby`/`"`r`n"
 
-                    (get-content -raw $CONFIG_FILE) -replace "(?ms)^namespace AccelByte+.+} // Namespace AccelByte", $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
+                    (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\\[\\/Script\\/AccelByteUe4Sdk\\.AccelByteSettings\\]).*' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
 
                     foreach ($LINE in get-content $CONFIG_FILE)
                     {
@@ -263,6 +247,23 @@ pipeline {
                 failure {
                     script{ 
                         FAILED_STAGE = "upload";
+                    }
+                }
+            }
+        }
+        stage('PublishDocumentation'){
+            agent {
+                label "windows-sdk"
+            }
+            steps {
+                bat '''
+                    PublishDocumentation.bat
+                '''
+            }
+            post {
+                failure {
+                    script{ 
+                        FAILED_STAGE = "PublishDocumentation";
                     }
                 }
             }
