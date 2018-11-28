@@ -16,7 +16,7 @@ namespace AccelByte
 {
 namespace Api
 {
-	
+
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -24,20 +24,135 @@ namespace Api
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
+    /**
+     * @brief presence enumeration.
+     */
+    enum class Presence : int {
+        Online = 21,
+        InParty = 22,
+        Playing = 23,
+        Offline = 24,
+    };
+
+    // Party 
+    /**
+     * @brief delegate for handling info party response.
+     */
+    DECLARE_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&); 
+
+
+    /**
+     * @brief delegate for handling create party response.
+     */
+    DECLARE_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&); 
+
+    /**
+     * @brief delegate for handling leave party response.
+     */
+    DECLARE_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&); 
+
+    /**
+     * @brief delegate for handling leave party notification.
+     */
+    DECLARE_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&);                  // Passive
+
+
+    /**
+     * @brief delegate for handling invite party response.
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&); 
+
+    /**
+     * @brief delegate for handling party invitation notification
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&);       // Passive
+
+    /**
+     * @brief delegate for handling get party invitation notification
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&);  // Passive
+
+    /**
+     * @brief delegate for handling join party response
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinReponse&); 
+
+    /**
+     * @brief delegate for handling join party notification
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&);              // Passive
+
+    /**
+     * @brief delegate for handling member kicked from party event
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&); 
+    
+    /**
+     * @brief delegate for handling member kicked from party event notification
+     */
+    DECLARE_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
+
+
+    // Chat
+    /**
+     * @brief delegate for handling private message response
+     */
+    DECLARE_DELEGATE_OneParam(FPrivateMessageResponse, const FAccelByteModelsPersonalMessageResponse&);    
+
+    /**
+     * @brief delegate for handling private message event notification
+     */
+    DECLARE_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPersonalMessageNotice&);         // Passive
+
+    /**
+     * @brief delegate for handling party message event response
+     */
+    DECLARE_DELEGATE_OneParam(FPartyMessageResponse, const FAccelByteModelsPartyMessageResponse&);
+
+    /**
+     * @brief delegate for handling party message event notification
+     */
+    DECLARE_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&);              // Passive
+    
+    // Presence
+    /**
+     * @brief delegate for handling user change presence status
+     */
+    DECLARE_DELEGATE_OneParam(FSetUserPresenceResponse, const FAccelByteModelsSetOnlineUsersResponse&);
+
+    /**
+     * @brief delegate for handling other user change their presence status event
+     */
+    DECLARE_DELEGATE_OneParam(FUserPresenceNotice, const FAccelByteModelsUsersPresenceNotice&);             // Passive
+
+    /**
+     * @brief delegate for handling get all user presence
+     */
+    DECLARE_DELEGATE_OneParam(FGetAllUserPresenceResponse, const FAccelByteModelsGetOnlineUsersResponse&);        
+
+
+    // Notification
+
+
+    // Matchmaking
+    /**
+     * @brief delegate for handling matchmaking response
+     */
+    DECLARE_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&);
+
+
+
 	/**
 	 * @brief Get instance of this singleton class.
 	 */
 	static Lobby& Get();
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
-	/**
+	
+    /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
-	 * 
-	 * @param OnSuccess Callback for when the connection was successful.
-	 * @param OnError Callback for when the connection was unsuccessful.
-	 * @param OnConnectionClosed Callback for when the connection was closed. The callback takes 3 parameter: int32 StatusCode, const FString& Reason, and bool Was Clean.
 	 */
-	void Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed);
+	void Connect();
 
 	/**
 	 * @brief Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
@@ -52,9 +167,7 @@ public:
 	bool IsConnected() const;
 	
 	/**
-	 * @brief Send ping; you should call this every some time (for example every 4 seconds) so that the server doesn't close the connection.
-	 * Note that the UE4 WebSocket library (which is just a simple implementation of libwebsockets.org) doesn't support sending ping control frame (RFC 6455 Section 5.5.2). This is LWS_WRITE_PING in libwebsockets.org.
-	 * So we just send a text data frame (RFC 6455 Section 5.6) containing empty text. This is LWS_WRITE_TEXT in libwebsockets.org.
+	 * @brief Send ping
 	 */
 	void SendPing();
 
@@ -64,36 +177,49 @@ public:
 	 * @param UserId The recipient's user ID.
 	 * @param Message Message to be sent.
 	 */
-	void SendPrivateMessage(const FString& UserId, const FString& Message);
+	FString SendPrivateMessage(const FString& UserId, const FString& Message);
 
 	/**
 	 * @brief Send a message to other party members.
 	 * 
 	 * @param Message Message to be sent.
 	 */
-	void SendPartyMessage(const FString& Message);
+    FString SendPartyMessage(const FString& Message);
 	
+
+    //------------------------
+    // Party
+    //------------------------
+
 	/**
 	 * @brief Get information about current party.
 	 */
-	void SendInfoPartyRequest();
+	FString SendInfoPartyRequest();
 
 	/**
 	 * @brief Create a party.
 	 */
-	void SendCreatePartyRequest();
+    FString SendCreatePartyRequest();
 
 	/**
 	 * @brief Leave current party.
 	 */
-	void SendLeavePartyRequest();
+    FString SendLeavePartyRequest();
 
 	/**
 	 * @brief Invite a user to party.
 	 * 
 	 * @param UserId The target user ID to be invited.
 	 */
-	void SendInviteToPartyRequest(const FString& UserId);
+    FString SendInviteToPartyRequest(const FString& UserId);
+
+    /**
+     * @brief Set presence status on lobby service
+     *
+     * @param State the presence state that you want to use. State is Presence type
+     * @param GameName the game name that you play
+     */
+	FString SendSetPresenceStatus(const Presence State, const FString& GameName);
 
 	/**
 	 * @brief Accept a party invitation.
@@ -101,31 +227,35 @@ public:
 	 * @param PartyId Party ID from the invitation notice.
 	 * @param InvitationToken Random string from the invitation notice.
 	 */
-	void SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken);
+	FString SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken);
 	
 	/**
 	 * @brief Kick a party member.
 	 * 
 	 * @param UserId The target user ID to be kicked.
 	 */
-	void SendKickPartyMemberRequest(const FString& UserId);
+	FString SendKickPartyMemberRequest(const FString& UserId);
 	/**
 	 * @brief Get a list of online users in the Lobby server.
 	 */
-	void SendGetOnlineUsersRequest();
+    FString SendGetOnlineUsersRequest();
 
-	DECLARE_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPrivateMessageNotice&);
-	DECLARE_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&);
-	DECLARE_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&);
-	DECLARE_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&);
-	DECLARE_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&);
-	DECLARE_DELEGATE_OneParam(FInviteToPartyResponse, const FAccelByteModelsInviteToPartyResponse&);
-	DECLARE_DELEGATE_OneParam(FPartyInvitationNotice, const FAccelByteModelsPartyInvitationNotice&);
-	DECLARE_DELEGATE_OneParam(FAcceptInvitationResponse, const FAccelByteModelsAcceptInvitationReponse&);
-	DECLARE_DELEGATE_OneParam(FPartyInvitationAcceptanceNotice, const FAccelByteModelsPartyInvitationAcceptanceNotice&);
-	DECLARE_DELEGATE_OneParam(FKickPartyMemberResponse, const FAccelByteModelsKickPartyMemberResponse&);
-	DECLARE_DELEGATE_OneParam(FGotKickedNoticeFromParty, const FAccelByteModelsGotKickedFromPartyNotice&);
-	DECLARE_DELEGATE_OneParam(FGetOnlineUsersResponse, const FAccelByteModelsGetOnlineUsersResponse&);
+    // Matchmaking
+    /**
+     * @brief start the matchmaking
+     *
+     * @param GameMode The mode that party member want to play.
+     * @param PartyId Party ID.
+     * @param MemberIds list of user id that in the party.
+     */
+    FString SendStartMatchmaking(FString GameMode, FString PartyId, TArray<FString> MemberIds);
+
+    /**
+     * @brief cancel the currently running matchmaking process
+     *     
+     * @param PartyId Party ID.     
+     */
+    FString SendCancelMatchmaking(FString PartyId);
 
 	/**
 	 * @brief You must bind delegates/callbacks first to handle the events.
@@ -133,37 +263,126 @@ public:
 	 * A delegate which ends with Notice means that it's like a notification, while one which ends with Response means it's like a response to a request.
 	 * The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
 	 * 
-	 * @param OnPrivateMessageNotice Called when a private message was received.
-	 * @param OnPartyMessageNotice Called when a party message was received.
-	 * @param OnInfoPartyResponse Called when server has responded to "get party information".
-	 * @param OnCreatePartyResponse Called when server has responded to "create party".
-	 * @param OnLeavePartyResponse Called when server has responded to "leave party".
-	 * @param OnInviteToPartyResponse Called when server has responded to "invite a user to party".
-	 * @param OnPartyInvitationNotice Called when you receive an invitation to join other's party.
-	 * @param OnAcceptInvitationResponse Called when server has responded to "accept a party invitation".
-	 * @param OnPartyInvitationAcceptanceNotice Called when your party invitation has been accepted.
-	 * @param OnKickPartyMemberResponse Called when server has responded to "kick a party member".
-	 * @param OnGotKickedNoticeFromParty Called when you got kicked from party.
-	 * @param OnGetOnlineUsersResponse Called when server has responded to "get online users".
+     * @param OnConnectSuccess Called when user connect to lobby successfully.
+     * @param OnConnectError Called when user fail to connect to lobby.
+     * @param FConnectionClosed Called when user disconnected from lobby.     
+     * @param OnLeavePartyNotice Called when other user leave the party.
+     * @param OnInvitePartyInvitationNotice Called when user invite to the party.
+     * @param OnInvitePartyGetInvitedNotice Called when user got invited to the party.
+     * @param OnInvitePartyJoinNotice Called when user join to the party.
+     * @param OnInvitePartyKickedNotice Called when other user has been kicked from the party.
+     * @param OnPrivateMessageNotice Called when user got private message.
+     * @param OnPartyMessageNotice Called when user got party message.
+     * @param OnUserPresenceNotice Called when other user change their presence status.
+	 * @param OnParsingError Called when receive invalid response from server.
 	 */
-	void BindDelegates(
+	void BindEvent(
+        const FConnectSuccess& OnConnectSuccess, 
+        const FErrorHandler& OnConnectError,
+        const FConnectionClosed& OnConnectionClosed,
+		const FLeavePartyNotice& OnLeavePartyNotice,
+		const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
+		const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
+		const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
+		const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
 		const FPrivateMessageNotice& OnPrivateMessageNotice,
 		const FPartyMessageNotice& OnPartyMessageNotice,
-		const FInfoPartyResponse& OnInfoPartyResponse,
-		const FCreatePartyResponse& OnCreatePartyResponse,
-		const FLeavePartyResponse& OnLeavePartyResponse,
-		const FInviteToPartyResponse& OnInviteToPartyResponse,
-		const FPartyInvitationNotice& OnPartyInvitationNotice,
-		const FAcceptInvitationResponse& OnAcceptInvitationResponse,
-		const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
-		const FKickPartyMemberResponse& OnKickPartyMemberResponse,
-		const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
-		const FGetOnlineUsersResponse& OnGetOnlineUsersResponse
+		const FUserPresenceNotice& OnUserPresenceNotice,
+        const FErrorHandler& OnParsingError
 	);
+
+
 	/**
 	 * @brief Unbind all delegates set previously.
 	 */
-	void UnbindDelegates();
+	void UnbindEvent();
+
+
+    // Party
+    /**
+     * @brief set info party response
+     *
+     * @param OnInfoPartyResponse set delegate .
+     */
+    void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse) { InfoPartyResponse = OnInfoPartyResponse; };
+
+    /**
+     * @brief create party response delegate
+     *
+     * @param OnCreatePartyResponse set delegate .
+     */
+    void SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse) { CreatePartyResponse = OnCreatePartyResponse; };
+
+    /**
+     * @brief set leave party response delegate
+     *
+     * @param OnLeavePartyResponse set delegate .
+     */
+    void SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse) { LeavePartyResponse = OnLeavePartyResponse; };
+
+    /**
+     * @brief set invite party response delegate
+     *
+     * @param OnInvitePartyResponse set delegate .
+     */
+    void SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse) { InvitePartyResponse = OnInvitePartyResponse; };
+
+    /**
+     * @brief set invite party join response
+     *
+     * @param OnInvitePartyJoinResponse set delegate .
+     */
+    void SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse) { InvitePartyJoinResponse = OnInvitePartyJoinResponse; };
+
+    /**
+     * @brief set invite party kick member reponse
+     *
+     * @param OnInvitePartyKickMemberResponse set delegate .
+     */
+    void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse) { InvitePartyKickMemberResponse = OnInvitePartyKickMemberResponse; };
+
+    // Chat
+    /**
+     * @brief set private message delegate
+     *
+     * @param OnPrivateMessageResponse set delegate .
+     */
+    void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse) { PrivateMessageResponse = OnPrivateMessageResponse; };
+
+    /**
+     * @brief set party message response
+     *
+     * @param OnPartyMessageResponse set delegate .
+     */
+    void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse) { PartyMessageResponse = OnPartyMessageResponse; };
+
+
+    // Presence
+    /**
+     * @brief set user presence response
+     *
+     * @param OnSetUserPresenceResponse set delegate .
+     */
+    void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnSetUserPresenceResponse) { SetUserPresenceResponse = OnSetUserPresenceResponse; };
+
+    /**
+     * @brief set info party response
+     *
+     * @param OnGetAllUserPresenceResponse set delegate .
+     */
+    void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse) { GetAllUserPresenceResponse = OnGetAllUserPresenceResponse; };
+
+    // Notification
+
+    // Matchmaking
+    /**
+     * @brief set matchmaking response
+     *
+     * @param OnMatchmakingResponse set delegate .
+     */
+    void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse) { MatchmakingResponse = OnMatchmakingResponse; };
+
+
 private:
 	Lobby();
 	~Lobby();
@@ -177,23 +396,48 @@ private:
 	void OnMessage(const FString& Message);
 	void OnClosed(int32 StatusCode, const FString& Reason, bool WasClean);
 
+    FString SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload = TEXT(""));
+    bool Tick(float DeltaTime);
+    FString GenerateMessageID(FString Prefix = TEXT(""));
+    FString LobbyMessageToJson(FString Message);
+
+    FTickerDelegate LobbyTickDelegate;
+    FDelegateHandle LobbyTickDelegateHandle;
 	TSharedPtr<IWebSocket> WebSocket;
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
+    FErrorHandler ParsingError;
 	FConnectionClosed ConnectionClosed;
 	
-	FPrivateMessageNotice PrivateMessageNotice;
-	FPartyMessageNotice PartyMessageNotice;
-	FInfoPartyResponse InfoPartyResponse;
-	FCreatePartyResponse CreatePartyResponse;
-	FLeavePartyResponse LeavePartyResponse;
-	FInviteToPartyResponse InviteToPartyResponse;
-	FPartyInvitationNotice PartyInvitationNotice;
-	FAcceptInvitationResponse AcceptInvitationResponse;
-	FPartyInvitationAcceptanceNotice PartyInvitationAcceptanceNotice;
-	FKickPartyMemberResponse KickPartyMemberResponse;
-	FGotKickedNoticeFromParty GotKickedFromPartyNotice;
-	FGetOnlineUsersResponse GetOnlineUsersResponse;
+    // Party 
+    FInfoPartyResponse InfoPartyResponse;
+    FCreatePartyResponse CreatePartyResponse;
+    FLeavePartyResponse LeavePartyResponse;
+    FLeavePartyNotice LeavePartyNotice;
+    FInvitePartyResponse InvitePartyResponse;
+    FInvitePartyInvitationNotice InvitePartyInvitationNotice;
+    FInvitePartyGetInvitedNotice InvitePartyGetInvitedNotice;
+    FInvitePartyJoinResponse InvitePartyJoinResponse;
+    FInvitePartyJoinNotice InvitePartyJoinNotice;
+    FInvitePartyKickMemberResponse InvitePartyKickMemberResponse;
+    FInvitePartyKickedNotice InvitePartyKickedNotice;
+
+    // Chat
+    FPrivateMessageResponse PrivateMessageResponse;
+    FPrivateMessageNotice PrivateMessageNotice;
+    FPartyMessageResponse PartyMessageResponse;
+    FPartyMessageNotice PartyMessageNotice;
+
+    // Presence
+    FSetUserPresenceResponse SetUserPresenceResponse;
+    FUserPresenceNotice UserPresenceNotice;
+    FGetAllUserPresenceResponse GetAllUserPresenceResponse;
+
+    // Notification
+
+
+    // Matchmaking
+    FMatchmakingResponse MatchmakingResponse;
 };
 
 } // Namespace Api
