@@ -15,11 +15,6 @@ class ACCELBYTEUE4SDK_API Settings
 {
 public:
 	static FString ClientId;
-	/**
-	 * @brief Secret key!
-	 * IETF does not recommend that you put your client secrets in "the the source code of the application or an associated resource bundle". Reference: RFC 6819 Section 5.2.3.1.
-	 * @todo IAM, remove this.
-	 */
 	static FString ClientSecret;
 	static FString GameId;
 	static FString PublisherId;

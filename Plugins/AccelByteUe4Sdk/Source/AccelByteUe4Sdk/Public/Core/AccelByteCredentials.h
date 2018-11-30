@@ -6,7 +6,10 @@
 
 #include "CoreMinimal.h"
 #include "AccelByteOauth2Models.h"
+#include "AccelByteUserAuthenticationApi.h"
+#include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Engine.h"
 #include "AccelByteCredentials.generated.h"
 
 namespace AccelByte
@@ -39,6 +42,9 @@ public:
 	FString GetUserId() const;
 	FString GetUserDisplayName() const;
 	FString GetUserNamespace() const;
+	float GetRefreshTokenDuration() const;
+	FTickerDelegate& GetRefreshTokenTickerDelegate();
+
 private:
 	Credentials(Credentials const&) = delete; // Copy constructor
 	Credentials(Credentials&&) = delete; // Move constructor
@@ -53,6 +59,12 @@ private:
 	FString UserNamespace;
 	FString UserId;
 	FString UserDisplayName;
+	int32 RefreshAttempt = 0;
+	bool RefreshTokenTick(float NextTickInSecond);
+	FTickerDelegate RefreshTokenTickerDelegate;
+	AccelByte::Api::UserAuthentication::FRefreshTokenSuccess OnRefreshSuccess;
+	AccelByte::Api::UserAuthentication::FRefreshTokenSuccess GetOnRefreshSuccess() const;
+
 protected:
 	Credentials();
 	~Credentials();
