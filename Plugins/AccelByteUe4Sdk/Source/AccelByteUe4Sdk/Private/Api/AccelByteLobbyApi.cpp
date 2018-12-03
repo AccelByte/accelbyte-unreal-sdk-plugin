@@ -13,6 +13,70 @@ namespace AccelByte
 {
 namespace Api
 {
+    namespace LobbyRequest
+    {
+        // Party
+        const FString PartyInfo = TEXT("partyInfoRequest");
+        const FString CreateParty = TEXT("partyCreateRequest");
+        const FString LeaveParty = TEXT("partyLeaveRequest");
+        const FString InviteParty = TEXT("partyInviteRequest");
+        const FString JoinParty = TEXT("partyJoinRequest");
+        const FString KickParty = TEXT("partyKickRequest");
+
+        // Chat
+        const FString PersonalChat = TEXT("personalChatRequest");
+        const FString PartyChat = TEXT("partyChatRequest");
+
+        // Presence
+        const FString SetPresence = TEXT("setUserStatusRequest");
+        const FString FriendsPresence = TEXT("friendsPresenceRequest");
+
+        // Notification
+
+        // Matchmaking
+        const FString StartMatchmaking = TEXT("startMatchmakingRequest");
+        const FString CancelMatchmaking = TEXT("cancelMatchmakingRequest");
+    }
+
+    namespace LobbyResponse
+    {
+        // Party
+        const FString PartyInfo = TEXT("partyInfoResponse");
+        const FString CreateParty = TEXT("partyCreateResponse");
+        const FString LeaveParty = TEXT("partyLeaveResponse");
+        const FString LeavePartyNotice = TEXT("partyLeaveNotif");        
+        const FString InviteParty = TEXT("partyInviteResponse");
+        const FString InvitePartyNotice = TEXT("partyInviteNotif");
+        const FString InvitedToParty = TEXT("partyGetInvitedNotif");
+        const FString JoinParty = TEXT("partyJoinResponse");
+        const FString JoinPartyNotice = TEXT("partyJoinNotif");
+        const FString KickParty = TEXT("partyKickResponse");
+        const FString KickPartyNotice = TEXT("partyKickNotif");
+
+        // Chat
+        const FString PersonalChat = TEXT("personalChatResponse");
+        const FString PersonalChatNotice = TEXT("personalChatNotif");
+        const FString PartyChat = TEXT("partyChatResponse");
+        const FString PartyChatNotice = TEXT("partyChatNotif");
+
+        // Presence
+        const FString SetPresence = TEXT("setUserStatusResponse");
+        const FString PresenceNotice = TEXT("userStatusNotif");
+        const FString FriendsPresence = TEXT("friendsPresenceResponse");
+
+        // Notification
+
+        // Matchmaking
+        const FString StartMatchmaking = TEXT("matchmakingResponse");
+    }
+
+    namespace Prefix
+    {
+        const FString Party = TEXT("party");
+        const FString Chat = TEXT("chat");
+        const FString Presence = TEXT("presence");
+        const FString Matchmaking = TEXT("matchmaking");
+    }
 
 Lobby & Lobby::Get()
 {
@@ -22,23 +86,18 @@ Lobby & Lobby::Get()
     return Instance;
 }
 
-void Lobby::Connect(const FConnectSuccess& OnSuccess, const FErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed)
+void Lobby::Connect()
 {
-	ConnectionClosed = OnConnectionClosed;
-	ConnectSuccess = OnSuccess;
-	ConnectError = OnError;
-
+	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials::Get().GetUserAccessToken());
-	// Samuel's note: Module have to be loaded first or else it will crash, damn it.
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings::LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
-	WebSocket->Connect();
-	
+	WebSocket->Connect();	
 	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Settings::LobbyServerUrl);
 }
 
@@ -46,6 +105,7 @@ void Lobby::Disconnect()
 {
 	if(WebSocket.IsValid() && WebSocket->IsConnected())
 	{
+		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
 		WebSocket->OnMessage().Clear();
 		WebSocket->OnConnected().Clear();
 		WebSocket->OnConnectionError().Clear();
@@ -66,148 +126,140 @@ void Lobby::SendPing()
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		WebSocket->Send(FString());
-		UE_LOG(LogTemp, Display, TEXT("Sending ping"))
 	}
 }
 
-void Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
+//-------------------------------------------------------------------------------------------------
+// Chat
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:1to1Chat\nid:%s\nto:%s\npayload:%s\n"), *FGuid::NewGuid().ToString(EGuidFormats::Digits), *UserId, *Message);
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::PersonalChat, Prefix::Chat,
+        FString::Printf(TEXT("to: %s\npayload: %s\n"), *UserId, *Message));
 }
 
-void Lobby::SendPartyMessage(const FString& Message)
+FString Lobby::SendPartyMessage(const FString& Message)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:partyChat\nid:%s\npayload:%s\n"), *FGuid::NewGuid().ToString(EGuidFormats::Digits), *Message);
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::PartyChat, Prefix::Chat,
+        FString::Printf(TEXT("payload: %s\n"), *Message));
 }
 
-void Lobby::SendInfoPartyRequest()
+//-------------------------------------------------------------------------------------------------
+// Party
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SendInfoPartyRequest()
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:info\n"));
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::PartyInfo, Prefix::Party);
 }
 
-void Lobby::SendCreatePartyRequest()
+FString Lobby::SendCreatePartyRequest()
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:create\n"));
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::CreateParty, Prefix::Party);
 }
 
-void Lobby::SendLeavePartyRequest()
+FString Lobby::SendLeavePartyRequest()
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:leave\n"));
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::LeaveParty, Prefix::Party);
 }
 
-void Lobby::SendInviteToPartyRequest(const FString& UserId)
+FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:invite\nfriendID:%s\n"), *UserId);
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::InviteParty, Prefix::Party,
+        FString::Printf(TEXT("friendID: %s"), *UserId));
 }
 
-void Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
+FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:join\npartyID:%s\ninvitationToken:%s\n"), *PartyId, *InvitationToken);
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::JoinParty, Prefix::Party,
+        FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
 }
 
-void Lobby::SendKickPartyMemberRequest(const FString& UserId)
+FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:kick\nmemberID:%s\n"), *UserId);
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
+        FString::Printf(TEXT("memberID: %s\n"), *UserId));
 }
 
-void Lobby::SendGetOnlineUsersRequest()
+//-------------------------------------------------------------------------------------------------
+// Presence
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SendSetPresenceStatus(const Presence State, const FString& GameName)
 {
-	if (WebSocket.IsValid() && WebSocket->IsConnected())
-	{
-		FString Content = FString::Printf(TEXT("type:listOnlineFriends\n"));
-		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content)
-	}
+    return SendRawRequest(LobbyRequest::SetPresence, Prefix::Presence,
+        FString::Printf(TEXT("statusID: %d\ngameName: %s\n"), (int)State, *GameName));
 }
 
-void Lobby::BindDelegates(const FPrivateMessageNotice& OnPrivateMessageReceived,
-	const FPartyMessageNotice& OnPartyMessageReceived,
-	const FInfoPartyResponse& OnInfoPartyResponse,
-	const FCreatePartyResponse& OnCreatePartyResponse,
-	const FLeavePartyResponse& OnLeavePartyResponse,
-	const FInviteToPartyResponse& OnInviteToPartyResponse,
-	const FPartyInvitationNotice& OnPartyInvitationReceived,
-	const FAcceptInvitationResponse& OnAcceptInvitationResponse,
-	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceReceived,
-	const FKickPartyMemberResponse& OnKickPartyMemberResponse,
-	const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
-	const FGetOnlineUsersResponse& OnGetOnlineUsersResponse)
+FString Lobby::SendGetOnlineUsersRequest()
 {
-	PrivateMessageNotice = OnPrivateMessageReceived;
-	PartyMessageNotice = OnPartyMessageReceived;
-	InfoPartyResponse = OnInfoPartyResponse;
-	CreatePartyResponse = OnCreatePartyResponse;
-	LeavePartyResponse = OnLeavePartyResponse;
-	InviteToPartyResponse = OnInviteToPartyResponse;
-	PartyInvitationNotice = OnPartyInvitationReceived;
-	AcceptInvitationResponse = OnAcceptInvitationResponse;
-	PartyInvitationAcceptanceNotice = OnPartyInvitationAcceptanceReceived;
-	KickPartyMemberResponse = OnKickPartyMemberResponse,
-	GotKickedFromPartyNotice = OnGotKickedNoticeFromParty,
-	GetOnlineUsersResponse = OnGetOnlineUsersResponse;
+    return SendRawRequest(LobbyRequest::FriendsPresence, Prefix::Presence);
 }
 
-
-void Lobby::UnbindDelegates()
+//-------------------------------------------------------------------------------------------------
+// Matchmaking
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SendStartMatchmaking(FString GameMode, FString PartyId, TArray<FString> MemberIds)
 {
-	PrivateMessageNotice.Unbind();
-	PartyMessageNotice.Unbind();
-	InfoPartyResponse.Unbind();
-	CreatePartyResponse.Unbind();
-	LeavePartyResponse.Unbind();
-	InviteToPartyResponse.Unbind();
-	PartyInvitationNotice.Unbind();
-	AcceptInvitationResponse.Unbind();
-	PartyInvitationAcceptanceNotice.Unbind();
-	KickPartyMemberResponse.Unbind();
-	GotKickedFromPartyNotice.Unbind();
-	GetOnlineUsersResponse.Unbind();
+    return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
+        FString::Printf(TEXT("gameMode: %s\npartyId: %s\nmemberId: [%s,]"), 
+            *GameMode, *PartyId, *FString::Join(MemberIds, TEXT(","))));
+}
+
+FString Lobby::SendCancelMatchmaking(FString PartyId)
+{
+    return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
+        FString::Printf(TEXT("partyId: %s\n"),*PartyId));
+}
+
+//-------------------------------------------------------------------------------------------------
+// Notification
+//-------------------------------------------------------------------------------------------------
+
+void Lobby::BindEvent(
+    const FConnectSuccess& OnConnectSuccess,
+    const FErrorHandler& OnConnectError,
+    const FConnectionClosed& OnConnectionClosed,
+    const FLeavePartyNotice& OnLeavePartyNotice,
+    const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
+    const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
+    const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
+    const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+    const FPrivateMessageNotice& OnPrivateMessageNotice,
+    const FPartyMessageNotice& OnPartyMessageNotice,
+    const FUserPresenceNotice& OnUserPresenceNotice,
+    const FErrorHandler& OnParsingError)
+{
+    ConnectionClosed = OnConnectionClosed;
+    ConnectSuccess = OnConnectSuccess;
+    ConnectError = OnConnectError;
+    LeavePartyNotice = OnLeavePartyNotice;
+    InvitePartyInvitationNotice = OnInvitePartyInvitationNotice;
+    InvitePartyGetInvitedNotice = OnInvitePartyGetInvitedNotice;
+    InvitePartyJoinNotice = OnInvitePartyJoinNotice;
+    InvitePartyKickedNotice = OnInvitePartyKickedNotice;
+    PrivateMessageNotice = OnPrivateMessageNotice;
+    PartyMessageNotice = OnPartyMessageNotice;
+    UserPresenceNotice = OnUserPresenceNotice;		
+    ParsingError = OnParsingError;
+}
+
+void Lobby::UnbindEvent()
+{
+    LeavePartyNotice.Unbind();
+    InvitePartyInvitationNotice.Unbind();
+    InvitePartyGetInvitedNotice.Unbind();
+    InvitePartyJoinNotice.Unbind();
+    InvitePartyKickedNotice.Unbind();
+    PrivateMessageNotice.Unbind();
+    PartyMessageNotice.Unbind();
+    UserPresenceNotice.Unbind();	
 }
 
 void Lobby::OnConnected()
 {
 	UE_LOG(LogTemp, Display, TEXT("Connected"))
 	ConnectSuccess.ExecuteIfBound();
+	// start timer, ping every 4 second
+	LobbyTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(LobbyTickDelegate, 4);
 }
 
 void Lobby::OnConnectionError(const FString& Error)
@@ -222,97 +274,131 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
 
+FString Lobby::SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload)
+{
+    if (WebSocket.IsValid() && WebSocket->IsConnected())
+    {
+        FString MessageID = GenerateMessageID(MessageIDPrefix);
+        FString Content = FString::Printf(TEXT("type: %s\nid: %s"),*MessageType, *MessageID);
+        if (!CustomPayload.IsEmpty())
+        {
+            Content.Append(FString::Printf(TEXT("\n%s"), *CustomPayload));
+        }
+        WebSocket->Send(Content);
+        UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content);
+        return MessageID;
+    }
+    return TEXT("");
+}
+
+bool Lobby::Tick(float DeltaTime)
+{
+	SendPing();
+	return true;
+}
+
+FString Lobby::GenerateMessageID(FString Prefix)
+{
+    return FString::Printf(TEXT("%s-%d"), FMath::RandRange(1000,9999));
+}
+
+FString Lobby::LobbyMessageToJson(FString Message)
+{
+    FString ParsedJson = TEXT("{");
+    TArray<FString> Out;
+    Message.ParseIntoArray(Out, TEXT("\n"), true);
+    for (int i = 0; i < Out.Num(); i++)
+    {
+        FString currentLine = Out[i];
+        if (currentLine.Contains("["))
+        {
+            ParsedJson += "\"";
+            currentLine.ReplaceInline(TEXT(": "), TEXT("\":"));
+            if (!currentLine.Contains("[]"))
+            {
+                currentLine.ReplaceInline(TEXT("["), TEXT("[\""));
+                currentLine.ReplaceInline(TEXT(",]"), TEXT("\"]"));
+                currentLine.ReplaceInline(TEXT(","), TEXT("\",\""));
+            }
+            ParsedJson += currentLine;
+        }
+        else
+        {
+            ParsedJson += "\"";
+            currentLine.ReplaceInline(TEXT(": "), TEXT("\":\""));
+            ParsedJson += currentLine;
+            ParsedJson += "\"";
+        }
+        if (i < Out.Num() - 1)
+        {
+            ParsedJson += ",";
+        }
+    }
+    ParsedJson += TEXT("}");
+    return ParsedJson;
+}
+
 void Lobby::OnMessage(const FString& Message)
 {
-	UE_LOG(LogTemp, Display, TEXT("I GOT SOMETHING: %s"), *Message)
+    UE_LOG(LogTemp, Display, TEXT("Raw Lobby Response\n%s"), *Message);
+    FString ParsedJson = LobbyMessageToJson(Message);
+    UE_LOG(LogTemp, Display, TEXT("JSON Version: %s"), *ParsedJson);  
+    TSharedPtr<FJsonObject> JsonParsed;
+    TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParsedJson);
+    if (!FJsonSerializer::Deserialize(JsonReader, JsonParsed))
+    {
+        UE_LOG(LogTemp, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJson);
+        return;
+    }
+    FString lobbyResponseType = JsonParsed->GetStringField("type");
+    UE_LOG(LogTemp, Display, TEXT("Type: %s"), *lobbyResponseType);
 
-	FString ParsedJson = TEXT("{\"");
-	ParsedJson += Message;
-	ParsedJson.RemoveFromEnd(TEXT("\n"));
-	ParsedJson += TEXT("\"}");
-	ParsedJson.ReplaceInline(TEXT(":"), TEXT("\":\""));
-	ParsedJson.ReplaceInline(TEXT("\n"), TEXT("\",\""));
-	
-	UE_LOG(LogTemp, Display, TEXT("CONVERTED TO JSON: %s"), *ParsedJson)
+#define HANDLE_LOBBY_MESSAGE(MessageType, Model, ResponseCallback) \
+    if (lobbyResponseType.Equals(MessageType)) \
+    { \
+        Model Result; \
+        bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0); \
+        if (bSuccess) \
+        { \
+            ResponseCallback.ExecuteIfBound(Result); \
+        } \
+        else \
+        { \
+            ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse response %s, Raw: %s"), *MessageType, *ParsedJson)); \
+        } \
+        return; \
+    }\
 
-	FAccelByteModelsLobbyType Type;
-	FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Type, 0, 0);
-	
-	const FString ResponseType = Type.Type;
-	UE_LOG(LogTemp, Display, TEXT("Type: %s"), *ResponseType)
+    // Party 
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, InfoPartyResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::CreateParty, FAccelByteModelsCreatePartyResponse, CreatePartyResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::LeaveParty, FAccelByteModelsLeavePartyResponse, LeavePartyResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::LeavePartyNotice, FAccelByteModelsLeavePartyNotice, LeavePartyNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::InviteParty, FAccelByteModelsPartyInviteResponse, InvitePartyResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::InvitedToParty, FAccelByteModelsInvitationNotice, InvitePartyInvitationNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::JoinParty, FAccelByteModelsPartyGetInvitedNotice, InvitePartyGetInvitedNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::JoinPartyNotice, FAccelByteModelsPartyJoinReponse, InvitePartyJoinResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickParty, FAccelByteModelsPartyJoinNotice, InvitePartyJoinNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickPartyNotice, FAccelByteModelsKickPartyMemberResponse, InvitePartyKickMemberResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickPartyNotice, FAccelByteModelsGotKickedFromPartyNotice, InvitePartyKickedNotice);
 
-	if(ResponseType.Compare(TEXT("1to1Chat")) == 0)
-	{
-		FAccelByteModelsPrivateMessageNotice Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		PrivateMessageNotice.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("partyChat")) == 0)
-	{
-		FAccelByteModelsPartyMessageNotice Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		PartyMessageNotice.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("info")) == 0)
-	{
-		FAccelByteModelsInfoPartyResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		InfoPartyResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("create")) == 0)
-	{
-		FAccelByteModelsCreatePartyResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		CreatePartyResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("leave")) == 0)
-	{
-		FAccelByteModelsLeavePartyResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		LeavePartyResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("invite")) == 0)
-	{
-		FAccelByteModelsInviteToPartyResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		InviteToPartyResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("invitation")) == 0)
-	{
-		FAccelByteModelsPartyInvitationNotice Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		PartyInvitationNotice.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("join")) == 0)
-	{
-		FAccelByteModelsAcceptInvitationReponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		AcceptInvitationResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("joinNotice")) == 0)
-	{
-		FAccelByteModelsPartyInvitationAcceptanceNotice Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		PartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("kick")) == 0)
-	{
-		FAccelByteModelsKickPartyMemberResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		KickPartyMemberResponse.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("kickNotice")) == 0)
-	{
-		FAccelByteModelsGotKickedFromPartyNotice Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		GotKickedFromPartyNotice.ExecuteIfBound(Result);
-	}
-	else if (ResponseType.Compare(TEXT("onlineFriends")) == 0)
-	{
-		FAccelByteModelsGetOnlineUsersResponse Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
-		GetOnlineUsersResponse.ExecuteIfBound(Result);
-	}
+    // Chat
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PrivateMessageResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChatNotice, FAccelByteModelsPersonalMessageNotice, PrivateMessageNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyMessageResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChatNotice, FAccelByteModelsPartyMessageNotice, PartyMessageNotice);
+
+    // Presence
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::SetPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PresenceNotice, FAccelByteModelsUsersPresenceNotice, UserPresenceNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllUserPresenceResponse);
+
+    // Matchmaking
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingResponse);
+
+#undef HANDLE_LOBBY_MESSAGE
+    ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Warning: Unhandled message %s, Raw: %s"), *lobbyResponseType, *ParsedJson));
+
 }
 
 Lobby::Lobby()
@@ -321,6 +407,7 @@ Lobby::Lobby()
 
 Lobby::~Lobby()
 {
+    Disconnect();
 }
 
 } // Namespace Api

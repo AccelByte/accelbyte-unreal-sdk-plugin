@@ -8,20 +8,9 @@
 using AccelByte::Api::Lobby;
 using AccelByte::FErrorHandler;
 
-void UAccelByteBlueprintsLobby::Connect(const FConnectSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed)
+void UAccelByteBlueprintsLobby::Connect()
 {
-	Lobby::Get().Connect(Lobby::FConnectSuccess::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}),
-		Lobby::FConnectionClosed::CreateLambda([OnConnectionClosed](int32 StatusCode, const FString& Reason, bool WasClean)
-	{
-		OnConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
-	}));
+	Lobby::Get().Connect();
 }
 
 void UAccelByteBlueprintsLobby::Disconnect()
@@ -84,71 +73,200 @@ void UAccelByteBlueprintsLobby::SendGetOnlineUsersRequest()
 	Lobby::Get().SendGetOnlineUsersRequest();
 }
 
-void UAccelByteBlueprintsLobby::BindDelegates(
-	const FPrivateMessageNotice& OnPrivateMessageNotice,
-	const FPartyMessageNotice& OnPartyMessageNotice,
-	const FInfoPartyResponse& OnInfoPartyResponse,
-	const FCreatePartyResponse& OnCreatePartyResponse,
-	const FLeavePartyResponse& OnLeavePartyResponse,
-	const FInviteToPartyResponse& OnInviteToPartyResponse,
-	const FPartyInvitationNotice& OnPartyInvitationNotice,
-	const FAcceptInvitationResponse& OnAcceptInvitationResponse,
-	const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
-	const FKickPartyMemberResponse& OnKickPartyMemberResponse,
-	const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
-	const FGetOnlineUsersResponse& OnGetOnlineUsersResponse)
+void UAccelByteBlueprintsLobby::BindEvent(
+    const FConnectSuccess& OnSuccess,
+    const FBlueprintErrorHandler& OnError,
+    const FConnectionClosed& OnConnectionClosed,
+    const FLeavePartyNotice& OnLeavePartyNotice,
+    const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
+    const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
+    const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
+    const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+    const FPrivateMessageNotice& OnPrivateMessageNotice,
+    const FPartyMessageNotice& OnPartyMessageNotice,
+    const FUserPresenceNotice& OnUserPresenceNotice,
+    const FBlueprintErrorHandler& OnParsingError)
 {
-	Lobby::Get().BindDelegates(Lobby::FPrivateMessageNotice::CreateLambda([OnPrivateMessageNotice](const FAccelByteModelsPrivateMessageNotice& Result)
-	{
-		OnPrivateMessageNotice.ExecuteIfBound(Result);
-	}),
-	Lobby::FPartyMessageNotice::CreateLambda([OnPartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result)
-	{
-		OnPartyMessageNotice.ExecuteIfBound(Result);
-	}),
-	Lobby::FInfoPartyResponse::CreateLambda([OnInfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result)
-	{
-		OnInfoPartyResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FCreatePartyResponse::CreateLambda([OnCreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result)
-	{
-		OnCreatePartyResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FLeavePartyResponse::CreateLambda([OnLeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result)
-	{
-		OnLeavePartyResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FInviteToPartyResponse::CreateLambda([OnInviteToPartyResponse](const FAccelByteModelsInviteToPartyResponse& Result)
-	{
-		OnInviteToPartyResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FPartyInvitationNotice::CreateLambda([OnPartyInvitationNotice](const FAccelByteModelsPartyInvitationNotice& Result)
-	{
-		OnPartyInvitationNotice.ExecuteIfBound(Result);
-	}),
-	Lobby::FAcceptInvitationResponse::CreateLambda([OnAcceptInvitationResponse](const FAccelByteModelsAcceptInvitationReponse& Result)
-	{
-		OnAcceptInvitationResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FPartyInvitationAcceptanceNotice::CreateLambda([OnPartyInvitationAcceptanceNotice](const FAccelByteModelsPartyInvitationAcceptanceNotice& Result)
-	{
-		OnPartyInvitationAcceptanceNotice.ExecuteIfBound(Result);
-	}),
-	Lobby::FKickPartyMemberResponse::CreateLambda([OnKickPartyMemberResponse](const FAccelByteModelsKickPartyMemberResponse& Result)
-	{
-		OnKickPartyMemberResponse.ExecuteIfBound(Result);
-	}),
-	Lobby::FGotKickedNoticeFromParty::CreateLambda([OnGotKickedNoticeFromParty](const FAccelByteModelsGotKickedFromPartyNotice& Result)
-	{
-		OnGotKickedNoticeFromParty.ExecuteIfBound(Result);
-	}),
-	Lobby::FGetOnlineUsersResponse::CreateLambda([OnGetOnlineUsersResponse](const FAccelByteModelsGetOnlineUsersResponse& Result)
-	{
-		OnGetOnlineUsersResponse.ExecuteIfBound(Result);
-	}));
-}
+    FSimpleDelegate OnSuccessDelegate = FSimpleDelegate::CreateLambda([OnSuccess]() {
+        OnSuccess.ExecuteIfBound();
+    });
 
+    FErrorHandler OnErrorDelegate = FErrorHandler::CreateLambda([OnError](int32 Code, const FString& ErrorMessage) {
+        OnError.ExecuteIfBound(Code, ErrorMessage);
+    });
+
+    AccelByte::Api::Lobby::FConnectionClosed OnConnectionCloseDelegate =
+        AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([OnConnectionClosed](int32  StatusCode, const FString& Reason, bool  WasClean) {
+        OnConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
+    });
+
+
+
+    // Party
+    AccelByte::Api::Lobby::FLeavePartyNotice OnLeavePartyNoticeDelegate =
+        AccelByte::Api::Lobby::FLeavePartyNotice::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
+        OnLeavePartyNotice.ExecuteIfBound(Result);
+    });
+
+    AccelByte::Api::Lobby::FInvitePartyInvitationNotice OnInvitePartyInvitationNoticeDelegate =
+        AccelByte::Api::Lobby::FInvitePartyInvitationNotice::CreateLambda([OnInvitePartyInvitationNotice](const FAccelByteModelsInvitationNotice& Result) {
+        OnInvitePartyInvitationNotice.ExecuteIfBound(Result);
+    });
+
+    AccelByte::Api::Lobby::FInvitePartyGetInvitedNotice OnInvitePartyGetInvitedNoticeDelegate =
+        AccelByte::Api::Lobby::FInvitePartyGetInvitedNotice::CreateLambda([OnInvitePartyGetInvitedNotice](const FAccelByteModelsPartyGetInvitedNotice& Result) {
+        OnInvitePartyGetInvitedNotice.ExecuteIfBound(Result);
+    });
+
+    AccelByte::Api::Lobby::FInvitePartyJoinNotice OnInvitePartyJoinNoticeDelegate =
+        AccelByte::Api::Lobby::FInvitePartyJoinNotice::CreateLambda([OnInvitePartyJoinNotice](const FAccelByteModelsPartyJoinNotice& Result) {
+        OnInvitePartyJoinNotice.ExecuteIfBound(Result);
+    });
+
+    AccelByte::Api::Lobby::FInvitePartyKickedNotice OnInvitePartyKickedNoticeDelegate =
+        AccelByte::Api::Lobby::FInvitePartyKickedNotice::CreateLambda([OnInvitePartyKickedNotice](const FAccelByteModelsGotKickedFromPartyNotice& Result) {
+        OnInvitePartyKickedNotice.ExecuteIfBound(Result);
+    });
+    
+    // Chat
+    AccelByte::Api::Lobby::FPrivateMessageNotice OnPrivateMessageNoticeDelegate =
+        AccelByte::Api::Lobby::FPrivateMessageNotice::CreateLambda([OnPrivateMessageNotice](const FAccelByteModelsPersonalMessageNotice& Result) {
+        OnPrivateMessageNotice.ExecuteIfBound(Result);
+    });
+
+    AccelByte::Api::Lobby::FPartyMessageNotice OnPartyMessageNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyMessageNotice::CreateLambda([OnPartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result) {
+        OnPartyMessageNotice.ExecuteIfBound(Result);
+    });
+
+    // Presence
+    AccelByte::Api::Lobby::FUserPresenceNotice OnOnUserPresenceNoticeDelegate =
+        AccelByte::Api::Lobby::FUserPresenceNotice::CreateLambda([OnUserPresenceNotice](const FAccelByteModelsUsersPresenceNotice& Result) {
+        OnUserPresenceNotice.ExecuteIfBound(Result);
+    });
+
+    FErrorHandler OnParsingErrorDelegate = FErrorHandler::CreateLambda([OnParsingError](int32 Code, const FString& ErrorMessage) {
+        OnParsingError.ExecuteIfBound(Code, ErrorMessage);
+    });
+    
+	Lobby::Get().BindEvent(
+        OnSuccessDelegate,
+        OnErrorDelegate,
+        OnConnectionCloseDelegate,
+        OnLeavePartyNoticeDelegate,
+        OnInvitePartyInvitationNoticeDelegate,
+        OnInvitePartyGetInvitedNoticeDelegate,
+        OnInvitePartyJoinNoticeDelegate,
+        OnInvitePartyKickedNoticeDelegate,
+        OnPrivateMessageNoticeDelegate,
+        OnPartyMessageNoticeDelegate,
+        OnOnUserPresenceNoticeDelegate,
+        OnParsingErrorDelegate);
+}
 void UAccelByteBlueprintsLobby::UnbindDelegates()
 {
-	Lobby::Get().UnbindDelegates();
+    Lobby::Get().UnbindEvent();
+}
+
+// Party
+void UAccelByteBlueprintsLobby::SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse)
+{
+    AccelByte::Api::Lobby::FInfoPartyResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FInfoPartyResponse::CreateLambda([OnInfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result) {
+        OnInfoPartyResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetInfoPartyResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse)
+{
+    AccelByte::Api::Lobby::FCreatePartyResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FCreatePartyResponse::CreateLambda([OnCreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result) {
+        OnCreatePartyResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetCreatePartyResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse)
+{
+    AccelByte::Api::Lobby::FLeavePartyResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FLeavePartyResponse::CreateLambda([OnLeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result) {
+        OnLeavePartyResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetLeavePartyResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse)
+{
+    AccelByte::Api::Lobby::FInvitePartyResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FInvitePartyResponse::CreateLambda([OnInvitePartyResponse](const FAccelByteModelsPartyInviteResponse& Result) {
+        OnInvitePartyResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetInvitePartyResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse)
+{
+    AccelByte::Api::Lobby::FInvitePartyJoinResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FInvitePartyJoinResponse::CreateLambda([OnInvitePartyJoinResponse](const FAccelByteModelsPartyJoinReponse& Result) {
+        OnInvitePartyJoinResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetInvitePartyJoinResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse)
+{
+    AccelByte::Api::Lobby::FInvitePartyKickMemberResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FInvitePartyKickMemberResponse::CreateLambda([OnInvitePartyKickMemberResponse](const FAccelByteModelsKickPartyMemberResponse& Result) {
+        OnInvitePartyKickMemberResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetInvitePartyKickMemberResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+// Chat
+void UAccelByteBlueprintsLobby::SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse)
+{
+    AccelByte::Api::Lobby::FPrivateMessageResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPrivateMessageResponse::CreateLambda([OnPrivateMessageResponse](const FAccelByteModelsPersonalMessageResponse& Result) {
+        OnPrivateMessageResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetPrivateMessageResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse)
+{
+    AccelByte::Api::Lobby::FPartyMessageResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyMessageResponse::CreateLambda([OnPartyMessageResponse](const FAccelByteModelsPartyMessageResponse& Result) {
+        OnPartyMessageResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetPartyMessageResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+// Presence
+void UAccelByteBlueprintsLobby::SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse)
+{
+    AccelByte::Api::Lobby::FSetUserPresenceResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FSetUserPresenceResponse::CreateLambda([OnUserPresenceResponse](const FAccelByteModelsSetOnlineUsersResponse& Result) {
+        OnUserPresenceResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetUserPresenceResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse)
+{
+    AccelByte::Api::Lobby::FGetAllUserPresenceResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FGetAllUserPresenceResponse::CreateLambda([OnGetAllUserPresenceResponse](const FAccelByteModelsGetOnlineUsersResponse& Result) {
+        OnGetAllUserPresenceResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetGetAllUserPresenceResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+// Matchmaking
+void UAccelByteBlueprintsLobby::SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse)
+{
+    AccelByte::Api::Lobby::FMatchmakingResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FMatchmakingResponse::CreateLambda([OnMatchmakingResponse](const FAccelByteModelsMatchmakingResponse& Result) {
+        OnMatchmakingResponse.ExecuteIfBound(Result);
+    });
+    Lobby::Get().SetMatchmakingResponseDelegate(OnInfoPartyResponseDelegate);
 }

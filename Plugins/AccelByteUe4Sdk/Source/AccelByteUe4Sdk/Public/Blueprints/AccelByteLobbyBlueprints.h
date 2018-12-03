@@ -20,7 +20,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE(FConnectSuccess);
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void Connect(const FConnectSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, const FConnectionClosed& OnConnectionClosed);
+	static void Connect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void Disconnect();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
@@ -48,34 +48,93 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendGetOnlineUsersRequest();
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPrivateMessageNotice&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FInviteToPartyResponse, const FAccelByteModelsInviteToPartyResponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyInvitationNotice, const FAccelByteModelsPartyInvitationNotice&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptInvitationResponse, const FAccelByteModelsAcceptInvitationReponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyInvitationAcceptanceNotice, const FAccelByteModelsPartyInvitationAcceptanceNotice&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FKickPartyMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGotKickedNoticeFromParty, const FAccelByteModelsGotKickedFromPartyNotice&, Result);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetOnlineUsersResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
-	
+    // Party 
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&, Result);                  
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&, Result);       
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&, Result);  
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinReponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&, Result);              
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);   
+
+    // Chat
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FPrivateMessageResponse, const FAccelByteModelsPersonalMessageResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPersonalMessageNotice&, Result);         
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMessageResponse, const FAccelByteModelsPartyMessageResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&, Result);              
+
+    // Presence
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FSetUserPresenceResponse, const FAccelByteModelsSetOnlineUsersResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FUserPresenceNotice, const FAccelByteModelsUsersPresenceNotice&, Result);             
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FGetAllUserPresenceResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
+
+
+    // Matchmaking
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&, Result);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void BindDelegates(
-		const FPrivateMessageNotice& OnPrivateMessageNotice,
-		const FPartyMessageNotice& OnPartyMessageNotice,
-		const FInfoPartyResponse& OnInfoPartyResponse,
-		const FCreatePartyResponse& OnCreatePartyResponse,
-		const FLeavePartyResponse& OnLeavePartyResponse,
-		const FInviteToPartyResponse& OnInviteToPartyResponse,
-		const FPartyInvitationNotice& OnPartyInvitationNotice,
-		const FAcceptInvitationResponse& OnAcceptInvitationResponse,
-		const FPartyInvitationAcceptanceNotice& OnPartyInvitationAcceptanceNotice,
-		const FKickPartyMemberResponse& OnKickPartyMemberResponse,
-		const FGotKickedNoticeFromParty& OnGotKickedNoticeFromParty,
-		const FGetOnlineUsersResponse& OnGetOnlineUsersResponse
+	static void BindEvent(
+        const FConnectSuccess& OnConnectSuccess,
+        const FBlueprintErrorHandler& OnConnectError,
+        const FConnectionClosed& OnConnectionClosed,
+        const FLeavePartyNotice& OnLeavePartyNotice,
+        const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
+        const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
+        const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
+        const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
+        const FPrivateMessageNotice& OnPrivateMessageNotice,
+        const FPartyMessageNotice& OnPartyMessageNotice,
+        const FUserPresenceNotice& OnUserPresenceNotice,
+        const FBlueprintErrorHandler& OnParsingError
 	);
+
+
+    // Party
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse);
+
+
+
+    // Chat
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse);
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse);
+
+
+    // Presence
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse);
+
+
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
+
+
+    // Matchmaking
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+    void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void UnbindDelegates();
 };
