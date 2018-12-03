@@ -72,6 +72,8 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FUserPresenceNotice, const FAccelByteModelsUsersPresenceNotice&, Result);             
     DECLARE_DYNAMIC_DELEGATE_OneParam(FGetAllUserPresenceResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
 
+	// Notification
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FNotificationMessage, const FAccelByteModelsNotificationMessage&, Result);
 
     // Matchmaking
     DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&, Result);
@@ -89,6 +91,7 @@ public:
         const FPrivateMessageNotice& OnPrivateMessageNotice,
         const FPartyMessageNotice& OnPartyMessageNotice,
         const FUserPresenceNotice& OnUserPresenceNotice,
+		const FNotificationMessage& OnNotificationMessage,
         const FBlueprintErrorHandler& OnParsingError
 	);
 
@@ -130,6 +133,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
 
+	// Notification
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	static void GetAllAsyncNotification();
 
     // Matchmaking
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")

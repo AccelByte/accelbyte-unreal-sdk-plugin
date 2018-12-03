@@ -85,6 +85,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FPrivateMessageNotice& OnPrivateMessageNotice,
     const FPartyMessageNotice& OnPartyMessageNotice,
     const FUserPresenceNotice& OnUserPresenceNotice,
+	const FNotificationMessage& OnNotificationMessage,
     const FBlueprintErrorHandler& OnParsingError)
 {
     FSimpleDelegate OnSuccessDelegate = FSimpleDelegate::CreateLambda([OnSuccess]() {
@@ -145,6 +146,12 @@ void UAccelByteBlueprintsLobby::BindEvent(
         OnUserPresenceNotice.ExecuteIfBound(Result);
     });
 
+	// Notification
+	Lobby::FNotificationMessage OnNotificationMessageDelegate =
+		Lobby::FNotificationMessage::CreateLambda([OnNotificationMessage](const FAccelByteModelsNotificationMessage& Result) {
+		OnNotificationMessage.ExecuteIfBound(Result);
+	});
+
     FErrorHandler OnParsingErrorDelegate = FErrorHandler::CreateLambda([OnParsingError](int32 Code, const FString& ErrorMessage) {
         OnParsingError.ExecuteIfBound(Code, ErrorMessage);
     });
@@ -161,6 +168,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
         OnPrivateMessageNoticeDelegate,
         OnPartyMessageNoticeDelegate,
         OnOnUserPresenceNoticeDelegate,
+		OnNotificationMessageDelegate,
         OnParsingErrorDelegate);
 }
 void UAccelByteBlueprintsLobby::UnbindDelegates()
@@ -259,6 +267,12 @@ void UAccelByteBlueprintsLobby::SetGetAllUserPresenceResponseDelegate(FGetAllUse
         OnGetAllUserPresenceResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetGetAllUserPresenceResponseDelegate(OnInfoPartyResponseDelegate);
+}
+
+// Notification
+void UAccelByteBlueprintsLobby::GetAllAsyncNotification()
+{
+	Lobby::Get().GetAllAsyncNotification();
 }
 
 // Matchmaking

@@ -168,6 +168,8 @@ pipeline {
 
                 "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log
 
+                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -ExecCmds="Automation RunTests Project.Functional Tests; Quit" -log
+
                 pushd SteamHelper
                 SteamTicketHelper.exe logout
                 popd

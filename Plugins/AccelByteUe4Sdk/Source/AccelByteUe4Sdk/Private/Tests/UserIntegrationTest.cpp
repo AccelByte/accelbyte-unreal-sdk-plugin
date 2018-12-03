@@ -2,6 +2,8 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#pragma once
+
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
@@ -27,7 +29,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
 const int32 AutomationFlagMask = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-DECLARE_DELEGATE(FDeleteUserByIdSuccess);
+DECLARE_DELEGATE(FDeleteUserByIdSuccess)
 static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 static FString GetVerificationCode(const FString& Email);
