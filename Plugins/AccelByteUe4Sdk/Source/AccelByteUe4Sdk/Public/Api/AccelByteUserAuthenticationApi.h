@@ -79,6 +79,17 @@ public:
 	 */
 	static void LoginWithDeviceId(const FLoginWithDeviceIdSuccess& OnSuccess, const FErrorHandler& OnError);
 	
+    DECLARE_DELEGATE_OneParam(FGetAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOauth2Token&);
+    /**
+     * @brief login from Accelbyte Launcher
+     *
+     * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
+     * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+     * @param OnError This will be called when the operation failed.
+     */
+    static void LoginFromLauncher(const FString& AuthorizationCode, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+
+
 	DECLARE_DELEGATE(FRefreshTokenSuccess);
 	/**
 	 * @brief The access token expires after some time; you need to get new access token with refresh token.

@@ -138,4 +138,4 @@ void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr 
 }
 
 } // Namespace Api
-} // GameId AccelByte
+} // Namespace AccelByte

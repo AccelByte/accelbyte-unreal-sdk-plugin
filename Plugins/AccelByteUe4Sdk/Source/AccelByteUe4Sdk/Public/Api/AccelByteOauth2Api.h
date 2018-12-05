@@ -25,9 +25,7 @@ class ACCELBYTEUE4SDK_API Oauth2
 public:
 	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
-	 * @brief WARNING: THIS DOESN'T ACTUALLY WORK!!! DO NOT USE!!! This function *was* meant for logging in from Justice Launcher with their account on Justice Launcher.
-	 * Also missing state parameter. You (user) will be susceptible to Cross-Site Request Forgery attack.
-	 * @todo IAM fix.
+	 * @brief login from Accelbyte Launcher
 	 * 
 	 * @param ClientId The issued OAuth2 client credentials.
 	 * @param ClientSecret The issued OAuth2 client credentials.

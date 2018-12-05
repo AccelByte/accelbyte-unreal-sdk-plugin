@@ -80,6 +80,15 @@ void UserAuthentication::LoginWithDeviceId(const FLoginWithDeviceIdSuccess& OnSu
 	}));
 }
 
+void UserAuthentication::LoginFromLauncher(const FString & AuthorizationCode, const FGetAccessTokenWithAuthorizationCodeGrantSuccess & OnSuccess, const FErrorHandler & OnError)
+{
+    Oauth2::GetAccessTokenWithAuthorizationCodeGrant(Settings::ClientId, Settings::ClientSecret, AuthorizationCode, Settings::RedirectURI, Oauth2::FGetAccessTokenWithAuthorizationCodeGrantSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOauth2Token& Token) {
+        OnSuccess.ExecuteIfBound(Token);
+    }), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) {
+        OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+    }));
+}
+
 void UserAuthentication::RefreshToken(const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	Oauth2::GetAccessTokenWithRefreshTokenGrant(Settings::ClientId, Settings::ClientSecret, Credentials::Get().GetUserRefreshToken(), Oauth2::FGetAccessTokenWithRefreshTokenGrantSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOauth2Token& Result)

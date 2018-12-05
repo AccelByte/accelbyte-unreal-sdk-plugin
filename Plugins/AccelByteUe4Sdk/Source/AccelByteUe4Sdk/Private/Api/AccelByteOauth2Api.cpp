@@ -11,7 +11,6 @@ namespace AccelByte
 {
 namespace Api
 {
-// WARNING: THIS DOESN'T ACTUALLY WORK!!!
 void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
@@ -19,7 +18,6 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, c
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
-	// Missing state parameter. Do not use this!!! You (user) will be susceptible to Cross-Site Request Forgery attack!!!
 	FString Content = FString::Printf(TEXT("grant_type=authorization_code&code=%s&redirect_uri=%s"), *AuthorizationCode, *RedirectUri);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();

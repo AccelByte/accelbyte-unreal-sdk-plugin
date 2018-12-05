@@ -187,9 +187,9 @@ FString UAccelByteCustomWebBrowserWidget::CefQuery(FString value)
 				FString ClientId;
 				FString ClientSecret;
 
-				if (!GConfig->GetString(TEXT("AccelByteUe4Sdk"), TEXT("GameId"), Namespace, GEngineIni))
+				if (!GConfig->GetString(TEXT("AccelByteUe4Sdk"), TEXT("Namespace"), Namespace, GEngineIni))
 				{
-					UE_LOG(LogTemp, Error, TEXT("Missing GameId= in [AccelByteUe4Sdk] of DefaultEngine.ini"));
+					UE_LOG(LogTemp, Error, TEXT("Missing Namespace= in [AccelByteUe4Sdk] of DefaultEngine.ini"));
 				}
 				if (!GConfig->GetString(TEXT("AccelByteUe4Sdk"), TEXT("ClientId"), ClientId, GEngineIni))
 				{

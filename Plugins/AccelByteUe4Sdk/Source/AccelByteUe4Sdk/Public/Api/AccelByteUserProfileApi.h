@@ -67,5 +67,5 @@ private:
 	
 };
 
-} // GameId Service
+} // Namespace Service
 } // Namespace AccelByte

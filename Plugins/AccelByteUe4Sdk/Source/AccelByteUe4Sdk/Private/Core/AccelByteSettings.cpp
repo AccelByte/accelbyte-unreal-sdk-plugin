@@ -11,8 +11,10 @@ namespace AccelByte
 
 FString Settings::ClientId;
 FString Settings::ClientSecret;
-FString Settings::GameId;
-FString Settings::PublisherId;
+FString Settings::Namespace;
+FString Settings::PublisherNamespace;
+FString Settings::RedirectURI;
+FString Settings::BaseUrl;
 FString Settings::IamServerUrl;
 FString Settings::PlatformServerUrl;
 FString Settings::LobbyServerUrl;
@@ -33,14 +35,14 @@ FString UAccelByteBlueprintsSettings::GetClientSecret()
 	return Settings::ClientSecret;
 }
 
-FString UAccelByteBlueprintsSettings::GetGameId()
+FString UAccelByteBlueprintsSettings::GetNamespace()
 {
-	return Settings::GameId;
+	return Settings::Namespace;
 }
 
-FString UAccelByteBlueprintsSettings::GetPublisherId()
+FString UAccelByteBlueprintsSettings::GetPublisherNamespace()
 {
-	return Settings::PublisherId;
+	return Settings::PublisherNamespace;
 }
 
 FString UAccelByteBlueprintsSettings::GetIamServerUrl()
@@ -68,14 +70,14 @@ void UAccelByteBlueprintsSettings::SetClientSecret(const FString& ClientSecret)
 	Settings::ClientSecret = ClientSecret;
 }
 
-void UAccelByteBlueprintsSettings::SetGameId(const FString& GameId)
+void UAccelByteBlueprintsSettings::SetNamespace(const FString& Namespace)
 {
-	Settings::GameId = GameId;
+	Settings::Namespace = Namespace;
 }
 
-void UAccelByteBlueprintsSettings::SetPublisherId(const FString& PublisherId)
+void UAccelByteBlueprintsSettings::SetPublisherNamespace(const FString& PublisherNamespace)
 {
-	Settings::PublisherId = PublisherId;
+	Settings::PublisherNamespace = PublisherNamespace;
 }
 
 void UAccelByteBlueprintsSettings::SetIamServerUrl(const FString& IamServerUrl)
