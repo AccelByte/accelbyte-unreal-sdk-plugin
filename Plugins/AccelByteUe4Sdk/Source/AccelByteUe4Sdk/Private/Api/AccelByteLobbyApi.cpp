@@ -43,34 +43,35 @@ namespace Api
     {
 		// default
 		const FString ConnectedNotif = TEXT("connectNotif");
-		
+        const FString DisconnectNotif = TEXT("disconnectNotif");
+
 
         // Party
         const FString PartyInfo = TEXT("partyInfoResponse");
-        const FString CreateParty = TEXT("partyCreateResponse");
-        const FString LeaveParty = TEXT("partyLeaveResponse");
-        const FString LeavePartyNotice = TEXT("partyLeaveNotif");        
-        const FString InviteParty = TEXT("partyInviteResponse");
-        const FString InvitePartyNotice = TEXT("partyInviteNotif");
-        const FString InvitedToParty = TEXT("partyGetInvitedNotif");
-        const FString JoinParty = TEXT("partyJoinResponse");
-        const FString JoinPartyNotice = TEXT("partyJoinNotif");
-        const FString KickParty = TEXT("partyKickResponse");
-        const FString KickPartyNotice = TEXT("partyKickNotif");
+        const FString PartyCreate = TEXT("partyCreateResponse");
+        const FString PartyLeave = TEXT("partyLeaveResponse");
+        const FString PartyLeaveNotif = TEXT("partyLeaveNotif");        
+        const FString PartyInvite = TEXT("partyInviteResponse");
+        const FString PartyInviteNotif = TEXT("partyInviteNotif");
+        const FString PartyGetInvitedNotif = TEXT("partyGetInvitedNotif");
+        const FString PartyJoin = TEXT("partyJoinResponse");
+        const FString PartyJoinNotif = TEXT("partyJoinNotif");
+        const FString PartyKick = TEXT("partyKickResponse");
+        const FString PartyKickNotif = TEXT("partyKickNotif");
 
         // Chat
         const FString PersonalChat = TEXT("personalChatResponse");
-        const FString PersonalChatNotice = TEXT("personalChatNotif");
+        const FString PersonalChatNotif = TEXT("personalChatNotif");
         const FString PartyChat = TEXT("partyChatResponse");
-        const FString PartyChatNotice = TEXT("partyChatNotif");
+        const FString PartyChatNotif = TEXT("partyChatNotif");
 
         // Presence
-        const FString SetPresence = TEXT("setUserStatusResponse");
-        const FString PresenceNotice = TEXT("userStatusNotif");
+        const FString SetUserPresence = TEXT("setUserStatusResponse");
+        const FString UserPresenceNotif = TEXT("userStatusNotif");
         const FString FriendsPresence = TEXT("friendsPresenceResponse");
 
         // Notification
-		const FString Notification = TEXT("messageNotif");
+		const FString MessageNotif = TEXT("messageNotif");
 
         // Matchmaking
         const FString StartMatchmaking = TEXT("matchmakingResponse");
@@ -233,42 +234,42 @@ void Lobby::BindEvent(
     const FConnectSuccess& OnConnectSuccess,
     const FErrorHandler& OnConnectError,
     const FConnectionClosed& OnConnectionClosed,
-    const FLeavePartyNotice& OnLeavePartyNotice,
-    const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
-    const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
-    const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
-    const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
-    const FPrivateMessageNotice& OnPrivateMessageNotice,
-    const FPartyMessageNotice& OnPartyMessageNotice,
-    const FUserPresenceNotice& OnUserPresenceNotice,
-	const FNotificationMessage& OnNotificationMessage,
+    const FPartyLeaveNotif& OnPartyLeaveNotif,
+    const FPartyInviteNotif& OnPartyInviteNotif,
+    const FPartyGetInvitedNotif& OnPartyGetInvitedNotif,
+    const FPartyJoinNotif& OnPartyJoinNotif,
+    const FPartyKickNotif& OnPartyKickNotif,
+    const FPersonalChatNotif& OnPersonalChatNotif,
+    const FPartyChatNotif& OnPartyChatNotif,
+    const FUserPresenceNotif& OnUserPresenceNotif,
+	const FMessageNotif& OnMessageNotif,
     const FErrorHandler& OnParsingError)
 {
     ConnectionClosed = OnConnectionClosed;
     ConnectSuccess = OnConnectSuccess;
     ConnectError = OnConnectError;
-    LeavePartyNotice = OnLeavePartyNotice;
-    InvitePartyInvitationNotice = OnInvitePartyInvitationNotice;
-    InvitePartyGetInvitedNotice = OnInvitePartyGetInvitedNotice;
-    InvitePartyJoinNotice = OnInvitePartyJoinNotice;
-    InvitePartyKickedNotice = OnInvitePartyKickedNotice;
-    PrivateMessageNotice = OnPrivateMessageNotice;
-    PartyMessageNotice = OnPartyMessageNotice;
-    UserPresenceNotice = OnUserPresenceNotice;
-	NotificationMessage = OnNotificationMessage;
+    PartyLeaveNotif = OnPartyLeaveNotif;
+    PartyInviteNotif = OnPartyInviteNotif;
+    PartyGetInvitedNotif = OnPartyGetInvitedNotif;
+    PartyJoinNotif = OnPartyJoinNotif;
+    PartyKickNotif = OnPartyKickNotif;
+    PersonalChatNotif = OnPersonalChatNotif;
+    PartyChatNotif = OnPartyChatNotif;
+    UserPresenceNotif = OnUserPresenceNotif;
+	MessageNotif = OnMessageNotif;
     ParsingError = OnParsingError;
 }
 
 void Lobby::UnbindEvent()
 {
-    LeavePartyNotice.Unbind();
-    InvitePartyInvitationNotice.Unbind();
-    InvitePartyGetInvitedNotice.Unbind();
-    InvitePartyJoinNotice.Unbind();
-    InvitePartyKickedNotice.Unbind();
-    PrivateMessageNotice.Unbind();
-    PartyMessageNotice.Unbind();
-    UserPresenceNotice.Unbind();	
+    PartyLeaveNotif.Unbind();
+    PartyInviteNotif.Unbind();
+    PartyGetInvitedNotif.Unbind();
+    PartyJoinNotif.Unbind();
+    PartyKickNotif.Unbind();
+    PersonalChatNotif.Unbind();
+    PartyChatNotif.Unbind();
+    UserPresenceNotif.Unbind();	
 }
 
 void Lobby::OnConnected()
@@ -396,31 +397,31 @@ void Lobby::OnMessage(const FString& Message)
 
 
     // Party 
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, InfoPartyResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::CreateParty, FAccelByteModelsCreatePartyResponse, CreatePartyResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::LeaveParty, FAccelByteModelsLeavePartyResponse, LeavePartyResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::LeavePartyNotice, FAccelByteModelsLeavePartyNotice, LeavePartyNotice);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::InviteParty, FAccelByteModelsPartyInviteResponse, InvitePartyResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::InvitedToParty, FAccelByteModelsInvitationNotice, InvitePartyInvitationNotice);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::JoinParty, FAccelByteModelsPartyGetInvitedNotice, InvitePartyGetInvitedNotice);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::JoinPartyNotice, FAccelByteModelsPartyJoinReponse, InvitePartyJoinResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickParty, FAccelByteModelsPartyJoinNotice, InvitePartyJoinNotice);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickPartyNotice, FAccelByteModelsKickPartyMemberResponse, InvitePartyKickMemberResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::KickPartyNotice, FAccelByteModelsGotKickedFromPartyNotice, InvitePartyKickedNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, PartyInfoResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyCreate, FAccelByteModelsCreatePartyResponse, PartyCreateResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyLeave, FAccelByteModelsLeavePartyResponse, PartyLeaveResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyLeaveNotif, FAccelByteModelsLeavePartyNotice, PartyLeaveNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInvite, FAccelByteModelsPartyInviteResponse, PartyInviteResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyGetInvitedNotif, FAccelByteModelsInvitationNotice, PartyInviteNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoin, FAccelByteModelsPartyGetInvitedNotice, PartyGetInvitedNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoinNotif, FAccelByteModelsPartyJoinReponse, PartyJoinResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKick, FAccelByteModelsPartyJoinNotice, PartyJoinNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
 
     // Chat
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PrivateMessageResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChatNotice, FAccelByteModelsPersonalMessageNotice, PrivateMessageNotice);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyMessageResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChatNotice, FAccelByteModelsPartyMessageNotice, PartyMessageNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChatNotif, FAccelByteModelsPersonalMessageNotice, PersonalChatNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyChatResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChatNotif, FAccelByteModelsPartyMessageNotice, PartyChatNotif);
 
     // Presence
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::SetPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::PresenceNotice, FAccelByteModelsUsersPresenceNotice, UserPresenceNotice);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::UserPresenceNotif, FAccelByteModelsUsersPresenceNotice, UserPresenceNotif);
     HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllUserPresenceResponse);
 
 	// Notification
-	HANDLE_LOBBY_MESSAGE(LobbyResponse::Notification, FAccelByteModelsNotificationMessage, NotificationMessage);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::MessageNotif, FAccelByteModelsNotificationMessage, MessageNotif);
 
     // Matchmaking
     HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingResponse);

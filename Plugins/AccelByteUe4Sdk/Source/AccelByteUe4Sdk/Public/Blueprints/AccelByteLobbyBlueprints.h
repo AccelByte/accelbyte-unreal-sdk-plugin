@@ -98,40 +98,40 @@ public:
 
     // Party
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse);
+    static void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse);
+    static void SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse);
+    static void SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse);
+    static void SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse);
+    static void SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse);
+    static void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse);
 
 
 
     // Chat
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse);
+    static void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse);
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse);
+    static void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse);
 
 
     // Presence
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse);
+    static void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnUserPresenceResponse);
 
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
+    static void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
 
 	// Notification
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
@@ -139,7 +139,7 @@ public:
 
     // Matchmaking
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse);
+    static void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void UnbindDelegates();

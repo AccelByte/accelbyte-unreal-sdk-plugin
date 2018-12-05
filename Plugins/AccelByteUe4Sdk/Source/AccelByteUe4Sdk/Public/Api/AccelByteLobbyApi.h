@@ -38,81 +38,81 @@ public:
     /**
      * @brief delegate for handling info party response.
      */
-    DECLARE_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyInfoResponse, const FAccelByteModelsInfoPartyResponse&); 
 
 
     /**
      * @brief delegate for handling create party response.
      */
-    DECLARE_DELEGATE_OneParam(FCreatePartyResponse, const FAccelByteModelsCreatePartyResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyCreateResponse, const FAccelByteModelsCreatePartyResponse&); 
 
     /**
      * @brief delegate for handling leave party response.
      */
-    DECLARE_DELEGATE_OneParam(FLeavePartyResponse, const FAccelByteModelsLeavePartyResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyLeaveResponse, const FAccelByteModelsLeavePartyResponse&); 
 
     /**
      * @brief delegate for handling leave party notification.
      */
-    DECLARE_DELEGATE_OneParam(FLeavePartyNotice, const FAccelByteModelsLeavePartyNotice&);                  // Passive
+    DECLARE_DELEGATE_OneParam(FPartyLeaveNotif, const FAccelByteModelsLeavePartyNotice&);                  // Passive
 
 
     /**
      * @brief delegate for handling invite party response.
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyInviteResponse, const FAccelByteModelsPartyInviteResponse&); 
 
     /**
      * @brief delegate for handling party invitation notification
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&);       // Passive
+    DECLARE_DELEGATE_OneParam(FPartyInviteNotif, const FAccelByteModelsInvitationNotice&);       // Passive
 
     /**
      * @brief delegate for handling get party invitation notification
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&);  // Passive
+    DECLARE_DELEGATE_OneParam(FPartyGetInvitedNotif, const FAccelByteModelsPartyGetInvitedNotice&);  // Passive
 
     /**
      * @brief delegate for handling join party response
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinReponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinReponse&); 
 
     /**
      * @brief delegate for handling join party notification
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&);              // Passive
+    DECLARE_DELEGATE_OneParam(FPartyJoinNotif, const FAccelByteModelsPartyJoinNotice&);              // Passive
 
     /**
      * @brief delegate for handling member kicked from party event
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyKickResponse, const FAccelByteModelsKickPartyMemberResponse&); 
     
     /**
      * @brief delegate for handling member kicked from party event notification
      */
-    DECLARE_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
+    DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
 
 
     // Chat
     /**
      * @brief delegate for handling private message response
      */
-    DECLARE_DELEGATE_OneParam(FPrivateMessageResponse, const FAccelByteModelsPersonalMessageResponse&);    
+    DECLARE_DELEGATE_OneParam(FPersonalChatResponse, const FAccelByteModelsPersonalMessageResponse&);    
 
     /**
      * @brief delegate for handling private message event notification
      */
-    DECLARE_DELEGATE_OneParam(FPrivateMessageNotice, const FAccelByteModelsPersonalMessageNotice&);         // Passive
+    DECLARE_DELEGATE_OneParam(FPersonalChatNotif, const FAccelByteModelsPersonalMessageNotice&);         // Passive
 
     /**
      * @brief delegate for handling party message event response
      */
-    DECLARE_DELEGATE_OneParam(FPartyMessageResponse, const FAccelByteModelsPartyMessageResponse&);
+    DECLARE_DELEGATE_OneParam(FPartyChatResponse, const FAccelByteModelsPartyMessageResponse&);
 
     /**
      * @brief delegate for handling party message event notification
      */
-    DECLARE_DELEGATE_OneParam(FPartyMessageNotice, const FAccelByteModelsPartyMessageNotice&);              // Passive
+    DECLARE_DELEGATE_OneParam(FPartyChatNotif, const FAccelByteModelsPartyMessageNotice&);              // Passive
     
     // Presence
     /**
@@ -123,7 +123,7 @@ public:
     /**
      * @brief delegate for handling other user change their presence status event
      */
-    DECLARE_DELEGATE_OneParam(FUserPresenceNotice, const FAccelByteModelsUsersPresenceNotice&);             // Passive
+    DECLARE_DELEGATE_OneParam(FUserPresenceNotif, const FAccelByteModelsUsersPresenceNotice&);             // Passive
 
     /**
      * @brief delegate for handling get all user presence
@@ -135,7 +135,7 @@ public:
 	/**
 	 * @brief delegate for handling incoming notification
 	*/
-	DECLARE_DELEGATE_OneParam(FNotificationMessage, const FAccelByteModelsNotificationMessage&); //Passive
+	DECLARE_DELEGATE_OneParam(FMessageNotif, const FAccelByteModelsNotificationMessage&); //Passive
 
     // Matchmaking
     /**
@@ -292,15 +292,15 @@ public:
         const FConnectSuccess& OnConnectSuccess, 
         const FErrorHandler& OnConnectError,
         const FConnectionClosed& OnConnectionClosed,
-		const FLeavePartyNotice& OnLeavePartyNotice,
-		const FInvitePartyInvitationNotice& OnInvitePartyInvitationNotice,
-		const FInvitePartyGetInvitedNotice& OnInvitePartyGetInvitedNotice,
-		const FInvitePartyJoinNotice& OnInvitePartyJoinNotice,
-		const FInvitePartyKickedNotice& OnInvitePartyKickedNotice,
-		const FPrivateMessageNotice& OnPrivateMessageNotice,
-		const FPartyMessageNotice& OnPartyMessageNotice,
-		const FUserPresenceNotice& OnUserPresenceNotice,
-		const FNotificationMessage& OnNotificationMessage,
+		const FPartyLeaveNotif& OnLeavePartyNotice,
+		const FPartyInviteNotif& OnInvitePartyInvitationNotice,
+		const FPartyGetInvitedNotif& OnInvitePartyGetInvitedNotice,
+		const FPartyJoinNotif& OnInvitePartyJoinNotice,
+		const FPartyKickNotif& OnInvitePartyKickedNotice,
+		const FPersonalChatNotif& OnPrivateMessageNotice,
+		const FPartyChatNotif& OnPartyMessageNotice,
+		const FUserPresenceNotif& OnUserPresenceNotice,
+		const FMessageNotif& OnNotificationMessage,
         const FErrorHandler& OnParsingError
 	);
 
@@ -317,42 +317,42 @@ public:
      *
      * @param OnInfoPartyResponse set delegate .
      */
-    void SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse) { InfoPartyResponse = OnInfoPartyResponse; };
+    void SetInfoPartyResponseDelegate(FPartyInfoResponse OnInfoPartyResponse) { PartyInfoResponse = OnInfoPartyResponse; };
 
     /**
      * @brief create party response delegate
      *
      * @param OnCreatePartyResponse set delegate .
      */
-    void SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse) { CreatePartyResponse = OnCreatePartyResponse; };
+    void SetCreatePartyResponseDelegate(FPartyCreateResponse OnCreatePartyResponse) { PartyCreateResponse = OnCreatePartyResponse; };
 
     /**
      * @brief set leave party response delegate
      *
      * @param OnLeavePartyResponse set delegate .
      */
-    void SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse) { LeavePartyResponse = OnLeavePartyResponse; };
+    void SetLeavePartyResponseDelegate(FPartyLeaveResponse OnLeavePartyResponse) { PartyLeaveResponse = OnLeavePartyResponse; };
 
     /**
      * @brief set invite party response delegate
      *
      * @param OnInvitePartyResponse set delegate .
      */
-    void SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse) { InvitePartyResponse = OnInvitePartyResponse; };
+    void SetInvitePartyResponseDelegate(FPartyInviteResponse OnInvitePartyResponse) { PartyInviteResponse = OnInvitePartyResponse; };
 
     /**
      * @brief set invite party join response
      *
      * @param OnInvitePartyJoinResponse set delegate .
      */
-    void SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse) { InvitePartyJoinResponse = OnInvitePartyJoinResponse; };
+    void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse) { PartyJoinResponse = OnInvitePartyJoinResponse; };
 
     /**
      * @brief set invite party kick member reponse
      *
      * @param OnInvitePartyKickMemberResponse set delegate .
      */
-    void SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse) { InvitePartyKickMemberResponse = OnInvitePartyKickMemberResponse; };
+    void SetInvitePartyKickMemberResponseDelegate(FPartyKickResponse OnInvitePartyKickMemberResponse) { PartyKickResponse = OnInvitePartyKickMemberResponse; };
 
     // Chat
     /**
@@ -360,14 +360,14 @@ public:
      *
      * @param OnPrivateMessageResponse set delegate .
      */
-    void SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse) { PrivateMessageResponse = OnPrivateMessageResponse; };
+    void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse) { PersonalChatResponse = OnPrivateMessageResponse; };
 
     /**
      * @brief set party message response
      *
      * @param OnPartyMessageResponse set delegate .
      */
-    void SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse) { PartyMessageResponse = OnPartyMessageResponse; };
+    void SetPartyMessageResponseDelegate(FPartyChatResponse OnPartyMessageResponse) { PartyChatResponse = OnPartyMessageResponse; };
 
 
     // Presence
@@ -423,31 +423,31 @@ private:
 	FConnectionClosed ConnectionClosed;
 	
     // Party 
-    FInfoPartyResponse InfoPartyResponse;
-    FCreatePartyResponse CreatePartyResponse;
-    FLeavePartyResponse LeavePartyResponse;
-    FLeavePartyNotice LeavePartyNotice;
-    FInvitePartyResponse InvitePartyResponse;
-    FInvitePartyInvitationNotice InvitePartyInvitationNotice;
-    FInvitePartyGetInvitedNotice InvitePartyGetInvitedNotice;
-    FInvitePartyJoinResponse InvitePartyJoinResponse;
-    FInvitePartyJoinNotice InvitePartyJoinNotice;
-    FInvitePartyKickMemberResponse InvitePartyKickMemberResponse;
-    FInvitePartyKickedNotice InvitePartyKickedNotice;
+    FPartyInfoResponse PartyInfoResponse;
+    FPartyCreateResponse PartyCreateResponse;
+    FPartyLeaveResponse PartyLeaveResponse;
+    FPartyLeaveNotif PartyLeaveNotif;
+    FPartyInviteResponse PartyInviteResponse;
+    FPartyInviteNotif PartyInviteNotif;
+    FPartyGetInvitedNotif PartyGetInvitedNotif;
+    FPartyJoinResponse PartyJoinResponse;
+    FPartyJoinNotif PartyJoinNotif;
+    FPartyKickResponse PartyKickResponse;
+    FPartyKickNotif PartyKickNotif;
 
     // Chat
-    FPrivateMessageResponse PrivateMessageResponse;
-    FPrivateMessageNotice PrivateMessageNotice;
-    FPartyMessageResponse PartyMessageResponse;
-    FPartyMessageNotice PartyMessageNotice;
+    FPersonalChatResponse PersonalChatResponse;
+    FPersonalChatNotif PersonalChatNotif;
+    FPartyChatResponse PartyChatResponse;
+    FPartyChatNotif PartyChatNotif;
 
     // Presence
     FSetUserPresenceResponse SetUserPresenceResponse;
-    FUserPresenceNotice UserPresenceNotice;
+    FUserPresenceNotif UserPresenceNotif;
     FGetAllUserPresenceResponse GetAllUserPresenceResponse;
 
     // Notification
-	FNotificationMessage NotificationMessage;
+	FMessageNotif MessageNotif;
 
     // Matchmaking
     FMatchmakingResponse MatchmakingResponse;

@@ -104,51 +104,51 @@ void UAccelByteBlueprintsLobby::BindEvent(
 
 
     // Party
-    AccelByte::Api::Lobby::FLeavePartyNotice OnLeavePartyNoticeDelegate =
-        AccelByte::Api::Lobby::FLeavePartyNotice::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
+    AccelByte::Api::Lobby::FPartyLeaveNotif OnLeavePartyNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyLeaveNotif::CreateLambda([OnLeavePartyNotice](const FAccelByteModelsLeavePartyNotice& Result) {
         OnLeavePartyNotice.ExecuteIfBound(Result);
     });
 
-    AccelByte::Api::Lobby::FInvitePartyInvitationNotice OnInvitePartyInvitationNoticeDelegate =
-        AccelByte::Api::Lobby::FInvitePartyInvitationNotice::CreateLambda([OnInvitePartyInvitationNotice](const FAccelByteModelsInvitationNotice& Result) {
+    AccelByte::Api::Lobby::FPartyInviteNotif OnInvitePartyInvitationNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyInviteNotif::CreateLambda([OnInvitePartyInvitationNotice](const FAccelByteModelsInvitationNotice& Result) {
         OnInvitePartyInvitationNotice.ExecuteIfBound(Result);
     });
 
-    AccelByte::Api::Lobby::FInvitePartyGetInvitedNotice OnInvitePartyGetInvitedNoticeDelegate =
-        AccelByte::Api::Lobby::FInvitePartyGetInvitedNotice::CreateLambda([OnInvitePartyGetInvitedNotice](const FAccelByteModelsPartyGetInvitedNotice& Result) {
+    AccelByte::Api::Lobby::FPartyGetInvitedNotif OnInvitePartyGetInvitedNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyGetInvitedNotif::CreateLambda([OnInvitePartyGetInvitedNotice](const FAccelByteModelsPartyGetInvitedNotice& Result) {
         OnInvitePartyGetInvitedNotice.ExecuteIfBound(Result);
     });
 
-    AccelByte::Api::Lobby::FInvitePartyJoinNotice OnInvitePartyJoinNoticeDelegate =
-        AccelByte::Api::Lobby::FInvitePartyJoinNotice::CreateLambda([OnInvitePartyJoinNotice](const FAccelByteModelsPartyJoinNotice& Result) {
+    AccelByte::Api::Lobby::FPartyJoinNotif OnInvitePartyJoinNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyJoinNotif::CreateLambda([OnInvitePartyJoinNotice](const FAccelByteModelsPartyJoinNotice& Result) {
         OnInvitePartyJoinNotice.ExecuteIfBound(Result);
     });
 
-    AccelByte::Api::Lobby::FInvitePartyKickedNotice OnInvitePartyKickedNoticeDelegate =
-        AccelByte::Api::Lobby::FInvitePartyKickedNotice::CreateLambda([OnInvitePartyKickedNotice](const FAccelByteModelsGotKickedFromPartyNotice& Result) {
+    AccelByte::Api::Lobby::FPartyKickNotif OnInvitePartyKickedNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyKickNotif::CreateLambda([OnInvitePartyKickedNotice](const FAccelByteModelsGotKickedFromPartyNotice& Result) {
         OnInvitePartyKickedNotice.ExecuteIfBound(Result);
     });
     
     // Chat
-    AccelByte::Api::Lobby::FPrivateMessageNotice OnPrivateMessageNoticeDelegate =
-        AccelByte::Api::Lobby::FPrivateMessageNotice::CreateLambda([OnPrivateMessageNotice](const FAccelByteModelsPersonalMessageNotice& Result) {
+    AccelByte::Api::Lobby::FPersonalChatNotif OnPrivateMessageNoticeDelegate =
+        AccelByte::Api::Lobby::FPersonalChatNotif::CreateLambda([OnPrivateMessageNotice](const FAccelByteModelsPersonalMessageNotice& Result) {
         OnPrivateMessageNotice.ExecuteIfBound(Result);
     });
 
-    AccelByte::Api::Lobby::FPartyMessageNotice OnPartyMessageNoticeDelegate =
-        AccelByte::Api::Lobby::FPartyMessageNotice::CreateLambda([OnPartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result) {
+    AccelByte::Api::Lobby::FPartyChatNotif OnPartyMessageNoticeDelegate =
+        AccelByte::Api::Lobby::FPartyChatNotif::CreateLambda([OnPartyMessageNotice](const FAccelByteModelsPartyMessageNotice& Result) {
         OnPartyMessageNotice.ExecuteIfBound(Result);
     });
 
     // Presence
-    AccelByte::Api::Lobby::FUserPresenceNotice OnOnUserPresenceNoticeDelegate =
-        AccelByte::Api::Lobby::FUserPresenceNotice::CreateLambda([OnUserPresenceNotice](const FAccelByteModelsUsersPresenceNotice& Result) {
+    AccelByte::Api::Lobby::FUserPresenceNotif OnOnUserPresenceNoticeDelegate =
+        AccelByte::Api::Lobby::FUserPresenceNotif::CreateLambda([OnUserPresenceNotice](const FAccelByteModelsUsersPresenceNotice& Result) {
         OnUserPresenceNotice.ExecuteIfBound(Result);
     });
 
 	// Notification
-	Lobby::FNotificationMessage OnNotificationMessageDelegate =
-		Lobby::FNotificationMessage::CreateLambda([OnNotificationMessage](const FAccelByteModelsNotificationMessage& Result) {
+	Lobby::FMessageNotif OnNotificationMessageDelegate =
+		Lobby::FMessageNotif::CreateLambda([OnNotificationMessage](const FAccelByteModelsNotificationMessage& Result) {
 		OnNotificationMessage.ExecuteIfBound(Result);
 	});
 
@@ -179,8 +179,8 @@ void UAccelByteBlueprintsLobby::UnbindDelegates()
 // Party
 void UAccelByteBlueprintsLobby::SetInfoPartyResponseDelegate(FInfoPartyResponse OnInfoPartyResponse)
 {
-    AccelByte::Api::Lobby::FInfoPartyResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FInfoPartyResponse::CreateLambda([OnInfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result) {
+    AccelByte::Api::Lobby::FPartyInfoResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyInfoResponse::CreateLambda([OnInfoPartyResponse](const FAccelByteModelsInfoPartyResponse& Result) {
         OnInfoPartyResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetInfoPartyResponseDelegate(OnInfoPartyResponseDelegate);
@@ -188,8 +188,8 @@ void UAccelByteBlueprintsLobby::SetInfoPartyResponseDelegate(FInfoPartyResponse 
 
 void UAccelByteBlueprintsLobby::SetCreatePartyResponseDelegate(FCreatePartyResponse OnCreatePartyResponse)
 {
-    AccelByte::Api::Lobby::FCreatePartyResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FCreatePartyResponse::CreateLambda([OnCreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result) {
+    AccelByte::Api::Lobby::FPartyCreateResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyCreateResponse::CreateLambda([OnCreatePartyResponse](const FAccelByteModelsCreatePartyResponse& Result) {
         OnCreatePartyResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetCreatePartyResponseDelegate(OnInfoPartyResponseDelegate);
@@ -197,8 +197,8 @@ void UAccelByteBlueprintsLobby::SetCreatePartyResponseDelegate(FCreatePartyRespo
 
 void UAccelByteBlueprintsLobby::SetLeavePartyResponseDelegate(FLeavePartyResponse OnLeavePartyResponse)
 {
-    AccelByte::Api::Lobby::FLeavePartyResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FLeavePartyResponse::CreateLambda([OnLeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result) {
+    AccelByte::Api::Lobby::FPartyLeaveResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyLeaveResponse::CreateLambda([OnLeavePartyResponse](const FAccelByteModelsLeavePartyResponse& Result) {
         OnLeavePartyResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetLeavePartyResponseDelegate(OnInfoPartyResponseDelegate);
@@ -206,8 +206,8 @@ void UAccelByteBlueprintsLobby::SetLeavePartyResponseDelegate(FLeavePartyRespons
 
 void UAccelByteBlueprintsLobby::SetInvitePartyResponseDelegate(FInvitePartyResponse OnInvitePartyResponse)
 {
-    AccelByte::Api::Lobby::FInvitePartyResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FInvitePartyResponse::CreateLambda([OnInvitePartyResponse](const FAccelByteModelsPartyInviteResponse& Result) {
+    AccelByte::Api::Lobby::FPartyInviteResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyInviteResponse::CreateLambda([OnInvitePartyResponse](const FAccelByteModelsPartyInviteResponse& Result) {
         OnInvitePartyResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetInvitePartyResponseDelegate(OnInfoPartyResponseDelegate);
@@ -215,8 +215,8 @@ void UAccelByteBlueprintsLobby::SetInvitePartyResponseDelegate(FInvitePartyRespo
 
 void UAccelByteBlueprintsLobby::SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse)
 {
-    AccelByte::Api::Lobby::FInvitePartyJoinResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FInvitePartyJoinResponse::CreateLambda([OnInvitePartyJoinResponse](const FAccelByteModelsPartyJoinReponse& Result) {
+    AccelByte::Api::Lobby::FPartyJoinResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyJoinResponse::CreateLambda([OnInvitePartyJoinResponse](const FAccelByteModelsPartyJoinReponse& Result) {
         OnInvitePartyJoinResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetInvitePartyJoinResponseDelegate(OnInfoPartyResponseDelegate);
@@ -224,8 +224,8 @@ void UAccelByteBlueprintsLobby::SetInvitePartyJoinResponseDelegate(FInvitePartyJ
 
 void UAccelByteBlueprintsLobby::SetInvitePartyKickMemberResponseDelegate(FInvitePartyKickMemberResponse OnInvitePartyKickMemberResponse)
 {
-    AccelByte::Api::Lobby::FInvitePartyKickMemberResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FInvitePartyKickMemberResponse::CreateLambda([OnInvitePartyKickMemberResponse](const FAccelByteModelsKickPartyMemberResponse& Result) {
+    AccelByte::Api::Lobby::FPartyKickResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyKickResponse::CreateLambda([OnInvitePartyKickMemberResponse](const FAccelByteModelsKickPartyMemberResponse& Result) {
         OnInvitePartyKickMemberResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetInvitePartyKickMemberResponseDelegate(OnInfoPartyResponseDelegate);
@@ -234,8 +234,8 @@ void UAccelByteBlueprintsLobby::SetInvitePartyKickMemberResponseDelegate(FInvite
 // Chat
 void UAccelByteBlueprintsLobby::SetPrivateMessageResponseDelegate(FPrivateMessageResponse OnPrivateMessageResponse)
 {
-    AccelByte::Api::Lobby::FPrivateMessageResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FPrivateMessageResponse::CreateLambda([OnPrivateMessageResponse](const FAccelByteModelsPersonalMessageResponse& Result) {
+    AccelByte::Api::Lobby::FPersonalChatResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPersonalChatResponse::CreateLambda([OnPrivateMessageResponse](const FAccelByteModelsPersonalMessageResponse& Result) {
         OnPrivateMessageResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetPrivateMessageResponseDelegate(OnInfoPartyResponseDelegate);
@@ -243,8 +243,8 @@ void UAccelByteBlueprintsLobby::SetPrivateMessageResponseDelegate(FPrivateMessag
 
 void UAccelByteBlueprintsLobby::SetPartyMessageResponseDelegate(FPartyMessageResponse OnPartyMessageResponse)
 {
-    AccelByte::Api::Lobby::FPartyMessageResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FPartyMessageResponse::CreateLambda([OnPartyMessageResponse](const FAccelByteModelsPartyMessageResponse& Result) {
+    AccelByte::Api::Lobby::FPartyChatResponse OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FPartyChatResponse::CreateLambda([OnPartyMessageResponse](const FAccelByteModelsPartyMessageResponse& Result) {
         OnPartyMessageResponse.ExecuteIfBound(Result);
     });
     Lobby::Get().SetPartyMessageResponseDelegate(OnInfoPartyResponseDelegate);
