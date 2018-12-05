@@ -13,6 +13,20 @@ namespace AccelByte
 namespace Api
 {
 
+FString EAccelByteItemTypeToString(const EAccelByteItemType& EnumValue) {
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteItemType"), true);
+	if (!EnumPtr) return "Invalid";
+
+	return EnumPtr->GetNameStringByValue((int64)EnumValue);
+}
+
+FString EAccelByteItemStatusToString(const EAccelByteItemStatus& EnumValue) {
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteItemStatus"), true);
+	if (!EnumPtr) return "Invalid";
+
+	return EnumPtr->GetNameStringByValue((int64)EnumValue);
+}
+
 void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
@@ -50,17 +64,17 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 	Request->ProcessRequest();
 }
 
-void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const FString& ItemType, const FString& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError)
+void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
-	if (!ItemType.IsEmpty())
+	if (ItemType != EAccelByteItemType::NONE)
 	{
-		Url.Append(FString::Printf(TEXT("&itemType=%s"), *ItemType));
+		Url.Append(FString::Printf(TEXT("&itemType=%s"), *EAccelByteItemTypeToString(ItemType)));
 	}
-	if (!Status.IsEmpty())
+	if (Status != EAccelByteItemStatus::NONE)
 	{
-		Url.Append(FString::Printf(TEXT("&status=%"), *Status));
+		Url.Append(FString::Printf(TEXT("&status=%"), *EAccelByteItemStatusToString(Status)));
 	}
 	Url.Append(FString::Printf(TEXT("&status=%d"), Page));
 	if (Size > 0)

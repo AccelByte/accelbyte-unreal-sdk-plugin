@@ -185,8 +185,8 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 
 	FString Language = TEXT("en");
 	FString Region = TEXT("US");
-	FString Status = TEXT("ACTIVE");
-	FString Type = TEXT("INGAMEITEM");
+	EAccelByteItemStatus Status = EAccelByteItemStatus::ACTIVE;
+	EAccelByteItemType Type = EAccelByteItemType::INGAMEITEM;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -221,8 +221,8 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 
 	FString Language = TEXT("en");
 	FString Region = TEXT("US");
-	FString Status = TEXT("ACTIVE");
-	FString Type = TEXT("INGAMEITEM");
+	EAccelByteItemStatus Status = EAccelByteItemStatus::ACTIVE;
+	EAccelByteItemType Type = EAccelByteItemType::INGAMEITEM;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -273,8 +273,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 
 	FString Language = TEXT("en");
 	FString Region = TEXT("US");
-	FString Status = TEXT("ACTIVE");
-	FString TypeCoin = TEXT("COINS");
+	EAccelByteItemStatus Status = EAccelByteItemStatus::ACTIVE;
+	EAccelByteItemType TypeCoin = EAccelByteItemType::COINS;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_VirtualCurrency"));
@@ -320,7 +320,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 
 #pragma region GetItemByCriteria_InGameItem
 
-	FString TypeInGameItem = TEXT("INGAMEITEM");
+	EAccelByteItemType TypeInGameItem = EAccelByteItemType::INGAMEITEM;
 	bool bGetItemByCriteriaSuccess2 = false;
 	bool bExpectedItemFound2 = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_InGameItem"));
@@ -383,8 +383,8 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 
 	FString Language = TEXT("en");
 	FString Region = TEXT("US");
-	FString Status = TEXT("ACTIVE");
-	FString Type = TEXT("COINS");
+	EAccelByteItemStatus Status = EAccelByteItemStatus::ACTIVE;
+	EAccelByteItemType Type = EAccelByteItemType::COINS;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
@@ -461,8 +461,8 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 
 	FString Language = TEXT("en");
 	FString Region = TEXT("US");
-	FString Status = TEXT("ACTIVE");
-	FString Type = TEXT("COINS");
+	EAccelByteItemStatus Status = EAccelByteItemStatus::ACTIVE;
+	EAccelByteItemType Type = EAccelByteItemType::COINS;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));

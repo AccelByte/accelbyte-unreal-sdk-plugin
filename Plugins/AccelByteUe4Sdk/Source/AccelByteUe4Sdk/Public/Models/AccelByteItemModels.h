@@ -18,6 +18,13 @@ enum class EAccelByteItemType : uint8
 	PRODUCT
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteItemStatus : uint8 {
+	NONE = 0,
+	ACTIVE,
+	INACTIVE
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfoRegionData
 {
