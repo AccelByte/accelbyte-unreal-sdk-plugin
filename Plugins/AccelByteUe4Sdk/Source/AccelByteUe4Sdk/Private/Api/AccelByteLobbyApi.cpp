@@ -8,6 +8,7 @@
 #include "WebSocketsModule.h"
 #include "AccelByteCredentials.h"
 #include "AccelByteSettings.h"
+#include "AccelByteLobbyApi.h"
 
 namespace AccelByte
 {
@@ -40,6 +41,10 @@ namespace Api
 
     namespace LobbyResponse
     {
+		// default
+		const FString ConnectedNotif = TEXT("connectNotif");
+		
+
         // Party
         const FString PartyInfo = TEXT("partyInfoResponse");
         const FString CreateParty = TEXT("partyCreateResponse");
@@ -65,6 +70,7 @@ namespace Api
         const FString FriendsPresence = TEXT("friendsPresenceResponse");
 
         // Notification
+		const FString Notification = TEXT("messageNotif");
 
         // Matchmaking
         const FString StartMatchmaking = TEXT("matchmakingResponse");
@@ -195,6 +201,19 @@ FString Lobby::SendGetOnlineUsersRequest()
 }
 
 //-------------------------------------------------------------------------------------------------
+// Notification
+//-------------------------------------------------------------------------------------------------
+void Lobby::GetAllAsyncNotification()
+{
+	if (WebSocket.IsValid() && WebSocket->IsConnected())
+	{
+		FString Content = FString::Printf(TEXT("type: offlineNotificationRequest\nid:%s"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+		WebSocket->Send(Content);
+		UE_LOG(LogTemp, Display, TEXT("Get async notification (id=%s)"), *Content)
+	}
+}
+
+//-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendStartMatchmaking(FString GameMode, FString PartyId, TArray<FString> MemberIds)
@@ -210,10 +229,6 @@ FString Lobby::SendCancelMatchmaking(FString PartyId)
         FString::Printf(TEXT("partyId: %s\n"),*PartyId));
 }
 
-//-------------------------------------------------------------------------------------------------
-// Notification
-//-------------------------------------------------------------------------------------------------
-
 void Lobby::BindEvent(
     const FConnectSuccess& OnConnectSuccess,
     const FErrorHandler& OnConnectError,
@@ -226,6 +241,7 @@ void Lobby::BindEvent(
     const FPrivateMessageNotice& OnPrivateMessageNotice,
     const FPartyMessageNotice& OnPartyMessageNotice,
     const FUserPresenceNotice& OnUserPresenceNotice,
+	const FNotificationMessage& OnNotificationMessage,
     const FErrorHandler& OnParsingError)
 {
     ConnectionClosed = OnConnectionClosed;
@@ -238,7 +254,8 @@ void Lobby::BindEvent(
     InvitePartyKickedNotice = OnInvitePartyKickedNotice;
     PrivateMessageNotice = OnPrivateMessageNotice;
     PartyMessageNotice = OnPartyMessageNotice;
-    UserPresenceNotice = OnUserPresenceNotice;		
+    UserPresenceNotice = OnUserPresenceNotice;
+	NotificationMessage = OnNotificationMessage;
     ParsingError = OnParsingError;
 }
 
@@ -299,7 +316,7 @@ bool Lobby::Tick(float DeltaTime)
 
 FString Lobby::GenerateMessageID(FString Prefix)
 {
-    return FString::Printf(TEXT("%s-%d"), FMath::RandRange(1000,9999));
+    return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000,9999));
 }
 
 FString Lobby::LobbyMessageToJson(FString Message)
@@ -369,6 +386,15 @@ void Lobby::OnMessage(const FString& Message)
         return; \
     }\
 
+	// Default
+	if (lobbyResponseType.Equals(LobbyResponse::ConnectedNotif))
+	{ 
+		ConnectSuccess.ExecuteIfBound();
+		return; 
+	}
+
+
+
     // Party 
     HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, InfoPartyResponse);
     HANDLE_LOBBY_MESSAGE(LobbyResponse::CreateParty, FAccelByteModelsCreatePartyResponse, CreatePartyResponse);
@@ -392,6 +418,9 @@ void Lobby::OnMessage(const FString& Message)
     HANDLE_LOBBY_MESSAGE(LobbyResponse::SetPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
     HANDLE_LOBBY_MESSAGE(LobbyResponse::PresenceNotice, FAccelByteModelsUsersPresenceNotice, UserPresenceNotice);
     HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllUserPresenceResponse);
+
+	// Notification
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::Notification, FAccelByteModelsNotificationMessage, NotificationMessage);
 
     // Matchmaking
     HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingResponse);

@@ -285,6 +285,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 // ------------------------------------------------------------------------------------------------
 // Notification 
 // ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString From;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString To;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Payload;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FDateTime SentAt;
+};
 
 
 // ------------------------------------------------------------------------------------------------

@@ -132,7 +132,10 @@ public:
 
 
     // Notification
-
+	/**
+	 * @brief delegate for handling incoming notification
+	*/
+	DECLARE_DELEGATE_OneParam(FNotificationMessage, const FAccelByteModelsNotificationMessage&); //Passive
 
     // Matchmaking
     /**
@@ -240,6 +243,15 @@ public:
 	 */
     FString SendGetOnlineUsersRequest();
 
+	//------------------------
+	// Notification
+	//------------------------
+	/**
+	* @brief Get all pending notification(s) that is sent to user when user is not connected to lobby. Please call this function after user connected to lobby.
+	*
+	*/
+	void GetAllAsyncNotification();
+
     // Matchmaking
     /**
      * @brief start the matchmaking
@@ -288,6 +300,7 @@ public:
 		const FPrivateMessageNotice& OnPrivateMessageNotice,
 		const FPartyMessageNotice& OnPartyMessageNotice,
 		const FUserPresenceNotice& OnUserPresenceNotice,
+		const FNotificationMessage& OnNotificationMessage,
         const FErrorHandler& OnParsingError
 	);
 
@@ -434,7 +447,7 @@ private:
     FGetAllUserPresenceResponse GetAllUserPresenceResponse;
 
     // Notification
-
+	FNotificationMessage NotificationMessage;
 
     // Matchmaking
     FMatchmakingResponse MatchmakingResponse;
