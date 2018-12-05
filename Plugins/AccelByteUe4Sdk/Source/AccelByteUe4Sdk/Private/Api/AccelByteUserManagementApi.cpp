@@ -168,7 +168,7 @@ void UserManagement::VerifyUserAccount(const FString& VerificationCode, const FV
 void UserManagement::SendPasswordResetCode(const FString& Username, const FSendPasswordResetCodeSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(Settings::ClientId + ":" + Settings::ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/forgotPassword"), *Settings::IamServerUrl, *Settings::GameId);
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/forgotPassword"), *Settings::IamServerUrl, *Settings::Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -192,7 +192,7 @@ void UserManagement::ResetPassword(const FString& Username, const FString& Verif
 	ResetPasswordRequest.LoginId = Username;
 	ResetPasswordRequest.NewPassword = NewPassword;
 	FString Authorization = TEXT("Basic " + FBase64::Encode(Settings::ClientId + ":" + Settings::ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/resetPassword"), *Settings::IamServerUrl, *Settings::GameId);
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/resetPassword"), *Settings::IamServerUrl, *Settings::Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

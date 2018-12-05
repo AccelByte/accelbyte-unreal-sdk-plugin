@@ -16,8 +16,10 @@ class ACCELBYTEUE4SDK_API Settings
 public:
 	static FString ClientId;
 	static FString ClientSecret;
-	static FString GameId;
-	static FString PublisherId;
+	static FString Namespace;
+	static FString PublisherNamespace;
+    static FString RedirectURI;
+    static FString BaseUrl;
 	static FString IamServerUrl;
 	static FString PlatformServerUrl;
 	static FString LobbyServerUrl;
@@ -41,16 +43,28 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString ClientId;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString ClientSecret;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
-	FString GameId;
+	FString Namespace;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
-	FString PublisherId;
+	FString PublisherNamespace;
+
+    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
+    FString RedirectURI;
+
+    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
+    FString BaseUrl;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString IamServerUrl;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString PlatformServerUrl;
+
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString LobbyServerUrl;
 };
@@ -66,31 +80,43 @@ public:
 	GENERATED_BODY()
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static FString GetClientId();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static FString GetClientSecret();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
-	static FString GetGameId();
+	static FString GetNamespace();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
-	static FString GetPublisherId();
+	static FString GetPublisherNamespace();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static FString GetIamServerUrl();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static FString GetPlatformServerUrl();
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static FString GetLobbyServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetClientId(const FString& ClientId);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetClientSecret(const FString& ClientSecret);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
-	static void SetGameId(const FString& GameId);
+	static void SetNamespace(const FString& Namespace);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
-	static void SetPublisherId(const FString& PublisherId);
+	static void SetPublisherNamespace(const FString& PublisherNamespace);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetIamServerUrl(const FString& IamServerUrl);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetPlatformServerUrl(const FString& PlatformServerUrl);
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
 };

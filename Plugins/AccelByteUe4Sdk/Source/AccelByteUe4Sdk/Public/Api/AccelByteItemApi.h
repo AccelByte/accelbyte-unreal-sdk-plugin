@@ -55,4 +55,4 @@ private:
 };
 
 } // Namespace Api
-} // GameId AccelByte
+} // Namespace AccelByte

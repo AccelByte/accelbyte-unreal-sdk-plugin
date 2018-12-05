@@ -68,8 +68,10 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	using AccelByte::Settings;
 	Settings::ClientId = GetDefault<UAccelByteSettings>()->ClientId;
 	Settings::ClientSecret = GetDefault<UAccelByteSettings>()->ClientSecret;
-	Settings::GameId = GetDefault<UAccelByteSettings>()->GameId;
-	Settings::PublisherId = GetDefault<UAccelByteSettings>()->PublisherId;
+	Settings::Namespace = GetDefault<UAccelByteSettings>()->Namespace;
+	Settings::PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
+    Settings::RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
+    Settings::BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
 	Settings::IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
 	Settings::PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
 	Settings::LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
