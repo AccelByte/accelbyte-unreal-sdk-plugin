@@ -36,6 +36,9 @@ pipeline {
                     IF EXIST artifacts (
                     rd /s /q artifacts
                     )
+                    IF EXIST Doxygen (
+                    rd /s /q Doxygen
+                    )
                 '''
             }
             post {
