@@ -269,6 +269,11 @@ void UAccelByteBlueprintsLobby::SetGetAllUserPresenceResponseDelegate(FGetAllUse
     Lobby::Get().SetGetAllUserPresenceResponseDelegate(OnInfoPartyResponseDelegate);
 }
 
+void UAccelByteBlueprintsLobby::SetPresenceStatus(Presence State, FString GameName)
+{
+	Lobby::Get().SendSetPresenceStatus(State, GameName);
+}
+
 // Notification
 void UAccelByteBlueprintsLobby::GetAllAsyncNotification()
 {
