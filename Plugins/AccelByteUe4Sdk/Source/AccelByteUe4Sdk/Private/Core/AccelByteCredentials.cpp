@@ -93,7 +93,7 @@ FTickerDelegate & Credentials::GetRefreshTokenTickerDelegate()
 
 bool Credentials::RefreshTokenTick(float NextTickInSecond)
 {
-	float NextRefreshIn = FMath::Pow(2, RefreshAttempt);
+	float NextRefreshIn = FMath::Pow(2, RefreshAttempt) + FMath::RandRange(0.01f, 0.99f);
 	if (NextRefreshIn < 60.0f) // next retry is not more than 60 second
 	{
 		RefreshAttempt += 1;

@@ -133,6 +133,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
+	static void SetPresenceStatus(Presence State, FString GameName);
+
 	// Notification
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void GetAllAsyncNotification();

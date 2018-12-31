@@ -33,7 +33,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsInfoPartyResponse
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         TArray<FString> Members;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-        FString Invitees;
+		TArray<FString> Invitees;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString InvitationToken;
 };
@@ -50,9 +50,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreatePartyResponse
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString LeaderId;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-        FString Members;
+		TArray<FString> Members;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-        FString Invitees;
+        TArray<FString> Invitees;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString InvitationToken;
 };
@@ -124,9 +124,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyJoinReponse
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString LeaderId;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-        FString Members;
+        TArray<FString> Members;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-        FString Invitees;
+        TArray<FString> Invitees;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString InvitationToken;
 };
@@ -329,4 +329,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     TArray<FString> TeamB;
+};
+
+/**
+ * @brief presence enumeration.
+ */
+UENUM(BlueprintType)
+enum class Presence : uint8 {
+	Online = 21,
+	InParty = 22,
+	Playing = 23,
+	Offline = 24,
 };

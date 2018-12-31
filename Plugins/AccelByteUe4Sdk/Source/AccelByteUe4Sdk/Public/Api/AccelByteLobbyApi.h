@@ -24,15 +24,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-    /**
-     * @brief presence enumeration.
-     */
-    enum class Presence : int {
-        Online = 21,
-        InParty = 22,
-        Playing = 23,
-        Offline = 24,
-    };
 
     // Party 
     /**
