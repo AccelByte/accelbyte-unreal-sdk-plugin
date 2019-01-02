@@ -70,7 +70,7 @@ public:
     // Presence
     DECLARE_DYNAMIC_DELEGATE_OneParam(FSetUserPresenceResponse, const FAccelByteModelsSetOnlineUsersResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FUserPresenceNotice, const FAccelByteModelsUsersPresenceNotice&, Result);             
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FGetAllUserPresenceResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FGetAllFriendsStatusResponse, const FAccelByteModelsGetOnlineUsersResponse&, Result);
 
 	// Notification
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FNotificationMessage, const FAccelByteModelsNotificationMessage&, Result);
@@ -131,10 +131,10 @@ public:
 
 
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    static void SetGetAllUserPresenceResponseDelegate(FGetAllUserPresenceResponse OnGetAllUserPresenceResponse);
+	static void SetPresenceStatus(Availability State, FString Activity);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-	static void SetPresenceStatus(Presence State, FString GameName);
+    static void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse);
 
 	// Notification
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
