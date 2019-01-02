@@ -19,4 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
 	static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
+	static FString BytesToFString(TArray<uint8> Input);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
+	static TArray<uint8> FStringToBytes(FString Input);
 };
