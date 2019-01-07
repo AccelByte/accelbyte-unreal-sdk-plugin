@@ -1,12 +1,11 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteOrderApi.h"
 #include "AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
-#include "AccelByteCredentials.h"
-#include "AccelByteSettings.h"
+#include "AccelByteRegistry.h"
 
 namespace AccelByte
 {
@@ -15,8 +14,8 @@ namespace Api
 
 void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(),  *Credentials::Get().GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(),  *FRegistry::Credentials.GetUserId());
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -30,14 +29,14 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(CreateNewOrderResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(CreateNewOrderResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Order::GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -50,14 +49,14 @@ void Order::GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnS
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetUserOrderResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetUserOrderResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Order::GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -72,14 +71,14 @@ void Order::GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& O
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetUserOrdersResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetUserOrdersResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Order::FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -92,14 +91,14 @@ void Order::FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnS
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(FulfillOrderResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(FulfillOrderResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Order::GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -112,8 +111,8 @@ void Order::GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHisto
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetUserOrderHistoryResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetUserOrderHistoryResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 // =============================================================================================================================

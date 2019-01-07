@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -6,7 +6,6 @@
 
 #include "CoreMinimal.h"
 #include "AccelByteOauth2Models.h"
-#include "AccelByteUserAuthenticationApi.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
@@ -21,53 +20,57 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Credentials
 {
 public:
-	static Credentials& Get();
+	enum class ETokenState
+	{
+		Invalid,
+		Expired,
+		Refreshing,
+		Valid,
+	};
+
+public:
+	Credentials();
+
 	void ForgetAll();
-	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace);
-	void SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace);
+	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
+	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
+	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, double ExpiredTime, const FString& Id, const FString& DisplayName, const FString& Namespace);
 	/**
 	 * @brief Get stored access token.
 	 */
-	FString GetUserAccessToken() const;
+	const FString& GetUserAccessToken() const;
 	/**
 	 * @brief Get stored refresh token; this is not set if you logged in with client credentials and you simply have to login with client credentials again to get new access token.
 	 */
-	FString GetUserRefreshToken() const;
+	const FString& GetUserRefreshToken() const;
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */
-	FString GetClientAccessToken() const;
-	FString GetClientNamespace() const;
-	FDateTime GetUserAccessTokenExpirationUtc() const;
-	FString GetUserId() const;
-	FString GetUserDisplayName() const;
-	FString GetUserNamespace() const;
-	float GetRefreshTokenDuration() const;
-	FTickerDelegate& GetRefreshTokenTickerDelegate();
+	const FString& GetClientAccessToken() const;
+	const FString& GetClientNamespace() const;
+	const FString& GetUserId() const;
+	const FString& GetUserDisplayName() const;
+	const FString& GetUserNamespace() const;
+	ETokenState GetTokenState() const;
+	
+	void PollRefreshToken(double CurrentTime);
+	void ScheduleRefreshToken(double NextRefreshTime);
 
 private:
-	Credentials(Credentials const&) = delete; // Copy constructor
-	Credentials(Credentials&&) = delete; // Move constructor
-	Credentials& operator=(Credentials const&) = delete; // Copy assignment operator
-	Credentials& operator=(Credentials &&) = delete; // Move assignment operator
-
+	FString ClientId;
+	FString ClientSecret;
 	FString ClientAccessToken;
 	FString ClientNamespace;
+	
 	FString UserAccessToken;
 	FString UserRefreshToken;
-	FDateTime UserAccessTokenExpirationUtc;
 	FString UserNamespace;
 	FString UserId;
-	FString UserDisplayName;
-	int32 RefreshAttempt = 0;
-	bool RefreshTokenTick(float NextTickInSecond);
-	FTickerDelegate RefreshTokenTickerDelegate;
-	AccelByte::Api::UserAuthentication::FRefreshTokenSuccess OnRefreshSuccess;
-	AccelByte::Api::UserAuthentication::FRefreshTokenSuccess GetOnRefreshSuccess() const;
-
-protected:
-	Credentials();
-	~Credentials();
+	FString UserDisplayName;		
+	double UserRefreshTime;
+	double UserExpiredTime;
+	double UserRefreshBackoff;
+	ETokenState UserTokenState;
 };
 
 } // Namespace AccelByte
@@ -80,10 +83,6 @@ public:
 	GENERATED_BODY()
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserAccessToken();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserRefreshToken();
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FDateTime GetUserAccessTokenExpirationUtc();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserId();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")

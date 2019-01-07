@@ -1,10 +1,10 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteOauth2Api.h"
+#include "AccelByteRegistry.h"
 #include "JsonUtilities.h"
-#include "AccelByteSettings.h"
 #include "Base64.h"
 
 namespace AccelByte
@@ -14,7 +14,7 @@ namespace Api
 void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *Settings::IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -34,7 +34,7 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, c
 void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FGetAccessTokenWithPasswordGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *Settings::IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -54,7 +54,7 @@ void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FStr
 void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const FGetAccessTokenWithClientCredentialsGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *Settings::IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -74,7 +74,7 @@ void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, c
 void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const FGetAccessTokenWithRefreshTokenGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *Settings::IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -100,7 +100,7 @@ void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FStrin
 	FString DeviceId = FGenericPlatformMisc::GetDeviceId();
 
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/platforms/device/token"), *Settings::IamServerUrl);;
+	FString Url = FString::Printf(TEXT("%s/oauth/platforms/device/token"), *FRegistry::Settings.IamServerUrl);;
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -120,7 +120,7 @@ void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FStrin
 void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const FGetAccessTokenWithPlatformGrantSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-    FString Url = FString::Printf(TEXT("%s/oauth/platforms/%s/token"), *Settings::IamServerUrl, *PlatformId);
+    FString Url = FString::Printf(TEXT("%s/oauth/platforms/%s/token"), *FRegistry::Settings.IamServerUrl, *PlatformId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/x-www-form-urlencoded");
     FString Accept = TEXT("application/json");

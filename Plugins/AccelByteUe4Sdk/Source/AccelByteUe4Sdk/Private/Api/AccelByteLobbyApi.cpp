@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -6,8 +6,7 @@
 #include "ModuleManager.h"
 #include "IWebSocket.h"
 #include "WebSocketsModule.h"
-#include "AccelByteCredentials.h"
-#include "AccelByteSettings.h"
+#include "AccelByteRegistry.h"
 #include "AccelByteLobbyApi.h"
 
 namespace AccelByte
@@ -97,15 +96,15 @@ void Lobby::Connect()
 {
 	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	TMap<FString, FString> Headers;
-	Headers.Add("Authorization", "Bearer " + Credentials::Get().GetUserAccessToken());
+	Headers.Add("Authorization", "Bearer " + FRegistry::Credentials.GetUserAccessToken());
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings::LobbyServerUrl, TEXT("wss"), Headers);
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*FRegistry::Settings.LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	WebSocket->Connect();	
-	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Settings::LobbyServerUrl);
+	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *FRegistry::Settings.LobbyServerUrl);
 }
 
 void Lobby::Disconnect()

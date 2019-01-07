@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -56,20 +56,7 @@ void UAccelByteBlueprintsUserAuthentication::LoginWithDeviceId(const FLoginWithD
 	}));
 }
 
-void UAccelByteBlueprintsUserAuthentication::RefreshToken(const FRefreshTokenSuccess & OnSuccess, const FBlueprintErrorHandler & OnError)
-{
-	UserAuthentication::RefreshToken(UserAuthentication::FRefreshTokenSuccess::CreateLambda([OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
-}
-
 void UAccelByteBlueprintsUserAuthentication::ForgetAllCredentials()
 {
 	UserAuthentication::ForgetAllCredentials();
 }
-

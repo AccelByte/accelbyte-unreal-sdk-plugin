@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -14,21 +14,17 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Settings
 {
 public:
-	static FString ClientId;
-	static FString ClientSecret;
-	static FString Namespace;
-	static FString PublisherNamespace;
-    static FString RedirectURI;
-    static FString BaseUrl;
-	static FString IamServerUrl;
-	static FString PlatformServerUrl;
-	static FString LobbyServerUrl;
-	static FString CloudStorageServerUrl;
-	static FString BasicServerUrl;
-private:
-	Settings() = delete; // Static class can't have instance
-	Settings(Settings const&) = delete;
-	Settings(Settings&&) = delete;
+	FString ClientId;
+	FString ClientSecret;
+	FString Namespace;
+	FString PublisherNamespace;
+    FString RedirectURI;
+    FString BaseUrl;
+	FString IamServerUrl;
+	FString PlatformServerUrl;
+	FString LobbyServerUrl;
+	FString BasicServerUrl;
+	FString CloudStorageServerUrl;
 };
 
 } // Namespace AccelByte

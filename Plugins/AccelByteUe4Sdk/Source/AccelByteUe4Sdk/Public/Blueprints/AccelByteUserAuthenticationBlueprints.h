@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -31,10 +31,6 @@ public:
 	DECLARE_DYNAMIC_DELEGATE(FLoginWithDeviceIdSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
 	static void LoginWithDeviceId(const FLoginWithDeviceIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-	
-	DECLARE_DYNAMIC_DELEGATE(FRefreshTokenSuccess);
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
-	static void RefreshToken(const FRefreshTokenSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserAuthentication | Api ")
 	static void ForgetAllCredentials();
