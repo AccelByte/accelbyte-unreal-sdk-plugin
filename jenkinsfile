@@ -94,7 +94,8 @@ pipeline {
                     "PublisherId=$Env:UE4_PublisherNamespace`r`n" +
                     "IamServerUrl=`"$Env:UE4_BASE_URL`/iam`"`r`n" +
                     "PlatformServerUrl=`"$Env:UE4_BASE_URL`/platform`"`r`n" +
-                    "LobbyServerUrl=`"$Env:UE4_BASE_URL`/lobby`/`"`r`n"
+                    "LobbyServerUrl=`"$Env:UE4_BASE_URL`/lobby`/`"`r`n" +
+                    "BasicServerUrl=`"$Env:UE4_BASE_URL`/basic`/`"`r`n"
 
                     (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\\[\\/Script\\/AccelByteUe4Sdk\\.AccelByteSettings\\]).*' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
 

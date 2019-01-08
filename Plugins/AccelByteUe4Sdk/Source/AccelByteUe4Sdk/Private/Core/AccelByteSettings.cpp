@@ -18,6 +18,7 @@ FString Settings::BaseUrl;
 FString Settings::IamServerUrl;
 FString Settings::PlatformServerUrl;
 FString Settings::LobbyServerUrl;
+FString Settings::BasicServerUrl;
 
 }
 
@@ -60,6 +61,11 @@ FString UAccelByteBlueprintsSettings::GetLobbyServerUrl()
 	return Settings::LobbyServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetBasicServerUrl()
+{
+	return Settings::BasicServerUrl;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	Settings::ClientId = ClientId;
@@ -93,4 +99,9 @@ void UAccelByteBlueprintsSettings::SetPlatformServerUrl(const FString& PlatformS
 void UAccelByteBlueprintsSettings::SetLobbyServerUrl(const FString& LobbyServerUrl)
 {
 	Settings::LobbyServerUrl = LobbyServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetBasicServerUrl(const FString& BasicServerUrl)
+{
+	Settings::BasicServerUrl = BasicServerUrl;
 }

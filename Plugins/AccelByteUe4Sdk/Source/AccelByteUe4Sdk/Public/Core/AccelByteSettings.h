@@ -23,6 +23,7 @@ public:
 	static FString IamServerUrl;
 	static FString PlatformServerUrl;
 	static FString LobbyServerUrl;
+	static FString BasicServerUrl;
 private:
 	Settings() = delete; // Static class can't have instance
 	Settings(Settings const&) = delete;
@@ -67,6 +68,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
 	FString LobbyServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte | Settings")
+	FString BasicServerUrl;
 };
 
 
@@ -100,6 +104,9 @@ public:
 	static FString GetLobbyServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
+	static FString GetBasicServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
@@ -119,5 +126,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Settings")
+	static void SetBasicServerUrl(const FString& BasicServerUrl);
 };
 
