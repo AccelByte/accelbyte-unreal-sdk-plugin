@@ -254,10 +254,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUsersPresenceNotice
     FString UserID;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    FString StatusID;
+    FString Availability;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    FString GameName;
+    FString Activity;
 };
 
 
@@ -275,11 +275,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
     FString id;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-	TArray<FString> onlineFriendsId;
+	TArray<FString> friendsId;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> payload;
+    TArray<FString> availability;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    TArray<FString> activity;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    TArray<FString> lastSeenAt;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -296,6 +301,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
 	FString From;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	FString To;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString Topic;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	FString Payload;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
@@ -331,13 +338,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
     TArray<FString> TeamB;
 };
 
+UENUM(BlueprintType)
 /**
  * @brief presence enumeration.
  */
-UENUM(BlueprintType)
-enum class Presence : uint8 {
-	Online = 21,
-	InParty = 22,
-	Playing = 23,
-	Offline = 24,
+enum class Availability : uint8
+{
+	Offline = 0,
+	Availabe = 1,
+	Busy = 2,
+	Invisible = 3
 };

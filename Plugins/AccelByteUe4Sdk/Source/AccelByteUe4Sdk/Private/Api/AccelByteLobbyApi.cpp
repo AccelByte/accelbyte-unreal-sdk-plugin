@@ -30,7 +30,7 @@ namespace Api
 
         // Presence
         const FString SetPresence = TEXT("setUserStatusRequest");
-        const FString FriendsPresence = TEXT("friendsPresenceRequest");
+        const FString FriendsPresence = TEXT("friendsStatusRequest");
 
         // Notification
 
@@ -67,8 +67,8 @@ namespace Api
 
         // Presence
         const FString SetUserPresence = TEXT("setUserStatusResponse");
-        const FString UserPresenceNotif = TEXT("userStatusNotif");
-        const FString FriendsPresence = TEXT("friendsPresenceResponse");
+        const FString FriendStatusNotif = TEXT("userStatusNotif");
+        const FString FriendsPresence = TEXT("friendsStatusResponse");
 
         // Notification
 		const FString MessageNotif = TEXT("messageNotif");
@@ -190,10 +190,10 @@ FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 //-------------------------------------------------------------------------------------------------
 // Presence
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendSetPresenceStatus(const Presence State, const FString& GameName)
+FString Lobby::SendSetPresenceStatus(const Availability Availability, const FString& Activity)
 {
     return SendRawRequest(LobbyRequest::SetPresence, Prefix::Presence,
-        FString::Printf(TEXT("statusID: %d\ngameName: %s\n"), (int)State, *GameName));
+        FString::Printf(TEXT("availability: %d\nactivity: %s\n"), (int)Availability, *Activity));
 }
 
 FString Lobby::SendGetOnlineUsersRequest()
@@ -230,36 +230,6 @@ FString Lobby::SendCancelMatchmaking(FString PartyId)
         FString::Printf(TEXT("partyId: %s\n"),*PartyId));
 }
 
-void Lobby::BindEvent(
-    const FConnectSuccess& OnConnectSuccess,
-    const FErrorHandler& OnConnectError,
-    const FConnectionClosed& OnConnectionClosed,
-    const FPartyLeaveNotif& OnPartyLeaveNotif,
-    const FPartyInviteNotif& OnPartyInviteNotif,
-    const FPartyGetInvitedNotif& OnPartyGetInvitedNotif,
-    const FPartyJoinNotif& OnPartyJoinNotif,
-    const FPartyKickNotif& OnPartyKickNotif,
-    const FPersonalChatNotif& OnPersonalChatNotif,
-    const FPartyChatNotif& OnPartyChatNotif,
-    const FUserPresenceNotif& OnUserPresenceNotif,
-	const FMessageNotif& OnMessageNotif,
-    const FErrorHandler& OnParsingError)
-{
-    ConnectionClosed = OnConnectionClosed;
-    ConnectSuccess = OnConnectSuccess;
-    ConnectError = OnConnectError;
-    PartyLeaveNotif = OnPartyLeaveNotif;
-    PartyInviteNotif = OnPartyInviteNotif;
-    PartyGetInvitedNotif = OnPartyGetInvitedNotif;
-    PartyJoinNotif = OnPartyJoinNotif;
-    PartyKickNotif = OnPartyKickNotif;
-    PersonalChatNotif = OnPersonalChatNotif;
-    PartyChatNotif = OnPartyChatNotif;
-    UserPresenceNotif = OnUserPresenceNotif;
-	MessageNotif = OnMessageNotif;
-    ParsingError = OnParsingError;
-}
-
 void Lobby::UnbindEvent()
 {
     PartyLeaveNotif.Unbind();
@@ -269,7 +239,7 @@ void Lobby::UnbindEvent()
     PartyKickNotif.Unbind();
     PersonalChatNotif.Unbind();
     PartyChatNotif.Unbind();
-    UserPresenceNotif.Unbind();	
+    FriendStatusNotif.Unbind();	
 }
 
 void Lobby::OnConnected()
@@ -407,7 +377,7 @@ void Lobby::OnMessage(const FString& Message)
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoinNotif, FAccelByteModelsPartyJoinNotice, PartyJoinNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoin, FAccelByteModelsPartyJoinReponse, PartyJoinResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
-	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
 
     // Chat
     HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);
@@ -417,8 +387,8 @@ void Lobby::OnMessage(const FString& Message)
 
     // Presence
     HANDLE_LOBBY_MESSAGE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::UserPresenceNotif, FAccelByteModelsUsersPresenceNotice, UserPresenceNotif);
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllUserPresenceResponse);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendStatusNotif, FAccelByteModelsUsersPresenceNotice, FriendStatusNotif);
+    HANDLE_LOBBY_MESSAGE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse);
 
 	// Notification
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::MessageNotif, FAccelByteModelsNotificationMessage, MessageNotif);
