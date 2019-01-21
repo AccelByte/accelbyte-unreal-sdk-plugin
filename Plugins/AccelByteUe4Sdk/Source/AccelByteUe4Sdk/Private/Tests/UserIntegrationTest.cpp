@@ -522,6 +522,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	FString SecondUserId = "";
 	FString ThirdUserId = "";
 	double LastTime = 0;
+	FString OldAccessToken = "", RefreshedAccessToken = "";
 
 	bool bClientLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
@@ -544,6 +545,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
+	OldAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
@@ -552,8 +554,9 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 	}), GlobalErrorHandler);
-
+	
 	FlushHttpRequests();
+	RefreshedAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	UserAuthentication::ForgetAllCredentials();
 
@@ -614,15 +617,17 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser2
 
-	check(bUpgradeSuccessful);
-	check(bUpgradedHeadlessAccountUserIdRemain);
-	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
-	check(bEmailLoginSuccessful);
-	check(bDeviceLoginSuccessful1);
-	check(bDeviceLoginSuccessful2);
-	check(bDeleteSuccessful1);
-	check(bDeleteSuccessful2);
-	return true;
+	check(bUpgradeSuccessful)
+		check(bUpgradedHeadlessAccountUserIdRemain)
+		check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
+		check(bEmailLoginSuccessful)
+		check(bDeviceLoginSuccessful1)
+		check(bDeviceLoginSuccessful2)
+		check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
+		check(!OldAccessToken.Equals(RefreshedAccessToken))
+		check(bDeleteSuccessful1)
+		check(bDeleteSuccessful2)
+		return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.User.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMaskUser);
@@ -763,6 +768,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	FString Password = TEXT("password");
 	double LastTime = 0;
 	FString FirstUserId = TEXT("");
+	FString OldAccessToken = "", RefreshedAccessToken = "";
 
 	bool bClientLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
@@ -785,6 +791,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
+	OldAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
@@ -793,8 +800,8 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 	}), GlobalErrorHandler);
-
 	FlushHttpRequests();
+	RefreshedAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	UserAuthentication::ForgetAllCredentials();
 
@@ -828,6 +835,8 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	check(bLoginPlatformSuccessful);
 	check(bUpgradeSuccessful);
 	check(bLoginEmailSuccessful);
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
+	check(!OldAccessToken.Equals(RefreshedAccessToken))
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -945,6 +954,7 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 	FString Password = TEXT("password");
 	FString FirstUserId = "";
 	double LastTime = 0;
+	FString OldAccessToken = "", RefreshedAccessToken = "";
 
 	bool bClientLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
@@ -967,6 +977,7 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 	FlushHttpRequests();
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
+	OldAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	bool bSendUserUpgradeVerificationCode = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendUserUpgradeVerificationCode"));
@@ -992,6 +1003,7 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 	}), GlobalErrorHandler);
 
 	FlushHttpRequests();
+	RefreshedAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
 	bool bEmailLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -1019,12 +1031,14 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 
 #pragma endregion DeleteUser1
 
-	check(bDeviceLoginSuccessful);
-	check(bSendUserUpgradeVerificationCode);
-	check(bGetVerificationCode);
-	check(bEmailLoginSuccessful);
-	check(bDeleteSuccessful1);
-	return true;
+	check(bDeviceLoginSuccessful)
+	check(bSendUserUpgradeVerificationCode)
+	check(bGetVerificationCode)
+	check(bEmailLoginSuccessful)
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
+	check(!OldAccessToken.Equals(RefreshedAccessToken))
+	check(bDeleteSuccessful1)
+		return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.User.SteamTicket", AutomationFlagMaskUser);

@@ -132,6 +132,11 @@ void Credentials::ScheduleRefreshToken(double RefreshTime)
 	UserRefreshTime = RefreshTime;
 }
 
+void Credentials::ForceRefreshToken()
+{
+	ScheduleRefreshToken(FPlatformTime::Seconds());
+}
+
 const FString& Credentials::GetUserId() const
 {
 	return UserId;

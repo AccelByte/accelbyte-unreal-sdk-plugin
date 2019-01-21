@@ -55,6 +55,11 @@ public:
 	
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
+	
+	/**
+	 * @brief Force to refresh access token.
+	 */
+	void ForceRefreshToken();
 
 private:
 	FString ClientId;

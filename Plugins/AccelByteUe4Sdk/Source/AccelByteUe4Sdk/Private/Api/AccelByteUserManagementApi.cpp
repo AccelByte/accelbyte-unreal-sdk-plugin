@@ -310,6 +310,7 @@ void UserManagement::AddUsernameAndPasswordResponse(FHttpRequestPtr Request, FHt
 	FString Message;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
+		FRegistry::Credentials.ForceRefreshToken();
 		OnSuccess.ExecuteIfBound();
 		return;
 	}
@@ -416,6 +417,7 @@ void UserManagement::UpgradeHeadlessAccountWithVerificationCodeResponse(FHttpReq
 	FString Message;
 	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 	{
+		FRegistry::Credentials.ForceRefreshToken();
 		FAccelByteModelsUserResponse Result;
 		FJsonObjectConverter::JsonObjectStringToUStruct<FAccelByteModelsUserResponse>(Response->GetContentAsString(), &Result, 0, 0);
 		OnSuccess.ExecuteIfBound(Result);
