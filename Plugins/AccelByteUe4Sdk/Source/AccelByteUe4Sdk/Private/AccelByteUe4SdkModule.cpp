@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -96,6 +96,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
 	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
 	FRegistry::Settings.BasicServerUrl = GetDefault<UAccelByteSettings>()->BasicServerUrl;
+	FRegistry::Settings.CloudStorageServerUrl = GetDefault<UAccelByteSettings>()->CloudStorageServerUrl;
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
