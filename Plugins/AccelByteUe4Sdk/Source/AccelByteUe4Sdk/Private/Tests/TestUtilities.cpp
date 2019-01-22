@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -6,8 +6,7 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
+#include "AccelByteRegistry.h"
 #include "FileManager.h"
 
 using AccelByte::FErrorHandler;
@@ -17,8 +16,8 @@ using AccelByte::HandleHttpError;
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%snotification/namespaces/%s/users/%s/freeform"), *Settings::LobbyServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%snotification/namespaces/%s/users/%s/freeform"), *FRegistry::Settings.LobbyServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -68,4 +67,21 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 	Return.AddUninitialized(Input.Len());
 	StringToBytes(Input, Return.GetData(), Input.Len());
 	return Return;
+}
+
+
+
+void FlushHttpRequests()
+{
+	double LastTickTime = FPlatformTime::Seconds();
+
+	while (FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials))
+	{
+		FRegistry::Credentials.PollRefreshToken(FPlatformTime::Seconds());
+		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
+		LastTickTime = FPlatformTime::Seconds();
+		FPlatformProcess::Sleep(0.5);
+	};
+
+	FHttpModule::Get().GetHttpManager().Flush(false);
 }

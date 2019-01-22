@@ -1,12 +1,11 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteEntitlementApi.h"
 #include "AccelByteError.h"
+#include "AccelByteRegistry.h"
 #include "JsonUtilities.h"
-#include "AccelByteCredentials.h"
-#include "AccelByteSettings.h"
 #include "EngineMinimal.h"
 
 namespace AccelByte
@@ -16,8 +15,8 @@ namespace Api
 
 void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const FQueryUserEntitlementSuccess& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
 	
 	FString Query = TEXT("");
 	if (!EntitlementName.IsEmpty())
@@ -65,8 +64,8 @@ void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FS
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(QueryUserEntitlementResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(QueryUserEntitlementResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 // =============================================================================================================================

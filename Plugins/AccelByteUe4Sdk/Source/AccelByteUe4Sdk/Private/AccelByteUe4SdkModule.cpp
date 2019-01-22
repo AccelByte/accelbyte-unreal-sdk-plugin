@@ -1,14 +1,16 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
+#include "AccelByteRegistry.h"
+#include "CoreUObject.h"
+#include "Runtime/Core/Public/Containers/Ticker.h"
+
 #if WITH_EDITOR
 #include "ISettingsModule.h"
 #include "ISettingsSection.h"
 #endif
-#include "CoreUObject.h"
-#include "AccelByteSettings.h"
 
 
 class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
@@ -27,6 +29,25 @@ void FAccelByteUe4SdkModule::StartupModule()
 {
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
+	auto Ticker = FTicker::GetCoreTicker();
+
+	Ticker.AddTicker(
+		FTickerDelegate::CreateLambda([](float DeltaTime)
+		{
+			FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+
+			return true;
+		}),
+		0.2f);
+
+	Ticker.AddTicker(
+		FTickerDelegate::CreateLambda([](float DeltaTime)
+		{
+			FRegistry::Credentials.PollRefreshToken(FPlatformTime::Seconds());
+
+			return true;
+		}),
+		0.2f);
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
@@ -65,18 +86,19 @@ void FAccelByteUe4SdkModule::UnregisterSettings()
 
 bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 {
-	using AccelByte::Settings;
-	Settings::ClientId = GetDefault<UAccelByteSettings>()->ClientId;
-	Settings::ClientSecret = GetDefault<UAccelByteSettings>()->ClientSecret;
-	Settings::Namespace = GetDefault<UAccelByteSettings>()->Namespace;
-	Settings::PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
-    Settings::RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
-    Settings::BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
-	Settings::IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
-	Settings::PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
-	Settings::LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
-    Settings::CloudStorageServerUrl = GetDefault<UAccelByteSettings>()->CloudStorageServerUrl;
-	Settings::BasicServerUrl = GetDefault<UAccelByteSettings>()->BasicServerUrl;
+	FRegistry::Settings.ClientId = GetDefault<UAccelByteSettings>()->ClientId;
+	FRegistry::Settings.ClientSecret = GetDefault<UAccelByteSettings>()->ClientSecret;
+	FRegistry::Settings.Namespace = GetDefault<UAccelByteSettings>()->Namespace;
+	FRegistry::Settings.PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
+	FRegistry::Settings.RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
+	FRegistry::Settings.BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
+	FRegistry::Settings.IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
+	FRegistry::Settings.PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
+	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
+	FRegistry::Settings.BasicServerUrl = GetDefault<UAccelByteSettings>()->BasicServerUrl;
+	FRegistry::Settings.CloudStorageServerUrl = GetDefault<UAccelByteSettings>()->CloudStorageServerUrl;
+	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+	
 	return true;
 }
 

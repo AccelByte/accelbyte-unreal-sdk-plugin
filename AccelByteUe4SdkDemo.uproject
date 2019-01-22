@@ -33,8 +33,7 @@
 		},
 		{
 			"Name": "AccelByteUe4Sdk",
-			"Enabled": true,
-			"LoadingPhase": "PostEngineInit"
+			"Enabled": true
 		},
 		{
 			"Name": "WebBrowserWidget",

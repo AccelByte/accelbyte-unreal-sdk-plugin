@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -11,8 +11,7 @@
 #include "AccelByteUserManagementApi.h"
 #include "AccelByteWalletApi.h"
 #include "AccelByteEntitlementApi.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
+#include "AccelByteRegistry.h"
 #include "FileManager.h"
 #include "AccelByteUserAuthenticationApi.h"
 
@@ -34,6 +33,7 @@ DECLARE_DELEGATE(FEcommerceUserInitializationFail);
 
 DECLARE_DELEGATE(FDeleteUserByIdSuccess);
 static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+void FlushHttpRequests();//defined in TestUtilities.cpp
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 FString EcommerceUserEmail;
@@ -67,7 +67,7 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetCategorySuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 
 #pragma endregion GetCategory
 
@@ -98,7 +98,8 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetRootCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	
+	FlushHttpRequests();
 
 #pragma endregion GetRootCategories
 
@@ -130,7 +131,8 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetChildCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetChildCategories
 
@@ -166,7 +168,8 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 		}
 		bGetDescendantCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetDescendantCategories
 
@@ -202,7 +205,8 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 		}
 		bGetItemByCriteriaSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria
 
@@ -240,7 +244,8 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		}
 		bGetItemByCriteriaSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria
 
@@ -253,7 +258,8 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetItemByIdSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItem
 
@@ -292,7 +298,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 			}
 		}
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria
 
@@ -314,7 +321,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion CreateOrder
 
@@ -339,7 +347,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 			}
 		}
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria_InGameItem
 
@@ -359,7 +368,8 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bCreateNewOrderSuccess2 = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion CreateOrder_InGameItem
 
@@ -403,7 +413,8 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 			}
 		}
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria
 
@@ -426,7 +437,8 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		OrderNo = Result.OrderNo;
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion CreateOrder
 
@@ -439,7 +451,8 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetUserOrder
 
@@ -481,7 +494,8 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 			}
 		}
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetItemByCriteria
 
@@ -504,7 +518,8 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		OrderNo = Result.OrderNo;
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion CreateOrder
 
@@ -517,7 +532,8 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrderHistorySuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion GetUserOrderHistory
 
@@ -541,7 +557,8 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma region GetUserOrders
 
@@ -559,7 +576,8 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetWalletSuccess = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 	check(bGetWalletSuccess);
 	return true;
@@ -579,7 +597,8 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 		bQueryEntitlementSuccess = true;
 		bQueryResultTrue = (Result.Data.Num() > 0);
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 	check(bQueryEntitlementSuccess);
 	check(bQueryResultTrue);
@@ -613,7 +632,8 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithDeviceAccount"));
@@ -622,7 +642,8 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 	if (bLoginSuccessful)
 	{
@@ -645,13 +666,14 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("DeleteUserById"));
-	DeleteUserByIdLobby(Credentials::Get().GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	DeleteUserByIdLobby(FRegistry::Credentials.GetUserId(), FDeleteUserByIdSuccess::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
 	}), EcommerceErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+
+	FlushHttpRequests();
 
 #pragma endregion DeleteUser
 
@@ -664,8 +686,8 @@ void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& On
 	using AccelByte::Settings;
 	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *Settings::IamServerUrl, *Settings::Namespace, *UserId, *Settings::PublisherNamespace);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -690,8 +712,8 @@ void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& On
 				{
 					FString RealUserId = JsonParsed->GetStringField("UserId");
 
-					FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetClientAccessToken());
-					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *Settings::IamServerUrl, *Settings::PublisherNamespace, *RealUserId);
+					FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
 					FString Verb = TEXT("DELETE");
 					FString ContentType = TEXT("application/json");
 					FString Accept = TEXT("application/json");

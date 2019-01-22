@@ -1,168 +1,182 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteCredentials.h"
+#include "AccelByteOauth2Api.h"
 #include "AccelByteOauth2Models.h"
+
+using namespace AccelByte::Api;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCredentials, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteCredentials);
+
 
 namespace AccelByte
 {
 
 Credentials::Credentials()
+	: ClientAccessToken(TEXT(""))
+	, ClientNamespace(TEXT(""))
+	, UserAccessToken(TEXT(""))
+	, UserRefreshToken(TEXT(""))
+	, UserNamespace(TEXT(""))
+	, UserId(TEXT(""))
+	, UserDisplayName(TEXT(""))
+	, UserRefreshBackoff(0.0)
+	, UserRefreshTime(0.0)
+	, UserExpiredTime(0.0)
+	, UserTokenState(ETokenState::Invalid)
 {
-	OnRefreshSuccess.BindLambda([this]()
-	{
-		RefreshAttempt = 0;
-		UE_LOG(LogTemp, Log, TEXT("OnRefreshSuccess.BindLambda"));
-		FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate(), Credentials::Get().GetRefreshTokenDuration());
-	});
-
-	RefreshTokenTickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByte::Credentials::RefreshTokenTick);
-}
-
-Credentials::~Credentials()
-{
-}
-
-Credentials& Credentials::Get()
-{
-    // Deferred/lazy initialization
-    // Thread-safe in C++11
-    static Credentials Instance;
-    return Instance;
 }
 
 void Credentials::ForgetAll()
 {
 	UserAccessToken = FString();
 	UserRefreshToken = FString();
-	UserAccessTokenExpirationUtc = FDateTime();
 	UserNamespace = FString();
 	UserId = FString();
 	UserDisplayName = FString();
-	FTicker::GetCoreTicker().RemoveTicker(FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate()));
+
+	UserRefreshBackoff = 0.0;
+	UserRefreshTime = 0.0;
+	UserExpiredTime = 0.0;
+	UserTokenState = ETokenState::Invalid;
 }
 
-void Credentials::SetUserToken(const FString& AccessToken, const FString& RefreshToken, const FDateTime& ExpirationUtc, const FString& Id, const FString& DisplayName, const FString& Namespace)
+void Credentials::SetClientCredentials(const FString& ClientId, const FString& ClientSecret)
 {
-	UserAccessToken = AccessToken;
-	UserRefreshToken = RefreshToken;
-	UserAccessTokenExpirationUtc = ExpirationUtc;
-	UserId = Id;
-	UserDisplayName = DisplayName;
-	UserNamespace = Namespace;
+	this->ClientId = ClientId;
+	this->ClientSecret = ClientSecret;
 }
 
-void Credentials::SetClientToken(const FString& AccessToken, const FDateTime& ExpirationUtc, const FString& Namespace)
+void Credentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)
 {
 	ClientAccessToken = AccessToken;
 	ClientNamespace = Namespace;
 }
 
-FString Credentials::GetUserAccessToken() const
+void Credentials::SetUserToken(const FString& AccessToken, const FString& RefreshToken, double ExpiredTime, const FString& Id, const FString& DisplayName, const FString& Namespace)
+{
+	UserAccessToken = AccessToken;
+	UserRefreshToken = RefreshToken;
+	UserId = Id;
+	UserDisplayName = DisplayName;
+	UserNamespace = Namespace;
+	UserRefreshTime = ExpiredTime;
+
+	UserTokenState = ETokenState::Valid;
+}
+
+const FString& Credentials::GetUserAccessToken() const
 {
 	return UserAccessToken;
 }
 
-FString Credentials::GetUserRefreshToken() const
+const FString& Credentials::GetUserRefreshToken() const
 {
 	return UserRefreshToken;
 }
 
-FDateTime Credentials::GetUserAccessTokenExpirationUtc() const
-{
-	return UserAccessTokenExpirationUtc;
-}
-
-FString Credentials::GetUserNamespace() const
+const FString& Credentials::GetUserNamespace() const
 {
 	return UserNamespace;
 }
 
-float Credentials::GetRefreshTokenDuration() const
+Credentials::ETokenState Credentials::GetTokenState() const
 {
-	auto Duration = Credentials::Get().GetUserAccessTokenExpirationUtc() - FDateTime::UtcNow();
-	float Result = (Duration.GetTotalSeconds() * 0.8f) + (FMath::RandRange(1, 60));	
-	return Result;
+	return UserTokenState;
 }
 
-FTickerDelegate & Credentials::GetRefreshTokenTickerDelegate()
+void Credentials::PollRefreshToken(double CurrentTime)
 {
-	return RefreshTokenTickerDelegate;
-}
-
-bool Credentials::RefreshTokenTick(float NextTickInSecond)
-{
-	float NextRefreshIn = FMath::Pow(2, RefreshAttempt) + FMath::RandRange(0.01f, 0.99f);
-	if (NextRefreshIn < 60.0f) // next retry is not more than 60 second
+	switch (UserTokenState)
 	{
-		RefreshAttempt += 1;
-		UE_LOG(LogTemp, Log, TEXT("Retry, attempt number: %d, retrying in %.4f second"), RefreshAttempt, NextRefreshIn);
-		AccelByte::Api::UserAuthentication::RefreshToken(Credentials::GetOnRefreshSuccess(),
-			FErrorHandler::CreateLambda([&, NextRefreshIn](int32 Code, FString Message)
+	case ETokenState::Expired:
+	case ETokenState::Valid:
+		if (UserRefreshTime <= CurrentTime)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Retrying..."));
-			FTicker::GetCoreTicker().AddTicker(Credentials::Get().GetRefreshTokenTickerDelegate(), NextRefreshIn);
-		}));
+			Oauth2::GetAccessTokenWithRefreshTokenGrant(
+				ClientId, ClientSecret, 
+				UserRefreshToken, 
+				Oauth2::FGetAccessTokenWithRefreshTokenGrantSuccess::CreateLambda([this, CurrentTime](const FAccelByteModelsOauth2Token& Result)
+				{
+					SetUserToken(Result.Access_token, Result.Refresh_token, CurrentTime + (Result.Expires_in * FMath::FRandRange(0.7, 0.9)), Result.User_id, Result.Display_name, Result.Namespace);
+				}), 
+				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					if (UserRefreshBackoff <= 0.0)
+					{
+						UserRefreshBackoff = 10.0;
+					}
+
+					UserRefreshBackoff *= 2.0;
+					UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+					ScheduleRefreshToken(CurrentTime + UserRefreshBackoff);
+					
+					UserTokenState = ETokenState::Expired;
+				}));
+
+			UserTokenState = ETokenState::Refreshing;
+		}
+
+		break;
+	case ETokenState::Refreshing:
+	case ETokenState::Invalid:
+		break;
 	}
-	return false;
 }
 
-AccelByte::Api::UserAuthentication::FRefreshTokenSuccess Credentials::GetOnRefreshSuccess() const
+void Credentials::ScheduleRefreshToken(double RefreshTime)
 {
-	return OnRefreshSuccess;
+	UserRefreshTime = RefreshTime;
 }
 
-FString Credentials::GetUserId() const
+void Credentials::ForceRefreshToken()
+{
+	ScheduleRefreshToken(FPlatformTime::Seconds());
+}
+
+const FString& Credentials::GetUserId() const
 {
 	return UserId;
 }
 
-FString Credentials::GetUserDisplayName() const
+const FString& Credentials::GetUserDisplayName() const
 {
 	return UserDisplayName;
 }
 
-FString Credentials::GetClientAccessToken() const
+const FString& Credentials::GetClientAccessToken() const
 {
 	return ClientAccessToken;
 }
 
-FString Credentials::GetClientNamespace() const
+const FString& Credentials::GetClientNamespace() const
 {
 	return ClientNamespace;
 }
 
 } // Namespace AccelByte
 
-using AccelByte::Credentials;
+#include "AccelByteRegistry.h"
 
 FString UAccelByteBlueprintsCredentials::GetUserAccessToken()
 {
-	return Credentials::Get().GetUserAccessToken();
-}
-
-FString UAccelByteBlueprintsCredentials::GetUserRefreshToken()
-{
-	return Credentials::Get().GetUserRefreshToken();
-}
-
-FDateTime UAccelByteBlueprintsCredentials::GetUserAccessTokenExpirationUtc()
-{
-	return Credentials::Get().GetUserAccessTokenExpirationUtc();
+	return FRegistry::Credentials.GetUserAccessToken();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserId()
 {
-	return Credentials::Get().GetUserId();
+	return FRegistry::Credentials.GetUserId();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserDisplayName()
 {
-	return Credentials::Get().GetUserDisplayName();
+	return FRegistry::Credentials.GetUserDisplayName();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserNamespace()
 {
-	return Credentials::Get().GetUserNamespace();
+	return FRegistry::Credentials.GetUserNamespace();
 }

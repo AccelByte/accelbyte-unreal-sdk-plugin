@@ -1,10 +1,10 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteWalletApi.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
+
+#include "AccelByteRegistry.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
@@ -14,8 +14,8 @@ namespace Api
 
 void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings::PlatformServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *CurrencyCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *CurrencyCode);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -28,8 +28,8 @@ void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGet
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetWalletInfoByCurrencyCodeResponse, OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetWalletInfoByCurrencyCodeResponse, OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 // =============================================================================================================================

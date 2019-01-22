@@ -1,12 +1,11 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteCloudStorageApi.h"
 #include "AccelByteError.h"
 #include "JsonUtilities.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
+#include "AccelByteRegistry.h"
 
 namespace AccelByte
 {
@@ -14,8 +13,8 @@ namespace Api
 {
 	void CloudStorage::GetAllSlots(const FGetAllSlotsSuccess& OnSuccess, const FErrorHandler& OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-		FString Url				= FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *Settings::CloudStorageServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+		FString Url				= FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
 		FString Verb			= TEXT("GET");
 		FString ContentType		= TEXT("application/json");
 		FString Accept			= TEXT("application/json");
@@ -34,8 +33,8 @@ namespace Api
 
 	void CloudStorage::CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotSuccess& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *Settings::CloudStorageServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
 
 		if (!Tags.IsEmpty() || !Label.IsEmpty())
 		{
@@ -72,8 +71,8 @@ namespace Api
 
 	void CloudStorage::GetSlot(FString SlotID, const FGetSlotSuccess & OnSuccess, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *Settings::CloudStorageServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *SlotID);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *SlotID);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("*/*");
@@ -92,9 +91,9 @@ namespace Api
 
 	void CloudStorage::UpdateSlot(FString SlotID, const TArray<uint8> BinaryData, const FString& FileName, const FString & Tags, const FString& Label, const FUpdateSlotSuccess & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *Settings::CloudStorageServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *SlotID);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *SlotID);
 
 		if (!Tags.IsEmpty() || !Label.IsEmpty())
 		{
@@ -131,8 +130,8 @@ namespace Api
 
 	void CloudStorage::DeleteSlot(FString SlotID, const FDeleteSlotSuccess & OnSuccess, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials::Get().GetUserAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *Settings::CloudStorageServerUrl, *Credentials::Get().GetUserNamespace(), *Credentials::Get().GetUserId(), *SlotID);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *SlotID);
 		FString Verb = TEXT("DELETE");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("*/*");

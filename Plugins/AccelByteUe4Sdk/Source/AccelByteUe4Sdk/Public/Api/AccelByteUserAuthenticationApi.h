@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -88,18 +88,6 @@ public:
      * @param OnError This will be called when the operation failed.
      */
     static void LoginFromLauncher(const FString& AuthorizationCode, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError);
-
-
-	DECLARE_DELEGATE(FRefreshTokenSuccess);
-	/**
-	 * @brief The access token expires after some time; you need to get new access token with refresh token.
-	 * 
-	 * @ref AccelByte::Credentials::GetUserAccessTokenExpirationUtc()
-	 * @param RefreshToken The refresh token.
-	 * @param OnSuccess This will be called when the operation succeeded.
-	 * @param OnError This will be called when the operation failed.
-	 */
-	static void RefreshToken(const FRefreshTokenSuccess& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Remove access tokens, user ID, and other credentials from memory.
