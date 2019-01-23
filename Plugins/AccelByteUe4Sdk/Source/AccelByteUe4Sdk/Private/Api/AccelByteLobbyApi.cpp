@@ -36,6 +36,17 @@ namespace Api
         // Matchmaking
         const FString StartMatchmaking = TEXT("startMatchmakingRequest");
         const FString CancelMatchmaking = TEXT("cancelMatchmakingRequest");
+
+		// Friends
+		const FString RequestFriend = TEXT("requestFriendsRequest");
+		const FString Unfriend = TEXT("unfriendRequest");
+		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsRequest");
+		const FString CancelFriends = TEXT("cancelFriendsRequest");
+		const FString ListIncomingFriends = TEXT("listIncomingFriendsRequest");
+		const FString AcceptFriends = TEXT("acceptFriendsRequest");
+		const FString RejectFriends = TEXT("rejectFriendsRequest");
+		const FString LoadFriendList = TEXT("listOfFriendsRequest");
+		const FString GetFriendshipStatus = TEXT("getFriendshipStatusRequest");
     }
 
     namespace LobbyResponse
@@ -74,6 +85,17 @@ namespace Api
 
         // Matchmaking
         const FString StartMatchmaking = TEXT("matchmakingResponse");
+
+		// Friends
+		const FString RequestFriends = TEXT("requestFriendsResponse");
+		const FString Unfriend = TEXT("unfriendResponse");
+		const FString ListOutgoingFriends = TEXT("listOutgoingFriendsResponse");
+		const FString CancelFriends = TEXT("cancelFriendsResponse");
+		const FString ListIncomingFriends = TEXT("listIncomingFriendsResponse");
+		const FString AcceptFriends = TEXT("acceptFriendsResponse");
+		const FString RejectFriends = TEXT("rejectFriendsResponse");
+		const FString LoadFriendList = TEXT("listOfFriendsResponse");
+		const FString GetFriendshipStatus = TEXT("getFriendshipStatusResponse");
     }
 
     namespace Prefix
@@ -82,6 +104,7 @@ namespace Api
         const FString Chat = TEXT("chat");
         const FString Presence = TEXT("presence");
         const FString Matchmaking = TEXT("matchmaking");
+		const FString Friends = TEXT("friends");
     }
 
 Lobby & Lobby::Get()
@@ -227,6 +250,60 @@ FString Lobby::SendCancelMatchmaking(FString PartyId)
 {
     return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
         FString::Printf(TEXT("partyId: %s\n"),*PartyId));
+}
+
+//-------------------------------------------------------------------------------------------------
+// Friends
+//-------------------------------------------------------------------------------------------------
+void Lobby::RequestFriend(FString UserId)
+{
+	SendRawRequest(LobbyRequest::RequestFriend, Prefix::Friends, 
+		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::Unfriend(FString UserId)
+{
+	SendRawRequest(LobbyRequest::Unfriend, Prefix::Friends,
+		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::ListOutgoingFriends()
+{
+	SendRawRequest(LobbyRequest::ListOutgoingFriends, Prefix::Friends);
+}
+
+void Lobby::CancelFriendRequest(FString UserId)
+{
+	SendRawRequest(LobbyRequest::CancelFriends, Prefix::Friends, 
+		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::ListIncomingFriends()
+{
+	SendRawRequest(LobbyRequest::ListIncomingFriends, Prefix::Friends);
+}
+
+void Lobby::AcceptFriend(FString UserId)
+{
+	SendRawRequest(LobbyRequest::AcceptFriends, Prefix::Friends,
+		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::RejectFriend(FString UserId)
+{
+	SendRawRequest(LobbyRequest::RejectFriends, Prefix::Friends,
+		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::LoadFriendsList()
+{
+	SendRawRequest(LobbyRequest::LoadFriendList, Prefix::Friends);
+}
+
+void Lobby::GetFriendshipStatus(FString UserId)
+{
+	SendRawRequest(LobbyRequest::GetFriendshipStatus, Prefix::Friends,
+		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::UnbindEvent()
@@ -394,6 +471,31 @@ void Lobby::OnMessage(const FString& Message)
 
     // Matchmaking
     HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingResponse);
+
+	// Friends
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriends, FAccelByteModelsRequestFriendsResponse, RequestFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::Unfriend, FAccelByteModelsUnfriendResponse, UnfriendResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse, ListOutgoingFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::CancelFriends, FAccelByteModelsCancelFriendsResponse, CancelFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse, ListIncomingFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriends, FAccelByteModelsAcceptFriendsResponse, AcceptFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::RejectFriends, FAccelByteModelsRejectFriendsResponse, RejectFriendsResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::LoadFriendList, FAccelByteModelsLoadFriendListResponse, LoadFriendListResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyRequest::GetFriendshipStatus, FAccelByteModelsGetFriendshipStatusResponse, GetFriendshipStatusResponse);
+
+	if (lobbyResponseType.Equals(LobbyResponse::GetFriendshipStatus))
+	{
+		FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
+		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &StringResult, 0, 0);
+		if (bParseSuccess)
+		{
+			FAccelByteModelsGetFriendshipStatusResponse Result;
+			Result.Code = StringResult.Code;
+			Result.friendshipStatus = (ERelationshipStatusCode) FCString::Atoi(*StringResult.friendshipStatus);
+			GetFriendshipStatusResponse.ExecuteIfBound(Result);
+			return;
+		}
+	}
 
 #undef HANDLE_LOBBY_MESSAGE
     ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Warning: Unhandled message %s, Raw: %s"), *lobbyResponseType, *ParsedJson));

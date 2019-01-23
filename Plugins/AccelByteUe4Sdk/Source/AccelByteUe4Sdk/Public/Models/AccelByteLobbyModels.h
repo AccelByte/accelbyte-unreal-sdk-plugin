@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -336,6 +336,111 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     TArray<FString> TeamB;
+};
+
+// ------------------------------------------------------------------------------------------------
+// Friends
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRequestFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsResponse")
+		FString Code;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUnfriendResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnfriendResponse")
+		FString Code;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListOutgoingFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListOutgoingFriendsResponse")
+		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListOutgoingFriendsResponse")
+		TArray<FString> friendsId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCancelFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | CancelFriendsResponse")
+		FString Code;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsListIncomingFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListIncomingFriendsResponse")
+		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListIncomingFriendsResponse")
+		TArray<FString> friendsId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | AcceptFriendsResponse")
+		FString Code;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRejectFriendsResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RejectFriendsResponse")
+		FString Code;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLoadFriendListResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListOfFriendsResponse")
+		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | ListOfFriendsResponse")
+		TArray<FString> friendsId;
+};
+
+UENUM(BlueprintType)
+/**
+ * @brief Friends relation enumeration.
+ */
+enum class ERelationshipStatusCode : uint8
+{
+	Friend = 3,
+	Incoming = 2,
+	Outgoing = 1,
+	NotFriend = 0
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsGetFriendshipStatusResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusResponse")
+		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusResponse")
+		ERelationshipStatusCode friendshipStatus;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsGetFriendshipStatusStringResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, NotBlueprintType)
+		FString Code;
+	UPROPERTY(EditAnywhere, NotBlueprintType)
+		FString friendshipStatus;
 };
 
 UENUM(BlueprintType)
