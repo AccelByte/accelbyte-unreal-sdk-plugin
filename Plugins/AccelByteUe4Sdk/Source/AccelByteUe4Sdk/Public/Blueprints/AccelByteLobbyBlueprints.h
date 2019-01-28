@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -47,6 +47,24 @@ public:
 	static void SendKickPartyMemberRequest(const FString& UserId);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void SendGetOnlineUsersRequest();
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void RequestFriend(FString UserId);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void Unfriend(FString UserId);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void ListOutgoingFriends();
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void CancelFriendRequest(FString UserId);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void ListIncomingFriends();
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void AcceptFriend(FString UserId);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void RejectFriend(FString UserId);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void LoadFriendsList();
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void GetFriendshipStatus(FString UserId);
 
     // Party 
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
@@ -77,6 +95,18 @@ public:
 
     // Matchmaking
     DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&, Result);
+
+    // Friends
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FRequestFriendsResponseDelegate, const FAccelByteModelsRequestFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FUnfriendResponseDelegate, const FAccelByteModelsUnfriendResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FListOutgoingFriendsResponseDelegate, const FAccelByteModelsListOutgoingFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FCancelFriendsResponseDelegate, const FAccelByteModelsCancelFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FListIncomingFriendsResponseDelegate, const FAccelByteModelsListIncomingFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptFriendsResponseDelegate, const FAccelByteModelsAcceptFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectFriendsResponseDelegate, const FAccelByteModelsRejectFriendsResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadFriendListResponseDelegate, const FAccelByteModelsLoadFriendListResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FGetFriendshipStatusResponseDelegate, const FAccelByteModelsGetFriendshipStatusResponse&, Result);
+
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void BindEvent(
@@ -143,6 +173,26 @@ public:
     // Matchmaking
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
     static void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse);
+
+	// Friends
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetRequestFriendResponseDelegate(FRequestFriendsResponseDelegate OnRequestFriendsResponseDelegate);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetUnfriendResponseDelegate(FUnfriendResponseDelegate OnUnfriendResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetListOutgoingFriendsResponseDelegate(FListOutgoingFriendsResponseDelegate OnListOutgoingFriendsResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetCancelFriendRequestResponseDelegate(FCancelFriendsResponseDelegate OnCancelFriendsResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetListIncomingFriendsResponseDelegate(FListIncomingFriendsResponseDelegate OnListIncomingFriendsResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetAcceptFriendResponseDelegate(FAcceptFriendsResponseDelegate OnAcceptFriendsResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetRejectFriendResponseDelegate(FRejectFriendsResponseDelegate OnRejectFriendsResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetLoadFriendsListResponseDelegate(FLoadFriendListResponseDelegate OnLoadFriendListResponse);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
+    static void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponseDelegate OnGetFriendshipStatusResponse);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void UnbindDelegates();
