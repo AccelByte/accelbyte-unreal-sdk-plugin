@@ -84,7 +84,9 @@ namespace Api
 		const FString MessageNotif = TEXT("messageNotif");
 
         // Matchmaking
-        const FString StartMatchmaking = TEXT("matchmakingResponse");
+        const FString StartMatchmaking = TEXT("startMatchmakingResponse");
+		const FString CancelMatchmaking = TEXT("cancelMatchmakingResponse");
+		const FString MatchmakingNotif = TEXT("matchmakingNotif");
 
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsResponse");
@@ -239,17 +241,17 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString GameMode, FString PartyId, TArray<FString> MemberIds)
+FString Lobby::SendStartMatchmaking(FString GameMode)
 {
     return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
-        FString::Printf(TEXT("gameMode: %s\npartyId: %s\nmemberId: [%s,]"), 
-            *GameMode, *PartyId, *FString::Join(MemberIds, TEXT(","))));
+        FString::Printf(TEXT("gameMode: %s"), 
+            *GameMode));
 }
 
-FString Lobby::SendCancelMatchmaking(FString PartyId)
+FString Lobby::SendCancelMatchmaking(FString GameMode)
 {
     return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
-        FString::Printf(TEXT("partyId: %s\n"),*PartyId));
+        FString::Printf(TEXT("gameMode: %s\n"),*GameMode));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -470,7 +472,9 @@ void Lobby::OnMessage(const FString& Message)
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::MessageNotif, FAccelByteModelsNotificationMessage, MessageNotif);
 
     // Matchmaking
-    HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::CancelMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::MatchmakingNotif, FAccelByteModelsMatchmakingNotice, MatchmakingNotif);
 
 	// Friends
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriends, FAccelByteModelsRequestFriendsResponse, RequestFriendsResponse);
