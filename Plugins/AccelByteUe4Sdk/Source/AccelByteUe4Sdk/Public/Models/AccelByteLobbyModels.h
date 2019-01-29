@@ -313,29 +313,47 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
 // ------------------------------------------------------------------------------------------------
 // Matchmaking
 // ------------------------------------------------------------------------------------------------
-// Matchmaking response
+UENUM(BlueprintType)
+/**
+ * @brief matchmaking status enumeration.
+ */
+enum class EAccelByteMatchmakingStatus : uint8
+{
+	Unknown = 0	UMETA(DisplayName = "unknown"),
+	Start		UMETA(DisplayName = "start"),
+	Timeout		UMETA(DisplayName = "timeout"),
+	Cancel		UMETA(DisplayName = "cancel"),
+	Done		UMETA(DisplayName = "done")
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
 {
     GENERATED_BODY()
-
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    FString type;
+    FString Code;
+};
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    FString id;
+// Matchmaking notification
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
+{
+    GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString MatchId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    EAccelByteMatchmakingStatus Status;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> TeamA;
+    TArray<FString> PartyMember;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> TeamB;
+    TArray<FString> CounterPartyMember;
 };
 
 // ------------------------------------------------------------------------------------------------

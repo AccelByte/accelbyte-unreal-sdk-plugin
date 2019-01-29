@@ -73,6 +73,18 @@ void UAccelByteBlueprintsLobby::SendGetOnlineUsersRequest()
 	Lobby::Get().SendGetOnlineUsersRequest();
 }
 
+// Matchmaking
+void UAccelByteBlueprintsLobby::SendStartMatchmaking(const FString& GameMode)
+{
+	Lobby::Get().SendStartMatchmaking(GameMode);
+}
+
+void UAccelByteBlueprintsLobby::SendCancelMatchmaking(const FString& GameMode)
+{
+	Lobby::Get().SendCancelMatchmaking(GameMode);
+}
+
+
 // Friends
 void UAccelByteBlueprintsLobby::RequestFriend(FString UserId)
 {
@@ -132,6 +144,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FPartyMessageNotice& OnPartyMessageNotice,
     const FUserPresenceNotice& OnUserPresenceNotice,
 	const FNotificationMessage& OnNotificationMessage,
+	const FMatchmakingNotice& OnMatchmakingNotice,
     const FBlueprintErrorHandler& OnParsingError)
 {
     FSimpleDelegate OnSuccessDelegate = FSimpleDelegate::CreateLambda([OnSuccess]() {
@@ -198,6 +211,12 @@ void UAccelByteBlueprintsLobby::BindEvent(
 		OnNotificationMessage.ExecuteIfBound(Result);
 	});
 
+	// Matchmaking
+	Lobby::FMatchmakingNotif OnMatchmakingNoticeDelegate =
+		Lobby::FMatchmakingNotif::CreateLambda([OnMatchmakingNotice](const FAccelByteModelsMatchmakingNotice& Result) {
+		OnMatchmakingNotice.ExecuteIfBound(Result);
+	});
+
     FErrorHandler OnParsingErrorDelegate = FErrorHandler::CreateLambda([OnParsingError](int32 Code, const FString& ErrorMessage) {
         OnParsingError.ExecuteIfBound(Code, ErrorMessage);
     });
@@ -214,6 +233,7 @@ void UAccelByteBlueprintsLobby::BindEvent(
     Lobby::Get().SetPartyChatNotifDelegate(OnPartyMessageNoticeDelegate);
     Lobby::Get().SetUserPresenceNotifDelegate(OnOnUserPresenceNoticeDelegate);
     Lobby::Get().SetMessageNotifDelegate(OnNotificationMessageDelegate);
+	Lobby::Get().SetMatchmakingNotifDelegate(OnMatchmakingNoticeDelegate);
     Lobby::Get().SetParsingErrorDelegate(OnParsingErrorDelegate);
 }
 void UAccelByteBlueprintsLobby::UnbindDelegates()
@@ -326,13 +346,31 @@ void UAccelByteBlueprintsLobby::GetAllAsyncNotification()
 }
 
 // Matchmaking
-void UAccelByteBlueprintsLobby::SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse)
+void UAccelByteBlueprintsLobby::SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart)
 {
-    AccelByte::Api::Lobby::FMatchmakingResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FMatchmakingResponse::CreateLambda([OnMatchmakingResponse](const FAccelByteModelsMatchmakingResponse& Result) {
-        OnMatchmakingResponse.ExecuteIfBound(Result);
+	Lobby::FMatchmakingResponse OnMatchmakingStartDelegate =
+		Lobby::FMatchmakingResponse::CreateLambda([OnMatchmakingStart](const FAccelByteModelsMatchmakingResponse& Result) {
+		OnMatchmakingStart.ExecuteIfBound(Result);
+	});
+	Lobby::Get().SetStartMatchmakingResponseDelegate(OnMatchmakingStartDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel)
+{
+	Lobby::FMatchmakingResponse OnMatchmakingCancelDelegate =
+		Lobby::FMatchmakingResponse::CreateLambda([OnMatchmakingCancel](const FAccelByteModelsMatchmakingResponse& Result) {
+		OnMatchmakingCancel.ExecuteIfBound(Result);
+	});
+	Lobby::Get().SetCancelMatchmakingResponseDelegate(OnMatchmakingCancelDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetMatchmakingNotifDelegate(FMatchmakingNotice OnMatchmakingNotice)
+{
+    AccelByte::Api::Lobby::FMatchmakingNotif OnInfoPartyResponseDelegate =
+        AccelByte::Api::Lobby::FMatchmakingNotif::CreateLambda([OnMatchmakingNotice](const FAccelByteModelsMatchmakingNotice& Result) {
+        OnMatchmakingNotice.ExecuteIfBound(Result);
     });
-    Lobby::Get().SetMatchmakingResponseDelegate(OnInfoPartyResponseDelegate);
+    Lobby::Get().SetMatchmakingNotifDelegate(OnInfoPartyResponseDelegate);
 }
 
 // Friends

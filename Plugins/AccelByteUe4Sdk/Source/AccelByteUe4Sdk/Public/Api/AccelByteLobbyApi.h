@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -129,10 +129,15 @@ public:
 	DECLARE_DELEGATE_OneParam(FMessageNotif, const FAccelByteModelsNotificationMessage&); //Passive
 
     // Matchmaking
+	/**
+	 * @brief delegate for handling matchmaking response
+	 */
+	DECLARE_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&);
+
     /**
-     * @brief delegate for handling matchmaking response
+     * @brief delegate for handling matchmaking notification
      */
-    DECLARE_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&);
+    DECLARE_DELEGATE_OneParam(FMatchmakingNotif, const FAccelByteModelsMatchmakingNotice&);
 
 
 	// Friends
@@ -293,17 +298,15 @@ public:
      * @brief start the matchmaking
      *
      * @param GameMode The mode that party member want to play.
-     * @param PartyId Party ID.
-     * @param MemberIds list of user id that in the party.
      */
-    FString SendStartMatchmaking(FString GameMode, FString PartyId, TArray<FString> MemberIds);
+    FString SendStartMatchmaking(FString GameMode);
 
     /**
      * @brief cancel the currently running matchmaking process
      *     
-     * @param PartyId Party ID.     
+     * @param GameMode The mode that party member want to cancel.     
      */
-    FString SendCancelMatchmaking(FString PartyId);
+    FString SendCancelMatchmaking(FString GameMode);
 	
 	// Friends
 	/**
@@ -461,12 +464,26 @@ public:
     // Notification
 
     // Matchmaking
+	/**
+	 * @brief set start matchmaking response
+	 *
+	 * @param OnMatchmakingStart set delegate .
+	 */
+	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart) { MatchmakingStartResponse = OnMatchmakingStart; };
+
+	/**
+	 * @brief set cancel matchmaking notification
+	 *
+	 * @param OnMatchmakingCancel set delegate .
+	 */
+	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel) { MatchmakingCancelResponse = OnMatchmakingCancel; };
+
     /**
-     * @brief set matchmaking response
+     * @brief set matchmaking notification
      *
-     * @param OnMatchmakingResponse set delegate .
+     * @param OnMatchmakingNotification set delegate .
      */
-    void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse) { MatchmakingResponse = OnMatchmakingResponse; };
+    void SetMatchmakingNotifDelegate(FMatchmakingNotif OnMatchmakingNotification) { MatchmakingNotif = OnMatchmakingNotification; };
 
 	// Friends
 	/**
@@ -586,7 +603,9 @@ private:
 	FMessageNotif MessageNotif;
 
     // Matchmaking
-    FMatchmakingResponse MatchmakingResponse;
+	FMatchmakingResponse MatchmakingStartResponse;
+	FMatchmakingResponse MatchmakingCancelResponse;
+    FMatchmakingNotif MatchmakingNotif;
 
 	// Friends
 	FRequestFriendsResponse RequestFriendsResponse;

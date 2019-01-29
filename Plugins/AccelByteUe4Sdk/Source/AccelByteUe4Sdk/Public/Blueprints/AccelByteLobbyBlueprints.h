@@ -65,6 +65,10 @@ public:
     static void LoadFriendsList();
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
     static void GetFriendshipStatus(FString UserId);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SendStartMatchmaking(const FString& GameMode);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SendCancelMatchmaking(const FString& GameMode);
 
     // Party 
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInfoPartyResponse, const FAccelByteModelsInfoPartyResponse&, Result);
@@ -94,7 +98,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FNotificationMessage, const FAccelByteModelsNotificationMessage&, Result);
 
     // Matchmaking
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FMatchmakingNotice, const FAccelByteModelsMatchmakingNotice&, Result);
 
     // Friends
     DECLARE_DYNAMIC_DELEGATE_OneParam(FRequestFriendsResponseDelegate, const FAccelByteModelsRequestFriendsResponse&, Result);
@@ -122,6 +127,7 @@ public:
         const FPartyMessageNotice& OnPartyMessageNotice,
         const FUserPresenceNotice& OnUserPresenceNotice,
 		const FNotificationMessage& OnNotificationMessage,
+		const FMatchmakingNotice& OnMatchmakingNotice,
         const FBlueprintErrorHandler& OnParsingError
 	);
 
@@ -171,8 +177,12 @@ public:
 	static void GetAllAsyncNotification();
 
     // Matchmaking
-    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
-    static void SetMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingResponse);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+	static void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel);
+    UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Matchmaking")
+    static void SetMatchmakingNotifDelegate(FMatchmakingNotice OnMatchmakingNotice);
 
 	// Friends
     UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api | Friends")
