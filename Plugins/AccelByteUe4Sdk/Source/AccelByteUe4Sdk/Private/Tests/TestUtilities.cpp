@@ -69,7 +69,85 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 	return Return;
 }
 
+void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	using AccelByte::Settings;
+	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
+	{
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content;
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+		Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
+		{
+			int32 Code = 0;
+			FString Message;
+			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+			{
+				TSharedPtr<FJsonObject> JsonParsed;
+				TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
+				if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
+				{
+					FString RealUserId = JsonParsed->GetStringField("UserId");
+
+					FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
+					FString Verb = TEXT("DELETE");
+					FString ContentType = TEXT("application/json");
+					FString Accept = TEXT("application/json");
+					FString Content;
+					FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
+					Request2->SetURL(Url);
+					Request2->SetHeader(TEXT("Authorization"), Authorization);
+					Request2->SetVerb(Verb);
+					Request2->SetHeader(TEXT("Content-Type"), ContentType);
+					Request2->SetHeader(TEXT("Accept"), Accept);
+					Request2->SetContentAsString(Content);
+					Request2->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
+					{
+						int32 Code;
+						FString Message;
+						if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+						{
+							OnSuccess.ExecuteIfBound();
+						}
+						else
+						{
+							HandleHttpError(Request, Response, Code, Message);
+							OnError.ExecuteIfBound(Code, Message);
+						}
+					});
+					Request2->ProcessRequest();
+				}
+				else
+				{
+					HandleHttpError(Request, Response, Code, Message);
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			}
+			else
+			{
+				HandleHttpError(Request, Response, Code, Message);
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		});
+
+		Request->ProcessRequest();
+	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+	{
+		OnError.ExecuteIfBound(Code, Message);
+	}));
+}
 
 void FlushHttpRequests()
 {

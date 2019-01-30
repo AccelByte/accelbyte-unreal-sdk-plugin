@@ -4,9 +4,12 @@
 
 #pragma once
 
+#include "AccelByteError.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
+
+using AccelByte::FErrorHandler;
 
 UCLASS(Blueprintable, BlueprintType)
 class UAccelByteBlueprintsTest : public UBlueprintFunctionLibrary
@@ -26,4 +29,8 @@ public:
 	static TArray<uint8> FStringToBytes(FString Input);
 };
 
+void DeleteUserById(
+	const FString& UserId, 
+	const FSimpleDelegate& OnSuccess, 
+	const FErrorHandler& OnError);
 void FlushHttpRequests();
