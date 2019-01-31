@@ -112,6 +112,9 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FLoadFriendListResponseDelegate, const FAccelByteModelsLoadFriendListResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FGetFriendshipStatusResponseDelegate, const FAccelByteModelsGetFriendshipStatusResponse&, Result);
 
+	// Friends + Notification
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFriendAcceptFriendRequestNotif, const FAccelByteModelsAcceptFriendsNotif&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FIncomingFriendNotif, const FAccelByteModelsRequestFriendsNotif&, Result);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Lobby | Api")
 	static void BindEvent(
@@ -128,6 +131,8 @@ public:
         const FUserPresenceNotice& OnUserPresenceNotice,
 		const FNotificationMessage& OnNotificationMessage,
 		const FMatchmakingNotice& OnMatchmakingNotice,
+		const FFriendAcceptFriendRequestNotif& OnAcceptFriendsNotifDelegate,
+		const FIncomingFriendNotif& OnRequestFriendsNotifDelegate,
         const FBlueprintErrorHandler& OnParsingError
 	);
 

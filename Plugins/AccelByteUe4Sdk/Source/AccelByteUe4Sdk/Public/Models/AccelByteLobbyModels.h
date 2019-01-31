@@ -472,3 +472,19 @@ enum class Availability : uint8
 	Busy = 2,
 	Invisible = 3
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsAcceptFriendsNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | AcceptFriendsNotif")
+		FString friendId;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsRequestFriendsNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+		FString friendId;
+};
