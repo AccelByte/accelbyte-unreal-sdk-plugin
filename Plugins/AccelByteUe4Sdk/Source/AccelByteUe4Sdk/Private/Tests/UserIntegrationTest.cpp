@@ -14,6 +14,7 @@
 #include "FileManager.h"
 #include "AccelByteUserAuthenticationApi.h"
 #include "AccelByteUserProfileApi.h"
+#include "TestUtilities.h"
 
 using namespace std;
 
@@ -25,14 +26,14 @@ using AccelByte::Api::UserAuthentication;
 using AccelByte::Api::UserManagement;
 using AccelByte::Api::UserProfile;
 
+typedef FSimpleDelegate FDeleteUserByIdSuccess;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUserTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
 const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 void FlushHttpRequests();//defined in TestUtilities.cpp
-DECLARE_DELEGATE(FDeleteUserByIdSuccess)
-static void DeleteUserById(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 static FString GetVerificationCode(const FString& Email);
 FString GetVerificationCodeFromUserId(const FString& UserId);
@@ -1048,86 +1049,6 @@ bool FGetSteamTicket::RunTest(const FString & Parameter)
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
 	check(Ticket != TEXT(""));
 	return true;
-}
-
-void DeleteUserById(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	using AccelByte::Settings;
-	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
-	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		FString Content;
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		Request->SetContentAsString(Content);
-		Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-		{
-			int32 Code = 0;
-			FString Message;
-			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-			{
-				TSharedPtr<FJsonObject> JsonParsed;
-				TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-				if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
-				{
-					FString RealUserId = JsonParsed->GetStringField("UserId");
-
-					FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
-					FString Verb = TEXT("DELETE");
-					FString ContentType = TEXT("application/json");
-					FString Accept = TEXT("application/json");
-					FString Content;
-					FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
-					Request2->SetURL(Url);
-					Request2->SetHeader(TEXT("Authorization"), Authorization);
-					Request2->SetVerb(Verb);
-					Request2->SetHeader(TEXT("Content-Type"), ContentType);
-					Request2->SetHeader(TEXT("Accept"), Accept);
-					Request2->SetContentAsString(Content);
-					Request2->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-					{
-						int32 Code;
-						FString Message;
-						if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-						{
-							OnSuccess.ExecuteIfBound();
-						}
-						else
-						{
-							HandleHttpError(Request, Response, Code, Message);
-							OnError.ExecuteIfBound(Code, Message);
-						}
-					});
-					Request2->ProcessRequest();
-				}
-				else
-				{
-					HandleHttpError(Request, Response, Code, Message);
-					OnError.ExecuteIfBound(Code, Message);
-				}
-			}
-			else
-			{
-				HandleHttpError(Request, Response, Code, Message);
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		});
-
-		Request->ProcessRequest();		
-	}), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
 }
 
 FString GetVerificationCode(const FString& Email)

@@ -7,7 +7,7 @@
 #include "IWebSocket.h"
 #include "WebSocketsModule.h"
 #include "AccelByteRegistry.h"
-#include "AccelByteLobbyApi.h"
+#include "AccelByteSettings.h"
 
 namespace AccelByte
 {
@@ -109,27 +109,19 @@ namespace Api
 		const FString Friends = TEXT("friends");
     }
 
-Lobby & Lobby::Get()
-{
-    // Deferred/lazy initialization
-    // Thread-safe in C++11
-    static Lobby Instance;
-    return Instance;
-}
-
 void Lobby::Connect()
 {
 	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	TMap<FString, FString> Headers;
-	Headers.Add("Authorization", "Bearer " + FRegistry::Credentials.GetUserAccessToken());
+	Headers.Add("Authorization", "Bearer " + LobbyCredentials.GetUserAccessToken());
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*FRegistry::Settings.LobbyServerUrl, TEXT("wss"), Headers);
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*LobbySettings.LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	WebSocket->Connect();	
-	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *FRegistry::Settings.LobbyServerUrl);
+	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *LobbySettings.LobbyServerUrl);
 }
 
 void Lobby::Disconnect()
@@ -506,7 +498,7 @@ void Lobby::OnMessage(const FString& Message)
 
 }
 
-Lobby::Lobby()
+Lobby::Lobby(const Credentials& Credentials, const AccelByte::Settings& Setting) : LobbyCredentials(Credentials), LobbySettings(Setting)
 {
 }
 

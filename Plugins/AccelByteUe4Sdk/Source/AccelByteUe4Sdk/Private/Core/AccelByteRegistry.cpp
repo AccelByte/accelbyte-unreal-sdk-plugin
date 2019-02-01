@@ -6,9 +6,11 @@
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 #include "AccelByteHttpRetryScheduler.h"
+#include "AccelByteLobbyApi.h"
 
 using namespace AccelByte;
 
 Settings FRegistry::Settings;
 Credentials FRegistry::Credentials;
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
+Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);

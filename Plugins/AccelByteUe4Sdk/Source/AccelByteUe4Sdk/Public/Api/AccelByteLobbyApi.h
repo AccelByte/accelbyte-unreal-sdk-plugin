@@ -14,6 +14,8 @@ class IWebSocket;
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -23,6 +25,13 @@ namespace Api
  */
 class ACCELBYTEUE4SDK_API Lobby
 {
+public:
+	Lobby(const Credentials& Credentials, const Settings& Settings);
+	~Lobby();
+private:
+	const Credentials& LobbyCredentials;
+	const Settings& LobbySettings;
+
 public:
 
     // Party 
@@ -186,13 +195,10 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FGetFriendshipStatusResponse, const FAccelByteModelsGetFriendshipStatusResponse&);
 
-	/**
-	 * @brief Get instance of this singleton class.
-	 */
-	static Lobby& Get();
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	
+public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
 	 */
@@ -550,8 +556,6 @@ public:
 	void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponse OnGetFriendshipStatusResponse) { GetFriendshipStatusResponse = OnGetFriendshipStatusResponse; };
 
 private:
-	Lobby();
-	~Lobby();
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
 	Lobby& operator=(Lobby const&) = delete; // Copy assignment operator

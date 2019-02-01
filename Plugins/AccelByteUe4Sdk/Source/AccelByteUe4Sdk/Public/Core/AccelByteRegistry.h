@@ -12,6 +12,10 @@ using namespace AccelByte;
 
 namespace AccelByte
 {
+	namespace Api
+	{
+		class Lobby;
+	}
 
 class ACCELBYTEUE4SDK_API FRegistry
 {
@@ -19,6 +23,7 @@ public:
 	static Settings Settings;
 	static Credentials Credentials;
 	static FHttpRetryScheduler HttpRetryScheduler;
+	static Api::Lobby Lobby;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

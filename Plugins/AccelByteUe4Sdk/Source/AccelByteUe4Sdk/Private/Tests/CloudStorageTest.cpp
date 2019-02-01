@@ -8,6 +8,7 @@
 #include "AccelByteUserManagementApi.h"
 #include "AccelByteUserAuthenticationApi.h"
 #include "AccelByteCloudStorageApi.h"
+#include "AccelByteRegistry.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 #include "TestUtilities.h"
@@ -24,6 +25,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudStorageTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCloudStorageTest);
 
 const int32 AutomationFlagMaskCloudStorage = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+void FlushHttpRequests();
 
 FString Payloads[2] = { TEXT("PayloadOne"), TEXT("PayloadTwo") };
 FString OriginalNames[2] = { TEXT("File1.txt"), TEXT("File2.txt") };
@@ -63,6 +65,19 @@ bool CloudStorageSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageTearDown, "AccelByte.Tests.CloudStorage.Z.TearDown", AutomationFlagMaskCloudStorage);
 bool CloudStorageTearDown::RunTest(const FString& Parameters)
 {
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	
+	UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), CloudStorageErrorHandler);
+	FlushHttpRequests();
+	
+	check(bDeleteSuccessful);
 	return true;
 }
 
