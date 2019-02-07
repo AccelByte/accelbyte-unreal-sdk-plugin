@@ -195,6 +195,17 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FGetFriendshipStatusResponse, const FAccelByteModelsGetFriendshipStatusResponse&);
 
+	// Friends + Notification
+	/**
+	 * @brief delegate for handling notification when your request friend is accepted
+	 */
+	DECLARE_DELEGATE_OneParam(FAcceptFriendsNotif, const FAccelByteModelsAcceptFriendsNotif&);
+
+	/**
+	 * @brief delegate for handling notification when you receive a request friend
+	 */
+	DECLARE_DELEGATE_OneParam(FRequestFriendsNotif, const FAccelByteModelsRequestFriendsNotif&);
+
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	
@@ -385,7 +396,9 @@ public:
     void SetPartyChatNotifDelegate(FPartyChatNotif OnPersonalChatNotif) { PartyChatNotif = OnPersonalChatNotif; }
     void SetUserPresenceNotifDelegate(FFriendStatusNotif OnUserPresenceNotif) { FriendStatusNotif = OnUserPresenceNotif; };
     void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage) { MessageNotif = OnNotificationMessage; }
-    void SetParsingErrorDelegate(const FErrorHandler& OnParsingError) { ParsingError = OnParsingError; }
+	void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif) { AcceptFriendsNotif = OnAcceptFriendsNotif;  }
+	void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif) { RequestFriendsNotif = OnRequestFriendsNotif;  }
+	void SetParsingErrorDelegate(const FErrorHandler& OnParsingError) { ParsingError = OnParsingError; }
 
     // Party
     /**
@@ -621,6 +634,10 @@ private:
 	FRejectFriendsResponse RejectFriendsResponse;
 	FLoadFriendListResponse LoadFriendListResponse;
 	FGetFriendshipStatusResponse GetFriendshipStatusResponse;
+
+	// Friends + Notification
+	FAcceptFriendsNotif AcceptFriendsNotif;
+	FRequestFriendsNotif RequestFriendsNotif;
 };
 
 } // Namespace Api

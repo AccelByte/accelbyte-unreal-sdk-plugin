@@ -145,7 +145,9 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FUserPresenceNotice& OnUserPresenceNotice,
 	const FNotificationMessage& OnNotificationMessage,
 	const FMatchmakingNotice& OnMatchmakingNotice,
-    const FBlueprintErrorHandler& OnParsingError)
+	const FFriendAcceptFriendRequestNotif& OnAcceptFriendsNotif,
+	const FIncomingFriendNotif& OnRequestFriendsNotif,
+	const FBlueprintErrorHandler& OnParsingError)
 {
     FSimpleDelegate OnSuccessDelegate = FSimpleDelegate::CreateLambda([OnSuccess]() {
         OnSuccess.ExecuteIfBound();
@@ -217,6 +219,17 @@ void UAccelByteBlueprintsLobby::BindEvent(
 		OnMatchmakingNotice.ExecuteIfBound(Result);
 	});
 
+	// Friends + Notification
+	AccelByte::Api::Lobby::FAcceptFriendsNotif OnAcceptFriendsNotifDelegate =
+		AccelByte::Api::Lobby::FAcceptFriendsNotif::CreateLambda([OnAcceptFriendsNotif](const FAccelByteModelsAcceptFriendsNotif& Result) {
+		OnAcceptFriendsNotif.Execute(Result);
+	});
+
+	AccelByte::Api::Lobby::FRequestFriendsNotif OnRequestFriendsNotifDelegate =
+		AccelByte::Api::Lobby::FRequestFriendsNotif::CreateLambda([OnRequestFriendsNotif](const FAccelByteModelsRequestFriendsNotif& Result) {
+		OnRequestFriendsNotif.Execute(Result);
+	});
+
     FErrorHandler OnParsingErrorDelegate = FErrorHandler::CreateLambda([OnParsingError](int32 Code, const FString& ErrorMessage) {
         OnParsingError.ExecuteIfBound(Code, ErrorMessage);
     });
@@ -234,6 +247,8 @@ void UAccelByteBlueprintsLobby::BindEvent(
     FRegistry::Lobby.SetUserPresenceNotifDelegate(OnOnUserPresenceNoticeDelegate);
     FRegistry::Lobby.SetMessageNotifDelegate(OnNotificationMessageDelegate);
 	FRegistry::Lobby.SetMatchmakingNotifDelegate(OnMatchmakingNoticeDelegate);
+	FRegistry::Lobby.SetOnFriendRequestAcceptedNotifDelegate(OnAcceptFriendsNotifDelegate);
+	FRegistry::Lobby.SetOnIncomingRequestFriendsNotifDelegate(OnRequestFriendsNotifDelegate);
     FRegistry::Lobby.SetParsingErrorDelegate(OnParsingErrorDelegate);
 }
 void UAccelByteBlueprintsLobby::UnbindDelegates()

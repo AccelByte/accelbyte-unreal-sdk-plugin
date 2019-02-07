@@ -98,6 +98,10 @@ namespace Api
 		const FString RejectFriends = TEXT("rejectFriendsResponse");
 		const FString LoadFriendList = TEXT("listOfFriendsResponse");
 		const FString GetFriendshipStatus = TEXT("getFriendshipStatusResponse");
+
+		// Friends + Notification
+		const FString AcceptFriendsNotif = TEXT("acceptFriendsNotif");
+		const FString RequestFriendsNotif = TEXT("requestFriendsNotif");
     }
 
     namespace Prefix
@@ -477,8 +481,6 @@ void Lobby::OnMessage(const FString& Message)
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriends, FAccelByteModelsAcceptFriendsResponse, AcceptFriendsResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RejectFriends, FAccelByteModelsRejectFriendsResponse, RejectFriendsResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::LoadFriendList, FAccelByteModelsLoadFriendListResponse, LoadFriendListResponse);
-	HANDLE_LOBBY_MESSAGE(LobbyRequest::GetFriendshipStatus, FAccelByteModelsGetFriendshipStatusResponse, GetFriendshipStatusResponse);
-
 	if (lobbyResponseType.Equals(LobbyResponse::GetFriendshipStatus))
 	{
 		FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
@@ -492,6 +494,10 @@ void Lobby::OnMessage(const FString& Message)
 			return;
 		}
 	}
+
+	// Friends + Notification
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif, AcceptFriendsNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, RequestFriendsNotif);
 
 #undef HANDLE_LOBBY_MESSAGE
     ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Warning: Unhandled message %s, Raw: %s"), *lobbyResponseType, *ParsedJson));
