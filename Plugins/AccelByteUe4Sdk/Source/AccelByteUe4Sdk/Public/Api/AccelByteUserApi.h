@@ -61,8 +61,7 @@ public:
 	/**
 	 * @brief login from Accelbyte Launcher
 	 *
-	 * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
@@ -78,10 +77,18 @@ public:
 	 * @param Username User email address or phone number.
 	 * @param Password The Password.
 	 * @param DisplayName The DisplayName.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function will get data of currently logged in user.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief This function will update user's account.

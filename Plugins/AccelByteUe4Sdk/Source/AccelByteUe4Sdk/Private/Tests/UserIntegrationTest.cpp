@@ -80,6 +80,8 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 
+	FString OldAccessToken = FRegistry::Credentials.GetUserAccessToken();
+
 	bool bUserUpdated = false;
     UE_LOG(LogAccelByteUserTest, Display, TEXT("UpdateUserAccount"))
 	FUserUpdateRequest UpdateRequest
@@ -89,13 +91,18 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 		FString(UpdatedEmail),
 		FString()
 	};
-    User::Update(UpdateRequest, THandler<FUserData>::CreateLambda([&bUserUpdated](const FUserData& Result)
+	FUserData UpdateResult;
+	User::Update(UpdateRequest, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
 		bUserUpdated = true;
+		UpdateResult = Result;
 	}), GlobalErrorHandler);
 
 	FlushHttpRequests();
+
+	FString NewAccessToken = FRegistry::Credentials.GetUserAccessToken();
+
 
 	bool bLoginWithUpdatedAccount = false;
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPassword (Updated Email)"))
@@ -123,6 +130,8 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 #pragma endregion DeleteUserById
 
 	check(bLoginWithUpdatedAccount);
+	check(!OldAccessToken.Equals(NewAccessToken));
+	check(UpdateResult.Country.Equals("US"));
 	check(bDeleteDone);
 	return true;
 };
@@ -227,10 +236,12 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 
 	bool bRegisterSuccessful = false;
+	FUserData RegisterResult;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
 	User::Register(LoginId, Password, DisplayName, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		RegisterResult = Result;
 		bRegisterSuccessful = true;
 	}), GlobalErrorHandler);
 
@@ -257,19 +268,18 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	FlushHttpRequests();
 
-	///////////////////
-	//FString VerificationCode = FIntegrationTestModule::GetVerificationCode(LoginId);
-	//UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
-	///////////////////
+	bool bGetDataSuccessful = false;
+	FUserData GetDataResult;
+	User::GetData(
+		THandler<FUserData>::CreateLambda([&](const FUserData& Result) 
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bGetDataSuccessful = true;
+			GetDataResult = Result;
+		}),
+		GlobalErrorHandler);
 
-	//bool bVerifySuccessful = false;
-	//UE_LOG(LogAccelByteUserTest, Log, TEXT("VerifyEmailAccount"));
-	//UserManagement::VerifyUserAccount(VerificationCode, UserManagement::FVerifyUserAccountSuccess::CreateLambda([&]()
-	//{
-	//	UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-	//	bVerifySuccessful = true;
-	//}), GlobalErrorHandler);
-	//FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
@@ -283,9 +293,13 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	FlushHttpRequests();
 
+	check(bGetDataSuccessful);
 	check(bLoginSuccessful);
 	check(bSendSuccessful);
 	check(bDeleteSuccessful);
+	check(RegisterResult.Username.Equals(GetDataResult.Username));
+	check(RegisterResult.LoginId.Equals(GetDataResult.LoginId));
+	check(RegisterResult.UserId.Equals(GetDataResult.UserId));
 
 	return true;
 }
@@ -337,7 +351,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	Password = "new_password";
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("ResetPassword"));
 	
-	User::ResetPassword(LoginId, VerificationCode, Password, FVoidHandler::CreateLambda([&]()
+	User::ResetPassword(VerificationCode, LoginId, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bResetPasswordSuccessful = true;
@@ -552,10 +566,10 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 	}), GlobalErrorHandler);
-	
-	FlushHttpRequests();
-	RefreshedAccessToken = FRegistry::Credentials.GetUserAccessToken();
 
+	FlushHttpRequests();
+	
+	RefreshedAccessToken = FRegistry::Credentials.GetUserAccessToken();
 	User::ForgetAllCredentials();
 
 	bool bEmailLoginSuccessful = false;
@@ -615,17 +629,17 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser2
 
-	check(bUpgradeSuccessful)
-		check(bUpgradedHeadlessAccountUserIdRemain)
-		check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "")
-		check(bEmailLoginSuccessful)
-		check(bDeviceLoginSuccessful1)
-		check(bDeviceLoginSuccessful2)
-		check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
-		check(!OldAccessToken.Equals(RefreshedAccessToken))
-		check(bDeleteSuccessful1)
-		check(bDeleteSuccessful2)
-		return true;
+	check(bUpgradeSuccessful);
+	check(bUpgradedHeadlessAccountUserIdRemain);
+	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
+	check(bEmailLoginSuccessful);
+	check(bDeviceLoginSuccessful1);
+	check(bDeviceLoginSuccessful2);
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
+	check(!OldAccessToken.Equals(RefreshedAccessToken));
+	check(bDeleteSuccessful1);
+	check(bDeleteSuccessful2);
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.User.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMaskUser);
@@ -833,8 +847,8 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	check(bLoginPlatformSuccessful);
 	check(bUpgradeSuccessful);
 	check(bLoginEmailSuccessful);
-	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
-	check(!OldAccessToken.Equals(RefreshedAccessToken))
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
+	check(!OldAccessToken.Equals(RefreshedAccessToken));
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -1026,14 +1040,14 @@ bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Para
 
 #pragma endregion DeleteUser1
 
-	check(bDeviceLoginSuccessful)
-	check(bSendUserUpgradeVerificationCode)
-	check(bGetVerificationCode)
-	check(bEmailLoginSuccessful)
-	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty())
-	check(!OldAccessToken.Equals(RefreshedAccessToken))
-	check(bDeleteSuccessful1)
-		return true;
+	check(bDeviceLoginSuccessful);
+	check(bSendUserUpgradeVerificationCode);
+	check(bGetVerificationCode);
+	check(bEmailLoginSuccessful);
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
+	check(!OldAccessToken.Equals(RefreshedAccessToken));
+	check(bDeleteSuccessful1);
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.User.SteamTicket", AutomationFlagMaskUser);

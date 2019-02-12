@@ -248,7 +248,7 @@ const std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> ErrorM
 void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
 {
 	int32 Code = 0;
-	FAccelByteModelsErrorEntity Error;
+	FErrorInfo Error;
 	FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0);
 	Code = Error.NumericErrorCode;
 	auto it = ErrorMessages::Default.find(Code);

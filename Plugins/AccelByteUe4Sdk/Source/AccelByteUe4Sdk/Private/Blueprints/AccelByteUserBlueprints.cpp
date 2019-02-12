@@ -10,6 +10,59 @@ using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Api::User;
 
+void UBPUser::LoginWithClientCredentials(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UBPUser::LoginWithUsername(const FString& Username, const FString& Password, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	User::LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	User::LoginWithOtherPlatform(PlatformId, Token, FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	User::LoginWithDeviceId(FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UBPUser::ForgetAllCredentials()
+{
+	User::ForgetAllCredentials();
+}
+
 void UBPUser::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	User::Register(

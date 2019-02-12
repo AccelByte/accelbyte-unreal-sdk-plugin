@@ -134,6 +134,26 @@ void User::Register(const FString& Username, const FString& Password, const FStr
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void User::Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
@@ -152,7 +172,17 @@ void User::Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserD
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			THandler<FUserData>::CreateLambda(
+				[OnSuccess](const FUserData& UserData)
+				{
+					FRegistry::Credentials.ForceRefreshToken();
+					OnSuccess.ExecuteIfBound(UserData);
+				}),
+				OnError),
+		FPlatformTime::Seconds());
 }
 
 void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -196,7 +226,17 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			THandler<FUserData>::CreateLambda(
+				[OnSuccess](const FUserData& UserData)
+				{
+					FRegistry::Credentials.ForceRefreshToken();
+					OnSuccess.ExecuteIfBound(UserData);
+				}),
+				OnError),
+		FPlatformTime::Seconds());
 }
 
 void User::Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
@@ -216,7 +256,17 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			THandler<FUserData>::CreateLambda(
+				[OnSuccess](const FUserData& UserData)
+				{
+					FRegistry::Credentials.ForceRefreshToken();
+					OnSuccess.ExecuteIfBound(UserData);
+				}),
+				OnError),
+		FPlatformTime::Seconds());
 }
 
 void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)

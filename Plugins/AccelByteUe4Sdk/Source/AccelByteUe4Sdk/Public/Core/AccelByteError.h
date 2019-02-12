@@ -7,14 +7,18 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "JsonUtilities.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "UnrealTypeTraits.h"
 
 #include <unordered_map>
 
 #include "AccelByteError.generated.h"
 
+DECLARE_DYNAMIC_DELEGATE(FDHandler);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FDErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
+
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsErrorEntity
+struct ACCELBYTEUE4SDK_API FErrorInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
@@ -27,9 +31,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsErrorEntity
 
 namespace AccelByte
 {
-
-//DECLARE_DELEGATE(FHandler);
-//DECLARE_DELEGATE_TwoParams(FErrorHandler, int32 /* ErrorCode */, const FString& /* ErrorMessage */);
 
 template <class T> using THandler = TBaseDelegate<void, T>;
 using FVoidHandler = TBaseDelegate<void>;
