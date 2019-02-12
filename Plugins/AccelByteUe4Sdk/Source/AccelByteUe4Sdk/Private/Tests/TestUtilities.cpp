@@ -7,8 +7,11 @@
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "FileManager.h"
 
+using AccelByte::THandler;
+using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
@@ -72,7 +75,7 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	using AccelByte::Settings;
-	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);

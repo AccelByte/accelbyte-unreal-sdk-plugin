@@ -11,7 +11,7 @@ namespace AccelByte
 {
 namespace Api
 {
-void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
@@ -27,11 +27,11 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, c
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithAuthorizationCodeGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FGetAccessTokenWithPasswordGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
@@ -47,11 +47,11 @@ void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithPasswordGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const FGetAccessTokenWithClientCredentialsGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
@@ -67,11 +67,11 @@ void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, c
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithClientCredentialsGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const FGetAccessTokenWithRefreshTokenGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
@@ -87,7 +87,7 @@ void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithRefreshTokenGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
@@ -95,7 +95,7 @@ void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const 
 // Custom grant types 
 //
 
-void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const FGetAccessTokenWithDeviceGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString DeviceId = FGenericPlatformMisc::GetDeviceId();
 
@@ -113,11 +113,11 @@ void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithDeviceGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
 }
 
-void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const FGetAccessTokenWithPlatformGrantSuccess& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
     FString Url = FString::Printf(TEXT("%s/oauth/platforms/%s/token"), *FRegistry::Settings.IamServerUrl, *PlatformId);
@@ -133,102 +133,8 @@ void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetAccessTokenWithPlatformGrantResponse, OnSuccess, OnError);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 	Request->ProcessRequest();
-}
-
-// =============================================================================================================================
-// ========================================================= Responses =========================================================
-// =============================================================================================================================
-
-void Oauth2::GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Oauth2::GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Oauth2::GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Oauth2::GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Oauth2::GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Oauth2::GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsOauth2Token Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
 }
 
 } // Namespace Api

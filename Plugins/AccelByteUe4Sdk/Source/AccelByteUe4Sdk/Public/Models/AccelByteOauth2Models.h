@@ -11,7 +11,7 @@
 // Emulate namespace with long class names
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2TokenPermission
+struct ACCELBYTEUE4SDK_API FOauth2TokenPermission
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Permission")
@@ -21,7 +21,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2TokenPermission
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2TokenBan
+struct ACCELBYTEUE4SDK_API FOauth2TokenBan
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Ban")
@@ -31,7 +31,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2TokenBan
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2Token
+struct ACCELBYTEUE4SDK_API FOauth2Token
 {
 	// UE4 JSON parser is case-insensitive and we have to match the variable names against the backend's model.
 	// But "namespace" is a reserved keyword so we capitalize the first character.
@@ -45,11 +45,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOauth2Token
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 		float Expires_in;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-		TArray<FAccelByteModelsOauth2TokenPermission> Permissions;
+		TArray<FOauth2TokenPermission> Permissions;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 		TArray<FString> Roles;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-		TArray<FAccelByteModelsOauth2TokenBan> Bans;
+		TArray<FOauth2TokenBan> Bans;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
 		FString User_id;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")

@@ -5,18 +5,20 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteUserManagementApi.h"
-#include "AccelByteUserAuthenticationApi.h"
+#include "AccelByteOauth2Api.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteLobbyApi.h"
 #include "TestUtilities.h"
 #include "FileManager.h"
 
+using AccelByte::THandler;
+using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::UserAuthentication;
-using AccelByte::Api::UserManagement;
+using AccelByte::Api::User;
+using AccelByte::Api::Oauth2;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobbyTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLobbyTest);
@@ -40,7 +42,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool UsersCreationSuccess[TestUserCount];
 	bool UsersLoginSuccess[TestUserCount];
 
-	AccelByte::Api::UserAuthentication::LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
 	{
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Client Login Success"));
@@ -53,7 +55,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		FString Password = TEXT("Password");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
 
-		AccelByte::Api::UserManagement::CreateUserAccount(Email, Password, DisplayName, UserManagement::FCreateUserAccountSuccess::CreateLambda([&](const FAccelByteModelsUserCreateResponse& Response)
+		AccelByte::Api::User::Register(Email, Password, DisplayName, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
 		{
 			UsersCreationSuccess[i] = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is Created"), i, TestUserCount);
@@ -71,12 +73,12 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		}));
 		FlushHttpRequests();
 
-		AccelByte::Api::Oauth2::GetAccessTokenWithPasswordGrant(
+		Oauth2::GetAccessTokenWithPasswordGrant(
 			FRegistry::Settings.ClientId, 
 			FRegistry::Settings.ClientSecret, 
 			Email, 
 			Password, 
-			Api::Oauth2::FGetAccessTokenWithPasswordGrantSuccess::CreateLambda([&](const FAccelByteModelsOauth2Token& Token)
+			THandler<FOauth2Token>::CreateLambda([&](const FOauth2Token& Token)
 		{
 			UsersLoginSuccess[i] = true;
 			UserCreds[i].SetUserToken(Token.Access_token, Token.Refresh_token, Token.Expires_in, Token.User_id, Token.Display_name, Token.Namespace);

@@ -6,16 +6,18 @@
 
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
-#include "AccelByteHttpRetryScheduler.h"
 
 using namespace AccelByte;
 
 namespace AccelByte
 {
-	namespace Api
-	{
-		class Lobby;
-	}
+
+class FHttpRetryScheduler;
+
+namespace Api
+{
+	class Lobby;
+}
 
 class ACCELBYTEUE4SDK_API FRegistry
 {

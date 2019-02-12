@@ -5,11 +5,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteOauth2Models.h"
-#include "AccelByteUserManagementModels.generated.h"
+#include "AccelByteUserModels.generated.h"
+
+UENUM(BlueprintType)
+/**
+ *  @brief Supported platforms by AccelByte IAM.
+ */
+	enum class EAccelBytePlatformType : uint8
+{
+	Steam,
+	Google,
+	Facebook,
+	Android,
+	iOS,
+	Device,
+	Twitch,
+	Oculus,
+	Twitter
+};
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserCreateRequest
+struct ACCELBYTEUE4SDK_API FRegisterRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
@@ -23,23 +39,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserCreateRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserCreateResponse
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserCreateResponse")
-		FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserCreateResponse")
-		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserCreateResponse")
-		FString AuthType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserCreateResponse")
-		FString DisplayName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserCreateResponse")
-		FString LoginId;
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserUpdateRequest
+struct ACCELBYTEUE4SDK_API FUserUpdateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
@@ -53,7 +53,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserUpdateRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserResponse
+struct ACCELBYTEUE4SDK_API FUserData
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRespone")
@@ -81,8 +81,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRespone")
 		FString OldEmailAddress;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRespone")
-		TArray<FAccelByteModelsOauth2TokenPermission> Permissions;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRespone")
 		FString PhoneNumber; //optional
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRespone")
 		bool PhoneVerified;
@@ -99,7 +97,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserResponse
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPasswordResetRequest
+struct ACCELBYTEUE4SDK_API FResetPasswordRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ResetPasswordRequest")
@@ -111,7 +109,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPasswordResetRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsLinkedPlatform
+struct ACCELBYTEUE4SDK_API FPlatformLink
 {
 	GENERATED_BODY()
 
@@ -134,7 +132,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLinkedPlatform
 };
 
 UENUM(BlueprintType)
-enum class EAccelByteVerificationCodeContext : uint8
+enum class EVerificationContext : uint8
 {
 	UserAccountRegistration,
 	UpdateEmailAddress,
@@ -142,12 +140,12 @@ enum class EAccelByteVerificationCodeContext : uint8
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsSendVerificationCodeRequest
+struct ACCELBYTEUE4SDK_API FVerificationCodeRequest
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
-		EAccelByteVerificationCodeContext Context;
+		EVerificationContext Context;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
 		FString LanguageTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
@@ -155,7 +153,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSendVerificationCodeRequest
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUpgradeHeadlessAccountWithVerificationCodeRequest
+struct ACCELBYTEUE4SDK_API FUpgradeAndVerifyRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
@@ -163,5 +161,5 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpgradeHeadlessAccountWithVerificatio
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
 		FString Password;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString loginId;
+		FString LoginId;
 };

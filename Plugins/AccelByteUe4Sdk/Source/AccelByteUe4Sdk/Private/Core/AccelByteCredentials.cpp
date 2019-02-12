@@ -99,7 +99,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 			Oauth2::GetAccessTokenWithRefreshTokenGrant(
 				ClientId, ClientSecret, 
 				UserRefreshToken, 
-				Oauth2::FGetAccessTokenWithRefreshTokenGrantSuccess::CreateLambda([this, CurrentTime](const FAccelByteModelsOauth2Token& Result)
+				THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
 				{
 					SetUserToken(Result.Access_token, Result.Refresh_token, CurrentTime + (Result.Expires_in * FMath::FRandRange(0.7, 0.9)), Result.User_id, Result.Display_name, Result.Namespace);
 				}), 

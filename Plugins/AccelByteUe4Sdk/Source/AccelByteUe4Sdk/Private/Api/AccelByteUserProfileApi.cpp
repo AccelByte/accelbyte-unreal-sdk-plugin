@@ -6,6 +6,7 @@
 #include "AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {

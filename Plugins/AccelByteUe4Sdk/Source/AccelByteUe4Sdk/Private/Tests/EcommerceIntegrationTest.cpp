@@ -8,18 +8,17 @@
 #include "AccelByteOrderApi.h"
 #include "AccelByteCategoryApi.h"
 #include "AccelByteItemApi.h"
-#include "AccelByteUserManagementApi.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteWalletApi.h"
 #include "AccelByteEntitlementApi.h"
 #include "AccelByteRegistry.h"
 #include "FileManager.h"
-#include "AccelByteUserAuthenticationApi.h"
+#include "AccelByteUserApi.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::UserAuthentication;
-using AccelByte::Api::UserManagement;
+using AccelByte::Api::User;
 using AccelByte::Api::Category;
 using AccelByte::Api::Item;
 using AccelByte::Api::Order;
@@ -627,7 +626,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 	double LastTime = 0;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ClientLogin"));
-	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&]()
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bClientTokenObtained = true;
@@ -637,7 +636,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithDeviceAccount"));
-	UserAuthentication::LoginWithDeviceId(UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&]()
+	User::LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
@@ -684,7 +683,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
 {
 	using AccelByte::Settings;
-	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([OnSuccess, OnError, UserId]()
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
