@@ -4,6 +4,7 @@
 
 #include "AccelByteUe4SdkModule.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
@@ -29,7 +30,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 {
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
-	auto Ticker = FTicker::GetCoreTicker();
+	FTicker& Ticker = FTicker::GetCoreTicker();
 
 	Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([](float DeltaTime)

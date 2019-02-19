@@ -5,6 +5,7 @@
 #include "AccelByteEntitlementApi.h"
 #include "AccelByteError.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "EngineMinimal.h"
 

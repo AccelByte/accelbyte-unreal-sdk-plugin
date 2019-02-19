@@ -8,6 +8,10 @@
 #include "AccelByteError.h"
 #include "Http.h"
 
+using AccelByte::THandler;
+using AccelByte::FVoidHandler;
+using AccelByte::FErrorHandler;
+
 namespace AccelByte
 {
 
@@ -23,7 +27,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Oauth2
 {
 public:
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithAuthorizationCodeGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	 * @brief login from Accelbyte Launcher
 	 * 
@@ -34,9 +37,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const FGetAccessTokenWithAuthorizationCodeGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPasswordGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	 * @brief Log user in with their email account.
 	 * 
@@ -47,9 +49,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FGetAccessTokenWithPasswordGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithClientCredentialsGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	* @brief Get client token.
 	* he result is FAccelByteModelsOauth2Token.
@@ -59,9 +60,8 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const FGetAccessTokenWithClientCredentialsGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithRefreshTokenGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	* @brief Get new access token with refresh token.
 	*
@@ -71,14 +71,13 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const FGetAccessTokenWithRefreshTokenGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 	//
 	// Custom grant types
 	// These shouldn't be here but, eh.
 	//
 
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithDeviceGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	 * @brief This function allows user to login without entering any information.
 	 * This will automatically obtain user's device information using UE4 function.
@@ -89,9 +88,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const FGetAccessTokenWithDeviceGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 	
-	DECLARE_DELEGATE_OneParam(FGetAccessTokenWithPlatformGrantSuccess, const FAccelByteModelsOauth2Token&);
 	/**
 	* @brief Log user in with their other platform account, e.g., Steam, Google, Facebook, Twitter, Twitch, etc.
 	* Will return a "user" access token.
@@ -101,19 +99,12 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const FGetAccessTokenWithPlatformGrantSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;
 	Oauth2(Oauth2&&) = delete;
-
-	static void GetAccessTokenWithAuthorizationCodeGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithAuthorizationCodeGrantSuccess OnSuccess, FErrorHandler OnError);
-	static void GetAccessTokenWithPasswordGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPasswordGrantSuccess OnSuccess, FErrorHandler OnError);
-	static void GetAccessTokenWithClientCredentialsGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithClientCredentialsGrantSuccess OnSuccess, FErrorHandler OnError);
-	static void GetAccessTokenWithRefreshTokenGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithRefreshTokenGrantSuccess OnSuccess, FErrorHandler OnError);
-	static void GetAccessTokenWithDeviceGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithDeviceGrantSuccess OnSuccess, FErrorHandler OnError);
-    static void GetAccessTokenWithPlatformGrantResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAccessTokenWithPlatformGrantSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

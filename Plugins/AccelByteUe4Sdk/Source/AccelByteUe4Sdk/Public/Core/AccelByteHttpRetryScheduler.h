@@ -14,12 +14,12 @@
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "AccelByteOrderApi.h"
-#include "AccelByteUserManagementApi.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteUserProfileModels.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
 #include "FileManager.h"
-#include "AccelByteUserAuthenticationApi.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteUserProfileApi.h"
 #include <vector>
 
@@ -27,8 +27,7 @@ using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::Settings;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::UserAuthentication;
-using AccelByte::Api::UserManagement;
+using AccelByte::Api::User;
 using AccelByte::Api::UserProfile;
 using namespace std;
 

@@ -5,8 +5,7 @@
 #include "AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteUserManagementApi.h"
-#include "AccelByteUserAuthenticationApi.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteCloudStorageApi.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteSettings.h"
@@ -14,11 +13,11 @@
 #include "TestUtilities.h"
 #include "FileManager.h"
 
+using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::UserAuthentication;
-using AccelByte::Api::UserManagement;
+using AccelByte::Api::User;
 using AccelByte::Api::CloudStorage;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudStorageTest, Log, All);
@@ -42,7 +41,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageSetup, "AccelByte.Tests.CloudStorag
 bool CloudStorageSetup::RunTest(const FString& Parameters)
 {
 	bool bClientLoginResult = false;
-	UserAuthentication::LoginWithClientCredentials(UserAuthentication::FLoginWithClientCredentialsSuccess::CreateLambda([&bClientLoginResult]()
+	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginResult]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Client Login Succeess"));
 		bClientLoginResult = true;
@@ -50,7 +49,7 @@ bool CloudStorageSetup::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	bool bUserLoginResult = false;
-	UserAuthentication::LoginWithDeviceId(UserAuthentication::FLoginWithDeviceIdSuccess::CreateLambda([&bUserLoginResult]()
+	User::LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginResult]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("User Login Success"));
 		bUserLoginResult = true;

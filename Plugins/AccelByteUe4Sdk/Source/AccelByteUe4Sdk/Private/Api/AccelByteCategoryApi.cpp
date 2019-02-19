@@ -5,6 +5,7 @@
 #include "AccelByteCategoryApi.h"
 #include "AccelByteError.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte

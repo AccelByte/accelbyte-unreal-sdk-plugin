@@ -6,6 +6,7 @@
 #include "ModuleManager.h"
 #include "IWebSocket.h"
 #include "WebSocketsModule.h"
+#include "AccelByteCredentials.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteSettings.h"
 

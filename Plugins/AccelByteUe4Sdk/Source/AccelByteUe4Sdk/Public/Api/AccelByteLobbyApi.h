@@ -16,6 +16,7 @@ namespace AccelByte
 {
 class Credentials;
 class Settings;
+
 namespace Api
 {
 

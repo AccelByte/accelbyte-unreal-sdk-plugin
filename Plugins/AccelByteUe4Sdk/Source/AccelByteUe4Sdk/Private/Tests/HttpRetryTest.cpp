@@ -18,8 +18,7 @@
 #include "AccelByteHttpRetryScheduler.h"
 #include "AccelByteOrderApi.h"
 #include "AccelByteRegistry.h"
-#include "AccelByteUserAuthenticationApi.h"
-#include "AccelByteUserManagementApi.h"
+#include "AccelByteUserApi.h"
 #include "AccelByteUserProfileApi.h"
 #include "AccelByteUserProfileModels.h"
 
@@ -27,8 +26,7 @@ using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::Settings;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::UserAuthentication;
-using AccelByte::Api::UserManagement;
+using AccelByte::Api::User;
 using AccelByte::Api::UserProfile;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetryTest, Log, All);

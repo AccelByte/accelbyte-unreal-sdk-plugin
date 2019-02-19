@@ -3,14 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteRegistry.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
 #include "AccelByteHttpRetryScheduler.h"
 #include "AccelByteLobbyApi.h"
 
 using namespace AccelByte;
+using namespace AccelByte::Api;
 
 Settings FRegistry::Settings;
 Credentials FRegistry::Credentials;
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
-Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
+Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);

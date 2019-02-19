@@ -5,6 +5,7 @@
 #include "AccelByteWalletApi.h"
 
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 
 namespace AccelByte
