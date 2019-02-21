@@ -84,7 +84,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageCreateSlot, "AccelByte.Tests.CloudS
 bool CloudStorageCreateSlot::RunTest(const FString& Parameters)
 {
 	bool bSlotCreatedResult = false;
-	CloudStorage::CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags[0], Labels[0], CloudStorage::FCreateSlotSuccess::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	CloudStorage::CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags[0], Labels[0], THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Create Slot Success"));
 		CreatedSlot = Result;
@@ -100,7 +100,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageUpdateSlot, "AccelByte.Tests.CloudS
 bool CloudStorageUpdateSlot::RunTest(const FString& Parameters)
 {
 	bool bSlotUpdatedResult = false;
-	CloudStorage::UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", Tags[1], Labels[1], CloudStorage::FCreateSlotSuccess::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	CloudStorage::UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", Tags[1], Labels[1], THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
 		bSlotUpdatedResult = true;
@@ -116,7 +116,7 @@ bool CloudStorageGetAllSlots::RunTest(const FString& Parameter)
 {
 	bool bGetAllSlotsResult = false;
 	TArray<FAccelByteModelsSlot> Results;
-	CloudStorage::GetAllSlots(CloudStorage::FGetAllSlotsSuccess::CreateLambda([&](const TArray<FAccelByteModelsSlot> Slots)
+	CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
 		Results = Slots;
@@ -161,7 +161,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageDeleteSlot, "AccelByte.Tests.CloudS
 bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 {
 	bool bDeleteSlotResult = false;
-	CloudStorage::DeleteSlot(CreatedSlot.SlotId, CloudStorage::FDeleteSlotSuccess::CreateLambda([&]()
+	CloudStorage::DeleteSlot(CreatedSlot.SlotId, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Delete Slot Success"));
 		bDeleteSlotResult = true;
@@ -170,7 +170,7 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 
 	bool bGetAllSlotsResult = false;
 	TArray<FAccelByteModelsSlot> Results;
-	CloudStorage::GetAllSlots(CloudStorage::FGetAllSlotsSuccess::CreateLambda([&](const TArray<FAccelByteModelsSlot> Slots)
+	CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
 		Results = Slots;

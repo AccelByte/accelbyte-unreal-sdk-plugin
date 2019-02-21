@@ -20,7 +20,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Category
 {
 public:
-	DECLARE_DELEGATE_OneParam(FGetRootCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
 	 * @brief This function gets root categories that exist in the specified namespace.
 	 *
@@ -28,9 +27,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetRootCategories(const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetRootCategories(const FString& Language, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetCategorySuccess, const FAccelByteModelsFullCategoryInfo&);
 	/**
 	 * @brief This function gets the category from a store in the specified namespace.
 	 *
@@ -39,9 +37,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsFullCategoryInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetCategory(const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetCategory(const FString& CategoryPath, const FString& Language, const THandler<FAccelByteModelsFullCategoryInfo>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetChildCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
 	 * @brief This function gets the subcategories from a category in the specified namespace.
 	 *
@@ -50,9 +47,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetChildCategories(const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetChildCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetDescendantCategoriesSuccess, const TArray<FAccelByteModelsFullCategoryInfo>&);
 	/**
 	 * @brief Get every subcategories from a category in the specified namespace.
 	 *
@@ -61,16 +57,11 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsFullCategoryInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetDescendantCategories(const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetDescendantCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError);
 private:
 	Category() = delete; // static class can't have instance
 	Category(Category const&) = delete;
 	Category(Category&&) = delete;
-
-	static void GetRootCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetRootCategoriesSuccess OnSuccess, FErrorHandler OnError);
-	static void GetCategoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetCategorySuccess OnSuccess, FErrorHandler OnError);
-	static void GetChildCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetChildCategoriesSuccess OnSuccess, FErrorHandler OnError);
-	static void GetDescendantCategoriesResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetDescendantCategoriesSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

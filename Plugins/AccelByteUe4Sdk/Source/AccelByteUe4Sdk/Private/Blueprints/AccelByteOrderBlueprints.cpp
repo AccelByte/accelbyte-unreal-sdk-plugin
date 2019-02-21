@@ -9,12 +9,13 @@
 
 using AccelByte::Api::Order;
 using AccelByte::FErrorHandler;
+using AccelByte::THandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
 void UAccelByteBlueprintsOrder::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::CreateNewOrder(OrderCreate, Order::FCreateNewOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::CreateNewOrder(OrderCreate, AccelByte::THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -25,7 +26,7 @@ void UAccelByteBlueprintsOrder::CreateNewOrder(const FAccelByteModelsOrderCreate
 
 void UAccelByteBlueprintsOrder::GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrder(OrderNo, Order::FGetUserOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::GetUserOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -36,7 +37,7 @@ void UAccelByteBlueprintsOrder::GetUserOrder(const FString& OrderNo, const FGetU
 
 void UAccelByteBlueprintsOrder::GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrders(Page, Size, Order::FGetUserOrdersSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
+	Order::GetUserOrders(Page, Size, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -47,7 +48,7 @@ void UAccelByteBlueprintsOrder::GetUserOrders(int32 Page, int32 Size, const FGet
 
 void UAccelByteBlueprintsOrder::FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::FulfillOrder(OrderNo, Order::FFulfillOrderSuccess::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
+	Order::FulfillOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -58,7 +59,7 @@ void UAccelByteBlueprintsOrder::FulfillOrder(const FString& OrderNo, const FFulf
 
 void UAccelByteBlueprintsOrder::GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Order::GetUserOrderHistory(OrderNo, Order::FGetUserOrderHistorySuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
+	Order::GetUserOrderHistory(OrderNo, THandler<TArray<FAccelByteModelsOrderHistoryInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

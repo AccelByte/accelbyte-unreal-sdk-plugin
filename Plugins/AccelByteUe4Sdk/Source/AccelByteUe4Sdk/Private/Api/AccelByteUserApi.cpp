@@ -86,12 +86,13 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
 	TCHAR AuthorizationCode[1000];
-	AuthorizationCode[0] = 0;	
+	AuthorizationCode[0] = 0;
 #if defined(PLATFORM_WINDOWS)
 	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
 #elif defined(PLATFORM_LINUX)
 	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
 #endif
+
 
 
 	Oauth2::GetAccessTokenWithAuthorizationCodeGrant(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret, AuthorizationCode, FRegistry::Settings.RedirectURI, THandler<FOauth2Token>::CreateLambda([OnSuccess](const FOauth2Token& Result) {
@@ -419,6 +420,44 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/byLoginId?loginId=%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(LoginId));
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetPublicUserInfo(const FString& UserID, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *UserID);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
+	Request->ProcessRequest();
 }
 
 } // Namespace Api

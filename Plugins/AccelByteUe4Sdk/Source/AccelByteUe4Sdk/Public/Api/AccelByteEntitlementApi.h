@@ -18,7 +18,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Entitlement
 {
 public:
-	DECLARE_DELEGATE_OneParam(FQueryUserEntitlementSuccess, const FAccelByteModelsEntitlementPagingSlicedResult&);
 	/**
 	* @brief Get list of ownership(s) that belongs to the user.
 	*
@@ -31,14 +30,12 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	static void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const FQueryUserEntitlementSuccess & OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	static void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;
 	Entitlement(Entitlement&&) = delete;
-
-	static void QueryUserEntitlementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FQueryUserEntitlementSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

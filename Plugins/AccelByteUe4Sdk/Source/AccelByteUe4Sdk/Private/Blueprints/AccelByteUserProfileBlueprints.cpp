@@ -6,10 +6,12 @@
 
 using AccelByte::Api::UserProfile;
 using AccelByte::FErrorHandler;
+using AccelByte::THandler;
+using AccelByte::FVoidHandler;
 
 void UAccelByteBlueprintsUserProfile::GetUserProfile(const FGetUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	UserProfile::GetUserProfile(UserProfile::FGetUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
+	UserProfile::GetUserProfile(AccelByte::THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -20,7 +22,7 @@ void UAccelByteBlueprintsUserProfile::GetUserProfile(const FGetUserProfileSucces
 
 void UAccelByteBlueprintsUserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	UserProfile::UpdateUserProfile(ProfileUpdateRequest, UserProfile::FUpdateUserProfileSuccess::CreateLambda([OnSuccess]()
+	UserProfile::UpdateUserProfile(ProfileUpdateRequest, FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -32,7 +34,7 @@ void UAccelByteBlueprintsUserProfile::UpdateUserProfile(const FAccelByteModelsUs
 
 void UAccelByteBlueprintsUserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	UserProfile::CreateUserProfile(ProfileCreateRequest, UserProfile::FCreateUserProfileSuccess::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
+	UserProfile::CreateUserProfile(ProfileCreateRequest, AccelByte::THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([OnSuccess](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

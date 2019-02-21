@@ -32,7 +32,7 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 namespace AccelByte
 {
 
-template <class T> using THandler = TBaseDelegate<void, T>;
+template <class T> using THandler = TBaseDelegate<void, const T&>;
 using FVoidHandler = TBaseDelegate<void>;
 using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 
@@ -267,6 +267,7 @@ enum class ErrorCodes : int32
 		
 	UnknownError = 14000,
 	JsonDeserializationFailed = 14001,
+	EmptyResponse = 14002,
 	WebSocketConnectFailed = 14201,
 };
 
@@ -285,64 +286,51 @@ public:
 
 ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
 
-inline FHttpRequestCompleteDelegate CreateHttpResultHandler(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+inline void HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& OnSuccess)
 {
-	return FHttpRequestCompleteDelegate::CreateLambda(
-		[OnSuccess, OnError]
-		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-		{
-			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-			{
-				OnSuccess.ExecuteIfBound();
-
-				return;
-			}
-
-			int32 Code;
-			FString Message;
-			HandleHttpError(Request, Response, Code, Message);
-			OnError.ExecuteIfBound(Code, Message);
-		});
+	OnSuccess.ExecuteIfBound();
 }
 
 template<class T>
-FHttpRequestCompleteDelegate CreateHttpResultHandler(const THandler<TArray<T>>& OnSuccess, const FErrorHandler& OnError)
+inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<TArray<T>>& OnSuccess)
 {
-	return FHttpRequestCompleteDelegate::CreateLambda(
-		[OnSuccess, OnError]
-		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-		{
-			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-			{
-				TArray<T> Result;
-				FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+	TArray<T> Result;
+	FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
 
-				OnSuccess.ExecuteIfBound(Result);
+	OnSuccess.ExecuteIfBound(Result);
+}
 
-				return;
-			}
-
-			int32 Code;
-			FString Message;
-			HandleHttpError(Request, Response, Code, Message);
-			OnError.ExecuteIfBound(Code, Message);
-		});
+template<>
+inline void HandleHttpResultOk<uint8>(FHttpResponsePtr Response, const THandler<TArray<uint8>>& OnSuccess)
+{
+	OnSuccess.ExecuteIfBound(Response->GetContent());
 }
 
 template<class T>
-FHttpRequestCompleteDelegate CreateHttpResultHandler(const THandler<T>& OnSuccess, const FErrorHandler& OnError)
+inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<T>& OnSuccess)
+{
+	std::remove_const<std::remove_reference<T>::type>::type Result;
+	FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+
+	OnSuccess.ExecuteIfBound(Result);
+}
+
+template<>
+inline void HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
+{
+	OnSuccess.ExecuteIfBound(Response->GetContentAsString());
+}
+
+template<class T>
+FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError)
 {
 	return FHttpRequestCompleteDelegate::CreateLambda(
 		[OnSuccess, OnError]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 		{
-			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
-				T Result;
-				FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-
-				OnSuccess.ExecuteIfBound(Result);
-
+				HandleHttpResultOk(Response, OnSuccess);
 				return;
 			}
 

@@ -882,7 +882,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileCreate.Timezone = "Etc/UTC";
 	ProfileCreate.DateOfBirth = "1970-01-01";
 
-	UserProfile::CreateUserProfile(ProfileCreate, UserProfile::FCreateUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::CreateUserProfile(ProfileCreate, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bCreateProfileSuccessful1 = true;
@@ -904,7 +904,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 
 	bool bGetProfileSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile"));
-	UserProfile::GetUserProfile(UserProfile::FGetUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bGetProfileSuccessful1 = true;
@@ -914,7 +914,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 
 	bool bUpdateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateProfile"));
-	UserProfile::UpdateUserProfile(ProfileUpdate, UserProfile::FUpdateUserProfileSuccess::CreateLambda([&]()
+	UserProfile::UpdateUserProfile(ProfileUpdate, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpdateProfileSuccessful = true;
@@ -924,7 +924,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 
 	bool bGetProfileSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile // Second attempt"));
-	UserProfile::GetUserProfile(UserProfile::FGetUserProfileSuccess::CreateLambda([&](FAccelByteModelsUserProfileInfo Result)
+	UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bGetProfileSuccessful2 = true;

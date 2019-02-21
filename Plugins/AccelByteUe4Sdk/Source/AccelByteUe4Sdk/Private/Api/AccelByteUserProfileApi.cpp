@@ -13,7 +13,7 @@ namespace AccelByte
 namespace Api
 {
 
-void UserProfile::GetUserProfile(const FGetUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
@@ -29,12 +29,31 @@ void UserProfile::GetUserProfile(const FGetUserProfileSuccess& OnSuccess, const 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindStatic(GetUserProfileResponse, OnSuccess, OnError);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetUserProfileResponse, OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/public"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace(), *UserID);
+    FString Verb = TEXT("GET");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FString Content;
+
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+
+void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
@@ -52,10 +71,10 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(UpdateUserProfileResponse, OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const FCreateUserProfileSuccess& OnSuccess, const FErrorHandler& OnError)
+void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
@@ -73,54 +92,7 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(CreateUserProfileResponse, OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-// =============================================================================================================================
-// ========================================================= Responses =========================================================
-// =============================================================================================================================
-
-void UserProfile::GetUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserProfileSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsUserProfileInfo Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void UserProfile::UpdateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FUpdateUserProfileSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		OnSuccess.ExecuteIfBound();
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void UserProfile::CreateUserProfileResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateUserProfileSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		FAccelByteModelsUserProfileInfo Result;
-		FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
-		OnSuccess.ExecuteIfBound(Result);
-		return;
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

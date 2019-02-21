@@ -20,7 +20,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Order
 {
 public:
-	DECLARE_DELEGATE_OneParam(FCreateNewOrderSuccess, const FAccelByteModelsOrderInfo&);
 	/**
 	 * @brief Create order to purchase something from the store. 
 	 * 
@@ -28,9 +27,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const FCreateNewOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetUserOrderSuccess, const FAccelByteModelsOrderInfo&);
 	/**
 	 * @brief Get user's order information. 
 	 * 
@@ -38,9 +36,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&);
 	/**
 	 * @brief Get all of user's orders that have been created with paging.
 	 * 
@@ -48,18 +45,16 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
-	static void GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FFulfillOrderSuccess, const FAccelByteModelsOrderInfo&);
 	/**
 	 * @brief Fulfill an order if the order is charged but the fulfillment fail.
 	 * 
 	 * @param OrderNo Order number.
 	 * @param OnSuccess OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsOrderInfo&.
 	 */
-	static void FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetUserOrderHistorySuccess, const TArray<FAccelByteModelsOrderHistoryInfo>&);
 	/**
 	 * @brief  Get the history of the created orders.
 	 * 
@@ -68,17 +63,11 @@ public:
 	 * The result is TArray<FAccelByteModelsOrderHistoryInfo>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError);
 private:
 	Order() = delete; // static class can't have instance
 	Order(Order const&) = delete;
 	Order(Order&&) = delete;
-
-	static void CreateNewOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateNewOrderSuccess OnSuccess, FErrorHandler OnError);
-	static void GetUserOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserOrderSuccess OnSuccess, FErrorHandler OnError);
-	static void GetUserOrdersResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserOrdersSuccess OnSuccess, FErrorHandler OnError);
-	static void FulfillOrderResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FFulfillOrderSuccess OnSuccess, FErrorHandler OnError);
-	static void GetUserOrderHistoryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetUserOrderHistorySuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

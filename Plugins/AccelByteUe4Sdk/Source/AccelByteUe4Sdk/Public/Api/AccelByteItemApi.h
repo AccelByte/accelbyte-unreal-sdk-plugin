@@ -17,7 +17,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Item
 {
 public:
-	DECLARE_DELEGATE_OneParam(FGetItemByIdSuccess, const FAccelByteModelsItemInfo&);
 	/**
 	 * @brief Get one item information from an online store.
 	 *
@@ -27,9 +26,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&);
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
 	 *
@@ -43,15 +41,13 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsItemInfo>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Item() = delete; // static class can't have instance
 	Item(Item const&) = delete;
 	Item(Item&&) = delete;
 
-	static void GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorHandler OnError);
-	static void GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

@@ -8,11 +8,13 @@
 
 using AccelByte::Api::CloudStorage;
 using AccelByte::FErrorHandler;
+using AccelByte::THandler;
+using AccelByte::FVoidHandler;
 using AccelByte::Settings;
 
 void UAccelByteBlueprintsCloudStorage::GetAllSlots(const FGetAllSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::GetAllSlots(AccelByte::Api::CloudStorage::FGetAllSlotsSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsSlot>& Slots)
+	AccelByte::Api::CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsSlot>& Slots)
 	{
 		OnSuccess.ExecuteIfBound(Slots);
 	}),
@@ -24,7 +26,7 @@ void UAccelByteBlueprintsCloudStorage::GetAllSlots(const FGetAllSlotsSuccess& On
 
 void UAccelByteBlueprintsCloudStorage::GetSlot(const FString& SlotId, const FGetSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::GetSlot(SlotId, CloudStorage::FGetSlotSuccess::CreateLambda([OnSuccess](const TArray<uint8>& Data)
+	AccelByte::Api::CloudStorage::GetSlot(SlotId, THandler<TArray<uint8>>::CreateLambda([OnSuccess](const TArray<uint8>& Data)
 	{
 		OnSuccess.ExecuteIfBound(Data);
 	}),
@@ -36,7 +38,7 @@ void UAccelByteBlueprintsCloudStorage::GetSlot(const FString& SlotId, const FGet
 
 void UAccelByteBlueprintsCloudStorage::CreateSlot(const TArray<uint8>& Data, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::CreateSlot(Data, FileName, Tags, Label, CloudStorage::FCreateSlotSuccess::CreateLambda([OnSuccess](const FAccelByteModelsSlot& CreatedSlot)
+	AccelByte::Api::CloudStorage::CreateSlot(Data, FileName, Tags, Label, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& CreatedSlot)
 	{
 		OnSuccess.ExecuteIfBound(CreatedSlot);
 	}), nullptr, 
@@ -48,7 +50,7 @@ void UAccelByteBlueprintsCloudStorage::CreateSlot(const TArray<uint8>& Data, con
 
 void UAccelByteBlueprintsCloudStorage::UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const FString& Tags, const FString& Label, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::UpdateSlot(SlotId, Data, FileName, Tags, Label, CloudStorage::FUpdateSlotSuccess::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
+	AccelByte::Api::CloudStorage::UpdateSlot(SlotId, Data, FileName, Tags, Label, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
 	{
 		OnSuccess.ExecuteIfBound(UpdatedSlot);
 	}), nullptr,
@@ -60,7 +62,7 @@ void UAccelByteBlueprintsCloudStorage::UpdateSlot(const FString& SlotId, const F
 
 void UAccelByteBlueprintsCloudStorage::DeleteSlot(const FString& SlotId, const FDeleteSlotSuccees& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::DeleteSlot(SlotId, AccelByte::Api::CloudStorage::FDeleteSlotSuccess::CreateLambda([OnSuccess]()
+	AccelByte::Api::CloudStorage::DeleteSlot(SlotId, FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
