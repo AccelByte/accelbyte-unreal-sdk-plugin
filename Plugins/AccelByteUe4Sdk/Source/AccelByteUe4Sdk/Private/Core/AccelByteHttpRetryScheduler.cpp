@@ -35,7 +35,7 @@ bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const F
 
 	if (bIsStarted)
 	{
-		RetryList.push_back(MakeShared<FHttpRetryTask>(Request, CompleteDelegate, RequestTime, InitialDelay));
+		RetryList.Add(MakeShared<FHttpRetryTask>(Request, CompleteDelegate, RequestTime, InitialDelay));
 	}
 
 	return bIsStarted;
@@ -43,37 +43,31 @@ bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const F
 
 bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredentials)
 {
-	if (RetryList.empty())
+	if (RetryList.Num() == 0)
 	{
 		return false;
 	}
 
-	auto EraseBegin = remove_if(begin(RetryList), end(RetryList),
-		[this, &CurrentTime, &UserCredentials](const TSharedRef<FHttpRetryTask>& CurrentTask)
+	TArray<TSharedRef<FHttpRetryTask>> CompletedTasks;
+
+	RetryList.RemoveAll([CurrentTime, &UserCredentials, &CompletedTasks](const TSharedRef<FHttpRetryTask>& CurrentTask)
 	{
 		if (!CurrentTask->Request.IsValid())
 		{
 			return true;
 		}
 
-		if (!HttpRequest::IsFinished(CurrentTask->Request))
-		{
-			if (CurrentTime < CurrentTask->NextRetryTime)
-			{
-				return false;
-			}
-			else if (CurrentTime >= CurrentTask->RequestTime + TotalTimeout)
-			{
-				CurrentTask->Request->CancelRequest();
-
-				return false;
-			}
-		}
-
 		switch (CurrentTask->Request->GetStatus())
 		{
 		case EHttpRequestStatus::Processing:
-			ScheduleNextRetry(CurrentTask, CurrentTime);
+			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
+			{
+				CurrentTask->Request->CancelRequest();
+			}
+			else if (CurrentTime >= CurrentTask->NextRetryTime)
+			{
+				CurrentTask->ScheduleNextRetry(CurrentTime);
+			}
 
 			return false;
 		case EHttpRequestStatus::Succeeded: //got response
@@ -83,51 +77,54 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 			case EHttpResponseCodes::BadGateway:
 			case EHttpResponseCodes::ServiceUnavail:
 			case EHttpResponseCodes::GatewayTimeout:
-				ScheduleNextRetry(CurrentTask, CurrentTime);
+				CurrentTask->ScheduleNextRetry(CurrentTime);
 				CurrentTask->Request->ProcessRequest();
 
 				return false;
 			case EHttpResponseCodes::Forbidden:
 				UserCredentials.ScheduleRefreshToken(CurrentTime);
-				CurrentTask->CompleteDelegate.ExecuteIfBound(CurrentTask->Request, CurrentTask->Request->GetResponse(), true);
+				CompletedTasks.Add(CurrentTask);
 
 				return true;
 			default:
-				CurrentTask->CompleteDelegate.ExecuteIfBound(CurrentTask->Request, CurrentTask->Request->GetResponse(), true);
+				CompletedTasks.Add(CurrentTask);
 
 				return true;
 			}
 		case EHttpRequestStatus::Failed: //request cancelled
 		case EHttpRequestStatus::Failed_ConnectionError: //network error
-			CurrentTask->CompleteDelegate.ExecuteIfBound(CurrentTask->Request, nullptr, false);
+		case EHttpRequestStatus::NotStarted:
+			CompletedTasks.Add(CurrentTask);
 
 			return true;
-
-		default:
-			return false;
 		}
+
+		return false;
 	});
 
-	RetryList.erase(EraseBegin, end(RetryList));
-	
+	for (const auto& Task : CompletedTasks)
+	{
+		Task->CompleteDelegate.ExecuteIfBound(Task->Request, Task->Request->GetResponse(), Task->Request->GetResponse().IsValid());
+	}
+
 	return true;
 }
 
-void FHttpRetryScheduler::ScheduleNextRetry(TSharedPtr<FHttpRetryTask> Task, double CurrentTime)
+void FHttpRetryScheduler::FHttpRetryTask::ScheduleNextRetry(double CurrentTime)
 {
-	Task->NextDelay *= 2;
-	Task->NextDelay += FMath::RandRange(-Task->NextDelay, Task->NextDelay) / 4;
+	NextDelay *= 2;
+	NextDelay += FMath::RandRange(-NextDelay, NextDelay) / 4;
 
-	if (Task->NextDelay > MaximumDelay)
+	if (NextDelay > FHttpRetryScheduler::MaximumDelay)
 	{
-		Task->NextDelay = MaximumDelay;
+		NextDelay = FHttpRetryScheduler::MaximumDelay;
 	}
 
-	Task->NextRetryTime = CurrentTime + Task->NextDelay;
+	NextRetryTime = CurrentTime + NextDelay;
 
-	if (Task->NextRetryTime > Task->RequestTime + TotalTimeout)
+	if (NextRetryTime > RequestTime + FHttpRetryScheduler::TotalTimeout)
 	{
-		Task->NextRetryTime = Task->RequestTime + TotalTimeout;
+		NextRetryTime = RequestTime + FHttpRetryScheduler::TotalTimeout;
 	}
 }
 

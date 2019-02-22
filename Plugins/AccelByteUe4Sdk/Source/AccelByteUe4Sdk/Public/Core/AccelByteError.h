@@ -264,11 +264,13 @@ enum class ErrorCodes : int32
 	OffenseTypeNotFoundException = 4242,
 	OffenseTypeAlreadyExistsException = 4271,
 	OffenseReportAssociatedException = 4272,
-		
+	//
+	//Client side Error Code List
+	//
 	UnknownError = 14000,
 	JsonDeserializationFailed = 14001,
 	NetworkError = 14005,
-	WebSocketConnectFailed = 14201,
+	WebSocketConnectFailed = 14201
 };
 
 

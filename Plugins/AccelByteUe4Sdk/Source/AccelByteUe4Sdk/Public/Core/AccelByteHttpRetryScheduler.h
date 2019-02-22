@@ -42,12 +42,12 @@ namespace HttpRequest
 class FHttpRetryScheduler
 {
 public:
+	static const int InitialDelay = 1;
+	static const int MaximumDelay = 30;
+	static const int TotalTimeout = 60;
+
 	bool ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 	bool PollRetry(double CurrentTime, Credentials& UserCredentials);
-
-	double GetInitialDelay() const { return InitialDelay; }
-	double GetMaximumDelay() const { return MaximumDelay; }
-	double GetTotalTimeout() const { return TotalTimeout; }
 
 private:
 	class FHttpRetryTask
@@ -60,17 +60,11 @@ private:
 		double NextRetryTime;
 
 		FHttpRetryTask(const FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay);
+		void ScheduleNextRetry(double CurrentTime);
 	};
 
 private:
-	void ScheduleNextRetry(TSharedPtr<FHttpRetryTask> Task, double CurrentTime);
-
-private:
-	const double InitialDelay = 1.0;
-	const double MaximumDelay = 30.0;
-	const double TotalTimeout = 60.0;
-
-	vector<TSharedRef<FHttpRetryTask>> RetryList;
+	TArray<TSharedRef<FHttpRetryTask>> RetryList;
 };
 
 }

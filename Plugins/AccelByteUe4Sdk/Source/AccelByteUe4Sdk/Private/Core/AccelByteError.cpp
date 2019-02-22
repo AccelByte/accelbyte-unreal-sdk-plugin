@@ -237,7 +237,9 @@ const std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> ErrorM
 	{ static_cast<int32>(ErrorCodes::OffenseTypeNotFoundException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_not_found") },
 	{ static_cast<int32>(ErrorCodes::OffenseTypeAlreadyExistsException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_already_exists") },
 	{ static_cast<int32>(ErrorCodes::OffenseReportAssociatedException), TEXT("errors.net.accelbyte.platform.offensereport.offense_report_associated") },
-		
+	//
+	//Client side Error Code List
+	//
 	{ static_cast<int32>(ErrorCodes::UnknownError), TEXT("Unknown error.") },
 	{ static_cast<int32>(ErrorCodes::JsonDeserializationFailed), TEXT("JSON deserialization failed.") },
 	{ static_cast<int32>(ErrorCodes::NetworkError), TEXT("There is no response.") },
