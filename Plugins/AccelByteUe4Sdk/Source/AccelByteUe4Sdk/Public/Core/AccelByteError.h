@@ -267,7 +267,7 @@ enum class ErrorCodes : int32
 		
 	UnknownError = 14000,
 	JsonDeserializationFailed = 14001,
-	EmptyResponse = 14002,
+	NetworkError = 14005,
 	WebSocketConnectFailed = 14201,
 };
 
