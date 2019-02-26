@@ -17,6 +17,7 @@ class FHttpRetryScheduler;
 namespace Api
 {
 	class Lobby;
+	class GameProfile;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -26,6 +27,7 @@ public:
 	static Credentials Credentials;
 	static FHttpRetryScheduler HttpRetryScheduler;
 	static Api::Lobby Lobby;
+	static Api::GameProfile GameProfile;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

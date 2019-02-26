@@ -56,6 +56,11 @@ FString UAccelByteBlueprintsSettings::GetBasicServerUrl()
 	return FRegistry::Settings.BasicServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetGameProfileServerUrl()
+{
+	return FRegistry::Settings.GameProfileServerUrl;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -99,4 +104,9 @@ void UAccelByteBlueprintsSettings::SetCloudStorageServerUrl(const FString& Cloud
 void UAccelByteBlueprintsSettings::SetBasicServerUrl(const FString& BasicServerUrl)
 {
 	FRegistry::Settings.BasicServerUrl = BasicServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetGameProfileServerUrl(const FString& GameProfileServerUrl)
+{
+	FRegistry::Settings.GameProfileServerUrl = GameProfileServerUrl;
 }
