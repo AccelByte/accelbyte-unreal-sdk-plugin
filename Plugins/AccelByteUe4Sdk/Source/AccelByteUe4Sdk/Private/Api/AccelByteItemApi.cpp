@@ -27,7 +27,7 @@ FString EAccelByteItemStatusToString(const EAccelByteItemStatus& EnumValue) {
 	return EnumPtr->GetNameStringByValue((int64)EnumValue);
 }
 
-void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const FGetItemByIdSuccess& OnSuccess, const FErrorHandler& OnError)
+void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *ItemId);
@@ -61,22 +61,22 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetItemByIdResponse, OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FErrorHandler& OnError)
+void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&language=%s&region=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language, *Region);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&region=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Region);
+	if (!Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+	}	
 	if (ItemType != EAccelByteItemType::NONE)
 	{
 		Url.Append(FString::Printf(TEXT("&itemType=%s"), *EAccelByteItemTypeToString(ItemType)));
 	}
-	if (Status != EAccelByteItemStatus::NONE)
-	{
-		Url.Append(FString::Printf(TEXT("&status=%"), *EAccelByteItemStatusToString(Status)));
-	}
-	Url.Append(FString::Printf(TEXT("&status=%d"), Page));
+	Url.Append(FString::Printf(TEXT("&page=%d"), Page));
 	if (Size > 0)
 	{
 		Url.Append(FString::Printf(TEXT("&size=%d"), Size));
@@ -94,47 +94,7 @@ void Item::GetItemsByCriteria(const FString& Language, const FString& Region, co
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(GetItemsByCriteriaResponse, OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-// =============================================================================================================================
-// ========================================================= Responses =========================================================
-// =============================================================================================================================
-
-void Item::GetItemByIdResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemByIdSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	FAccelByteModelsItemInfo Output;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Output, 0, 0))
-		{
-			OnSuccess.ExecuteIfBound(Output);
-			return;
-		}
-		Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
-void Item::GetItemsByCriteriaResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetItemsByCriteriaSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	FAccelByteModelsItemPagingSlicedResult Output;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Output, 0, 0))
-		{
-			OnSuccess.ExecuteIfBound(Output);
-			return;
-		}
-		Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

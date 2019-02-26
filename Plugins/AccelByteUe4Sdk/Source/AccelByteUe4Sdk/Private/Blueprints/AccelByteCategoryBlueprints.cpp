@@ -9,12 +9,13 @@
 
 using AccelByte::Api::Category;
 using AccelByte::FErrorHandler;
+using AccelByte::THandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
 void UAccelByteBlueprintsCategory::GetRootCategories(const FString& Language, const FGetRootCategoriesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Category::GetRootCategories(Language, Category::FGetRootCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	Category::GetRootCategories(Language, THandler<TArray<FAccelByteModelsFullCategoryInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
@@ -26,7 +27,7 @@ void UAccelByteBlueprintsCategory::GetRootCategories(const FString& Language, co
 
 void UAccelByteBlueprintsCategory::GetCategory(const FString& CategoryPath, const FString& Language, const FGetCategorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Category::GetCategory(CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([OnSuccess](const FAccelByteModelsFullCategoryInfo& Result)
+	Category::GetCategory(CategoryPath, Language, THandler<FAccelByteModelsFullCategoryInfo>::CreateLambda([OnSuccess](const FAccelByteModelsFullCategoryInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
@@ -38,7 +39,7 @@ void UAccelByteBlueprintsCategory::GetCategory(const FString& CategoryPath, cons
 
 void UAccelByteBlueprintsCategory::GetChildCategories(const FString& Language, const FString& CategoryPath, const FGetChildCategoriesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Category::GetChildCategories(Language, CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	Category::GetChildCategories(Language, CategoryPath, THandler<TArray<FAccelByteModelsFullCategoryInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
@@ -50,7 +51,7 @@ void UAccelByteBlueprintsCategory::GetChildCategories(const FString& Language, c
 
 void UAccelByteBlueprintsCategory::GetDescendantCategories(const FString& Language, const FString& CategoryPath, const FGetDescendantCategoriesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Category::GetDescendantCategories(Language, CategoryPath, Category::FGetDescendantCategoriesSuccess::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
+	Category::GetDescendantCategories(Language, CategoryPath, THandler<TArray<FAccelByteModelsFullCategoryInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsFullCategoryInfo>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),

@@ -9,12 +9,13 @@
 
 using AccelByte::Api::Wallet;
 using AccelByte::FErrorHandler;
+using AccelByte::THandler;
 using AccelByte::Settings;
 using AccelByte::Credentials;
 
 void UAccelByteBlueprintsWallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Wallet::GetWalletInfoByCurrencyCode(CurrencyCode, Wallet::FGetWalletByCurrencyCodeSuccess::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfo& Result)
+	Wallet::GetWalletInfoByCurrencyCode(CurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([OnSuccess](const FAccelByteModelsWalletInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

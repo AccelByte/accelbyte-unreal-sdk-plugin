@@ -323,7 +323,8 @@ enum class EAccelByteMatchmakingStatus : uint8
 	Start		UMETA(DisplayName = "start"),
 	Timeout		UMETA(DisplayName = "timeout"),
 	Cancel		UMETA(DisplayName = "cancel"),
-	Done		UMETA(DisplayName = "done")
+	Done		UMETA(DisplayName = "done"),
+	Unavailable UMETA(DisplayName = "unavailable"),
 };
 
 USTRUCT(BlueprintType)

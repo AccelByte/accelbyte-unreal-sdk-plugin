@@ -14,7 +14,7 @@ namespace AccelByte
 namespace Api
 {
 
-void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const FQueryUserEntitlementSuccess& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
+void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
@@ -66,30 +66,7 @@ void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FS
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 	
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, FHttpRequestCompleteDelegate::CreateStatic(QueryUserEntitlementResponse, OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
-
-// =============================================================================================================================
-// ========================================================= Responses =========================================================
-// =============================================================================================================================
-
-void Entitlement::QueryUserEntitlementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FQueryUserEntitlementSuccess OnSuccess, FErrorHandler OnError)
-{
-	int32 Code;
-	FString Message;
-	FAccelByteModelsEntitlementPagingSlicedResult Output;
-	if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-	{
-		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Output, 0, 0))
-		{
-			OnSuccess.ExecuteIfBound(Output);
-			return;
-		}
-		Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-	}
-	HandleHttpError(Request, Response, Code, Message);
-	OnError.ExecuteIfBound(Code, Message);
-}
-
 } // Namespace Api
 }

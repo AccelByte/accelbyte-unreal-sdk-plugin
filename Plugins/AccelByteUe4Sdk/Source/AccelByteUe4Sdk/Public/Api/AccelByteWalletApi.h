@@ -20,7 +20,6 @@ namespace Api
 class ACCELBYTEUE4SDK_API Wallet
 {
 public:
-	DECLARE_DELEGATE_OneParam(FGetWalletByCurrencyCodeSuccess, const FAccelByteModelsWalletInfo&);
 	/**
 	 * @brief Get user's wallet information for a specific currency code.
 	 *
@@ -28,14 +27,12 @@ public:
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const FGetWalletByCurrencyCodeSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Wallet() = delete; // static class can't have instance
 	Wallet(Wallet const&) = delete;
 	Wallet(Wallet&&) = delete;
-
-	static void GetWalletInfoByCurrencyCodeResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetWalletByCurrencyCodeSuccess OnSuccess, FErrorHandler OnError);
 };
 
 } // Namespace Api

@@ -133,7 +133,8 @@ void Lobby::Disconnect()
 {
 	if(WebSocket.IsValid() && WebSocket->IsConnected())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
+		// only remove ticker when game engine running, core ticker already destructed when game engine shuttingdown
+		if (GEngine) FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
 		WebSocket->OnMessage().Clear();
 		WebSocket->OnConnected().Clear();
 		WebSocket->OnConnectionError().Clear();
@@ -141,7 +142,7 @@ void Lobby::Disconnect()
 		WebSocket->Close();
 		WebSocket = nullptr;
 	}
-	UE_LOG(LogTemp, Display, TEXT("Disconnected"))
+	if (GEngine) UE_LOG(LogTemp, Display, TEXT("Disconnected"));
 }
 
 bool Lobby::IsConnected() const

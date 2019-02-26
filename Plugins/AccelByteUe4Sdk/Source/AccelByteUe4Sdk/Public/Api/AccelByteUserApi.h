@@ -85,7 +85,7 @@ public:
 	/**
 	 * @brief This function will get data of currently logged in user.
 	 *
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
@@ -94,7 +94,7 @@ public:
 	* @brief This function will update user's account.
 	*
 	* @param UpdateRequest User's request.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FUpdateUserAccountSuccess.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	* @param OnError This will be called when the operation failed.
 	*/
 	static void Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
@@ -174,7 +174,7 @@ public:
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.
 	 * 
-	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FAccelByteModelsLinkedPlatform>.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FPlatformLink>.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError);
@@ -201,6 +201,24 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function will search user by their login ID (email or phone number in the future).
+	 *
+	 * @param Login Targeted user's login ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function will search user by userId.
+	 *
+	 * @param Login Targeted user's ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FPublicUserInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void GetPublicUserInfo(const FString& UserId, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	User() = delete; // static class can't have instance

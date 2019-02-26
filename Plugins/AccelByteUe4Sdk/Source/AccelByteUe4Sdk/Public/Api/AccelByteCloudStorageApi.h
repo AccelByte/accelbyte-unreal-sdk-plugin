@@ -20,16 +20,14 @@ namespace Api
 class ACCELBYTEUE4SDK_API CloudStorage
 {
 public:
-	DECLARE_DELEGATE_OneParam(FGetAllSlotsSuccess, const TArray<FAccelByteModelsSlot>&);
 	/**
 	 * @brief This function gets list of slot(s) those owned by the player.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsSlot>&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAllSlots(const FGetAllSlotsSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess, const FErrorHandler& OnError);
 	
-	DECLARE_DELEGATE_OneParam(FCreateSlotSuccess, const FAccelByteModelsSlot&);
 	/**
 	 * @brief This function creates a slot for an uploaded binary data.
 	 *
@@ -41,9 +39,8 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotSuccess& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	static void CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FUpdateSlotSuccess, const FAccelByteModelsSlot&);
 	/**
 	 * @brief This function updates a stored slot.
 	 *
@@ -56,7 +53,7 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const FUpdateSlotSuccess& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	static void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
 	DECLARE_DELEGATE_OneParam(FGetSlotSuccess, const TArray<uint8>&);
 	/**
@@ -67,9 +64,8 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetSlot(FString SlotId, const FGetSlotSuccess& OnSuccess, const FErrorHandler& OnError);
+	static void GetSlot(FString SlotId, const THandler<TArray<uint8>>& OnSuccess, const FErrorHandler& OnError);
 
-    DECLARE_DELEGATE(FDeleteSlotSuccess);
 	/**
 	 * @brief This function delete the specified slot.
 	 *
@@ -77,7 +73,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-    static void DeleteSlot(FString SlotId, const FDeleteSlotSuccess& OnSuccess, const FErrorHandler& OnError);
+    static void DeleteSlot(FString SlotId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	CloudStorage() = delete;
@@ -85,12 +81,6 @@ private:
 	CloudStorage(CloudStorage&&) = delete;
 
 	static TArray<uint8> FormDataBuilder(TArray<uint8> BinaryData,FString BoundaryGuid, FString FileName);
-    static void OnGetAllSlotsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAllSlotsSuccess OnSuccess, FErrorHandler OnError);
-    static void OnCreateSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateSlotSuccess OnSuccess, FErrorHandler OnError);
-    static void OnUpdateSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateSlotSuccess OnSuccess, FErrorHandler OnError);
-    static void OnGetSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetSlotSuccess OnSuccess, FErrorHandler OnError);
-    static void OnDeleteSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FDeleteSlotSuccess OnSuccess, FErrorHandler OnError);
-
 };
 
 } // Namespace Api

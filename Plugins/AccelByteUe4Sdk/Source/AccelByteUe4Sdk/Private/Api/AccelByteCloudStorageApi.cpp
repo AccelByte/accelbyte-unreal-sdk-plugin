@@ -11,7 +11,7 @@ namespace AccelByte
 {
 namespace Api
 {
-	void CloudStorage::GetAllSlots(const FGetAllSlotsSuccess& OnSuccess, const FErrorHandler& OnError)
+	void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess, const FErrorHandler& OnError)
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		FString Url				= FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
@@ -27,11 +27,11 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
-		Request->OnProcessRequestComplete().BindStatic(OnGetAllSlotsResponse, OnSuccess, OnError);
+		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
 	}
 
-	void CloudStorage::CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotSuccess& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
+	void CloudStorage::CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
@@ -64,12 +64,12 @@ namespace Api
 
 		Request->SetContent(Content);
 		Request->OnRequestProgress() = OnProgress;
-		Request->OnProcessRequestComplete().BindStatic(OnCreateSlotResponse, OnSuccess, OnError);
+		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
 		UE_LOG(LogTemp, Log, TEXT("[AccelByte] Cloud Storage Start uploading..."));
 	}
 
-	void CloudStorage::GetSlot(FString SlotID, const FGetSlotSuccess & OnSuccess, const FErrorHandler & OnError)
+	void CloudStorage::GetSlot(FString SlotID, const THandler<TArray<uint8>> & OnSuccess, const FErrorHandler & OnError)
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *SlotID);
@@ -85,11 +85,11 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
-		Request->OnProcessRequestComplete().BindStatic(OnGetSlotResponse, OnSuccess, OnError);
+		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
 	}
 
-	void CloudStorage::UpdateSlot(FString SlotID, const TArray<uint8> BinaryData, const FString& FileName, const FString & Tags, const FString& Label, const FUpdateSlotSuccess & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
+	void CloudStorage::UpdateSlot(FString SlotID, const TArray<uint8> BinaryData, const FString& FileName, const FString & Tags, const FString& Label, const THandler<FAccelByteModelsSlot> & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		
@@ -123,12 +123,12 @@ namespace Api
 
 		Request->SetContent(Content);
 		Request->OnRequestProgress() = OnProgress;
-		Request->OnProcessRequestComplete().BindStatic(OnUpdateSlotResponse, OnSuccess, OnError);
+		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
 		UE_LOG(LogTemp, Log, TEXT("[AccelByte] Cloud Storage Start uploading..."));
 	}
 
-	void CloudStorage::DeleteSlot(FString SlotID, const FDeleteSlotSuccess & OnSuccess, const FErrorHandler & OnError)
+	void CloudStorage::DeleteSlot(FString SlotID, const FVoidHandler & OnSuccess, const FErrorHandler & OnError)
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/slots/%s"), *FRegistry::Settings.CloudStorageServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *SlotID);
@@ -144,7 +144,7 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
-		Request->OnProcessRequestComplete().BindStatic(OnDeleteSlotResponse, OnSuccess, OnError);
+		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
 	}
 
@@ -164,86 +164,5 @@ namespace Api
 
 		return Data;
 	}
-
-	void CloudStorage::OnGetAllSlotsResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetAllSlotsSuccess OnSuccess, FErrorHandler OnError)
-	{
-		int32 Code;
-		FString Message;
-		TArray<FAccelByteModelsSlot> Result;
-		if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-		{
-			if (FJsonObjectConverter::JsonArrayStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
-			{
-				OnSuccess.ExecuteIfBound(Result);
-				return;
-			}
-			Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-		}
-		HandleHttpError(Request, Response, Code, Message);
-		OnError.ExecuteIfBound(Code, Message);
-	}
-
-	void CloudStorage::OnCreateSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateSlotSuccess OnSuccess, FErrorHandler OnError)
-	{
-		int32 Code;
-		FString Message;
-		FAccelByteModelsSlot Result;
-		if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-		{
-			if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
-			{
-				OnSuccess.ExecuteIfBound(Result);
-				return;
-			}
-			Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-		}
-		HandleHttpError(Request, Response, Code, Message);
-		OnError.ExecuteIfBound(Code, Message);
-	}
-
-	void CloudStorage::OnUpdateSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FCreateSlotSuccess OnSuccess, FErrorHandler OnError)
-	{
-		int32 Code;
-		FString Message;
-		FAccelByteModelsSlot Result;
-		if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-		{
-			if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
-			{
-				OnSuccess.ExecuteIfBound(Result);
-				return;
-			}
-			Code = static_cast<int32>(ErrorCodes::JsonDeserializationFailed);
-		}
-		HandleHttpError(Request, Response, Code, Message);
-		OnError.ExecuteIfBound(Code, Message);
-	}
-
-	void CloudStorage::OnGetSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FGetSlotSuccess OnSuccess, FErrorHandler OnError)
-	{
-		if (Successful)
-		{
-			OnSuccess.ExecuteIfBound(Response->GetContent());
-			return;
-		}
-		int32 Code;
-		FString Message;
-		HandleHttpError(Request, Response, Code, Message);
-		OnError.ExecuteIfBound(Code, Message);
-	}
-
-	void CloudStorage::OnDeleteSlotResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool Successful, FDeleteSlotSuccess OnSuccess, FErrorHandler OnError)
-	{
-		if (Successful)
-		{
-			OnSuccess.ExecuteIfBound();
-			return;
-		}
-		int32 Code;
-		FString Message;
-		HandleHttpError(Request, Response, Code, Message);
-		OnError.ExecuteIfBound(Code, Message);
-	}
-
 }
 }
