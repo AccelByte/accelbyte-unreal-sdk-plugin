@@ -39,7 +39,7 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	static void CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function updates a stored slot.
@@ -53,9 +53,21 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const FString& Tags, const FString& Label, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	static void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	
+	/**
+	 * @brief This function updates stored slot's metadata.
+	 *
+	 * @param SlotId This is specific slot that will be updated.
+	 * @param FileName This is the filename of the item that saved in the slot.
+	 * @param Tags This is an array of tag that will be stored in the slot.
+	 * @param Label This is the label that will be stored in the slot.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
+	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void UpdateSlotMetadata(FString SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
-	DECLARE_DELEGATE_OneParam(FGetSlotSuccess, const TArray<uint8>&);
 	/**
 	 * @brief This function gets the data that stored in the slot.
 	 *
@@ -81,6 +93,15 @@ private:
 	CloudStorage(CloudStorage&&) = delete;
 
 	static TArray<uint8> FormDataBuilder(TArray<uint8> BinaryData,FString BoundaryGuid, FString FileName);
+	
+	/*
+	 * @brief Generate custom attribute form data.
+	 * 
+	 * @param CustomAttribute This is the content.
+	 * @param BoundaryGuid This is the boundary.
+	 * @param CloseFooter TRUE = the boundary will be close with extra double dash "--"; FALSE = the boundary will be left open and it can be appended with another form data.
+	*/
+	static TArray<uint8> CustomAttributeFormDataBuilder(const FString& CustomAttribute, FString BoundaryGuid, bool CloseFooter);
 };
 
 } // Namespace Api

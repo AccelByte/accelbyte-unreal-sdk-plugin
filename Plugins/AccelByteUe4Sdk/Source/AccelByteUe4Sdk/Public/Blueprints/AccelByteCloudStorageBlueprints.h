@@ -26,11 +26,15 @@ public:
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateSlotsSuccess, const FAccelByteModelsSlot&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
-	static void CreateSlot(const TArray<uint8>& Data, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void CreateSlot(const TArray<uint8>& Data, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FCreateSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateSlotSuccess, const FAccelByteModelsSlot&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
-	static void UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const FString& Tags, const FString& Label, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+		
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateSlotMetadataSuccess, const FAccelByteModelsSlot&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
+	static void UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotMetadataSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE(FDeleteSlotSuccees);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")

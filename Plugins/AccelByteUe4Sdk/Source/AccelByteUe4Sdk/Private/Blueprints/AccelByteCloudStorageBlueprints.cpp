@@ -36,9 +36,9 @@ void UAccelByteBlueprintsCloudStorage::GetSlot(const FString& SlotId, const FGet
 	}));
 }
 
-void UAccelByteBlueprintsCloudStorage::CreateSlot(const TArray<uint8>& Data, const FString& FileName, const FString& Tags, const FString& Label, const FCreateSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsCloudStorage::CreateSlot(const TArray<uint8>& Data, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FCreateSlotsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::CreateSlot(Data, FileName, Tags, Label, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& CreatedSlot)
+	AccelByte::Api::CloudStorage::CreateSlot(Data, FileName, Tags, Label, CustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& CreatedSlot)
 	{
 		OnSuccess.ExecuteIfBound(CreatedSlot);
 	}), nullptr, 
@@ -48,9 +48,21 @@ void UAccelByteBlueprintsCloudStorage::CreateSlot(const TArray<uint8>& Data, con
 	}));
 }
 
-void UAccelByteBlueprintsCloudStorage::UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const FString& Tags, const FString& Label, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsCloudStorage::UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	AccelByte::Api::CloudStorage::UpdateSlot(SlotId, Data, FileName, Tags, Label, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
+	AccelByte::Api::CloudStorage::UpdateSlot(SlotId, Data, FileName, Tags, Label, CustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
+	{
+		OnSuccess.ExecuteIfBound(UpdatedSlot);
+	}), nullptr,
+	FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UAccelByteBlueprintsCloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotMetadataSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	AccelByte::Api::CloudStorage::UpdateSlotMetadata(SlotId, FileName, Tags, Label, CustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
 	{
 		OnSuccess.ExecuteIfBound(UpdatedSlot);
 	}), nullptr,
