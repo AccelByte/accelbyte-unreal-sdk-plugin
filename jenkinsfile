@@ -6,24 +6,6 @@ pipeline {
         }
     }
     stages {
-        stage('Turn on EC2') {
-            agent {
-                label "master"
-            }
-            steps {
-                sh '''
-                    aws ec2 start-instances --instance-ids i-${SDK_INSTANCE_ID}
-                    sleep 60
-                '''
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Turn on EC2";
-                    }
-                }
-            }
-        }
         stage('Cleanup') {
             agent {
                 label "windows-sdk"
@@ -64,6 +46,21 @@ pipeline {
                 }
             }
         }
+        stage('Build Linux') {
+            agent {
+                label "windows-sdk"
+            }
+            steps {
+                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
+            }
+            post {
+                failure {
+                    script{ 
+                        FAILED_STAGE = "Build Linux";
+                    }
+                }
+            }       
+        }
         stage('Build Windows') {
             agent {
                 label "windows-sdk"
@@ -79,23 +76,50 @@ pipeline {
                 }
             }
         }
-        stage('Build Linux') {
+        stage('ProxySetup') {
             agent {
                 label "windows-sdk"
             }
             steps {
                 powershell '''
+                $internetSettings = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"
+                Set-ItemProperty -Path $internetSettings -Name ProxyServer -Value "$Env:PROXY_SERVER"
+                Set-ItemProperty -Path $internetSettings -Name ProxyEnable -Value 1
+                '''
+            }
+            post {
+                failure {
+                    script{ 
+                        FAILED_STAGE = "ProxySetup";
+                    }
+                }
+            }
+        }
+        stage('Automation Test') {
+            agent {
+                label "windows-sdk"
+            }
+            steps {
+                powershell '''
+                    $STEAM_PATH = $Env:STEAM_PATH
+                    $STEAM_ID = $Env:STEAM_ID
+                    $STEAM_PASS = $Env:STEAM_PASS
+
+                    & $STEAM_PATH -login $STEAM_ID $STEAM_PASS
+                
                     $CONFIG_FILE="$Env:WORKSPACE\\Config\\DefaultEngine.ini"
                     $CONFIG_FIELD =
                     "[/Script/AccelByteUe4Sdk.AccelByteSettings]`r`n" + 
                     "ClientId=$Env:UE4_CLIENT_ID`r`n" +
                     "ClientSecret=$Env:UE4_CLIENT_SECRET`r`n" +
-                    "GameId=$Env:NAMESPACE`r`n" +
-                    "PublisherId=$Env:UE4_PublisherNamespace`r`n" +
+                    "Namespace=$Env:ADMIN_NAMESPACE`r`n" +
+                    "PublisherNamespace=$Env:UE4_PublisherNamespace`r`n" +
                     "IamServerUrl=`"$Env:UE4_BASE_URL`/iam`"`r`n" +
                     "PlatformServerUrl=`"$Env:UE4_BASE_URL`/platform`"`r`n" +
-                    "LobbyServerUrl=`"$Env:UE4_BASE_URL`/lobby`/`"`r`n" +
-                    "BasicServerUrl=`"$Env:UE4_BASE_URL`/basic`/`"`r`n"
+                    "LobbyServerUrl=`"$Env:LOBBY_SERVER_URL`/lobby`/`"`r`n" +
+                    "BasicServerUrl=`"$Env:UE4_BASE_URL`/basic`"`r`n" +
+                    "CloudStorageServerUrl=`"$Env:UE4_BASE_URL`/binary-store`"`r`n" +
+                    "GameProfileServerUrl=`"$Env:UE4_BASE_URL`/soc-profile`"`r`n"
 
                     (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\\[\\/Script\\/AccelByteUe4Sdk\\.AccelByteSettings\\]).*' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
 
@@ -107,57 +131,8 @@ pipeline {
                         }
                     }
                 '''
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Build Linux";
-                    }
-                }
-            }       
-        }
-        stage('Automation Test') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat 'echo "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject"'
-
                 bat '''
-                    SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
-                    SET NAMESPACE = %NAMESPACE%
-                    SET TABLE_PREFIX = %TABLE_PREFIX%
-                    SET AWS_ACCESS_KEY_ID = %AWS_ACCESS_KEY_ID%
-                    SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
-                    SET AWS_REGION = %AWS_REGION%
-
-                    set IAM_BASE_URL=%IAM_DATABASE_URL%
-                    set ADMIN_CLIENT_ID=%ADMIN_CLIENT_ID%
-                    set ADMIN_CLIENT_SECRET=%ADMIN_CLIENT_SECRET%
-                    set ADMIN_NAMESPACE=%ADMIN_NAMESPACE%
-                    set ADMIN_USER=%ADMIN_USER%
-                    set ADMIN_PASSWORD=%ADMIN_PASSWORD%
-
-                    set UTILITIES_PATH=%WORKSPACE%\\TestUtilities
-                    set VARIABLE_FILE_PATH=%WORKSPACE%\\TestUtilities\\EcommerceVariables.txt
-
-                    set ROOT_CATEGORY_PATH=/EcommRoot
-                    set CHILD_CATEGORY_PATH=/EcommRoot/SubPath
-                    set GRANDCHILD_CATEGORY_PATH=/EcommRoot/SubPath/Children
-                    set TEST_EMAIL=ecommuser@example.com
-                    set TEST_PASSWORD=123456
-                    set CURRENCY_CODE=ECOMMCOIN
-                    set INGAME_ITEM_TITLE=In Game E-Commerce Item
-                    set CURRENCY_ITEM_TITLE=In Game Currency Item
-
-                    set VARIABLES_FILE_CONTENT=%ROOT_CATEGORY_PATH%___%CHILD_CATEGORY_PATH%___%GRANDCHILD_CATEGORY_PATH%___%TEST_EMAIL%___%TEST_PASSWORD%___%CURRENCY_CODE%___%INGAME_ITEM_TITLE%___%CURRENCY_ITEM_TITLE%
-                    echo %VARIABLES_FILE_CONTENT%> "%VARIABLE_FILE_PATH%"
-
-                    "%UTILITIES_PATH%\\justice-test-utilities-windows_amd64.exe" ecommerce --setup --rootcategorypath %ROOT_CATEGORY_PATH% --childcategorypath %CHILD_CATEGORY_PATH% --grandchildcategorypath %GRANDCHILD_CATEGORY_PATH% --testemail %TEST_EMAIL% --testpassword %TEST_PASSWORD% --currencycode %CURRENCY_CODE% --ingameitemtitle "%INGAME_ITEM_TITLE%" --currencyitemtitle "%CURRENCY_ITEM_TITLE%"
-                '''
-
-                bat '''
+                echo "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject"
                 cls
                 SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
                 SET NAMESPACE = %NAMESPACE%
@@ -170,25 +145,14 @@ pipeline {
                 SteamTicketHelper.exe login
                 popd
 
-                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log
-
-                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -ExecCmds="Automation RunTests Project.Functional Tests; Quit" -log
+                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=AutomationTestLog.Log
+                echo %errorlevel%
 
                 pushd SteamHelper
                 SteamTicketHelper.exe logout
                 popd
-                '''
-                bat '''
-                    set IAM_BASE_URL=%IAM_DATABASE_URL%
-                    set ADMIN_CLIENT_ID=%ADMIN_CLIENT_ID%
-                    set ADMIN_CLIENT_SECRET=%ADMIN_CLIENT_SECRET%
-                    set ADMIN_NAMESPACE=%ADMIN_NAMESPACE%
-                    set ADMIN_USER=%ADMIN_USER%
-                    set ADMIN_PASSWORD=%ADMIN_PASSWORD%
 
-                    set UTILITIES_PATH=%WORKSPACE%\\TestUtilities
-
-                    "%UTILITIES_PATH%\\justice-test-utilities-windows_amd64.exe" ecommerce --teardown
+                type "%WORKSPACE%\\Saved\\Logs\\AutomationTestLog.Log"
                 '''
             }
             post {
@@ -283,17 +247,6 @@ pipeline {
                 slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
 
                 def turnOff = true       
-                Jenkins.instance.getItems().each { job->
-                    if (job.getName() != JOB_NAME){
-                        Jenkins.instance.getLabels().each{ label ->
-                            if(label=="windows-sdk"){
-                                if(job.getLastBuild.getResult().equals(null)){
-                                    turnOff = false
-                                }
-                            }
-                        }
-                    }
-                }
                 if (turnOff){
                     node('master'){
                     sh '''
@@ -319,17 +272,6 @@ pipeline {
 
                 slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
                 def turnOff = true
-                Jenkins.instance.getItems().each { job->
-                    if (job.getName() != JOB_NAME){
-                        Jenkins.instance.getLabels().each{ label ->
-                            if(label=="windows-sdk"){
-                                if(job.getLastBuild.getResult().equals(null)){
-                                    turnOff = false
-                                }
-                            }
-                        }
-                    }
-                }
                 if (turnOff){
                     node('master'){
                     sh '''

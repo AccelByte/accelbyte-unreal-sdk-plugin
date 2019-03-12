@@ -35,6 +35,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteHttpRetryTest);
 static const int32 AutomationFlagMaskHttpRetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 using namespace std;
+void ResetSettings();
 
 class MockHttpResponse : public IHttpResponse
 {
@@ -200,6 +201,7 @@ bool ProcessRequest_GotError500_Retries::RunTest(const FString& Parameter)
 	check(RequestCompleted);
 	FRegistry::Credentials.ForgetAll();
 
+	ResetSettings();
 	return true;
 }
 
@@ -280,6 +282,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 
 	FRegistry::Credentials.ForgetAll();
 
+	ResetSettings();
 	return true;
 }
 
@@ -376,6 +379,7 @@ bool ProcessRequest_GotError403_RefreshToken::RunTest(const FString& Parameter)
 
 	FRegistry::Credentials.ForgetAll();
 
+	ResetSettings();
 	return true;
 }
 
@@ -449,6 +453,7 @@ bool Credentials_OnExpired_Refreshed::RunTest(const FString& Parameter)
 	FRegistry::Credentials.ForgetAll();
 	check(FRegistry::Credentials.GetTokenState() == Credentials::ETokenState::Invalid);
 
+	ResetSettings();
 	return true;
 }
 
@@ -901,5 +906,23 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 
 	FRegistry::Credentials.ForgetAll();
 
+	ResetSettings();
 	return true;
+}
+
+void ResetSettings()
+{
+	FRegistry::Settings.ClientId = GetDefault<UAccelByteSettings>()->ClientId;
+	FRegistry::Settings.ClientSecret = GetDefault<UAccelByteSettings>()->ClientSecret;
+	FRegistry::Settings.Namespace = GetDefault<UAccelByteSettings>()->Namespace;
+	FRegistry::Settings.PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
+	FRegistry::Settings.RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
+	FRegistry::Settings.BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
+	FRegistry::Settings.IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
+	FRegistry::Settings.PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
+	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
+	FRegistry::Settings.BasicServerUrl = GetDefault<UAccelByteSettings>()->BasicServerUrl;
+	FRegistry::Settings.CloudStorageServerUrl = GetDefault<UAccelByteSettings>()->CloudStorageServerUrl;
+	FRegistry::Settings.GameProfileServerUrl = GetDefault<UAccelByteSettings>()->GameProfileServerUrl;
+	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 }
