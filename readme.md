@@ -1,22 +1,34 @@
 # AccelByte UE4 SDK
 
-AccelByte UE4 SDK is a plugin for Unreal Engine 4. 
+AccelByte UE4 SDK is a plugin for Unreal Engine 4.
 
 ## Assumptions
 
 This documentation assumes that you are already familiar with modern C++, Unreal Engine 4 (including Blueprint), HTTP, REST API, microservice architecture, OAuth2, OpenID Connect, JWT, WebSocket.
 
+## Dependencies
+
+AccelByte SDK is compatible with these AccelByte backend services:
+
+| Service              | Version              |
+|----------------------|----------------------|
+| IAM                  | v2.1.0               |
+| Platform/E-Commerce  | v1.3.0-80            |
+| Basic                | v1.0.0               |
+| cloudstorage-service | v0.3.0               |
+| lobby-server         | v0.2.2.528           |
+
 ## Features
 
 AccelByte UE4 SDK features:
 
-- Access the API from C++ and blueprint. C++ 
+- Access the API from C++ and blueprint. C++
 - Provides easy-to-use client APIs for:
-    - User authentication (access tokens stored in memory)
-    - User management (create user, reset password, verify user.)
-    - User profile (create, update, view).
-    - Ecommerce (get item categories, get items, create orders, etc.)
-    - Lobby (chatting, party management)
+  - User authentication (access tokens stored in memory)
+  - User management (create user, reset password, verify user.)
+  - User profile (create, update, view).
+  - Ecommerce (get item categories, get items, create orders, etc.)
+  - Lobby (chatting, party management)
 - Maybe server API in the future.
 
 ## Architecture
