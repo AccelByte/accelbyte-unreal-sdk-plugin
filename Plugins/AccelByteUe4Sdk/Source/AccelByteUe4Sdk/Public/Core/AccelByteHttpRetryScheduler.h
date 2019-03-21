@@ -42,9 +42,9 @@ namespace HttpRequest
 class FHttpRetryScheduler
 {
 public:
-	static const int InitialDelay = 1;
-	static const int MaximumDelay = 30;
-	static const int TotalTimeout = 60;
+	static const int InitialDelay;
+	static const int MaximumDelay;
+	static const int TotalTimeout;
 
 	bool ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 	bool PollRetry(double CurrentTime, Credentials& UserCredentials);

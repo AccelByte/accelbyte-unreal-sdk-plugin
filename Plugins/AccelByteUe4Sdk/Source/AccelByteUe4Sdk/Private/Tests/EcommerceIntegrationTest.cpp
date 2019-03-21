@@ -14,6 +14,7 @@
 #include "AccelByteRegistry.h"
 #include "FileManager.h"
 #include "AccelByteUserApi.h"
+#include "TestUtilities.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -35,15 +36,54 @@ static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSucc
 void FlushHttpRequests();//defined in TestUtilities.cpp
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-FString EcommerceUserEmail;
-FString EcommerceUserPassword;
-FString EcommerceUserDisplayName;
-FString ExpectedRootCategoryPath;
-FString ExpectedChildCategoryPath;
-FString ExpectedGrandChildCategoryPath;
-FString ExpectedRootItemTitle; //"INGAMEITEM", 2 DOGECOIN, 0 Discount
-FString ExpectedChildItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
-FString ExpectedCurrencyCode;
+
+TMap<FString, FString> LocalizationDescription;
+FCurrencyCreateRequest CurrencyRequest
+{
+	TEXT("UE4_SdkCoin"),
+	LocalizationDescription,
+	TEXT("UE4SDKC"),
+	ECurrencyType::VIRTUAL,
+	0,
+	-1,
+	-1,
+	-1
+};
+FStoreCreateRequest ArchiveStore
+{
+	"UE4_Store_Archive",
+	"keep the original store",
+	{"en"},
+	{"US"},
+	"en",
+	"US"
+};
+FStoreCreateRequest TemporaryStore
+{
+	"UE4_Store_Temporary",
+	"for SDK testing purpose",
+	{"en"},
+	{"US"},
+	"en",
+	"US"
+};
+const EcommerceExpectedVariable ExpectedVariable{
+	"/UE4RootCategory",
+	"/UE4RootCategory/UE4ChildCategory",
+	"/UE4RootCategory/UE4ChildCategory/UE4GrandChildCategory",
+	CurrencyRequest,
+	"UE4RootItem",
+	"UE4ChildItem",
+	ArchiveStore,
+	TemporaryStore
+};
+
+FString ExpectedRootCategoryPath = ExpectedVariable.ExpectedRootCategoryPath;
+FString ExpectedChildCategoryPath = ExpectedVariable.ExpectedChildCategoryPath;
+FString ExpectedGrandChildCategoryPath = ExpectedVariable.ExpectedGrandChildCategoryPath;
+FString ExpectedRootItemTitle = ExpectedVariable.ExpectedRootItemTitle; //"INGAMEITEM", 2 DOGECOIN, 0 Discount
+FString ExpectedChildItemTitle = ExpectedVariable.ExpectedChildItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
+FString ExpectedCurrencyCode = ExpectedVariable.ExpectedCurrency.currencyCode;
 
 const auto EcommerceErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
@@ -607,23 +647,6 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool EcommerceSetup::RunTest(const FString& Parameters)
 {
-	FString TestVariableFileContent = TEXT("");
-	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("TestUtilities/EcommerceVariables.txt"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	FFileHelper::LoadFileToString(TestVariableFileContent, *CurrentDirectory);
-	TArray<FString> TestVariables;
-	TestVariableFileContent.ParseIntoArray(TestVariables, TEXT("___"), false);
-	ExpectedRootCategoryPath = TestVariables[0];
-	ExpectedChildCategoryPath = TestVariables[1];
-	ExpectedGrandChildCategoryPath = TestVariables[2];
-	EcommerceUserEmail = TestVariables[3];
-	EcommerceUserPassword = TestVariables[4];
-	ExpectedCurrencyCode = TestVariables[5];
-	ExpectedRootItemTitle = TestVariables[6];
-	ExpectedChildItemTitle = TestVariables[7];
-
-	double LastTime = 0;
 	bool bClientTokenObtained = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ClientLogin"));
 	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
@@ -634,29 +657,28 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 
-	bool bLoginSuccessful = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithDeviceAccount"));
-	User::LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
-		bLoginSuccessful = true;
-	}), EcommerceErrorHandler);
-
+	bool bSetupSuccess = false;
+	SetupEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bSetupSuccess = true; }), EcommerceErrorHandler);
 	FlushHttpRequests();
+	check(bSetupSuccess);
 
-	if (bLoginSuccessful)
-	{
-		// call E-CommerceTest.exe -setup
-		return true;
-	}
-	return false;
+	bool bUserLoginSuccess = false;
+	User::LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
+	{ 
+		bUserLoginSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	check(bUserLoginSuccess);
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceTearDown, "AccelByte.Tests.Ecommerce.Z.Teardown", AutomationFlagMaskEcommerce);
 bool EcommerceTearDown::RunTest(const FString& Parameters)
 {
-
-	// call E-CommerceTest.exe -tearDown
+	bool bTearDownSuccess = false;
+	TearDownEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bTearDownSuccess = true; }), EcommerceErrorHandler);
+	FlushHttpRequests();
+	check(bTearDownSuccess)
 
 	float LastTime = 0.0f;
 
@@ -665,7 +687,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("DeleteUserById"));
-	DeleteUserByIdLobby(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -679,82 +701,3 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	return bDeleteSuccessful;
 }
 
-
-void DeleteUserByIdLobby(const FString& UserId, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError)
-{
-	using AccelByte::Settings;
-	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
-	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-		FString Content;
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-		Request->SetContentAsString(Content);
-		Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-		{
-			int32 Code = 0;
-			FString Message;
-			if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-			{
-				TSharedPtr<FJsonObject> JsonParsed;
-				TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-				if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
-				{
-					FString RealUserId = JsonParsed->GetStringField("UserId");
-
-					FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
-					FString Verb = TEXT("DELETE");
-					FString ContentType = TEXT("application/json");
-					FString Accept = TEXT("application/json");
-					FString Content;
-					FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
-					Request2->SetURL(Url);
-					Request2->SetHeader(TEXT("Authorization"), Authorization);
-					Request2->SetVerb(Verb);
-					Request2->SetHeader(TEXT("Content-Type"), ContentType);
-					Request2->SetHeader(TEXT("Accept"), Accept);
-					Request2->SetContentAsString(Content);
-					Request2->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-					{
-						int32 Code;
-						FString Message;
-						if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-						{
-							OnSuccess.ExecuteIfBound();
-						}
-						else
-						{
-							HandleHttpError(Request, Response, Code, Message);
-							OnError.ExecuteIfBound(Code, Message);
-						}
-					});
-					Request2->ProcessRequest();
-				}
-				else
-				{
-					HandleHttpError(Request, Response, Code, Message);
-					OnError.ExecuteIfBound(Code, Message);
-				}
-			}
-			else
-			{
-				HandleHttpError(Request, Response, Code, Message);
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		});
-		Request->ProcessRequest();
-	}), AccelByte::FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}

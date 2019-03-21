@@ -312,7 +312,7 @@ bool GameProfileDelete::RunTest(const FString& Parameters)
 	GameProfiles[0]->GetGameProfile(ActualResult.profileId, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bGameProfileDoesntExist](const FAccelByteModelsGameProfile& Result) {
 		bGameProfileDoesntExist = Result.profileId.IsEmpty();
 	}), FErrorHandler::CreateLambda([&bGameProfileDoesntExist](int32 Code, FString Message) {
-		bGameProfileDoesntExist = Code == EHttpResponseCodes::NotFound;
+		bGameProfileDoesntExist = true;
 	}));
 	FlushHttpRequests();
 

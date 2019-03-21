@@ -255,7 +255,7 @@ void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& Ou
 	OutMessage = "";
 	if (Response.IsValid())
 	{
-		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0) && Error.NumericErrorCode != -1)
 		{
 			Code = Error.NumericErrorCode;
 		}

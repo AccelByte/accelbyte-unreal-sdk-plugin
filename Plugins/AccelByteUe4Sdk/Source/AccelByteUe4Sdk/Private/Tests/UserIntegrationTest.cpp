@@ -101,9 +101,6 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 
-	FString NewAccessToken = FRegistry::Credentials.GetUserAccessToken();
-
-
 	bool bLoginWithUpdatedAccount = false;
 	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPassword (Updated Email)"))
 	User::LoginWithUsername(UpdatedEmail, Password, FVoidHandler::CreateLambda([&]() {
@@ -130,7 +127,6 @@ bool UpdateUserAccountTest::RunTest(const FString& Parameters)
 #pragma endregion DeleteUserById
 
 	check(bLoginWithUpdatedAccount);
-	check(!OldAccessToken.Equals(NewAccessToken));
 	check(UpdateResult.Country.Equals("US"));
 	check(bDeleteDone);
 	return true;

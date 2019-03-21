@@ -87,9 +87,9 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 {
 	TCHAR AuthorizationCode[1000];
 	AuthorizationCode[0] = 0;
-#if defined(PLATFORM_WINDOWS)
+#if PLATFORM_WINDOWS
 	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
-#elif defined(PLATFORM_LINUX)
+#elif PLATFORM_LINUX
 	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
 #endif
 
@@ -172,18 +172,8 @@ void User::Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserD
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(
-		Request,
-		CreateHttpResultHandler(
-			THandler<FUserData>::CreateLambda(
-				[OnSuccess](const FUserData& UserData)
-				{
-					FRegistry::Credentials.ForceRefreshToken();
-					OnSuccess.ExecuteIfBound(UserData);
-				}),
-				OnError),
-		FPlatformTime::Seconds());
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)

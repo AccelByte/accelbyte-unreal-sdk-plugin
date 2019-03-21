@@ -20,6 +20,10 @@ namespace HttpRequest
 	}
 }
 
+const int FHttpRetryScheduler::InitialDelay = 1;
+const int FHttpRetryScheduler::MaximumDelay = 30;
+const int FHttpRetryScheduler::TotalTimeout = 60;
+
 FHttpRetryScheduler::FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay)
 	: Request(Request)
 	, CompleteDelegate(CompleteDelegate)

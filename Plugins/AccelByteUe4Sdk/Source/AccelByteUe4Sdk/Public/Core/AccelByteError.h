@@ -22,7 +22,7 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		int32 NumericErrorCode;
+		int32 NumericErrorCode = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString ErrorCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
@@ -32,7 +32,7 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 namespace AccelByte
 {
 
-template <class T> using THandler = TBaseDelegate<void, const T&>;
+template <typename T> using THandler = TBaseDelegate<void, const T&>;
 using FVoidHandler = TBaseDelegate<void>;
 using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 
@@ -293,7 +293,7 @@ inline void HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& On
 	OnSuccess.ExecuteIfBound();
 }
 
-template<class T>
+template<typename T>
 inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<TArray<T>>& OnSuccess)
 {
 	TArray<T> Result;
@@ -308,10 +308,10 @@ inline void HandleHttpResultOk<uint8>(FHttpResponsePtr Response, const THandler<
 	OnSuccess.ExecuteIfBound(Response->GetContent());
 }
 
-template<class T>
+template<typename T>
 inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<T>& OnSuccess)
 {
-	std::remove_const<std::remove_reference<T>::type>::type Result;
+	typename std::remove_const<typename std::remove_reference<T>::type>::type Result;
 	FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
 
 	OnSuccess.ExecuteIfBound(Result);
@@ -323,7 +323,7 @@ inline void HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandle
 	OnSuccess.ExecuteIfBound(Response->GetContentAsString());
 }
 
-template<class T>
+template<typename T>
 FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError)
 {
 	return FHttpRequestCompleteDelegate::CreateLambda(
