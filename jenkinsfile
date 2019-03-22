@@ -66,7 +66,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic'
+                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic /m'
             }
             post {
                 failure {
@@ -145,14 +145,17 @@ pipeline {
                 SteamTicketHelper.exe login
                 popd
 
+                set https_proxy=%PROXY_SERVER%
                 "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=AutomationTestLog.Log
-                echo %errorlevel%
+                set EXIT_CODE=%errorlevel%
 
                 pushd SteamHelper
                 SteamTicketHelper.exe logout
                 popd
 
                 type "%WORKSPACE%\\Saved\\Logs\\AutomationTestLog.Log"
+
+                ::if NOT %EXIT_CODE% == 0 (exit 1)
                 '''
             }
             post {

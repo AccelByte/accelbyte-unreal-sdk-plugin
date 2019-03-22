@@ -457,7 +457,7 @@ bool Credentials_OnExpired_Refreshed::RunTest(const FString& Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Disabled.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
 {
 	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
