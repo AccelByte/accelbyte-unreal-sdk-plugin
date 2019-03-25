@@ -35,7 +35,7 @@ FString UserIds[TestUserCount];
 Credentials UserCreds[TestUserCount];
 TArray<TSharedPtr<Api::Lobby>> Lobbies;
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSetup, "AccelByte.DisabledTests.Lobby.A.Setup", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSetup, "AccelByte.Tests.Lobby.A.Setup", AutomationFlagMaskLobby);
 bool LobbyTestSetup::RunTest(const FString& Parameters)
 {
 	bool bClientLoginSuccess = false;
@@ -98,7 +98,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.DisabledTests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.Tests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
 bool LobbyTestTeardown::RunTest(const FString& Parameters)
 {
 	bool bDeleteUsersSuccessful[TestUserCount];
@@ -122,7 +122,7 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnect2Users, "AccelByte.DisabledTests.Lobby.B.2UsersConnect", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnect2Users, "AccelByte.Tests.Lobby.B.2UsersConnect", AutomationFlagMaskLobby);
 bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 {
 	bool UsersConnected[2];
@@ -179,7 +179,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnectUser, "AccelByte.DisabledTests.Lobby.B.UserConnect", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnectUser, "AccelByte.Tests.Lobby.B.UserConnect", AutomationFlagMaskLobby);
 bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 {
 	Api::Lobby Lobby(UserCreds[0], FRegistry::Settings);

@@ -11,17 +11,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '''
-                    IF EXIST temp (
-                    rd /s /q temp
-                    )        
-                    IF EXIST artifacts (
-                    rd /s /q artifacts
-                    )
-                    IF EXIST Doxygen (
-                    rd /s /q Doxygen
-                    )
-                '''
+                bat '%WORKSPACE%\\Jenkins\\Cleanup.bat'
             }
             post {
                 failure {
@@ -31,42 +21,27 @@ pipeline {
                 }
             }       
         }    
-		stage('Setup') {
+		stage('Generate Project Solution') {
             agent {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Binaries\\DotNet\\UnrealBuildTool.exe" -projectfiles  -project="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -game -rocket -progress'
+                bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
             }
             post {
                 failure {
                     script{ 
-                        FAILED_STAGE = "Setup";
+                        FAILED_STAGE = "Generate Project Solution";
                     }
                 }
             }
-        }
-        stage('Build Linux') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="DebugGame";Platform=Linux;verbosity=diagnostic'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Build Linux";
-                    }
-                }
-            }       
         }
         stage('Build Windows') {
             agent {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\MSBuild.bat" "%WORKSPACE%\\AccelByteUe4SdkDemo.sln" /t:build /p:Configuration="Development Editor";Platform=Win64;verbosity=diagnostic /m'
+                bat '%WORKSPACE%\\Jenkins\\BuildWindows.bat'
             }
             post {
                 failure {
@@ -76,16 +51,27 @@ pipeline {
                 }
             }
         }
+        stage('Build Linux') {
+            agent {
+                label "windows-sdk"
+            }
+            steps {
+                bat '%WORKSPACE%\\Jenkins\\BuildLinux.bat'
+            }
+            post {
+                failure {
+                    script{ 
+                        FAILED_STAGE = "Build Linux";
+                    }
+                }
+            }       
+        }
         stage('ProxySetup') {
             agent {
                 label "windows-sdk"
             }
             steps {
-                powershell '''
-                $internetSettings = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings"
-                Set-ItemProperty -Path $internetSettings -Name ProxyServer -Value "$Env:PROXY_SERVER"
-                Set-ItemProperty -Path $internetSettings -Name ProxyEnable -Value 1
-                '''
+                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
             }
             post {
                 failure {
@@ -100,63 +86,8 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                powershell '''
-                    $STEAM_PATH = $Env:STEAM_PATH
-                    $STEAM_ID = $Env:STEAM_ID
-                    $STEAM_PASS = $Env:STEAM_PASS
-
-                    & $STEAM_PATH -login $STEAM_ID $STEAM_PASS
-                
-                    $CONFIG_FILE="$Env:WORKSPACE\\Config\\DefaultEngine.ini"
-                    $CONFIG_FIELD =
-                    "[/Script/AccelByteUe4Sdk.AccelByteSettings]`r`n" + 
-                    "ClientId=$Env:UE4_CLIENT_ID`r`n" +
-                    "ClientSecret=$Env:UE4_CLIENT_SECRET`r`n" +
-                    "Namespace=$Env:ADMIN_NAMESPACE`r`n" +
-                    "PublisherNamespace=$Env:UE4_PublisherNamespace`r`n" +
-                    "IamServerUrl=`"$Env:UE4_BASE_URL`/iam`"`r`n" +
-                    "PlatformServerUrl=`"$Env:UE4_BASE_URL`/platform`"`r`n" +
-                    "LobbyServerUrl=`"$Env:LOBBY_SERVER_URL`/lobby`/`"`r`n" +
-                    "BasicServerUrl=`"$Env:UE4_BASE_URL`/basic`"`r`n" +
-                    "CloudStorageServerUrl=`"$Env:UE4_BASE_URL`/binary-store`"`r`n" +
-                    "GameProfileServerUrl=`"$Env:UE4_BASE_URL`/soc-profile`"`r`n"
-
-                    (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\\[\\/Script\\/AccelByteUe4Sdk\\.AccelByteSettings\\]).*' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
-
-                    foreach ($LINE in get-content $CONFIG_FILE)
-                    {
-                        if (($LINE -match "ClientId" -or $LINE -match "ClientSecret" ) -eq $false)
-                        {
-                            echo $LINE
-                        }
-                    }
-                '''
-                bat '''
-                echo "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject"
-                cls
-                SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
-                SET NAMESPACE = %NAMESPACE%
-                SET TABLE_PREFIX = %TABLE_PREFIX%
-                SET AWS_ACCESS_KEY_ID = %AWS_ACCESS_KEY_ID%
-                SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
-                SET AWS_REGION = %AWS_REGION%
-
-                pushd SteamHelper
-                SteamTicketHelper.exe login
-                popd
-
-                set https_proxy=%PROXY_SERVER%
-                "%ENGINE_PATH%\\Engine\\Binaries\\Win64\\UE4Editor-Cmd.exe" "%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=AutomationTestLog.Log
-                set EXIT_CODE=%errorlevel%
-
-                pushd SteamHelper
-                SteamTicketHelper.exe logout
-                popd
-
-                type "%WORKSPACE%\\Saved\\Logs\\AutomationTestLog.Log"
-
-                ::if NOT %EXIT_CODE% == 0 (exit 1)
-                '''
+                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
+                bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
             }
             post {
                 failure {
@@ -171,7 +102,7 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                bat '"%ENGINE_PATH%\\Engine\\Build\\BatchFiles\\RunUAT.bat" -ScriptsForProject="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" BuildCookRun -nocompileeditor -nop4 -project="%WORKSPACE%\\AccelByteUe4SdkDemo.uproject" -cook -stage -archive -archivedirectory="%WORKSPACE%\\temp" -package -clientconfig=Shipping -ue4exe=UE4Editor-Cmd.exe  -pak -prereqs -targetplatform=Win64 -build -AccelByteUe4SdkDemo -utf8output'
+                bat '%WORKSPACE%\\Jenkins\\Package.bat'
             }
             post {
                 failure {
@@ -186,17 +117,7 @@ pipeline {
                 label "windows-sdk"
             }      
             steps {				
-                bat '''        
-                    mkdir "%WORKSPACE%\\artifacts"
-                    IF EXIST "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Binaries" (
-                    rd /s /q "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Binaries"
-                    )        
-                    IF EXIST "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Intermediate" (
-                    rd /s /q "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk\\Intermediate"
-                    )    
-                    "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\temp"
-                    "%ZIP_PATH%\\7z.exe" a -t7z "%WORKSPACE%\\artifacts\\AccelByteUe4Sdk-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" "%WORKSPACE%\\Plugins\\AccelByteUe4Sdk"
-                '''
+                bat '%WORKSPACE%\\Jenkins\\Archive.bat'
             }
             post {
                 failure {
@@ -206,37 +127,32 @@ pipeline {
                 }
             }
         }
-        stage('upload'){
+        stage('Upload Archive'){
             agent {
                 label "windows-sdk"
             }
             steps {
-                bat '''
-                    aws s3 cp "%WORKSPACE%\\artifacts\\JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDKSampleGameDemo-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
-                    aws s3 cp "%WORKSPACE%\\artifacts\\AccelByteUe4Sdk-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z" s3://justice-sdk/UE4/JusticeSDK-%GIT_COMMIT%-BUILD-%BUILD_NUMBER%.7z --storage-class STANDARD_IA --metadata GitSha=%GIT_COMMIT%,BuildNo=%BUILD_NUMBER%
-                '''
+                bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
             }
             post {
                 failure {
                     script{ 
-                        FAILED_STAGE = "upload";
+                        FAILED_STAGE = "Upload Archive";
                     }
                 }
             }
         }
-        stage('PublishDocumentation'){
+        stage('Publish Documentation'){
             agent {
                 label "windows-sdk"
             }
             steps {
-                bat '''
-                    PublishDocumentation.bat
-                '''
+                bat '%WORKSPACE%\\Jenkins\\PublishDocumentation.bat'
             }
             post {
                 failure {
                     script{ 
-                        FAILED_STAGE = "PublishDocumentation";
+                        FAILED_STAGE = "Publish Documentation";
                     }
                 }
             }
