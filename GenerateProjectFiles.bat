@@ -1,1 +1,0 @@
-"C:\Program Files\Epic Games\UE_4.18\Engine\Binaries\DotNet\UnrealBuildTool.exe" -projectfiles  -project="C:\Users\User\source\repos\accelbyte\justice-ue4-sdk\AccelByteUe4SdkDemo.uproject" -game -rocket -progress
