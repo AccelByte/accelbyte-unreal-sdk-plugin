@@ -415,13 +415,20 @@ void Lobby::OnMessage(const FString& Message)
         return;
     }
     FString lobbyResponseType = JsonParsed->GetStringField("type");
+	int lobbyResponseCode;
+	if(lobbyResponseType.Contains("Response"))
+		lobbyResponseCode = JsonParsed->GetIntegerField("code");
     UE_LOG(LogTemp, Display, TEXT("Type: %s"), *lobbyResponseType);
-
+	
 #define HANDLE_LOBBY_MESSAGE(MessageType, Model, ResponseCallback) \
     if (lobbyResponseType.Equals(MessageType)) \
     { \
         Model Result; \
-        bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0); \
+		bool bSuccess; \
+		if(lobbyResponseCode == 0 || lobbyResponseType.Contains("Notif")) \
+			bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0); \
+		else \
+			bSuccess = true; \
         if (bSuccess) \
         { \
             ResponseCallback.ExecuteIfBound(Result); \
