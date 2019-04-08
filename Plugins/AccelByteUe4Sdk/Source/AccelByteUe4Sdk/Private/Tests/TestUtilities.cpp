@@ -20,15 +20,33 @@ using AccelByte::HandleHttpError;
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
+	UAccelByteBlueprintsTest::SendNotif(FRegistry::Credentials.GetUserId(), Message, bAsync, FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}), FErrorHandler::CreateLambda([OnError](int32 Code, const FString& Message)
+	{
+		OnError.ExecuteIfBound(Code, Message);
+	}));
+}
+
+void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%snotification/namespaces/%s/users/%s/freeform"), *FRegistry::Settings.LobbyServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Url = FString::Printf(TEXT("%snotification/namespaces/%s/users/%s/freeform"), *FRegistry::Settings.LobbyServerUrl, *FRegistry::Settings.Namespace, *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content = FString::Printf(TEXT("{\"message\":\"%s\"}"), *Message);
 	Url = Url.Replace(TEXT("wss"), TEXT("https")); //change protocol
 	Url = Url.Replace(TEXT("lobby/"), TEXT("")); //no /lobby
-	if (bAsync) { Url.Append(TEXT("?async=true")); } else { Url.Append(TEXT("?async=false")); }
+	if (bAsync)
+	{
+		Url.Append(TEXT("?async=true"));
+	}
+	else
+	{
+		Url.Append(TEXT("?async=false"));
+	}
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -37,23 +55,8 @@ void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, co
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-	{
-		int32 Code;
-		FString Message;
-		if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-		{
-			OnSuccess.ExecuteIfBound();
-			return;
-		} 
-		else
-		{
-			HandleHttpError(Request, Response, Code, Message);
-			OnError.ExecuteIfBound(Code, Message);
-			return;
-		}
-	});
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 FString UAccelByteBlueprintsTest::BytesToFString(TArray<uint8> Input)
@@ -178,14 +181,14 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bool bClientTokenObtained = false;
 		User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"));
 			bClientTokenObtained = true;
 		}), OnError);
 		FlushHttpRequests();
 		check(bClientTokenObtained);
 	}
 
-	/* 
+	/*
 	 Check the currency that expected for integration test. If it's already created, it doesn't need to be created again.
 	 If it doesn't exist, then it will be created.
 	*/
@@ -193,12 +196,12 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bCurrencyCreated = false;
 	Ecommerce_Currency_Get(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created already."))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created already."));
 		bCurrencyAlreadyExist = true;
 		bCurrencyCreated = true;
 	}), FErrorHandler::CreateLambda([&bCurrencyAlreadyExist](int32 Code, FString Message)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
 		bCurrencyAlreadyExist = false;
 	}));
 	FlushHttpRequests();
@@ -206,11 +209,11 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	{
 		Ecommerce_Currency_Create(Variables.ExpectedCurrency, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created"))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created"));
 			bCurrencyCreated = true;
 		}), FErrorHandler::CreateLambda([&OnError, &bCurrencyCreated](int32 Code, FString Message)
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY can not be created."))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY can not be created."));
 			bCurrencyCreated = false;
 			OnError.ExecuteIfBound(Code, Message);
 		}));
@@ -228,7 +231,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	FStoreInfo PublishedStoreInfo;
 	Ecommerce_PublishedStore_Get(THandler<FStoreInfo>::CreateLambda([&Variables, &bTheresPublishedStore, &PublishedStoreInfo](const FStoreInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"));
 		Variables.ExpectedStoreArchive.defaultLanguage = Result.defaultLanguage;
 		Variables.ExpectedStoreArchive.defaultRegion = Result.defaultRegion;
 		Variables.ExpectedStoreArchive.supportedLanguages = Result.supportedLanguages;
@@ -243,7 +246,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		FStoreInfo CreatedArchiveStoreInfo;
 		Ecommerce_Store_Create(Variables.ExpectedStoreArchive, THandler<FStoreInfo>::CreateLambda([&bArchiveStoreCreated, &CreatedArchiveStoreInfo](const FStoreInfo& Result)
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     ARCHIVE_STORE for PUBLISHED_STORE is created"))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     ARCHIVE_STORE for PUBLISHED_STORE is created"));
 			CreatedArchiveStoreInfo = Result;
 			bArchiveStoreCreated = true;
 		}), OnError);
@@ -251,7 +254,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bool bArchiveCloned = false;
 		Ecommerce_Store_Clone(PublishedStoreInfo.storeId, CreatedArchiveStoreInfo.storeId, FSimpleDelegate::CreateLambda([&bArchiveCloned]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"));
 			bArchiveCloned = true;
 		}), OnError);
 		FlushHttpRequests();
@@ -263,7 +266,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		*/
 		Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"))
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"));
 		}), nullptr);
 		FlushHttpRequests();
 	}
@@ -276,7 +279,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bTemporaryStoreCreated = false;
 	Ecommerce_Store_Create(Variables.ExpectedStoreTemporary, THandler<FStoreInfo>::CreateLambda([&CreatedTemporaryStoreInfo, &bTemporaryStoreCreated](const FStoreInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is created"));
 		CreatedTemporaryStoreInfo = Result;
 		bTemporaryStoreCreated = true;
 	}), OnError);
@@ -288,11 +291,11 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	*/
 	TMap<FString, FString> Localization;
 	Localization.Add("en", "UE4's ecommerce root category");
-	FCategoryCreateRequest CategoryRequest { Variables.ExpectedRootCategoryPath, Localization };
+	FCategoryCreateRequest CategoryRequest{ Variables.ExpectedRootCategoryPath, Localization };
 	bool bCreateRootCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateRootCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY root is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY root is created"));
 		bCreateRootCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -303,11 +306,11 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	*/
 	Localization.Reset();
 	Localization.Add("en", "UE4's ecommerce child category");
-	CategoryRequest = FCategoryCreateRequest { Variables.ExpectedChildCategoryPath, Localization };
+	CategoryRequest = FCategoryCreateRequest{ Variables.ExpectedChildCategoryPath, Localization };
 	bool bCreateChildCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateChildCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY child is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY child is created"));
 		bCreateChildCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -318,11 +321,11 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	*/
 	Localization.Reset();
 	Localization.Add("en", "UE4's ecommerce grand child category");
-	CategoryRequest = FCategoryCreateRequest { Variables.ExpectedGrandChildCategoryPath, Localization };
+	CategoryRequest = FCategoryCreateRequest{ Variables.ExpectedGrandChildCategoryPath, Localization };
 	bool bCreateGrandChildCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateGrandChildCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"));
 		bCreateGrandChildCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -381,7 +384,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bRootItemCreated = false;
 	Ecommerce_Item_Create(RootItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRootItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM root is created "))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM root is created "));
 		bRootItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -439,12 +442,12 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bChildItemCreated = false;
 	Ecommerce_Item_Create(ChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bChildItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM child is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM child is created"));
 		bChildItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
 	check(bChildItemCreated);
-	
+
 	/*
 	 Create grandchild ITEM
 	*/
@@ -497,7 +500,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bGrandchildItemCreated = false;
 	Ecommerce_Item_Create(grandChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bGrandchildItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM grandchild is created"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM grandchild is created"));
 		bGrandchildItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -509,7 +512,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	bool bPublishTemporaryStoreSuccess = false;
 	Ecommerce_Store_Clone(CreatedTemporaryStoreInfo.storeId, "", FSimpleDelegate::CreateLambda([&]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is published"))
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is published"));
 		bPublishTemporaryStoreSuccess = true;
 	}), OnError);
 	FlushHttpRequests();
@@ -526,7 +529,7 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 		bool bClientTokenObtained = false;
 		User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CLIENT is logged in"))
+			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CLIENT is logged in"));
 			bClientTokenObtained = true;
 		}), OnError);
 		FlushHttpRequests();
@@ -536,9 +539,9 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 	// Delete testing currency
 	bool bCurrencyDeleted = false;
 	Ecommerce_Currency_Delete(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
-	{ 
-		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"))
-		bCurrencyDeleted = true; 
+	{
+		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"));
+		bCurrencyDeleted = true;
 	}), OnError);
 	FlushHttpRequests();
 	check(bCurrencyDeleted);
@@ -547,7 +550,7 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 	bool bPublishedStoreDeleted = false;
 	Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"))
+		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"));
 		bPublishedStoreDeleted = true;
 	}), nullptr);
 	FlushHttpRequests();
@@ -555,34 +558,38 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 
 	// Fetch all store
 	TArray<FStoreInfo> GetAllResult;
-	Ecommerce_Store_Get_All(THandler<TArray<FStoreInfo>>::CreateLambda([&GetAllResult](const TArray<FStoreInfo>& Result) { GetAllResult = Result; }), OnError);
+	Ecommerce_Store_Get_All(THandler<TArray<FStoreInfo>>::CreateLambda([&GetAllResult](const TArray<FStoreInfo>& Result)
+	{
+		GetAllResult = Result;
+	}), OnError);
 	FlushHttpRequests();
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		// PUBLISH then DELETE the Archive
 		if (GetAllResult[i].title == Variables.ExpectedStoreArchive.title)
 		{
-			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"))
+			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"));
 			Ecommerce_Store_Clone(GetAllResult[i].storeId, "", FSimpleDelegate::CreateLambda([]()
 			{
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"))
+				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
 			}), nullptr);
 			FlushHttpRequests();
 			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([]()
 			{
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"))
-			}), nullptr);
-			FlushHttpRequests();
-		} else // DELETE all testing store
-		if (GetAllResult[i].title == Variables.ExpectedStoreTemporary.title)
-		{
-			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"))
-			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([]()
-			{
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"))
+				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
 			}), nullptr);
 			FlushHttpRequests();
 		}
+		else // DELETE all testing store
+			if (GetAllResult[i].title == Variables.ExpectedStoreTemporary.title)
+			{
+				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"));
+				Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([]()
+				{
+					UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
+				}), nullptr);
+				FlushHttpRequests();
+			}
 	}
 
 	OnSuccess.ExecuteIfBound();
@@ -772,22 +779,22 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-    FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/categories?storeId=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *StoreId);
-    FString Verb = TEXT("POST");
-    FString ContentType = TEXT("application/json");
-    FString Accept = TEXT("application/json");
-    FString Content;
-    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/categories?storeId=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *StoreId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	FJsonObjectConverter::UStructToJsonObjectString(Category, Content);
-    Request->SetURL(Url);
-    Request->SetHeader(TEXT("Authorization"), Authorization);
-    Request->SetVerb(Verb);
-    Request->SetHeader(TEXT("Content-Type"), ContentType);
-    Request->SetHeader(TEXT("Accept"), Accept);
-    Request->SetContentAsString(Content);
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
 
-    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
