@@ -14,6 +14,7 @@
     - [Unbind Delegates](#unbind-delegates)
     - [Chat](#chat)
     - [Party](#party)
+    - [Presence](#presence)
     - [Notification](#notification)
     - [Matchmaking](#matchmaking)
     - [Friends](#friends)
@@ -781,29 +782,24 @@ See AccelByte::Api::Entitlement::QueryUserEntitlement().
 
 ## Lobby
 Lobby is for chatting and party management. Unlike other servers which use HTTP, Lobby server uses WebSocket ([RFC 6455](https://tools.ietf.org/html/rfc6455)).
-See AccelByte::Api::Lobby
 
 ### Connect to server
 You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
 
 ```cpp
-FRegistry::Lobby.Connect();
+AccelByte::FRegistry::Lobby.Connect();
 ```
-See AccelByte::Api::Lobby::Connect().
 
 ### Disconnect from server
 Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
-
 ```cpp
-FRegistry::Lobby.Disconnect();
+AccelByte::FRegistry::Lobby.Disconnect();
 ```
-See AccelByte::Api::Lobby::Disconnect().
 
-### Check If Connected
-Check whether the websocket is currently connected to the Lobby server.
-
+### Check if connected
+Check whether the connection has been established with the server.
 ```cpp
-if (FRegistry::Lobby.IsConnected())
+if (AccelByte::FRegistry::Lobby.IsConnected())
 {
     UE_LOG(LogTemp, Log, TEXT("Yay."));
 }
@@ -812,260 +808,506 @@ else
     UE_LOG(LogTemp, Log, TEXT("Nay."));
 }
 ```
-See AccelByte::Api::Lobby::IsConnected().
 
-### Sending Ping
+### Sending ping
 You should send ping every some time (for example, every 4 seconds) so that the server doesn't close the connection.
 
 ```cpp
-FRegistry::Lobby.SendPing();
+AccelByte::FRegistry::Lobby.SendPing();
 ```
-See AccelByte::Api::Lobby::SendPing().
 
-### Bind Delegates
- You must bind delegates/callbacks first to handle the events. For example when a user received a private message or a response to create party request. You can bind the delegate by using set method on every delegate you want to use. The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
-
+### Bind delegates
+ You must bind delegates/callbacks first to handle the events. For example when a user received a private message or a response to create party request. A delegate which ends with `Notice` means that it's like a notification, while one which ends with `Response` means it's like a response to a request. The delegates can be `nullptr` if you want to not bind the callback. All delegates have one parameter `Result` with different types.
 ```cpp
-    void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
-    void SetConnectFailedDelegate(const FErrorHandler& OnConnectError)
-    void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed)
-    void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice)
-    void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
-    void SetPartyGetInvitedNotifDelegate(const FPartyGetInvitedNotif& OnInvitePartyGetInvitedNotice)
-    void SetPartyJoinNotifDelegate(const FPartyJoinNotif& OnInvitePartyJoinNotice)
-    void SetPartyKickNotifDelegate(const FPartyKickNotif& OnInvitePartyKickedNotice)
-    void SetPrivateMessageNotifDelegate(FPersonalChatNotif OnPersonalChatNotif)
-    void SetPartyChatNotifDelegate(FPartyChatNotif OnPersonalChatNotif)
-    void SetUserPresenceNotifDelegate(FFriendStatusNotif OnUserPresenceNotif)
-    void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
-    void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif) 
-    void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif)
-    void SetParsingErrorDelegate(const FErrorHandler& OnParsingError)
-    ...
+    //CONNECTION delegates
+    AccelByte::FRegistry::Lobby.SetConnectSuccessDelegate(
+        AccelByte::Api::Lobby::FConnectSuccess::CreateLambda([]()
+        {
+            UE_LOG(LogTemp, Log, TEXT("Connected to lobby!"));
+        }));
+
+    AccelByte::FRegistry::Lobby.SetConnectFailedDelegate(
+        AccelByte::FErrorHandler::CreateLambda([](int32 Code, const FString& ErrorMessage)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Failed to establish lobby connection!\nCause: %s\nCode:%d"), *ErrorMessage, Code);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetConnectionClosedDelegate(
+        AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([](int32 StatusCode, const FString& Reason, bool WasClean)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Lobby connection closed!\nReason: %s\nCode:%d"), *Reason, StatusCode);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetParsingErrorDelegate(
+        AccelByte::FErrorHandler::CreateLambda([](int32 Code, const FString& ErrorMessage)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Failed to parsing message!\nCause: %s\nCode:%d"), *ErrorMessage, Code);
+        }));
+
+    //PARTY NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetPartyLeaveNotifDelegate(
+        AccelByte::Api::Lobby::FPartyLeaveNotif::CreateLambda([](const FAccelByteModelsLeavePartyNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s is leaving your party!"), *Result.UserID);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPartyInviteNotifDelegate(
+        AccelByte::Api::Lobby::FPartyInviteNotif::CreateLambda([](const FAccelByteModelsInvitationNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s invites %s to join a party!"), *Result.InviterID, *Result.InviteeID);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPartyGetInvitedNotifDelegate(
+        AccelByte::Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](const FAccelByteModelsPartyGetInvitedNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s invites you to join a party!"), *Result.From);
+            UE_LOG(LogTemp, Log, TEXT("Party ID = %s"), *Result.PartyId);
+            UE_LOG(LogTemp, Log, TEXT("Invitation Token = %s"), *Result.InvitationToken);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPartyJoinNotifDelegate(
+        AccelByte::Api::Lobby::FPartyJoinNotif::CreateLambda([](const FAccelByteModelsPartyJoinNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s joins to your party!"), *Result.UserId);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPartyKickNotifDelegate(
+        AccelByte::Api::Lobby::FPartyKickNotif::CreateLambda([](const FAccelByteModelsGotKickedFromPartyNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s kick %s from this party (%s)!"), *Result.LeaderId, *Result.UserId, *Result.PartyId);
+        }));
+
+    //PARTY RESPONSE delegates
+    AccelByte::FRegistry::Lobby.SetInfoPartyResponseDelegate(
+        AccelByte::Api::Lobby::FPartyInfoResponse::CreateLambda([](const FAccelByteModelsInfoPartyResponse& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Here is your current party information."));
+            UE_LOG(LogTemp, Log, TEXT("Party ID: %s"), *Result.PartyId);
+            UE_LOG(LogTemp, Log, TEXT("Leader's user ID: %s"), *Result.LeaderId);
+            for (int i = 0; i < Result.Members.Num(); i++)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Member %d user ID = %s"), i, *Result.Members[i]);
+            }
+            UE_LOG(LogTemp, Log, TEXT("Party's invitation token: %s"), *Result.InvitationToken);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetCreatePartyResponseDelegate(
+        AccelByte::Api::Lobby::FPartyCreateResponse::CreateLambda([](const FAccelByteModelsCreatePartyResponse& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Party created!"));
+            UE_LOG(LogTemp, Log, TEXT("Party ID: %s"), *Result.PartyId);
+            UE_LOG(LogTemp, Log, TEXT("Party leader's user ID: %s"), *Result.LeaderId);
+            for (int i = 0; i < Result.Members.Num(); i++)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Member %d user ID = %s"), i, *Result.Members[i]);
+            }
+            UE_LOG(LogTemp, Log, TEXT("Party's invitation token: %s"), *Result.InvitationToken);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetLeavePartyResponseDelegate(
+        AccelByte::Api::Lobby::FPartyLeaveResponse::CreateLambda([](const FAccelByteModelsLeavePartyResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully leave party!")); }
+            else 
+            { UE_LOG(LogTemp, Log, TEXT("Failed to leave party! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetInvitePartyResponseDelegate(
+        AccelByte::Api::Lobby::FPartyInviteResponse::CreateLambda([](const FAccelByteModelsPartyInviteResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully invite your friend to your party!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to invite your friend to your party! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetInvitePartyJoinResponseDelegate(
+        AccelByte::Api::Lobby::FPartyJoinResponse::CreateLambda([](const FAccelByteModelsPartyJoinReponse& Result)
+        {
+            if (Result.Code != "0") { UE_LOG(LogTemp, Log, TEXT("Failed to accept a party invitation! Code: %s"), *Result.Code); }
+            else
+            { 
+                UE_LOG(LogTemp, Log, TEXT("Successfully accept a party invitation!"));
+                UE_LOG(LogTemp, Log, TEXT("Party ID: %s"), *Result.PartyId);
+                UE_LOG(LogTemp, Log, TEXT("Party leader's user ID: %s"), *Result.LeaderId);
+                for (int i = 0; i < Result.Members.Num(); i++)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("Member %d user ID = %s"), i, *Result.Members[i]);
+                }
+            }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetInvitePartyKickMemberResponseDelegate(
+        AccelByte::Api::Lobby::FPartyKickResponse::CreateLambda([](const FAccelByteModelsKickPartyMemberResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully kick a member from current party!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to kick a member from current party! Code: %s"), *Result.Code); }
+        }));
+
+    //CHAT NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetPartyChatNotifDelegate(
+        AccelByte::Api::Lobby::FPartyChatNotif::CreateLambda([](const FAccelByteModelsPartyMessageNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s send a party message to this party (%s)!"), *Result.From, *Result.To);
+            UE_LOG(LogTemp, Log, TEXT("Message:\n%s"), *Result.Payload);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPrivateMessageNotifDelegate(
+        AccelByte::Api::Lobby::FPersonalChatNotif::CreateLambda([](const FAccelByteModelsPersonalMessageNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s send a private message to you (%s)!"), *Result.From, *Result.To);
+            UE_LOG(LogTemp, Log, TEXT("Message:\n%s"), *Result.Payload);
+        }));
+
+    //CHAT RESPONSE delegates
+    AccelByte::FRegistry::Lobby.SetPrivateMessageResponseDelegate(
+        AccelByte::Api::Lobby::FPersonalChatResponse::CreateLambda([](const FAccelByteModelsPersonalMessageResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully send a private message!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to send a private message! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetPartyMessageResponseDelegate(
+        AccelByte::Api::Lobby::FPartyChatResponse::CreateLambda([](const FAccelByteModelsPartyMessageResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully send a party message!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to send a party message! Code: %s"), *Result.Code); }
+        }));
+
+    //PRESENCE NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetUserPresenceNotifDelegate(
+        AccelByte::Api::Lobby::FFriendStatusNotif::CreateLambda([](const FAccelByteModelsUsersPresenceNotice& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s is %s right now!"), *Result.UserID, *Result.Availability);
+            UE_LOG(LogTemp, Log, TEXT("Activity: %s"), *Result.Activity);
+        }));
+
+    //PRESENCE RESPONSE delegates
+    AccelByte::FRegistry::Lobby.SetUserPresenceResponseDelegate(
+        AccelByte::Api::Lobby::FSetUserPresenceResponse::CreateLambda([](const FAccelByteModelsSetOnlineUsersResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully set your presence!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to set your presence! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetGetAllUserPresenceResponseDelegate(
+        AccelByte::Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](const FAccelByteModelsGetOnlineUsersResponse& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Here is your friends' current statuses."));
+            for (int i = 0 ; i < Result.friendsId.Num() ; i++)
+            {
+                UE_LOG(LogTemp, Log, TEXT("%s availability is %s & the activity is %s."), *Result.friendsId[i], *Result.availability[i], *Result.activity[i]);
+                UE_LOG(LogTemp, Log, TEXT("%s last seen at %s."), *Result.friendsId[i], *Result.lastSeenAt[i]);
+            }   
+        }));
+
+    //NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetMessageNotifDelegate(
+        AccelByte::Api::Lobby::FMessageNotif::CreateLambda([](const FAccelByteModelsNotificationMessage& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("There is an incoming notification."));
+            UE_LOG(LogTemp, Log, TEXT("From: %s \nTo: %s\nTopic: %s"), *Result.From, *Result.To, *Result.Topic);
+            UE_LOG(LogTemp, Log, TEXT("Notification: %s"), *Result.Payload);
+        }));
+
+    //MATCHMAKING NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetMatchmakingNotifDelegate(
+        AccelByte::Api::Lobby::FMatchmakingNotif::CreateLambda([](const FAccelByteModelsMatchmakingNotice& Result)
+        {
+            const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteMatchmakingStatus"), true);
+
+            UE_LOG(LogTemp, Log, TEXT("Here is the detail of your matchmaking result!"));
+            UE_LOG(LogTemp, Log, TEXT("MatchId: %s"), *Result.MatchId);
+            UE_LOG(LogTemp, Log, TEXT("Status: %s"), *(EnumPtr->GetNameByValue((int8)Result.Status)).ToString());
+            for (int i = 0; i < Result.PartyMember.Num(); i++)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Party member %d user ID = %s"), i, *Result.PartyMember[i]);
+            }
+            for (int i = 0; i < Result.CounterPartyMember.Num(); i++)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Enemy member %d user ID = %s"), i, *Result.CounterPartyMember[i]);
+            }
+        }));
+
+    //MATCHMAKING RESPONSE delegates
+    AccelByte::FRegistry::Lobby.SetStartMatchmakingResponseDelegate(
+        AccelByte::Api::Lobby::FMatchmakingResponse::CreateLambda([](const FAccelByteModelsMatchmakingResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully start a matchmaking!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to start a matchmaking! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetCancelMatchmakingResponseDelegate(
+        AccelByte::Api::Lobby::FMatchmakingResponse::CreateLambda([](const FAccelByteModelsMatchmakingResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully cancel a matchmaking!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to cancel a matchmaking! Code: %s"), *Result.Code); }
+        }));
+
+    //FRIEND NOTIFICATION delegates
+    AccelByte::FRegistry::Lobby.SetOnFriendRequestAcceptedNotifDelegate(
+        AccelByte::Api::Lobby::FAcceptFriendsNotif::CreateLambda([](const FAccelByteModelsAcceptFriendsNotif& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s accepted your friend request!"), *Result.friendId);
+        }));
+
+    AccelByte::FRegistry::Lobby.SetOnIncomingRequestFriendsNotifDelegate(
+        AccelByte::Api::Lobby::FRequestFriendsNotif::CreateLambda([](const FAccelByteModelsRequestFriendsNotif& Result)
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s send you a friend request!"), *Result.friendId);
+        }));
+
+    //FRIEND RESPONSE delegates
+    AccelByte::FRegistry::Lobby.SetRequestFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FRequestFriendsResponse::CreateLambda([](const FAccelByteModelsRequestFriendsResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully send a friend request!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to send a friend request! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetUnfriendResponseDelegate(
+        AccelByte::Api::Lobby::FUnfriendResponse::CreateLambda([](const FAccelByteModelsUnfriendResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully unfriend a friend!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to unfriend a friend! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetListOutgoingFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FListOutgoingFriendsResponse::CreateLambda([](const FAccelByteModelsListOutgoingFriendsResponse& Result)
+        {
+            if (Result.Code != "0") { UE_LOG(LogTemp, Log, TEXT("Cannot retrieve the list of outgoing/pending friend request!")); }
+            else
+            {
+                UE_LOG(LogTemp, Log, TEXT("Here is the list of outgoing/pending friend request.")); 
+                for (int i = 0 ; i < Result.friendsId.Num() ; i++ )
+                {
+                    UE_LOG(LogTemp, Log, TEXT("Friend user ID = %s"), *Result.friendsId[i]); 
+                }
+            }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetCancelFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FCancelFriendsResponse::CreateLambda([](const FAccelByteModelsCancelFriendsResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully cancel an outgoing friend request!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to cancel an outgoing friend request! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetListIncomingFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FListIncomingFriendsResponse::CreateLambda([](const FAccelByteModelsListIncomingFriendsResponse& Result)
+        {
+            if (Result.Code != "0") { UE_LOG(LogTemp, Log, TEXT("Cannot retrieve the list of incoming friend request!")); }
+            else
+            {
+                UE_LOG(LogTemp, Log, TEXT("Here is the list of incoming friend request.")); 
+                for (int i = 0 ; i < Result.friendsId.Num() ; i++ )
+                {
+                    UE_LOG(LogTemp, Log, TEXT("Friend user ID = %s"), *Result.friendsId[i]); 
+                }
+            }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetAcceptFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FAcceptFriendsResponse::CreateLambda([](const FAccelByteModelsAcceptFriendsResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully accept a friend request!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to accept a friend request! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetRejectFriendsResponseDelegate(
+        AccelByte::Api::Lobby::FRejectFriendsResponse::CreateLambda([](const FAccelByteModelsRejectFriendsResponse& Result)
+        {
+            if (Result.Code == "0") { UE_LOG(LogTemp, Log, TEXT("Successfully reject a friend request!")); }
+            else
+            { UE_LOG(LogTemp, Log, TEXT("Failed to reject a friend request! Code: %s"), *Result.Code); }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetLoadFriendListResponseDelegate(
+        AccelByte::Api::Lobby::FLoadFriendListResponse::CreateLambda([](const FAccelByteModelsLoadFriendListResponse& Result)
+        {
+            if (Result.Code != "0") { UE_LOG(LogTemp, Log, TEXT("Cannot retrieve the your friend list!")); }
+            else
+            {
+                UE_LOG(LogTemp, Log, TEXT("Here is the list of your friend.")); 
+                for (int i = 0 ; i < Result.friendsId.Num() ; i++ )
+                {
+                    UE_LOG(LogTemp, Log, TEXT("Friend user ID = %s"), *Result.friendsId[i]); 
+                }
+            }
+        }));
+
+    AccelByte::FRegistry::Lobby.SetGetFriendshipStatusResponseDelegate(
+        AccelByte::Api::Lobby::FGetFriendshipStatusResponse::CreateLambda([](const FAccelByteModelsGetFriendshipStatusResponse& Result)
+        {
+            if (Result.Code != "0") { UE_LOG(LogTemp, Log, TEXT("Cannot get your friendship status!")); }
+            else
+            {
+                const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("ERelationshipStatusCode"), true);
+                UE_LOG(LogTemp, Log, TEXT("Your friendship status is %s"), *(EnumPtr->GetNameByValue((int8)Result.friendshipStatus)).ToString());
+            }
+        }));
 ```
 
-Usage :
-```cpp
-FRegistry::Lobby.SetConnectSuccessDelegate(Api::Lobby::FConnectSuccess::CreateLambda([&]()
-    {
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    User 0 connected!"))
-        UsersConnected = true;
-        UsersConnectionResponded = true;
-    }));
-
-FRegistry::Lobby.SetConnectFailedDelegate(FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-    {
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    User 0 failed to connect!"))
-        UsersConnected = false;
-        UsersConnectionResponded = true;
-    }));
-Lobby.Connect();
-```
-See AccelByte::Api::Lobby.
-
-### Unbind Delegates
+### Unbind delegates
 Unbind all callbacks.
 ```cpp
-FRegistry::Lobby.UnbindEvent();
+AccelByte::FRegistry::Lobby.UnbindDelegates();
 ```
-See AccelByte::Api::Lobby::UnbindEvent().
 
 ### Chat
 
-#### Party Chat
-Send a message to other party members.
-
+#### Party chat
+Send a party chat.
 ```cpp
-FString Message = TEXT("Message");
-
-FRegistry::Lobby.SendPartyMessage(Message);
+AccelByte::FRegistry::Lobby.SendPartyMessage(TEXT("Hello, my party."));
 ```
-See AccelByte::Api::Lobby::SendPartyMessage(). 
 
-#### Private Message (PM)
-Send a private message to another user.
-
+#### Private message (PM)
+Send a private message. Note that the `UserId` format in IAM is just a GUID without hyphens. The `UserId` used here is just for examples.
 ```cpp
-FString UserId = TEXT("FriendUserId");
-FString Message = TEXT("Message");
-
-FRegistry::Lobby.SendPrivateMessage(UserId, Message);
+AccelByte::FRegistry::Lobby.SendPrivateMessage(TEXT("Bahamut"), TEXT("Hello, Bahamut."));
 ```
-See AccelByte::Api::Lobby::SendPrivateMessage().
 
 ### Party
 
-#### Get Party Information
+#### Get party information
 Get information about current party.
 ```cpp
-FRegistry::Lobby.SendInfoPartyRequest();
+AccelByte::FRegistry::Lobby.SendInfoPartyRequest();
 ```
-See AccelByte::Api::Lobby::SendInfoPartyRequest().
 
-#### Create a Party
+#### Create a party
 Create a party. You can't create a party when you're already in one.
 ```cpp
-FRegistry::Lobby.SendCreatePartyRequest();
+AccelByte::FRegistry::Lobby.SendCreatePartyRequest();
 ```
-See AccelByte::Api::Lobby::SendCreatePartyRequest().
 
-#### Leave Current party
+#### Leave current party
 Leave current a party. You can't leave party when you're not in one.
 ```cpp
-FRegistry::Lobby.SendLeavePartyRequest();
+AccelByte::FRegistry::Lobby.SendLeavePartyRequest();
 ```
-See AccelByte::Api::Lobby::SendLeavePartyRequest().
 
-#### Invite Someone to Party
+#### Invite someone to party
 Invite someone to party.
 ```cpp
-FString UserId = TEXT("UserId");
-
-FRegistry::Lobby.SendInviteToPartyRequest(UserId);
+AccelByte::FRegistry::Lobby.SendInviteToPartyRequest(TEXT("Bahamut"));
 ```
-See AccelByte::Api::SendInviteToPartyRequest().
 
-#### Set Presence Status
-Set presence status on lobby service
+#### Accept a party invitation
+Invite someone to party. `PartyId` and `InvitationToken` are from the invitation notice.
 ```cpp
-Availability availability = Availabe;
-FString activity = TEXT("Active");
-
-FRegistry::Lobby.SendSetPresenceStatus(availability, activity);
+AccelByte::FRegistry::Lobby.SendAcceptInvitationRequest(TEXT("Bahamut's Party"), TEXT("Random text from the invitation notice"));
 ```
-See AccelByte::Api::Lobby::SendSetPresenceStatus().
 
-#### Accept a Party Invitation
-Accept a party invitation. `PartyId` and `InvitationToken` are from the invitation notice.
-```cpp
-FString partyId;
-FString invitationToken;
-
-FRegistry::Lobby.SendAcceptInvitationRequest(partyId, invitationToken);
-```
-See AccelByte::Api::Lobby::SendAcceptInvitationRequest().
-
-#### Kick a Party Member
+#### Kick a party member
 Only party leader can kick a party member.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.SendKickPartyMemberRequest(userId);
+AccelByte::FRegistry::Lobby.SendKickPartyMemberRequest(TEXT("Behemoth"));
 ```
-See AccelByte::Api::Lobby::SendKickPartyMemberRequest().
 
-#### Get All Online Users
+### Presence
+
+#### Get all online users
 Get a list of all online users in the Lobby server.
 ```cpp
-FRegistry::Lobby.SendGetOnlineUsersRequest();
+AccelByte::FRegistry::Lobby.SendGetOnlineUsersRequest();
 ```
-See AccelByte::Api::Lobby::SendGetOnlineUsersRequest();
+
+#### Set my presence
+Set user presence (availability and activity). 
+```cpp
+AccelByte::FRegistry::Lobby.SendSetPresenceStatus(Availability::Offline, TEXT("Away"));
+```
 
 ### Notification
 
-#### Get All Asynchronous Notifications
+#### Fetch all pending notification
 Get all pending notification(s) that is sent to user when user is not connected to lobby. Please call this function after user connected to lobby.
 ```cpp
-FRegistry::Lobby.GetAllAsyncNotification();
+AccelByte::FRegistry::Lobby.GetAllAsyncNotification();
 ```
-See AccelByte::Api::Lobby::GetAllAsyncNotification().
 
 ### Matchmaking
 
-#### Send Start Matchmaking
-Start the matchmaking.
+#### Start matchmaking
+Start the matchmaking with specified game mode. Please register a matchmaking channel first before send a matchmaking request.
+Channel is just a string that registered to matchmaking server and the game developer that implement SDK should know the channel that already registered.
+In this example, the game request a "4vs4" matchmaking. And the developer should configure or register the "4vs4" rule before that.
 ```cpp
-FString gameMode;
-
-FRegistry::Lobby.SendStartMatchmaking(gameMode);
+AccelByte::FRegistry::Lobby.SendStartMatchmaking(TEXT("4vs4"));
 ```
-See AccelByte::Api::Lobby::SendStartMatchmaking().
 
-#### Send Cancel Matchmaking
-Cancel the currently running matchmaking process.
+#### Cancel matchmaking
+Cancel the matchmaking request that already created.
 ```cpp
-FString gameMode;
-
-FRegistry::Lobby.SendCancelMatchmaking(gameMode);
+AccelByte::FRegistry::Lobby.SendCancelMatchmaking(TEXT("4vs4"));
 ```
-See AccelByte::Api::Lobby::SendCancelMatchmaking().
 
 ### Friends
 
-#### Request Friend
-Send request friend request.
+#### Friend request
+Send a friend request to a user.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.RequestFriend(userId);
+AccelByte::FRegistry::Lobby.RequestFriend(FString UserId);
 ```
-See AccelByte::Api::Lobby::RequestFriend().
 
 #### Unfriend
-Send unfriend request.
+Unfriend a user.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.Unfriend(userId);
+AccelByte::FRegistry::Lobby.Unfriend(FString UserId);
 ```
-See AccelByte::Api::Lobby::Unfriend().
 
-#### List Outgoing Friends
-Send list of outgoing friends request.
+#### List outgoing friend request
+Get all friend request that already send and has not accepted yet.
 ```cpp
-FRegistry::Lobby.ListOutgoingFriends();
+AccelByte::FRegistry::Lobby.ListOutgoingFriends();
 ```
-See AccelByte::Api::Lobby::ListOutgoingFriends().
 
-#### Cancel Friend Request
-Send cancel friend request.
+#### Cancel friend request
+Cancel the friend request that already sent.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.CancelFriendRequest(userId);
+AccelByte::FRegistry::Lobby.CancelFriendRequest(FString UserId);
 ```
-See AccelByte::Api::Lobby::CancelFriendRequest().
-
-#### List Incoming Friends
-Send list of incoming friends request.
+#### List incoming friend request
+Get all friend request that is sent to user.
 ```cpp
-FRegistry::Lobby.ListIncomingFriends();
+AccelByte::FRegistry::Lobby.ListIncomingFriends();
 ```
-See AccelByte::Api::Lobby::ListIncomingFriends().
 
-#### Accept Friend
-Send accept friend request.
+#### Accept friend request
+Accepting an incoming friend request.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.AcceptFriend(userId);
+AccelByte::FRegistry::Lobby.AcceptFriend(FString UserId);
 ```
-See AccelByte::Api::Lobby::AcceptFriend().
 
-#### Reject Friend
-Send reject friend request.
+#### Reject friend request
+Reject an incoming friend request.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.RejectFriend(userId);
+AccelByte::FRegistry::Lobby.RejectFriend(FString UserId);
 ```
-See AccelByte::Api::Lobby::RejectFriend().
 
-#### Load Friends List
-Send load friends list request.
+### Load friend list
+Get all friend request that is sent to user.
 ```cpp
-FRegistry::Lobby.LoadFriendsList();
+AccelByte::FRegistry::Lobby.LoadFriendsList();
 ```
-See AccelByte::Api::Lobby::LoadFriendsList().
 
-#### Get Friendship Status
-Send get friendship status request.
+#### Get friendship status
+Get friendship status with another user.
 ```cpp
-FString userId;
-
-FRegistry::Lobby.GetFriendshipStatus(userId);
+AccelByte::FRegistry::Lobby.GetFriendshipStatus(FString UserId);
 ```
-See AccelByte::Api::Lobby::GetFriendshipStatus().
+
 
 ## Game Profile
 GameProfile API to manage user's in-game profiles (character).
