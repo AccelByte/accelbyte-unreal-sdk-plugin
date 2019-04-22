@@ -624,6 +624,37 @@ Item::GetItemsByCriteria(Language, Region, CategoryPath, Type, Status, 0, 20, TH
 ```
 See AccelByte::Api::Item::GetItemsByCriteria().
 
+#### Search Items
+Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
+
+```cpp
+FString Language = TEXT("en");
+FString Region = TEXT("US");
+int PageNumber = 0;
+int PageSize = 10;
+FString SearchedItem = TEXT("Elixir");
+bool bSearchItemSuccess = false;
+bool bSearchedItemFound = false;
+UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SearchItem"));
+Item::SearchItem(Language, SearchedItem, PageNumber, PageSize, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+    {
+        for (int i = 0; i < Result.Data.Num(); i++)
+        {
+            if (Result.Data[i].Title == SearchedItem)
+            {
+                UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Searched item is found!"));
+                bSearchedItemFound = true;
+            }
+        }
+        UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Finished"));
+        bSearchItemSuccess = true;
+	}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+    {
+        UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+    }));
+
+```
+
 ### Order
 Order is used to purchase something from the online store.
 See AccelByte::Api::Order

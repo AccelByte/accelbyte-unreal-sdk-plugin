@@ -76,15 +76,50 @@ void Item::GetItemsByCriteria(const FString& Language, const FString& Region, co
 	{
 		Url.Append(FString::Printf(TEXT("&itemType=%s"), *EAccelByteItemTypeToString(ItemType)));
 	}
-	Url.Append(FString::Printf(TEXT("&page=%d"), Page));
+	if (Page > 0)
+	{
+		Url.Append(FString::Printf(TEXT("&offset=%d"), Page));
+	}
 	if (Size > 0)
 	{
-		Url.Append(FString::Printf(TEXT("&size=%d"), Size));
+		Url.Append(FString::Printf(TEXT("&limit=%d"), Size));
 	}
 	FString Verb		= TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept		= TEXT("application/json");
 	FString Content		= TEXT("");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Item::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/items/search?language=%s&keyword=%s&namespace=%s"), *FRegistry::Settings.PlatformServerUrl, *Language, *FGenericPlatformHttp::UrlEncode(Keyword), *FRegistry::Settings.Namespace);
+	if (!Region.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));
+	}
+	if (Page > 0)
+	{
+		Url.Append(FString::Printf(TEXT("&offset=%d"), Page));
+	}
+	if (Size > 0)
+	{
+		Url.Append(FString::Printf(TEXT("&limit=%d"), Size));
+	}
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

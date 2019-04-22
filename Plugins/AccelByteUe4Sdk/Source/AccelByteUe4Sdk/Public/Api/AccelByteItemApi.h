@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #pragma once
@@ -38,10 +38,23 @@ public:
 	 * @param Status Status of the item.
 	 * @param Page Page number.
 	 * @param Size Page size.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<FAccelByteModelsItemInfo>&.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
+	 * 
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Keyword Item's keyword in title or description or long description.
+	 * @param Page Page number.
+	 * @param Size Page size.
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	static void SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Item() = delete; // static class can't have instance

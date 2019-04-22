@@ -308,6 +308,38 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSearchItemSuccess, "AccelByte.Tests.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
+bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
+{
+#pragma region SearchItem
+
+	FString Language = TEXT("en");
+	FString Region = TEXT("US");
+	bool bSearchItemSuccess = false;
+	bool bSearchedItemFound = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SearchItem"));
+	Item::SearchItem(Language, ExpectedChildItemTitle, 0, 20, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		for (int i = 0; i < Result.Data.Num(); i++)
+		{
+			if (Result.Data[i].Title == ExpectedChildItemTitle)
+			{
+				bSearchedItemFound = true;
+			}
+		}
+		bSearchItemSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+
+#pragma endregion SearchItem
+
+	check(bSearchItemSuccess);
+	check(bSearchedItemFound);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateOrderSuccess, "AccelByte.Tests.Ecommerce.D1.CreateOrder", AutomationFlagMaskEcommerce);
 bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 {
