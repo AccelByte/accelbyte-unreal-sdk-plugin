@@ -2183,10 +2183,6 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	}
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[1]);
-	check(matchmakingNotifResponse[0].PartyMember.Num() > 0);
-	check(matchmakingNotifResponse[1].PartyMember.Num() > 0);
-	check(matchmakingNotifResponse[0].CounterPartyMember.Num() > 0);
-	check(matchmakingNotifResponse[1].CounterPartyMember.Num() > 0);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
 	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
 	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
