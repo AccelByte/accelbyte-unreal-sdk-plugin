@@ -349,12 +349,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     EAccelByteMatchmakingStatus Status;
-    
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> PartyMember;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    TArray<FString> CounterPartyMember;
 };
 
 // ------------------------------------------------------------------------------------------------
