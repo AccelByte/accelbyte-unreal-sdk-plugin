@@ -84,6 +84,11 @@ void UAccelByteBlueprintsLobby::SendCancelMatchmaking(const FString& GameMode)
 	FRegistry::Lobby.SendCancelMatchmaking(GameMode);
 }
 
+void UAccelByteBlueprintsLobby::SendReadyConsentRequest(const FString& MatchId)
+{
+	FRegistry::Lobby.SendReadyConsentRequest(MatchId);
+}
+
 
 // Friends
 void UAccelByteBlueprintsLobby::RequestFriend(FString UserId)
@@ -145,6 +150,9 @@ void UAccelByteBlueprintsLobby::BindEvent(
     const FUserPresenceNotice& OnUserPresenceNotice,
 	const FNotificationMessage& OnNotificationMessage,
 	const FMatchmakingNotice& OnMatchmakingNotice,
+	const FReadyConsentNotice& OnReadyConsentNotice,
+	const FRematchmakingNotice& OnRematchmakingNotice,
+	const FDsNotice& OnDsNotice,
 	const FFriendAcceptFriendRequestNotif& OnAcceptFriendsNotif,
 	const FIncomingFriendNotif& OnRequestFriendsNotif,
 	const FBlueprintErrorHandler& OnParsingError)
@@ -217,6 +225,18 @@ void UAccelByteBlueprintsLobby::BindEvent(
 	AccelByte::Api::Lobby::FMatchmakingNotif OnMatchmakingNoticeDelegate =
 		AccelByte::Api::Lobby::FMatchmakingNotif::CreateLambda([OnMatchmakingNotice](const FAccelByteModelsMatchmakingNotice& Result) {
 		OnMatchmakingNotice.ExecuteIfBound(Result);
+	});
+
+	AccelByte::Api::Lobby::FReadyConsentNotif OnReadyConsentNoticeDelegate =
+		AccelByte::Api::Lobby::FReadyConsentNotif::CreateLambda([OnReadyConsentNotice](const FAccelByteModelsReadyConsentNotice& Result) {
+	});
+
+	AccelByte::Api::Lobby::FRematchmakingNotif OnRematchmakingNoticeDelegate =
+		AccelByte::Api::Lobby::FRematchmakingNotif::CreateLambda([OnRematchmakingNotice](const FAccelByteModelsRematchmakingNotice& Result) {
+	});
+
+	AccelByte::Api::Lobby::FDsNotif OnDsNoticeDelegate =
+		AccelByte::Api::Lobby::FDsNotif::CreateLambda([OnDsNotice](const FAccelByteModelsDsNotice& Result){
 	});
 
 	// Friends + Notification
@@ -379,6 +399,14 @@ void UAccelByteBlueprintsLobby::SetCancelMatchmakingResponseDelegate(FMatchmakin
 	FRegistry::Lobby.SetCancelMatchmakingResponseDelegate(OnMatchmakingCancelDelegate);
 }
 
+void UAccelByteBlueprintsLobby::SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse)
+{
+	AccelByte::Api::Lobby::FReadyConsentResponse OnReadyConsentResponseDelegate =
+		AccelByte::Api::Lobby::FReadyConsentResponse::CreateLambda([OnReadyConsentResponse](const FAccelByteModelsReadyConsentRequest& Result){
+	});
+	FRegistry::Lobby.SetReadyConsentResponseDelegate(OnReadyConsentResponseDelegate);
+}
+
 void UAccelByteBlueprintsLobby::SetMatchmakingNotifDelegate(FMatchmakingNotice OnMatchmakingNotice)
 {
     AccelByte::Api::Lobby::FMatchmakingNotif OnInfoPartyResponseDelegate =
@@ -386,6 +414,30 @@ void UAccelByteBlueprintsLobby::SetMatchmakingNotifDelegate(FMatchmakingNotice O
         OnMatchmakingNotice.ExecuteIfBound(Result);
     });
     FRegistry::Lobby.SetMatchmakingNotifDelegate(OnInfoPartyResponseDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetReadyConsentNotifDelegate(FReadyConsentNotice OnReadyConsentNotice)
+{
+	AccelByte::Api::Lobby::FReadyConsentNotif OnReadyConsentNotifDelegate =
+		AccelByte::Api::Lobby::FReadyConsentNotif::CreateLambda([OnReadyConsentNotice](const FAccelByteModelsReadyConsentNotice& Result) {
+	});
+	FRegistry::Lobby.SetReadyConsentNotifDelegate(OnReadyConsentNotifDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetRematchmakingNotifDelegate(FRematchmakingNotice OnRematchmakingNotice)
+{
+	AccelByte::Api::Lobby::FRematchmakingNotif OnRematchmakingNotifDelegate =
+		AccelByte::Api::Lobby::FRematchmakingNotif::CreateLambda([OnRematchmakingNotice](const FAccelByteModelsRematchmakingNotice& Result) {
+	});
+	FRegistry::Lobby.SetRematchmakingNotifDelegate(OnRematchmakingNotifDelegate);
+}
+
+void UAccelByteBlueprintsLobby::SetDsNotifDelegate(FDsNotice OnDsNotice)
+{
+	AccelByte::Api::Lobby::FDsNotif OnDsNotifDelegate =
+		AccelByte::Api::Lobby::FDsNotif::CreateLambda([OnDsNotice](const FAccelByteModelsDsNotice& Result) {
+	});
+	FRegistry::Lobby.SetDsNotifDelegate(OnDsNotifDelegate);
 }
 
 // Friends
