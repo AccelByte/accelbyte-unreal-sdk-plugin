@@ -43,7 +43,8 @@ bool bUserPresenceError, bUserPresenceNotifSuccess, bUserPresenceNotifError, bUn
 bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendError, bListIncomingFriendSuccess, bListIncomingFriendError;
 bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSuccess, bOnIncomingRequestNotifError, bOnRequestAcceptedNotifSuccess, bOnRequestAcceptedNotifError;
 bool bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError, bStartMatchmakingSuccess, bStartMatchmakingError;
-bool bCancelMatchmakingSuccess, bCancelMatchmakingError;
+bool bCancelMatchmakingSuccess, bCancelMatchmakingError, bReadyConsentResponseSuccess, bReadyConsentResponseError, bReadyConsentNotifSuccess, bReadyConsentNotifError;
+bool bDsNotifSuccess, bDsNotifError;
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
 FAccelByteModelsPartyJoinReponse joinPartyResponse;
@@ -57,12 +58,14 @@ FAccelByteModelsLoadFriendListResponse loadFriendListResponse;
 FAccelByteModelsRequestFriendsNotif requestFriendNotifResponse;
 FAccelByteModelsAcceptFriendsNotif acceptFriendNotifResponse;
 FAccelByteModelsMatchmakingResponse matchmakingResponse;
+FAccelByteModelsReadyConsentNotice readyConsentNotice;
+FAccelByteModelsDsNotice dsNotice;
 
 void Waiting(FString text)
 {
-	FPlatformProcess::Sleep(.2f);
+	FPlatformProcess::Sleep(.5f);
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s"), *text);
-	FTicker::GetCoreTicker().Tick(.2f);
+	FTicker::GetCoreTicker().Tick(.5f);
 }
 
 void LobbyConnect(int userCount)
@@ -160,6 +163,12 @@ void resetResponses()
 	bStartMatchmakingError = false;
 	bCancelMatchmakingSuccess = false;
 	bCancelMatchmakingError = false;
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	bReadyConsentResponseSuccess = false;
+	bReadyConsentResponseError = false;
+	bDsNotifSuccess = false;
+	bDsNotifError = false;
 }
 
 auto ConnectSuccessDelegate = Api::Lobby::FConnectSuccess::CreateLambda([&]()
@@ -452,6 +461,36 @@ auto CancelMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda(
 	if (result.Code != "0")
 	{
 		bCancelMatchmakingError = true;
+	}
+});
+
+auto ReadyConsentResponseDelegate = Api::Lobby::FReadyConsentResponse::CreateLambda([&](FAccelByteModelsReadyConsentRequest result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Ready Consent Send!"));
+	bReadyConsentResponseSuccess = true;
+});
+
+auto ReadyConsentNotifDelegate = Api::Lobby::FReadyConsentNotif::CreateLambda([&](FAccelByteModelsReadyConsentNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Ready Consent Notice!"));
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s is ready for match."), *result.UserId);
+	readyConsentNotice = result;
+	bReadyConsentNotifSuccess = true;
+	if (result.MatchId.IsEmpty())
+	{
+		bReadyConsentNotifError = true;
+	}
+});
+
+auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([&](FAccelByteModelsDsNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s"), *result.MatchId, *result.Message, *result.Status);
+	dsNotice = result;
+	bDsNotifSuccess = true;
+	if (result.MatchId.IsEmpty())
+	{
+		bDsNotifError = true;
 	}
 });
 
@@ -2077,11 +2116,23 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
 	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
 	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
 	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
@@ -2181,12 +2232,40 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	{
 		Waiting("Waiting for Matchmaking Notification...");
 	}
+	
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	while (!bReadyConsentNotifSuccess)
+	{
+		Waiting("Waiting for Ready Consent Notification...");
+	}
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	while (!bReadyConsentNotifSuccess)
+	{
+		Waiting("Waiting for Ready Consent Notification...");
+	}
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[1] = readyConsentNotice;
+
+	while (!bDsNotifSuccess)
+	{
+		Waiting("Waiting for DS Notification...");
+	}
+	check(!bDsNotifError);
+
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[1]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
 	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
 	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
 	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
+	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
+	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
 	resetResponses();
@@ -2264,6 +2343,274 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);
 
 	LobbyDisconnect(1);
+	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingRematch", AutomationFlagMaskLobby);
+bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
+{
+	LobbyConnect(3);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[3];
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[3];
+	bool bMatchmakingNotifSuccess[3] = { false };
+	bool bMatchmakingNotifError[3] = { false };
+	int matchMakingNotifNum = 0;
+	int rematchmakingNotifNum = 0;
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 0 Get Matchmaking Notification!"));
+		matchmakingNotifResponse[0] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[0] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[0] = true;
+		}
+	}));
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[0]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 0 Get Rematchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[0].GetUserId(), result.BanDuration);
+		rematchmakingNotifNum++;
+	}));
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 1 Get Matchmaking Notification!"));
+		matchmakingNotifResponse[1] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[1] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[1] = true;
+		}
+	}));
+
+	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[1]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 1 Get Rematchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[1].GetUserId(), result.BanDuration);
+		rematchmakingNotifNum++;
+	}));
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[2]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[2]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[2]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[2]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[2]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[2]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 2 Get Matchmaking Notification!"));
+		matchmakingNotifResponse[2] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[2] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[2] = true;
+		}
+	}));
+
+	Lobbies[2]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[2]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 2 Get Rematchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[2].GetUserId(), result.BanDuration);
+		rematchmakingNotifNum++;
+	}));
+
+	Lobbies[2]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+	while (!bGetInfoPartySuccess)
+	{
+		Waiting("Getting Info Party...");
+	}
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+		while (!bLeavePartySuccess)
+		{
+			Waiting("Leaving Party...");
+		}
+	}
+	Lobbies[0]->SendCreatePartyRequest();
+	while (!bCreatePartySuccess)
+	{
+		Waiting("Creating Party...");
+	}
+	check(!bCreatePartyError);
+
+	bGetInfoPartySuccess = false;
+	bGetInfoPartyError = false;
+	Lobbies[1]->SendInfoPartyRequest();
+	while (!bGetInfoPartySuccess)
+	{
+		Waiting("Getting Info Party...");
+	}
+	if (!bGetInfoPartyError)
+	{
+		bLeavePartySuccess = false;
+		bLeavePartyError = false;
+		Lobbies[1]->SendLeavePartyRequest();
+		while (!bLeavePartySuccess)
+		{
+			Waiting("Leaving Party...");
+		}
+	}
+	bCreatePartySuccess = false;
+	bCreatePartyError = false;
+	Lobbies[1]->SendCreatePartyRequest();
+	while (!bCreatePartySuccess)
+	{
+		Waiting("Creating Party...");
+	}
+	check(!bCreatePartyError);
+
+	bGetInfoPartySuccess = false;
+	bGetInfoPartyError = false;
+	Lobbies[2]->SendInfoPartyRequest();
+	while (!bGetInfoPartySuccess)
+	{
+		Waiting("Getting Info Party...");
+	}
+	if (!bGetInfoPartyError)
+	{
+		bLeavePartySuccess = false;
+		bLeavePartyError = false;
+		Lobbies[2]->SendLeavePartyRequest();
+		while (!bLeavePartySuccess)
+		{
+			Waiting("Leaving Party...");
+		}
+	}
+	bCreatePartySuccess = false;
+	bCreatePartyError = false;
+	Lobbies[2]->SendCreatePartyRequest();
+	while (!bCreatePartySuccess)
+	{
+		Waiting("Creating Party...");
+	}
+	check(!bCreatePartyError);
+
+	Lobbies[0]->SendStartMatchmaking("test");
+	while (!bStartMatchmakingSuccess)
+	{
+		Waiting("Lobby 0 Starting Matchmaking...");
+	}
+	check(!bStartMatchmakingError);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[1]->SendStartMatchmaking("test");
+	while (!bStartMatchmakingSuccess)
+	{
+		Waiting("Lobby 1 Starting Matchmaking...");
+	}
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < 2)
+	{
+		Waiting("Waiting for Matchmaking Notification...");
+	}
+
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	while (!bReadyConsentNotifSuccess)
+	{
+		Waiting("Waiting for Ready Consent Notification...");
+	}
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	while (rematchmakingNotifNum < 2)
+	{
+		Waiting("Waiting for Rematchmaking Notification...");
+	}
+	check(rematchmakingNotifNum == 2);
+
+	matchMakingNotifNum = 0;
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[2]->SendStartMatchmaking("test");
+	while (!bStartMatchmakingSuccess)
+	{
+		Waiting("Lobby 2 Starting Matchmaking...");
+	}
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < 2)
+	{
+		Waiting("Waiting for Matchmaking Notification...");
+	}
+	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
+	check(matchmakingNotifResponse[2].Status == EAccelByteMatchmakingStatus::Done);
+
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	while (!bReadyConsentNotifSuccess)
+	{
+		Waiting("Waiting for Ready Consent Notification...");
+	}
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[2]->SendReadyConsentRequest(matchmakingNotifResponse[2].MatchId);
+	while (!bReadyConsentNotifSuccess)
+	{
+		Waiting("Waiting for Ready Consent Notification...");
+	}
+	readyConsentNoticeResponse[2] = readyConsentNotice;
+
+	while (!bDsNotifSuccess)
+	{
+		Waiting("Waiting for DS Notification...");
+	}
+	check(!bDsNotifError);
+
+	check(!bMatchmakingNotifError[0]);
+	check(!bMatchmakingNotifError[2]);
+	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	check(!matchmakingNotifResponse[2].MatchId.IsEmpty());
+
+	LobbyDisconnect(3);
 	resetResponses();
 	return true;
 }

@@ -144,11 +144,30 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FMatchmakingResponse, const FAccelByteModelsMatchmakingResponse&);
 
+	/**
+	 * @brief delegate for handling ready consent response
+	 */
+	DECLARE_DELEGATE_OneParam(FReadyConsentResponse, const FAccelByteModelsReadyConsentRequest&);
+
     /**
      * @brief delegate for handling matchmaking notification
      */
     DECLARE_DELEGATE_OneParam(FMatchmakingNotif, const FAccelByteModelsMatchmakingNotice&);
 
+	/*
+	 * @brief delegate for handling ready consent notification
+	 */
+	DECLARE_DELEGATE_OneParam(FReadyConsentNotif, const FAccelByteModelsReadyConsentNotice&);
+
+	/*
+	 * @brief delegate for handling rematchmaking notification
+	 */
+	DECLARE_DELEGATE_OneParam(FRematchmakingNotif, const FAccelByteModelsRematchmakingNotice&);
+
+	/*
+	 * @brief delegate for handling DS notification
+	 */
+	DECLARE_DELEGATE_OneParam(FDsNotif, const FAccelByteModelsDsNotice&);
 
 	// Friends
 	/**
@@ -325,6 +344,13 @@ public:
      * @param GameMode The mode that party member want to cancel.     
      */
     FString SendCancelMatchmaking(FString GameMode);
+
+	/**
+	 * @brief send ready consent request
+	 *
+	 * @param MatchId The id of a match user ready to play.
+	 */
+	FString SendReadyConsentRequest(FString MatchId);
 	
 	// Friends
 	/**
@@ -498,12 +524,40 @@ public:
 	 */
 	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel) { MatchmakingCancelResponse = OnMatchmakingCancel; };
 
+	/**
+	 * @brief set ready consent response notification
+	 *
+	 * @param OnReadyConsentResponse set delegate .
+	 */
+	void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse) { ReadyConsentResponse = OnReadyConsentResponse; };
+
     /**
      * @brief set matchmaking notification
      *
      * @param OnMatchmakingNotification set delegate .
      */
     void SetMatchmakingNotifDelegate(FMatchmakingNotif OnMatchmakingNotification) { MatchmakingNotif = OnMatchmakingNotification; };
+
+	/**
+	 * @brief set ready consent notification
+	 *
+	 * @param OnReadyConsentNotification set delegate .
+	 */
+	void SetReadyConsentNotifDelegate(FReadyConsentNotif OnReadyConsentNotification) { ReadyConsentNotif = OnReadyConsentNotification; };
+
+	/**
+	 * @brief set rematchmaking notification
+	 *
+	 * @param OnRematchmakingNotification set delegate .
+	 */
+	void SetRematchmakingNotifDelegate(FRematchmakingNotif OnRematchmakingNotification) { RematchmakingNotif = OnRematchmakingNotification; };
+
+	/**
+	 * @brief set ready consent notification
+	 *
+	 * @param OnReadyConsentNotification set delegate .
+	 */
+	void SetDsNotifDelegate(FDsNotif OnDsNotification) { DsNotif = OnDsNotification; };
 
 	// Friends
 	/**
@@ -623,7 +677,11 @@ private:
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;
 	FMatchmakingResponse MatchmakingCancelResponse;
+	FReadyConsentResponse ReadyConsentResponse;
     FMatchmakingNotif MatchmakingNotif;
+	FReadyConsentNotif ReadyConsentNotif;
+	FRematchmakingNotif RematchmakingNotif;
+	FDsNotif DsNotif;
 
 	// Friends
 	FRequestFriendsResponse RequestFriendsResponse;
