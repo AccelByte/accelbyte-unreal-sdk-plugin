@@ -6,6 +6,7 @@
 #include "AccelByteHttpRetryScheduler.h"
 #include "AccelByteLobbyApi.h"
 #include "AccelByteGameProfileApi.h"
+#include "AccelByteStatisticApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -15,3 +16,4 @@ Credentials FRegistry::Credentials;
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings);
+Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings);

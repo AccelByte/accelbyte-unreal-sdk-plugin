@@ -18,6 +18,7 @@ namespace Api
 {
 	class Lobby;
 	class GameProfile;
+	class Statistic;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -28,6 +29,7 @@ public:
 	static FHttpRetryScheduler HttpRetryScheduler;
 	static Api::Lobby Lobby;
 	static Api::GameProfile GameProfile;
+	static Api::Statistic Statistic;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;
