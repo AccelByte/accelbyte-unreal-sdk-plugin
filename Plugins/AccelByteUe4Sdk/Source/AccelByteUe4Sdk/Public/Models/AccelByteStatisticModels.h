@@ -76,6 +76,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
+		FString StatName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 		FString UpdatedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 		float Value;
