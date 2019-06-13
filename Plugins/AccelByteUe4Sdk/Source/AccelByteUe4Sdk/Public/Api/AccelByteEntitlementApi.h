@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #pragma once
@@ -9,6 +9,8 @@
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -17,6 +19,12 @@ namespace Api
 */
 class ACCELBYTEUE4SDK_API Entitlement
 {
+public:
+	Entitlement(const Credentials& Credentials, const Settings& Settings);
+	~Entitlement();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
 public:
 	/**
 	* @brief Get list of ownership(s) that belongs to the user.
@@ -30,7 +38,7 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	static void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
 private:
 	Entitlement() = delete;

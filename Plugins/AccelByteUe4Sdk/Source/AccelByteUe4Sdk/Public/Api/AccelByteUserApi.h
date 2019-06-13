@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -11,6 +11,8 @@
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -20,6 +22,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API User
 {
 public:
+	User(Credentials& Credentials, Settings& Settings);
+	~User();
+private:
+	Credentials& Credentials;
+	Settings& Settings;
+public:
 	/**
 	 * @brief This is to get access token from `client_credentials` grant, then store the access token in memory.
 	 * You shouldn't use this if your application is a client. It is intended for machine-to-machine (server).
@@ -28,7 +36,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Log in with email/phone number account.
@@ -38,7 +46,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -48,7 +56,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Log in with device ID (anonymous log in).
@@ -56,7 +64,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief login from Accelbyte Launcher
@@ -64,12 +72,12 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Remove access tokens, user ID, and other credentials from memory.
 	 */
-	static void ForgetAllCredentials();
+	void ForgetAllCredentials();
 
 	/**
 	 * @brief This function will register a new user with email-based account.
@@ -80,7 +88,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will get data of currently logged in user.
@@ -88,7 +96,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief This function will update user's account.
@@ -97,7 +105,9 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	/*! Commented because can't send PATCH request yet
+	void Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	*/
 
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -110,7 +120,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Verify user's email. User should login with email and password first to get access token.
@@ -119,7 +129,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will verify the registered email **after** user receives verification code sent with ::SendUserAccountVerificationCode() to their email.
@@ -128,7 +138,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
     /**
 	 * @brief Send a request to reset user's password. For some reason the endpoint uses HTTP basic authentication instead of bearer, because you know... our IAM is very inconsistent.
@@ -137,7 +147,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Reset user's password with sent verification code.
@@ -149,7 +159,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function should be done before user upgrade their headless account. After this function successfully called, obtain the verification code from the submitted email. Then call UpgradeHeadlessAccountWithVerificationCode function afterwards.
@@ -158,7 +168,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	static void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
@@ -169,7 +179,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	//void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.
@@ -177,7 +187,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FPlatformLink>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError);
+	void GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError);
 
     /**
      * @brief This function links user's current account to their other account in other platform.
@@ -189,7 +199,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function links user's current account to their other account in other platform
@@ -200,7 +210,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will search user by their login ID (email or phone number in the future).
@@ -209,7 +219,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will search user by userId.
@@ -218,14 +228,14 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FPublicUserInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetPublicUserInfo(const FString& UserId, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetPublicUserInfo(const FString& UserId, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
-	User() = delete; // static class can't have instance
+	User() = delete;
 	User(User const&) = delete;
 	User(User&&) = delete;
 
-	static void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	static FString TempUsername;
 };

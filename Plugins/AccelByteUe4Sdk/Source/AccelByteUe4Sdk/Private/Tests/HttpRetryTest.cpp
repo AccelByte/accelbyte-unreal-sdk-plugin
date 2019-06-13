@@ -45,7 +45,8 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	FRegistry::Settings.ClientSecret = "ClientSecret";
 	FRegistry::Settings.Namespace = "game01";
 	FRegistry::Settings.PublisherNamespace = "publisher01";
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 3600.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 3600.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -55,16 +56,6 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),
@@ -116,6 +107,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 		FPlatformProcess::Sleep(0.5);
 	}
 
+
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
 	check(!RequestCompleted);
@@ -127,181 +119,162 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError403_RefreshToken, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError403_RefreshToken", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_GotError403_RefreshToken::RunTest(const FString& Parameter)
-{
-	//Mock IamServerUrl path prefix
-	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-	//Sucess 200, with json for refresh token:
-	//{
-	//	"access_token": "some_access_token",
-	//	"bans" : []
-	//	"display_name": "some_display_name",
-	//	"expires_in" : 10,
-	//	"jflgs" : 0,
-	//	"namespace" : "string",
-	//	"permissions" : [],
-	//	"platform_id": "string",
-	//	"platform_user_id" : "string",
-	//	"refresh_token" : "some_refresh_token",
-	//	"roles" : [],
-	//	"token_type" : "string",
-	//	"user_id" : "string"
-	//}
-	
-	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
-	FRegistry::Settings.ClientId = "ClientID";
-	FRegistry::Settings.ClientSecret = "ClientSecret";
-	FRegistry::Settings.Namespace = "game01";
-	FRegistry::Settings.PublisherNamespace = "publisher01";
-	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
+//IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError403_RefreshToken, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError403_RefreshToken", AutomationFlagMaskHttpRetry);
+//bool ProcessRequest_GotError403_RefreshToken::RunTest(const FString& Parameter)
+//{
+//	//Mock IamServerUrl path prefix
+//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+//	//Sucess 200, with json for refresh token:
+//	//{
+//	//	"access_token": "some_access_token",
+//	//	"bans" : []
+//	//	"display_name": "some_display_name",
+//	//	"expires_in" : 10,
+//	//	"jflgs" : 0,
+//	//	"namespace" : "string",
+//	//	"permissions" : [],
+//	//	"platform_id": "string",
+//	//	"platform_user_id" : "string",
+//	//	"refresh_token" : "some_refresh_token",
+//	//	"roles" : [],
+//	//	"token_type" : "string",
+//	//	"user_id" : "string"
+//	//}
+//	
+//	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
+//	FRegistry::Settings.ClientId = "ClientID";
+//	FRegistry::Settings.ClientSecret = "ClientSecret";
+//	FRegistry::Settings.Namespace = "game01";
+//	FRegistry::Settings.PublisherNamespace = "publisher01";
+//	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
+//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+//	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+//	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+//	auto Ticker = FTicker::GetCoreTicker();
+//	double CurrentTime;
+//
+//	Ticker.AddTicker(
+//		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
+//		{
+//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
+//			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+//
+//			return true;
+//		}),
+//		0.2f);
+//
+//	auto Request = FHttpModule::Get().CreateRequest();
+//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+//	//Forbidden 403
+//	Request->SetURL("http://www.mocky.io/v2/5c38c0853100007800a99210");
+//	Request->SetVerb(TEXT("GET"));
+//	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
+//	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
+//	bool RequestCompleted = false;
+//	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+//	{
+//		if (Response.IsValid())
+//		{
+//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d"), CurrentTime, Response->GetResponseCode());
+//		}
+//		else
+//		{
+//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, NoResponse"), CurrentTime);
+//		}
+//
+//		RequestCompleted = true;
+//	});
+//
+//	CurrentTime = 10.0;
+//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
+//	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+//
+//	while (CurrentTime < 15)
+//	{
+//		CurrentTime += 0.2;
+//		Ticker.Tick(0.2);
+//		FPlatformProcess::Sleep(0.2);
+//	}
+//
+//	check(Request->GetResponse()->GetResponseCode() == 403);
+//	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("Session State %d"), static_cast<int32>(FRegistry::Credentials.GetSessionState()));
+//	check(FRegistry::Credentials.GetUserSessionId().Compare(TEXT("some_access_token")) == 0);
+//
+//	FRegistry::Credentials.ForgetAll();
+//
+//	ResetSettings();
+//	return true;
+//}
 
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	auto Request = FHttpModule::Get().CreateRequest();
-	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-	//Forbidden 403
-	Request->SetURL("http://www.mocky.io/v2/5c38c0853100007800a99210");
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		if (Response.IsValid())
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d"), CurrentTime, Response->GetResponseCode());
-		}
-		else
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, NoResponse"), CurrentTime);
-		}
-
-		RequestCompleted = true;
-	});
-
-	CurrentTime = 10.0;
-	check(FRegistry::Credentials.GetTokenState() == Credentials::ETokenState::Valid);
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-
-	while (CurrentTime < 15)
-	{
-		CurrentTime += 0.2;
-		Ticker.Tick(0.2);
-		FPlatformProcess::Sleep(0.2);
-	}
-
-	check(Request->GetResponse()->GetResponseCode() == 403);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("Token State %d"), static_cast<int32>(FRegistry::Credentials.GetTokenState()));
-	check(FRegistry::Credentials.GetUserAccessToken().Compare(TEXT("some_access_token")) == 0);
-	check(FRegistry::Credentials.GetUserRefreshToken().Compare(TEXT("some_refresh_token")) == 0);
-
-	FRegistry::Credentials.ForgetAll();
-
-	ResetSettings();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(Credentials_OnExpired_Refreshed, "AccelByte.Tests.Core.HttpRetry.Credentials_OnExpired_Refreshed", AutomationFlagMaskHttpRetry);
-bool Credentials_OnExpired_Refreshed::RunTest(const FString& Parameter)
-{
-	//Mock IamServerUrl path prefix
-	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-	//Sucess 200, with json for refresh token:
-	//{
-	//	"access_token": "some_access_token",
-	//	"bans" : []
-	//	"display_name": "some_display_name",
-	//	"expires_in" : 10,
-	//	"jflgs" : 0,
-	//	"namespace" : "string",
-	//	"permissions" : [],
-	//	"platform_id": "string",
-	//	"platform_user_id" : "string",
-	//	"refresh_token" : "some_refresh_token",
-	//	"roles" : [],
-	//	"token_type" : "string",
-	//	"user_id" : "string"
-	//}
-
-	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
-	FRegistry::Settings.ClientId = "ClientID";
-	FRegistry::Settings.ClientSecret = "ClientSecret";
-	FRegistry::Settings.Namespace = "game01";
-	FRegistry::Settings.PublisherNamespace = "publisher01";
-	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 20.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-		FRegistry::Credentials.PollRefreshToken(CurrentTime);
-
-		return true;
-	}),
-		0.2f);
-
-	CurrentTime = 10.0;
-	check(FRegistry::Credentials.GetTokenState() == Credentials::ETokenState::Valid);
-
-	while (CurrentTime < 25.0)
-	{
-		CurrentTime += 0.2;
-		Ticker.Tick(0.2);
-		FPlatformProcess::Sleep(0.2);
-	}
-
-	check(FRegistry::Credentials.GetTokenState() == Credentials::ETokenState::Valid);
-	check(FRegistry::Credentials.GetUserAccessToken().Compare(TEXT("some_access_token")) == 0);
-	check(FRegistry::Credentials.GetUserRefreshToken().Compare(TEXT("some_refresh_token")) == 0);
-
-	FRegistry::Credentials.ForgetAll();
-	check(FRegistry::Credentials.GetTokenState() == Credentials::ETokenState::Invalid);
-
-	ResetSettings();
-	return true;
-}
+//IMPLEMENT_SIMPLE_AUTOMATION_TEST(Credentials_OnExpired_Refreshed, "AccelByte.Tests.Core.HttpRetry.Credentials_OnExpired_Refreshed", AutomationFlagMaskHttpRetry);
+//bool Credentials_OnExpired_Refreshed::RunTest(const FString& Parameter)
+//{
+//	//Mock IamServerUrl path prefix
+//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+//	//Sucess 200, with json for refresh token:
+//	//{
+//	//	"access_token": "some_access_token",
+//	//	"bans" : []
+//	//	"display_name": "some_display_name",
+//	//	"expires_in" : 10,
+//	//	"jflgs" : 0,
+//	//	"namespace" : "string",
+//	//	"permissions" : [],
+//	//	"platform_id": "string",
+//	//	"platform_user_id" : "string",
+//	//	"refresh_token" : "some_refresh_token",
+//	//	"roles" : [],
+//	//	"token_type" : "string",
+//	//	"user_id" : "string"
+//	//}
+//
+//	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
+//	FRegistry::Settings.ClientId = "ClientID";
+//	FRegistry::Settings.ClientSecret = "ClientSecret";
+//	FRegistry::Settings.Namespace = "game01";
+//	FRegistry::Settings.PublisherNamespace = "publisher01";
+//	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
+//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 20.0);
+//	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+//	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+//	auto Ticker = FTicker::GetCoreTicker();
+//	double CurrentTime;
+//
+//	Ticker.AddTicker(
+//		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
+//		{
+//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
+//			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+//
+//			return true;
+//		}),
+//		0.2f);
+//
+//	CurrentTime = 10.0;
+//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
+//
+//	while (CurrentTime < 25.0)
+//	{
+//		CurrentTime += 0.2;
+//		Ticker.Tick(0.2);
+//		FPlatformProcess::Sleep(0.2);
+//	}
+//
+//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
+//	check(FRegistry::Credentials.GetUserSessionId().Compare(TEXT("some_access_token")) == 0);
+//
+//	FRegistry::Credentials.ForgetAll();
+//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Invalid);
+//
+//	ResetSettings();
+//	return true;
+//}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Disabled.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
 {
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -311,16 +284,6 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),
@@ -368,7 +331,8 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoResponseFor60s_RequestCancelled, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NoResponseFor60s_RequestCancelled", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Parameter)
 {
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -378,16 +342,6 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),
@@ -440,7 +394,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithValidURL_AllCompleted, 
 bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -450,16 +405,6 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),
@@ -503,7 +448,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllComp
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -513,16 +459,6 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),
@@ -641,7 +577,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequestsChain_WithValidURLs_AllCompleted
 bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 100.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto& Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
@@ -661,16 +598,6 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
 			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
 
 			return true;
 		}),

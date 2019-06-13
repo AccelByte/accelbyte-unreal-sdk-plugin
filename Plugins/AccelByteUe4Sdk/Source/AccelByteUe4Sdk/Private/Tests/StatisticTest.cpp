@@ -28,9 +28,6 @@ const auto StatisticTestErrorHandler = FErrorHandler::CreateLambda([](int32 Erro
 	UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-Credentials UserCred;
-TSharedPtr<Api::GameProfile> gameProfile;
-TSharedPtr<Api::Statistic> statistic;
 FAccelByteModelsGameProfile Profile;
 
 FAccelByteModelsGameProfileRequest CreateGameProfileRequest(int32 AttributesLength, FString AttributeKeyPrefix, FString AttributeValuePrefix, int32 TagsLength, FString TagPrefix, FString AvatarUrl = "http://example.com/", FString Label = "DefaultLabel", FString ProfileName = "DefaultName")
@@ -54,22 +51,27 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticSetup, "AccelByte.Tests.Statistic.A.Se
 bool StatisticSetup::RunTest(const FString& Parameters)
 {
 	bool bClientLoginSuccess = false;
-	bool UsersCreationSuccess;
-	bool UsersLoginSuccess;
+	bool UsersCreationSuccess = false;
+	bool UsersLoginSuccess = false;
 
-	User::LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
+	FRegistry::User.LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
 	{
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Client Login Success"));
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
+	Waiting(bClientLoginSuccess,"Waiting for Login...");
 
 
 	FString Email = FString::Printf(TEXT("StatisticUE4Test@example.com"));
+	Email.ToLowerInline();
 	FString Password = FString::Printf(TEXT("password"), 0);
 	FString DisplayName = FString::Printf(TEXT("StatisticUE4Test"), 0);
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-	User::Register(Email, Password, DisplayName, THandler<FUserData>::CreateLambda([&](const FUserData& Response)
+	FRegistry::User.Register(Email, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Response)
 	{
 		UsersCreationSuccess = true;
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Test GameProfile User is successfuly created."));
@@ -86,31 +88,30 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		}
 	}));
 	FlushHttpRequests();
+	Waiting(UsersCreationSuccess,"Waiting for user created...");
 
-	AccelByte::Api::Oauth2::GetAccessTokenWithPasswordGrant(
-		FRegistry::Settings.ClientId,
-		FRegistry::Settings.ClientSecret,
+	FRegistry::User.LoginWithUsername(
 		Email,
 		Password,
-		THandler<FOauth2Token>::CreateLambda([&](const FOauth2Token& Token)
+		FVoidHandler::CreateLambda([&]()
 	{
 		UsersLoginSuccess = true;
-		UserCred.SetUserToken(Token.Access_token, Token.Refresh_token, Token.Expires_in, Token.User_id, Token.Display_name, Token.Namespace);
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("\t\tSuccessfully Login."));
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
-
-	gameProfile = MakeShared<Api::GameProfile>(UserCred, FRegistry::Settings);
-	statistic = MakeShared<Api::Statistic>(UserCred, FRegistry::Settings);
+	Waiting(UsersLoginSuccess,"Waiting for Login...");
+	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	TArray<FAccelByteModelsGameProfile> GetAllGameProfileResult;
 	bool bGetAllGameProfileSuccess = false;
-	gameProfile->GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result)
+	FRegistry::GameProfile.GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("\t\tsuccess"));
 		GetAllGameProfileResult = Result;
 		bGetAllGameProfileSuccess = true;
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
+	Waiting(bGetAllGameProfileSuccess,"Waiting for get all game profiles...");
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("\t%d game profile is found!"), GetAllGameProfileResult.Num());
 	check(bGetAllGameProfileSuccess);
 	if (GetAllGameProfileResult.Num() == 0)
@@ -119,13 +120,14 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 
 		FAccelByteModelsGameProfile ActualResult;
 		bool bCreateGameProfileSuccess = false;
-		gameProfile->CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result)
+		FRegistry::GameProfile.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result)
 		{
 			ActualResult = Result;
 			Profile = Result;
 			bCreateGameProfileSuccess = true;
 		}), StatisticTestErrorHandler);
 		FlushHttpRequests();
+		Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
 
 		check(bCreateGameProfileSuccess)
 			check(ActualResult.attributes.Num() == Request.attributes.Num());
@@ -160,7 +162,7 @@ bool StatisticGetAllStatItems ::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING ALL STATITEMS..."));
 	bool bGetAllStatItemsSuccess = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-	statistic->GetAllStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+	FRegistry::Statistic.GetAllStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL STATITEMS SUCCESS!"));
 		bGetAllStatItemsSuccess = true;
@@ -171,6 +173,7 @@ bool StatisticGetAllStatItems ::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
+	Waiting(bGetAllStatItemsSuccess,"Waiting for get all stat items...");
 	check(bGetAllStatItemsSuccess);
 	return true;
 }
@@ -181,7 +184,7 @@ bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING STATITEMS BY STATCODES..."));
 	bool bGetStatItemsByStatCodesSuccess = false;
 	TArray<FAccelByteModelsUserStatItemInfo> GetResult;
-	statistic->GetStatItemsByStatCodes(Profile.profileId, {"TOTAL_KILLS"}, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
+	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, {"TOTAL_KILLS"}, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET STATITEMS SUCCESS!"));
 		bGetStatItemsByStatCodesSuccess = true;
@@ -192,6 +195,7 @@ bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
+	Waiting(bGetStatItemsByStatCodesSuccess,"Waiting for get stat items...");
 	check(bGetStatItemsByStatCodesSuccess);
 	return true;
 }

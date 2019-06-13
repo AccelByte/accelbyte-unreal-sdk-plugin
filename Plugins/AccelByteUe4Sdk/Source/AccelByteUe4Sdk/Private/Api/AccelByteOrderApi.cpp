@@ -7,16 +7,21 @@
 #include "JsonUtilities.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteHttpRetryScheduler.h"
+#include "AccelByteSettings.h"
 
 namespace AccelByte
 {
 namespace Api
 {
 
+Order::Order(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings) :Credentials(Credentials), Settings(Settings){}
+
+Order::~Order(){}
+
 void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(),  *FRegistry::Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(),  *Credentials.GetUserId());
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -36,8 +41,8 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const
 
 void Order::GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -56,8 +61,8 @@ void Order::GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModels
 
 void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -78,8 +83,8 @@ void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModel
 
 void Order::FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -98,8 +103,8 @@ void Order::FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModels
 
 void Order::GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId(), *OrderNo);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

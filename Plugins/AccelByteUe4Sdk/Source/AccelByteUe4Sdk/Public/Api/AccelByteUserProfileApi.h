@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -13,6 +13,8 @@
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -22,13 +24,19 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile
 {
 public:
+	UserProfile(const Credentials& Credentials, const Settings& Settings);
+	~UserProfile();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
+public:
 	/**
 	 * @brief Get user's profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
 ;
     /**
      * @brief Get user's profile information. If it doesn't exist, that will be an error.
@@ -36,7 +44,7 @@ public:
      * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
      * @param OnError This will be called when the operation failed.
      */
-    static void GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+    void GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
@@ -48,7 +56,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    static void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+    void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
@@ -60,10 +68,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
-	UserProfile() = delete; // static class can't have instance
+	UserProfile() = delete;
 	UserProfile(UserProfile const&) = delete;
 	UserProfile(UserProfile&&) = delete;	
 };

@@ -7,16 +7,20 @@
 #include "JsonUtilities.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteHttpRetryScheduler.h"
+#include "AccelByteSettings.h"
 
 namespace AccelByte
 {
 namespace Api
 {
+UserProfile::UserProfile(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting){}
+
+UserProfile::~UserProfile(){}
 
 void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Credentials.GetUserNamespace());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -35,8 +39,8 @@ void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>
 
 void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/public"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace(), *UserID);
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/public"), *Settings.BasicServerUrl, *Credentials.GetUserNamespace(), *UserID);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
@@ -55,8 +59,8 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccel
 
 void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Credentials.GetUserNamespace());
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -76,8 +80,8 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 
 void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *FRegistry::Settings.BasicServerUrl, *FRegistry::Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Credentials.GetUserNamespace());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

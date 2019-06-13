@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -42,20 +42,22 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageSetup, "AccelByte.Tests.CloudStorag
 bool CloudStorageSetup::RunTest(const FString& Parameters)
 {
 	bool bClientLoginResult = false;
-	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginResult]()
+	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginResult]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Client Login Succeess"));
 		bClientLoginResult = true;
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bClientLoginResult, "Waiting for Login...");
 
 	bool bUserLoginResult = false;
-	User::LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginResult]()
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginResult]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("User Login Success"));
 		bUserLoginResult = true;
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bUserLoginResult, "Waiting for Login...");
 
 	check(bClientLoginResult);
 	check(bUserLoginResult);
@@ -76,6 +78,7 @@ bool CloudStorageTearDown::RunTest(const FString& Parameters)
 		bDeleteDone = true;
 	}), CloudStorageErrorHandler);
 	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for deletion...");
 	
 	check(bDeleteSuccessful);
 	return true;
@@ -85,13 +88,14 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageCreateSlot, "AccelByte.Tests.CloudS
 bool CloudStorageCreateSlot::RunTest(const FString& Parameters)
 {
 	bool bSlotCreatedResult = false;
-	CloudStorage::CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags, Labels[0], "customAttributeCreated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	FRegistry::CloudStorage.CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags, Labels[0], "customAttributeCreated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Create Slot Success"));
 		CreatedSlot = Result;
 		bSlotCreatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bSlotCreatedResult, "Waiting for slot created...");
 	
 	check(bSlotCreatedResult);
 	return true;
@@ -101,12 +105,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageUpdateSlot, "AccelByte.Tests.CloudS
 bool CloudStorageUpdateSlot::RunTest(const FString& Parameters)
 {
 	bool bSlotUpdatedResult = false;
-	CloudStorage::UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", UpdateTags, Labels[1], "customAttributeUpdated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	FRegistry::CloudStorage.UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", UpdateTags, Labels[1], "customAttributeUpdated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
 		bSlotUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bSlotUpdatedResult, "Waiting for slot updated...");
 	
 	check(bSlotUpdatedResult);
 	return true;
@@ -123,16 +128,17 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 	FString UpdateCustomAttribute = TEXT("This is a custom attribute");
 
 	bool bMetadataUpdatedResult = false;
-	CloudStorage::UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	FRegistry::CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 		bMetadataUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bMetadataUpdatedResult, "Waiting for meta updated...");
 	check(bMetadataUpdatedResult);
 
 	bool bGetSlotAfterUpdateResult = false;
-	CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](TArray<FAccelByteModelsSlot> Result)
+	FRegistry::CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](TArray<FAccelByteModelsSlot> Result)
 	{
 		for (int i = 0; i < Result.Num(); i++)
 		{
@@ -147,6 +153,7 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 		}
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bGetSlotAfterUpdateResult, "Waiting for get slot...");
 	check(bGetSlotAfterUpdateResult);
 
 	return true;
@@ -157,13 +164,14 @@ bool CloudStorageGetAllSlots::RunTest(const FString& Parameter)
 {
 	bool bGetAllSlotsResult = false;
 	TArray<FAccelByteModelsSlot> Results;
-	CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
+	FRegistry::CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 
 	bool bUpdatedSlotFound = false;
 	for (int i = 0; i < Results.Num(); i++)
@@ -185,12 +193,13 @@ bool CloudStorageGetSlot::RunTest(const FString& Parameters)
 {
 	bool bGetSlotResult = false;
 	bool bSlotContentUpdated = false;
-	CloudStorage::GetSlot(CreatedSlot.SlotId, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& Data)
+	FRegistry::CloudStorage.GetSlot(CreatedSlot.SlotId, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& Data)
 	{
 		bGetSlotResult = true;
 		bSlotContentUpdated = (UAccelByteBlueprintsTest::BytesToFString(Data) == Payloads[1]);
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bGetSlotResult, "Waiting for get slot...");
 
 	check(bGetSlotResult);
 	check(bSlotContentUpdated);
@@ -202,19 +211,20 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 {
 	bool bGetAllSlotsResult = false;
 	TArray<FAccelByteModelsSlot> Results;
-	CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
+	FRegistry::CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
 	FHttpModule::Get().GetHttpManager().Flush(false);
+	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 	check(bGetAllSlotsResult);
 
 	TArray<bool> bDeleteSlotResults;
 	for (int i = 0; i < Results.Num(); i++)
 	{
-		CloudStorage::DeleteSlot(Results[i].SlotId, FVoidHandler::CreateLambda([&]()
+		FRegistry::CloudStorage.DeleteSlot(Results[i].SlotId, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Delete Slot %d / %d Success"), i+1, Results.Num());
 			bDeleteSlotResults.Add(true);
@@ -223,6 +233,7 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 			bDeleteSlotResults.Add(false);
 		}));
 		FHttpModule::Get().GetHttpManager().Flush(false);
+		Waiting(bDeleteSlotResults[i], "Waiting for slot deletion...");
 	}
 	check(!bDeleteSlotResults.Contains(false));
 

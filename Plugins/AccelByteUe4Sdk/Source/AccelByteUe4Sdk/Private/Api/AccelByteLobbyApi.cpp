@@ -123,15 +123,15 @@ void Lobby::Connect()
 {
 	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	TMap<FString, FString> Headers;
-	Headers.Add("Authorization", "Bearer " + LobbyCredentials.GetUserAccessToken());
+	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*LobbySettings.LobbyServerUrl, TEXT("wss"), Headers);
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
 	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	WebSocket->Connect();	
-	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *LobbySettings.LobbyServerUrl);
+	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
 }
 
 void Lobby::Disconnect()
@@ -529,7 +529,7 @@ void Lobby::OnMessage(const FString& Message)
 
 }
 
-Lobby::Lobby(const Credentials& Credentials, const AccelByte::Settings& Setting) : LobbyCredentials(Credentials), LobbySettings(Setting)
+Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
 {
 }
 

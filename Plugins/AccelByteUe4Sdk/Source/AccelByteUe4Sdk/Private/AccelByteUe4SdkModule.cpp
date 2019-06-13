@@ -41,14 +41,6 @@ void FAccelByteUe4SdkModule::StartupModule()
 		}),
 		0.2f);
 
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([](float DeltaTime)
-		{
-			FRegistry::Credentials.PollRefreshToken(FPlatformTime::Seconds());
-
-			return true;
-		}),
-		0.2f);
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()

@@ -18,30 +18,24 @@ namespace AccelByte
 Credentials::Credentials()
 	: ClientAccessToken(TEXT(""))
 	, ClientNamespace(TEXT(""))
-	, UserAccessToken(TEXT(""))
-	, UserRefreshToken(TEXT(""))
+	, UserSessionId(TEXT(""))
+	, UserSessionExpire(0)
 	, UserNamespace(TEXT(""))
 	, UserId(TEXT(""))
 	, UserDisplayName(TEXT(""))
-	, UserRefreshTime(0.0)
-	, UserExpiredTime(0.0)
-	, UserRefreshBackoff(0.0)
-	, UserTokenState(ETokenState::Invalid)
+	, UserSessionState(ESessionState::Invalid)
 {
 }
 
 void Credentials::ForgetAll()
 {
-	UserAccessToken = FString();
-	UserRefreshToken = FString();
+	UserSessionId = FString();
+	UserSessionExpire = 0;
 	UserNamespace = FString();
 	UserId = FString();
 	UserDisplayName = FString();
 
-	UserRefreshBackoff = 0.0;
-	UserRefreshTime = 0.0;
-	UserExpiredTime = 0.0;
-	UserTokenState = ETokenState::Invalid;
+	UserSessionState = ESessionState::Invalid;
 }
 
 void Credentials::SetClientCredentials(const FString& ClientId, const FString& ClientSecret)
@@ -56,26 +50,24 @@ void Credentials::SetClientToken(const FString& AccessToken, double ExpiresIn, c
 	ClientNamespace = Namespace;
 }
 
-void Credentials::SetUserToken(const FString& AccessToken, const FString& RefreshToken, double ExpiredTime, const FString& Id, const FString& DisplayName, const FString& Namespace)
+void Credentials::SetUserSession(const FString& SessionId, double ExpiredTime)
 {
-	UserAccessToken = AccessToken;
-	UserRefreshToken = RefreshToken;
+	UserSessionId = SessionId;
+	UserSessionExpire = ExpiredTime;
+
+	UserSessionState = ESessionState::Valid;
+}
+
+void Credentials::SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace)
+{
 	UserId = Id;
 	UserDisplayName = DisplayName;
 	UserNamespace = Namespace;
-	UserRefreshTime = ExpiredTime;
-
-	UserTokenState = ETokenState::Valid;
 }
 
-const FString& Credentials::GetUserAccessToken() const
+const FString& Credentials::GetUserSessionId() const
 {
-	return UserAccessToken;
-}
-
-const FString& Credentials::GetUserRefreshToken() const
-{
-	return UserRefreshToken;
+	return UserSessionId;
 }
 
 const FString& Credentials::GetUserNamespace() const
@@ -83,58 +75,9 @@ const FString& Credentials::GetUserNamespace() const
 	return UserNamespace;
 }
 
-Credentials::ETokenState Credentials::GetTokenState() const
+Credentials::ESessionState Credentials::GetSessionState() const
 {
-	return UserTokenState;
-}
-
-void Credentials::PollRefreshToken(double CurrentTime)
-{
-	switch (UserTokenState)
-	{
-	case ETokenState::Expired:
-	case ETokenState::Valid:
-		if (UserRefreshTime <= CurrentTime)
-		{
-			Oauth2::GetAccessTokenWithRefreshTokenGrant(
-				ClientId, ClientSecret, 
-				UserRefreshToken, 
-				THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
-				{
-					SetUserToken(Result.Access_token, Result.Refresh_token, CurrentTime + (Result.Expires_in * FMath::FRandRange(0.7, 0.9)), Result.User_id, Result.Display_name, Result.Namespace);
-				}), 
-				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					if (UserRefreshBackoff <= 0.0)
-					{
-						UserRefreshBackoff = 10.0;
-					}
-
-					UserRefreshBackoff *= 2.0;
-					UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-					ScheduleRefreshToken(CurrentTime + UserRefreshBackoff);
-					
-					UserTokenState = ETokenState::Expired;
-				}));
-
-			UserTokenState = ETokenState::Refreshing;
-		}
-
-		break;
-	case ETokenState::Refreshing:
-	case ETokenState::Invalid:
-		break;
-	}
-}
-
-void Credentials::ScheduleRefreshToken(double RefreshTime)
-{
-	UserRefreshTime = RefreshTime;
-}
-
-void Credentials::ForceRefreshToken()
-{
-	ScheduleRefreshToken(FPlatformTime::Seconds());
+	return UserSessionState;
 }
 
 const FString& Credentials::GetUserId() const
@@ -161,9 +104,9 @@ const FString& Credentials::GetClientNamespace() const
 
 #include "AccelByteRegistry.h"
 
-FString UAccelByteBlueprintsCredentials::GetUserAccessToken()
+FString UAccelByteBlueprintsCredentials::GetUserSessionId()
 {
-	return FRegistry::Credentials.GetUserAccessToken();
+	return FRegistry::Credentials.GetUserSessionId();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserId()

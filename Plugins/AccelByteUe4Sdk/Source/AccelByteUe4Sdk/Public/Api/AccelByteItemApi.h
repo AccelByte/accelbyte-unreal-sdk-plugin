@@ -8,6 +8,8 @@
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -16,6 +18,12 @@ namespace Api
  */
 class ACCELBYTEUE4SDK_API Item
 {
+public:
+	Item(const Credentials& Credentials, const Settings& Settings);
+	~Item();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
 public:
 	/**
 	 * @brief Get one item information from an online store.
@@ -26,7 +34,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
@@ -41,7 +49,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -54,10 +62,10 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 private:
-	Item() = delete; // static class can't have instance
+	Item() = delete;
 	Item(Item const&) = delete;
 	Item(Item&&) = delete;
 
