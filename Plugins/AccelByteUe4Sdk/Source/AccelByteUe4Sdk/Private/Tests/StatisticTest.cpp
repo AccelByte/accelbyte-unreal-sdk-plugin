@@ -29,8 +29,8 @@ const auto StatisticTestErrorHandler = FErrorHandler::CreateLambda([](int32 Erro
 });
 
 Credentials UserCred;
-TSharedPtr<Api::GameProfile> GameProfile;
-TSharedPtr<Api::Statistic> Statistic;
+TSharedPtr<Api::GameProfile> gameProfile;
+TSharedPtr<Api::Statistic> statistic;
 FAccelByteModelsGameProfile Profile;
 
 FAccelByteModelsGameProfileRequest CreateGameProfileRequest(int32 AttributesLength, FString AttributeKeyPrefix, FString AttributeValuePrefix, int32 TagsLength, FString TagPrefix, FString AvatarUrl = "http://example.com/", FString Label = "DefaultLabel", FString ProfileName = "DefaultName")
@@ -99,12 +99,12 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
 
-	GameProfile = MakeShared<Api::GameProfile>(UserCred, FRegistry::Settings);
-	Statistic = MakeShared<Api::Statistic>(UserCred, FRegistry::Settings);
+	gameProfile = MakeShared<Api::GameProfile>(UserCred, FRegistry::Settings);
+	statistic = MakeShared<Api::Statistic>(UserCred, FRegistry::Settings);
 
 	TArray<FAccelByteModelsGameProfile> GetAllGameProfileResult;
 	bool bGetAllGameProfileSuccess = false;
-	GameProfile->GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result)
+	gameProfile->GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("\t\tsuccess"));
 		GetAllGameProfileResult = Result;
@@ -119,7 +119,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 
 		FAccelByteModelsGameProfile ActualResult;
 		bool bCreateGameProfileSuccess = false;
-		GameProfile->CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result)
+		gameProfile->CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result)
 		{
 			ActualResult = Result;
 			Profile = Result;
@@ -160,7 +160,7 @@ bool StatisticGetAllStatItems ::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING ALL STATITEMS..."));
 	bool bGetAllStatItemsSuccess = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-	Statistic->GetAllStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+	statistic->GetAllStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL STATITEMS SUCCESS!"));
 		bGetAllStatItemsSuccess = true;
@@ -181,7 +181,7 @@ bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING STATITEMS BY STATCODES..."));
 	bool bGetStatItemsByStatCodesSuccess = false;
 	TArray<FAccelByteModelsUserStatItemInfo> GetResult;
-	Statistic->GetStatItemsByStatCodes(Profile.profileId, {"TOTAL_KILLS"}, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
+	statistic->GetStatItemsByStatCodes(Profile.profileId, {"TOTAL_KILLS"}, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET STATITEMS SUCCESS!"));
 		bGetStatItemsByStatCodesSuccess = true;
