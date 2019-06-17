@@ -229,14 +229,17 @@ void UAccelByteBlueprintsLobby::BindEvent(
 
 	AccelByte::Api::Lobby::FReadyConsentNotif OnReadyConsentNoticeDelegate =
 		AccelByte::Api::Lobby::FReadyConsentNotif::CreateLambda([OnReadyConsentNotice](const FAccelByteModelsReadyConsentNotice& Result) {
+		OnReadyConsentNotice.ExecuteIfBound(Result);
 	});
 
 	AccelByte::Api::Lobby::FRematchmakingNotif OnRematchmakingNoticeDelegate =
 		AccelByte::Api::Lobby::FRematchmakingNotif::CreateLambda([OnRematchmakingNotice](const FAccelByteModelsRematchmakingNotice& Result) {
+		OnRematchmakingNotice.ExecuteIfBound(Result);
 	});
 
 	AccelByte::Api::Lobby::FDsNotif OnDsNoticeDelegate =
 		AccelByte::Api::Lobby::FDsNotif::CreateLambda([OnDsNotice](const FAccelByteModelsDsNotice& Result){
+		OnDsNotice.ExecuteIfBound(Result);
 	});
 
 	// Friends + Notification
@@ -270,6 +273,9 @@ void UAccelByteBlueprintsLobby::BindEvent(
 	FRegistry::Lobby.SetOnFriendRequestAcceptedNotifDelegate(OnAcceptFriendsNotifDelegate);
 	FRegistry::Lobby.SetOnIncomingRequestFriendsNotifDelegate(OnRequestFriendsNotifDelegate);
     FRegistry::Lobby.SetParsingErrorDelegate(OnParsingErrorDelegate);
+	FRegistry::Lobby.SetReadyConsentNotifDelegate(OnReadyConsentNoticeDelegate);
+	FRegistry::Lobby.SetRematchmakingNotifDelegate(OnRematchmakingNoticeDelegate);
+	FRegistry::Lobby.SetDsNotifDelegate(OnDsNoticeDelegate);
 }
 void UAccelByteBlueprintsLobby::UnbindDelegates()
 {
