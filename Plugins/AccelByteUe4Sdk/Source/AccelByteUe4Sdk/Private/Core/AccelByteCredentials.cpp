@@ -23,9 +23,9 @@ Credentials::Credentials()
 	, UserNamespace(TEXT(""))
 	, UserId(TEXT(""))
 	, UserDisplayName(TEXT(""))
-	, UserRefreshBackoff(0.0)
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
+	, UserRefreshBackoff(0.0)
 	, UserTokenState(ETokenState::Invalid)
 {
 }
