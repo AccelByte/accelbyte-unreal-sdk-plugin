@@ -111,6 +111,15 @@ ExtraModuleNames.AddRange(new string[]
     ...
 }
 ```
+also in `/Source/MyAwesomeGame/MyAwesomeGame.Build.cs`.
+```cs
+ PublicDependencyModuleNames.AddRange(
+			new string[] {
+				...
+                "AccelByteUe4Sdk",
+                ...
+            }
+```
 `7.` Open the editor, click File -> Project Settings.
 
 ![](Documentation/images/setup_001.png)
