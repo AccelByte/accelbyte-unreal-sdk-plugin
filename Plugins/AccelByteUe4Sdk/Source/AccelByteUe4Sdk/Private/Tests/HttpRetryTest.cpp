@@ -37,174 +37,6 @@ static const int32 AutomationFlagMaskHttpRetry = (EAutomationTestFlags::EditorCo
 using namespace std;
 void ResetSettings();
 
-class MockHttpResponse : public IHttpResponse
-{
-public:
-	FString GetURL() override { return TEXT(""); };
-	FString GetURLParameter(const FString& ParameterName) override { return TEXT(""); };
-	FString GetHeader(const FString& HeaderName) override { return TEXT(""); };
-	TArray<FString> GetAllHeaders() override { return Headers; };
-	FString GetContentType() override { return TEXT(""); };
-	int32 GetContentLength() override { return 0; };
-	const TArray<uint8>& GetContent() override { return Content; };
-
-	int32 GetResponseCode() override { return ResponseCode; }
-	FString GetContentAsString() override { return FString(); }
-	
-	void SetResponseCode(int32 ResponseCode) { this->ResponseCode = ResponseCode; }
-
-private:
-	int32 ResponseCode;
-	TArray<FString> Headers;
-	TArray<uint8> Content;
-};
-
-class MockHttpRequest : public IHttpRequest
-{
-public:
-	FString GetURL() override { return TEXT(""); };
-	FString GetURLParameter(const FString& ParameterName) override { return TEXT(""); };
-	FString GetHeader(const FString& HeaderName) override { return TEXT(""); };
-	TArray<FString> GetAllHeaders() override { return Headers; };
-	FString GetContentType() override { return TEXT(""); };
-	int32 GetContentLength() override { return 0; };
-	const TArray<uint8>& GetContent() override { return Content; };
-
-	FString GetVerb() override { return TEXT(""); };
-	void SetVerb(const FString& Verb) override {};
-	void SetURL(const FString& URL) override {};
-	void SetContent(const TArray<uint8>& ContentPayload) override {};
-	void SetContentAsString(const FString& ContentString) override {};
-	void SetHeader(const FString& HeaderName, const FString& HeaderValue) override {};
-	void AppendToHeader(const FString& HeaderName, const FString& AdditionalHeaderValue) override {};
-	
-	bool ProcessRequest() override 
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("Process Request"));
-		Status = EHttpRequestStatus::Processing;
-		++RetryCount;
-		
-		return true; 
-	};
-	
-	FHttpRequestCompleteDelegate& OnProcessRequestComplete() override { return RequestCompleteDelegate; };
-	FHttpRequestProgressDelegate& OnRequestProgress() override { return RequestProgressDelegate; };
-	
-	void CancelRequest() override 
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("Cancel Request"));
-		SetStatus(EHttpRequestStatus::Failed_ConnectionError);
-	};
-	
-	EHttpRequestStatus::Type GetStatus() override { return Status; };
-	const FHttpResponsePtr GetResponse() const override { return Response; };
-	
-	void Tick(float DeltaSeconds) override 
-	{
-		if (Status != EHttpRequestStatus::Processing && Status != EHttpRequestStatus::NotStarted)
-		{
-			OnProcessRequestComplete().ExecuteIfBound(MakeShareable(this), Response, true);
-		}
-	}
-	
-	float GetElapsedTime() override { return 0.0; }
-
-	void SetStatus(EHttpRequestStatus::Type Status) { this->Status = Status; }
-
-	MockHttpRequest() 
-		: Response(MakeShared<MockHttpResponse, ESPMode::ThreadSafe>())
-		, RetryCount(0) 
-	{
-	}
-
-public:
-	int32 RetryCount;
-
-private:
-	TArray<FString> Headers;
-	TArray<uint8> Content;
-
-	EHttpRequestStatus::Type Status;
-	TSharedPtr<MockHttpResponse, ESPMode::ThreadSafe> Response;
-	FHttpRequestCompleteDelegate RequestCompleteDelegate;
-	FHttpRequestProgressDelegate RequestProgressDelegate;
-};
-
-
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError500_Retries, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError500_Retries", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_GotError500_Retries::RunTest(const FString& Parameter)
-{	
-	FRegistry::Settings.IamServerUrl = "http://accelbyte.example";
-	FRegistry::Settings.ClientId = "ClientID";
-	FRegistry::Settings.ClientSecret = "ClientSecret";
-	FRegistry::Settings.Namespace = "game01";
-	FRegistry::Settings.PublisherNamespace = "publisher01";
-	FRegistry::Credentials.SetUserToken(TEXT("user_access_token"), TEXT("user_refresh_token"), 3600.0, TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime) 
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-	
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Refresh Token"), CurrentTime);
-			FRegistry::Credentials.PollRefreshToken(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	auto Request = MakeShared<MockHttpRequest>();
-	MockHttpResponse *Response = (MockHttpResponse *)Request->GetResponse().Get();
-	Request->SetURL(FRegistry::Settings.IamServerUrl + "/iam/authorize");
-	//Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed"), CurrentTime);
-		RequestCompleted = true;
-	});
-
-	CurrentTime = 10.0;
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-
-	CurrentTime += 0.2;
-	Ticker.Tick(0.2);
-	check(!RequestCompleted);
-
-	Request->SetStatus(EHttpRequestStatus::Succeeded);
-	Response->SetResponseCode(500);
-	
-	CurrentTime += 0.2;
-	Ticker.Tick(0.2);
-	check(!RequestCompleted);
-
-	Request->SetStatus(EHttpRequestStatus::Succeeded);
-	Response->SetResponseCode(200);
-
-	CurrentTime += 0.3;
-	Ticker.Tick(0.3);
-	check(RequestCompleted);
-	FRegistry::Credentials.ForgetAll();
-
-	ResetSettings();
-	return true;
-}
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError500Twice_RetryTwice, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError500Twice_RetryTwice", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Parameter)
 {
@@ -238,47 +70,56 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 		}),
 		0.2f);
 
-	auto Request = MakeShared<MockHttpRequest>();
-	MockHttpResponse *Response = (MockHttpResponse *)Request->GetResponse().Get();
-	Request->SetURL(FRegistry::Settings.IamServerUrl + "/iam/authorize");
-	//Request->SetHeader(TEXT("Authorization"), Authorization);
+
+	auto Request = FHttpModule::Get().CreateRequest();
+	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+	//Error 503 Service Unavailable, with response content:
+	//{
+	//	"numericErrorCode": 33333,
+	//		"errorCode" : "httpRetryErrorResponse",
+	//		"errorMessage" : "This endpoint will always answer with this exact response"
+	//}
+
+	Request->SetURL("http://www.mocky.io/v2/5d07138a3000001224051d6f");
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
 	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
 	bool RequestCompleted = false;
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+	int NumRequestRetry = 0;
+
+	//Hijack OnProcessRequestComplete to peek if it's retried or not
+	Request->OnProcessRequestComplete().BindLambda(
+	[&NumRequestRetry, &CurrentTime]
+	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+	{
+		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried"), CurrentTime);
+		NumRequestRetry++;
+	});
+	
+	//Official OnProcessRequestComplete
+	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+	[&RequestCompleted, &CurrentTime]
+	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
 		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed"), CurrentTime);
 		RequestCompleted = true;
 	});
 
+
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
-	CurrentTime += 0.21;
-	Ticker.Tick(0.21);
+	while (CurrentTime < 16)
+	{
+		CurrentTime += 0.5;
+		Ticker.Tick(0.5);
+		FPlatformProcess::Sleep(0.5);
+	}
+
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
 	check(!RequestCompleted);
-
-	Request->SetStatus(EHttpRequestStatus::Succeeded);
-	Response->SetResponseCode(500);
-
-	CurrentTime += 0.21;
-	Ticker.Tick(0.21);
-	check(!RequestCompleted);
-
-	Request->SetStatus(EHttpRequestStatus::Succeeded);
-	Response->SetResponseCode(502);
-
-	CurrentTime += 0.21;
-	Ticker.Tick(0.21);
-	check(!RequestCompleted);
-
-	Request->SetStatus(EHttpRequestStatus::Succeeded);
-	Response->SetResponseCode(200);
-
-	CurrentTime += 0.21;
-	Ticker.Tick(0.21);
-	check(RequestCompleted);
+	check(NumRequestRetry >= 2);
 
 	FRegistry::Credentials.ForgetAll();
 
