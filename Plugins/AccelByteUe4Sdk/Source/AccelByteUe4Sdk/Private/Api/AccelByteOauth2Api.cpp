@@ -4,6 +4,7 @@
 
 #include "AccelByteOauth2Api.h"
 #include "AccelByteRegistry.h"
+#include "AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Base64.h"
 
@@ -11,10 +12,16 @@ namespace AccelByte
 {
 namespace Api
 {
-void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetSessionIdWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError)
 {
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/v1/login/code"), *url);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -27,14 +34,20 @@ void Oauth2::GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, c
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetSessionIdWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError)
 {
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/v1/login/password"), *url);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -47,8 +60,8 @@ void Oauth2::GetAccessTokenWithPasswordGrant(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
@@ -67,40 +80,26 @@ void Oauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, c
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
-}
 
-void Oauth2::GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/x-www-form-urlencoded");
-	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("grant_type=refresh_token&refresh_token=%s"), *FGenericPlatformHttp::UrlEncode(RefreshToken));
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 //
 // Custom grant types 
 //
 
-void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetSessionIdWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString DeviceId = FGenericPlatformMisc::GetDeviceId();
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
 
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url = FString::Printf(TEXT("%s/oauth/platforms/device/token"), *FRegistry::Settings.IamServerUrl);;
+	FString Url = FString::Printf(TEXT("%s/v1/login/platforms/device"), *url);;
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -113,14 +112,21 @@ void Oauth2::GetAccessTokenWithDeviceGrant(const FString& ClientId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetSessionIdWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError)
 {
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
+
 	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-    FString Url = FString::Printf(TEXT("%s/oauth/platforms/%s/token"), *FRegistry::Settings.IamServerUrl, *PlatformId);
+    FString Url = FString::Printf(TEXT("%s/v1/login/platforms/%s"), *url, *PlatformId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/x-www-form-urlencoded");
     FString Accept = TEXT("application/json");
@@ -133,8 +139,35 @@ void Oauth2::GetAccessTokenWithPlatformGrant(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
-	Request->ProcessRequest();
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Oauth2::Logout(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
+
+	FString Authorization = TEXT("Bearer " + AccessToken);
+	FString Url = FString::Printf(TEXT("%s/v1/logout"), *url);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/x-www-form-urlencoded");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("token=%s"), *AccessToken);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

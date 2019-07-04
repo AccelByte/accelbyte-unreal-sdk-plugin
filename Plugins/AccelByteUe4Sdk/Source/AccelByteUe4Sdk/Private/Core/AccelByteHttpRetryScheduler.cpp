@@ -86,7 +86,6 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 
 				return false;
 			case EHttpResponseCodes::Forbidden:
-				UserCredentials.ScheduleRefreshToken(CurrentTime);
 				CompletedTasks.Add(CurrentTask);
 
 				return true;

@@ -28,8 +28,8 @@ public:
 	GameProfile(const Credentials& Credentials, const Settings& Settings);
 	~GameProfile();
 private:
-	const Credentials& GameProfileCredentials;
-	const Settings& GameProfileSettings;
+	const Credentials& Credentials;
+	const Settings& Settings;
 
 public:
 
@@ -108,7 +108,7 @@ public:
 	void UpdateGameProfileAttribute(const FString& ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler& OnError);
 	
 private:
-	GameProfile() = delete; // static class can't have instance
+	GameProfile() = delete;
 	GameProfile(GameProfile const&) = delete;
 	GameProfile(GameProfile&&) = delete;
 };

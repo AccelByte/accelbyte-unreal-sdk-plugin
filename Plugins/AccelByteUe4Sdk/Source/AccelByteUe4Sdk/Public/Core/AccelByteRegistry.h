@@ -16,6 +16,14 @@ class FHttpRetryScheduler;
 
 namespace Api
 {
+	class User;
+	class UserProfile;
+	class Category;
+	class Entitlement;
+	class Order;
+	class Item;
+	class Wallet;
+	class CloudStorage;
 	class Lobby;
 	class GameProfile;
 	class Statistic;
@@ -27,6 +35,14 @@ public:
 	static Settings Settings;
 	static Credentials Credentials;
 	static FHttpRetryScheduler HttpRetryScheduler;
+	static Api::User User;
+	static Api::UserProfile UserProfile;
+	static Api::Category Category;
+	static Api::Entitlement Entitlement;
+	static Api::Order Order;
+	static Api::Item Item;
+	static Api::Wallet Wallet;
+	static Api::CloudStorage CloudStorage;
 	static Api::Lobby Lobby;
 	static Api::GameProfile GameProfile;
 	static Api::Statistic Statistic;

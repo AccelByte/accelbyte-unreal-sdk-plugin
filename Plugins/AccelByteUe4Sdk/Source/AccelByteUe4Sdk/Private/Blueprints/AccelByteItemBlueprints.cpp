@@ -6,6 +6,7 @@
 #include "AccelByteSettings.h"
 #include "AccelByteItemApi.h"
 #include "AccelByteCredentials.h"
+#include "AccelByteRegistry.h"
 
 using AccelByte::Api::Item;
 using AccelByte::FErrorHandler;
@@ -15,7 +16,7 @@ using AccelByte::Credentials;
 
 void UAccelByteBlueprintsItem::GetItemById(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Item::GetItemById(ItemId, Language, Region, THandler<FAccelByteModelsItemInfo>::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
+	FRegistry::Item.GetItemById(ItemId, Language, Region, THandler<FAccelByteModelsItemInfo>::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -26,7 +27,7 @@ void UAccelByteBlueprintsItem::GetItemById(const FString& ItemId, const FString&
 
 void UAccelByteBlueprintsItem::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, EAccelByteItemType ItemType, EAccelByteItemStatus Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Item::GetItemsByCriteria(Language, Region, CategoryPath, ItemType, Status, Page, Size, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
+	FRegistry::Item.GetItemsByCriteria(Language, Region, CategoryPath, ItemType, Status, Page, Size, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -37,7 +38,7 @@ void UAccelByteBlueprintsItem::GetItemsByCriteria(const FString& Language, const
 
 void UAccelByteBlueprintsItem::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const FSearchItemSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	Item::SearchItem(Language, Keyword, Page, Size, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
+	FRegistry::Item.SearchItem(Language, Keyword, Page, Size, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

@@ -15,7 +15,7 @@ namespace AccelByte
 namespace Api
 {
 
-GameProfile::GameProfile(const Credentials& Credentials, const AccelByte::Settings& Setting) : GameProfileCredentials(Credentials), GameProfileSettings(Setting)
+GameProfile::GameProfile(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
 {
 }
 
@@ -29,8 +29,8 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace());
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -54,8 +54,8 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 
 void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameProfile>>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -73,8 +73,8 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 
 void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -93,8 +93,8 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 
 void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId(), *ProfileId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -112,8 +112,8 @@ void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAcce
 
 void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId(), *ProfileId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -132,8 +132,8 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteM
 
 void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId(), *ProfileId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -151,8 +151,8 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandle
 
 void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FString & AttributeName, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId(), *ProfileId, *AttributeName);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -170,8 +170,8 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FStri
 
 void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GameProfileCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *GameProfileSettings.GameProfileServerUrl, *GameProfileCredentials.GetUserNamespace(), *GameProfileCredentials.GetUserId(), *ProfileId, *Attribute.name);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

@@ -1,9 +1,10 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUserBlueprints.h"
 #include "AccelByteUserApi.h"
+#include "AccelByteRegistry.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -12,7 +13,7 @@ using AccelByte::Api::User;
 
 void UBPUser::LoginWithClientCredentials(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess]()
+	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -24,7 +25,7 @@ void UBPUser::LoginWithClientCredentials(const FDHandler& OnSuccess, const FDErr
 
 void UBPUser::LoginWithUsername(const FString& Username, const FString& Password, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([OnSuccess]()
+	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -36,7 +37,7 @@ void UBPUser::LoginWithUsername(const FString& Username, const FString& Password
 
 void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::LoginWithOtherPlatform(PlatformId, Token, FVoidHandler::CreateLambda([OnSuccess]()
+	FRegistry::User.LoginWithOtherPlatform(PlatformId, Token, FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -48,7 +49,7 @@ void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FS
 
 void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::LoginWithDeviceId(FVoidHandler::CreateLambda([OnSuccess]()
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
@@ -60,31 +61,32 @@ void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler
 
 void UBPUser::ForgetAllCredentials()
 {
-	User::ForgetAllCredentials();
+	FRegistry::User.ForgetAllCredentials();
 }
 
-void UBPUser::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::Register(
-		Username, Password, DisplayName,
+	FRegistry::User.Register(
+		Username, Password, DisplayName, Country, DateOfBirth,
 		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 
+/*! Commented because can't send PATCH request yet
 void UBPUser::Update(const FUserUpdateRequest& UpdateRequest, const FDUserDataHandler& OnSuccess, const FDErrorHandler & OnError)
 {
-	User::Update(
+	FRegistry::User.Update(
 		UpdateRequest,
 		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
-}
+}*/
 
 
 void UBPUser::Upgrade(const FString& Username, const FString& Password, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::Upgrade(
+	FRegistry::User.Upgrade(
 		Username, Password,
 		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
@@ -93,25 +95,25 @@ void UBPUser::Upgrade(const FString& Username, const FString& Password, const FD
 
 void UBPUser::SendUpgradeVerificationCode(const FString & Username, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::SendUpgradeVerificationCode(
+	FRegistry::User.SendUpgradeVerificationCode(
 		Username,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 
-void UBPUser::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
-{
-	User::UpgradeAndVerify(
-		Username, Password, VerificationCode,
-		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
-	);
-}
+//void UBPUser::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
+//{
+//	FRegistry::User.UpgradeAndVerify(
+//		Username, Password, VerificationCode,
+//		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
+//		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+//	);
+//}
 
 void UBPUser::SendVerificationCode(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::SendVerificationCode(
+	FRegistry::User.SendVerificationCode(
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
@@ -120,7 +122,7 @@ void UBPUser::SendVerificationCode(const FDHandler& OnSuccess, const FDErrorHand
 void UBPUser::Verify(const FString& VerificationCode, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	
-	User::Verify(
+	FRegistry::User.Verify(
 		VerificationCode,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
@@ -130,7 +132,7 @@ void UBPUser::Verify(const FString& VerificationCode, const FDHandler& OnSuccess
 void UBPUser::SendResetPasswordCode(const FString& Username, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	
-	User::SendResetPasswordCode(
+	FRegistry::User.SendResetPasswordCode(
 		Username, 
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
@@ -139,7 +141,7 @@ void UBPUser::SendResetPasswordCode(const FString& Username, const FDHandler& On
 
 void UBPUser::ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::ResetPassword(
+	FRegistry::User.ResetPassword(
 		VerificationCode, Username, NewPassword,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
@@ -148,7 +150,7 @@ void UBPUser::ResetPassword(const FString& VerificationCode, const FString& User
 
 void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::GetPlatformLinks(
+	FRegistry::User.GetPlatformLinks(
 		THandler<TArray<FPlatformLink>>::CreateLambda([OnSuccess](const TArray<FPlatformLink>& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
@@ -156,7 +158,7 @@ void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FD
 
 void UBPUser::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	User::LinkOtherPlatform(
+	FRegistry::User.LinkOtherPlatform(
 		PlatformId, Ticket,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
@@ -166,7 +168,7 @@ void UBPUser::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket
 void UBPUser::UnlinkOtherPlatform(const FString& PlatformId, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	
-	User::UnlinkOtherPlatform(
+	FRegistry::User.UnlinkOtherPlatform(
 		PlatformId,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })

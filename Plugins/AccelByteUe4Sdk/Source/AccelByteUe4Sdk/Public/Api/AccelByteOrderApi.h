@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -11,6 +11,8 @@
 
 namespace AccelByte
 {
+class Credentials;
+class Settings;
 namespace Api
 {
 
@@ -20,6 +22,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Order
 {
 public:
+	Order(const Credentials& Credentials, const Settings& Settings);
+	~Order();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
+public:
 	/**
 	 * @brief Create order to purchase something from the store. 
 	 * 
@@ -27,7 +35,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get user's order information. 
@@ -36,7 +44,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	static void GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get all of user's orders that have been created with paging.
@@ -45,7 +53,7 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
-	static void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Fulfill an order if the order is charged but the fulfillment fail.
@@ -53,7 +61,7 @@ public:
 	 * @param OrderNo Order number.
 	 * @param OnSuccess OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsOrderInfo&.
 	 */
-	static void FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief  Get the history of the created orders.
@@ -63,9 +71,9 @@ public:
 	 * The result is TArray<FAccelByteModelsOrderHistoryInfo>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError);
 private:
-	Order() = delete; // static class can't have instance
+	Order() = delete;
 	Order(Order const&) = delete;
 	Order(Order&&) = delete;
 };

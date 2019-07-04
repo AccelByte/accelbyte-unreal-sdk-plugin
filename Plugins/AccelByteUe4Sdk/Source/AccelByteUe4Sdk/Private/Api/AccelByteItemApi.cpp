@@ -7,11 +7,15 @@
 #include "JsonUtilities.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteHttpRetryScheduler.h"
+#include "AccelByteSettings.h"
 
 namespace AccelByte
 {
 namespace Api
 {
+Item::Item(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings) : Credentials(Credentials), Settings(Settings){}
+
+Item::~Item(){}
 
 FString EAccelByteItemTypeToString(const EAccelByteItemType& EnumValue) {
 	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteItemType"), true);
@@ -29,8 +33,8 @@ FString EAccelByteItemStatusToString(const EAccelByteItemStatus& EnumValue) {
 
 void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *ItemId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *ItemId);
 	if (!Region.IsEmpty() || !Language.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("?")));
@@ -66,8 +70,8 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 
 void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&region=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Region);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&region=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Region);
 	if (!Language.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
@@ -102,8 +106,8 @@ void Item::GetItemsByCriteria(const FString& Language, const FString& Region, co
 
 void Item::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/items/search?language=%s&keyword=%s&namespace=%s"), *FRegistry::Settings.PlatformServerUrl, *Language, *FGenericPlatformHttp::UrlEncode(Keyword), *FRegistry::Settings.Namespace);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/items/search?language=%s&keyword=%s&namespace=%s"), *Settings.PlatformServerUrl, *Language, *FGenericPlatformHttp::UrlEncode(Keyword), *Settings.Namespace);
 	if (!Region.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));

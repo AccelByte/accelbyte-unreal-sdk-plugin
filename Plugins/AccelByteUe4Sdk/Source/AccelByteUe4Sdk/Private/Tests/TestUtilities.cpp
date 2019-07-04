@@ -18,6 +18,16 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
+void Waiting(bool& condition , FString text)
+{
+	while (!condition)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("%s"), *text);
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+}
+
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
 	UAccelByteBlueprintsTest::SendNotif(FRegistry::Credentials.GetUserId(), Message, bAsync, FVoidHandler::CreateLambda([OnSuccess]()
@@ -31,8 +41,27 @@ void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, co
 
 void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
+	/*
+	 If the client is not logged in
+	*/
+	if (FRegistry::Credentials.GetClientAccessToken() == "")
+	{
+		bool bClientTokenObtained = false;
+		FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"));
+			bClientTokenObtained = true;
+		}), OnError);
+		FlushHttpRequests();
+		Waiting(bClientTokenObtained, "Waiting for Login...");
+		check(bClientTokenObtained);
+	}
+
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%snotification/namespaces/%s/users/%s/freeform"), *FRegistry::Settings.LobbyServerUrl, *FRegistry::Settings.Namespace, *UserId);
+	FString Url = FString::Printf(TEXT("%s/lobby/notification/namespaces/%s/users/%s/freeform"), BaseUrl, *FRegistry::Settings.Namespace, *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -79,10 +108,14 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	using AccelByte::Settings;
-	User::LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
+	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
 	{
+		UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *UserId);
+		const int32 length = 100;
+		TCHAR* BaseUrl = new TCHAR[length];
+		FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/platforms/justice/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
+		FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), BaseUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -105,10 +138,13 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 				TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
 				if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 				{
+					const int32 length = 100;
+					TCHAR* BaseUrl = new TCHAR[length];
+					FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 					FString RealUserId = JsonParsed->GetStringField("UserId");
 
 					FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-					FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s"), *FRegistry::Settings.IamServerUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
+					FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), BaseUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
 					FString Verb = TEXT("DELETE");
 					FString ContentType = TEXT("application/json");
 					FString Accept = TEXT("application/json");
@@ -162,7 +198,6 @@ void FlushHttpRequests()
 
 	while (FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials))
 	{
-		FRegistry::Credentials.PollRefreshToken(FPlatformTime::Seconds());
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
 		FPlatformProcess::Sleep(0.5);
@@ -179,12 +214,13 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	if (FRegistry::Credentials.GetClientAccessToken() == "")
 	{
 		bool bClientTokenObtained = false;
-		User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+		FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"));
 			bClientTokenObtained = true;
 		}), OnError);
 		FlushHttpRequests();
+		Waiting(bClientTokenObtained,"Waiting for Login...");
 		check(bClientTokenObtained);
 	}
 
@@ -194,17 +230,22 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	*/
 	bool bCurrencyAlreadyExist = false;
 	bool bCurrencyCreated = false;
-	Ecommerce_Currency_Get(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated]()
+	bool bCurrencyCheckDone = false;
+	Ecommerce_Currency_Get(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]()
 	{
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created already."));
 		bCurrencyAlreadyExist = true;
 		bCurrencyCreated = true;
-	}), FErrorHandler::CreateLambda([&bCurrencyAlreadyExist](int32 Code, FString Message)
+		bCurrencyCheckDone = true;
+	}), FErrorHandler::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCheckDone](int32 Code, FString Message)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
 		bCurrencyAlreadyExist = false;
+		bCurrencyCheckDone = true;
 	}));
 	FlushHttpRequests();
+	Waiting(bCurrencyCheckDone,"Waiting for currency check...");
+
 	if (!bCurrencyAlreadyExist)
 	{
 		Ecommerce_Currency_Create(Variables.ExpectedCurrency, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
@@ -218,6 +259,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 			OnError.ExecuteIfBound(Code, Message);
 		}));
 		FlushHttpRequests();
+		Waiting(bCurrencyCreated,"Waiting for currency created...");
 	}
 
 	/*
@@ -228,8 +270,9 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	 IF there's no published store: just go on.
 	*/
 	bool bTheresPublishedStore = false;
+	bool bPublishedStoreCheck = false;
 	FStoreInfo PublishedStoreInfo;
-	Ecommerce_PublishedStore_Get(THandler<FStoreInfo>::CreateLambda([&Variables, &bTheresPublishedStore, &PublishedStoreInfo](const FStoreInfo& Result)
+	Ecommerce_PublishedStore_Get(THandler<FStoreInfo>::CreateLambda([&Variables, &bTheresPublishedStore, &PublishedStoreInfo, &bPublishedStoreCheck](const FStoreInfo& Result)
 	{
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"));
 		Variables.ExpectedStoreArchive.defaultLanguage = Result.defaultLanguage;
@@ -238,8 +281,15 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		Variables.ExpectedStoreArchive.supportedRegions = Result.supportedRegions;
 		PublishedStoreInfo = Result;
 		bTheresPublishedStore = true;
-	}), nullptr);
+		bPublishedStoreCheck = true;
+	}), FErrorHandler::CreateLambda([&OnError, &bPublishedStoreCheck](int32 Code, FString Message)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is not found: %d | %s"), Code, *Message);
+		bPublishedStoreCheck = true;
+	}));
 	FlushHttpRequests();
+	Waiting(bPublishedStoreCheck,"Waiting for ");
+
 	if (bTheresPublishedStore)
 	{
 		bool bArchiveStoreCreated = false;
@@ -251,6 +301,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 			bArchiveStoreCreated = true;
 		}), OnError);
 		FlushHttpRequests();
+		Waiting(bArchiveStoreCreated,"Waiting for archive store created...");
 		bool bArchiveCloned = false;
 		Ecommerce_Store_Clone(PublishedStoreInfo.storeId, CreatedArchiveStoreInfo.storeId, FSimpleDelegate::CreateLambda([&bArchiveCloned]()
 		{
@@ -258,6 +309,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 			bArchiveCloned = true;
 		}), OnError);
 		FlushHttpRequests();
+		Waiting(bArchiveCloned,"Waiting for archive store cloned...");
 		check(bArchiveStoreCreated);
 		check(bArchiveCloned);
 
@@ -284,6 +336,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bTemporaryStoreCreated = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bTemporaryStoreCreated,"Waiting for store created...");
 	check(bTemporaryStoreCreated);
 
 	/*
@@ -299,6 +352,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bCreateRootCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bCreateRootCategorySuccess,"Waiting for root category created...");
 	check(bCreateRootCategorySuccess);
 
 	/*
@@ -314,6 +368,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bCreateChildCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bCreateChildCategorySuccess,"Waiting for child category created...");
 	check(bCreateChildCategorySuccess);
 
 	/*
@@ -329,6 +384,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bCreateGrandChildCategorySuccess = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bCreateGrandChildCategorySuccess,"Waiting for grand child category created...");
 	check(bCreateGrandChildCategorySuccess);
 
 	TArray<FString> emptyStrings;
@@ -388,6 +444,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bRootItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bRootItemCreated,"Waiting for root item created...");
 	check(bRootItemCreated);
 
 	/*
@@ -446,6 +503,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bChildItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bChildItemCreated,"Waiting for child item created...");
 	check(bChildItemCreated);
 
 	/*
@@ -504,6 +562,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bGrandchildItemCreated = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bGrandchildItemCreated,"Waiting for grand child item created...");
 	check(bGrandchildItemCreated);
 
 	/*
@@ -516,6 +575,7 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		bPublishTemporaryStoreSuccess = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bPublishTemporaryStoreSuccess,"Waiting for publish temp store...");
 	check(bPublishTemporaryStoreSuccess);
 
 	OnSuccess.ExecuteIfBound();
@@ -527,12 +587,13 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 	if (FRegistry::Credentials.GetClientAccessToken() == "")
 	{
 		bool bClientTokenObtained = false;
-		User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+		FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CLIENT is logged in"));
 			bClientTokenObtained = true;
 		}), OnError);
 		FlushHttpRequests();
+		Waiting(bClientTokenObtained,"Waiting for Login...");
 		check(bClientTokenObtained);
 	}
 
@@ -544,6 +605,7 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 		bCurrencyDeleted = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bCurrencyDeleted,"Waiting for currency deletion...");
 	check(bCurrencyDeleted);
 
 	// Delete published testing store
@@ -554,41 +616,54 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 		bPublishedStoreDeleted = true;
 	}), nullptr);
 	FlushHttpRequests();
+	Waiting(bPublishedStoreDeleted,"Waiting for published store deletion...");
 	check(bPublishedStoreDeleted);
 
 	// Fetch all store
+	bool bGetAllStoreSuccess = false;
 	TArray<FStoreInfo> GetAllResult;
-	Ecommerce_Store_Get_All(THandler<TArray<FStoreInfo>>::CreateLambda([&GetAllResult](const TArray<FStoreInfo>& Result)
+	Ecommerce_Store_Get_All(THandler<TArray<FStoreInfo>>::CreateLambda([&bGetAllStoreSuccess, &GetAllResult](const TArray<FStoreInfo>& Result)
 	{
 		GetAllResult = Result;
+		bGetAllStoreSuccess = true;
 	}), OnError);
 	FlushHttpRequests();
+	Waiting(bGetAllStoreSuccess,"Waiting for get all store...");
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		// PUBLISH then DELETE the Archive
 		if (GetAllResult[i].title == Variables.ExpectedStoreArchive.title)
 		{
+			bool bRestorePublishedStore = false;
 			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"));
-			Ecommerce_Store_Clone(GetAllResult[i].storeId, "", FSimpleDelegate::CreateLambda([]()
+			Ecommerce_Store_Clone(GetAllResult[i].storeId, "", FSimpleDelegate::CreateLambda([&bRestorePublishedStore]()
 			{
 				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
+				bRestorePublishedStore = true;
 			}), nullptr);
 			FlushHttpRequests();
-			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([]()
+			Waiting(bRestorePublishedStore,"Waiting for published store restored...");
+			bool bArchiveStoreDeleteSuccess = false;
+			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bArchiveStoreDeleteSuccess]()
 			{
 				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
+				bArchiveStoreDeleteSuccess = true;
 			}), nullptr);
 			FlushHttpRequests();
+			Waiting(bArchiveStoreDeleteSuccess,"Waiting for archive store deletion...");
 		}
 		else // DELETE all testing store
 			if (GetAllResult[i].title == Variables.ExpectedStoreTemporary.title)
 			{
+				bool bDeleteTestingStoreSuccess = false;
 				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"));
-				Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([]()
+				Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bDeleteTestingStoreSuccess]()
 				{
 					UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
+					bDeleteTestingStoreSuccess = true;
 				}), nullptr);
 				FlushHttpRequests();
+				Waiting(bDeleteTestingStoreSuccess,"Waiting for testing store deletion...");
 			}
 	}
 
@@ -597,8 +672,11 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 
 void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/currencies"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies"), BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -618,8 +696,11 @@ void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDel
 
 void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/currencies/%s/summary"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s/summary"), BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -638,8 +719,11 @@ void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSucce
 
 void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/currencies/%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s"), BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -658,8 +742,11 @@ void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSu
 
 void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores/published"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -678,8 +765,11 @@ void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const F
 
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores/published"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -698,8 +788,11 @@ void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FEr
 
 void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -719,8 +812,11 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -739,8 +835,11 @@ void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, cons
 
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores/%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *StoreId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s"), BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -759,8 +858,11 @@ void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, c
 
 void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/stores/%s/clone%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), BaseUrl, *FRegistry::Settings.Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -779,8 +881,11 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/categories?storeId=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *StoreId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/categories?storeId=%s"), BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -799,8 +904,11 @@ void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId,
 
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items?storeId=%s"), *FRegistry::Settings.PlatformServerUrl, *FRegistry::Settings.Namespace, *StoreId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

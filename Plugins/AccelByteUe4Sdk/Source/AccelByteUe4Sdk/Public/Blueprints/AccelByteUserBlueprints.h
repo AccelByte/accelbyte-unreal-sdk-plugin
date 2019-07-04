@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -35,10 +35,12 @@ public:
 	static void ForgetAllCredentials();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
+	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
 	
+	/*! Commented because can't send PATCH request yet
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void Update(const FUserUpdateRequest& UpdateRequest, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
+	*/
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void Upgrade(const FString& Username, const FString& Password, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
@@ -58,8 +60,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void SendUpgradeVerificationCode(const FString& Email, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
+	/*UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);*/
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError);

@@ -39,6 +39,8 @@ void DeleteUserById(
 	const FErrorHandler& OnError);
 void FlushHttpRequests();
 
+void Waiting(bool& condition, FString text);
+
 UENUM(BlueprintType)
 enum class ECurrencyType : uint8
 {

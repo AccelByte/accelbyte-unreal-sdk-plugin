@@ -4,8 +4,6 @@
 
 #include "AccelByteStatisticApi.h"
 #include "ModuleManager.h"
-#include "IWebSocket.h"
-#include "WebSocketsModule.h"
 #include "AccelByteRegistry.h"
 #include "AccelByteHttpRetryScheduler.h"
 #include "AccelByteSettings.h"
@@ -15,14 +13,14 @@ namespace AccelByte
 namespace Api
 {
 
-Statistic::Statistic(const Credentials& Credentials, const AccelByte::Settings& Setting) : StatisticCredentials(Credentials), StatisticSettings(Setting){}
+Statistic::Statistic(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting){}
 
 Statistic::~Statistic() {}
 
 void Statistic::GetAllStatItems(const FString& ProfileId, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *StatisticCredentials.GetUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems"), *StatisticSettings.StatisticServerUrl, *StatisticCredentials.GetUserNamespace(), *StatisticCredentials.GetUserId(), *ProfileId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -46,8 +44,8 @@ void Statistic::GetStatItemsByStatCodes(const FString& ProfileId, TArray<FString
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *StatisticCredentials.GetUserAccessToken());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems/byStatCodes"), *StatisticSettings.StatisticServerUrl, *StatisticCredentials.GetUserNamespace(), *StatisticCredentials.GetUserId(), *ProfileId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems/byStatCodes"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

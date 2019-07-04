@@ -28,8 +28,8 @@ public:
 	Statistic(const Credentials& Credentials, const Settings& Settings);
 	~Statistic();
 private:
-	const Credentials& StatisticCredentials;
-	const Settings& StatisticSettings;
+	const Credentials& Credentials;
+	const Settings& Settings;
 
 public:
 	
@@ -51,7 +51,7 @@ public:
 	void GetStatItemsByStatCodes(const FString& ProfileId, TArray<FString> StatCodes, const THandler<TArray<FAccelByteModelsUserStatItemInfo>>& OnSUccess, const FErrorHandler& OnError);
 	
 private:
-	Statistic() = delete; // static class can't have instance
+	Statistic() = delete;
 	Statistic(Statistic const&) = delete;
 	Statistic(Statistic&&) = delete;
 };

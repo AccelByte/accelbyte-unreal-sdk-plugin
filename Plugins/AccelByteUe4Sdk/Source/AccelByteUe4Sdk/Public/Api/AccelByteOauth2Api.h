@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -34,10 +34,10 @@ public:
 	 * @param ClientSecret The issued OAuth2 client credentials.
 	 * @param AuthorizationCode This should be filled with "JUSTICE_AUTHORIZATION_CODE" environment variable.
 	 * @param RedirectUri The URL the IAM server will redirect you to when the operation succeeded. Again, this doesn't work at all. Do not use this function!!!
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	static void GetSessionIdWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Log user in with their email account.
@@ -46,10 +46,10 @@ public:
 	 * @param ClientSecret The issued OAuth2 client credentials.
 	 * @param Username The email address. Dunno why it's called Login ID instead of username or something.
 	 * @param Password The password.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	static void GetSessionIdWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Get client token.
@@ -62,17 +62,6 @@ public:
 	*/
 	static void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-	/**
-	* @brief Get new access token with refresh token.
-	*
-	* @param ClientId The issued OAuth2 client credentials.
-	* @param ClientSecret The issued OAuth2 client credentials.
-	* @param RefreshToken Refresh token.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
-	* @param OnError This will be called when the operation failed.
-	*/
-	static void GetAccessTokenWithRefreshTokenGrant(const FString& ClientId, const FString& ClientSecret, const FString& RefreshToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
-
 	//
 	// Custom grant types
 	// These shouldn't be here but, eh.
@@ -81,25 +70,35 @@ public:
 	/**
 	 * @brief This function allows user to login without entering any information.
 	 * This will automatically obtain user's device information using UE4 function.
-	 * Will return a "user" access token.
+	 * Will return a "user" session id.
 	 * 
 	 * @param ClientId The issued OAuth2 client credentials.
 	 * @param ClientSecret The issued OAuth2 client credentials.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetAccessTokenWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	static void GetSessionIdWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief Log user in with their other platform account, e.g., Steam, Google, Facebook, Twitter, Twitch, etc.
-	* Will return a "user" access token.
+	* Will return a "user" session id.
 	* 
 	* @param PlatformId The PlatformId. The platform ID.
 	* @param PlatformToken The Token.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	static void GetSessionIdWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Log user out.
+	* Will make user session id invalid.
+	*
+	* @param AccessToken user Access Token or rather, Session Id.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void Logout(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Oauth2() = delete; // static class can't have instance

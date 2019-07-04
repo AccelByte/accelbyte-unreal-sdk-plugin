@@ -30,8 +30,8 @@ public:
 	Lobby(const Credentials& Credentials, const Settings& Settings);
 	~Lobby();
 private:
-	const Credentials& LobbyCredentials;
-	const Settings& LobbySettings;
+	const Credentials& Credentials;
+	const Settings& Settings;
 
 public:
 

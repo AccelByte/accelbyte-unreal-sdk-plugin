@@ -20,7 +20,7 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Credentials
 {
 public:
-	enum class ETokenState
+	enum class ESessionState
 	{
 		Invalid,
 		Expired,
@@ -34,15 +34,12 @@ public:
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
-	void SetUserToken(const FString& AccessToken, const FString& RefreshToken, double ExpiredTime, const FString& Id, const FString& DisplayName, const FString& Namespace);
+	void SetUserSession(const FString& SessionId, double ExpiredTime);
+	void SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace);
 	/**
-	 * @brief Get stored access token.
+	 * @brief Get stored session id.
 	 */
-	const FString& GetUserAccessToken() const;
-	/**
-	 * @brief Get stored refresh token; this is not set if you logged in with client credentials and you simply have to login with client credentials again to get new access token.
-	 */
-	const FString& GetUserRefreshToken() const;
+	const FString& GetUserSessionId() const;
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */
@@ -51,15 +48,7 @@ public:
 	const FString& GetUserId() const;
 	const FString& GetUserDisplayName() const;
 	const FString& GetUserNamespace() const;
-	ETokenState GetTokenState() const;
-	
-	void PollRefreshToken(double CurrentTime);
-	void ScheduleRefreshToken(double NextRefreshTime);
-	
-	/**
-	 * @brief Force to refresh access token.
-	 */
-	void ForceRefreshToken();
+	ESessionState GetSessionState() const;
 
 private:
 	FString ClientId;
@@ -67,15 +56,12 @@ private:
 	FString ClientAccessToken;
 	FString ClientNamespace;
 	
-	FString UserAccessToken;
-	FString UserRefreshToken;
+	FString UserSessionId;
+	double UserSessionExpire;
 	FString UserNamespace;
 	FString UserId;
-	FString UserDisplayName;		
-	double UserRefreshTime;
-	double UserExpiredTime;
-	double UserRefreshBackoff;
-	ETokenState UserTokenState;
+	FString UserDisplayName;
+	ESessionState UserSessionState;
 };
 
 } // Namespace AccelByte
@@ -87,7 +73,7 @@ class UAccelByteBlueprintsCredentials : public UBlueprintFunctionLibrary
 public:
 	GENERATED_BODY()
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
-	static FString GetUserAccessToken();
+	static FString GetUserSessionId();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserId();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
