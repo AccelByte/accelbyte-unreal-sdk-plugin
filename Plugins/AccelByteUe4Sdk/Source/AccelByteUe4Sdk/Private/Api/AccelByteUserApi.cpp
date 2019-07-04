@@ -91,6 +91,8 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
 #elif PLATFORM_LINUX
 	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
+#elif PLATFORM_MAC
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
 #endif
 
 
