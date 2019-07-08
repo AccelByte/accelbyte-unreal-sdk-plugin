@@ -19,11 +19,13 @@
     - [Matchmaking](#matchmaking)
     - [Friends](#friends)
   - [Game Profile](#game-profile)
+  - [Statistic](#statistic)
   - [Cloud Storage](#cloud-storage)
 
 
 ## User Management and Authorization
-See AccelByte::Api::User, AccelByte::Api::Oauth2, AccelByte::Credentials,
+
+See `AccelByte::Api::User`, `AccelByte::Api::Oauth2`, `AccelByte::Credentials`,
 
 ### Login with Client Credentials
 This is to get access token from `client_credentials` grant type, then store the access token in memory. 
@@ -33,7 +35,7 @@ It is "required" for user management (create new user, reset password, etc). See
 ```cpp
 bool bClientLoggedIn = false;
 
-User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoggedIn]()
+FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoggedIn]()
     {
         UE_LOG(LogAccelByteUserTest, Display, TEXT("Success."));
         bClientLoggedIn = true;
@@ -43,7 +45,7 @@ User::LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoggedIn]()
     }));
 ```
 
-See AccelByte::Api::User::LoginWithClientCredentials().
+See `AccelByte::Api::User::LoginWithClientCredentials()`.
 
 ### Login with Username
 Log in with email/phone number account.
@@ -53,7 +55,7 @@ const FString OriginalEmail = TEXT("originalEmail@example.com");
 const FString Password = TEXT("password");
 bool bUserLoggedIn = false;
 
-User::LoginWithUsername(OriginalEmail, Password, FVoidHandler::CreateLambda([&bUserLoggedIn]()
+FRegistry::User.LoginWithUsername(OriginalEmail, Password, FVoidHandler::CreateLambda([&bUserLoggedIn]()
     {
         UE_LOG(LogAccelByteUserTest, Display, TEXT("Success."));
         bUserLoggedIn = true;
@@ -62,15 +64,16 @@ User::LoginWithUsername(OriginalEmail, Password, FVoidHandler::CreateLambda([&bU
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::LoginWithUsername().
+See `AccelByte::Api::User::LoginWithUsername()`.
 
-### Login with Other Platform
-This is to get access token with another platform account e.g. Steam, Google, Facebook, Twitch, etc. See AccelByte IAM documentation for how this OAuth2 token endpoint works.
+### Login with Third Party Platform
+
+This is to get access token by using a third party platform account e.g. Steam, Google, Facebook, Twitch, etc. See AccelByte IAM documentation for how this OAuth2 token endpoint works.
 
 ```cpp
 bool bSteamLoginSuccessful1 = false;
 
-User::LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bSteamLoginSuccessful1 = true;
@@ -79,15 +82,16 @@ User::LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FV
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::LoginWithOtherPlatform().
+See `AccelByte::Api::User::LoginWithOtherPlatform()`.
 
-### Login with Device ID
-Log in with device ID (anonymous log in).
+### Login with Device Id
+
+Register / login with device id is very similar to a login with a third party platform. The user account created from this process is also a headless account.
 
 ```cpp
 bool bDeviceLoginSuccessful1 = false;
 
-User::LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
+FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bDeviceLoginSuccessful1 = true;
@@ -96,15 +100,15 @@ User::LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::LoginWithDeviceId().
+See `AccelByte::Api::User::LoginWithDeviceId()`.
 
 ### Login with Launcher
-Login from Accelbyte Launcher
+If you use the AccelByte Launcher, the game will login into the same user as the user that is logged in to the Launcher.
 
 ```cpp
 bool bLauncherLoginSuccessful1 = true;
 
-User::LoginWithLauncher(FVoidHandler::CreateLambda([&]()
+FRegistry::User.LoginWithLauncher(FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bLauncherLoginSuccessful1 = true;
@@ -113,15 +117,15 @@ User::LoginWithLauncher(FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::LoginWithLauncher().
+See `AccelByte::Api::User::LoginWithLauncher()`.
 
 ### Logout
-This simply remove the stored access tokens and user ID from memory.
+Logout will remove the user credentials from memory. User needs to re-login after logout.
 
 ```cpp
-AccelByte::Api::User::ForgetAllCredentials();
+FRegistry::User.ForgetAllCredentials();
 ```
-See AccelByte::Api::User::ForgetAllCredentials().
+See `AccelByte::Api::User::ForgetAllCredentials()`.
 
 ### Register
 This function will register a new user with email-based account.
@@ -130,9 +134,11 @@ This function will register a new user with email-based account.
 const FString OriginalEmail = TEXT("originalEmail@example.com");
 const FString Password = TEXT("password");
 const FString DisplayName = TEXT("testName");
+const FString Country = TEXT("US");
+const FString DateOfBirth = TEXT("2000-12-20");
 bool bUserAccountCreated = false;
 
-User::Register(OriginalEmail, Password, DisplayName, THandler<FUserData>::CreateLambda([&bUserAccountCreated](const FUserData& Result)
+FRegistry::User.Register(OriginalEmail, Password, DisplayName, Country, DateOfBirth, THandler<FUserData>::CreateLambda([&bUserAccountCreated](const FUserData& Result)
     {
         UE_LOG(LogAccelByteUserTest, Display, TEXT("Success."));
         bUserAccountCreated = true;
@@ -141,7 +147,7 @@ User::Register(OriginalEmail, Password, DisplayName, THandler<FUserData>::Create
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::Register().
+See `AccelByte::Api::User::Register()`.
 
 ### Get Data
 This function will get data of currently logged in user.
@@ -149,7 +155,7 @@ This function will get data of currently logged in user.
 ```cpp
 bool bGetDataSuccessful1 = false;
 FUserData GetDataResult;
-User::GetData(THandler<FUserData>::CreateLambda([&](const FUserData& Result) 
+FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&](const FUserData& Result) 
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bGetDataSuccessful = true;
@@ -159,7 +165,7 @@ User::GetData(THandler<FUserData>::CreateLambda([&](const FUserData& Result)
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::GetData().
+See `AccelByte::Api::User::GetData()`.
 
 ### Update
 This function will update user's account.
@@ -175,7 +181,7 @@ FUserUpdateRequest UpdateRequest
 FUserData UpdateResult;
 bool bUserUpdated = false;
 
-User::Update(UpdateRequest, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+FRegistry::User.Update(UpdateRequest, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
     {
         UE_LOG(LogAccelByteUserTest, Display, TEXT("Success."));
         bUserUpdated = true;
@@ -185,12 +191,11 @@ User::Update(UpdateRequest, THandler<FUserData>::CreateLambda([&](const FUserDat
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::Update().
+See `AccelByte::Api::User::Update()`.
 
 ### Upgrade
-This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
-Headless account is an account that doesn't have an email and password.
-If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
+This function will upgrade user's headless account. You may call SendVerificationCode afterwards.
+Headless account is an account that doesn't have an email and password. If a user logs in with a device/platform and they cannot login with email and password, their account is considered as a headless account.
 Therefore, the function requests user’s Username and Password for parameters.
 
 ```cpp
@@ -198,7 +203,7 @@ FString Email = TEXT("testSDK@game.test");
 FString Password = TEXT("password");
 bool bUpgradeSuccessful = false;
 
-User::Upgrade(Email, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+FRegistry::User.Upgrade(Email, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bUpgradeSuccessful = true;
@@ -207,7 +212,7 @@ User::Upgrade(Email, Password, THandler<FUserData>::CreateLambda([&](const FUser
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::Upgrade().
+See `AccelByte::Api::User::Upgrade()`.
 
 ### Send Verification Code 
 Verify user's email. User should login with email and password first to get access token.
@@ -215,7 +220,7 @@ Verify user's email. User should login with email and password first to get acce
 ```cpp
 bool bSendSuccessful = false;
 
-User::SendVerificationCode(FVoidHandler::CreateLambda([&]()
+FRegistry::User.SendVerificationCode(FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bSendSuccessful = true;
@@ -224,7 +229,7 @@ User::SendVerificationCode(FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::SendVerificationCode().
+See `AccelByte::Api::User::SendVerificationCode()`.
 
 ### Verify
 This function will verify the registered email **after** user receives verification code sent with ::SendVerificationCode() to their email.
@@ -233,7 +238,7 @@ This function will verify the registered email **after** user receives verificat
 bool bGetVerificationCode = false;
 FString VerificationCode = GetVerificationCodeFromUserId(FRegistry::Credentials.GetUserId());
 
-User::Verify(VerificationCode, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+FRegistry::User.Verify(VerificationCode, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bGetVerificationCode = true;
@@ -242,7 +247,7 @@ User::Verify(VerificationCode, THandler<FUserData>::CreateLambda([&](const FUser
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::Verify().
+See `AccelByte::Api::User::Verify()`.
 
 ### Send Reset Password Code
 For a password reset, verification code is sent to the email.
@@ -251,7 +256,7 @@ For a password reset, verification code is sent to the email.
 FString LoginId = TEXT("testeraccelbyte@game.test");
 bool bForgotPaswordSuccessful = false;
 
-User::SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
+FRegistry::User.SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bForgotPaswordSuccessful = true;
@@ -260,7 +265,7 @@ User::SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::SendResetPasswordCode().
+See `AccelByte::Api::User::SendResetPasswordCode()`.
 
 ### Reset Password
 Reset user's password with sent verification code.
@@ -271,7 +276,7 @@ FString Password = "new_password";
 FString VerificationCode = GetVerificationCode(LoginId);
 bool bResetPasswordSuccessful = false;
 
-User::ResetPassword(VerificationCode, LoginId, Password, FVoidHandler::CreateLambda([&]()
+FRegistry::User.ResetPassword(VerificationCode, LoginId, Password, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bResetPasswordSuccessful = true;
@@ -280,7 +285,7 @@ User::ResetPassword(VerificationCode, LoginId, Password, FVoidHandler::CreateLam
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::ResetPassword().
+See `AccelByte::Api::User::ResetPassword()`.
 
 ### Send Upgrade Verification Code
 This function should be done before user upgrade their headless account. After this function successfully called, obtain the verification code from the submitted email. Then call UpgradeHeadlessAccountWithVerificationCode function afterwards.
@@ -289,7 +294,7 @@ This function should be done before user upgrade their headless account. After t
 FString Email = TEXT("upgradeAndVerify@example.com");
 bool bSendUserUpgradeVerificationCode = false;
 
-User::SendUpgradeVerificationCode(Email, FVoidHandler::CreateLambda([&]()
+FRegistry::User.SendUpgradeVerificationCode(Email, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bSendUserUpgradeVerificationCode = true;
@@ -298,7 +303,7 @@ User::SendUpgradeVerificationCode(Email, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::SendUpgradeVerificationCode().
+See `AccelByte::Api::User::SendUpgradeVerificationCode()`.
 
 ### Upgrade and Verify
 This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
@@ -309,7 +314,7 @@ FString Password = TEXT("password");
 bool bGetVerificationCode = false;
 FString VerificationCode = GetVerificationCodeFromUserId(FRegistry::Credentials.GetUserId());
 
-User::UpgradeAndVerify(Email, Password, VerificationCode, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+FRegistry::User.UpgradeAndVerify(Email, Password, VerificationCode, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bGetVerificationCode = true;
@@ -318,15 +323,15 @@ User::UpgradeAndVerify(Email, Password, VerificationCode, THandler<FUserData>::C
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::UpgradeAndVerify().
+See `AccelByte::Api::User::UpgradeAndVerify()`.
 
-### Get Platform Links
+### Get Third Party Platform Links
 This function gets user's platform accounts linked to user’s account.
 
 ```cpp
 bool bGetPlatformLinksSuccessful = false;
 
-User::GetPlatformLinks(FVoidHandler::CreateLambda([&]()
+FRegistry::User.GetPlatformLinks(FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bGetPlatformLinksSuccessful = true;
@@ -335,9 +340,9 @@ User::GetPlatformLinks(FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::GetPlatformLinks().
+See `AccelByte::Api::User::GetPlatformLinks()`.
 
-### Link Other Platform
+### Link Third Party Platform
 This function links user's current account to their other account in other platform.
 Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
 The browser will redirect the URL to a site with a code in form of parameter URL.
@@ -347,7 +352,7 @@ bool bLinkOtherPlatformSuccessful = false;
 FString PlatformId = TEXT("PlatformId");
 FString Ticket = TEXT("Ticket");
 
-User::LinkOtherPlatform(PlatformId, Ticket, FVoidHandler::CreateLambda([&]()
+FRegistry::User.LinkOtherPlatform(PlatformId, Ticket, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bLinkOtherPlatformSuccessful = true;
@@ -356,9 +361,9 @@ User::LinkOtherPlatform(PlatformId, Ticket, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::LinkOtherPlatform().
+See `AccelByte::Api::User::LinkOtherPlatform()`.
 
-### Unlink Other Platform
+### Unlink Third Party Platform
 This function links user's current account to their other account in other platform
 Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch).
 The browser will redirect the URL to a site with a code in form of parameter URL.
@@ -367,7 +372,7 @@ The browser will redirect the URL to a site with a code in form of parameter URL
 bool bUnlinkOtherPlatformSuccessful = false;
 FString PlatformId = TEXT("PlatformId");
 
-User::UnlinkOtherPlatform(PlatformId, FVoidHandler::CreateLambda([&]()
+FRegistry::User.UnlinkOtherPlatform(PlatformId, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bLinkOtherPlatformSuccessful = true;
@@ -376,21 +381,21 @@ User::UnlinkOtherPlatform(PlatformId, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::User::UnlinkOtherPlatform().
+See `AccelByte::Api::User::UnlinkOtherPlatform()`.
 
 ---
 
 ## User Profile
 API to create, update, and get user's profile.
-See AccelByte::Api::UserProfile,
+See `AccelByte::Api::UserProfile`,
 
 ### Get User Profile
-Get user's profile information. If it doesn't exist, that will be an error.
+Get a user's profile information. If it doesn't exist, that will be an error.
 
 ```cpp
 bool bGetProfileSuccessful1 = false;
 
-UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+FRegistry::UserProfile.GetUserProfile(THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
         bGetProfileSuccessful1 = true;
@@ -399,7 +404,7 @@ UserProfile::GetUserProfile(THandler<FAccelByteModelsUserProfileInfo>::CreateLam
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::UserProfile::GetUserProfile().
+See `AccelByte::Api::UserProfile::GetUserProfile()`.
 
 ### Update User Profile
 Update user's current profile information. If it doesn't exist, that will be an error.
@@ -411,7 +416,7 @@ FAccelByteModelsUserProfileUpdateRequest ProfileUpdate;
     ProfileUpdate.DateOfBirth = "2000-01-01";
 bool bUpdateProfileSuccessful = false;
 
-UserProfile::UpdateUserProfile(ProfileUpdate, FVoidHandler::CreateLambda([&]()
+FRegistry::UserProfile.UpdateUserProfile(ProfileUpdate, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("Success"));
         bUpdateProfileSuccessful = true;
@@ -420,10 +425,10 @@ UserProfile::UpdateUserProfile(ProfileUpdate, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteUserTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::UserProfile::UpdateUserProfile().
+See `AccelByte::Api::UserProfile::UpdateUserProfile()`.
 
 ### Create User Profile
-Create complete player profile. If it already exist, that will be an error.
+Create complete player profile. If it already exists, that will be an error.
 
 ```cpp
 bool bCreateProfileSuccessful1 = false;
@@ -432,36 +437,28 @@ FAccelByteModelsUserProfileCreateRequest ProfileCreate;
     ProfileCreate.Timezone = "Etc/UTC";
     ProfileCreate.DateOfBirth = "1970-01-01";
 
-UserProfile::CreateUserProfile(ProfileCreate, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+FRegistry::UserProfile.CreateUserProfile(ProfileCreate, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
         bCreateProfileSuccessful1 = true;
     }), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
     {
-        if (Code != 2271)
-        {
-            UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-            bCreateProfileSuccessful1 = false;
-        }
-        else
-        {
-            UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-            bCreateProfileSuccessful1 = true;
-        }
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+        bCreateProfileSuccessful1 = false;
     }));
 ```
-See AccelByte::Api::UserProfile::CreateUserProfile().
+See `AccelByte::Api::UserProfile::CreateUserProfile()`.
 
 ---
 
 ## Ecommerce
 API related to Ecommerce.
-See AccelByte::Api::Category, AccelByte::Api::Item, AccelByte::Api::Order, AccelByte::Api::Wallet,
+See `AccelByte::Api::Category`, `AccelByte::Api::Item`, `AccelByte::Api::Order`, `AccelByte::Api::Wallet`,
 
 ### Categories
 Category API for buying things from the online store.
 The category has [tree data structure](https://en.wikipedia.org/wiki/Tree_(data_structure)). Each category has path, for example "/equipments/armor/legs". Each category has items inside it. You can get a list of items by criteria or by its ID.
-See AccelByte::Api::Category,
+See `AccelByte::Api::Category`,
 
 #### Get Root Categories
 This function gets root categories that exist in the specified namespace.
@@ -472,7 +469,7 @@ FString Language = TEXT("en");
 bool bGetRootCategoriesSuccess = false;
 bool bExpectedRootCategoryFound = false;
 
-Category::GetRootCategories(Language, Category::FGetRootCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+FRegistry::Category.GetRootCategories(Language, Category::FGetRootCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         for (int i = 0; i < Results.Num(); i++)
@@ -488,7 +485,7 @@ Category::GetRootCategories(Language, Category::FGetRootCategoriesSuccess::Creat
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Category::GetRootCategories().
+See `AccelByte::Api::Category::GetRootCategories()`.
 
 #### Get Category
 This function gets the category from a store in the specified namespace, for example, "/equipments/armor/torso".
@@ -498,7 +495,7 @@ FString CategoryPath = TEXT("/equipments/armor/torso");
 FString Language = TEXT("en");
 bool bGetCategorySuccess = false;
     
-Category::GetCategory(CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([&](FAccelByteModelsFullCategoryInfo Result)
+FRegistry::Category.GetCategory(CategoryPath, Language, Category::FGetCategorySuccess::CreateLambda([&](FAccelByteModelsFullCategoryInfo Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetCategorySuccess = true;
@@ -507,7 +504,7 @@ Category::GetCategory(CategoryPath, Language, Category::FGetCategorySuccess::Cre
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Category::GetCategory().
+See `AccelByte::Api::Category::GetCategory()`.
 
 #### Get Child Categories
 This function gets the subcategories from a category in the specified namespace.
@@ -518,7 +515,7 @@ FString CategoryPath = TEXT("/equipments/pay2win/super_badass_armor/chest");
 bool bGetChildCategoriesSuccess = false;
 bool bExpectedChildCategoryFound = false;
 
-Category::GetChildCategories(Language, CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+FRegistry::Category.GetChildCategories(Language, CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         for (int i = 0; i < Results.Num(); i++)
@@ -534,10 +531,10 @@ Category::GetChildCategories(Language, CategoryPath, Category::FGetChildCategori
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Category::GetChildCategories().
+See `AccelByte::Api::Category::GetChildCategories()`.
 
 #### Get Descendant Categories
-This is to get every subcategories from a category in the specified namespace.
+This will get every subcategory from a category in the specified namespace.
 
 ```cpp
 FString Language = TEXT("en");
@@ -546,7 +543,7 @@ bool bGetDescendantCategoriesSuccess = false;
 bool bExpectedDescendantCategoryFound1 = false;
 bool bExpectedDescendantCategoryFound2 = false;
     
-Category::GetDescendantCategories(Language, CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
+FRegistry::Category.GetDescendantCategories(Language, CategoryPath, Category::FGetChildCategoriesSuccess::CreateLambda([&](TArray<FAccelByteModelsFullCategoryInfo> Results)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         for (int i = 0; i < Results.Num(); i++)
@@ -566,14 +563,14 @@ Category::GetDescendantCategories(Language, CategoryPath, Category::FGetChildCat
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Category::GetDescendantCategories().
+See `AccelByte::Api::Category::GetDescendantCategories()`.
 
 ### Items
 Item API for buying things from the online store. An item represents a single product sold in the online store. Each category has items inside it. You can get a list of items by criteria or by its ID.
-See AccelByte::Api::Item,
+See `AccelByte::Api::Item`,
 
 #### Get Item by ID
-Get one item information from an online store.
+Get an items information from an online store.
 
 ```cpp
 FString ItemId = TEXT("YourItemId");
@@ -581,7 +578,7 @@ FString Language = TEXT("en");
 FString Region = TEXT("US");
 bool bGetItemByIdSuccess = false;
     
-Item::GetItemById(ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
+FRegistry::Item.GetItemById(ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetItemByIdSuccess = true;
@@ -590,7 +587,7 @@ Item::GetItemById(ItemId, Language, Region, Item::FGetItemByIdSuccess::CreateLam
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Item::GetItemById().
+See `AccelByte::Api::Item::GetItemById()`.
 
 #### Get Items by Criteria
 Get an array of items with specific criteria/filter from online store. You can think of it like a SQL query.
@@ -604,7 +601,7 @@ EAccelByteItemType Type = EAccelByteItemType::INGAMEITEM;
 bool bGetItemByCriteriaSuccess = false;
 bool bExpectedRootItemFound = false;
     
-Item::GetItemsByCriteria(Language, Region, CategoryPath, Type, Status, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+FRegistry::Item.GetItemsByCriteria(Language, Region, CategoryPath, Type, Status, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         for (int i = 0; i < Result.Data.Num(); i++)
@@ -622,10 +619,10 @@ Item::GetItemsByCriteria(Language, Region, CategoryPath, Type, Status, 0, 20, TH
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Item::GetItemsByCriteria().
+See `AccelByte::Api::Item::GetItemsByCriteria()`.
 
 #### Search Items
-Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
+Search items by keyword in title, description and long description from a published store. Language constrained. If the item does not exist in the specified region, the default region item will be returned.
 
 ```cpp
 FString Language = TEXT("en");
@@ -636,7 +633,7 @@ FString SearchedItem = TEXT("Elixir");
 bool bSearchItemSuccess = false;
 bool bSearchedItemFound = false;
 UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SearchItem"));
-Item::SearchItem(Language, SearchedItem, PageNumber, PageSize, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+FRegistry::Item.SearchItem(Language, SearchedItem, PageNumber, PageSize, Region, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
     {
         for (int i = 0; i < Result.Data.Num(); i++)
         {
@@ -657,7 +654,7 @@ Item::SearchItem(Language, SearchedItem, PageNumber, PageSize, Region, THandler<
 
 ### Order
 Order is used to purchase something from the online store.
-See AccelByte::Api::Order
+See `AccelByte::Api::Order`
 
 #### Create Order
 Create order to purchase something from the store. 
@@ -674,7 +671,7 @@ FAccelByteModelsOrderCreate OrderCreate;
 
 bool bCreateNewOrderSuccess = false;
     
-Order::CreateNewOrder(OrderCreate, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+FRegistry::Order.CreateNewOrder(OrderCreate, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](FAccelByteModelsOrderInfo Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bCreateNewOrderSuccess = true;
@@ -683,7 +680,7 @@ Order::CreateNewOrder(OrderCreate, THandler<FAccelByteModelsOrderInfo>::CreateLa
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Order::CreateNewOrder().
+See `AccelByte::Api::Order::CreateNewOrder()`.
 
 #### Get User Order
 Get a single order with order number.
@@ -692,7 +689,7 @@ Get a single order with order number.
 FString OrderNo = TEXT("YourOrderNo");
 bool bGetUserOrderSuccess = false;
     
-Order::GetUserOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](const FAccelByteModelsOrderInfo& Result)
+FRegistry::Order.GetUserOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](const FAccelByteModelsOrderInfo& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetUserOrderSuccess = true;
@@ -701,17 +698,17 @@ Order::GetUserOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Order::GetUserOrder().
+See `AccelByte::Api::Order::GetUserOrder()`.
 
 #### Get User Orders
-Get all of user's orders that have been created with paging.
+Get all of a user's orders that have been created, with paging.
 
 ```cpp
 const int32 page = 0;
 const int32 size = 20;
 bool bGetUserOrdersSuccess = false;
     
-Order::GetUserOrders(page, size, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([&](const FAccelByteModelsOrderInfoPaging& Result)
+FRegistry::Order.GetUserOrders(page, size, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([&](const FAccelByteModelsOrderInfoPaging& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetUserOrdersSuccess = true;
@@ -720,16 +717,16 @@ Order::GetUserOrders(page, size, THandler<FAccelByteModelsOrderInfoPaging>::Crea
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Order::GetUserOrders().
+See `AccelByte::Api::Order::GetUserOrders()`.
 
 #### Get Order History
-Get the history of the created orders.
+Get the order history of a specified user.
 
 ```cpp
 FString OrderNo = TEXT("YourOrderNo");
 bool bGetUserOrderHistorySuccess = false;
     
-Order::GetUserOrderHistory(OrderNo, THandler<TArray<FAccelByteModelsOrderHistoryInfo>>::CreateLambda([&](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
+FRegistry::Order.GetUserOrderHistory(OrderNo, THandler<TArray<FAccelByteModelsOrderHistoryInfo>>::CreateLambda([&](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetUserOrderHistorySuccess = true;
@@ -738,7 +735,7 @@ Order::GetUserOrderHistory(OrderNo, THandler<TArray<FAccelByteModelsOrderHistory
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Order::GetUserOrderHistory().
+See `AccelByte::Api::Order::GetUserOrderHistory()`.
 
 #### Fulfill order
 Fulfill an order if the order is charged but the fulfillment fail.
@@ -747,7 +744,7 @@ Fulfill an order if the order is charged but the fulfillment fail.
 FString OrderNo = TEXT("YourOrderNo");
 bool bFulfillOrderSuccess = false;
     
-Order::FulfillOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](const FAccelByteModelsOrderInfo& Result)
+FRegistry::Order.FulfillOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](const FAccelByteModelsOrderInfo& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bFulfillOrderSuccess = true;
@@ -756,11 +753,11 @@ Order::FulfillOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Api::Order::FulfillOrder().
+See `AccelByte::Api::Order::FulfillOrder()`.
 
 ### Wallet
 Wallet API for buying things from the online store; a wallet can be a virtual or real currency.
-See AccelByte::Api::Wallet
+See `AccelByte::Api::Wallet`
 
 #### Get Wallet Info by Currency Code
 Get user's wallet information for a specific currency code.
@@ -769,7 +766,7 @@ Get user's wallet information for a specific currency code.
 FString ExpectedCurrencyCode = TEXT("CurrencyCode");
 bool bGetWalletSuccess = false;
     
-Wallet::GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&](const FAccelByteModelsWalletInfo& Result)
+FRegistry::Wallet.GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&](const FAccelByteModelsWalletInfo& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
         bGetWalletSuccess = true;
@@ -778,14 +775,14 @@ Wallet::GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, THandler<FAccelByteMod
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }));
 ```
-See AccelByte::Wallet::GetWalletInfoByCurrencyCode().
+See `AccelByte::Wallet::GetWalletInfoByCurrencyCode()`.
 
 ### Entitlement
-Entitlement API for checking user's ownership. User can query a list of item that belongs to him/her.
-See AccelByte::Api::Entitlement
+Entitlement API for checking a users’s entitlements. User can query a list of item that belongs to him/her.
+See `AccelByte::Api::Entitlement`
 
 #### Query User Entitlement
-Get list of ownership(s) that belongs to the user.
+Get a list of entitlements that belong to the user.
 ```cpp
 bool bQueryEntitlementSuccess = false;
 bool bQueryResultTrue = false;
@@ -796,7 +793,7 @@ int32 size = 20;
 EAccelByteEntitlementClass entitlementClass = EAccelByteEntitlementClass::NONE;
 EAccelByteAppType appType = EAccelByteAppType::NONE; 
 
-Entitlement::QueryUserEntitlement(entitlementName, itemId, page, size,
+FRegistry::Entitlement.QueryUserEntitlement(entitlementName, itemId, page, size,
 THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Success"));
@@ -807,13 +804,69 @@ THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&](const 
         UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
     }), entitlementClass, appType);
 ```
-See AccelByte::Api::Entitlement::QueryUserEntitlement().
+See `AccelByte::Api::Entitlement::QueryUserEntitlement()`.
 
 ---
 
 ## Lobby
 Lobby is for chatting and party management. Unlike other servers which use HTTP, Lobby server uses WebSocket ([RFC 6455](https://tools.ietf.org/html/rfc6455)).
 
+![lobby-api](http://www.plantuml.com/plantuml/png/TP3DgeCm44RtynI3Uz_WSj5xIw7q1y6bk8ZZL8CnAN5i4V7TAxLGA6GvdCF7S991b9UnDo1Q3EF9LTK4GCQDDSxmEl4dhjt3nbXagpjXplwkYSjl-jyg2SBCyy2ME2ZilMPR3q5-SQAlcfHePuFIMGcrlUgqRJxE0d1JrAc6CKg9sFnDmfZlZX7EK6mBQNOeSLlvVKTO85aVMjCy0G00)
+
+Lobby is a collection of services that are connected together through a websocket connection. Those services are:
+
+1. Party Service
+2. Chat Service
+3. Friends Service
+4. Presence Service
+5. Notification Service
+6. Matchmaking Service
+
+### Lobby Protocol
+
+AccelByte Lobby Protocol closely follows RPC model and is described by its message format, which is a subset of YAML. The message is divided into two parts: header and payload. Header fields are type, id, and code (optional), while payload fields depends on the type.
+
+Request Example:
+
+```text
+type: someRequest\n
+id: id123\n
+payloadFieldBool1: true\n
+payloadFieldDouble2: 2.0\n
+payloadFieldInt3: 3\n
+payloadFieldStr4: some text message
+```
+
+Response code 0 means the request returned an OK response, while other code means the request returned an error response. Request and Response come in pair, so that a pair of request and response have the same id, while an Notification doesn't have an id.
+
+Response OK Example:
+
+```text
+type: someResponse\n
+id: id123\n
+code: 0\n
+payloadFieldBool1: true\n
+payloadFieldDouble2: 2.0\n
+payloadFieldInt3: 3\n
+payloadFieldStr4: some text message\n
+payloadFieldStrArray5: [item1,item2,item3,item4]
+```
+
+Response Error Example:
+
+```text
+type: someResponse\n
+id: id123\n
+code: 14777
+```
+
+Notification/Event Example:
+
+```text
+type: someNotif\n
+payloadFieldBool1: true\n
+payloadFieldStrArray5: [item1]
+```
 ### Connect to server
 You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
 
@@ -1327,7 +1380,7 @@ Reject an incoming friend request.
 AccelByte::FRegistry::Lobby.RejectFriend(FString UserId);
 ```
 
-### Load friend list
+#### Load friend list
 Get all friend request that is sent to user.
 ```cpp
 AccelByte::FRegistry::Lobby.LoadFriendsList();
@@ -1339,23 +1392,20 @@ Get friendship status with another user.
 AccelByte::FRegistry::Lobby.GetFriendshipStatus(FString UserId);
 ```
 
-
 ## Game Profile
 GameProfile API to manage user's in-game profiles (character).
-See AccelByte::Api::GameProfile,
+See `AccelByte::Api::GameProfile`,
 
 ### Batch Get Public Game Profiles
 Get public game profiles from the specified user id(s).
 ```cpp
 TArray<FAccelByteModelsPublicGameProfile> GetBatchPublicGameProfilesResult;
 bool bBatchGetPublicGameProfiles = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 TArray<FString> ArrayOfUserId;
 ArrayOfUserId.Add(TEXT("userId12345"));
 ArrayOfUserId.Add(TEXT("userId23456"));
 
-gameProfile.BatchGetPublicGameProfiles(ArrayOfUserId, THandler<TArray<FAccelByteModelsPublicGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsPublicGameProfile>& Result)
+FRegistry::GameProfile.BatchGetPublicGameProfiles(ArrayOfUserId, THandler<TArray<FAccelByteModelsPublicGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsPublicGameProfile>& Result)
     {
         bBatchGetPublicGameProfiles = true;
         GetBatchPublicGameProfilesResult = Result;
@@ -1364,17 +1414,15 @@ gameProfile.BatchGetPublicGameProfiles(ArrayOfUserId, THandler<TArray<FAccelByte
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::BatchGetPublicGameProfiles().
+See `AccelByte::Api::GameProfile::BatchGetPublicGameProfiles()`.
 
 ### Get All Game Profiles
 Get all user's game profiles.
 ```cpp
 TArray<FAccelByteModelsGameProfile> GetAllGameProfileResult;
 bool bGetAllGameProfileSuccess = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 
-gameProfile.GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result){
+FRegistry::GameProfile.GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result){
             UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\t\tsuccess"));
             GetAllGameProfileResult = Result;
             bGetAllGameProfileSuccess = true;
@@ -1383,7 +1431,7 @@ gameProfile.GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::Cr
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::GetAllGameProfiles().
+See `AccelByte::Api::GameProfile::GetAllGameProfiles()`.
 
 ### Create Game Profile
 Create a game profile.
@@ -1400,10 +1448,8 @@ FString profileName = TEXT("DefaultName");
 FAccelByteModelsGameProfileRequest Request = GenerateGameProfileRequest(attributeLength, attributeKeyPrefix, attributeValuePrefix, tagsLength, tagPrefix, avatarUrl, label, profileName);
 FAccelByteModelsGameProfile ActualResult;
 bool bCreateGameProfileSuccess = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 
-gameProfile.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result){
+FRegistry::GameProfile.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result){
         ActualResult = Result;
         bCreateGameProfileSuccess = true;
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -1411,18 +1457,16 @@ gameProfile.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::Cr
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::CreateGameProfile().
+See `AccelByte::Api::GameProfile::CreateGameProfile()`.
 
 ### Get Game Profile
 Get a specific game profile.
 ```cpp
 FAccelByteModelsGameProfile GetResult;
 bool bGetGameProfileSuccess = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 FString profileId;
 
-gameProfile.GetGameProfile(profileId, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bGetGameProfileSuccess, &GetResult](const FAccelByteModelsGameProfile& Result){
+FRegistry::GameProfile.GetGameProfile(profileId, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bGetGameProfileSuccess, &GetResult](const FAccelByteModelsGameProfile& Result){
         GetResult = Result;
         bGetGameProfileSuccess = true;
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -1430,7 +1474,7 @@ gameProfile.GetGameProfile(profileId, THandler<FAccelByteModelsGameProfile>::Cre
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::GetGameProfile().
+See `AccelByte::Api::GameProfile::GetGameProfile()`.
 
 ### Update Game Profile
 Update a specific game profile.
@@ -1446,11 +1490,9 @@ FString newProfileName = TEXT("NewName");
 FAccelByteModelsGameProfileRequest UpdateRequest = GenerateGameProfileRequest(oldAttributeLength+1, newAttributeKeyPrefix, newAttributeValuePrefix, oldTagsLength+1, newTagPrefix, newAvatarUrl, newLabel, newProfileName);
 bool bUpdateGameProfileSuccess = false;
 FAccelByteModelsGameProfile UpdateResult;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 FString profileId;
 
-gameProfile.UpdateGameProfile(profileId, UpdateRequest, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bUpdateGameProfileSuccess, &UpdateResult](const FAccelByteModelsGameProfile& Result){
+FRegistry::GameProfile.UpdateGameProfile(profileId, UpdateRequest, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bUpdateGameProfileSuccess, &UpdateResult](const FAccelByteModelsGameProfile& Result){
         UpdateResult = Result;
         bUpdateGameProfileSuccess = true;
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -1458,40 +1500,36 @@ gameProfile.UpdateGameProfile(profileId, UpdateRequest, THandler<FAccelByteModel
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::UpdateGameProfile().
+See `AccelByte::Api::GameProfile::UpdateGameProfile()`.
 
 ### Delete Game Profile
 Delete a specific game profile.
 ```cpp
 bool bDeleteGameProfileSuccess = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 FString profileId;
 
-gameProfile.DeleteGameProfile(profileId, FVoidHandler::CreateLambda([&bDeleteGameProfileSuccess]() {
+FRegistry::GameProfile.DeleteGameProfile(profileId, FVoidHandler::CreateLambda([&bDeleteGameProfileSuccess]() {
         bDeleteGameProfileSuccess = true;
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
     {
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::DeleteGameProfile().
+See `AccelByte::Api::GameProfile::DeleteGameProfile()`.
 
 ### Get Game Profile Attribute
 Get an attribute value from a game profile.
 ```cpp
 bool bGameProfileDoesntExist = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
-FString profileId;
+FString profileId = "profileid12345";
 
-gameProfile.GetGameProfile(profileId, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bGameProfileDoesntExist](const FAccelByteModelsGameProfile& Result) {
+FRegistry::GameProfile.GetGameProfile(profileId, THandler<FAccelByteModelsGameProfile>::CreateLambda([&bGameProfileDoesntExist](const FAccelByteModelsGameProfile& Result) {
         bGameProfileDoesntExist = Result.profileId.IsEmpty();
     }), FErrorHandler::CreateLambda([&bGameProfileDoesntExist](int32 Code, FString Message) {
         bGameProfileDoesntExist = Code == EHttpResponseCodes::NotFound;
     }));
 ```
-See AccelByte::Api::GameProfile::GetGameProfileAttribute().
+See `AccelByte::Api::GameProfile::GetGameProfileAttribute()`.
 
 ### Update Game Profile Attribute
 Update an attribute from a game profile.
@@ -1513,11 +1551,9 @@ FString UpdateAttributeValue = "updateVALUE";
 FAccelByteModelsGameProfile UpdateResult;
 FAccelByteModelsGameProfileAttribute AttributeRequest{ TestAttributeKey , UpdateAttributeValue };
 bool bUpdateGameProfileAttributeSuccess = false;
-Credentials GameProfileCred;
-AccelByte::Api::GameProfile gameProfile(GameProfileCred, FRegistry::Settings);
 FString profileId;
 
-gameProfile.UpdateGameProfileAttribute(profileId, AttributeRequest, THandler<FAccelByteModelsGameProfile>::CreateLambda([&](const FAccelByteModelsGameProfile& Result)
+FRegistry::GameProfile.UpdateGameProfileAttribute(profileId, AttributeRequest, THandler<FAccelByteModelsGameProfile>::CreateLambda([&](const FAccelByteModelsGameProfile& Result)
     {
         bUpdateGameProfileAttributeSuccess = true;
         UpdateResult = Result;
@@ -1526,18 +1562,62 @@ gameProfile.UpdateGameProfileAttribute(profileId, AttributeRequest, THandler<FAc
         UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::GameProfile::UpdateGameProfileAttribute().
+See `AccelByte::Api::GameProfile::UpdateGameProfileAttribute()`.
+
+## Statistic
+Statistic API manages user's statistics, e.g. : TOTAL_KILLS, TOTAL_DEATHS, TOTAL_ASSISTS, MVP, etc.
+See `AccelByte::Api::Statistic`,
+### Get All Stat Items
+This function gets all stat items from the specified user id and profile id.
+```cpp
+bool bGetAllStatItemsResult = false;
+FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
+const FString ProfileId = "profileid12345";
+
+FRegistry::Statistic.GetAllStatItems(ProfileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+	{
+		bGetAllStatItemsResult = true;
+		GetResult = Result;
+	}), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+    }));
+```
+See `AccelByte::Api::Statistic::GetAllStatItems()`.
+
+### Get Stat Items By Stat Codes
+This function gets stat item(s) from the specified user id and profile id by the stat code(s).
+```cpp
+bool bGetStatItemsByStatCodesResult = false;
+const FString ProfileId = "profileid12345";
+TArray<FString> StatCodes;
+StatCodes.Add(TEXT("TOTAL_KILLS");
+StatCodes.Add(TEXT("TOTAL_DEATHS");
+TArray<FAccelByteModelsUserStatItemInfo> GetResult;
+
+FRegistry::Statistic.GetStatItemsByStatCodes(ProfileId, StatCodes, const THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([&](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
+	{
+		bGetStatItemsByStatCodesResult = true;
+		GetResult = Result;
+	}), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+    }));
+```
+See `AccelByte::Api::Statistic::GetStatItemsByStatCodes()`.
+
+---
 
 ## Cloud Storage
 Cloud Storage API for storing binary data on the cloud.
-See AccelByte::Api::CloudStorage,
+See `AccelByte::Api::CloudStorage`,
 
 ### Get All Slots
-This function gets list of slot(s) those owned by the player.
+This function gets a list of slot(s) owned by the player.
 ```cpp
 bool bGetAllSlotsResult = false;
 TArray<FAccelByteModelsSlot> Results;
-CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
+FRegistry::CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
     {
         UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
         Results = Slots;
@@ -1547,10 +1627,10 @@ CloudStorage::GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([
         UE_LOG(LogAccelByteCloudStorageTest, Fatal, TEXT("Error code: %s\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::CloudStorage::GetAllSlots().
+See `AccelByte::Api::CloudStorage::GetAllSlots()`.
 
 ### Create Slot
-This function creates a slot for an uploaded binary data.
+This function creates a slot for uploaded binary data to be stored.
 ```cpp
 FString PayloadString = TEXT("PayloadOne");
 FString fileName = TEXT("create.txt");
@@ -1563,7 +1643,7 @@ TArray<uint8> Payload;
 Payload.AddUninitialized(PayloadString.Len());
 StringToBytes(PayloadString, Payload.GetData(), PayloadString.Len());
 
-CloudStorage::CreateSlot(Payload, fileName, tags, label, customAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+FRegistry::CloudStorage.CreateSlot(Payload, fileName, tags, label, customAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
     {
         UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Create Slot Success"));
         CreatedSlot = Result;
@@ -1573,7 +1653,7 @@ CloudStorage::CreateSlot(Payload, fileName, tags, label, customAttribute, THandl
         UE_LOG(LogAccelByteCloudStorageTest, Fatal, TEXT("Error code: %s\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::CloudStorage::CreateSlot().
+See `AccelByte::Api::CloudStorage::CreateSlot()`.
 
 ### Update Slot
 This function updates a stored slot.
@@ -1590,7 +1670,7 @@ TArray<uint8> Payload;
 Payload.AddUninitialized(PayloadString.Len());
 StringToBytes(PayloadString, Payload.GetData(), PayloadString.Len());
 
-CloudStorage::UpdateSlot(SlotId, Payload, newFileName, newTag, newLabel, customAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+FRegistry::CloudStorage.UpdateSlot(SlotId, Payload, newFileName, newTag, newLabel, customAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
     {
         UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
         bSlotUpdatedResult = true;
@@ -1599,10 +1679,10 @@ CloudStorage::UpdateSlot(SlotId, Payload, newFileName, newTag, newLabel, customA
         UE_LOG(LogAccelByteCloudStorageTest, Fatal, TEXT("Error code: %s\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::CloudStorage::UpdateSlot().
+See `AccelByte::Api::CloudStorage::UpdateSlot()`.
 
 ### Update Slot Metadata
-This function updates stored slot's metadata.
+This function updates a stored slot's metadata.
 ```cpp
 FString SlotId = "1234567890" // example of slot ID that owned by the user;
 FString UpdateFileName = "metadataUpdate.txt";
@@ -1612,7 +1692,7 @@ UpdateTags.Add("tagTwo");
 FString UpdateLabel = "metadataLabel";
 FString UpdateCustomAttribute = TEXT("This is a custom attribute");
 
-CloudStorage::UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+FRegistry::CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 {
 	UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 	bMetadataUpdatedResult = true;
@@ -1623,12 +1703,12 @@ CloudStorage::UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags,
 ```
 
 ### Get Slot
-This function gets the data that stored in the slot.
+This function gets the data that is stored in the slot.
 ```cpp
 bool bGetSlotResult = false;
 FString SlotId = "1234567890" // example of slot ID that owned by the user;
 
-CloudStorage::GetSlot(SlotId, CloudStorage::FGetSlotSuccess::CreateLambda([&](const TArray<uint8>& Data)
+FRegistry::CloudStorage.GetSlot(SlotId, CloudStorage::FGetSlotSuccess::CreateLambda([&](const TArray<uint8>& Data)
     {
         bGetSlotResult = true;
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -1636,15 +1716,15 @@ CloudStorage::GetSlot(SlotId, CloudStorage::FGetSlotSuccess::CreateLambda([&](co
         UE_LOG(LogAccelByteCloudStorageTest, Fatal, TEXT("Error code: %s\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::CloudStorage::GetSlot().
+See `AccelByte::Api::CloudStorage::GetSlot()`.
 
 ### Delete Slot
-This function delete the specified slot.
+This function deletes the specified slot.
 ```cpp
 bool bDeleteSlotResult = false;
 FString SlotId = "1234567890" // example of slot ID that owned by the user;
 
-CloudStorage::DeleteSlot(SlotId, FVoidHandler::CreateLambda([&]()
+FRegistry::CloudStorage.DeleteSlot(SlotId, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Delete Slot Success"));
         bDeleteSlotResult = true;
@@ -1653,4 +1733,4 @@ CloudStorage::DeleteSlot(SlotId, FVoidHandler::CreateLambda([&]()
         UE_LOG(LogAccelByteCloudStorageTest, Fatal, TEXT("Error code: %s\nError message:%s"), ErrorCode, *ErrorMessage);
     }));
 ```
-See AccelByte::Api::CloudStorage::DeleteSlot().
+See `AccelByte::Api::CloudStorage::DeleteSlot()`.
