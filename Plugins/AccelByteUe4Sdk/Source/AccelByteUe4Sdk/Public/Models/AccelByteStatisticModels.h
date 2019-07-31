@@ -21,13 +21,6 @@ enum class EAccelByteStatisticStatus : uint8
 	TIED
 };
 
-UENUM(BlueprintType)
-enum class EAccelByteStatisticType : uint8
-{
-	INT = 0,
-	FLOAT
-};
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsStatInfo
 {
@@ -56,8 +49,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStatInfo
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatInfo")
 		EAccelByteStatisticStatus Status;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatInfo")
-		EAccelByteStatisticType type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatInfo")
 		FString UpdatedAt;
 
@@ -123,3 +114,27 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemPagingSlicedResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | StatItemPagingSlicedResult")
 		FAccelByteModelsPaging Paging;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatItemInc
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
+		float inc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
+		FString profileId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
+		FString statCode;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkStatItemInc
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemInc")
+		float inc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemInc")
+		FString statCode;
+};
+
+

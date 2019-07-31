@@ -925,3 +925,80 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats/%s"), BaseUrl, *FRegistry::Settings.Namespace, *statCode);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats"), BaseUrl, *FRegistry::Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+{
+	const int32 length = 100;
+	TCHAR BaseUrl[length];
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), BaseUrl, length);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/users/%s/profiles/%s/statitems/bulk/create"), BaseUrl, *FRegistry::Settings.Namespace, *userId, *profileId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = "[";
+	for (int i = 0; i < statCode.Num(); i++)
+	{
+		Content += FString::Printf(TEXT("{\"statCode\":\"%s\"}"), *statCode[i]);
+		if (i < statCode.Num() - 1)
+		{
+			Content += ",";
+		}
+		else
+		{
+			Content += "]";
+		}
+	}
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}

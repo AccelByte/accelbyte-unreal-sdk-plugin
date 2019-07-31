@@ -6,6 +6,7 @@
 
 #include "AccelByteError.h"
 #include "../AccelByteUe4Sdk/Public/Models/AccelByteItemModels.h"
+#include "../AccelByteUe4Sdk/Public/Models/AccelByteStatisticModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
@@ -302,6 +303,30 @@ struct FItemFullInfo
 		FString updatedAt;
 };
 
+USTRUCT(BlueprintType)
+struct FStatCreateRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		float defaultValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		FString description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		bool incrementOnly;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		float maximum;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		float minimum;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		FString name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		bool setAsGlobal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		EAccelByteStatisticSetBy setBy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		FString statCode;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -332,3 +357,7 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError);
 
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
+
+void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
+void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
+void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
