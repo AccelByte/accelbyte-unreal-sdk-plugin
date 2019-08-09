@@ -32,5 +32,8 @@ popd
 ::::Print the content of the automation test log file
 type "%WORKSPACE%\Saved\Logs\%TEST_LOG%"
 
+::::Cannot exit from test stage if "Steam" is active.
+TSKILL "Steam"
+
 :::::If the result of the test is not 0, then something wrong happen with the test
 if NOT %EXIT_CODE% == 0 (exit 1)
