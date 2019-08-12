@@ -1,12 +1,5 @@
 #Automation test preparation
 
-##Steam account login
-$STEAM_PATH = $Env:STEAM_PATH
-$STEAM_ID = $Env:STEAM_ID
-$STEAM_PASS = $Env:STEAM_PASS
-
-& $STEAM_PATH -login $STEAM_ID $STEAM_PASS
-
 ##Set the content of the configuration file
 $CONFIG_FILE="$Env:WORKSPACE\Config\DefaultEngine.ini"
 $CONFIG_FIELD =

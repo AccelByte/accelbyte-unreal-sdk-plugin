@@ -9,6 +9,15 @@ SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
 SET AWS_REGION = %AWS_REGION%
 set TEST_LOG="AutomationTestLog.log"
 
+::::Steam account login
+SET STEAM_PATH = %STEAM_PATH%
+SET STEAM_ID = %STEAM_ID%
+SET STEAM_PASS = %STEAM_PASS%
+
+start "Steam" "%STEAM_PATH%" "-login" "%STEAM_ID%" "%STEAM_PASS%"
+::::Wait for steam to startup
+powershell Start-Sleep -m 10000
+
 ::::Login Steam account to an application and generate the Steam authorization ticket
 pushd SteamHelper
 SteamTicketHelper.exe login
@@ -33,7 +42,7 @@ popd
 type "%WORKSPACE%\Saved\Logs\%TEST_LOG%"
 
 ::::Cannot exit from test stage if "Steam" is active.
-TSKILL "Steam"
+taskkill /F /IM Steam.exe
 
 :::::If the result of the test is not 0, then something wrong happen with the test
 if NOT %EXIT_CODE% == 0 (exit 1)
