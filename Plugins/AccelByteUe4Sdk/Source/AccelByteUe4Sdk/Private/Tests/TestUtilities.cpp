@@ -916,7 +916,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 {
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats/%s"), BaseUrl, *FRegistry::Settings.Namespace, *statCode);
+    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
@@ -934,7 +934,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 {
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats"), BaseUrl, *FRegistry::Settings.Namespace);
+    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
@@ -955,7 +955,7 @@ void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FS
 {
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/users/%s/profiles/%s/statitems/bulk/create"), BaseUrl, *FRegistry::Settings.Namespace, *userId, *profileId);
+    FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/users/%s/profiles/%s/statitems/bulk/create"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *profileId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
