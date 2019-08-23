@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 

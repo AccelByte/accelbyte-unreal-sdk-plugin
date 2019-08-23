@@ -3,13 +3,13 @@
 // and restrictions contact your company contract manager.
 
 #include "TestUtilities.h"
-#include "AutomationTest.h"
+#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Json.h"
-#include "FileManager.h"
+#include "HAL/FileManager.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;

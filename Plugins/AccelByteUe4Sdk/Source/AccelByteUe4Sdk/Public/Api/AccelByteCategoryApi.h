@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "AccelByteError.h"
-#include "AccelByteCategoryModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteCategoryModels.h"
 
 namespace AccelByte
 {

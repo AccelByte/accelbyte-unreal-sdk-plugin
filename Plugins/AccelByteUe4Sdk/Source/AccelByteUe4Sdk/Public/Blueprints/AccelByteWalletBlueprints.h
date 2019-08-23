@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteWalletApi.h"
-#include "AccelByteWalletModels.h"
+#include "Api/AccelByteWalletApi.h"
+#include "Models/AccelByteWalletModels.h"
 #include "AccelByteWalletBlueprints.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

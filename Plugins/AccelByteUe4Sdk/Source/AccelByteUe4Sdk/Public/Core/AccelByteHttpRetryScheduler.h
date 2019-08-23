@@ -10,17 +10,17 @@
 #include "HttpRetrySystem.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
-#include "AutomationTest.h"
+#include "Runtime/Core/Public/Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteOrderApi.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteUserProfileModels.h"
+#include "Api/AccelByteOrderApi.h"
+#include "Api/AccelByteUserApi.h"
+#include "Models/AccelByteUserProfileModels.h"
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
-#include "FileManager.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteUserProfileApi.h"
+#include "Runtime/Core/Public/HAL/FileManager.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteUserProfileApi.h"
 #include <vector>
 
 using AccelByte::FErrorHandler;

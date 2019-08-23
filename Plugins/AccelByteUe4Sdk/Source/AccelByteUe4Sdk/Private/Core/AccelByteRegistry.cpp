@@ -2,19 +2,19 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteUserProfileApi.h"
-#include "AccelByteCategoryApi.h"
-#include "AccelByteEntitlementApi.h"
-#include "AccelByteOrderApi.h"
-#include "AccelByteItemApi.h"
-#include "AccelByteWalletApi.h"
-#include "AccelByteCloudStorageApi.h"
-#include "AccelByteLobbyApi.h"
-#include "AccelByteGameProfileApi.h"
-#include "AccelByteStatisticApi.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteUserProfileApi.h"
+#include "Api/AccelByteCategoryApi.h"
+#include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteOrderApi.h"
+#include "Api/AccelByteItemApi.h"
+#include "Api/AccelByteWalletApi.h"
+#include "Api/AccelByteCloudStorageApi.h"
+#include "Api/AccelByteLobbyApi.h"
+#include "Api/AccelByteGameProfileApi.h"
+#include "Api/AccelByteStatisticApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;

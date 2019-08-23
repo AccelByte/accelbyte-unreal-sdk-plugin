@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Http.h"
-#include "AccelByteError.h"
-#include "AccelByteOrderModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteOrderModels.h"
 
 namespace AccelByte
 {

@@ -2,10 +2,10 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteCloudStorageBlueprints.h"
-#include "AccelByteCloudStorageApi.h"
-#include "AccelByteSettings.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteCloudStorageBlueprints.h"
+#include "Api/AccelByteCloudStorageApi.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::Api::CloudStorage;
 using AccelByte::FErrorHandler;

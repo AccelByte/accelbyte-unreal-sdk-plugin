@@ -3,7 +3,7 @@
 // and restrictions contact your company contract manager.
 #pragma once
 
-#include "AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Models/AccelByteItemModels.h"
 
 namespace AccelByte

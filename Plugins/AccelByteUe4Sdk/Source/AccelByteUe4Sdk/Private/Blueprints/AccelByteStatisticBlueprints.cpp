@@ -2,9 +2,9 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteStatisticBlueprints.h"
-#include "AccelByteStatisticApi.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteStatisticBlueprints.h"
+#include "Api/AccelByteStatisticApi.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::FRegistry;
 using AccelByte::FErrorHandler;

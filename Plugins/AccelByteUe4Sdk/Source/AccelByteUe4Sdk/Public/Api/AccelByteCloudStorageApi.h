@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "AccelByteError.h"
-#include "AccelByteCloudStorageModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteCloudStorageModels.h"
 
 namespace AccelByte
 {
