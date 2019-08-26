@@ -2,13 +2,13 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteGameProfileApi.h"
-#include "ModuleManager.h"
+#include "Api/AccelByteGameProfileApi.h"
+#include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
 #include "WebSocketsModule.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
-#include "AccelByteSettings.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
 
 namespace AccelByte
 {

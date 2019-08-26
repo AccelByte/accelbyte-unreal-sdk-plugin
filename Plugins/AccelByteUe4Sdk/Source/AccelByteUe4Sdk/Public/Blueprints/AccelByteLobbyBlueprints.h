@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteLobbyModels.h"
+#include "Models/AccelByteLobbyModels.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteLobbyBlueprints.generated.h"
 

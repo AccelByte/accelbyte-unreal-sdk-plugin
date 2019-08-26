@@ -9,18 +9,18 @@
 #include <queue>
 #include <vector>
 
-#include "AutomationTest.h"
-#include "FileManager.h"
+#include "Misc/AutomationTest.h"
+#include "HAL/FileManager.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
-#include "AccelByteHttpRetryScheduler.h"
-#include "AccelByteOrderApi.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteUserProfileApi.h"
-#include "AccelByteUserProfileModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Api/AccelByteOrderApi.h"
+#include "Core/AccelByteRegistry.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteUserProfileApi.h"
+#include "Models/AccelByteUserProfileModels.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;

@@ -2,16 +2,16 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AutomationTest.h"
+#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteCloudStorageApi.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteCloudStorageApi.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
-#include "FileManager.h"
+#include "HAL/FileManager.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;

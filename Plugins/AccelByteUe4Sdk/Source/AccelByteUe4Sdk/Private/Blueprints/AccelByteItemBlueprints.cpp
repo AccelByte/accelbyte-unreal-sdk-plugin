@@ -2,11 +2,11 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteItemBlueprints.h"
-#include "AccelByteSettings.h"
-#include "AccelByteItemApi.h"
-#include "AccelByteCredentials.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteItemBlueprints.h"
+#include "Core/AccelByteSettings.h"
+#include "Api/AccelByteItemApi.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::Api::Item;
 using AccelByte::FErrorHandler;

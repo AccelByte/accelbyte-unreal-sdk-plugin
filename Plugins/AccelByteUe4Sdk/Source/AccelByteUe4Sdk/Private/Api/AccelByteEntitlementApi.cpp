@@ -2,13 +2,13 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteEntitlementApi.h"
-#include "AccelByteError.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
+#include "Api/AccelByteEntitlementApi.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "EngineMinimal.h"
-#include "AccelByteSettings.h"
+#include "Core/AccelByteSettings.h"
 
 namespace AccelByte
 {

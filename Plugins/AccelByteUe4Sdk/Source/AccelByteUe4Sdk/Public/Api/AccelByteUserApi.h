@@ -5,8 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUserModels.h"
-#include "AccelByteError.h"
+#include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
+#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 
 
 namespace AccelByte
@@ -97,17 +97,6 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
-	
-	/**
-	* @brief This function will update user's account.
-	*
-	* @param UpdateRequest User's request.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
-	* @param OnError This will be called when the operation failed.
-	*/
-	/*! Commented because can't send PATCH request yet
-	void Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
-	*/
 
 	/**
 	 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -169,17 +158,6 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	*/
 	void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-	/**
-	 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
-	 *
-	 * @param LoginId Email or phone number that will be used to upgrade the headless account.
-	 * @param Password User's password.
-	 * @param VerificationCode User's verification code that obtained from email.
-	 * @param OnSuccess This will be called when the operation succeeded.
-	 * @param OnError This will be called when the operation failed.
-	 */
-	//void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.

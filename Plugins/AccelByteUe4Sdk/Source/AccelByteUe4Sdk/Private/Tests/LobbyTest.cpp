@@ -2,15 +2,15 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AutomationTest.h"
+#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteOauth2Api.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteLobbyApi.h"
+#include "Api/AccelByteOauth2Api.h"
+#include "Api/AccelByteUserApi.h"
+#include "Core/AccelByteRegistry.h"
+#include "Api/AccelByteLobbyApi.h"
 #include "TestUtilities.h"
-#include "FileManager.h"
+#include "HAL/FileManager.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;

@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteCloudStorageModels.h"
+#include "Models/AccelByteCloudStorageModels.h"
 #include "AccelByteCloudStorageBlueprints.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

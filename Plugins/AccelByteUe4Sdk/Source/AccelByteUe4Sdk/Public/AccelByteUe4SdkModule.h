@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ModuleManager.h"
+#include "Modules/ModuleManager.h"
 
 class IAccelByteUe4SdkModuleInterface : public IModuleInterface
 {

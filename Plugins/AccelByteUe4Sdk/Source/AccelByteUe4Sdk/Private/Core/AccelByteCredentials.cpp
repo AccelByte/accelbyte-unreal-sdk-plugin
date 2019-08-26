@@ -2,9 +2,9 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteCredentials.h"
-#include "AccelByteOauth2Api.h"
-#include "AccelByteOauth2Models.h"
+#include "Core/AccelByteCredentials.h"
+#include "Api/AccelByteOauth2Api.h"
+#include "Models/AccelByteOauth2Models.h"
 
 using namespace AccelByte::Api;
 
@@ -102,7 +102,7 @@ const FString& Credentials::GetClientNamespace() const
 
 } // Namespace AccelByte
 
-#include "AccelByteRegistry.h"
+#include "Core/AccelByteRegistry.h"
 
 FString UAccelByteBlueprintsCredentials::GetUserSessionId()
 {

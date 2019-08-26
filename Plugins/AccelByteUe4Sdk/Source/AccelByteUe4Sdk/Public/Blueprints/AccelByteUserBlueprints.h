@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteError.h"
-#include "AccelByteUserModels.h"
+#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
 #include "AccelByteUserBlueprints.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FUserData&, Result);
@@ -36,11 +36,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
-	
-	/*! Commented because can't send PATCH request yet
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void Update(const FUserUpdateRequest& UpdateRequest, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
-	*/
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void Upgrade(const FString& Username, const FString& Password, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
@@ -59,9 +54,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void SendUpgradeVerificationCode(const FString& Email, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
-
-	/*UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);*/
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError);

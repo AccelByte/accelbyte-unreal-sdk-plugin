@@ -2,18 +2,18 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AutomationTest.h"
+#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteOrderApi.h"
-#include "AccelByteCategoryApi.h"
-#include "AccelByteItemApi.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteWalletApi.h"
-#include "AccelByteEntitlementApi.h"
-#include "AccelByteRegistry.h"
-#include "FileManager.h"
-#include "AccelByteUserApi.h"
+#include "Api/AccelByteOrderApi.h"
+#include "Api/AccelByteCategoryApi.h"
+#include "Api/AccelByteItemApi.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteWalletApi.h"
+#include "Api/AccelByteEntitlementApi.h"
+#include "Core/AccelByteRegistry.h"
+#include "HAL/FileManager.h"
+#include "Api/AccelByteUserApi.h"
 #include "TestUtilities.h"
 
 using AccelByte::FErrorHandler;
