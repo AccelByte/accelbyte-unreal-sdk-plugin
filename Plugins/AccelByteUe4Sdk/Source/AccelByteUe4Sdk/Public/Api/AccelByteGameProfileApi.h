@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteError.h"
+#include "Core/AccelByteError.h"
 #include "Models/AccelByteGameProfileModels.h"
 
 // Forward declarations

@@ -2,7 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteError.h"
+#include "Core/AccelByteError.h"
 
 namespace AccelByte
 {

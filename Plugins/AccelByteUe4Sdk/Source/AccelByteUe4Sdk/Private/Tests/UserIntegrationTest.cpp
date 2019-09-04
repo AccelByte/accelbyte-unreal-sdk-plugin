@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "AutomationTest.h"
+#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "AccelByteOrderApi.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteUserProfileModels.h"
-#include "AccelByteRegistry.h"
-#include "FileManager.h"
-#include "AccelByteUserProfileApi.h"
+#include "Api/AccelByteOrderApi.h"
+#include "Api/AccelByteUserApi.h"
+#include "Models/AccelByteUserProfileModels.h"
+#include "Core/AccelByteRegistry.h"
+#include "HAL/FileManager.h"
+#include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
 
 using namespace std;

@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteUserProfileModels.h"
-#include "AccelByteUserProfileApi.h"
+#include "Models/AccelByteUserProfileModels.h"
+#include "Api/AccelByteUserProfileApi.h"
 #include "AccelByteUserProfileBlueprints.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

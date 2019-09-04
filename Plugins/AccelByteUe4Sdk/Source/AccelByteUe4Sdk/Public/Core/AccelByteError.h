@@ -8,7 +8,7 @@
 #include "Http.h"
 #include "JsonUtilities.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "UnrealTypeTraits.h"
+#include "Runtime/Core/Public/Templates/UnrealTypeTraits.h"
 
 #include <unordered_map>
 

@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteEntitlementModels.h"
+#include "Models/AccelByteEntitlementModels.h"
 #include "AccelByteEntitlementBlueprints.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

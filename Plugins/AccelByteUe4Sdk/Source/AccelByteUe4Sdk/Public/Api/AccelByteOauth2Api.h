@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "AccelByteOauth2Models.h"
-#include "AccelByteError.h"
+#include "Models/AccelByteOauth2Models.h"
+#include "Core/AccelByteError.h"
 #include "Http.h"
 
 using AccelByte::THandler;

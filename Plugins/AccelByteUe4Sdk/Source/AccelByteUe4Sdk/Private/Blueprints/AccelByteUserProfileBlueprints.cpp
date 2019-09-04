@@ -2,8 +2,8 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteUserProfileBlueprints.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteUserProfileBlueprints.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::Api::UserProfile;
 using AccelByte::FErrorHandler;

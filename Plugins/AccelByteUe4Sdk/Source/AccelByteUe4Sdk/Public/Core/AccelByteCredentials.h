@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteOauth2Models.h"
+#include "Models/AccelByteOauth2Models.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"

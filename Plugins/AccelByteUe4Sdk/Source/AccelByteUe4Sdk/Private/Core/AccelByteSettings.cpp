@@ -2,8 +2,8 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteSettings.h"
-#include "AccelByteRegistry.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteRegistry.h"
 
 using namespace AccelByte;
 
