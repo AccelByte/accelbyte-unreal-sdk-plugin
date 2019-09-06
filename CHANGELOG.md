@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.0 (2019-08-23)
+## v2.0.0 (2019-09-06)
 ## Added
 - Session Management
   - Implementing API Gateway
@@ -15,6 +15,7 @@
 - Supported Lobby Service Features
   - Ready Consent
   - DS Notif
+- Updated to v2.0.0 for Justice release v2.0.0 
 
 ## v1.0.0-beta.1 (2019-03-13)
 ### Added
