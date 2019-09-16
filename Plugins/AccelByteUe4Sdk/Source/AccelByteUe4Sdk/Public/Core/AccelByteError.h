@@ -155,9 +155,9 @@ enum class ErrorCodes : int32
 	//
 	DefaultRegionRequiredException = 3026,
 	//
-	CategoryNotFoundException = 3041,
-	ItemNotFoundException = 3042,
-	StoreNotFoundException = 3043,
+	CategoryNotFoundException = 30241,
+	ItemNotFoundException = 30341,
+	StoreNotFoundException = 30142,
 	//
 	PublishedStoreNotFoundException = 3044,
 	//

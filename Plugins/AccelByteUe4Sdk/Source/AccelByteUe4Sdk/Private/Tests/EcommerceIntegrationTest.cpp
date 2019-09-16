@@ -315,7 +315,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSearchItemSuccess, "AccelByte.Tests.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSearchItemSuccess, "AccelByte.unTested.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
 bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 {
 #pragma region SearchItem
