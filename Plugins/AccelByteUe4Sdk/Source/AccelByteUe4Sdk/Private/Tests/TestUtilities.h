@@ -327,6 +327,30 @@ struct FStatCreateRequest
 		FString statCode;
 };
 
+USTRUCT(BlueprintType)
+struct FMatchmakingRuleSet
+{
+    GENERATED_BODY()
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+        int alliance_number;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+        bool symmetric_match;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+        int symmetric_party_number;
+};
+
+USTRUCT(BlueprintType)
+struct FMatchmakingCreateRequest
+{
+    GENERATED_BODY()
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+        FString description;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+        FString game_mode;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+        FMatchmakingRuleSet rule_set;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;

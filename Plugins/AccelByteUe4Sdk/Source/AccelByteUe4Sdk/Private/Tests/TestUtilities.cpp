@@ -906,17 +906,15 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 
 void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError)
 {
-    FString RequestBody = FString::Printf(TEXT("{"
-        "\"description\": \"1v1 game mode for test\","
-        "\"game_mode\" : \"%s\","
-        "\"rule_set\" :"
-        "{  \"alliance_number\": 2,"
-            "\"flexing_rule\" : null,"
-            "\"matching_rule\" : null,"
-            "\"symmetric_match\" : true,"
-            "\"symmetric_party_number\" : 1"
-        "}"
-    "}"), *channel);
+    FMatchmakingCreateRequest RequestBody;
+    RequestBody.description = "1v1 game mode for test";
+    RequestBody.game_mode = channel;
+    RequestBody.rule_set.alliance_number = 2;
+    RequestBody.rule_set.symmetric_match = true;
+    RequestBody.rule_set.symmetric_party_number = 1;
+
+    FString Content;
+    FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
 
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
@@ -930,7 +928,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpl
     Request->SetVerb(Verb);
     Request->SetHeader(TEXT("Content-Type"), ContentType);
     Request->SetHeader(TEXT("Accept"), Accept);
-    Request->SetContentAsString(RequestBody);
+    Request->SetContentAsString(Content);
 
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -939,7 +937,7 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 {
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-    FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *BaseUrl, *FRegistry::Settings.Namespace);
+    FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *channel);
     FString Verb = TEXT("DELETE");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
