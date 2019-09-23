@@ -351,6 +351,18 @@ struct FMatchmakingCreateRequest
         FMatchmakingRuleSet rule_set;
 };
 
+USTRUCT(BlueprintType)
+struct FVerificationCode
+{
+    GENERATED_BODY()
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+        FString accountRegistration;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+        FString accountUpgrade;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+        FString passwordReset;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -388,3 +400,5 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
 void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+
+void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);

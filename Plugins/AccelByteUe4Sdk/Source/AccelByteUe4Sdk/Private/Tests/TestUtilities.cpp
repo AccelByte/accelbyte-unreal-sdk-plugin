@@ -74,7 +74,7 @@ FString GetAdminAccessToken()
 #endif
     FOauth2Token ClientLogin;
     bool ClientLoginSuccess = false;
-    Api::Oauth2::GetAccessTokenWithClientCredentialsGrant(ClientId, ClientSecret, THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
+    Api::Oauth2::GetAccessTokenWithClientCredentialsGrant(FString::Printf(TEXT("%s"), ClientId), FString::Printf(TEXT("%s"), ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
     {
         ClientLogin = Result;
         ClientLoginSuccess = true;
@@ -1018,6 +1018,25 @@ void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FS
     Request->SetHeader(TEXT("Content-Type"), ContentType);
     Request->SetHeader(TEXT("Accept"), Accept);
     Request->SetContentAsString(Content);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User_Get_Verification_Code(const FString & userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler & OnError)
+{
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *FRegistry::Settings.Namespace, *userId);
+    FString Verb = TEXT("GET");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
 
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

@@ -34,8 +34,18 @@ const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAut
 void FlushHttpRequests();//defined in TestUtilities.cpp
 void Waiting(bool& condition, FString text);
 
+UENUM(BlueprintType)
+const enum class EVerificationCode : uint8
+{
+    accountRegistration,
+    accountUpgrade,
+    passwordReset
+};
+
 static FString GetVerificationCode(const FString& Email);
 FString GetVerificationCodeFromUserId(const FString& UserId);
+
+FString GetVerificationCode(const FString& userId, EVerificationCode code);
 static FString GetSteamTicket();
 
 const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
@@ -264,7 +274,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
 
-	FString VerificationCode = GetVerificationCode(LoginId);
+    FString VerificationCode = GetVerificationCode(FRegistry::Credentials.GetUserId(), EVerificationCode::passwordReset); //GetVerificationCode(LoginId);
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
@@ -957,6 +967,27 @@ FString GetVerificationCodeFromUserId(const FString& UserId)
 	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
 #endif
 	return VerificationCodeOutput;
+}
+
+FString GetVerificationCode(const FString& userId, EVerificationCode code)
+{
+    bool bGetVerificationCodeSuccess = false;
+    FVerificationCode verificationCode;
+    User_Get_Verification_Code(userId, THandler<FVerificationCode>::CreateLambda([&verificationCode, &bGetVerificationCodeSuccess](const FVerificationCode& result)
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("Get Verification Code Success..!"));
+        verificationCode = result;
+        bGetVerificationCodeSuccess = true;
+    }), GlobalErrorHandler);
+    Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
+
+    switch (code)
+    {
+    case EVerificationCode::accountRegistration: return verificationCode.accountRegistration;
+    case EVerificationCode::accountUpgrade: return verificationCode.accountUpgrade;
+    case EVerificationCode::passwordReset: return verificationCode.passwordReset;
+    }
+    return FString("");
 }
 
 FString GetSteamTicket()
