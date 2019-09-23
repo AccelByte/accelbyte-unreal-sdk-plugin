@@ -2,9 +2,9 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteLobbyBlueprints.h"
-#include "AccelByteLobbyApi.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteLobbyBlueprints.h"
+#include "Api/AccelByteLobbyApi.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::FErrorHandler;
 

@@ -8,8 +8,8 @@
 #include "UObject/NoExportTypes.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Http.h"
-#include "AccelByteUserProfileModels.h"
-#include "AccelByteError.h"
+#include "Models/AccelByteUserProfileModels.h"
+#include "Core/AccelByteError.h"
 
 namespace AccelByte
 {

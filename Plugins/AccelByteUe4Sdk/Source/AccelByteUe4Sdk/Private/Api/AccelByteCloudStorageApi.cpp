@@ -2,11 +2,11 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteCloudStorageApi.h"
-#include "AccelByteError.h"
+#include "Api/AccelByteCloudStorageApi.h"
+#include "Core/AccelByteError.h"
 #include "JsonUtilities.h"
-#include "AccelByteRegistry.h"
-#include "AccelByteSettings.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteSettings.h"
 
 namespace AccelByte
 {

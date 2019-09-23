@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "AccelByteError.h"
-#include "AccelByteStatisticModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteStatisticModels.h"
 
 // Forward declarations
 class IWebSocket;

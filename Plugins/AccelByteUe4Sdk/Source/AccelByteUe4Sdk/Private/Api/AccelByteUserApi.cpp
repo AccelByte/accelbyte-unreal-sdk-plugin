@@ -2,12 +2,12 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteUserApi.h"
+#include "Api/AccelByteUserApi.h"
 
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
-#include "AccelByteOauth2Api.h"
-#include "Base64.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Api/AccelByteOauth2Api.h"
+#include "Runtime/Core/Public/Misc/Base64.h"
 
 using AccelByte::Api::Oauth2;
 
@@ -230,29 +230,6 @@ void User::GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& On
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-/*! Commented because can't send PATCH request yet
-void User::Update(const FUserUpdateRequest& UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *UserCredentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v2/public/users/me"), *UserSettings.IamServerUrl);
-	FString Verb = TEXT("PATCH");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(UpdateRequest, Content);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-	
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-*/
-
 void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FVerificationCodeRequest SendVerificationCodeRequest
@@ -276,36 +253,6 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 	
 	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
 }
-
-//not implemented yet on api-gateway
-//void User::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
-//{
-//	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserSessionId());
-//	FString Url = FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/headless/code/verify"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
-//	FString Verb = TEXT("POST");
-//	FString ContentType = TEXT("application/json");
-//	FString Accept = TEXT("application/json");
-//	FString Content = FString::Printf(TEXT("{ \"Code\": \"%s\", \"LoginId\": \"%s\", \"Password\": \"%s\"}"), *VerificationCode, *Username, *Password);
-//
-//	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-//	Request->SetURL(Url);
-//	Request->SetHeader(TEXT("Authorization"), Authorization);
-//	Request->SetVerb(Verb);
-//	Request->SetHeader(TEXT("Content-Type"), ContentType);
-//	Request->SetHeader(TEXT("Accept"), Accept);
-//	Request->SetContentAsString(Content);
-//
-//	FRegistry::HttpRetryScheduler.ProcessRequest(
-//		Request,
-//		CreateHttpResultHandler(
-//			THandler<FUserData>::CreateLambda(
-//				[OnSuccess](const FUserData& UserData)
-//				{
-//					OnSuccess.ExecuteIfBound(UserData);
-//				}),
-//				OnError),
-//		FPlatformTime::Seconds());
-//}
 
 void User::Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
 {

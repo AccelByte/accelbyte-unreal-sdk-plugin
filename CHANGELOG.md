@@ -1,6 +1,24 @@
 # Changelog
 
+## v2.0.0 (2019-09-06)
+## Added
+- Session Management
+  - Implementing API Gateway
+- Supported Game Profile Service Features
+  - Create Game Profile
+  - Get Game Profile
+  - Update Game Profile
+  - Delete Game Profile
+- Supported Statistic Service Features
+  - Get StatItem
+  - Update StatItem from Client
+- Supported Lobby Service Features
+  - Ready Consent
+  - DS Notif
+- Updated to v2.0.0 for Justice release v2.0.0 
+
 ## v1.0.0-beta.1 (2019-03-13)
+### Added
 
 - Supported IAM Service Features:
   - Login With Username and Password

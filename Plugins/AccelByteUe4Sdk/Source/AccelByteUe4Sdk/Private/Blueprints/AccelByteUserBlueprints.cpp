@@ -2,9 +2,9 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteUserBlueprints.h"
-#include "AccelByteUserApi.h"
-#include "AccelByteRegistry.h"
+#include "Blueprints/AccelByteUserBlueprints.h"
+#include "Api/AccelByteUserApi.h"
+#include "Core/AccelByteRegistry.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -73,16 +73,6 @@ void UBPUser::Register(const FString& Username, const FString& Password, const F
 	);
 }
 
-/*! Commented because can't send PATCH request yet
-void UBPUser::Update(const FUserUpdateRequest& UpdateRequest, const FDUserDataHandler& OnSuccess, const FDErrorHandler & OnError)
-{
-	FRegistry::User.Update(
-		UpdateRequest,
-		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
-	);
-}*/
-
 
 void UBPUser::Upgrade(const FString& Username, const FString& Password, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
 {
@@ -101,15 +91,6 @@ void UBPUser::SendUpgradeVerificationCode(const FString & Username, const FDHand
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
-
-//void UBPUser::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
-//{
-//	FRegistry::User.UpgradeAndVerify(
-//		Username, Password, VerificationCode,
-//		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
-//		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
-//	);
-//}
 
 void UBPUser::SendVerificationCode(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {

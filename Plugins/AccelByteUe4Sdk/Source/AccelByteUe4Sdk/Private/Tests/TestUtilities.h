@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "AccelByteError.h"
-#include "../AccelByteUe4Sdk/Public/Models/AccelByteItemModels.h"
-#include "../AccelByteUe4Sdk/Public/Models/AccelByteStatisticModels.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteItemModels.h"
+#include "Models/AccelByteStatisticModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
