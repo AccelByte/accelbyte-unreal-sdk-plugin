@@ -43,133 +43,6 @@ const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, 
 	UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
 });
 
-/*! commented because can't send PATCH request yet
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(UpdateUserAccountTest, "AccelByte.Tests.User.UpdateUserAccount", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter);
-bool UpdateUserAccountTest::RunTest(const FString& Parameters)
-{
-	const FString OriginalEmail = (FString::Printf(TEXT("originalEmail+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits))).ToLower();
-	const FString UpdatedEmail = (FString::Printf(TEXT("updatedEmail+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits))).ToLower();
-	const FString Password = TEXT("password");
-	const FString DisplayName = TEXT("testName");
-	const FString Country = "US";
-	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
-	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-
-	bool bClientLoggedIn = false;
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithClientCredentials"));
-    FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoggedIn]()
-	{
-		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
-		bClientLoggedIn = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bClientLoggedIn)
-	{
-		Waiting("Waiting for Login...");
-	}
-
-	bool bUserAccountCreated = false;
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("CreateUserAccount"));
-    
-	FRegistry::User.Register(OriginalEmail, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&bUserAccountCreated](const FUserData& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
-		bUserAccountCreated = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bUserAccountCreated)
-	{
-		Waiting("Waiting for account registered...");
-	}
-
-	bool bUserLoggedIn = false;
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPassword"));
-    FRegistry::User.LoginWithUsername(OriginalEmail, Password, FVoidHandler::CreateLambda([&bUserLoggedIn]()
-	{
-		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
-		bUserLoggedIn = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bUserLoggedIn)
-	{
-		Waiting("Waiting for Login...");
-	}
-
-	FString OldAccessToken = FRegistry::Credentials.GetUserSessionId();
-
-	bool bUserUpdated = false;
-    UE_LOG(LogAccelByteUserTest, Display, TEXT("UpdateUserAccount"))
-	FUserUpdateRequest UpdateRequest
-	{
-		TEXT("US"),
-		FString(),
-		TEXT("UpdateName"),
-		FString(UpdatedEmail),
-		FString()
-	};
-	FUserData UpdateResult;
-	FRegistry::User.Update(UpdateRequest, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
-		bUserUpdated = true;
-		UpdateResult = Result;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bUserUpdated)
-	{
-		Waiting("Waiting for user updated...");
-	}
-
-	bool bLoginWithUpdatedAccount = false;
-	UE_LOG(LogAccelByteUserTest, Display, TEXT("LoginWithUsernameAndPassword (Updated Email)"))
-	FRegistry::User.LoginWithUsername(UpdatedEmail, Password, FVoidHandler::CreateLambda([&]() {
-		UE_LOG(LogAccelByteUserTest, Display, TEXT("    Success."));
-		bLoginWithUpdatedAccount = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bLoginWithUpdatedAccount)
-	{
-		Waiting("Waiting for Login...");
-	}
-
-#pragma region DeleteUserById
-
-	bool bDeleteDone = false;
-	bool bDeleteSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bDeleteSuccessful = true;
-		bDeleteDone = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-
-	while (!bDeleteDone)
-	{
-		Waiting("Waiting for Deletion...");
-	}
-
-#pragma endregion DeleteUserById
-
-	check(bLoginWithUpdatedAccount);
-	check(UpdateResult.Country.Equals("US"));
-	check(bDeleteDone);
-	return true;
-};
-*/
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "AccelByte.Tests.User.LoginGameClient", AutomationFlagMaskUser);
 bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 {
@@ -307,18 +180,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
-	bool bSendSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendEmailVerificationCode"));
-	
-	FRegistry::User.SendVerificationCode(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bSendSuccessful = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bSendSuccessful, "Waiting for Verification to be sent...");
-
 	bool bGetDataSuccessful = false;
 	FUserData GetDataResult;
 	FRegistry::User.GetData(
@@ -348,7 +209,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	check(bGetDataSuccessful);
 	check(bLoginSuccessful);
-	check(bSendSuccessful);
 	check(bDeleteSuccessful);
 	check(RegisterResult.Username.Equals(GetDataResult.Username));
 	check(RegisterResult.LoginId.Equals(GetDataResult.LoginId));
@@ -1059,98 +919,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	check(bDeleteSuccessful);
 	return true;
 }
-
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeAndVerifyHeadlessDeviceAccountSuccess, "AccelByte.Tests.User.UpgradeAndVerifyHeadlessDeviceAccount", AutomationFlagMaskUser);
-//bool FUpgradeAndVerifyHeadlessDeviceAccountSuccess::RunTest(const FString & Parameter)
-//{
-//	FRegistry::User.ForgetAllCredentials();
-//	FString Email = FString::Printf(TEXT("upgradeAndVerify+%s@example.com"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
-//	FString Password = TEXT("password");
-//	FString FirstUserId = "";
-//	double LastTime = 0;
-//	FString OldAccessToken = "", RefreshedAccessToken = "";
-//
-//	bool bClientLoginSuccessful = false;
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-//	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bClientLoginSuccessful = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//
-//	bool bDeviceLoginSuccessful = false;
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
-//	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bDeviceLoginSuccessful = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//
-//	FirstUserId = FRegistry::Credentials.GetUserId();
-//	OldAccessToken = FRegistry::Credentials.GetUserSessionId();
-//
-//	bool bSendUserUpgradeVerificationCode = false;
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("SendUserUpgradeVerificationCode"));
-//	FRegistry::User.SendUpgradeVerificationCode(Email, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bSendUserUpgradeVerificationCode = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//
-//	bool bGetVerificationCode = false;
-//	FString VerificationCode = GetVerificationCodeFromUserId(FRegistry::Credentials.GetUserId());
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccountWithVerificationCode"));
-//
-//	FRegistry::User.UpgradeAndVerify(Email, Password, VerificationCode, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bGetVerificationCode = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
-//
-//	bool bEmailLoginSuccessful = false;
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-//	FRegistry::User.LoginWithUsername(Email, Password, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bEmailLoginSuccessful = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//
-//#pragma region DeleteUser1
-//
-//	bool bDeleteDone1 = false;
-//	bool bDeleteSuccessful1 = false;
-//	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
-//	DeleteUserById(FirstUserId, FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
-//	{
-//		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-//		bDeleteSuccessful1 = true;
-//		bDeleteDone1 = true;
-//	}), GlobalErrorHandler);
-//
-//	FlushHttpRequests();
-//
-//#pragma endregion DeleteUser1
-//
-//	check(bDeviceLoginSuccessful);
-//	check(bSendUserUpgradeVerificationCode);
-//	check(bGetVerificationCode);
-//	check(bEmailLoginSuccessful);
-//	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-//	check(!OldAccessToken.Equals(RefreshedAccessToken));
-//	check(bDeleteSuccessful1);
-//	return true;
-//}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.User.SteamTicket", AutomationFlagMaskUser);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
