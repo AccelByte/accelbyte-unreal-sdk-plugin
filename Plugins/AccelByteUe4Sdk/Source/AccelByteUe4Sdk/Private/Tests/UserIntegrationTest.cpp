@@ -42,9 +42,6 @@ const enum class EVerificationCode : uint8
     passwordReset
 };
 
-static FString GetVerificationCode(const FString& Email);
-FString GetVerificationCodeFromUserId(const FString& UserId);
-
 FString GetVerificationCode(const FString& userId, EVerificationCode code);
 static FString GetSteamTicket();
 
@@ -937,36 +934,6 @@ bool FGetSteamTicket::RunTest(const FString & Parameter)
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
 	check(Ticket != TEXT(""));
 	return true;
-}
-
-FString GetVerificationCode(const FString& Email)
-{
-	FString VerificationCodeOutput = TEXT("");
-	FString CurrentDirectory = TEXT("");
-	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
-	FString args = TEXT("verificationcode -a " + Email);
-#ifdef _WIN32
-	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
-#endif
-	return VerificationCodeOutput;
-}
-
-FString GetVerificationCodeFromUserId(const FString& UserId)
-{
-	FString VerificationCodeOutput = TEXT("");
-	FString CurrentDirectory = TEXT("");
-	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
-	FString args = TEXT("verificationcode -p " + UserId);
-#ifdef _WIN32
-	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
-#endif
-	return VerificationCodeOutput;
 }
 
 FString GetVerificationCode(const FString& userId, EVerificationCode code)
