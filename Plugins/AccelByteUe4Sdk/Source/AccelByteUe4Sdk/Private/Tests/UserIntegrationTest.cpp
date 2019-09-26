@@ -35,7 +35,7 @@ void FlushHttpRequests();//defined in TestUtilities.cpp
 void Waiting(bool& condition, FString text);
 
 UENUM(BlueprintType)
-const enum class EVerificationCode : uint8
+enum class EVerificationCode : uint8
 {
     accountRegistration,
     accountUpgrade,
@@ -259,7 +259,18 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bRegisterSuccessful, "Waiting for Registered...");
 
-	bool bForgotPasswordSuccessful = false;
+    bool bLoginSuccessful = false;
+    UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+    FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+        bLoginSuccessful = true;
+    }), GlobalErrorHandler);
+
+    FlushHttpRequests();
+    Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	bool bForgotPasswordSuccessful = false; 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("RequestPasswordReset"));
 	
 	FRegistry::User.SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
@@ -271,7 +282,17 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
 
-    FString VerificationCode = GetVerificationCode(FRegistry::Credentials.GetUserId(), EVerificationCode::passwordReset); //GetVerificationCode(LoginId);
+    bool bGetVerificationCodeSuccess = false;
+    FString VerificationCode;
+    User_Get_Verification_Code(FRegistry::Credentials.GetUserId(), THandler<FVerificationCode>::CreateLambda([&VerificationCode, &bGetVerificationCodeSuccess](const FVerificationCode& result)
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("Get Verification Code Success..!"));
+        VerificationCode = result.passwordReset;
+        bGetVerificationCodeSuccess = true;
+    }), GlobalErrorHandler);
+    Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
+    FlushHttpRequests();
+
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
@@ -287,7 +308,10 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bResetPasswordSuccessful, "Waiting for Reset...");
 
-	bool bLoginSuccessful = false;
+    UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
+    FRegistry::User.ForgetAllCredentials();
+
+	bLoginSuccessful = false;
 	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
 	
 	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
@@ -824,6 +848,11 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileUpdate.Language = "en";
 	ProfileUpdate.Timezone = "Etc/UTC";
 	ProfileUpdate.DateOfBirth = "2000-01-01";
+    ProfileUpdate.FirstName = "first";
+    ProfileUpdate.LastName = "last";
+    ProfileUpdate.AvatarSmallUrl = "http://example.com";
+    ProfileUpdate.AvatarUrl = "http://example.com";
+    ProfileUpdate.AvatarLargeUrl = "http://example.com";
 	FString UpdatedDateOfBirth = TEXT("");
 	double LastTime = 0;
 
@@ -842,9 +871,14 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
 
 	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
+    ProfileCreate.FirstName = "first";
+    ProfileCreate.LastName = "last";
 	ProfileCreate.Language = "en";
 	ProfileCreate.Timezone = "Etc/UTC";
 	ProfileCreate.DateOfBirth = "1970-01-01";
+    ProfileCreate.AvatarSmallUrl = "http://example.com";
+    ProfileCreate.AvatarUrl = "http://example.com";
+    ProfileCreate.AvatarLargeUrl = "http://example.com";
 
 	FRegistry::UserProfile.CreateUserProfile(ProfileCreate, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 	{

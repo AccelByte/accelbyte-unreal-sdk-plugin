@@ -78,11 +78,13 @@ FString GetAdminAccessToken()
     {
         ClientLogin = Result;
         ClientLoginSuccess = true;
+        UE_LOG(LogTemp, Log, TEXT("Login with Client Success..!"));
     }), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
     {
         UE_LOG(LogTemp, Log, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
     }));
     Waiting(ClientLoginSuccess, "Login with Client...");
+    FlushHttpRequests();
 
     return ClientLogin.Access_token;
 }
@@ -148,78 +150,31 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 
 void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-    using AccelByte::Settings;
-    UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *UserId);
+    bool bGetUserMapSuccess = false;
+    FUserMapResponse userMap;
+    User_Get_User_Mapping(UserId, THandler<FUserMapResponse>::CreateLambda([&userMap, &bGetUserMapSuccess](const FUserMapResponse& Result)
+    {
+        userMap = Result;
+        bGetUserMapSuccess = true;
+    }), OnError);
+    Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+    FlushHttpRequests();
+
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *UserId, *GetPublisherNamespace());
-    FString Verb = TEXT("GET");
+    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseUrl, *userMap.Namespace, *userMap.userId);
+    FString Verb = TEXT("DELETE");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
-    FString Content;
-    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
     Request->SetURL(Url);
     Request->SetHeader(TEXT("Authorization"), Authorization);
     Request->SetVerb(Verb);
     Request->SetHeader(TEXT("Content-Type"), ContentType);
     Request->SetHeader(TEXT("Accept"), Accept);
-    Request->SetContentAsString(Content);
-    Request->OnProcessRequestComplete().BindLambda([BaseUrl, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-    {
-        int32 Code = 0;
-        FString Message;
-        if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-        {
-            TSharedPtr<FJsonObject> JsonParsed;
-            TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-            if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
-            {
-                FString RealUserId = JsonParsed->GetStringField("UserId");
 
-                FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-                FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseUrl, *GetPublisherNamespace(), *RealUserId);
-                FString Verb = TEXT("DELETE");
-                FString ContentType = TEXT("application/json");
-                FString Accept = TEXT("application/json");
-                FString Content;
-                FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
-                Request2->SetURL(Url);
-                Request2->SetHeader(TEXT("Authorization"), Authorization);
-                Request2->SetVerb(Verb);
-                Request2->SetHeader(TEXT("Content-Type"), ContentType);
-                Request2->SetHeader(TEXT("Accept"), Accept);
-                Request2->SetContentAsString(Content);
-                Request2->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-                {
-                    int32 Code;
-                    FString Message;
-                    if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-                    {
-                        OnSuccess.ExecuteIfBound();
-                    }
-                    else
-                    {
-                        HandleHttpError(Request, Response, Code, Message);
-                        OnError.ExecuteIfBound(Code, Message);
-                    }
-                });
-                Request2->ProcessRequest();
-            }
-            else
-            {
-                HandleHttpError(Request, Response, Code, Message);
-                OnError.ExecuteIfBound(Code, Message);
-            }
-        }
-        else
-        {
-            HandleHttpError(Request, Response, Code, Message);
-            OnError.ExecuteIfBound(Code, Message);
-        }
-    });
-
-    Request->ProcessRequest();
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void FlushHttpRequests()
@@ -1022,15 +977,44 @@ void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FS
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User_Get_Verification_Code(const FString & userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler & OnError)
+void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError)
 {
+    UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-    FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *FRegistry::Settings.Namespace, *userId);
+    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");
-    
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User_Get_Verification_Code(const FString & userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler & OnError)
+{
+    bool bGetUserMapSuccess = false;
+    FUserMapResponse userMap;
+    User_Get_User_Mapping(userId, THandler<FUserMapResponse>::CreateLambda([&userMap, &bGetUserMapSuccess](const FUserMapResponse& Result)
+    {
+        userMap = Result;
+        bGetUserMapSuccess = true;
+    }), OnError);
+    Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+    FlushHttpRequests();
+
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *userMap.Namespace, *userMap.userId);
+    FString Verb = TEXT("GET");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
     FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
     Request->SetURL(Url);
     Request->SetHeader(TEXT("Authorization"), Authorization);

@@ -352,6 +352,16 @@ struct FMatchmakingCreateRequest
 };
 
 USTRUCT(BlueprintType)
+struct FUserMapResponse
+{
+    GENERATED_BODY()
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
+        FString Namespace;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
+        FString userId;
+};
+
+USTRUCT(BlueprintType)
 struct FVerificationCode
 {
     GENERATED_BODY()
@@ -401,4 +411,5 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
 void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
 
+void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
