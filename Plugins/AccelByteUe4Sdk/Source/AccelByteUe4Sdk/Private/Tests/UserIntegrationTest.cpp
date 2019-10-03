@@ -34,8 +34,15 @@ const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAut
 void FlushHttpRequests();//defined in TestUtilities.cpp
 void Waiting(bool& condition, FString text);
 
-static FString GetVerificationCode(const FString& Email);
-FString GetVerificationCodeFromUserId(const FString& UserId);
+UENUM(BlueprintType)
+enum class EVerificationCode : uint8
+{
+    accountRegistration,
+    accountUpgrade,
+    passwordReset
+};
+
+FString GetVerificationCode(const FString& userId, EVerificationCode code);
 static FString GetSteamTicket();
 
 const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
@@ -252,7 +259,18 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bRegisterSuccessful, "Waiting for Registered...");
 
-	bool bForgotPasswordSuccessful = false;
+    bool bLoginSuccessful = false;
+    UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+    FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+        bLoginSuccessful = true;
+    }), GlobalErrorHandler);
+
+    FlushHttpRequests();
+    Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	bool bForgotPasswordSuccessful = false; 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("RequestPasswordReset"));
 	
 	FRegistry::User.SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
@@ -264,7 +282,17 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
 
-	FString VerificationCode = GetVerificationCode(LoginId);
+    bool bGetVerificationCodeSuccess = false;
+    FString VerificationCode;
+    User_Get_Verification_Code(FRegistry::Credentials.GetUserId(), THandler<FVerificationCode>::CreateLambda([&VerificationCode, &bGetVerificationCodeSuccess](const FVerificationCode& result)
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("Get Verification Code Success..!"));
+        VerificationCode = result.passwordReset;
+        bGetVerificationCodeSuccess = true;
+    }), GlobalErrorHandler);
+    Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
+    FlushHttpRequests();
+
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
@@ -280,7 +308,10 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bResetPasswordSuccessful, "Waiting for Reset...");
 
-	bool bLoginSuccessful = false;
+    UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
+    FRegistry::User.ForgetAllCredentials();
+
+	bLoginSuccessful = false;
 	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
 	
 	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
@@ -817,6 +848,11 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileUpdate.Language = "en";
 	ProfileUpdate.Timezone = "Etc/UTC";
 	ProfileUpdate.DateOfBirth = "2000-01-01";
+    ProfileUpdate.FirstName = "first";
+    ProfileUpdate.LastName = "last";
+    ProfileUpdate.AvatarSmallUrl = "http://example.com";
+    ProfileUpdate.AvatarUrl = "http://example.com";
+    ProfileUpdate.AvatarLargeUrl = "http://example.com";
 	FString UpdatedDateOfBirth = TEXT("");
 	double LastTime = 0;
 
@@ -835,9 +871,14 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
 
 	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
+    ProfileCreate.FirstName = "first";
+    ProfileCreate.LastName = "last";
 	ProfileCreate.Language = "en";
 	ProfileCreate.Timezone = "Etc/UTC";
 	ProfileCreate.DateOfBirth = "1970-01-01";
+    ProfileCreate.AvatarSmallUrl = "http://example.com";
+    ProfileCreate.AvatarUrl = "http://example.com";
+    ProfileCreate.AvatarLargeUrl = "http://example.com";
 
 	FRegistry::UserProfile.CreateUserProfile(ProfileCreate, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 	{
@@ -929,34 +970,25 @@ bool FGetSteamTicket::RunTest(const FString & Parameter)
 	return true;
 }
 
-FString GetVerificationCode(const FString& Email)
+FString GetVerificationCode(const FString& userId, EVerificationCode code)
 {
-	FString VerificationCodeOutput = TEXT("");
-	FString CurrentDirectory = TEXT("");
-	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
-	FString args = TEXT("verificationcode -a " + Email);
-#ifdef _WIN32
-	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
-#endif
-	return VerificationCodeOutput;
-}
+    bool bGetVerificationCodeSuccess = false;
+    FVerificationCode verificationCode;
+    User_Get_Verification_Code(userId, THandler<FVerificationCode>::CreateLambda([&verificationCode, &bGetVerificationCodeSuccess](const FVerificationCode& result)
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("Get Verification Code Success..!"));
+        verificationCode = result;
+        bGetVerificationCodeSuccess = true;
+    }), GlobalErrorHandler);
+    Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
 
-FString GetVerificationCodeFromUserId(const FString& UserId)
-{
-	FString VerificationCodeOutput = TEXT("");
-	FString CurrentDirectory = TEXT("");
-	CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("TestUtilities/justice-test-utilities-windows_amd64.exe"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s"), *CurrentDirectory);
-	FString args = TEXT("verificationcode -p " + UserId);
-#ifdef _WIN32
-	FWindowsPlatformProcess::ExecProcess(CurrentDirectory.GetCharArray().GetData(), *args, nullptr, &VerificationCodeOutput, nullptr);
-#endif
-	return VerificationCodeOutput;
+    switch (code)
+    {
+    case EVerificationCode::accountRegistration: return verificationCode.accountRegistration;
+    case EVerificationCode::accountUpgrade: return verificationCode.accountUpgrade;
+    case EVerificationCode::passwordReset: return verificationCode.passwordReset;
+    }
+    return FString("");
 }
 
 FString GetSteamTicket()
