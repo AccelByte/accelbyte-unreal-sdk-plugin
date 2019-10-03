@@ -48,7 +48,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsUserStatItemInfo.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetStatItemsByStatCodes(const FString& ProfileId, const TArray<FString>& StatCodes, const THandler<TArray<FAccelByteModelsUserStatItemInfo>>& OnSuccess, const FErrorHandler& OnError);
+	void GetStatItemsByStatCodes(const FString& ProfileId, const TArray<FString>& StatCodes, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Bulk add stat item(s) value from specified profile id(s) by stat code(s).

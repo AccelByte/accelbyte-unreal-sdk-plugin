@@ -107,7 +107,7 @@ enum class ErrorCodes : int32
 	StatusNetworkAuthenticationRequired = 511, // Reference: RFC 6585, Section 6
 
 	// Platform error
-	PlatformInternalServerErrorException = 2000,
+	PlatformInternalServerErrorException = 20000,
 	UnauthorizedException,
 	ValidationException,
 	ForbiddenException,
@@ -264,6 +264,15 @@ enum class ErrorCodes : int32
 	OffenseTypeNotFoundException = 4242,
 	OffenseTypeAlreadyExistsException = 4271,
 	OffenseReportAssociatedException = 4272,
+    //
+    //Statistic Error Code List
+    //
+    InvalidStatOperatorException = 70330,
+    StatisticNotFoundException = 70331,
+    StatNotDecreasableException = 70334,
+    UserStatsNotFoundException = 70335,
+    UserStatAlreadyExistException = 70336,
+    StatValueOutOfRangeException = 70337,
 	//
 	//Client side Error Code List
 	//

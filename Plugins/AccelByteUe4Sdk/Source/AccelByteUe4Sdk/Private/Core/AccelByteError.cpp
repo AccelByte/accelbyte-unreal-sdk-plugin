@@ -237,6 +237,15 @@ const std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> ErrorM
 	{ static_cast<int32>(ErrorCodes::OffenseTypeNotFoundException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_not_found") },
 	{ static_cast<int32>(ErrorCodes::OffenseTypeAlreadyExistsException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_already_exists") },
 	{ static_cast<int32>(ErrorCodes::OffenseReportAssociatedException), TEXT("errors.net.accelbyte.platform.offensereport.offense_report_associated") },
+    //
+    //Statistic Error Code List
+    //
+    { static_cast<int32>(ErrorCodes::InvalidStatOperatorException), TEXT("errors.net.accelbyte.platform.statistic.invalid_stat_operator") },
+    { static_cast<int32>(ErrorCodes::StatisticNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.statistic_not_found") },
+    { static_cast<int32>(ErrorCodes::StatNotDecreasableException), TEXT("errors.net.accelbyte.platform.statistic.stat_not_decreasable") },
+    { static_cast<int32>(ErrorCodes::UserStatsNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.user_stat_not_found") },
+    { static_cast<int32>(ErrorCodes::UserStatAlreadyExistException), TEXT("errors.net.accelbyte.platform.statistic.user_stat_already_exist") },
+    { static_cast<int32>(ErrorCodes::StatValueOutOfRangeException), TEXT("errors.net.accelbyte.platform.statistic.stat_value_out_of_range") },
 	//
 	//Client side Error Code List
 	//

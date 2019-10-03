@@ -198,8 +198,8 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	
 	bool bStatItemIsExist = false;
 	bool bGetStatItemDone = false;
-	TArray<FAccelByteModelsUserStatItemInfo> GetStatItemResult;
-	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, { "MVP" }, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([&bGetStatItemDone, &bStatItemIsExist, &GetStatItemResult](TArray<FAccelByteModelsUserStatItemInfo> Result)
+    FAccelByteModelsUserStatItemPagingSlicedResult GetStatItemResult;
+	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, { "MVP" }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetStatItemDone, &bStatItemIsExist, &GetStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
 	{
 		GetStatItemResult = Result;
 		bGetStatItemDone = true;
@@ -207,7 +207,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetStatItemDone, "Waiting for get statitem...");
 	check(bGetStatDone);
-	if (GetStatItemResult.Num() == 0)
+	if (GetStatItemResult.Data.Num() == 0)
 	{
 		bool bCreateStatItemDone = false;
 		TArray<FAccelByteModelsBulkStatItemIncResult> CreateStatItemResult;
@@ -276,13 +276,13 @@ bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING STATITEMS BY STATCODES..."));
 	bool bGetStatItemsByStatCodesSuccess = false;
-	TArray<FAccelByteModelsUserStatItemInfo> GetResult;
-	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, {"MVP"}, THandler<TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
+    FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
+	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, {"MVP"}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET STATITEMS SUCCESS!"));
 		bGetStatItemsByStatCodesSuccess = true;
 		GetResult = Result;
-		for (FAccelByteModelsUserStatItemInfo data : GetResult)
+		for (FAccelByteModelsUserStatItemInfo data : GetResult.Data)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}

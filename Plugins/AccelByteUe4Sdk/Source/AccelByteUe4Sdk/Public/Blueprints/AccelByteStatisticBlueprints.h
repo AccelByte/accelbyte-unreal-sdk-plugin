@@ -20,9 +20,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	static void GetAllStatItems(const FString& ProfileId, const FGetAllStatItemsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetStatItemsByStatCodesSuccess, const TArray<FAccelByteModelsUserStatItemInfo>&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetStatItemsByStatCodesSuccess, const FAccelByteModelsUserStatItemPagingSlicedResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 	static void GetStatItemsByStatCodes(const FString& ProfileId, TArray<FString> StatCodes, const FGetStatItemsByStatCodesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-
 };
 

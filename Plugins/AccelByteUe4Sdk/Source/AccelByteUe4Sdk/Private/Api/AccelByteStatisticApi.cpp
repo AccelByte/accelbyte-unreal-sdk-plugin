@@ -20,7 +20,7 @@ Statistic::~Statistic() {}
 void Statistic::GetAllStatItems(const FString& ProfileId, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -36,7 +36,7 @@ void Statistic::GetAllStatItems(const FString& ProfileId, const THandler<FAccelB
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic::GetStatItemsByStatCodes(const FString& ProfileId, const TArray<FString>& StatCodes, const THandler<TArray<FAccelByteModelsUserStatItemInfo>>& OnSuccess, const FErrorHandler& OnError)
+void Statistic::GetStatItemsByStatCodes(const FString& ProfileId, const TArray<FString>& StatCodes, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	if (StatCodes.Num() < 1)
 	{
@@ -45,7 +45,7 @@ void Statistic::GetStatItemsByStatCodes(const FString& ProfileId, const TArray<F
 	else
 	{
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems/byStatCodes"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -70,7 +70,7 @@ void Statistic::GetStatItemsByStatCodes(const FString& ProfileId, const TArray<F
 void Statistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/statitems/bulk/inc"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -102,7 +102,7 @@ void Statistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatIt
 void Statistic::BulkAddUserStatItemValue(const FString& ProfileId, const TArray<FAccelByteModelsBulkStatItemInc>& data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/statitems/bulk/inc"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -134,7 +134,7 @@ void Statistic::BulkAddUserStatItemValue(const FString& ProfileId, const TArray<
 void Statistic::AddUserStatItemValue(const FString& ProfileId, const FString& statCode, const float& inc, const THandler<FAccelByteModelsStatItemIncResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/stats/%s/statitems/inc"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *statCode);
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/%s/stats/%s/statitems/value"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *statCode);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

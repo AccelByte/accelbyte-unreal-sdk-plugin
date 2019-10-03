@@ -23,7 +23,7 @@ void UAccelByteBlueprintsStatistic::GetAllStatItems(const FString& ProfileId, co
 
 void UAccelByteBlueprintsStatistic::GetStatItemsByStatCodes(const FString& ProfileId, TArray<FString> StatCodes, const FGetStatItemsByStatCodesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Statistic.GetStatItemsByStatCodes(ProfileId, StatCodes, THandler< TArray<FAccelByteModelsUserStatItemInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsUserStatItemInfo>& Result)
+	FRegistry::Statistic.GetStatItemsByStatCodes(ProfileId, StatCodes, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
