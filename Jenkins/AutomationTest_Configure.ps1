@@ -6,7 +6,7 @@ $CONFIG_FIELD =
 "[/Script/AccelByteUe4Sdk.AccelByteSettings]`r`n" + 
 "ClientId=$Env:CLIENT_ID`r`n" +
 "ClientSecret=$Env:CLIENT_SECRET`r`n" +
-"Namespace=$Env:ADMIN_NAMESPACE`r`n" +
+"Namespace=$Env:CLIENT_NAMESPACE`r`n" +
 "PublisherNamespace=$Env:PUBLISHER_NAMESPACE`r`n" +
 "IamServerUrl=`"$Env:BASE_URL$Env:IAM_PREFIX`"`r`n" +
 "PlatformServerUrl=`"$Env:BASE_URL$Env:PLATFORM_PREFIX`"`r`n" +
@@ -27,3 +27,11 @@ foreach ($LINE in get-content $CONFIG_FILE)
         echo $LINE
     }
 }
+
+$STEAM_PATH = $Env:STEAM_PATH
+$STEAM_ID = $Env:STEAM_ID
+$STEAM_PASS = $Env:STEAM_PASS
+
+echo "Logging in Steam"
+& $STEAM_PATH -login $STEAM_ID $STEAM_PASS
+Start-Sleep -Seconds 20

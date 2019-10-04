@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.1.0 (2019-10-01)
+## Fixed
+- Ecommerce Test
+  - Change CurrencyCode from "Ue4SdkCoin" to "SDKC"
+  - Change Store name separator from '_' to '-'
+- Automation
+  - Change package format from "AccelByteUe4SdkPackage-{GIT_SHA}-BUILD-{BUILD_NUMBER}.7z" to "AccelByteUe4SdkPackage-{GIT_SHA}-{SDK_VERSION}.7z"
+
 ## v2.0.0 (2019-09-06)
 ## Added
 - Session Management
