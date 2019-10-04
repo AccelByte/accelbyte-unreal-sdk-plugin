@@ -53,7 +53,7 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
-	void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Fulfill an order if the order is charged but the fulfillment fail.

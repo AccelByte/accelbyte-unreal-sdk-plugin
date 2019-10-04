@@ -59,7 +59,7 @@ void Order::GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModels
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsOrderInfoPaging>& OnSuccess, const FErrorHandler& OnError)
+void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());

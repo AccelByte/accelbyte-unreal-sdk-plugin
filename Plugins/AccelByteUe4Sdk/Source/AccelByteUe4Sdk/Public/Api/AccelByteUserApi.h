@@ -88,7 +88,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will get data of currently logged in user.
@@ -160,6 +160,17 @@ public:
 	void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
+	 *
+	 * @param LoginId Email or phone number that will be used to upgrade the headless account.
+	 * @param Password User's password.
+	 * @param VerificationCode User's verification code that obtained from email.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	 * @brief This function gets user's platform accounts linked to user’s account.
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FPlatformLink>.
@@ -191,22 +202,22 @@ public:
 	void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
-	 * @brief This function will search user by their login ID (email or phone number in the future).
+	 * @brief This function will search user by their Email Address.
 	 *
-	 * @param Login Targeted user's login ID.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+	 * @param EmailAddress Targeted user's Email Address.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserByEmailAddress(const FString& EmailAddress, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function will search user by userId.
 	 *
-	 * @param Login Targeted user's ID.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FPublicUserInfo.
+	 * @param UserId Targeted user's ID.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPublicUserInfo(const FString& UserId, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserByUserId(const FString& UserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	User() = delete;

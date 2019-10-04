@@ -523,13 +523,13 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 
 		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
-		FString Password = TEXT("Password");
+		FString Password = TEXT("123Password123");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
 		FString Country = "US";
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-		LobbyUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+		LobbyUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
 		{
 			UsersCreationSuccess[i] = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is Created"), i, TestUserCount);

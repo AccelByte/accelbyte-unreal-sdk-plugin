@@ -11,6 +11,7 @@
 #include "AccelByteUserBlueprints.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FUserData&, Result);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserRegisterHandler, const FRegisterResponse&, Result);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPlatformLinksHandler, const TArray<FPlatformLink>&, PlatformLinks);
 
 UCLASS(Blueprintable, BlueprintType)
@@ -35,7 +36,7 @@ public:
 	static void ForgetAllCredentials();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
+	static void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserRegisterHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void Upgrade(const FString& Username, const FString& Password, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
@@ -54,6 +55,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void SendUpgradeVerificationCode(const FString& Email, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
+	static void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
 	static void GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError);

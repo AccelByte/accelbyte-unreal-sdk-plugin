@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteGeneralModels.h"
 #include "AccelByteItemModels.h"
 #include "AccelByteEntitlementModels.generated.h"
 
@@ -143,21 +144,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementPaging
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | Paging")
-		FString Previous;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | Paging")
-		FString Next;
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementPagingSlicedResult
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult ")
 		TArray<FAccelByteModelsEntitlementInfo> Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult ")
-		FAccelByteModelsEntitlementPaging Paging;
+		FAccelByteModelsPaging Paging;
 };
