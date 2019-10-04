@@ -40,9 +40,9 @@ const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext |
 TMap<FString, FString> LocalizationDescription;
 FCurrencyCreateRequest CurrencyRequest
 {
-	TEXT("UE4_SdkCoin"),
+	TEXT("SDKC"),
 	LocalizationDescription,
-	TEXT("UE4SDKC"),
+	TEXT("SDKC"),
 	ECurrencyType::VIRTUAL,
 	0,
 	-1,
@@ -51,7 +51,7 @@ FCurrencyCreateRequest CurrencyRequest
 };
 FStoreCreateRequest ArchiveStore
 {
-	"UE4_Store_Archive",
+	"UE4-Store-Archive",
 	"keep the original store",
 	{"en"},
 	{"US"},
@@ -60,7 +60,7 @@ FStoreCreateRequest ArchiveStore
 };
 FStoreCreateRequest TemporaryStore
 {
-	"UE4_Store_Temporary",
+	"UE4-Store-Temporary",
 	"for SDK testing purpose",
 	{"en"},
 	{"US"},
