@@ -39,7 +39,7 @@ namespace HttpRequest
 	bool IsFinished(const FHttpRequestPtr& Request);
 }
 
-class FHttpRetryScheduler
+class ACCELBYTEUE4SDK_API FHttpRetryScheduler
 {
 public:
 	static const int InitialDelay;

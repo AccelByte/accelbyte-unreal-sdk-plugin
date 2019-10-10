@@ -12,7 +12,7 @@
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FUserData&, Result);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserRegisterHandler, const FRegisterResponse&, Result);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDPlatformLinksHandler, const TArray<FPlatformLink>&, PlatformLinks);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPlatformLinksHandler, const FPagedPlatformLinks&, PlatformLinks);
 
 UCLASS(Blueprintable, BlueprintType)
 class UBPUser : public UBlueprintFunctionLibrary

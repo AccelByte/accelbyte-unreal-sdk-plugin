@@ -141,7 +141,7 @@ void UBPUser::ResetPassword(const FString& VerificationCode, const FString& User
 void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.GetPlatformLinks(
-		THandler<TArray<FPlatformLink>>::CreateLambda([OnSuccess](const TArray<FPlatformLink>& Result) { OnSuccess.ExecuteIfBound(Result); }),
+		THandler<FPagedPlatformLinks>::CreateLambda([OnSuccess](const FPagedPlatformLinks& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }

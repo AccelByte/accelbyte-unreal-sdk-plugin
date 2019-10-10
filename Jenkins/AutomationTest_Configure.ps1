@@ -27,11 +27,3 @@ foreach ($LINE in get-content $CONFIG_FILE)
         echo $LINE
     }
 }
-
-$STEAM_PATH = $Env:STEAM_PATH
-$STEAM_ID = $Env:STEAM_ID
-$STEAM_PASS = $Env:STEAM_PASS
-
-echo "Logging in Steam"
-& $STEAM_PATH -login $STEAM_ID $STEAM_PASS
-Start-Sleep -Seconds 20

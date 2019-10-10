@@ -374,7 +374,7 @@ void User::ResetPassword(const FString& VerificationCode, const FString& Usernam
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError)
+void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());

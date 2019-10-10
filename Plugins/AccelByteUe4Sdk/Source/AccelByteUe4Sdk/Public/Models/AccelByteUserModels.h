@@ -262,7 +262,7 @@ struct ACCELBYTEUE4SDK_API FPagedPublicUsersInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FPagedPlatformLink
+struct ACCELBYTEUE4SDK_API FPagedPlatformLinks
 {
     GENERATED_BODY()
 

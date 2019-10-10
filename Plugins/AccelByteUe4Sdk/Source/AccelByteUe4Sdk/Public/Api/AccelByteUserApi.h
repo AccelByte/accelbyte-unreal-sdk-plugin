@@ -176,7 +176,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is TArray<FPlatformLink>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError);
+	void GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, const FErrorHandler& OnError);
 
     /**
      * @brief This function links user's current account to their other account in other platform.
