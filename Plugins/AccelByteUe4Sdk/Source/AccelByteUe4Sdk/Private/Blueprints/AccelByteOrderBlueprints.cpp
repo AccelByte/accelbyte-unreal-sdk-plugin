@@ -38,7 +38,7 @@ void UAccelByteBlueprintsOrder::GetUserOrder(const FString& OrderNo, const FGetU
 
 void UAccelByteBlueprintsOrder::GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Order.GetUserOrders(Page, Size, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfoPaging& Result)
+	FRegistry::Order.GetUserOrders(Page, Size, THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsPagedOrderInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

@@ -63,15 +63,15 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	Waiting(bClientLoginSuccess,"Waiting for Login...");
 
 
-	FString Email = FString::Printf(TEXT("StatisticUE4Test@example.com"));
+	FString Email = FString::Printf(TEXT("Statistic_UE4Test@example.com"));
 	Email.ToLowerInline();
-	FString Password = FString::Printf(TEXT("password"), 0);
+	FString Password = FString::Printf(TEXT("123Password123"), 0);
 	FString DisplayName = FString::Printf(TEXT("StatisticUE4Test"), 0);
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-	FRegistry::User.Register(Email, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Response)
+	FRegistry::User.Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Response)
 	{
 		UsersCreationSuccess = true;
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Test GameProfile User is successfuly created."));
@@ -228,6 +228,25 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	check(bStatItemIsExist);
 
 	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticTearDown, "AccelByte.Tests.Statistic.Z.Teardown", AutomationFlagMaskStatistic);
+bool StatisticTearDown::RunTest(const FString& Parameters)
+{
+    bool bDeleteUsersSuccessful = false;
+
+    UE_LOG(LogAccelByteStatisticTest, Log, TEXT("DeleteUserById..."));
+    DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&]()
+    {
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Success"));
+        bDeleteUsersSuccessful = true;
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bDeleteUsersSuccessful, "Waiting for user deletion...");
+
+
+    check(bDeleteUsersSuccessful);
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetAllStatItems, "AccelByte.Tests.Statistic.B.GetAllStatItems_Success", AutomationFlagMaskStatistic);

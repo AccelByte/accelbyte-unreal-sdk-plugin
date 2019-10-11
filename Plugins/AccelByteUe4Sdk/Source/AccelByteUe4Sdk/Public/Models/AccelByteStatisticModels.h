@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteGeneralModels.h"
 #include "AccelByteStatisticModels.generated.h"
 
 UENUM(BlueprintType)
@@ -93,16 +94,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkStatItemIncResult
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkStatItemIncResult")
 		bool Success;
 
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | Paging")
-		FString Next;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | Paging")
-		FString Previous;
 };
 
 USTRUCT(BlueprintType)

@@ -641,7 +641,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 #pragma region GetUserOrders
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrders"));
-	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([&](const FAccelByteModelsOrderInfoPaging& Result)
+	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda([&](const FAccelByteModelsPagedOrderInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;

@@ -77,7 +77,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	FRegistry::User.ForgetAllCredentials();
 	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
 	LoginId.ToLowerInline();
-	FString Password = "testtest";
+	FString Password = "123SDKTest123";
 	FString DisplayName = "testSDK";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
@@ -97,7 +97,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
@@ -143,9 +143,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "AccelByte.Tests.User.LoginEmai
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
-	LoginId.ToLowerInline();
-	FString Password = "testtest";
+	FString EmailAddress = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
 	FString DisplayName = "testSDK";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
@@ -164,9 +164,9 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	bool bRegisterSuccessful = false;
-	FUserData RegisterResult;
+    FRegisterResponse RegisterResult;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		RegisterResult = Result;
@@ -176,9 +176,11 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bRegisterSuccessful, "Waiting for Registered...");
 
+    const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::accountRegistration);
+
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bLoginSuccessful = true;
@@ -186,6 +188,17 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+    bool bVerifyUserSuccessful = false;
+    UE_LOG(LogAccelByteUserTest, Log, TEXT("VerifyingAccount"));
+    FRegistry::User.Verify(VerificationCode, FVoidHandler::CreateLambda([&bVerifyUserSuccessful]()
+    {
+        UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+        bVerifyUserSuccessful = true;
+    }), GlobalErrorHandler);
+
+    FlushHttpRequests();
+    Waiting(bVerifyUserSuccessful, "Waiting for Verfying Account...");
 
 	bool bGetDataSuccessful = false;
 	FUserData GetDataResult;
@@ -217,8 +230,8 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	check(bGetDataSuccessful);
 	check(bLoginSuccessful);
 	check(bDeleteSuccessful);
-	check(RegisterResult.Username.Equals(GetDataResult.Username));
-	check(RegisterResult.LoginId.Equals(GetDataResult.LoginId));
+	check(RegisterResult.DisplayName.Equals(GetDataResult.DisplayName));
+	check(RegisterResult.EmailAddress.Equals(GetDataResult.EmailAddress));
 	check(RegisterResult.UserId.Equals(GetDataResult.UserId));
 
 	return true;
@@ -228,9 +241,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "AccelByte.Tests.User.R
 bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
-	LoginId.ToLowerInline();
-	FString Password = "old_password";
+	FString EmailAddress = "testeraccelbyte+" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "1Old_Password1";
 	FString DisplayName = "testSDK";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
@@ -250,7 +263,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
@@ -261,7 +274,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 
     bool bLoginSuccessful = false;
     UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
-    FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+    FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
     {
         UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
         bLoginSuccessful = true;
@@ -273,7 +286,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	bool bForgotPasswordSuccessful = false; 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("RequestPasswordReset"));
 	
-	FRegistry::User.SendResetPasswordCode(LoginId, FVoidHandler::CreateLambda([&]()
+	FRegistry::User.SendResetPasswordCode(EmailAddress, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bForgotPasswordSuccessful = true;
@@ -296,10 +309,10 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
 	bool bResetPasswordSuccessful = false;
-	Password = "new_password";
+	Password = "1New_Password1";
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("ResetPassword"));
 	
-	FRegistry::User.ResetPassword(VerificationCode, LoginId, Password, FVoidHandler::CreateLambda([&]()
+	FRegistry::User.ResetPassword(VerificationCode, EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bResetPasswordSuccessful = true;
@@ -314,7 +327,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	bLoginSuccessful = false;
 	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
 	
-	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
@@ -491,7 +504,7 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
 	FString Email = TEXT("testSDK@game.test");
-	FString Password = TEXT("password");
+	FString Password = TEXT("123SDKTest123");
 	bool bUpgradedHeadlessAccountUserIdRemain = false;
 	FString FirstUserId = "";
 	FString SecondUserId = "";
@@ -758,7 +771,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
 	FString Email = TEXT("testSDKsteam@game.test");
-	FString Password = TEXT("password");
+	FString Password = TEXT("123SDKTest123");
 	double LastTime = 0;
 	FString FirstUserId = TEXT("");
 	FString OldAccessToken = "", RefreshedAccessToken = "";

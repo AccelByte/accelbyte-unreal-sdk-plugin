@@ -88,7 +88,6 @@ pipeline {
             steps {
                 powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
                 bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
-                bat '%WORKSPACE%\\Jenkins\\AutomationTest_Kill_Steam.bat'
             }
             post {
                 failure {

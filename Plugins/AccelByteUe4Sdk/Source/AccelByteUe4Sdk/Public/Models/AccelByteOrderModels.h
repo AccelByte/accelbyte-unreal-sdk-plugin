@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AccelByteGeneralModels.h"
 #include "AccelByteOrderModels.generated.h"
 
 USTRUCT(BlueprintType)
@@ -136,13 +137,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfo
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfoPaging
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPagedOrderInfo
 {
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
-		FString Previous;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
-		FString Next;
+    GENERATED_BODY()
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+        TArray<FAccelByteModelsOrderInfo> Data;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+        FAccelByteModelsPaging Paging;
 };
 
 USTRUCT(BlueprintType)
