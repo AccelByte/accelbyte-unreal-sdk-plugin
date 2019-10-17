@@ -948,6 +948,20 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bGetProfileSuccessful2, "Waiting for Get Profile...");
 
+#pragma region DeleteUserProfile
+	bool bDeleteProfileDone = false;
+	bool bDeleteProfileSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
+	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteProfileSuccessful = true;
+		bDeleteProfileDone = true;
+	}), GlobalErrorHandler);
+
+	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+#pragma endregion DeleteUserProfile
+
 #pragma region DeleteUserById
 
 	bool bDeleteDone = false;
@@ -970,6 +984,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	check(bUpdateProfileSuccessful);
 	check(UpdatedDateOfBirth == ProfileUpdate.DateOfBirth);
 	check(bGetProfileSuccessful2);
+	check(bDeleteProfileSuccessful);
 	check(bDeleteSuccessful);
 	return true;
 }

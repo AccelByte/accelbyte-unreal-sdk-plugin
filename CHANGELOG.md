@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+## Fixed
+- Basic
+  - Follow API Standardization
+    - Endpoint Url:
+        - UserProfile::CreateUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
+        - UserProfile::GetPublicUserProfileInfo() "%s/public/namespaces/%s/users/%s/profiles/public" -> "%s/v1/public/namespaces/%s/users/%s/profiles/public"
+        - UserProfile::UpdateUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
+        - UserProfile::GetUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
+  - Cleanup user profile on integration test
+
 ## v2.1.0 (2019-10-04)
 ## Fixed
 - Ecommerce Test
