@@ -196,25 +196,24 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	}
 	check(bStatIsExist);
 	
-	bool bStatItemIsExist = false;
-	bool bGetStatItemDone = false;
-    FAccelByteModelsUserStatItemPagingSlicedResult GetStatItemResult;
-	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, { "MVP" }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetStatItemDone, &bStatItemIsExist, &GetStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
+	bool bProfileStatItemIsExist = false;
+	bool bGetProfileStatItemDone = false;
+    FAccelByteModelsUserStatItemPagingSlicedResult GetProfileStatItemResult;
+	FRegistry::Statistic.GetProfileStatItemsByStatCodes(Profile.profileId, { "MVP" }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetProfileStatItemDone, &bProfileStatItemIsExist, &GetProfileStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
 	{
-		GetStatItemResult = Result;
-		bGetStatItemDone = true;
+		GetProfileStatItemResult = Result;
+		bGetProfileStatItemDone = true;
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bGetStatItemDone, "Waiting for get statitem...");
-	check(bGetStatDone);
-	if (GetStatItemResult.Data.Num() == 0)
+	Waiting(bGetProfileStatItemDone, "Waiting for get statitem...");
+	if (GetProfileStatItemResult.Data.Num() == 0)
 	{
 		bool bCreateStatItemDone = false;
 		TArray<FAccelByteModelsBulkStatItemIncResult> CreateStatItemResult;
-		Statistic_Bulk_Create_StatItem(Profile.userId, Profile.profileId, { "MVP" }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bStatItemIsExist, &bCreateStatItemDone, &CreateStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+		Statistic_Bulk_Create_Profile_StatItem(Profile.userId, Profile.profileId, { "MVP" }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bProfileStatItemIsExist, &bCreateStatItemDone, &CreateStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
 		{
 			CreateStatItemResult = Result;
-			bStatItemIsExist = true;
+			bProfileStatItemIsExist = true;
 			bCreateStatItemDone = true;
 		}), StatisticTestErrorHandler);
 		FlushHttpRequests();
@@ -223,9 +222,40 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	}
 	else
 	{
-		bStatItemIsExist = true;
+		bProfileStatItemIsExist = true;
 	}
-	check(bStatItemIsExist);
+	check(bProfileStatItemIsExist);
+
+    bool bUserStatItemIsExist = false;
+    bool bGetUserStatItemDone = false;
+    FAccelByteModelsUserStatItemPagingSlicedResult GetUserStatItemResult;
+    FRegistry::Statistic.GetUserStatItemsByStatCodes({ "MVP" }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetUserStatItemDone, &bUserStatItemIsExist, &GetUserStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
+    {
+        GetUserStatItemResult = Result;
+        bGetUserStatItemDone = true;
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bGetUserStatItemDone, "Waiting for get statitem...");
+    if (GetUserStatItemResult.Data.Num() == 0)
+    {
+        bool bCreateStatItemDone = false;
+        TArray<FAccelByteModelsBulkStatItemIncResult> CreateStatItemResult;
+        Statistic_Bulk_Create_User_StatItem(Profile.userId, { "MVP" }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bUserStatItemIsExist, &bCreateStatItemDone, &CreateStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+        {
+            CreateStatItemResult = Result;
+            bUserStatItemIsExist = true;
+            bCreateStatItemDone = true;
+        }), StatisticTestErrorHandler);
+        FlushHttpRequests();
+        Waiting(bCreateStatItemDone, "Waiting for statitem created...");
+        check(bCreateStatItemDone);
+    }
+    else
+    {
+        bUserStatItemIsExist = true;
+    }
+    check(bUserStatItemIsExist);
+    check(bGetStatDone);
 
 	return true;
 }
@@ -249,16 +279,16 @@ bool StatisticTearDown::RunTest(const FString& Parameters)
     return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetAllStatItems, "AccelByte.Tests.Statistic.B.GetAllStatItems_Success", AutomationFlagMaskStatistic);
-bool StatisticGetAllStatItems ::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetAllProfileStatItems, "AccelByte.Tests.Statistic.B.0GetAllProfileStatItems_Success", AutomationFlagMaskStatistic);
+bool StatisticGetAllProfileStatItems ::RunTest(const FString& Parameters)
 {
-	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING ALL STATITEMS..."));
-	bool bGetAllStatItemsSuccess = false;
+	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING PROFILE ALL STATITEMS..."));
+	bool bGetAllProfileStatItemsSuccess = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-	FRegistry::Statistic.GetAllStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+	FRegistry::Statistic.GetAllProfileStatItems(Profile.profileId, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllProfileStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL STATITEMS SUCCESS!"));
-		bGetAllStatItemsSuccess = true;
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL PROFILE STATITEMS SUCCESS!"));
+		bGetAllProfileStatItemsSuccess = true;
 		GetResult = Result;
 		for (FAccelByteModelsUserStatItemInfo data : GetResult.Data)
 		{
@@ -266,21 +296,21 @@ bool StatisticGetAllStatItems ::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bGetAllStatItemsSuccess,"Waiting for get all stat items...");
-	check(bGetAllStatItemsSuccess);
+	Waiting(bGetAllProfileStatItemsSuccess,"Waiting for get all stat items...");
+	check(bGetAllProfileStatItemsSuccess);
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetStatItemsByStatCodes, "AccelByte.Tests.Statistic.B.GetStatItemsByStatCodes_Success", AutomationFlagMaskStatistic);
-bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetProfileStatItemsByStatCodes, "AccelByte.Tests.Statistic.B.0GetProfileStatItemsByStatCodes_Success", AutomationFlagMaskStatistic);
+bool StatisticGetProfileStatItemsByStatCodes::RunTest(const FString& Parameters)
 {
-	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING STATITEMS BY STATCODES..."));
-	bool bGetStatItemsByStatCodesSuccess = false;
+	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING PROFILE STATITEMS BY STATCODES..."));
+	bool bGetProfileStatItemsByStatCodesSuccess = false;
     FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-	FRegistry::Statistic.GetStatItemsByStatCodes(Profile.profileId, {"MVP"}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+	FRegistry::Statistic.GetProfileStatItemsByStatCodes(Profile.profileId, {"MVP"}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetProfileStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 	{
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET STATITEMS SUCCESS!"));
-		bGetStatItemsByStatCodesSuccess = true;
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET PROFILE STATITEMS SUCCESS!"));
+		bGetProfileStatItemsByStatCodesSuccess = true;
 		GetResult = Result;
 		for (FAccelByteModelsUserStatItemInfo data : GetResult.Data)
 		{
@@ -288,9 +318,53 @@ bool StatisticGetStatItemsByStatCodes::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bGetStatItemsByStatCodesSuccess,"Waiting for get stat items...");
-	check(bGetStatItemsByStatCodesSuccess);
+	Waiting(bGetProfileStatItemsByStatCodesSuccess,"Waiting for get stat items...");
+	check(bGetProfileStatItemsByStatCodesSuccess);
 	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetAllUserStatItems, "AccelByte.Tests.Statistic.B.0GetAllUserStatItems_Success", AutomationFlagMaskStatistic);
+bool StatisticGetAllUserStatItems::RunTest(const FString& Parameters)
+{
+    UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING USER ALL STATITEMS..."));
+    bool bGetAllUserStatItemsSuccess = false;
+    FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
+    FRegistry::Statistic.GetAllUserStatItems(THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetAllUserStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL User STATITEMS SUCCESS!"));
+        bGetAllUserStatItemsSuccess = true;
+        GetResult = Result;
+        for (FAccelByteModelsUserStatItemInfo data : GetResult.Data)
+        {
+            UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
+        }
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bGetAllUserStatItemsSuccess, "Waiting for get all stat items...");
+    check(bGetAllUserStatItemsSuccess);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticGetUserStatItemsByStatCodes, "AccelByte.Tests.Statistic.B.0GetUserStatItemsByStatCodes_Success", AutomationFlagMaskStatistic);
+bool StatisticGetUserStatItemsByStatCodes::RunTest(const FString& Parameters)
+{
+    UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING USER STATITEMS BY STATCODES..."));
+    bool bGetUserStatItemsByStatCodesSuccess = false;
+    FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
+    FRegistry::Statistic.GetUserStatItemsByStatCodes({ "MVP" }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([this, &GetResult, &bGetUserStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET User STATITEMS SUCCESS!"));
+        bGetUserStatItemsByStatCodesSuccess = true;
+        GetResult = Result;
+        for (FAccelByteModelsUserStatItemInfo data : GetResult.Data)
+        {
+            UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
+        }
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
+    check(bGetUserStatItemsByStatCodesSuccess);
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticBulkAddStatItemValue, "AccelByte.Tests.Statistic.B.BulkAddStatItemValue_Success", AutomationFlagMaskStatistic);
@@ -319,48 +393,94 @@ bool StatisticBulkAddStatItemValue::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticBulkAddUserStatItemValue, "AccelByte.Tests.Statistic.B.BulkAddUserStatItemValue_Success", AutomationFlagMaskStatistic);
-bool StatisticBulkAddUserStatItemValue::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticBulkAddProfileStatItemValue, "AccelByte.Tests.Statistic.B.BulkAddProfileStatItemValue_Success", AutomationFlagMaskStatistic);
+bool StatisticBulkAddProfileStatItemValue::RunTest(const FString& Parameters)
 {
-	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEM VALUE..."));
-	bool bBulkAddUserStatItemSuccess = false;
-	TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddUserStatItemResult;
+	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD PROFILE STATITEM VALUE..."));
+	bool bBulkAddProfileStatItemSuccess = false;
+	TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddProfileStatItemResult;
 	FAccelByteModelsBulkStatItemInc MVP;
 	MVP.inc = 1;
 	MVP.statCode = "MVP";
-	FRegistry::Statistic.BulkAddUserStatItemValue(Profile.profileId, { MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddUserStatItemSuccess, &BulkAddUserStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+	FRegistry::Statistic.BulkAddProfileStatItemValue(Profile.profileId, { MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddProfileStatItemSuccess, &BulkAddProfileStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
 	{
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEMS SUCCESS!"));
-		bBulkAddUserStatItemSuccess = true;
-		BulkAddUserStatItemResult = Result;
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD PROFILE STATITEMS SUCCESS!"));
+		bBulkAddProfileStatItemSuccess = true;
+		BulkAddProfileStatItemResult = Result;
 		for (FAccelByteModelsBulkStatItemIncResult data : Result)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Success: %d"), *data.StatCode, data.Success);
 		}
 	}), StatisticTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bBulkAddUserStatItemSuccess, "Waiting for bulk add user statitem...");
-	check(bBulkAddUserStatItemSuccess);
+	Waiting(bBulkAddProfileStatItemSuccess, "Waiting for bulk add Profile statitem...");
+	check(bBulkAddProfileStatItemSuccess);
 	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticAddProfileStatItemValue, "AccelByte.Tests.Statistic.B.AddProfileStatItemValue_Success", AutomationFlagMaskStatistic);
+bool StatisticAddProfileStatItemValue::RunTest(const FString& Parameters)
+{
+	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD PROFILE STATITEM VALUE..."));
+	bool bAddProfileStatItemSuccess = false;
+	FAccelByteModelsStatItemIncResult AddProfileStatItemResult;
+	FString statCode = "MVP";
+	const float increasedValue = 1;
+	FRegistry::Statistic.AddProfileStatItemValue(Profile.profileId, statCode, increasedValue, THandler<FAccelByteModelsStatItemIncResult>::CreateLambda([&bAddProfileStatItemSuccess, &AddProfileStatItemResult](FAccelByteModelsStatItemIncResult Result)
+	{
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD PROFILE STATITEMS SUCCESS!"));
+		bAddProfileStatItemSuccess = true;
+		AddProfileStatItemResult = Result;
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Current Value: %d"), Result.currentValue);
+	}), StatisticTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bAddProfileStatItemSuccess, "Waiting for add Profile statitem...");
+	check(bAddProfileStatItemSuccess);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticBulkAddUserStatItemValue, "AccelByte.Tests.Statistic.B.BulkAddUserStatItemValue_Success", AutomationFlagMaskStatistic);
+bool StatisticBulkAddUserStatItemValue::RunTest(const FString& Parameters)
+{
+    UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEM VALUE..."));
+    bool bBulkAddUserStatItemSuccess = false;
+    TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddUserStatItemResult;
+    FAccelByteModelsBulkStatItemInc MVP;
+    MVP.inc = 1;
+    MVP.statCode = "MVP";
+    FRegistry::Statistic.BulkAddUserStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddUserStatItemSuccess, &BulkAddUserStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEMS SUCCESS!"));
+        bBulkAddUserStatItemSuccess = true;
+        BulkAddUserStatItemResult = Result;
+        for (FAccelByteModelsBulkStatItemIncResult data : Result)
+        {
+            UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Success: %d"), *data.StatCode, data.Success);
+        }
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bBulkAddUserStatItemSuccess, "Waiting for bulk add User statitem...");
+    check(bBulkAddUserStatItemSuccess);
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticAddUserStatItemValue, "AccelByte.Tests.Statistic.B.AddUserStatItemValue_Success", AutomationFlagMaskStatistic);
 bool StatisticAddUserStatItemValue::RunTest(const FString& Parameters)
 {
-	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD USER STATITEM VALUE..."));
-	bool bAddUserStatItemSuccess = false;
-	FAccelByteModelsStatItemIncResult AddUserStatItemResult;
-	FString statCode = "MVP";
-	const float increasedValue = 1;
-	FRegistry::Statistic.AddUserStatItemValue(Profile.profileId, statCode, increasedValue, THandler<FAccelByteModelsStatItemIncResult>::CreateLambda([&bAddUserStatItemSuccess, &AddUserStatItemResult](FAccelByteModelsStatItemIncResult Result)
-	{
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD USER STATITEMS SUCCESS!"));
-		bAddUserStatItemSuccess = true;
-		AddUserStatItemResult = Result;
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Current Value: %d"), Result.currentValue);
-	}), StatisticTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bAddUserStatItemSuccess, "Waiting for add user statitem...");
-	check(bAddUserStatItemSuccess);
-	return true;
+    UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD USER STATITEM VALUE..."));
+    bool bAddUserStatItemSuccess = false;
+    FAccelByteModelsStatItemIncResult AddUserStatItemResult;
+    FString statCode = "MVP";
+    const float increasedValue = 1;
+    FRegistry::Statistic.AddUserStatItemValue(statCode, increasedValue, THandler<FAccelByteModelsStatItemIncResult>::CreateLambda([&bAddUserStatItemSuccess, &AddUserStatItemResult](FAccelByteModelsStatItemIncResult Result)
+    {
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("ADD USER STATITEMS SUCCESS!"));
+        bAddUserStatItemSuccess = true;
+        AddUserStatItemResult = Result;
+        UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Current Value: %d"), Result.currentValue);
+    }), StatisticTestErrorHandler);
+    FlushHttpRequests();
+    Waiting(bAddUserStatItemSuccess, "Waiting for add User statitem...");
+    check(bAddUserStatItemSuccess);
+    return true;
 }

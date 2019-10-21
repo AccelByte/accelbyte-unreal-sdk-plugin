@@ -966,11 +966,43 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+void Statistic_Bulk_Create_Profile_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
     FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/users/%s/profiles/%s/statitems/bulk"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *profileId);
+    FString Verb = TEXT("POST");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FString Content = "[";
+    for (int i = 0; i < statCode.Num(); i++)
+    {
+        Content += FString::Printf(TEXT("{\"statCode\":\"%s\"}"), *statCode[i]);
+        if (i < statCode.Num() - 1)
+        {
+            Content += ",";
+        }
+        else
+        {
+            Content += "]";
+        }
+    }
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+    Request->SetContentAsString(Content);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Statistic_Bulk_Create_User_StatItem(FString userId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+{
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/users/%s/statitems/bulk"), *BaseUrl, *FRegistry::Settings.Namespace, *userId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
     FString Accept = TEXT("application/json");

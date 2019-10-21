@@ -416,7 +416,8 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
-void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+void Statistic_Bulk_Create_Profile_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+void Statistic_Bulk_Create_User_StatItem(FString userId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
