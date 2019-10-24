@@ -38,6 +38,13 @@ void DeleteUserById(
 	const FString& UserId, 
 	const FSimpleDelegate& OnSuccess, 
 	const FErrorHandler& OnError);
+
+void DeleteUserProfile(
+	const FString& UserId,
+	const FString& Namespace,
+	const FSimpleDelegate& OnSuccess,
+	const FErrorHandler& OnError);
+
 void FlushHttpRequests();
 
 void Waiting(bool& condition, FString text);
