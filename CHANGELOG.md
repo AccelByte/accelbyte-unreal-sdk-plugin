@@ -10,7 +10,26 @@
         - UserProfile::UpdateUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
         - UserProfile::GetUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
   - Cleanup user profile on integration test
-
+## Changed
+- Statistic API Standardization
+  -API:
+    - GetAllStatItems() & GetStatItemsByStatCodes() -> GetUserStatItems()
+      - URL change: `GET` "/public/namespaces/%s/users/%s/profiles/%s/statitems" -> `GET` "/v1/public/namespaces/%s/users/%s/statitems"
+    - BulkAddStatItemValue()
+      - URL change: `POST` "/public/namespaces/%s/statitems/bulk/inc" -> `PUT` "/v1/public/namespaces/%s/statitems/value/bulk"
+    - BulkAddUserStatItemValue()
+      - URL change: `POST` "/public/namespaces/%s/users/%s/profiles/%s/statitems/bulk/inc" -> `PUT` "/v1/public/namespaces/%s/users/%s/statitems/value/bulk"
+    - AddUserStatItemValue()
+      - URL change: `POST` "/public/namespaces/%s/users/%s/profiles/%s/stats/%s/statitems/inc" -> `PUT` "/v1/public/namespaces/%s/users/%s/stats/%s/statitems/value"
+  - Model:
+    - FAccelByteModelsUserStatItemInfo
+      - Add member TArray<FString> Tags
+## Added
+- Statistic
+  - Add GetUserStatItemsByTags()
+    - URL: `GET` "/v1/public/namespaces/{namespace}/users/{userId}/statitems"
+    - Query param: "tags"
+    
 ## v2.1.0 (2019-10-04)
 ## Fixed
 - Ecommerce Test
