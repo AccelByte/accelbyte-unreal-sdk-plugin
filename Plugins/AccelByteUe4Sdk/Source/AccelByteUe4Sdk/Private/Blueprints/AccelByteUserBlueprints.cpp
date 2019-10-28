@@ -64,11 +64,11 @@ void UBPUser::ForgetAllCredentials()
 	FRegistry::User.ForgetAllCredentials();
 }
 
-void UBPUser::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const FDUserRegisterHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.Register(
 		Username, Password, DisplayName, Country, DateOfBirth,
-		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
+		THandler<FRegisterResponse>::CreateLambda([OnSuccess](const FRegisterResponse& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
@@ -88,6 +88,15 @@ void UBPUser::SendUpgradeVerificationCode(const FString & Username, const FDHand
 	FRegistry::User.SendUpgradeVerificationCode(
 		Username,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+	);
+}
+
+void UBPUser::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const FDUserDataHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	FRegistry::User.UpgradeAndVerify(
+		Username, Password, VerificationCode,
+		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
@@ -132,7 +141,7 @@ void UBPUser::ResetPassword(const FString& VerificationCode, const FString& User
 void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.GetPlatformLinks(
-		THandler<TArray<FPlatformLink>>::CreateLambda([OnSuccess](const TArray<FPlatformLink>& Result) { OnSuccess.ExecuteIfBound(Result); }),
+		THandler<FPagedPlatformLinks>::CreateLambda([OnSuccess](const FPagedPlatformLinks& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }

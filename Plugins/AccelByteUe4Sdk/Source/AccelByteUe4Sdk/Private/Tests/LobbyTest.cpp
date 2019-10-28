@@ -169,34 +169,34 @@ void resetResponses()
 	bDsNotifError = false;
 }
 
-auto ConnectSuccessDelegate = Api::Lobby::FConnectSuccess::CreateLambda([]()
+const auto ConnectSuccessDelegate = Api::Lobby::FConnectSuccess::CreateLambda([]()
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User connected!"));
 	bUsersConnected = true;
 	bUsersConnectionSuccess = true;
 });
 
-auto ConnectFailedDelegate = FErrorHandler::CreateLambda([](int32 Code, FString Message)
+const auto ConnectFailedDelegate = FErrorHandler::CreateLambda([](int32 Code, FString Message)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User failed to connect!"));
 	bUsersConnected = false;
 	bUsersConnectionSuccess = true;
 });
 
-auto GetMessageDelegate = Api::Lobby::FPersonalChatNotif::CreateLambda([](FAccelByteModelsPersonalMessageNotice result)
+const auto GetMessageDelegate = Api::Lobby::FPersonalChatNotif::CreateLambda([](FAccelByteModelsPersonalMessageNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Payload : %s"), *result.Payload);
 	bGetMessage = true;
 });
 
-auto GetAllUsersPresenceDelegate = Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](FAccelByteModelsGetOnlineUsersResponse result)
+const auto GetAllUsersPresenceDelegate = Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](FAccelByteModelsGetOnlineUsersResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("GetAllUserPresence Success!"));
 	bGetAllUserPresenceSuccess = true;
 	onlineUserResponse = result;
 });
 
-auto RequestFriendDelegate = Api::Lobby::FRequestFriendsResponse::CreateLambda([](FAccelByteModelsRequestFriendsResponse result)
+const auto RequestFriendDelegate = Api::Lobby::FRequestFriendsResponse::CreateLambda([](FAccelByteModelsRequestFriendsResponse result)
 {
 	bRequestFriendSuccess = true;
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Request Friend Success!"));
@@ -206,7 +206,7 @@ auto RequestFriendDelegate = Api::Lobby::FRequestFriendsResponse::CreateLambda([
 	}
 });
 
-auto AcceptFriendsDelegate = Api::Lobby::FAcceptFriendsResponse::CreateLambda([](FAccelByteModelsAcceptFriendsResponse result)
+const auto AcceptFriendsDelegate = Api::Lobby::FAcceptFriendsResponse::CreateLambda([](FAccelByteModelsAcceptFriendsResponse result)
 {
 	bAcceptFriendSuccess = true;
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Accept Friend Success!"));
@@ -216,7 +216,7 @@ auto AcceptFriendsDelegate = Api::Lobby::FAcceptFriendsResponse::CreateLambda([]
 	}
 });
 
-auto GetInfoPartyDelegate = Api::Lobby::FPartyInfoResponse::CreateLambda([](FAccelByteModelsInfoPartyResponse result)
+const auto GetInfoPartyDelegate = Api::Lobby::FPartyInfoResponse::CreateLambda([](FAccelByteModelsInfoPartyResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Info Party Success!"));
 	bGetInfoPartySuccess = true;
@@ -230,7 +230,7 @@ auto GetInfoPartyDelegate = Api::Lobby::FPartyInfoResponse::CreateLambda([](FAcc
 	}
 });
 
-auto LeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAccelByteModelsLeavePartyResponse result)
+const auto LeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAccelByteModelsLeavePartyResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Leave Party Success!"));
 	bLeavePartySuccess = true;
@@ -240,7 +240,7 @@ auto LeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAcce
 	}
 });
 
-auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda([](FAccelByteModelsCreatePartyResponse result)
+const auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda([](FAccelByteModelsCreatePartyResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Party Success!"));
 	bCreatePartySuccess = true;
@@ -250,13 +250,13 @@ auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda([](FAc
 	}
 });
 
-auto InvitePartyDelegate = Api::Lobby::FPartyInviteResponse::CreateLambda([](FAccelByteModelsPartyInviteResponse result)
+const auto InvitePartyDelegate = Api::Lobby::FPartyInviteResponse::CreateLambda([](FAccelByteModelsPartyInviteResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Invite Party Success!"));
 	bInvitePartySuccess = true;
 });
 
-auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](FAccelByteModelsPartyGetInvitedNotice result)
+const auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](FAccelByteModelsPartyGetInvitedNotice result)
 {
 	invitedToPartyResponse = result;
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Party Invitation!"));
@@ -267,7 +267,7 @@ auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([]
 	}
 });
 
-auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
+const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Join Party Success! Member : %d"), result.Members.Num());
 	joinPartyResponse = result;
@@ -278,14 +278,14 @@ auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelB
 	}
 });
 
-auto PartyChatNotifDelegate = Api::Lobby::FPartyChatNotif::CreateLambda([](FAccelByteModelsPartyMessageNotice result)
+const auto PartyChatNotifDelegate = Api::Lobby::FPartyChatNotif::CreateLambda([](FAccelByteModelsPartyMessageNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get a Party Message!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s | At : %s"), *result.From, *result.Payload, *result.ReceivedAt);
 	bReceivedPartyChatSuccess = true;
 });
 
-auto PartyChatSendDelegate = Api::Lobby::FPartyChatResponse::CreateLambda([](FAccelByteModelsPartyMessageResponse result)
+const auto PartyChatSendDelegate = Api::Lobby::FPartyChatResponse::CreateLambda([](FAccelByteModelsPartyMessageResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Send Party Chat Success!"));
 	bSendPartyChatSuccess = true;
@@ -295,7 +295,7 @@ auto PartyChatSendDelegate = Api::Lobby::FPartyChatResponse::CreateLambda([](FAc
 	}
 });
 
-auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
+const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kick Party Member Success!"));
 	bKickPartyMemberSuccess = true;
@@ -305,7 +305,7 @@ auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](F
 	}
 });
 
-auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
+const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kicked From Party!"));
 	{
@@ -313,7 +313,7 @@ auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAcc
 	}
 });
 
-auto GetNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([](FAccelByteModelsNotificationMessage result)
+const auto GetNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([](FAccelByteModelsNotificationMessage result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Notification!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s"), *result.From, *result.Payload);
@@ -321,7 +321,7 @@ auto GetNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([](FAccelByteMod
 	bGetNotifSuccess = true;
 });
 
-auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([](FAccelByteModelsSetOnlineUsersResponse result)
+const auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([](FAccelByteModelsSetOnlineUsersResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Presence Changed!"));
 	bUserPresenceSuccess = true;
@@ -331,7 +331,7 @@ auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([
 	}
 });
 
-auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLambda([](FAccelByteModelsUsersPresenceNotice result)
+const auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLambda([](FAccelByteModelsUsersPresenceNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Changed Their Presence!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("ID: %s | Status: %s | Activity: %s"), *result.UserID, *result.Availability, *result.Activity);
@@ -343,7 +343,7 @@ auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLambda([]
 	}
 });
 
-auto UnfriendDelegate = Api::Lobby::FUnfriendResponse::CreateLambda([](FAccelByteModelsUnfriendResponse result)
+const auto UnfriendDelegate = Api::Lobby::FUnfriendResponse::CreateLambda([](FAccelByteModelsUnfriendResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Unfriend Success!"));
 	bUnfriendSuccess = true;
@@ -353,7 +353,7 @@ auto UnfriendDelegate = Api::Lobby::FUnfriendResponse::CreateLambda([](FAccelByt
 	}
 });
 
-auto GetFriendshipStatusDelegate = Api::Lobby::FGetFriendshipStatusResponse::CreateLambda([](FAccelByteModelsGetFriendshipStatusResponse result)
+const auto GetFriendshipStatusDelegate = Api::Lobby::FGetFriendshipStatusResponse::CreateLambda([](FAccelByteModelsGetFriendshipStatusResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Friendship Status!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Code: %s, Status: %d"), *result.Code, (int)result.friendshipStatus);
@@ -365,7 +365,7 @@ auto GetFriendshipStatusDelegate = Api::Lobby::FGetFriendshipStatusResponse::Cre
 	}
 });
 
-auto ListOutgoingFriendDelegate = Api::Lobby::FListOutgoingFriendsResponse::CreateLambda([](FAccelByteModelsListOutgoingFriendsResponse result)
+const auto ListOutgoingFriendDelegate = Api::Lobby::FListOutgoingFriendsResponse::CreateLambda([](FAccelByteModelsListOutgoingFriendsResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get List Outgoing Friend Request!"));
 	listOutgoingFriendResponse = result;
@@ -376,7 +376,7 @@ auto ListOutgoingFriendDelegate = Api::Lobby::FListOutgoingFriendsResponse::Crea
 	}
 });
 
-auto ListIncomingFriendDelegate = Api::Lobby::FListIncomingFriendsResponse::CreateLambda([](FAccelByteModelsListIncomingFriendsResponse result)
+const auto ListIncomingFriendDelegate = Api::Lobby::FListIncomingFriendsResponse::CreateLambda([](FAccelByteModelsListIncomingFriendsResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get List Incoming Friend Request!"));
 	listIncomingFriendResponse = result;
@@ -387,7 +387,7 @@ auto ListIncomingFriendDelegate = Api::Lobby::FListIncomingFriendsResponse::Crea
 	}
 });
 
-auto LoadFriendListDelegate = Api::Lobby::FLoadFriendListResponse::CreateLambda([](FAccelByteModelsLoadFriendListResponse result)
+const auto LoadFriendListDelegate = Api::Lobby::FLoadFriendListResponse::CreateLambda([](FAccelByteModelsLoadFriendListResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Load Friend List!"));
 	loadFriendListResponse = result;
@@ -398,7 +398,7 @@ auto LoadFriendListDelegate = Api::Lobby::FLoadFriendListResponse::CreateLambda(
 	}
 });
 
-auto OnIncomingRequestNotifDelegate = Api::Lobby::FRequestFriendsNotif::CreateLambda([](FAccelByteModelsRequestFriendsNotif result)
+const auto OnIncomingRequestNotifDelegate = Api::Lobby::FRequestFriendsNotif::CreateLambda([](FAccelByteModelsRequestFriendsNotif result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Friend Request!"));
 	requestFriendNotifResponse = result;
@@ -409,7 +409,7 @@ auto OnIncomingRequestNotifDelegate = Api::Lobby::FRequestFriendsNotif::CreateLa
 	}
 });
 
-auto OnRequestAcceptedNotifDelegate = Api::Lobby::FAcceptFriendsNotif::CreateLambda([](FAccelByteModelsAcceptFriendsNotif result)
+const auto OnRequestAcceptedNotifDelegate = Api::Lobby::FAcceptFriendsNotif::CreateLambda([](FAccelByteModelsAcceptFriendsNotif result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Friend Request Accepted!"));
 	acceptFriendNotifResponse = result;
@@ -420,7 +420,7 @@ auto OnRequestAcceptedNotifDelegate = Api::Lobby::FAcceptFriendsNotif::CreateLam
 	}
 });
 
-auto RejectFriendDelegate = Api::Lobby::FRejectFriendsResponse::CreateLambda([](FAccelByteModelsRejectFriendsResponse result)
+const auto RejectFriendDelegate = Api::Lobby::FRejectFriendsResponse::CreateLambda([](FAccelByteModelsRejectFriendsResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Reject Friend Success!"));
 	bRejectFriendSuccess = true;
@@ -430,7 +430,7 @@ auto RejectFriendDelegate = Api::Lobby::FRejectFriendsResponse::CreateLambda([](
 	}
 });
 
-auto CancelFriendDelegate = Api::Lobby::FCancelFriendsResponse::CreateLambda([](FAccelByteModelsCancelFriendsResponse result)
+const auto CancelFriendDelegate = Api::Lobby::FCancelFriendsResponse::CreateLambda([](FAccelByteModelsCancelFriendsResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Cancel Friend Success!"));
 	bCancelFriendSuccess = true;
@@ -440,7 +440,7 @@ auto CancelFriendDelegate = Api::Lobby::FCancelFriendsResponse::CreateLambda([](
 	}
 });
 
-auto StartMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
+const auto StartMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Start Matchmaking Success!"));
 	matchmakingResponse = result;
@@ -451,7 +451,7 @@ auto StartMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([
 	}
 });
 
-auto CancelMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
+const auto CancelMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Cancel Matchmaking Success!"));
 	matchmakingResponse = result;
@@ -462,13 +462,13 @@ auto CancelMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda(
 	}
 });
 
-auto ReadyConsentResponseDelegate = Api::Lobby::FReadyConsentResponse::CreateLambda([](FAccelByteModelsReadyConsentRequest result)
+const auto ReadyConsentResponseDelegate = Api::Lobby::FReadyConsentResponse::CreateLambda([](FAccelByteModelsReadyConsentRequest result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Ready Consent Send!"));
 	bReadyConsentResponseSuccess = true;
 });
 
-auto ReadyConsentNotifDelegate = Api::Lobby::FReadyConsentNotif::CreateLambda([](FAccelByteModelsReadyConsentNotice result)
+const auto ReadyConsentNotifDelegate = Api::Lobby::FReadyConsentNotif::CreateLambda([](FAccelByteModelsReadyConsentNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Ready Consent Notice!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s is ready for match."), *result.UserId);
@@ -480,12 +480,15 @@ auto ReadyConsentNotifDelegate = Api::Lobby::FReadyConsentNotif::CreateLambda([]
 	}
 });
 
-auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([](FAccelByteModelsDsNotice result)
+const auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([](FAccelByteModelsDsNotice result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s"), *result.MatchId, *result.Message, *result.Status);
 	dsNotice = result;
-	bDsNotifSuccess = true;
+    if (dsNotice.Status == "READY")
+    {
+        bDsNotifSuccess = true;
+    }
 	if (result.MatchId.IsEmpty())
 	{
 		bDsNotifError = true;
@@ -520,13 +523,13 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 
 		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
-		FString Password = TEXT("Password");
+		FString Password = TEXT("123Password123");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
 		FString Country = "US";
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-		LobbyUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+		LobbyUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
 		{
 			UsersCreationSuccess[i] = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is Created"), i, TestUserCount);
@@ -1989,8 +1992,19 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
 	Lobbies[0]->SendInfoPartyRequest();
+
+    Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+    FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+    bool bCreateMatchmakingChannelSuccess = false;
+    Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+    {
+        bCreateMatchmakingChannelSuccess = true;
+        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+    }), LobbyTestErrorHandler);
 		
-	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+    Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
 	{
@@ -2025,14 +2039,14 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking("test");
+	Lobbies[0]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking("test");
+	Lobbies[1]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2059,10 +2073,20 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
-
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
+    bool bDeleteMatchmakingChannelSuccess = false;
+    Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+    {
+        bDeleteMatchmakingChannelSuccess = true;
+        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+    }), LobbyTestErrorHandler);
+
+    Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+    check(bCreateMatchmakingChannelSuccess);
+    check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[1]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
@@ -2252,6 +2276,17 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	Lobbies[2]->SetDsNotifDelegate(DsNotifDelegate);
 
+    FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+    bool bCreateMatchmakingChannelSuccess = false;
+    Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+    {
+        bCreateMatchmakingChannelSuccess = true;
+        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+    }), LobbyTestErrorHandler);
+
+    Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
 	Lobbies[0]->SendInfoPartyRequest();
 
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
@@ -2309,14 +2344,14 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking("test");
+	Lobbies[0]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking("test");
+	Lobbies[1]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2346,7 +2381,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[2]->SendStartMatchmaking("test");
+	Lobbies[2]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2375,6 +2410,17 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
+    bool bDeleteMatchmakingChannelSuccess = false;
+    Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+    {
+        bDeleteMatchmakingChannelSuccess = true;
+        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+    }), LobbyTestErrorHandler);
+
+    Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+    check(bCreateMatchmakingChannelSuccess);
+    check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[2]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());

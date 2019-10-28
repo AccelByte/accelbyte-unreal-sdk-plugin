@@ -107,7 +107,7 @@ void Item::GetItemsByCriteria(const FString& Language, const FString& Region, co
 void Item::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/items/search?language=%s&keyword=%s&namespace=%s"), *Settings.PlatformServerUrl, *Language, *FGenericPlatformHttp::UrlEncode(Keyword), *Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/search?language=%s&keyword=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *Language, *FGenericPlatformHttp::UrlEncode(Keyword));
 	if (!Region.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));

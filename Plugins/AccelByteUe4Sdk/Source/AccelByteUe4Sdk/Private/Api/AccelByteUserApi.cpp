@@ -183,12 +183,12 @@ void User::ForgetAllCredentials()
 	Credentials.ForgetAll();
 }
 
-void User::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FRegisterRequest NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
 	NewUserRequest.Password = Password;
-	NewUserRequest.LoginId = Username;
+	NewUserRequest.EmailAddress = Username;
 	NewUserRequest.AuthType = TEXT("EMAILPASSWD");
 	NewUserRequest.Country = Country;
 	NewUserRequest.DateOfBirth = DateOfBirth;
@@ -213,7 +213,7 @@ void User::Register(const FString& Username, const FString& Password, const FStr
 void User::GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v2/public/users/me"), *Settings.IamServerUrl);
+	FString Url = FString::Printf(TEXT("%s/v3/public/users/me"), *Settings.IamServerUrl);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -254,6 +254,35 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
 }
 
+void User::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("{ \"code\": \"%s\", \"emailAddress\": \"%s\", \"password\": \"%s\"}"), *VerificationCode, *Username, *Password);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			THandler<FUserData>::CreateLambda(
+				[OnSuccess](const FUserData& UserData)
+				{
+					OnSuccess.ExecuteIfBound(UserData);
+				}),
+				OnError),
+		FPlatformTime::Seconds());
+}
+
 void User::Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
@@ -261,7 +290,7 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{ \"LoginId\": \"%s\", \"Password\": \"%s\"}"), *Username, *Password);
+	FString Content = FString::Printf(TEXT("{ \"EmailAddress\": \"%s\", \"Password\": \"%s\"}"), *Username, *Password);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -306,11 +335,11 @@ void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess
 
 void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/forgotPassword"), *Settings.IamServerUrl, *Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/forgot"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{\"LoginId\": \"%s\"}"), *Username);
+	FString Content = FString::Printf(TEXT("{\"emailAddress\": \"%s\"}"), *Username);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -326,9 +355,9 @@ void User::ResetPassword(const FString& VerificationCode, const FString& Usernam
 {
 	FResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code = VerificationCode;
-	ResetPasswordRequest.LoginId = Username;
+	ResetPasswordRequest.EmailAddress = Username;
 	ResetPasswordRequest.NewPassword = NewPassword;
-	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/resetPassword"), *Settings.IamServerUrl, *Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/reset"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -345,7 +374,7 @@ void User::ResetPassword(const FString& VerificationCode, const FString& Usernam
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, const FErrorHandler& OnError)
+void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());
@@ -368,7 +397,7 @@ void User::GetPlatformLinks(const THandler<TArray<FPlatformLink>>& OnSuccess, co
 void User::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/platforms/%s/link"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/x-www-form-urlencoded");
 	FString Accept = TEXT("application/json");
@@ -388,8 +417,8 @@ void User::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, c
 void User::UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/me/platforms/%s/link"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
-	FString Verb = TEXT("POST");
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
+	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content;
@@ -431,10 +460,10 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::GetUserByEmailAddress(const FString& EmailAddress, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/byLoginId?loginId=%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(LoginId));
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(EmailAddress));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -451,10 +480,10 @@ void User::GetUserByLoginId(const FString& LoginId, const THandler<FUserData>& O
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetPublicUserInfo(const FString& UserID, const THandler<FPublicUserInfo>& OnSuccess, const FErrorHandler& OnError)
+void User::GetUserByUserId(const FString& UserID, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v2/public/namespaces/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *UserID);
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *UserID);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

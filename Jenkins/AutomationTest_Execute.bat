@@ -1,31 +1,35 @@
 ::Automation test execution
 
-::::Set environment variable to obtain verification code with an executable application
-SET IAM_DATABASE_URL = %IAM_DATABASE_URL%
-SET NAMESPACE = %PUBLISHER_NAMESPACE%
-SET TABLE_PREFIX = %TABLE_PREFIX%
-SET AWS_ACCESS_KEY_ID = %AWS_ACCESS_KEY_ID%
-SET AWS_SECRET_ACCESS_KEY = %AWS_SECRET_ACCESS_KEY%
-SET AWS_REGION = %AWS_REGION%
 set TEST_LOG="AutomationTestLog.log"
-
-::::Steam account login
-SET STEAM_PATH = %STEAM_PATH%
-SET STEAM_ID = %STEAM_ID%
-SET STEAM_PASS = %STEAM_PASS%
-
-start "Steam" "%STEAM_PATH%" "-login" "%STEAM_ID%" "%STEAM_PASS%"
-::::Wait for steam to startup
-powershell Start-Sleep -m 10000
-
-::::Login Steam account to an application and generate the Steam authorization ticket
-pushd SteamHelper
-SteamTicketHelper.exe login
-popd
 
 ::::Set an environment variable that will be read by libcurl and libwebsocket 
 set http_proxy=%PROXY_SERVER%
 set https_proxy=http://%PROXY_SERVER%
+
+set STEAM_PATH = %STEAM_PATH%
+set STEAM_ID = %STEAM_ID%
+set STEAM_PASS = %STEAM_PASS%
+
+echo "Logging in Steam"
+powershell -command "& $Env:STEAM_PATH -login $Env:STEAM_ID $Env:STEAM_PASS"
+powershell -command "Start-Sleep -m 10000"
+echo "Logged in to Steam"
+
+rm %WORKSPACE%\\SteamHelper\\steamticket.txt
+
+echo "Login with Steam Account"
+:::::Log in Steam account
+:here
+If exist %WORKSPACE%\SteamHelper\steamticket.txt (
+    echo "steamticket found"
+    type %WORKSPACE%\SteamHelper\steamticket.txt
+) else (
+    pushd SteamHelper
+    powershell -command "./SteamTicketHelper.exe login"
+    popd
+    powershell -command "Start-Sleep -s 20"
+    goto :here
+)
 
 ::::Run the automation test
 "%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=%TEST_LOG%
@@ -33,13 +37,16 @@ set https_proxy=http://%PROXY_SERVER%
 ::::Obtain the result of the test a.k.a. last exit code
 set EXIT_CODE=%errorlevel%
 
+::::Print the content of the automation test log file
+type "%WORKSPACE%\Saved\Logs\%TEST_LOG%"
+
 :::::Logout the logged in Steam account
 pushd SteamHelper
 SteamTicketHelper.exe logout
 popd
 
-::::Print the content of the automation test log file
-type "%WORKSPACE%\Saved\Logs\%TEST_LOG%"
+:::::Deleting SteamTicket
+rm %WORKSPACE%\\SteamHelper\\steamticket.txt
 
 ::::Cannot exit from test stage if "Steam" is active.
 taskkill /F /IM Steam.exe

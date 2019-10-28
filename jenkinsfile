@@ -116,7 +116,15 @@ pipeline {
             agent {
                 label "windows-sdk"
             }      
-            steps {				
+            steps {
+                script{	
+                    def VERSION = powershell(returnStdout: true, script: '''
+                        $json = Get-Content "$Env:WORKSPACE/version.json" | Out-String | ConvertFrom-Json
+                        $VERSION = $Env:GIT_SHA + "-" + $json.version
+                        Write-Output $VERSION
+                    ''')
+                    VERSION = VERSION.trim()
+                }			
                 bat '%WORKSPACE%\\Jenkins\\Archive.bat'
             }
             post {
@@ -146,13 +154,12 @@ pipeline {
             GIT_SHA = "${env.GIT_COMMIT}"       
             BUILD_NUMBER = "${env.BUILD_NUMBER}"
             WORKSPACE = "${env.WORKSPACE}"
-            VERSION = "${GIT_SHA}-BUILD-${BUILD_NUMBER}"
-            PACKAGE = "${WORKSPACE}/artifacts/AccelByteUe4SdkSource-${VERSION}.7z"
             }
             
             steps {
                 bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
                 script{
+                    def PACKAGE = "${env.WORKSPACE}/artifacts/AccelByteUe4SdkPackage-${VERSION}.7z"
                     nexusArtifactUploader(
                         nexusVersion: NEXUS_VERSION,
                         protocol: NEXUS_PROTOCOL,

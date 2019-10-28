@@ -40,9 +40,9 @@ const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext |
 TMap<FString, FString> LocalizationDescription;
 FCurrencyCreateRequest CurrencyRequest
 {
-	TEXT("UE4_SdkCoin"),
+	TEXT("SDKC"),
 	LocalizationDescription,
-	TEXT("UE4SDKC"),
+	TEXT("SDKC"),
 	ECurrencyType::VIRTUAL,
 	0,
 	-1,
@@ -51,7 +51,7 @@ FCurrencyCreateRequest CurrencyRequest
 };
 FStoreCreateRequest ArchiveStore
 {
-	"UE4_Store_Archive",
+	"UE4-Store-Archive",
 	"keep the original store",
 	{"en"},
 	{"US"},
@@ -60,7 +60,7 @@ FStoreCreateRequest ArchiveStore
 };
 FStoreCreateRequest TemporaryStore
 {
-	"UE4_Store_Temporary",
+	"UE4-Store-Temporary",
 	"for SDK testing purpose",
 	{"en"},
 	{"US"},
@@ -315,7 +315,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSearchItemSuccess, "AccelByte.Tests.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSearchItemSuccess, "AccelByte.unTested.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
 bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 {
 #pragma region SearchItem
@@ -641,7 +641,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 #pragma region GetUserOrders
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrders"));
-	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsOrderInfoPaging>::CreateLambda([&](const FAccelByteModelsOrderInfoPaging& Result)
+	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda([&](const FAccelByteModelsPagedOrderInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetUserOrdersSuccess = true;

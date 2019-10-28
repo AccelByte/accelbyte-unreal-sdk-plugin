@@ -76,14 +76,14 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 
 		FString Email = FString::Printf(TEXT("GameProfileUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
-		FString Password = FString::Printf(TEXT("password%d"), i);
+		FString Password = FString::Printf(TEXT("Password%d"), i);
 		FString DisplayName = FString::Printf(TEXT("GameProfileUE4%d"), i);
 		FString Country = "US";
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
 
-		GameProfileUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FUserData>::CreateLambda([&](const FUserData& Response)
+		GameProfileUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Response)
 		{
 			UsersCreationSuccess[i] = true;
 			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d is successfuly created."), i+1, GameProfileTestUserCount);

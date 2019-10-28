@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteOrderModels.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteOrderBlueprints.generated.h"
@@ -24,7 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsOrderInfoPaging&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsPagedOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 

@@ -8,6 +8,7 @@
 #include "HttpManager.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Api/AccelByteOauth2Api.h"
 #include "Json.h"
 #include "HAL/FileManager.h"
 
@@ -42,6 +43,52 @@ FString GetBaseUrl()
     return FString::Printf(TEXT("%s"), BaseUrl);
 }
 
+FString GetPublisherNamespace()
+{
+    const int32 length = 100;
+    TCHAR Namespace[length];
+#if PLATFORM_WINDOWS
+    FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), Namespace, length);
+#elif PLATFORM_LINUX
+    FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), Namespace, length);
+#elif PLATFORM_MAC
+    FApplePlatformMisc::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), Namespace, length);
+#endif
+    return FString::Printf(TEXT("%s"), Namespace);
+}
+
+FString GetAdminAccessToken()
+{
+    const int32 length = 100;
+    TCHAR ClientId[length];
+    TCHAR ClientSecret[length];
+#if PLATFORM_WINDOWS
+    FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+    FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+#elif PLATFORM_LINUX
+    FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+    FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+#elif PLATFORM_MAC
+    FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+    FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+#endif
+    FOauth2Token ClientLogin;
+    bool ClientLoginSuccess = false;
+    Api::Oauth2::GetAccessTokenWithClientCredentialsGrant(FString::Printf(TEXT("%s"), ClientId), FString::Printf(TEXT("%s"), ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
+    {
+        ClientLogin = Result;
+        ClientLoginSuccess = true;
+        UE_LOG(LogTemp, Log, TEXT("Login with Client Success..!"));
+    }), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+    {
+        UE_LOG(LogTemp, Log, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
+    }));
+    Waiting(ClientLoginSuccess, "Login with Client...");
+    FlushHttpRequests();
+
+    return ClientLogin.Access_token;
+}
+
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
     UAccelByteBlueprintsTest::SendNotif(FRegistry::Credentials.GetUserId(), Message, bAsync, FVoidHandler::CreateLambda([OnSuccess]()
@@ -55,25 +102,8 @@ void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, co
 
 void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-    /*
-     If the client is not logged in
-    */
-    if (FRegistry::Credentials.GetClientAccessToken() == "")
-    {
-        bool bClientTokenObtained = false;
-        FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-        {
-            UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"));
-            bClientTokenObtained = true;
-        }), OnError);
-        FlushHttpRequests();
-        Waiting(bClientTokenObtained, "Waiting for Login...");
-        check(bClientTokenObtained);
-    }
-
-
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/lobby/notification/namespaces/%s/users/%s/freeform"), *BaseUrl, *FRegistry::Settings.Namespace, *UserId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -120,84 +150,31 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 
 void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-    using AccelByte::Settings;
-    FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([OnSuccess, OnError, UserId]()
+    bool bGetUserMapSuccess = false;
+    FUserMapResponse userMap;
+    User_Get_User_Mapping(UserId, THandler<FUserMapResponse>::CreateLambda([&userMap, &bGetUserMapSuccess](const FUserMapResponse& Result)
     {
-        UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *UserId);
-        FString BaseUrl = GetBaseUrl();
-        FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-        FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *UserId, *FRegistry::Settings.PublisherNamespace);
-        FString Verb = TEXT("GET");
-        FString ContentType = TEXT("application/json");
-        FString Accept = TEXT("application/json");
-        FString Content;
-        FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+        userMap = Result;
+        bGetUserMapSuccess = true;
+    }), OnError);
+    Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+    FlushHttpRequests();
 
-        Request->SetURL(Url);
-        Request->SetHeader(TEXT("Authorization"), Authorization);
-        Request->SetVerb(Verb);
-        Request->SetHeader(TEXT("Content-Type"), ContentType);
-        Request->SetHeader(TEXT("Accept"), Accept);
-        Request->SetContentAsString(Content);
-        Request->OnProcessRequestComplete().BindLambda([BaseUrl, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-        {
-            int32 Code = 0;
-            FString Message;
-            if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-            {
-                TSharedPtr<FJsonObject> JsonParsed;
-                TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(Response->GetContentAsString());
-                if (FJsonSerializer::Deserialize(JsonReader, JsonParsed))
-                {
-                    FString RealUserId = JsonParsed->GetStringField("UserId");
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseUrl, *userMap.Namespace, *userMap.userId);
+    FString Verb = TEXT("DELETE");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
 
-                    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
-                    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseUrl, *FRegistry::Settings.PublisherNamespace, *RealUserId);
-                    FString Verb = TEXT("DELETE");
-                    FString ContentType = TEXT("application/json");
-                    FString Accept = TEXT("application/json");
-                    FString Content;
-                    FHttpRequestPtr Request2 = FHttpModule::Get().CreateRequest();
-                    Request2->SetURL(Url);
-                    Request2->SetHeader(TEXT("Authorization"), Authorization);
-                    Request2->SetVerb(Verb);
-                    Request2->SetHeader(TEXT("Content-Type"), ContentType);
-                    Request2->SetHeader(TEXT("Accept"), Accept);
-                    Request2->SetContentAsString(Content);
-                    Request2->OnProcessRequestComplete().BindLambda([OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
-                    {
-                        int32 Code;
-                        FString Message;
-                        if (EHttpResponseCodes::IsOk(Response->GetResponseCode()))
-                        {
-                            OnSuccess.ExecuteIfBound();
-                        }
-                        else
-                        {
-                            HandleHttpError(Request, Response, Code, Message);
-                            OnError.ExecuteIfBound(Code, Message);
-                        }
-                    });
-                    Request2->ProcessRequest();
-                }
-                else
-                {
-                    HandleHttpError(Request, Response, Code, Message);
-                    OnError.ExecuteIfBound(Code, Message);
-                }
-            }
-            else
-            {
-                HandleHttpError(Request, Response, Code, Message);
-                OnError.ExecuteIfBound(Code, Message);
-            }
-        });
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
 
-        Request->ProcessRequest();
-    }), FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-    {
-        OnError.ExecuteIfBound(Code, Message);
-    }));
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void FlushHttpRequests()
@@ -216,22 +193,6 @@ void FlushHttpRequests()
 
 void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-    /*
-     If the client is not logged in
-    */
-    if (FRegistry::Credentials.GetClientAccessToken() == "")
-    {
-        bool bClientTokenObtained = false;
-        FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-        {
-            UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CLIENT is logged in"));
-            bClientTokenObtained = true;
-        }), OnError);
-        FlushHttpRequests();
-        Waiting(bClientTokenObtained, "Waiting for Login...");
-        check(bClientTokenObtained);
-    }
-
     /*
      Check the currency that expected for integration test. If it's already created, it doesn't need to be created again.
      If it doesn't exist, then it will be created.
@@ -591,20 +552,6 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 
 void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-    // If the client is not logged in
-    if (FRegistry::Credentials.GetClientAccessToken() == "")
-    {
-        bool bClientTokenObtained = false;
-        FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-        {
-            UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CLIENT is logged in"));
-            bClientTokenObtained = true;
-        }), OnError);
-        FlushHttpRequests();
-        Waiting(bClientTokenObtained, "Waiting for Login...");
-        check(bClientTokenObtained);
-    }
-
     // Delete testing currency
     bool bCurrencyDeleted = false;
     Ecommerce_Currency_Delete(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
@@ -681,7 +628,7 @@ void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegat
 void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -703,7 +650,7 @@ void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDel
 void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s/summary"), *BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
@@ -724,7 +671,7 @@ void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSucce
 void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
     FString Verb = TEXT("DELETE");
     FString ContentType = TEXT("application/json");
@@ -745,7 +692,7 @@ void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSu
 void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
@@ -766,7 +713,7 @@ void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const F
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("DELETE");
     FString ContentType = TEXT("application/json");
@@ -787,7 +734,7 @@ void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FEr
 void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -809,7 +756,7 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
@@ -830,7 +777,7 @@ void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, cons
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
     FString Verb = TEXT("DELETE");
     FString ContentType = TEXT("application/json");
@@ -851,7 +798,7 @@ void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, c
 void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *BaseUrl, *FRegistry::Settings.Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
     FString Verb = TEXT("PUT");
     FString ContentType = TEXT("application/json");
@@ -872,7 +819,7 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/categories?storeId=%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -893,7 +840,7 @@ void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId,
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -912,10 +859,57 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError)
+{
+    FMatchmakingCreateRequest RequestBody;
+    RequestBody.description = "1v1 game mode for test";
+    RequestBody.game_mode = channel;
+    RequestBody.rule_set.alliance_number = 2;
+    RequestBody.rule_set.symmetric_match = true;
+    RequestBody.rule_set.symmetric_party_number = 1;
+
+    FString Content;
+    FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
+
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *BaseUrl, *FRegistry::Settings.Namespace);
+    FString Verb = TEXT("POST");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+    Request->SetContentAsString(Content);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *channel);
+    FString Verb = TEXT("DELETE");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
     FString Verb = TEXT("GET");
     FString ContentType = TEXT("application/json");
@@ -933,7 +927,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/stats"), *BaseUrl, *FRegistry::Settings.Namespace);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -954,7 +948,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
 {
     FString BaseUrl = GetBaseUrl();
-    FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetClientAccessToken());
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
     FString Url = FString::Printf(TEXT("%s/statistic/admin/namespaces/%s/users/%s/profiles/%s/statitems/bulk/create"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *profileId);
     FString Verb = TEXT("POST");
     FString ContentType = TEXT("application/json");
@@ -979,6 +973,54 @@ void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FS
     Request->SetHeader(TEXT("Content-Type"), ContentType);
     Request->SetHeader(TEXT("Accept"), Accept);
     Request->SetContentAsString(Content);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+    UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());
+    FString Verb = TEXT("GET");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
+
+    FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User_Get_Verification_Code(const FString & userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler & OnError)
+{
+    bool bGetUserMapSuccess = false;
+    FUserMapResponse userMap;
+    User_Get_User_Mapping(userId, THandler<FUserMapResponse>::CreateLambda([&userMap, &bGetUserMapSuccess](const FUserMapResponse& Result)
+    {
+        userMap = Result;
+        bGetUserMapSuccess = true;
+    }), OnError);
+    Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+    FlushHttpRequests();
+
+    FString BaseUrl = GetBaseUrl();
+    FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+    FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *userMap.Namespace, *userMap.userId);
+    FString Verb = TEXT("GET");
+    FString ContentType = TEXT("application/json");
+    FString Accept = TEXT("application/json");
+    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Authorization"), Authorization);
+    Request->SetVerb(Verb);
+    Request->SetHeader(TEXT("Content-Type"), ContentType);
+    Request->SetHeader(TEXT("Accept"), Accept);
 
     FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
