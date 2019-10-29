@@ -9,6 +9,7 @@
 **[2019-10-15]**
 
 ## What's new in this release?
+* Fix validation issues on ecommerce integration tests
 * Follow IAM Breaking Changes. API Standardization.
 
 # Release [2.0.0]
