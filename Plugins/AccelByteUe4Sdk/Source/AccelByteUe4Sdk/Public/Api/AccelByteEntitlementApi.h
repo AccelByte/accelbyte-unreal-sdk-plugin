@@ -4,8 +4,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
-#include "Models/AccelByteItemModels.h"
-#include "Models/AccelByteEntitlementModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
 {
@@ -31,14 +30,14 @@ public:
 	*
 	* @param EntitlementName The name of the entitlement (optional).
 	* @param ItemId Item's id (optional).
-	* @param Page Page of the list that has been sliced based on Size parameter (optional, default = 0).
-	* @param Size The size of pagination (optional).
+	* @param Offset Offset of the list that has been sliced based on Limit parameter (optional, default = 0).
+	* @param Limit The limit of item on page (optional).
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementPagingSlicedResult.
 	* @param OnError This will be called when the operation failed.
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
 private:
 	Entitlement() = delete;

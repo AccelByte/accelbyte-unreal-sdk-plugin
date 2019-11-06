@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "Core/AccelByteError.h"
-#include "Models/AccelByteOrderModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
 {
@@ -54,14 +54,6 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
 	void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess, const FErrorHandler& OnError);
-
-	/**
-	 * @brief Fulfill an order if the order is charged but the fulfillment fail.
-	 * 
-	 * @param OrderNo Order number.
-	 * @param OnSuccess OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsOrderInfo&.
-	 */
-	void FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief  Get the history of the created orders.

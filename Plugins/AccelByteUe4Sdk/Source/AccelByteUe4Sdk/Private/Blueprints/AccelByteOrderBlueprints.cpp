@@ -47,17 +47,6 @@ void UAccelByteBlueprintsOrder::GetUserOrders(int32 Page, int32 Size, const FGet
 	}));
 }
 
-void UAccelByteBlueprintsOrder::FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
-{
-	FRegistry::Order.FulfillOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
-}
-
 void UAccelByteBlueprintsOrder::GetUserOrderHistory(const FString& OrderNo, const FGetUserOrderHistorySuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Order.GetUserOrderHistory(OrderNo, THandler<TArray<FAccelByteModelsOrderHistoryInfo>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsOrderHistoryInfo>& Result)

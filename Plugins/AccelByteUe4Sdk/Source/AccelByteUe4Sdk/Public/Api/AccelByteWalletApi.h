@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Http.h"
-#include "Models/AccelByteWalletModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
 
 namespace AccelByte

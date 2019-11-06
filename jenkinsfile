@@ -103,6 +103,7 @@ pipeline {
             }
             steps {
                 bat '%WORKSPACE%\\Jenkins\\Package.bat'
+                bat '%WORKSPACE%\\Jenkins\\Package_Plugin.bat'
             }
             post {
                 failure {
