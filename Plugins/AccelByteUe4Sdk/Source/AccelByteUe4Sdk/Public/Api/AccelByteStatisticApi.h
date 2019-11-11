@@ -58,9 +58,9 @@ namespace AccelByte
 			void GetUserStatItemsByTags(const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			* @brief Bulk add stat item(s) value from specified profile id(s) by stat code(s).
+			* @brief Bulk add stat item(s) value from specified user id(s) by stat code(s).
 			*
-			* @param Data array consist of increased value, profile id, and stat code.
+			* @param Data array consist of increased value, user id, and stat code.
 			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemIncResult.
 			* @param OnError This will be called when the operation failed.
 			*/
@@ -69,7 +69,6 @@ namespace AccelByte
 			/**
 			* @brief Bulk add stat item(s) value from a specified user id by stat code(s).
 			*
-			* @param ProfileId the profileId that about to update
 			* @param Data array consist of increased value and stat code.
 			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemIncResult.
 			* @param OnError This will be called when the operation failed.
@@ -79,7 +78,6 @@ namespace AccelByte
 			/**
 			* @brief Add a stat item value from a specified user id by stat code.
 			*
-			* @param ProfileId the profileId that about to update
 			* @param StatCode the statCode of statItem that about to update.
 			* @param Inc increased value of the statItem.
 			* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsBulkStatItemIncResult.

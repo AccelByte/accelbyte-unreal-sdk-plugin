@@ -12,6 +12,12 @@
   - Cleanup user profile on integration test
 ## Changed
 - Statistic API Standardization
+  - Model:
+    - FAccelByteModelsUserStatItemInfo
+      - UPROPERTY change: profileId -> userId
+    - FAccelByteModelsBulkUserStatItemInc
+      - UPROPERTY change: profileId -> userId
+- Statistic API Standardization
   -API:
     - GetAllStatItems() & GetStatItemsByStatCodes() -> GetUserStatItems()
       - URL change: `GET` "/public/namespaces/%s/users/%s/profiles/%s/statitems" -> `GET` "/v1/public/namespaces/%s/users/%s/statitems"
