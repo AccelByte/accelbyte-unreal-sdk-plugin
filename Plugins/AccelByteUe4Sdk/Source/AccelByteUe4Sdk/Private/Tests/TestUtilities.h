@@ -23,21 +23,28 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE(FSendNotificationSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
-	static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+		static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	static void SendNotif(FString UserId, FString Message, bool bAsync, const AccelByte::FVoidHandler & OnSuccess, const FErrorHandler & OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
-	static FString BytesToFString(TArray<uint8> Input);
+		static FString BytesToFString(TArray<uint8> Input);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
-	static TArray<uint8> FStringToBytes(FString Input);
+		static TArray<uint8> FStringToBytes(FString Input);
 };
 
 void DeleteUserById(
-	const FString& UserId, 
-	const FSimpleDelegate& OnSuccess, 
+	const FString& UserId,
+	const FSimpleDelegate& OnSuccess,
 	const FErrorHandler& OnError);
+
+void DeleteUserProfile(
+	const FString& UserId,
+	const FString& Namespace,
+	const FSimpleDelegate& OnSuccess,
+	const FErrorHandler& OnError);
+
 void FlushHttpRequests();
 
 void Waiting(bool& condition, FString text);
@@ -168,7 +175,7 @@ enum class EAppType : uint8
 UENUM(BlueprintType)
 enum class EStatus : uint8
 {
-    ACTIVE, INACTIVE
+	ACTIVE, INACTIVE
 };
 
 USTRUCT(BlueprintType)
@@ -325,52 +332,54 @@ struct FStatCreateRequest
 		EAccelByteStatisticSetBy setBy;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
 		FString statCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Statistic | StatCreate")
+		TArray<FString> tags;
 };
 
 USTRUCT(BlueprintType)
 struct FMatchmakingRuleSet
 {
-    GENERATED_BODY()
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-        int alliance_number;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-        bool symmetric_match;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-        int symmetric_party_number;
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+		int alliance_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+		bool symmetric_match;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+		int symmetric_party_number;
 };
 
 USTRUCT(BlueprintType)
 struct FMatchmakingCreateRequest
 {
-    GENERATED_BODY()
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-        FString description;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-        FString game_mode;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-        FMatchmakingRuleSet rule_set;
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+		FString description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+		FString game_mode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+		FMatchmakingRuleSet rule_set;
 };
 
 USTRUCT(BlueprintType)
 struct FUserMapResponse
 {
-    GENERATED_BODY()
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-        FString Namespace;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-        FString userId;
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
+		FString userId;
 };
 
 USTRUCT(BlueprintType)
 struct FVerificationCode
 {
-    GENERATED_BODY()
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-        FString accountRegistration;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-        FString accountUpgrade;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
-        FString passwordReset;
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+		FString accountRegistration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+		FString accountUpgrade;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+		FString passwordReset;
 };
 
 struct EcommerceExpectedVariable
@@ -409,7 +418,7 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
-void Statistic_Bulk_Create_StatItem(FString userId, FString profileId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+void Statistic_Bulk_Create_User_StatItem(FString userId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
