@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.4.0 (2019-11-11)
 ## Fixed
 - Basic
   - Follow API Standardization
@@ -30,7 +30,7 @@
     - URL: `GET` "/v1/public/namespaces/{namespace}/users/{userId}/statitems"
     - Query param: "tags"
     
-## v2.1.0 (2019-10-04)
+## 2.3.0 (2019-10-15)
 ## Fixed
 - Ecommerce Test
   - Change CurrencyCode from "Ue4SdkCoin" to "SDKC"
@@ -62,7 +62,7 @@
   - Add FBan and FPermission on UserModels
   - Add FRegisterResponse
   - Update UserData
-## v2.0.0 (2019-09-06)
+## 2.0.0 (2019-09-06)
 ## Added
 - Session Management
   - Implementing API Gateway
@@ -79,7 +79,7 @@
   - DS Notif
 - Updated to v2.0.0 for Justice release v2.0.0 
 
-## v1.0.0-beta.1 (2019-03-13)
+## 1.0.0-beta.1 (2019-03-13)
 ### Added
 
 - Supported IAM Service Features:
