@@ -264,7 +264,7 @@ bool StatisticBulkAddStatItemValue::RunTest(const FString& Parameters)
 	TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddStatItemResult;
 	FAccelByteModelsBulkUserStatItemInc MVP;
 	MVP.inc = 1;
-	MVP.profileId = FRegistry::Credentials.GetUserId();
+	MVP.userId = FRegistry::Credentials.GetUserId();
 	MVP.statCode = StatisticStatCode;
 	FRegistry::Statistic.BulkAddStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddStatItemSuccess, &BulkAddStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
 	{
