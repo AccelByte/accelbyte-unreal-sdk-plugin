@@ -1,4 +1,17 @@
-# Release [v2.0.0]
+# Release [2.4.0]
+**[2019-11-11]**
+
+## What's new in this release?
+* Follow Basic Breaking Changes. API Standardization.
+* Follow Statistic Breaking Changes. API Standardization.
+
+# Release [2.3.0]
+**[2019-10-15]**
+
+## What's new in this release?
+* Follow IAM Breaking Changes. API Standardization.
+
+# Release [2.0.0]
 **[2019-08-23]**
 
 ## What's new in this release?
