@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Models/AccelByteItemModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "AccelByteItemBlueprints.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -16,13 +16,13 @@ class UAccelByteBlueprintsItem : public UBlueprintFunctionLibrary
 public:
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 	
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemByIdSuccess, const FAccelByteModelsItemInfo&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemByIdSuccess, const FAccelByteModelsPopulatedItemInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
 	static void GetItemById(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
-	static void GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, EAccelByteItemType ItemType, EAccelByteItemStatus Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+	static void GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSearchItemSuccess, const FAccelByteModelsItemPagingSlicedResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")

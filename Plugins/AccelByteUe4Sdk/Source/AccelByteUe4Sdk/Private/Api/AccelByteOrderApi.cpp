@@ -81,26 +81,6 @@ void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModel
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Order::FulfillOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/fulfill"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
 void Order::GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());

@@ -16,7 +16,7 @@ using AccelByte::Credentials;
 
 void UAccelByteBlueprintsItem::GetItemById(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Item.GetItemById(ItemId, Language, Region, THandler<FAccelByteModelsItemInfo>::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
+	FRegistry::Item.GetItemById(ItemId, Language, Region, THandler<FAccelByteModelsPopulatedItemInfo>::CreateLambda([OnSuccess](const FAccelByteModelsPopulatedItemInfo& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
@@ -25,9 +25,9 @@ void UAccelByteBlueprintsItem::GetItemById(const FString& ItemId, const FString&
 	}));
 }
 
-void UAccelByteBlueprintsItem::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, EAccelByteItemType ItemType, EAccelByteItemStatus Status, int32 Page, int32 Size, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsItem::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Item.GetItemsByCriteria(Language, Region, CategoryPath, ItemType, Status, Page, Size, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
+	FRegistry::Item.GetItemsByCriteria(ItemCriteria, Offset, Limit, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)

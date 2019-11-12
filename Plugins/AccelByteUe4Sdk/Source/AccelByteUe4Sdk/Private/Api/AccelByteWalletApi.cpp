@@ -20,7 +20,7 @@ Wallet::~Wallet(){}
 void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *Credentials.GetUserId(), *CurrencyCode);
+	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/me/wallets/%s"), *Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *CurrencyCode);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");

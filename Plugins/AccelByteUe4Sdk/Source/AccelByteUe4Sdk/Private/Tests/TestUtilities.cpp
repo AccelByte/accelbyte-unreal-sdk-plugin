@@ -386,19 +386,17 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		Variables.ExpectedRootItemTitle,
 		"Root item",
 		"Root item, virtual currency, not free",
-		{ FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "itemImage"} },
-		FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "thumbnailImage"}
 	};
 	TMap<FString, FLocalization> rootLocalizationMap;
 	rootLocalizationMap.Add("en", rootLocalization);
-	FAccelByteModelsItemInfoRegionData rootRegionData
+	FCreateRegionDataItem rootRegionData
 	{
 		1,
 		0,
 		0,
 		1,
 		Variables.ExpectedCurrency.currencyCode,
-		"VIRTUAL",
+		EAccelByteItemCurrencyType::VIRTUAL,
 		FRegistry::Settings.Namespace,
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601(),
@@ -407,24 +405,29 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	};
 	FItemCreateRequest RootItemRequest
 	{
-		EItemType::INGAMEITEM,
+		EAccelByteItemType::INGAMEITEM,
 		Variables.ExpectedRootItemTitle,
-		EEntitlementType::DURABLE,
+		EAccelByteEntitlementType::DURABLE,
+		0,
 		0,
 		"",
-		"",//appType
+		EAccelByteAppType::GAME,//appType
+		"",
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedRootCategoryPath,
 		rootLocalizationMap,
-		EStatus::ACTIVE,
+		EAccelByteItemStatus::ACTIVE,
 		"sku",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
 		FRegionDataUS{{rootRegionData}},
 		emptyStrings,
 		emptyStrings,
 		-1,
 		-1,
 		"",
+		0,
 		""
 	};
 	bool bRootItemCreated = false;
@@ -444,20 +447,18 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	{
 		Variables.ExpectedChildItemTitle,
 		"Child item",
-		"Child item, real currency, free, USD",
-		{ FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "itemImage"} },
-		FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "thumbnailImage"}
+		"Child item, real currency, free, USD"
 	};
 	TMap<FString, FLocalization> childLocalizationMap;
 	childLocalizationMap.Add("en", childLocalization);
-	FAccelByteModelsItemInfoRegionData childRegionData
+	FCreateRegionDataItem childRegionData
 	{
 		0,
 		0,
 		0,
 		0,
 		"USD",
-		"REAL",
+		EAccelByteItemCurrencyType::REAL,
 		FRegistry::Settings.Namespace,
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601(),
@@ -466,25 +467,30 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	};
 	FItemCreateRequest ChildItemRequest
 	{
-		EItemType::COINS,
+		EAccelByteItemType::COINS,
 		Variables.ExpectedChildItemTitle,
-		EEntitlementType::CONSUMABLE,
+		EAccelByteEntitlementType::CONSUMABLE,
 		20,
+		0,
 		"",
+		EAccelByteAppType::GAME,
 		"",
 		Variables.ExpectedCurrency.currencyCode,
-		"",
+		FRegistry::Settings.Namespace,
 		Variables.ExpectedChildCategoryPath,
 		childLocalizationMap,
-		EStatus::ACTIVE,
+		EAccelByteItemStatus::ACTIVE,
 		"UE4childSku",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
 		FRegionDataUS{{childRegionData}},
 		emptyStrings,
 		emptyStrings,
 		-1,
 		-1,
-		"classless",
-		""
+		"",
+		0,
+		"classless"
 	};
 	bool bChildItemCreated = false;
 	Ecommerce_Item_Create(ChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bChildItemCreated](const FItemFullInfo& Result)
@@ -503,20 +509,18 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	{
 		"UE4_GrandChildItem",
 		"Grandchild item",
-		"Grandchild item, real currency, free, USD",
-		{ FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "itemImage"} },
-		FAccelByteModelsItemInfoImage{32, 32, "http://example.com", "http://example.com", "thumbnailImage"}
+		"Grandchild item, real currency, free, USD"
 	};
 	TMap<FString, FLocalization> grandchildLocalizationMap;
 	grandchildLocalizationMap.Add("en", grandchildLocalization);
-	FAccelByteModelsItemInfoRegionData grandchildRegionData
+	FCreateRegionDataItem grandchildRegionData
 	{
 		0,
 		0,
 		0,
 		0,
 		"USD",
-		"REAL",
+		EAccelByteItemCurrencyType::REAL,
 		FRegistry::Settings.Namespace,
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601(),
@@ -525,25 +529,30 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	};
 	FItemCreateRequest grandChildItemRequest
 	{
-		EItemType::COINS,
+		EAccelByteItemType::COINS,
 		Variables.ExpectedChildItemTitle,
-		EEntitlementType::CONSUMABLE,
+		EAccelByteEntitlementType::CONSUMABLE,
 		10,
+		0,
 		"",
+		EAccelByteAppType::GAME,
 		"",
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedGrandChildCategoryPath,
 		grandchildLocalizationMap,
-		EStatus::ACTIVE,
+		EAccelByteItemStatus::ACTIVE,
 		"sku",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
 		FRegionDataUS{{grandchildRegionData}},
 		emptyStrings,
 		emptyStrings,
 		-1,
 		-1,
-		"classless",
-		""
+		"",
+		0,
+		"classless"
 	};
 	bool bGrandchildItemCreated = false;
 	Ecommerce_Item_Create(grandChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bGrandchildItemCreated](const FItemFullInfo& Result)

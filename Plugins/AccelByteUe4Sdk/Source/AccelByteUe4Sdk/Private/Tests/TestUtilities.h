@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
-#include "Models/AccelByteItemModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Models/AccelByteStatisticModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -49,13 +49,6 @@ void FlushHttpRequests();
 
 void Waiting(bool& condition, FString text);
 
-UENUM(BlueprintType)
-enum class ECurrencyType : uint8
-{
-	REAL,
-	VIRTUAL
-};
-
 USTRUCT(BlueprintType)
 struct FCurrencyCreateRequest
 {
@@ -67,7 +60,7 @@ struct FCurrencyCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
 		FString currencySymbol;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
-		ECurrencyType currencyType;
+		EAccelByteItemCurrencyType currencyType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
 		int decimals;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Currency")
@@ -154,30 +147,6 @@ struct FCategoryCreateRequest
 		TMap<FString, FString> localizationDisplayNames; // "Language" : "Description"
 };
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-	APP, COINS, INGAMEITEM, BUNDLE, CODE
-};
-
-UENUM(BlueprintType)
-enum class EEntitlementType : uint8
-{
-	DURABLE, CONSUMABLE
-};
-
-UENUM(BlueprintType)
-enum class EAppType : uint8
-{
-	GAME, SOFTWARE, DLC, DEMO
-};
-
-UENUM(BlueprintType)
-enum class EStatus : uint8
-{
-	ACTIVE, INACTIVE
-};
-
 USTRUCT(BlueprintType)
 struct FLocalExt
 {
@@ -198,10 +167,34 @@ struct FLocalization
 		FString description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString longDescription;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FAccelByteModelsItemInfoImage> image;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FAccelByteModelsItemInfoImage thumbnailImage;
+};
+
+USTRUCT(BlueprintType)
+struct FCreateRegionDataItem
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		int32 Price;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		int32 DiscountPercentage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		int32 DiscountAmount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		int32 DiscountedPrice;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString CurrencyCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		EAccelByteItemCurrencyType CurrencyType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString CurrencyNamespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString PurchaseAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString ExpireAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString DiscountPurchaseAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+		FString DiscountExpireAt;
 };
 
 USTRUCT(BlueprintType)
@@ -209,7 +202,7 @@ struct FRegionDataUS
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		TArray<FAccelByteModelsItemInfoRegionData> US;
+		TArray<FCreateRegionDataItem> US;
 };
 
 USTRUCT(BlueprintType)
@@ -217,17 +210,21 @@ struct FItemCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EItemType itemType;
+		EAccelByteItemType itemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EEntitlementType entitlementType; // "Language" : "Description"
+		EAccelByteEntitlementType entitlementType; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		int useCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		bool stackable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString appId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString appType;
+		EAccelByteAppType appType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		FString baseAppId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString targetCurrencyCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
@@ -237,9 +234,13 @@ struct FItemCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		TMap<FString, FLocalization> localizations;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EStatus status;
+		EAccelByteItemStatus status;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString sku;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		TArray<FAccelByteModelsItemImage> images;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		FString thumbnailUrl;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FRegionDataUS regionData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
@@ -251,9 +252,11 @@ struct FItemCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		int maxCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString clazz;
+		FString boothName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FString ext;
+		int displayOrder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		FString clazz;
 };
 
 USTRUCT(BlueprintType)
@@ -265,7 +268,7 @@ struct FItemFullInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString appId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EAppType appType;
+		EAccelByteAppType appType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString Namespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
@@ -273,7 +276,7 @@ struct FItemFullInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EEntitlementType entitlementType; // "Language" : "Description"
+		EAccelByteEntitlementType entitlementType; // "Language" : "Description"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		int useCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
@@ -281,15 +284,15 @@ struct FItemFullInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		TMap<FString, FLocalization> localizations;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EStatus status;
+		EAccelByteItemStatus status;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		EItemType itemType;
+		EAccelByteItemType itemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString targetCurrencyCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString targetNamespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
-		FAccelByteModelsItemInfoRegionData regionData;
+		FAccelByteModelsItemRegionDataItem regionData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		TArray<FString> itemIds;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
