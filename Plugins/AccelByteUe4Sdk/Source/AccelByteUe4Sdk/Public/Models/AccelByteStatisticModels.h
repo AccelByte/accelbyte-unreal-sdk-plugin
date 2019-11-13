@@ -64,7 +64,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 		FString Namespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
-		FString ProfileId;
+		FString userId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | UserStatItemInfo")
@@ -115,7 +115,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatItemInc
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
 		float inc;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
-		FString profileId;
+		FString userId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Statistic | Models | BulkUserStatItemInc")
 		FString statCode;
 };
