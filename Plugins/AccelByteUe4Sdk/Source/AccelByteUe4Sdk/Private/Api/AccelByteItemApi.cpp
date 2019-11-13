@@ -84,9 +84,27 @@ void Item::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, 
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&region=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Region);
-	if (!Language.IsEmpty())
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *Settings.PlatformServerUrl, *Settings.Namespace);
+    bool bIsNotFirst = false;
+    if (!ItemCriteria.CategoryPath.IsEmpty())
+    {
+        bIsNotFirst = true; Url.Append("?");
+        Url.Append(FString::Printf(TEXT("categoryPath=%s"), *FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath)));
+    }
+    if (!ItemCriteria.Region.IsEmpty())
+    {
+        if (bIsNotFirst)
+        {
+            Url.Append("&");
+        }
+        else
+        {
+            bIsNotFirst = true; Url.Append("?");
+        }
+        Url.Append(FString::Printf(TEXT("region=%s"), *ItemCriteria.Region));
+    }
+    if (!ItemCriteria.Language.IsEmpty())
 	{
 		if (bIsNotFirst)
 		{

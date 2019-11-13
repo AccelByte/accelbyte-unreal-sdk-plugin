@@ -399,9 +399,9 @@ void User::ResetPassword(const FString& VerificationCode, const FString& Usernam
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FResetPasswordRequest ResetPasswordRequest;
-	ResetPasswordRequest.Code			= VerificationCode;
-	ResetPasswordRequest.EmailAddress	= Username;
-	ResetPasswordRequest.NewPassword	= NewPassword;
+	ResetPasswordRequest.Code           = VerificationCode;
+	ResetPasswordRequest.EmailAddress   = Username;
+	ResetPasswordRequest.NewPassword    = NewPassword;
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/reset"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
