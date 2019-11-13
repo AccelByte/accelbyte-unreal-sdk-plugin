@@ -12,6 +12,7 @@
 
 #include <unordered_map>
 
+#include "Core/AccelByteReport.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
@@ -345,6 +346,9 @@ namespace AccelByte
 			[OnSuccess, OnError]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 		{
+			Report report;
+			report.GetHttpResponse(Request, Response);
+
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				HandleHttpResultOk(Response, OnSuccess);

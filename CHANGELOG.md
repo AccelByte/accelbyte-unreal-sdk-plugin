@@ -124,6 +124,9 @@
     - FAccelByteModelsUserStatItemInfo
       - Add member TArray<FString> Tags
 ## Added
+- Log
+  - Add HTTP Request/Response Log
+  - Add Current Function Log
 - Statistic
   - Add GetUserStatItemsByTags()
     - URL: `GET` "/v1/public/namespaces/{namespace}/users/{userId}/statitems"

@@ -18,12 +18,15 @@ namespace Api
 
 	void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess, const FErrorHandler& OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
-		FString Verb			= TEXT("GET");
-		FString ContentType		= TEXT("application/json");
-		FString Accept			= TEXT("application/json");
-		FString Content			= TEXT("");
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+		FString Verb            = TEXT("GET");
+		FString ContentType     = TEXT("application/json");
+		FString Accept          = TEXT("application/json");
+		FString Content         = TEXT("");
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
@@ -38,8 +41,11 @@ namespace Api
 
 	void CloudStorage::CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+		
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 
 		if (Tags.Num() != 0 || !Label.IsEmpty())
 		{
@@ -58,10 +64,10 @@ namespace Api
 			Url.Append(FString::Printf(TEXT("label=%s"), *FGenericPlatformHttp::UrlEncode(Label)));
 		}
 
-		FString Verb = TEXT("POST");
-		FString Accept = TEXT("*/*");
-		FString BoundaryGuid = FGuid::NewGuid().ToString();
-		TArray<uint8> Content = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, false);
+		FString Verb            = TEXT("POST");
+		FString Accept          = TEXT("*/*");
+		FString BoundaryGuid    = FGuid::NewGuid().ToString();
+		TArray<uint8> Content   = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, false);
 		Content.Append(FormDataBuilder(BinaryData, BoundaryGuid, FileName));
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -80,12 +86,15 @@ namespace Api
 
 	void CloudStorage::GetSlot(FString SlotID, const THandler<TArray<uint8>> & OnSuccess, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("*/*");
-		FString Content = TEXT("");
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
+		FString Verb            = TEXT("GET");
+		FString ContentType     = TEXT("application/json");
+		FString Accept          = TEXT("*/*");
+		FString Content         = TEXT("");
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
@@ -100,9 +109,11 @@ namespace Api
 
 	void CloudStorage::UpdateSlot(FString SlotID, const TArray<uint8> BinaryData, const FString& FileName, const TArray<FString> & Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot> & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());	
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
 
 		if (Tags.Num() != 0 || !Label.IsEmpty())
 		{
@@ -121,10 +132,10 @@ namespace Api
 			Url.Append(FString::Printf(TEXT("label=%s"), *FGenericPlatformHttp::UrlEncode(Label)));
 		}
 
-		FString Verb = TEXT("PUT");
-		FString Accept = TEXT("*/*");
-		FString BoundaryGuid = FGuid::NewGuid().ToString();
-		TArray<uint8> Content = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, false);
+		FString Verb            = TEXT("PUT");
+		FString Accept          = TEXT("*/*");
+		FString BoundaryGuid    = FGuid::NewGuid().ToString();
+		TArray<uint8> Content   = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, false);
 		Content.Append(FormDataBuilder(BinaryData, BoundaryGuid, FileName));
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -143,9 +154,11 @@ namespace Api
 
 	void CloudStorage::UpdateSlotMetadata(FString SlotID, const FString& FileName, const TArray<FString> & Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot> & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
 
 		if (Tags.Num() != 0 || !Label.IsEmpty())
 		{
@@ -164,10 +177,10 @@ namespace Api
 			Url.Append(FString::Printf(TEXT("label=%s"), *FGenericPlatformHttp::UrlEncode(Label)));
 		}
 
-		FString Verb = TEXT("PUT");
-		FString Accept = TEXT("*/*");
-		FString BoundaryGuid = FGuid::NewGuid().ToString();
-		TArray<uint8> Content = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, true);
+		FString Verb            = TEXT("PUT");
+		FString Accept          = TEXT("*/*");
+		FString BoundaryGuid    = FGuid::NewGuid().ToString();
+		TArray<uint8> Content   = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, true);
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
@@ -184,12 +197,15 @@ namespace Api
 
 	void CloudStorage::DeleteSlot(FString SlotID, const FVoidHandler & OnSuccess, const FErrorHandler & OnError)
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
-		FString Verb = TEXT("DELETE");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("*/*");
-		FString Content = TEXT("");
+		Report report;
+		report.GetFunctionLog(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
+		FString Verb            = TEXT("DELETE");
+		FString ContentType     = TEXT("application/json");
+		FString Accept          = TEXT("*/*");
+		FString Content         = TEXT("");
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
