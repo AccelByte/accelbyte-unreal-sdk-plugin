@@ -134,13 +134,13 @@ void Oauth2::GetSessionIdWithPlatformGrant(const FString& ClientId, const FStrin
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString url;
-	url						= FRegistry::Settings.IamServerUrl;
+	url                     = FRegistry::Settings.IamServerUrl;
 	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
 	{
 		url.RemoveFromEnd("/iam");
 	}
 
-	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
+    FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
     FString Url             = FString::Printf(TEXT("%s/v1/login/platforms/%s"), *url, *PlatformId);
     FString Verb            = TEXT("POST");
     FString ContentType     = TEXT("application/x-www-form-urlencoded");

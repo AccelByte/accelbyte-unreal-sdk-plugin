@@ -65,7 +65,7 @@ void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FS
 	FString Accept          = TEXT("application/json");
 	FString Content;
 
-	FHttpRequestPtr Request	= FHttpModule::Get().CreateRequest();
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
