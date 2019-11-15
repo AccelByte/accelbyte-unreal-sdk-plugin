@@ -1,6 +1,18 @@
 # Changelog
 
 ## Unreleased
+## Added
+- Game Server SDK
+  - ServerCredentials: stores ClientAccessToken, ClientNamespace, and MatchId
+  - ServerSettings: stores server's settings such as ClientId, ClientSecret, IAM URL, DSM URL, etc.
+  - CustomWebServerApi: to open a WebServer for accept DSM claim request
+  - ServerOauth2Api
+    - LoginWithClientCredentials
+  - ServerDSMApi
+    - RegisterServerToDSM
+    - SendShutdownToDSM
+
+## 2.5.0 (2019-11-25)
 ## Fixed
 - Platform
   - ErrorCode Refactor
@@ -95,6 +107,9 @@
     - Wallet::GetWalletInfoByCurrencyCode()
       - Url: "%s/public/namespaces/%s/users/%s/wallets/%s" -> "%s/public/namespaces/%s/users/me/wallets/%s"
     - Order::FulfillOrder() -> Deleted
+    
+## 2.4.0 (2019-11-11)
+## Fixed
 - Basic
   - Follow API Standardization
     - Endpoint Url:
@@ -132,7 +147,7 @@
     - URL: `GET` "/v1/public/namespaces/{namespace}/users/{userId}/statitems"
     - Query param: "tags"
     
-## v2.1.0 (2019-10-04)
+## 2.3.0 (2019-10-15)
 ## Fixed
 - Ecommerce Test
   - Change CurrencyCode from "Ue4SdkCoin" to "SDKC"
@@ -164,7 +179,7 @@
   - Add FBan and FPermission on UserModels
   - Add FRegisterResponse
   - Update UserData
-## v2.0.0 (2019-09-06)
+## 2.0.0 (2019-09-06)
 ## Added
 - Session Management
   - Implementing API Gateway
@@ -181,7 +196,7 @@
   - DS Notif
 - Updated to v2.0.0 for Justice release v2.0.0 
 
-## v1.0.0-beta.1 (2019-03-13)
+## 1.0.0-beta.1 (2019-03-13)
 ### Added
 
 - Supported IAM Service Features:

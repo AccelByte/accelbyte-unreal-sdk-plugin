@@ -50,27 +50,6 @@ const auto GlobalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, 
 	UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
 });
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "AccelByte.Tests.AUser.LoginGameClient", AutomationFlagMaskUser);
-bool LoginGameClientSuccess::RunTest(const FString& Parameters)
-{
-	FRegistry::User.ForgetAllCredentials();
-	bool bClientTokenObtained = false;
-	double LastTime = 0;
-
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientTokenObtained, "Waiting for Login...");
-
-	check(bClientTokenObtained);
-	return true;
-}
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "AccelByte.Tests.AUser.RegisterEmail_ThenLogin", AutomationFlagMaskUser);
 bool FUserRegisterTest::RunTest(const FString & Parameter)
 {
@@ -83,17 +62,6 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
-
-	bool bClientTokenObtained = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -151,17 +119,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
-
-	bool bClientTokenObtained = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	bool bRegisterSuccessful = false;
     FRegisterResponse RegisterResult;
@@ -249,17 +206,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
-
-	bool bClientTokenObtained = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	bool bRegisterSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -511,17 +457,6 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	FString ThirdUserId = "";
 	double LastTime = 0;
 	FString OldAccessToken = "", RefreshedAccessToken = "";
-
-	bool bClientLoginSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientLoginSuccessful = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccessful, "Waiting for Login...");
 
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // First attempt"));
@@ -775,17 +710,6 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	double LastTime = 0;
 	FString FirstUserId = TEXT("");
 	FString OldAccessToken = "", RefreshedAccessToken = "";
-
-	bool bClientLoginSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithClientCredentials"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bClientLoginSuccessful = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccessful, "Waiting for Login...");
 
 	bool bLoginPlatformSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));

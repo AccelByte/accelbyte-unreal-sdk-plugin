@@ -7,6 +7,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Models/AccelByteStatisticModels.h"
+#include "Models/AccelByteDSMModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
@@ -425,3 +426,5 @@ void Statistic_Bulk_Create_User_StatItem(FString userId, TArray<FString> statCod
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
+
+void WebServer_Request(const uint16 Port, const FString UrlPath, const FString Action, const FAccelByteModelsDSMMessage ReqBody, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);

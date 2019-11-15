@@ -511,16 +511,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 
 		LobbyUsers.Add(MakeShared<Api::User>(UserCreds[i], FRegistry::Settings));
 
-		LobbyUsers[i]->LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
-		{
-			bClientLoginSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Client Login Success"));
-		}), LobbyTestErrorHandler);
-		FlushHttpRequests();
-		Waiting(bClientLoginSuccess,"Waiting for Login...");
-
-		check(bClientLoginSuccess);
-
 		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
 		FString Password = TEXT("123Password123");
