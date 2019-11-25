@@ -31,10 +31,21 @@ FString EAccelByteItemStatusToString(const EAccelByteItemStatus& EnumValue) {
 	return EnumPtr->GetNameStringByValue((int64)EnumValue);
 }
 
-void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError)
+FString EAccelByteAppTypeToString(const EAccelByteAppType& EnumValue)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *ItemId);
+	const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true);
+	if (!EnumPtr) return "Invalid";
+
+	return EnumPtr->GetNameStringByValue((int64)EnumValue);
+}
+
+void Item::GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsPopulatedItemInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *ItemId);
 	if (!Region.IsEmpty() || !Language.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("?")));
@@ -52,9 +63,9 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 		}
 	}
 
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -68,30 +79,110 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Item::GetItemsByCriteria(const FString& Language, const FString& Region, const FString& CategoryPath, const EAccelByteItemType& ItemType, const EAccelByteItemStatus& Status, int32 Page, int32 Size, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+void Item::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria?categoryPath=%s&region=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *FGenericPlatformHttp::UrlEncode(CategoryPath), *Region);
-	if (!Language.IsEmpty())
+    FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *Settings.PlatformServerUrl, *Settings.Namespace);
+    bool bIsNotFirst = false;
+    if (!ItemCriteria.CategoryPath.IsEmpty())
+    {
+        bIsNotFirst = true; Url.Append("?");
+        Url.Append(FString::Printf(TEXT("categoryPath=%s"), *FGenericPlatformHttp::UrlEncode(ItemCriteria.CategoryPath)));
+    }
+    if (!ItemCriteria.Region.IsEmpty())
+    {
+        if (bIsNotFirst)
+        {
+            Url.Append("&");
+        }
+        else
+        {
+            bIsNotFirst = true; Url.Append("?");
+        }
+        Url.Append(FString::Printf(TEXT("region=%s"), *ItemCriteria.Region));
+    }
+    if (!ItemCriteria.Language.IsEmpty())
 	{
-		Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		Url.Append(FString::Printf(TEXT("language=%s"), *ItemCriteria.Language));
 	}	
-	if (ItemType != EAccelByteItemType::NONE)
+	if (ItemCriteria.ItemType != EAccelByteItemType::NONE)
 	{
-		Url.Append(FString::Printf(TEXT("&itemType=%s"), *EAccelByteItemTypeToString(ItemType)));
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		Url.Append(FString::Printf(TEXT("itemType=%s"), *EAccelByteItemTypeToString(ItemCriteria.ItemType)));
 	}
-	if (Page > 0)
+	if (ItemCriteria.AppType != EAccelByteAppType::NONE)
 	{
-		Url.Append(FString::Printf(TEXT("&offset=%d"), Page));
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		Url.Append(FString::Printf(TEXT("appType=%s"), *EAccelByteAppTypeToString(ItemCriteria.AppType)));
 	}
-	if (Size > 0)
+	if (ItemCriteria.Tags.Num() > 0)
 	{
-		Url.Append(FString::Printf(TEXT("&limit=%d"), Size));
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		for (int i = 0; i < ItemCriteria.Tags.Num(); i++)
+		{
+			Url.Append((i == 0) ? TEXT("tags=") : TEXT(",")).Append(ItemCriteria.Tags[i]);
+		}
 	}
-	FString Verb		= TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept		= TEXT("application/json");
-	FString Content		= TEXT("");
+	if (Offset > 0)
+	{
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		Url.Append(FString::Printf(TEXT("offset=%d"), Offset));
+	}
+	if (Limit > 0)
+	{
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		Url.Append(FString::Printf(TEXT("limit=%d"), Limit));
+	}
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = TEXT("");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -104,26 +195,29 @@ void Item::GetItemsByCriteria(const FString& Language, const FString& Region, co
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Item::SearchItem(const FString& Language, const FString& Keyword, int32 Page, int32 Size, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+void Item::SearchItem(const FString& Language, const FString& Keyword, const int32& Offset, const int32& Limit, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/search?language=%s&keyword=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *Language, *FGenericPlatformHttp::UrlEncode(Keyword));
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/search?language=%s&keyword=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *Language, *FGenericPlatformHttp::UrlEncode(Keyword));
 	if (!Region.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));
 	}
-	if (Page > 0)
+	if (Offset > 0)
 	{
-		Url.Append(FString::Printf(TEXT("&offset=%d"), Page));
+		Url.Append(FString::Printf(TEXT("&offset=%d"), Offset));
 	}
-	if (Size > 0)
+	if (Limit > 0)
 	{
-		Url.Append(FString::Printf(TEXT("&limit=%d"), Size));
+		Url.Append(FString::Printf(TEXT("&limit=%d"), Limit));
 	}
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = TEXT("");
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = TEXT("");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

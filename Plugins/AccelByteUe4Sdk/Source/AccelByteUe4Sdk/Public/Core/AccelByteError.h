@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -12,6 +12,7 @@
 
 #include <unordered_map>
 
+#include "Core/AccelByteReport.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
@@ -110,10 +111,22 @@ namespace AccelByte
 		PlatformInternalServerErrorException = 20000,
 		UnauthorizedException,
 		ValidationException,
-		ForbiddenException,
+		UnauthorizedAccessException,
 		ServiceUnavailableException,
 		UnsupportedMediaTypeException,
 		OptimisticLockException,
+		TooManyRequestException,
+		UserNotFoundException,
+		UnknownErrorException,
+		UserRevokedException,
+		TokenExpiredException,
+		TokenRevokedException,
+		insufficientPermissionException,
+		InvalidAudienceException,
+		insufficientScopeException,
+		ActionBannedException,
+		UserIsNotLinkedToNamespaceException,
+		BadRequestException,
 		// Namespace Error Code List
 		NamespaceNotFoundException = 2141,
 		NamespaceAlreadyExistsException = 2171,
@@ -148,105 +161,99 @@ namespace AccelByte
 		//Category Error Code List
 		//
 		DefaultLanguageRequiredException = 3021,
-		InvalidDiscountValueException = 3022,
 		ItemBundleException = 3023,
-		InvalidStoreDataException = 3024,
-		StoreMetaMismatchException = 3025,
-		//
 		DefaultRegionRequiredException = 3026,
-		//
-		CategoryNotFoundException = 30241,
-		ItemNotFoundException = 30341,
-		StoreNotFoundException = 30142,
-		//
-		PublishedStoreNotFoundException = 3044,
-		//
-		CategoryAlreadyExistsException = 3071,
-		CategoryNotEmptyException = 3072,
 		ItemAlreadyBundledException = 3073,
 		LanguageNotSupportedException = 3074,
 		RegionNotSupportedException = 3075,
 		PublishedStoreNotUpdatableException = 3076,
 		//
+		//
+		InvalidStoreDataException = 30121,
+		StoreMetaMismatchException = 30122,
+		InvalidDiscountValueException = 30321,
+		StoreNotFoundException = 30141,
+		PublishedStoreNotFoundException = 30142,
+		CategoryNotFoundException = 30241,
+		CategoryAlreadyExistsException = 30271,
+		CategoryNotEmptyException = 30272,
+		ItemNotFoundException = 30341,
+		ItemAppIdNotFoundException = 30342,
+		//
 		//Entitlement Error Code List
 		//
-		EntitlementNotDistributableException = 3121,
-		ExceedDistributeQuantityException = 3122,
-		//
-		PublisherNamespaceNotDistributableException = 3123,
-		//
 		UserEntitlementNotFoundException = 3141,
-		EntitlementNotFoundException = 3142,
-		UserAppEntitlementNotFoundException = 3143,
-		//
-		DistributionReceiverNotFoundException = 3144,
-		//
 		EntitlementAlreadyRevokedException = 3171,
 		EntitlementNotActiveException = 3172,
 		EntitlementNotConsumableException = 3173,
 		EntitlementUsedUpException = 3174,
 		EntitlementAlreadyDistributedException = 3175,
-		DistributionReceiverAlreadyExistsException = 3176,
+		//
+		//
+		EntitlementNotDistributableException = 31121,
+		ExceedDistributeQuantityException = 31122,
+		PublisherNamespaceNotDistributableException = 31123,
+		EntitlementIdNotFoundException = 31141,
+		EntitlementAppIdNotFoundException = 31142,
+		DistributionReceiverNotFoundException = 31241,
+		DistributionReceiverAlreadyExistsException = 31271,
 		//
 		//Order Error Code List
 		//
-		OrderPriceMismatchException = 3221,
-		//
-		OrderNotFoundException = 3241,
-		//
 		OrderNotRefundableException = 3271,
 		InvalidOrderStatusException = 3272,
-		OrderReceiptNotDownloadableException = 3273,
 		OrderTransactionAmountMismatchException = 3274,
-		ExceedItemMaxCountPerUserException = 3275,
+		//
+		//
+		OrderPriceMismatchException = 32121,
+		OrderNotFoundException = 32141,
+		OrderReceiptNotDownloadableException = 32173,
+		ExceedItemMaxCountPerUserException = 32175,
+		ExceedItemMaxCountException = 32176,
+		OrderNotCancelableException = 32177,
 		//
 		//Payment Error Code List
 		//
-		PaymentCurrencyNotSupportedException = 3321,
-		PaymentProviderNotSupportedException = 3322,
-		AliPayRefundFailedException = 3323,
-		//
-		WxPayRefundFailedException = 3324,
-		//
-		PaymentOrderNotFoundException = 3341,
-		//
-		PaymentOrderChargeTransactionNotFoundException = 3342,
-		//
-		InvalidPaymentOrderStatusException = 3371,
 		InvalidPaymentOrderTransactionStatusException = 3372,
 		InvalidPaymentOrderTransactionTypeException = 3373,
-		PaymentOrderNotRefundableException = 3374,
 		PaymentOrderTransactionAmountMismatchException = 3375,
 		WxPayUnifiedOrderFailedException = 3376,
 		PaymentExtOrderNoAlreadyExistsException = 3377,
-
+		//
+		//
+		PaymentOrderNotFoundException = 33141,
+		PaymentOrderChargeTransactionNotFoundException = 33142,
+		InvalidPaymentOrderStatusException = 33171,
+		PaymentOrderNotRefundableException = 33172,
+		PaymentCurrencyNotSupportedException = 33321,
+		PaymentProviderNotSupportedException = 33322,
+		AliPayRefundFailedException = 33323,
+		WxPayRefundFailedException = 33324,
+		//
 		//Wallet Error Code List
 		//
-		ExceedMaxTransactionAmountPerDayException = 3521,
-		ExceedMaxAmountPerTransactionException = 3522,
-		InactiveWalletException = 3523,
-		InsufficientBalanceException = 3524,
-		//
-		ExceedMaxBalanceAmountException = 3525,
-		//
-		WalletNotFoundException = 3541,
+		WalletExceedMaxTransactionAmountPerDayException = 35121,
+		WalletExceedMaxAmountPerTransactionException = 35122,
+		WalletInactiveException = 35123,
+		WalletInsufficientBalanceException = 35124,
+		WalletExceedMaxBalanceAmountException = 35125,
+		WalletNotFoundException = 35141,
 		//
 		//Currency Error Code List
 		//
-		CurrencyNotFoundException = 3641,
-		//
-		CurrencyAlreadyExistsException = 3671,
+		CurrencyAlreadyExistsException = 36171,
+		CurrencyNotFoundException = 36141,
 		//
 		//Campaign Error Code List
 		//
-		CampaignNotFoundException = 3741,
-		CodeNotFoundException = 3742,
-		CampaignAlreadyExistsException = 3771,
-		CampaignIsInactiveException = 3772,
-		CodeIsInactiveException = 3773,
-		ExceedMaxRedeemCountPerCodeException = 3774,
-		ExceedMaxRedeemCountPerUserException = 3775,
-		CodeHasBeenRedeemedException = 3776,
+		CampaignNotFoundException = 37141,
+		CodeNotFoundException = 37142,
+		CampaignAlreadyExistsException = 37171,
+		CampaignIsInactiveException = 37172,
+		CodeIsInactiveException = 37173,
+		ExceedMaxRedeemCountPerCodeException = 37174,
+		ExceedMaxRedeemCountPerUserException = 37175,
+		CodeHasBeenRedeemedException = 37176,
 		//
 		//Social Error Code List
 		//Activity
@@ -339,6 +346,9 @@ namespace AccelByte
 			[OnSuccess, OnError]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 		{
+			Report report;
+			report.GetHttpResponse(Request, Response);
+
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				HandleHttpResultOk(Response, OnSuccess);

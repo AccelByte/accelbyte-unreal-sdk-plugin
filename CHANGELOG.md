@@ -1,5 +1,101 @@
 # Changelog
 
+## 2.5.0 (2019-11-25)
+## Fixed
+- Platform
+  - ErrorCode Refactor
+  - Models
+    - FAccelByteModelsFullCategoryInfo -> FAccelByteModelsCategoryInfo
+      - FString CreatedAt -> FDateTime CreatedAt
+      - FString UpdatedAt -> FDateTime UpdatedAt
+    - FAccelByteModelsItemInfoRegionData -> FAccelByteModelsItemRegionDataItem
+      - FString CurrencyType -> EAccelByteItemCurrencyType CurrencyType
+      - FString PurchaseAt -> FDateTime PurchaseAt
+      - FString ExpireAt -> FDateTime ExpireAt
+      - FString DiscountPurchaseAt -> FDateTime DiscountPurchaseAt
+      - FString DiscountExpireAt -> FDateTime DiscountExpireAt
+    - FAccelByteModelsItemInfoImage -> FAccelByteModelsItemImage
+      - FString As -> Added
+    - FAccelByteModelsItemInfo
+      - FString BaseAppId -> Added
+      - FString EntitlementType -> EAccelByteEntitlementType EntitlementType
+      - bool Stackable -> Added
+      - FString Status -> EAccelByteItemStatus Status
+      - FString ItemType -> EAccelByteItemType ItemType
+      - FString ThumbnailUrl -> Added
+      - FAccelByteModelsItemInfoImage ThumbnailImage -> Deleted
+      - FString Clazz -> Added
+      - FString BoothName -> Added
+      - int32 DisplayOrder -> Added
+      - FString Ext -> Added
+      - FString LocalExt -> Added
+    - FAccelByteModelsPopulatedItemInfo -> Added
+    - FAccelByteModelsItemCriteria -> Added
+    - FAccelByteModelsEntitlementItemSnapshot
+      - FString BaseAppId -> Added
+      - EAccelByteEntitlementType EntitlementType -> Added
+      - bool Stackable -> Added
+      - FString ThumbnailUrl -> Added
+      - FAccelByteModelsItemInfoImage ThumbnailImage -> Deleted
+      - FString TargetItemId -> Added
+      - int32 MaxCount -> Added
+      - FString BoothName -> Added
+    - FAccelByteModelsEntitlementInfo
+      - FString GrantedCode -> Added
+      - FString BundleItemId -> Deleted
+      - EAccelByteEntitlementSource Source -> Added
+      - FString GrantedAt -> FDateTime GrantedAt
+      - FString CreatedAt -> FDateTime CreatedAt
+      - FString UpdatedAt -> FDateTime UpdatedAt
+    - FAccelByteModelsOrderInfoCurrencySummary -> FAccelByteModelsOrderCurrencySummary
+      - FString CurrencyType -> EAccelByteItemCurrencyType CurrencyType
+    - FAccelByteModelsOrderInfo
+      - FString PaymentOrderNo -> Added
+      - bool bSandbox -> bool Sandbox
+      - FAccelByteModelsOrderInfoPaymentUrl PaymentUrl -> Deleted
+      - TArray<FAccelByteModelsOrderInfoTransaction> Transactions -> Deleted
+      - TArray<FString> EntitlementIds > Deleted
+      - FString Status -> EAccelByteOrderStatus Status
+      - FAccelByteModelsEntitlementItemSnapshot ItemSnapshot -> Added
+      - FString CreatedTime -> FDateTime CreatedTime
+      - FString ChargedTime -> FDateTime ChargedTime
+      - FString FulfilledTime -> FDateTime FulfilledTime
+      - FString RefundedTime -> FDateTime RefundedTime
+      - FDateTime ChargebackTime -> Added
+      - FDateTime ChargebackReversedTime -> Added
+      - FString CreatedAt -> FDateTime CreatedAt
+      - FString UpdatedAt -> FDateTime UpdatedAt
+    - FAccelByteModelsOrderHistoryInfo
+      - FString Namespace -> Added
+      - FString CreatedAt -> FDateTime CreatedAt
+      - FString UpdatedAt -> FDateTime UpdatedAt
+    - FAccelByteModelsOrderCreate
+      - FString Region -> Added
+      - FString Language -> Added
+    - FAccelByteModelsWalletInfo
+      - FString Status -> EAccelByteItemStatus Status
+      - FString CreatedAt -> FDateTime CreatedAt
+      - FString UpdatedAt -> FDateTime UpdatedAt
+  - Api
+    - Entitlement::QueryUserEntitlement()
+      - Param: int32 Page -> const int32& Offset
+      - Param: int32 Size -> const int32& Limit
+    - Item::GetItemsByCriteria()
+      - Param: const FAccelByteModelsItemCriteria& ItemCriteria -> Added
+      - Param: const FString& Language -> Deleted
+      - Param: const FString& Region -> Deleted
+      - Param: const FString& CategoryPath -> Deleted
+      - Param: const EAccelByteItemType& ItemType -> Deleted
+      - Param: const EAccelByteItemStatus& Status -> Deleted
+      - Param: int32 Page -> const int32& Offset
+      - Param: int32 Size -> const int32& Limit
+    - Item::SearchItem()
+      - Param: int32 Page -> const int32& Offset
+      - Param: int32 Size -> const int32& Limit
+    - Wallet::GetWalletInfoByCurrencyCode()
+      - Url: "%s/public/namespaces/%s/users/%s/wallets/%s" -> "%s/public/namespaces/%s/users/me/wallets/%s"
+    - Order::FulfillOrder() -> Deleted
+    
 ## 2.4.0 (2019-11-11)
 ## Fixed
 - Basic
@@ -11,6 +107,12 @@
         - UserProfile::GetUserProfile() "%s/public/namespaces/%s/users/me/profiles" -> "%s/v1/public/namespaces/%s/users/me/profiles"
   - Cleanup user profile on integration test
 ## Changed
+- Statistic API Standardization
+  - Model:
+    - FAccelByteModelsUserStatItemInfo
+      - UPROPERTY change: profileId -> userId
+    - FAccelByteModelsBulkUserStatItemInc
+      - UPROPERTY change: profileId -> userId
 - Statistic API Standardization
   -API:
     - GetAllStatItems() & GetStatItemsByStatCodes() -> GetUserStatItems()
@@ -25,6 +127,9 @@
     - FAccelByteModelsUserStatItemInfo
       - Add member TArray<FString> Tags
 ## Added
+- Log
+  - Add HTTP Request/Response Log
+  - Add Current Function Log
 - Statistic
   - Add GetUserStatItemsByTags()
     - URL: `GET` "/v1/public/namespaces/{namespace}/users/{userId}/statitems"

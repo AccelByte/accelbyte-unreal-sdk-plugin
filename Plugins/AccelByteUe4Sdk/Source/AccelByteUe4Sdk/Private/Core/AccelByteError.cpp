@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -83,7 +83,7 @@ namespace AccelByte
 		// Platform error
 		{ static_cast<int32>(ErrorCodes::UnauthorizedException), TEXT("errors.net.accelbyte.platform.unauthorized") },
 		{ static_cast<int32>(ErrorCodes::ValidationException), TEXT("errors.net.accelbyte.platform.validation_error") },
-		{ static_cast<int32>(ErrorCodes::ForbiddenException), TEXT("errors.net.accelbyte.platform.forbidden") },
+		{ static_cast<int32>(ErrorCodes::UnauthorizedAccessException), TEXT("errors.net.accelbyte.platform.unathorized_access") },
 		{ static_cast<int32>(ErrorCodes::ServiceUnavailableException), TEXT("errors.net.accelbyte.platform.service_unavailable") },
 		{ static_cast<int32>(ErrorCodes::UnsupportedMediaTypeException), TEXT("errors.net.accelbyte.platform.unsupported_media_type") },
 		{ static_cast<int32>(ErrorCodes::OptimisticLockException), TEXT("errors.net.accelbyte.platform.optimistic_lock") },
@@ -149,8 +149,8 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::PublisherNamespaceNotDistributableException), TEXT("errors.net.accelbyte.platform.entitlement.publisher_namespace_not_distributable") },
 		//
 		{ static_cast<int32>(ErrorCodes::UserEntitlementNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.user_entitlement_not_found") },
-		{ static_cast<int32>(ErrorCodes::EntitlementNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_not_found") },
-		{ static_cast<int32>(ErrorCodes::UserAppEntitlementNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.user_app_entitlement_not_found") },
+		{ static_cast<int32>(ErrorCodes::EntitlementIdNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_id_not_found") },
+		{ static_cast<int32>(ErrorCodes::EntitlementAppIdNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_appid_not_found") },
 		//
 		{ static_cast<int32>(ErrorCodes::DistributionReceiverNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_not_found") },
 		//
@@ -195,12 +195,12 @@ namespace AccelByte
 
 		//Wallet Error Code List
 		//
-		{ static_cast<int32>(ErrorCodes::ExceedMaxTransactionAmountPerDayException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_transaction_amount_per_day") },
-		{ static_cast<int32>(ErrorCodes::ExceedMaxAmountPerTransactionException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_amount_per_transaction") },
-		{ static_cast<int32>(ErrorCodes::InactiveWalletException), TEXT("errors.net.accelbyte.platform.wallet.inactive_wallet") },
-		{ static_cast<int32>(ErrorCodes::InsufficientBalanceException), TEXT("errors.net.accelbyte.platform.wallet.insufficient_balance") },
+		{ static_cast<int32>(ErrorCodes::WalletExceedMaxTransactionAmountPerDayException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_transaction_amount_per_day") },
+		{ static_cast<int32>(ErrorCodes::WalletExceedMaxAmountPerTransactionException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_amount_per_transaction") },
+		{ static_cast<int32>(ErrorCodes::WalletInactiveException), TEXT("errors.net.accelbyte.platform.wallet.inactive_wallet") },
+		{ static_cast<int32>(ErrorCodes::WalletInsufficientBalanceException), TEXT("errors.net.accelbyte.platform.wallet.insufficient_balance") },
 		//
-		{ static_cast<int32>(ErrorCodes::ExceedMaxBalanceAmountException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_balance_amount") },
+		{ static_cast<int32>(ErrorCodes::WalletExceedMaxBalanceAmountException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_balance_amount") },
 		//
 		{ static_cast<int32>(ErrorCodes::WalletNotFoundException), TEXT("errors.net.accelbyte.platform.wallet.wallet_not_found") },
 		//

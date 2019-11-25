@@ -121,6 +121,9 @@ namespace Api
 
 void Lobby::Connect()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
@@ -136,6 +139,9 @@ void Lobby::Connect()
 
 void Lobby::Disconnect()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	if(WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		// only remove ticker when game engine running, core ticker already destructed when game engine shuttingdown
@@ -152,11 +158,17 @@ void Lobby::Disconnect()
 
 bool Lobby::IsConnected() const
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	return WebSocket.IsValid() && WebSocket->IsConnected();
 }
 
 void Lobby::SendPing()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		WebSocket->Send(FString());
@@ -168,12 +180,18 @@ void Lobby::SendPing()
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
     return SendRawRequest(LobbyRequest::PersonalChat, Prefix::Chat,
         FString::Printf(TEXT("to: %s\npayload: %s\n"), *UserId, *Message));
 }
 
 FString Lobby::SendPartyMessage(const FString& Message)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
     return SendRawRequest(LobbyRequest::PartyChat, Prefix::Chat,
         FString::Printf(TEXT("payload: %s\n"), *Message));
 }
@@ -183,34 +201,52 @@ FString Lobby::SendPartyMessage(const FString& Message)
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendInfoPartyRequest()
 {
-    return SendRawRequest(LobbyRequest::PartyInfo, Prefix::Party);
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::PartyInfo, Prefix::Party);
 }
 
 FString Lobby::SendCreatePartyRequest()
 {
-    return SendRawRequest(LobbyRequest::CreateParty, Prefix::Party);
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::CreateParty, Prefix::Party);
 }
 
 FString Lobby::SendLeavePartyRequest()
 {
-    return SendRawRequest(LobbyRequest::LeaveParty, Prefix::Party);
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::LeaveParty, Prefix::Party);
 }
 
 FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 {
-    return SendRawRequest(LobbyRequest::InviteParty, Prefix::Party,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::InviteParty, Prefix::Party,
         FString::Printf(TEXT("friendID: %s"), *UserId));
 }
 
 FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
-    return SendRawRequest(LobbyRequest::JoinParty, Prefix::Party,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::JoinParty, Prefix::Party,
         FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
 }
 
 FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 {
-    return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
         FString::Printf(TEXT("memberID: %s\n"), *UserId));
 }
 
@@ -219,13 +255,19 @@ FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendSetPresenceStatus(const Availability Availability, const FString& Activity)
 {
-    return SendRawRequest(LobbyRequest::SetPresence, Prefix::Presence,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::SetPresence, Prefix::Presence,
         FString::Printf(TEXT("availability: %d\nactivity: %s\n"), (int)Availability, *Activity));
 }
 
 FString Lobby::SendGetOnlineUsersRequest()
 {
-    return SendRawRequest(LobbyRequest::FriendsPresence, Prefix::Presence);
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::FriendsPresence, Prefix::Presence);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -233,6 +275,9 @@ FString Lobby::SendGetOnlineUsersRequest()
 //-------------------------------------------------------------------------------------------------
 void Lobby::GetAllAsyncNotification()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
 		FString Content = FString::Printf(TEXT("type: offlineNotificationRequest\nid:%s"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
@@ -246,19 +291,28 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendStartMatchmaking(FString GameMode)
 {
-    return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
         FString::Printf(TEXT("gameMode: %s"), 
             *GameMode));
 }
 
 FString Lobby::SendCancelMatchmaking(FString GameMode)
 {
-    return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
+    Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
         FString::Printf(TEXT("gameMode: %s\n"),*GameMode));
 }
 
 FString Lobby::SendReadyConsentRequest(FString MatchId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	return SendRawRequest(LobbyRequest::ReadyConsent, Prefix::Matchmaking,
 		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
 }
@@ -268,57 +322,87 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 //-------------------------------------------------------------------------------------------------
 void Lobby::RequestFriend(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
 	SendRawRequest(LobbyRequest::RequestFriend, Prefix::Friends, 
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::Unfriend(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
 	SendRawRequest(LobbyRequest::Unfriend, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::ListOutgoingFriends()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	SendRawRequest(LobbyRequest::ListOutgoingFriends, Prefix::Friends);
 }
 
 void Lobby::CancelFriendRequest(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	SendRawRequest(LobbyRequest::CancelFriends, Prefix::Friends, 
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::ListIncomingFriends()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	SendRawRequest(LobbyRequest::ListIncomingFriends, Prefix::Friends);
 }
 
 void Lobby::AcceptFriend(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	SendRawRequest(LobbyRequest::AcceptFriends, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::RejectFriend(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
 	SendRawRequest(LobbyRequest::RejectFriends, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::LoadFriendsList()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	SendRawRequest(LobbyRequest::LoadFriendList, Prefix::Friends);
 }
 
 void Lobby::GetFriendshipStatus(FString UserId)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
 	SendRawRequest(LobbyRequest::GetFriendshipStatus, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
 }
 
 void Lobby::UnbindEvent()
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
     PartyLeaveNotif.Unbind();
     PartyInviteNotif.Unbind();
     PartyGetInvitedNotif.Unbind();

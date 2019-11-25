@@ -23,17 +23,20 @@ GameProfile::~GameProfile() { }
 
 void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THandler<TArray<FAccelByteModelsPublicGameProfile>>& OnSuccess, const FErrorHandler& OnError)
 {
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
 	if (UserIds.Num() < 1)
 	{
 		OnError.ExecuteIfBound(EHttpResponseCodes::NotFound, TEXT("Please provide at least one user ID."));
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace());
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace());
+		FString Verb            = TEXT("GET");
+		FString ContentType     = TEXT("application/json");
+		FString Accept          = TEXT("application/json");
 		FString Content;
 
 		for (int i = 0 ; i < UserIds.Num() ; i++)
@@ -54,11 +57,14 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 
 void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameProfile>>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -73,11 +79,14 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 
 void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Verb            = TEXT("POST");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString<FAccelByteModelsGameProfileRequest>(GameProfileRequest, Content);
 
@@ -93,11 +102,14 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 
 void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -112,11 +124,14 @@ void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAcce
 
 void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Verb            = TEXT("PUT");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(GameProfileRequest, Content);
 
@@ -132,11 +147,14 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteM
 
 void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
-	FString Verb = TEXT("DELETE");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Verb            = TEXT("DELETE");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -151,11 +169,14 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandle
 
 void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FString & AttributeName, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -170,11 +191,14 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FStri
 
 void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
+	FString Verb            = TEXT("PUT");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Attribute, Content);
 

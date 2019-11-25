@@ -18,10 +18,13 @@ Entitlement::Entitlement(const AccelByte::Credentials& Credentials, const AccelB
 
 Entitlement::~Entitlement(){}
 
-void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
+void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	
 	FString Query = TEXT("");
 	if (!EntitlementName.IsEmpty())
@@ -34,15 +37,15 @@ void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FS
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
 		Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
 	}
-	if (Page>=0)
+	if (Offset>=0)
 	{
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("page=%d"), Page));
+		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
 	}
-	if (Size>=0)
+	if (Limit>=0)
 	{
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("size=%d"), Size));
+		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
 	}
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
@@ -57,9 +60,9 @@ void Entitlement::QueryUserEntitlement(const FString & EntitlementName, const FS
 
 	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
 	
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();

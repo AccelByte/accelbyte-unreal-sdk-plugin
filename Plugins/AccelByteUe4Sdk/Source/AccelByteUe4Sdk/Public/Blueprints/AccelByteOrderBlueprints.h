@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
-#include "Models/AccelByteOrderModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteOrderBlueprints.generated.h"
 
@@ -28,10 +28,6 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrdersSuccess, const FAccelByteModelsPagedOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void GetUserOrders(int32 Page, int32 Size, const FGetUserOrdersSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FFulfillOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
-	static void FulfillOrder(const FString& OrderNo, const FFulfillOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrderHistorySuccess, const TArray<FAccelByteModelsOrderHistoryInfo>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")

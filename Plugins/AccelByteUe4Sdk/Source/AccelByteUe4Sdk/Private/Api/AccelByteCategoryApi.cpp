@@ -17,14 +17,17 @@ Category::Category(const AccelByte::Credentials& Credentials, const AccelByte::S
 
 Category::~Category(){}
 
-void Category::GetRootCategories(const FString& Language, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
+void Category::GetRootCategories(const FString& Language, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Language);
-	FString Verb			= TEXT("GET");
-	FString ContentType		= TEXT("application/json");
-	FString Accept			= TEXT("application/json");
-	FString Content			= TEXT("");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Language);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = TEXT("");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -37,14 +40,17 @@ void Category::GetRootCategories(const FString& Language, const THandler<TArray<
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Category::GetCategory(const FString& CategoryPath, const FString& Language, const THandler<FAccelByteModelsFullCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
+void Category::GetCategory(const FString& CategoryPath, const FString& Language, const THandler<FAccelByteModelsCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url				= FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
-	FString Verb			= TEXT("GET");
-	FString ContentType		= TEXT("application/json");
-	FString Accept			= TEXT("application/json");
-	FString Content			= TEXT("");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = TEXT("");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -57,13 +63,16 @@ void Category::GetCategory(const FString& CategoryPath, const FString& Language,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Category::GetChildCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
+void Category::GetChildCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -77,13 +86,16 @@ void Category::GetChildCategories(const FString& Language, const FString& Catego
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Category::GetDescendantCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsFullCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
+void Category::GetDescendantCategories(const FString& Language, const FString& CategoryPath, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
 	FString Content;
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();

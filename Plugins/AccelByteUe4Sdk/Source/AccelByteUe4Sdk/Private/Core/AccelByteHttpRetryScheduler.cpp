@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteReport.h"
 #include <algorithm>
 
 using namespace std;
@@ -35,6 +36,9 @@ FHttpRetryScheduler::FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Reque
 
 bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
 {
+	Report report;
+	report.GetHttpRequest(Request);
+
 	bool bIsStarted = Request->ProcessRequest();
 
 	if (bIsStarted)
