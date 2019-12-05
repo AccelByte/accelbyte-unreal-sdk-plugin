@@ -64,16 +64,6 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 		UsersLoginSuccess[i] = false;
 		GameProfileUsers.Add(MakeShared<Api::User>(GameProfileCreds[i], FRegistry::Settings));
 
-		bClientLoginSuccess = false;
-		GameProfileUsers[i]->LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
-		{
-			bClientLoginSuccess = true;
-			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Client Login Success"));
-		}), GameProfileTestErrorHandler);
-		FlushHttpRequests();
-		Waiting(bClientLoginSuccess,"Waiting for Login...");
-		check(bClientLoginSuccess);
-
 		FString Email = FString::Printf(TEXT("GameProfileUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
 		FString Password = FString::Printf(TEXT("Password%d"), i);

@@ -1054,3 +1054,22 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void WebServer_Request(const uint16 Port, const FString UrlPath, const FString Action, const FAccelByteModelsDSMMessage ReqBody, const FSimpleDelegate& OnSuccess, const FErrorHandler & OnError)
+{
+	FString BaseUrl = "http://127.0.0.1";
+	FString Url = FString::Printf(TEXT("%s:%d%s"), *BaseUrl, Port, *UrlPath);
+	FString Verb = FString::Printf(TEXT("%s"), *Action);
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Contents;
+	FJsonObjectConverter::UStructToJsonObjectString(ReqBody, Contents);
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetContentAsString(Contents);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}

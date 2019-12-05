@@ -37,15 +37,6 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	bool UsersCreationSuccess = false;
 	bool UsersLoginSuccess = false;
 
-	FRegistry::User.LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
-	{
-		bClientLoginSuccess = true;
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Client Login Success"));
-	}), StatisticTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Login...");
-
-
 	FString Email = FString::Printf(TEXT("Statistic_UE4Test@example.com"));
 	Email.ToLowerInline();
 	FString Password = FString::Printf(TEXT("123Password123"), 0);

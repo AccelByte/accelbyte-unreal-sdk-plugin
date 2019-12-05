@@ -28,15 +28,6 @@ namespace AccelByte
 			Credentials& Credentials;
 			Settings& Settings;
 		public:
-			/**
-			 * @brief This is to get access token from `client_credentials` grant, then store the access token in memory.
-			 * You shouldn't use this if your application is a client. It is intended for machine-to-machine (server).
-			 * It is "required" for user management (create new user, reset password, etc).
-			 *
-			 * @param OnSuccess This will be called when the operation succeeded.
-			 * @param OnError This will be called when the operation failed.
-			 */
-			void LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Log in with email/phone number account.

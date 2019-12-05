@@ -36,21 +36,6 @@ static FString PlatformStrings[] = {
 	TEXT("twitter"),
 };
 
-void User::LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-{
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
-	Oauth2::GetAccessTokenWithClientCredentialsGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([this, OnSuccess](const FOauth2Token& Result)
-	{
-		AccelByte::Api::User::Credentials.SetClientToken(Result.Access_token, FPlatformTime::Seconds() + (Result.Expires_in*FMath::FRandRange(0.7, 0.9)), Result.Namespace);
-		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
-}
-
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
@@ -214,7 +199,7 @@ void User::Register(const FString& Username, const FString& Password, const FStr
 	NewUserRequest.Country      = Country;
 	NewUserRequest.DateOfBirth  = DateOfBirth;
 
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -355,7 +340,7 @@ void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess
 
 	FString ContactType     = TEXT("email");
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
