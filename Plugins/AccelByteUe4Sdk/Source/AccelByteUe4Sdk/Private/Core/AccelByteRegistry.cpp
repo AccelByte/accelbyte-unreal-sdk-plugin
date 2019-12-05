@@ -18,6 +18,7 @@
 #include "GameServerApi/AccelByteServerCustomWebServerApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
+#include "GameServerApi/AccelByteServerStatisticApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -41,3 +42,4 @@ Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings)
 GameServerApi::ServerCustomWebServer FRegistry::ServerCustomWebServer;
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);

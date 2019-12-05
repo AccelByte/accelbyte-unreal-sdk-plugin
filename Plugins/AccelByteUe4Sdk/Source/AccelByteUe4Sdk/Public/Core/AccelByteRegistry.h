@@ -36,6 +36,7 @@ namespace GameServerApi
 	class ServerCustomWebServer;
 	class ServerOauth2;
 	class ServerDSM;
+	class ServerStatistic;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -60,6 +61,7 @@ public:
 	static GameServerApi::ServerCustomWebServer ServerCustomWebServer;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
+	static GameServerApi::ServerStatistic ServerStatistic;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

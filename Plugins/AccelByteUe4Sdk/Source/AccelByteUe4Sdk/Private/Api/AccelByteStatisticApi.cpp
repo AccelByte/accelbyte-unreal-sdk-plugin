@@ -24,7 +24,7 @@ namespace AccelByte
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
 
-			Statistic::GetUserStatItems(*this, {}, {}, OnSuccess, OnError);
+			Statistic::GetUserStatItems({}, {}, OnSuccess, OnError);
 		}
 
 		void Statistic::GetUserStatItemsByStatCodes(const TArray<FString>& StatCodes, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
@@ -32,7 +32,7 @@ namespace AccelByte
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
 
-			Statistic::GetUserStatItems(*this, StatCodes, {}, OnSuccess, OnError);
+			Statistic::GetUserStatItems(StatCodes, {}, OnSuccess, OnError);
 		}
 
 		void Statistic::GetUserStatItemsByTags(const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
@@ -40,16 +40,16 @@ namespace AccelByte
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
 
-			Statistic::GetUserStatItems(*this, {}, Tags, OnSuccess, OnError);
+			Statistic::GetUserStatItems({}, Tags, OnSuccess, OnError);
 		}
 
-		void Statistic::GetUserStatItems(const Statistic& Object, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
+		void Statistic::GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
 		{
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
 
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Object.Credentials.GetUserSessionId());
-			FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *Object.Settings.StatisticServerUrl, *Object.Credentials.GetUserNamespace(), *Object.Credentials.GetUserId());
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+			FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 			FString Verb            = TEXT("GET");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");
@@ -75,7 +75,7 @@ namespace AccelByte
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
-		void Statistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+		void Statistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 		{
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
@@ -110,7 +110,7 @@ namespace AccelByte
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
-		void Statistic::BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+		void Statistic::BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 		{
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));

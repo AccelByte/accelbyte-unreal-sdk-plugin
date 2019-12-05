@@ -41,6 +41,11 @@ FString UAccelByteBlueprintsServerSettings::GetDSMServerUrl()
 	return FRegistry::ServerSettings.DSMServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetStatisticServerUrl()
+{
+	return FRegistry::ServerSettings.StatisticServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -69,4 +74,9 @@ void UAccelByteBlueprintsServerSettings::SetIamServerUrl(const FString& IamServe
 void UAccelByteBlueprintsServerSettings::SetDSMServerUrl(const FString& DSMServerUrl)
 {
 	FRegistry::ServerSettings.DSMServerUrl = DSMServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetStatisticServerUrl(const FString& StatisticServerUrl)
+{
+	FRegistry::ServerSettings.StatisticServerUrl = StatisticServerUrl;
 }

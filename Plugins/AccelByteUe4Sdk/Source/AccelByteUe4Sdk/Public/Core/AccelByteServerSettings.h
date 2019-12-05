@@ -22,6 +22,7 @@ public:
     FString BaseUrl;
 	FString IamServerUrl;
 	FString DSMServerUrl;
+	FString StatisticServerUrl;
 };
 
 } // Namespace AccelByte
@@ -59,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString DSMServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString StatisticServerUrl;
 };
 
 
@@ -89,6 +93,9 @@ public:
 	static FString GetDSMServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetStatisticServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -105,5 +112,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetDSMServerUrl(const FString& DSMServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetStatisticServerUrl(const FString& StatisticServerUrl);
 };
 
