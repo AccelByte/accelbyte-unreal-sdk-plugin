@@ -11,6 +11,12 @@
   - ServerDSMApi
     - RegisterServerToDSM
     - SendShutdownToDSM
+  - ServerStatisticApi
+    - CreateUserStatItem
+    - BulkCreateUserStatItems
+    - GetAllUserStatItems
+    - GetUserStatItemsByStatCodes
+    - GetUserStatItemsByTags
 
 ## 2.5.0 (2019-11-25)
 ## Fixed

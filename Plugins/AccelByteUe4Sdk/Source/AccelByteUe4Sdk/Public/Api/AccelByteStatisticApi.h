@@ -61,26 +61,26 @@ namespace AccelByte
 			* @brief Bulk add stat item(s) value from specified user id(s) by stat code(s).
 			*
 			* @param Data array consist of increased value, user id, and stat code.
-			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemIncResult.
+			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+			void BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			* @brief Bulk add stat item(s) value from a specified user id by stat code(s).
 			*
 			* @param Data array consist of increased value and stat code.
-			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemIncResult.
+			* @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsBulkStatItemOperationResult.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError);
+			void BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			* @brief Add a stat item value from a specified user id by stat code.
 			*
 			* @param StatCode the statCode of statItem that about to update.
 			* @param Inc increased value of the statItem.
-			* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsBulkStatItemIncResult.
+			* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsBulkStatItemOperationResult.
 			* @param OnError This will be called when the operation failed.
 			*/
 			void AddUserStatItemValue(const FString& StatCode, const float& Inc, const THandler<FAccelByteModelsStatItemIncResult>& OnSuccess, const FErrorHandler& OnError);
@@ -96,7 +96,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsUserStatItemPagingSlicedResult.
 			 * @param OnError This will be called when the operation failed.
 			*/
-			static void GetUserStatItems(const Statistic& Object, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+			void GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 		};
 
 	} // Namespace Api

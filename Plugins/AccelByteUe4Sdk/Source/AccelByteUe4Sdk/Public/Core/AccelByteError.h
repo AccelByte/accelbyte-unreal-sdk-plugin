@@ -25,7 +25,7 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		int32 NumericErrorCode = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		FString ErrorCode;
+		int32 ErrorCode = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString ErrorMessage;
 };
@@ -106,6 +106,8 @@ namespace AccelByte
 		StatusLoopDetected = 508, // Reference: RFC 5842, Section 7.2
 		StatusNotExtended = 510, // Reference: RFC 2774, Section 7
 		StatusNetworkAuthenticationRequired = 511, // Reference: RFC 6585, Section 6
+
+		UserEmailAlreadyUsedException = 10133,
 
 		// Platform error
 		PlatformInternalServerErrorException = 20000,
@@ -274,7 +276,7 @@ namespace AccelByte
 		//
 		//Statistic Error Code List
 		//
-		StatisticNotFoundException = 70131,
+		StatisticNotFoundException = 70331,
 		InvalidStatOperatorException = 70330,
 		StatNotDecreasableException = 70334,
 		UserStatsNotFoundException = 70335,
