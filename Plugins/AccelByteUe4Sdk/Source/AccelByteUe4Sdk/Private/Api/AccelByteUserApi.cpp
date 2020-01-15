@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -502,13 +502,13 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetUserByEmailAddress(const FString& EmailAddress, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(EmailAddress));
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
