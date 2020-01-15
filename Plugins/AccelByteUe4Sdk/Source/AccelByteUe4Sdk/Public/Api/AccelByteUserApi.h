@@ -47,7 +47,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Log in with device ID (anonymous log in).
@@ -209,6 +209,16 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void GetUserByUserId(const FString& UserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will get user by other platform user id it linked to.
+			 *
+			 * @param PlatformType Other platform type .
+			 * @param OtherPlatformUserId Targeted user's ID.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 		private:
 			User() = delete;

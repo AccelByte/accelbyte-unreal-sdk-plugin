@@ -98,4 +98,3 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserProfileCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserProfileRequest")
 		FString DateOfBirth;
 };
-
