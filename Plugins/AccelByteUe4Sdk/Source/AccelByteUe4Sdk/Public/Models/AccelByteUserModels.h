@@ -247,7 +247,7 @@ struct ACCELBYTEUE4SDK_API FPublicUserInfo
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
         FString PhoneNumber;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-        FString EmailAdress;
+        FString EmailAddress;
 };
 
 USTRUCT(BlueprintType)

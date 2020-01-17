@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -910,6 +910,158 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	check(bGetProfileSuccessful2);
 	check(bDeleteProfileSuccessful);
 	check(bDeleteSuccessful);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserByEmailAddressTest, "AccelByte.Tests.AUser.GetUserByEmailAddress", AutomationFlagMaskUser);
+bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
+	LoginId.ToLowerInline();
+	FString Password = "123SDKTest123";
+	FString DisplayName = "testSDK";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	bool bGetUserDone = false;
+	FPagedPublicUsersInfo ReceivedUserData;
+	FRegistry::User.SearchUsers(
+		LoginId,
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetUserDone = true;
+		ReceivedUserData = Result;
+		for (auto Data : ReceivedUserData.Data)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+		}
+	}),
+		GlobalErrorHandler);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	check(bLoginSuccessful);
+	check(bGetUserDone);
+	check(bDeleteSuccessful);
+	check(ReceivedUserData.Data.Num() != 0);
+	check(ReceivedUserData.Data[0].EmailAddress == LoginId);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserByDisplayNameTest, "AccelByte.Tests.AUser.GetUserByDisplayName", AutomationFlagMaskUser);
+bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
+	LoginId.ToLowerInline();
+	FString Password = "123SDKTest123";
+	FString DisplayName = "testSDK";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	bool bGetUserDone = false;
+	FPagedPublicUsersInfo ReceivedUserData;
+	FRegistry::User.SearchUsers(
+		DisplayName,
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetUserDone = true;
+		ReceivedUserData = Result;
+		for (auto Data : ReceivedUserData.Data)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+		}
+	}),
+		GlobalErrorHandler);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	check(bLoginSuccessful);
+	check(bGetUserDone);
+	check(bDeleteSuccessful);
+	check(ReceivedUserData.Data.Num() != 0);
+	check(ReceivedUserData.Data[0].DisplayName.Contains(DisplayName));
 	return true;
 }
 
