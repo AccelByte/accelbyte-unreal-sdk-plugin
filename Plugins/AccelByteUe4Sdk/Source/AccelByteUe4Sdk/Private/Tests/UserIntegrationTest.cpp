@@ -1065,6 +1065,72 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserBySteamUserIDTest, "AccelByte.Tests.AUser.GetUserBySteamUserID", AutomationFlagMaskUser);
+bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString FirstUserId = "";
+	double LastTime = 0;
+
+	bool bSteamLoginSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bSteamLoginSuccessful1 = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bSteamLoginSuccessful1, "Waiting for Login...");
+
+	FirstUserId = FRegistry::Credentials.GetUserId();
+	FString SteamUserID;
+
+	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
+
+	SteamUserID = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"));
+
+	bool bGetUserDone = false;
+	FUserData ReceivedUserData;
+	FRegistry::User.GetUserByOtherPlatformUserId(
+		EAccelBytePlatformType::Steam, 
+		SteamUserID,
+		THandler<FUserData>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FUserData& UserData)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bGetUserDone = true;
+			ReceivedUserData = UserData;
+		}),
+		GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetUserDone, "Waiting for Login...");	
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	check(bSteamLoginSuccessful1);
+	check(bDeleteSuccessful);
+	check(ReceivedUserData.UserId.Compare("") != 0);
+
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.AUser.SteamTicket", AutomationFlagMaskUser);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
