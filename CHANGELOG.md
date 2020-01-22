@@ -17,6 +17,12 @@
     - GetAllUserStatItems
     - GetUserStatItemsByStatCodes
     - GetUserStatItemsByTags
+- Game Client SDK 
+  - User Api
+    - GetUserByOtherPlatformUserId
+## Changed
+- GetUserByEmailAddress -> SearchUser
+  - const FString& EmailAddress -> const FString& Query
 
 ## 2.5.0 (2019-11-25)
 ## Fixed
