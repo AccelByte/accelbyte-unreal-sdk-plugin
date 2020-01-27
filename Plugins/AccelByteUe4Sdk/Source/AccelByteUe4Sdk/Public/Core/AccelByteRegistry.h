@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -37,6 +37,7 @@ namespace GameServerApi
 	class ServerOauth2;
 	class ServerDSM;
 	class ServerStatistic;
+	class ServerEcommerce;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -62,6 +63,7 @@ public:
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
+	static GameServerApi::ServerEcommerce ServerEcommerce;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;
@@ -73,4 +75,3 @@ public:
 };
 
 }
-
