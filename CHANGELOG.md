@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+## Added
+- Game Server SDK
+  - ServerCredentials: stores ClientAccessToken, ClientNamespace, and MatchId
+  - ServerSettings: stores server's settings such as ClientId, ClientSecret, IAM URL, DSM URL, etc.
+  - CustomWebServerApi: to open a WebServer for accept DSM claim request
+  - ServerOauth2Api
+    - LoginWithClientCredentials
+  - ServerDSMApi
+    - RegisterServerToDSM
+    - SendShutdownToDSM
+  - ServerStatisticApi
+    - CreateUserStatItem
+    - BulkCreateUserStatItems
+    - GetAllUserStatItems
+    - GetUserStatItemsByStatCodes
+    - GetUserStatItemsByTags
+
 ## 2.6.0 (2020-01-29)
 ## Added
 - Game Client SDK 
