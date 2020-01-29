@@ -15,12 +15,18 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteStatisticApi.h"
+#include "GameServerApi/AccelByteServerCustomWebServerApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "GameServerApi/AccelByteServerDSMApi.h"
+#include "GameServerApi/AccelByteServerStatisticApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
 
 Settings FRegistry::Settings;
 Credentials FRegistry::Credentials;
+ServerSettings FRegistry::ServerSettings;
+ServerCredentials FRegistry::ServerCredentials;
 FHttpRetryScheduler FRegistry::HttpRetryScheduler;
 Api::User FRegistry::User(FRegistry::Credentials, FRegistry::Settings);
 Api::UserProfile FRegistry::UserProfile(FRegistry::Credentials, FRegistry::Settings);
@@ -33,3 +39,7 @@ Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Set
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings);
 Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings);
+GameServerApi::ServerCustomWebServer FRegistry::ServerCustomWebServer;
+GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);

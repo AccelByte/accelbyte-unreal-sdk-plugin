@@ -47,7 +47,7 @@ void UAccelByteBlueprintsStatistic::GetUserStatItemsByTags(const TArray<FString>
 
 void UAccelByteBlueprintsStatistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& data, const FBulkAddStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Statistic.BulkAddStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemIncResult>& Result)
+	FRegistry::Statistic.BulkAddStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),
@@ -59,7 +59,7 @@ void UAccelByteBlueprintsStatistic::BulkAddStatItemValue(const TArray<FAccelByte
 
 void UAccelByteBlueprintsStatistic::BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& data, const FBulkAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Statistic.BulkAddUserStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemIncResult>& Result)
+	FRegistry::Statistic.BulkAddUserStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),

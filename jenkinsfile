@@ -188,21 +188,6 @@ pipeline {
                 }
             }
         }
-        stage('Publish Documentation'){
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\PublishDocumentation.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Publish Documentation";
-                    }
-                }
-            }
-        }
     }
     post {
         success {

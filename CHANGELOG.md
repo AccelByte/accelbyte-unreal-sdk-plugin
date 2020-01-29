@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6.0 (2020-01-29)
+## Added
+- Game Client SDK 
+  - User Api
+    - GetUserByOtherPlatformUserId
+## Changed
+- GetUserByEmailAddress -> SearchUser
+  - const FString& EmailAddress -> const FString& Query
+  
 ## 2.5.0 (2019-11-25)
 ## Fixed
 - Platform

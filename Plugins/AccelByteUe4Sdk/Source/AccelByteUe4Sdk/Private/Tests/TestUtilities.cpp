@@ -975,34 +975,38 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic_Bulk_Create_User_StatItem(FString userId, TArray<FString> statCode, const THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>& OnSuccess, const FErrorHandler& OnError)
+void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/users/%s/statitems/bulk"), *BaseUrl, *FRegistry::Settings.Namespace, *userId);
-	FString Verb = TEXT("POST");
+	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
+	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
-	FString Content = "[";
-	for (int i = 0; i < statCode.Num(); i++)
-	{
-		Content += FString::Printf(TEXT("{\"statCode\":\"%s\"}"), *statCode[i]);
-		if (i < statCode.Num() - 1)
-		{
-			Content += ",";
-		}
-		else
-		{
-			Content += "]";
-		}
-	}
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *statCode);
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -1049,6 +1053,25 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void WebServer_Request(const uint16 Port, const FString UrlPath, const FString Action, const FAccelByteModelsDSMMessage ReqBody, const FSimpleDelegate& OnSuccess, const FErrorHandler & OnError)
+{
+	FString BaseUrl = "http://127.0.0.1";
+	FString Url = FString::Printf(TEXT("%s:%d%s"), *BaseUrl, Port, *UrlPath);
+	FString Verb = FString::Printf(TEXT("%s"), *Action);
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Contents;
+	FJsonObjectConverter::UStructToJsonObjectString(ReqBody, Contents);
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetContentAsString(Contents);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 

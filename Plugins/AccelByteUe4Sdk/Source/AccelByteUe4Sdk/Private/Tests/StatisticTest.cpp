@@ -9,7 +9,8 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteStatisticApi.h"
-#include "Api/AccelByteGameProfileApi.h"
+#include "GameServerApi/AccelByteServerStatisticApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
 #include "HAL/FileManager.h"
 
@@ -28,7 +29,7 @@ const auto StatisticTestErrorHandler = FErrorHandler::CreateLambda([](int32 Erro
 	UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-const FString StatisticStatCode = "SDKTEST";
+const FString StatisticStatCode = "sdktest";
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(StatisticSetup, "AccelByte.Tests.Statistic.A.Setup", AutomationFlagMaskStatistic);
 bool StatisticSetup::RunTest(const FString& Parameters)
@@ -36,15 +37,6 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	bool bClientLoginSuccess = false;
 	bool UsersCreationSuccess = false;
 	bool UsersLoginSuccess = false;
-
-	FRegistry::User.LoginWithClientCredentials(FSimpleDelegate::CreateLambda([&bClientLoginSuccess]()
-	{
-		bClientLoginSuccess = true;
-		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Client Login Success"));
-	}), StatisticTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Login...");
-
 
 	FString Email = FString::Printf(TEXT("Statistic_UE4Test@example.com"));
 	Email.ToLowerInline();
@@ -60,7 +52,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Test User is successfuly created."));
 	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
-		if (Code == EHttpResponseCodes::Conflict)
+		if ((ErrorCodes) Code == ErrorCodes::UserEmailAlreadyUsedException)
 		{
 			UsersCreationSuccess = true;
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Test User is already created."));
@@ -85,6 +77,14 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	Waiting(UsersLoginSuccess, "Waiting for Login...");
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		bClientLoginSuccess = true;
+		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("\t\tClient Successfully Login."));
+	}), StatisticTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
 	check(bClientLoginSuccess);
 	check(UsersLoginSuccess);
 
@@ -98,11 +98,18 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		bGetStatDone = true;
 	}), FErrorHandler::CreateLambda([&bStatIsExist, &bGetStatDone](int32 ErrorCode, FString ErrorMessage)
 	{
-		UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		if ((ErrorCodes)ErrorCode != ErrorCodes::StatisticNotFoundException)
+		{
+			UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		}
+		else
+		{
+			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		}
 		bGetStatDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bStatIsExist, "Waiting for get stat...");
+	Waiting(bGetStatDone, "Waiting for get stat...");
 
 	if (!bStatIsExist)
 	{
@@ -145,8 +152,9 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	if (GetUserStatItemResult.Data.Num() == 0)
 	{
 		bool bCreateStatItemDone = false;
-		TArray<FAccelByteModelsBulkStatItemIncResult> CreateStatItemResult;
-		Statistic_Bulk_Create_User_StatItem(FRegistry::Credentials.GetUserId(), { StatisticStatCode }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bUserStatItemIsExist, &bCreateStatItemDone, &CreateStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+		TArray<FAccelByteModelsBulkStatItemOperationResult> CreateStatItemResult;
+		FAccelByteModelsBulkStatItemCreate BulkStatItem{ StatisticStatCode };
+		FRegistry::ServerStatistic.BulkCreateUserStatItems(FRegistry::Credentials.GetUserId(), { BulkStatItem }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&bUserStatItemIsExist, &bCreateStatItemDone, &CreateStatItemResult](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
 		{
 			CreateStatItemResult = Result;
 			bUserStatItemIsExist = true;
@@ -261,17 +269,17 @@ bool StatisticBulkAddStatItemValue::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD STATITEM VALUE..."));
 	bool bBulkAddStatItemSuccess = false;
-	TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddStatItemResult;
+	TArray<FAccelByteModelsBulkStatItemOperationResult> BulkAddStatItemResult;
 	FAccelByteModelsBulkUserStatItemInc MVP;
 	MVP.inc = 1;
 	MVP.userId = FRegistry::Credentials.GetUserId();
 	MVP.statCode = StatisticStatCode;
-	FRegistry::Statistic.BulkAddStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddStatItemSuccess, &BulkAddStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+	FRegistry::Statistic.BulkAddStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&bBulkAddStatItemSuccess, &BulkAddStatItemResult](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD STATITEMS SUCCESS!"));
 		bBulkAddStatItemSuccess = true;
 		BulkAddStatItemResult = Result;
-		for (FAccelByteModelsBulkStatItemIncResult data : Result)
+		for (FAccelByteModelsBulkStatItemOperationResult data : Result)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Success: %d"), *data.StatCode, data.Success);
 		}
@@ -289,16 +297,16 @@ bool StatisticBulkAddUserStatItemValue::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEM VALUE..."));
 	bool bBulkAddUserStatItemSuccess = false;
-	TArray<FAccelByteModelsBulkStatItemIncResult> BulkAddUserStatItemResult;
+	TArray<FAccelByteModelsBulkStatItemOperationResult> BulkAddUserStatItemResult;
 	FAccelByteModelsBulkStatItemInc MVP;
 	MVP.inc = 1;
 	MVP.statCode = StatisticStatCode;
-	FRegistry::Statistic.BulkAddUserStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemIncResult>>::CreateLambda([&bBulkAddUserStatItemSuccess, &BulkAddUserStatItemResult](TArray<FAccelByteModelsBulkStatItemIncResult> Result)
+	FRegistry::Statistic.BulkAddUserStatItemValue({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&bBulkAddUserStatItemSuccess, &BulkAddUserStatItemResult](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEMS SUCCESS!"));
 		bBulkAddUserStatItemSuccess = true;
 		BulkAddUserStatItemResult = Result;
-		for (FAccelByteModelsBulkStatItemIncResult data : Result)
+		for (FAccelByteModelsBulkStatItemOperationResult data : Result)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("StatCode: %s | Success: %d"), *data.StatCode, data.Success);
 		}

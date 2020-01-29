@@ -21,9 +21,6 @@ class UBPUser : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
-	static void LoginWithClientCredentials(const FDHandler& OnSuccess, const FDErrorHandler& OnError);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
 	static void LoginWithUsername(const FString& Username, const FString& Password, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")

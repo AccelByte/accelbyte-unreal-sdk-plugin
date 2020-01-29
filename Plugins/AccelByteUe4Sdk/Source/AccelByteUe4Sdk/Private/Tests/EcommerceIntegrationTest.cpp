@@ -759,16 +759,6 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool EcommerceSetup::RunTest(const FString& Parameters)
 {
-	bool bClientTokenObtained = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ClientLogin"));
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), EcommerceErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bClientTokenObtained,"Waiting for Login...");
 
 	bool bSetupSuccess = false;
 	SetupEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bSetupSuccess = true; }), EcommerceErrorHandler);

@@ -41,14 +41,6 @@ const auto CloudStorageErrorHandler = FErrorHandler::CreateLambda([](int32 Error
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageSetup, "AccelByte.Tests.CloudStorage.A.Setup", AutomationFlagMaskCloudStorage);
 bool CloudStorageSetup::RunTest(const FString& Parameters)
 {
-	bool bClientLoginResult = false;
-	FRegistry::User.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginResult]()
-	{
-		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Client Login Succeess"));
-		bClientLoginResult = true;
-	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
-	Waiting(bClientLoginResult, "Waiting for Login...");
 
 	bool bUserLoginResult = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginResult]()
@@ -59,7 +51,6 @@ bool CloudStorageSetup::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUserLoginResult, "Waiting for Login...");
 
-	check(bClientLoginResult);
 	check(bUserLoginResult);
 	return true;
 }

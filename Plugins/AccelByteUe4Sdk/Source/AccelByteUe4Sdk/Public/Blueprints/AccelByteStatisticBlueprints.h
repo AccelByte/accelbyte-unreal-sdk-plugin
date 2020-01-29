@@ -28,11 +28,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 		static void GetUserStatItemsByTags(const TArray<FString>& Tags, const FGetUserStatItemsByTagsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FBulkAddStatItemValueSuccess, const TArray<FAccelByteModelsBulkStatItemIncResult>&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FBulkAddStatItemValueSuccess, const TArray<FAccelByteModelsBulkStatItemOperationResult>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 		static void BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& data, const FBulkAddStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FBulkAddUserStatItemValueSuccess, const TArray<FAccelByteModelsBulkStatItemIncResult>&, Result);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FBulkAddUserStatItemValueSuccess, const TArray<FAccelByteModelsBulkStatItemOperationResult>&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Statistic | Api")
 		static void BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& data, const FBulkAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 

@@ -6,6 +6,8 @@
 
 #include "AccelByteSettings.h"
 #include "AccelByteCredentials.h"
+#include "AccelByteServerSettings.h"
+#include "AccelByteServerCredentials.h"
 
 using namespace AccelByte;
 
@@ -29,11 +31,21 @@ namespace Api
 	class Statistic;
 }
 
+namespace GameServerApi
+{
+	class ServerCustomWebServer;
+	class ServerOauth2;
+	class ServerDSM;
+	class ServerStatistic;
+}
+
 class ACCELBYTEUE4SDK_API FRegistry
 {
 public:
 	static Settings Settings;
 	static Credentials Credentials;
+	static ServerSettings ServerSettings;
+	static ServerCredentials ServerCredentials;
 	static FHttpRetryScheduler HttpRetryScheduler;
 	static Api::User User;
 	static Api::UserProfile UserProfile;
@@ -46,6 +58,10 @@ public:
 	static Api::Lobby Lobby;
 	static Api::GameProfile GameProfile;
 	static Api::Statistic Statistic;
+	static GameServerApi::ServerCustomWebServer ServerCustomWebServer;
+	static GameServerApi::ServerOauth2 ServerOauth2;
+	static GameServerApi::ServerDSM ServerDSM;
+	static GameServerApi::ServerStatistic ServerStatistic;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

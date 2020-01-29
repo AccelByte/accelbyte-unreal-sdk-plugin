@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -28,15 +28,6 @@ namespace AccelByte
 			Credentials& Credentials;
 			Settings& Settings;
 		public:
-			/**
-			 * @brief This is to get access token from `client_credentials` grant, then store the access token in memory.
-			 * You shouldn't use this if your application is a client. It is intended for machine-to-machine (server).
-			 * It is "required" for user management (create new user, reset password, etc).
-			 *
-			 * @param OnSuccess This will be called when the operation succeeded.
-			 * @param OnError This will be called when the operation failed.
-			 */
-			void LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Log in with email/phone number account.
@@ -56,7 +47,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Log in with device ID (anonymous log in).
@@ -202,13 +193,13 @@ namespace AccelByte
 			void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief This function will search user by their Email Address.
+			 * @brief This function will search user by their Email Address or Display Name.
 			 *
-			 * @param EmailAddress Targeted user's Email Address.
+			 * @param Query Targeted user's Email Address or Display Name.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetUserByEmailAddress(const FString& EmailAddress, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
+			void SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will search user by userId.
@@ -218,6 +209,16 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void GetUserByUserId(const FString& UserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will get user by other platform user id it linked to.
+			 *
+			 * @param PlatformType Other platform type .
+			 * @param OtherPlatformUserId Targeted user's ID.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 		private:
 			User() = delete;
