@@ -1,6 +1,6 @@
 # Changelog
 
-## RC 2.6.0 (2020-01-27)
+## 2.6.0 (2020-01-29)
 ## Added
 - Game Client SDK 
   - User Api
