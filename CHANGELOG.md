@@ -17,7 +17,14 @@
     - GetAllUserStatItems
     - GetUserStatItemsByStatCodes
     - GetUserStatItemsByTags
-
+  - ServerEcommerce
+    - GetUserEntitlementById
+    - GrantUserEntitlements
+    - CreditUserWallet
+- Game Client SDK 
+  - Entitlement
+    - GetUserEntitlementById
+    
 ## 2.6.0 (2020-01-29)
 ## Added
 - Game Client SDK 

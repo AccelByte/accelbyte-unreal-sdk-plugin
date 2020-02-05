@@ -36,7 +36,7 @@ static FString PlatformStrings[] = {
 	TEXT("twitter"),
 };
 
-void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
