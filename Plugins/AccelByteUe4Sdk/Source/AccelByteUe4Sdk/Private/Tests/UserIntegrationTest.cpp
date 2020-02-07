@@ -1088,7 +1088,16 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
 
-	SteamUserID = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"));
+	const int32 length = 100;
+	TCHAR SteamUserIDStr[length];
+#if PLATFORM_WINDOWS
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), SteamUserIDStr, length);
+#elif PLATFORM_LINUX
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), SteamUserIDStr, length);
+#elif PLATFORM_MAC
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), SteamUserIDStr, length);
+#endif
+	SteamUserID = SteamUserIDStr;
 
 	bool bGetUserDone = false;
 	FUserData ReceivedUserData;
