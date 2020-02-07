@@ -23,9 +23,9 @@ void UBPUser::LoginWithUsername(const FString& Username, const FString& Password
 	}));
 }
 
-void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformId, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
-	FRegistry::User.LoginWithOtherPlatform(PlatformId, Token, FVoidHandler::CreateLambda([OnSuccess]()
+	FRegistry::User.LoginWithOtherPlatform(PlatformType, Token, FVoidHandler::CreateLambda([OnSuccess]()
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
