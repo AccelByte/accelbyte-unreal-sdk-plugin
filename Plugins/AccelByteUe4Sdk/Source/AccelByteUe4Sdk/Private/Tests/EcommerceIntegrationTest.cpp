@@ -78,7 +78,7 @@ const EcommerceExpectedVariable ExpectedVariable{
 	"UE4RootItem",
 	"UE4ChildItem",
 	ArchiveStore,
-	TemporaryStore
+	TemporaryStore,
 };
 
 FString ExpectedRootCategoryPath = ExpectedVariable.ExpectedRootCategoryPath;
@@ -702,6 +702,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	float LastTime = FPlatformTime::Seconds();
 
 #pragma region GetUserOrders
+
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrders"));
 	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda([&](const FAccelByteModelsPagedOrderInfo& Result)
@@ -713,7 +714,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetUserOrdersSuccess,"Waiting for get user order...");
 
-#pragma region GetUserOrders
+#pragma endregion GetUserOrders
 
 	check(bGetUserOrdersSuccess);
 	return true;
@@ -991,6 +992,50 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceConsumeUserEntitlement, "AccelByte.Tests.Ecommerce.F4.ConsumeUserEntitlement", AutomationFlagMaskEcommerce);
+bool EcommerceConsumeUserEntitlement::RunTest(const FString& Parameters)
+{
+#pragma region FirstConsumption
+
+	bool bConsumeEntitlement1Success = false;
+	bool bConsumeResult1True = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("FirstConsumeUserEntitlement"));
+	FRegistry::Entitlement.ConsumeUserEntitlement(ExpectedEntitlementId, 1,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&bConsumeResult1True, &bConsumeEntitlement1Success](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bConsumeEntitlement1Success = true;
+		bConsumeResult1True = (Result.Status == EAccelByteEntitlementStatus::CONSUMED);
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+
+#pragma endregion FirstConsumption
+
+#pragma region SecondConsumption
+
+	bool bConsumeEntitlement2Success = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SecondConsumeUserEntitlement"));
+	FRegistry::Entitlement.ConsumeUserEntitlement(ExpectedEntitlementId, 1,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&bConsumeEntitlement2Success](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bConsumeEntitlement2Success = true;
+	}), FErrorHandler::CreateLambda([&bConsumeEntitlement2Success](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bConsumeEntitlement2Success = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+
+#pragma endregion SecondConsumption
+
+	check(bConsumeEntitlement1Success);
+	check(bConsumeResult1True);
+	check(bConsumeEntitlement2Success);
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserEntitlementByEntitlementId, "AccelByte.Tests.Ecommerce.F5.GetUserEntitlementSuccess", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserEntitlementByEntitlementId::RunTest(const FString& Parameters)

@@ -24,6 +24,7 @@
 - Game Client SDK 
   - Entitlement
     - GetUserEntitlementById
+    - ConsumeUserEntitlement
     
 ## 2.6.1 (2020-02-07)
 ## Fixed
