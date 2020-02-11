@@ -407,8 +407,8 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	{
 		EAccelByteItemType::INGAMEITEM,
 		Variables.ExpectedRootItemTitle,
-		EAccelByteEntitlementType::DURABLE,
-		0,
+		EAccelByteEntitlementType::CONSUMABLE,
+		1,
 		0,
 		"",
 		EAccelByteAppType::GAME,//appType

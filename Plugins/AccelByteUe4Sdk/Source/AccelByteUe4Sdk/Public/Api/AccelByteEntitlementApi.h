@@ -47,6 +47,15 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+/**
+	* @brief Consume a use entitlement.
+	*
+	* @param EntitlementId The id of the entitlement.
+	* @param UseCount Number of consumed entitlement.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void ConsumeUserEntitlement(const FString& EntitlementId, const int32& UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Entitlement() = delete;
