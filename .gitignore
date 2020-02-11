@@ -88,3 +88,4 @@ Doxygen/*
 # Test
 SteamHelper/steamticket.txt
 SteamHelper/SteamTicketHelper.pid
+*.orig

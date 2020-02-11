@@ -38,7 +38,7 @@ namespace AccelByte
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 
 	UENUM(BlueprintType)
-		enum class ErrorCodes : int32
+	enum class ErrorCodes : int32
 	{
 		// If there are no error models, then we just use these HTTP codes
 		StatusContinue = 100, // Reference: RFC 7231, Section 6.2.1

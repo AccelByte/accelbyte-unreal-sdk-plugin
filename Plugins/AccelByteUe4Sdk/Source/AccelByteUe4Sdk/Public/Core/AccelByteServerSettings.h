@@ -19,7 +19,6 @@ public:
 	FString Namespace;
 	FString PublisherNamespace;
     FString RedirectURI;
-    FString BaseUrl;
 	FString IamServerUrl;
 	FString DSMServerUrl;
 	FString StatisticServerUrl;
@@ -52,9 +51,6 @@ public:
 
     UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
     FString RedirectURI;
-
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
-    FString BaseUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString IamServerUrl;

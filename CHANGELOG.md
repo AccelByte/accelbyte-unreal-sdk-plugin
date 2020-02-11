@@ -11,6 +11,8 @@
   - ServerDSMApi
     - RegisterServerToDSM
     - SendShutdownToDSM
+    - RegisterLocalServerToDSM
+    - DeregisterLocalServerFromDSM
   - ServerStatisticApi
     - CreateUserStatItem
     - BulkCreateUserStatItems
@@ -25,6 +27,16 @@
   - Entitlement
     - GetUserEntitlementById
     - ConsumeUserEntitlement
+  - Qos & QosM Api
+    - GetServerLatencies
+    - GetQosServers
+## Changed
+- Game Client SDK
+  - Lobby
+    - SendStartMatchmaking(FString GameMode) -> SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies)
+## Removed
+  - CustomWebServer
+  - CustomWebServerApi
     
 ## 2.6.1 (2020-02-07)
 ## Fixed
