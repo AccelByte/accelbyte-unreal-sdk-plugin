@@ -9,6 +9,20 @@
 using AccelByte::FRegistry;
 using AccelByte::FErrorHandler;
 
+void UAccelByteBlueprintsStatistic::CreateUserStatItems(const TArray<FString>& StatCodes, const FCreateUserStatItemsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::Statistic.CreateUserStatItems(
+		StatCodes,
+		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
+		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
+}
+
 void UAccelByteBlueprintsStatistic::GetAllUserStatItems(const FGetAllUserStatItemsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Statistic.GetAllUserStatItems(THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
@@ -21,57 +35,24 @@ void UAccelByteBlueprintsStatistic::GetAllUserStatItems(const FGetAllUserStatIte
 	}));
 }
 
-void UAccelByteBlueprintsStatistic::GetUserStatItemsByStatCodes(const TArray<FString>& StatCodes, const FGetUserStatItemsByStatCodesSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsStatistic::GetUserStatItems(const TArray<FString>& StatCodes, const TArray<FString>& Tags, const FGetUserStatItemsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Statistic.GetUserStatItemsByStatCodes(StatCodes, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}),
+	FRegistry::Statistic.GetUserStatItems(
+		StatCodes,
+		Tags,
+		THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+		{
+			OnSuccess.ExecuteIfBound(Result);
+		}),
 		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
+		{
+			OnError.ExecuteIfBound(Code, Message);
+		}));
 }
 
-void UAccelByteBlueprintsStatistic::GetUserStatItemsByTags(const TArray<FString>& Tags, const FGetUserStatItemsByTagsSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+void UAccelByteBlueprintsStatistic::IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const FBulkAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::Statistic.GetUserStatItemsByTags(Tags, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}
-
-void UAccelByteBlueprintsStatistic::BulkAddStatItemValue(const TArray<FAccelByteModelsBulkUserStatItemInc>& data, const FBulkAddStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
-{
-	FRegistry::Statistic.BulkAddStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}
-
-void UAccelByteBlueprintsStatistic::BulkAddUserStatItemValue(const TArray<FAccelByteModelsBulkStatItemInc>& data, const FBulkAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
-{
-	FRegistry::Statistic.BulkAddUserStatItemValue(data, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}),
-		FErrorHandler::CreateLambda([OnError](int32 Code, FString Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}
-
-void UAccelByteBlueprintsStatistic::AddUserStatItemValue(const FString& statCode, const float& inc, const FAddUserStatItemValueSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
-{
-	FRegistry::Statistic.AddUserStatItemValue(statCode, inc, THandler<FAccelByteModelsStatItemIncResult>::CreateLambda([OnSuccess](const FAccelByteModelsStatItemIncResult& Result)
+	FRegistry::Statistic.IncrementUserStatItems(Data, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([OnSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 	{
 		OnSuccess.ExecuteIfBound(Result);
 	}),

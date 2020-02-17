@@ -14,11 +14,21 @@
     - RegisterLocalServerToDSM
     - DeregisterLocalServerFromDSM
   - ServerStatisticApi
-    - CreateUserStatItem
-    - BulkCreateUserStatItems
+    - CreateUserStatItems
+    - IncrementManyUsersStatItems
+    - IncrementUserStatItems
     - GetAllUserStatItems
+- Game Client SDK 
+  - Statistic
+    - CreateUserStatItems
+    - IncrementUserStatItems
+## Removed
     - GetUserStatItemsByStatCodes
     - GetUserStatItemsByTags
+    - BulkAddStatItemValue
+    - BulkAddUserStatItemValue
+    - AddUserStatItemValue
+    
   - ServerEcommerce
     - GetUserEntitlementById
     - GrantUserEntitlements
@@ -48,6 +58,7 @@
 - Game Client SDK 
   - User Api
     - GetUserByOtherPlatformUserId
+
 ## Changed
 - GetUserByEmailAddress -> SearchUser
   - const FString& EmailAddress -> const FString& Query
