@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -7,7 +7,6 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Models/AccelByteStatisticModels.h"
-#include "Models/AccelByteDSMModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
@@ -48,7 +47,7 @@ void DeleteUserProfile(
 
 void FlushHttpRequests();
 
-void Waiting(bool& condition, FString text);
+void Waiting(bool& condition, FString Message);
 
 USTRUCT(BlueprintType)
 struct FCurrencyCreateRequest
@@ -341,15 +340,55 @@ struct FStatCreateRequest
 };
 
 USTRUCT(BlueprintType)
+struct FAllianceRule
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceRule")
+	int max_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceRule")
+	int min_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceRule")
+	int player_max_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceRule")
+	int player_min_number;
+};
+
+USTRUCT(BlueprintType)
+struct FFlexingRule
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FFlexingRule")
+	FString attribute;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FFlexingRule")
+	FString criteria;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FFlexingRule")
+	int duration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FFlexingRule")
+	int reference;
+};
+
+USTRUCT(BlueprintType)
+struct FMatchingRule
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FMatchingRule")
+	FString attribute;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FMatchingRule")
+	FString criteria;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | FMatchingRule")
+	int reference;
+};
+
+USTRUCT(BlueprintType)
 struct FMatchmakingRuleSet
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-		int alliance_number;
+	FAllianceRule alliance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-		bool symmetric_match;
+	TArray<FFlexingRule> flexing_rule;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
-		int symmetric_party_number;
+	TArray<FMatchingRule> matching_rule;
 };
 
 USTRUCT(BlueprintType)
@@ -357,11 +396,13 @@ struct FMatchmakingCreateRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-		FString description;
+	FString description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-		FString game_mode;
+	int find_match_timeout_seconds;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-		FMatchmakingRuleSet rule_set;
+	FString game_mode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+	FMatchmakingRuleSet rule_set;
 };
 
 USTRUCT(BlueprintType)
@@ -369,9 +410,9 @@ struct FUserMapResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-		FString Namespace;
+	FString Namespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-		FString userId;
+	FString userId;
 };
 
 USTRUCT(BlueprintType)
@@ -418,6 +459,7 @@ void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId,
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
 
 void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError);
 void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError);
@@ -427,5 +469,3 @@ void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, c
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
-
-void WebServer_Request(const uint16 Port, const FString UrlPath, const FString Action, const FAccelByteModelsDSMMessage ReqBody, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);

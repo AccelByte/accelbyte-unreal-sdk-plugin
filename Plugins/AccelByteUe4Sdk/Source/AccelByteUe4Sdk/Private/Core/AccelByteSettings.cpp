@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -66,6 +66,11 @@ FString UAccelByteBlueprintsSettings::GetStatisticServerUrl()
 	return FRegistry::Settings.StatisticServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetQosManagerServerUrl()
+{
+	return FRegistry::Settings.QosManagerServerUrl;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -119,4 +124,9 @@ void UAccelByteBlueprintsSettings::SetGameProfileServerUrl(const FString& GamePr
 void UAccelByteBlueprintsSettings::SetStatisticServerUrl(const FString& StatisticServerUrl)
 {
 	FRegistry::Settings.StatisticServerUrl = StatisticServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetQosManagerServerUrl(const FString& QosManagerServerUrl)
+{
+	FRegistry::Settings.QosManagerServerUrl = QosManagerServerUrl;
 }

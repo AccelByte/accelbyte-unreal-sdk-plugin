@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -330,36 +330,39 @@ public:
 	*/
 	void GetAllAsyncNotification();
 
-    // Matchmaking
-    /**
-     * @brief start the matchmaking
-     *
-     * @param GameMode The mode that party member want to play.
-     */
-    FString SendStartMatchmaking(FString GameMode);
-
-    /**
-     * @brief cancel the currently running matchmaking process
-     *     
-     * @param GameMode The mode that party member want to cancel.     
-     */
-    FString SendCancelMatchmaking(FString GameMode);
+	// Matchmaking
+	/**
+	* @brief start the matchmaking
+	*
+	* @param GameMode The mode that party member want to play.
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	*/
+	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>());
 
 	/**
-	 * @brief send ready consent request
-	 *
-	 * @param MatchId The id of a match user ready to play.
-	 */
+	* @brief cancel the currently running matchmaking process
+	*
+	* @param GameMode The mode that party member want to cancel.
+	*/
+	FString SendCancelMatchmaking(FString GameMode);
+
+	/**
+	* @brief send ready consent request
+	*
+	* @param MatchId The id of a match user ready to play.
+	*/
 	FString SendReadyConsentRequest(FString MatchId);
-	
+
 	// Friends
 	/**
-	 * @brief Send request friend request.
-	 *
-	 * @param param UserId Targeted user ID.
-	 */
+	* @brief Send request friend request.
+	*
+	* @param param UserId Targeted user ID.
+	*/
 	void RequestFriend(FString UserId);
-	
+
 	/**
 	* @brief Send unfriend request.
 	*
@@ -407,221 +410,344 @@ public:
 	void GetFriendshipStatus(FString UserId);
 
 	/**
-	 * @brief Unbind all delegates set previously.
-	 */
+	* @brief Unbind all delegates set previously.
+	*/
 	void UnbindEvent();
 
-    void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess) { ConnectSuccess = OnConnectSuccess; }
-    void SetConnectFailedDelegate(const FErrorHandler& OnConnectError) { ConnectError = OnConnectError; }
-    void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed) { ConnectionClosed = OnConnectionClosed; }
-    void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice) { PartyLeaveNotif = OnLeavePartyNotice; }
-    void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif) { PartyInviteNotif = OnPartyInviteNotif; }
-    void SetPartyGetInvitedNotifDelegate(const FPartyGetInvitedNotif& OnInvitePartyGetInvitedNotice) {PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;}
-    void SetPartyJoinNotifDelegate(const FPartyJoinNotif& OnInvitePartyJoinNotice) { PartyJoinNotif = OnInvitePartyJoinNotice; }
-    void SetPartyKickNotifDelegate(const FPartyKickNotif& OnInvitePartyKickedNotice) { PartyKickNotif = OnInvitePartyKickedNotice; }
-    void SetPrivateMessageNotifDelegate(FPersonalChatNotif OnPersonalChatNotif) { PersonalChatNotif = OnPersonalChatNotif; };
-    void SetPartyChatNotifDelegate(FPartyChatNotif OnPersonalChatNotif) { PartyChatNotif = OnPersonalChatNotif; }
-    void SetUserPresenceNotifDelegate(FFriendStatusNotif OnUserPresenceNotif) { FriendStatusNotif = OnUserPresenceNotif; };
-    void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage) { MessageNotif = OnNotificationMessage; }
-	void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif) { AcceptFriendsNotif = OnAcceptFriendsNotif;  }
-	void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif) { RequestFriendsNotif = OnRequestFriendsNotif;  }
-	void SetParsingErrorDelegate(const FErrorHandler& OnParsingError) { ParsingError = OnParsingError; }
+	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
+	{
+		ConnectSuccess = OnConnectSuccess;
+	}
+	void SetConnectFailedDelegate(const FErrorHandler& OnConnectError)
+	{
+		ConnectError = OnConnectError;
+	}
+	void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed)
+	{
+		ConnectionClosed = OnConnectionClosed;
+	}
+	void SetPartyLeaveNotifDelegate(const FPartyLeaveNotif& OnLeavePartyNotice)
+	{
+		PartyLeaveNotif = OnLeavePartyNotice;
+	}
+	void SetPartyInviteNotifDelegate(const FPartyInviteNotif& OnPartyInviteNotif)
+	{
+		PartyInviteNotif = OnPartyInviteNotif;
+	}
+	void SetPartyGetInvitedNotifDelegate(const FPartyGetInvitedNotif& OnInvitePartyGetInvitedNotice)
+	{
+		PartyGetInvitedNotif = OnInvitePartyGetInvitedNotice;
+	}
+	void SetPartyJoinNotifDelegate(const FPartyJoinNotif& OnInvitePartyJoinNotice)
+	{
+		PartyJoinNotif = OnInvitePartyJoinNotice;
+	}
+	void SetPartyKickNotifDelegate(const FPartyKickNotif& OnInvitePartyKickedNotice)
+	{
+		PartyKickNotif = OnInvitePartyKickedNotice;
+	}
+	void SetPrivateMessageNotifDelegate(FPersonalChatNotif OnPersonalChatNotif)
+	{
+		PersonalChatNotif = OnPersonalChatNotif;
+	};
+	void SetPartyChatNotifDelegate(FPartyChatNotif OnPersonalChatNotif)
+	{
+		PartyChatNotif = OnPersonalChatNotif;
+	}
+	void SetUserPresenceNotifDelegate(FFriendStatusNotif OnUserPresenceNotif)
+	{
+		FriendStatusNotif = OnUserPresenceNotif;
+	};
+	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
+	{
+		MessageNotif = OnNotificationMessage;
+	}
+	void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif)
+	{
+		AcceptFriendsNotif = OnAcceptFriendsNotif;
+	}
+	void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif)
+	{
+		RequestFriendsNotif = OnRequestFriendsNotif;
+	}
+	void SetParsingErrorDelegate(const FErrorHandler& OnParsingError)
+	{
+		ParsingError = OnParsingError;
+	}
 
-    // Party
-    /**
-     * @brief set info party response
-     *
-     * @param OnInfoPartyResponse set delegate .
-     */
-    void SetInfoPartyResponseDelegate(FPartyInfoResponse OnInfoPartyResponse) { PartyInfoResponse = OnInfoPartyResponse; };
-
-    /**
-     * @brief create party response delegate
-     *
-     * @param OnCreatePartyResponse set delegate .
-     */
-    void SetCreatePartyResponseDelegate(FPartyCreateResponse OnCreatePartyResponse) { PartyCreateResponse = OnCreatePartyResponse; };
-
-    /**
-     * @brief set leave party response delegate
-     *
-     * @param OnLeavePartyResponse set delegate .
-     */
-    void SetLeavePartyResponseDelegate(FPartyLeaveResponse OnLeavePartyResponse) { PartyLeaveResponse = OnLeavePartyResponse; };
-
-    /**
-     * @brief set invite party response delegate
-     *
-     * @param OnInvitePartyResponse set delegate .
-     */
-    void SetInvitePartyResponseDelegate(FPartyInviteResponse OnInvitePartyResponse) { PartyInviteResponse = OnInvitePartyResponse; };
-
-    /**
-     * @brief set invite party join response
-     *
-     * @param OnInvitePartyJoinResponse set delegate .
-     */
-    void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse) { PartyJoinResponse = OnInvitePartyJoinResponse; };
-
-    /**
-     * @brief set invite party kick member reponse
-     *
-     * @param OnInvitePartyKickMemberResponse set delegate .
-     */
-    void SetInvitePartyKickMemberResponseDelegate(FPartyKickResponse OnInvitePartyKickMemberResponse) { PartyKickResponse = OnInvitePartyKickMemberResponse; };
-
-    // Chat
-    /**
-     * @brief set private message delegate
-     *
-     * @param OnPrivateMessageResponse set delegate .
-     */
-
-    /**
-     * @brief set private message receive delegate
-     *
-     * @param OnPrivateMessageResponse set delegate .
-     */
-    void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse) { PersonalChatResponse = OnPrivateMessageResponse; };
-
-    /**
-     * @brief set party message response
-     *
-     * @param OnPartyMessageResponse set delegate .
-     */
-    void SetPartyMessageResponseDelegate(FPartyChatResponse OnPartyMessageResponse) { PartyChatResponse = OnPartyMessageResponse; };
-
-
-    // Presence
-    /**
-     * @brief set user presence response
-     *
-     * @param OnSetUserPresenceResponse set delegate .
-     */
-    void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnSetUserPresenceResponse) { SetUserPresenceResponse = OnSetUserPresenceResponse; };
-
-    /**
-     * @brief set info party response
-     *
-     * @param OnGetAllUserPresenceResponse set delegate .
-     */
-    void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse) { GetAllFriendsStatusResponse = OnGetAllUserPresenceResponse; };
-
-    // Notification
-
-    // Matchmaking
+	// Party
 	/**
-	 * @brief set start matchmaking response
-	 *
-	 * @param OnMatchmakingStart set delegate .
-	 */
-	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart) { MatchmakingStartResponse = OnMatchmakingStart; };
+	* @brief set info party response
+	*
+	* @param OnInfoPartyResponse set delegate .
+	*/
+	void SetInfoPartyResponseDelegate(FPartyInfoResponse OnInfoPartyResponse)
+	{
+		PartyInfoResponse = OnInfoPartyResponse;
+	};
 
 	/**
-	 * @brief set cancel matchmaking notification
-	 *
-	 * @param OnMatchmakingCancel set delegate .
-	 */
-	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel) { MatchmakingCancelResponse = OnMatchmakingCancel; };
+	* @brief create party response delegate
+	*
+	* @param OnCreatePartyResponse set delegate .
+	*/
+	void SetCreatePartyResponseDelegate(FPartyCreateResponse OnCreatePartyResponse)
+	{
+		PartyCreateResponse = OnCreatePartyResponse;
+	};
 
 	/**
-	 * @brief set ready consent response notification
-	 *
-	 * @param OnReadyConsentResponse set delegate .
-	 */
-	void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse) { ReadyConsentResponse = OnReadyConsentResponse; };
-
-    /**
-     * @brief set matchmaking notification
-     *
-     * @param OnMatchmakingNotification set delegate .
-     */
-    void SetMatchmakingNotifDelegate(FMatchmakingNotif OnMatchmakingNotification) { MatchmakingNotif = OnMatchmakingNotification; };
+	* @brief set leave party response delegate
+	*
+	* @param OnLeavePartyResponse set delegate .
+	*/
+	void SetLeavePartyResponseDelegate(FPartyLeaveResponse OnLeavePartyResponse)
+	{
+		PartyLeaveResponse = OnLeavePartyResponse;
+	};
 
 	/**
-	 * @brief set ready consent notification
-	 *
-	 * @param OnReadyConsentNotification set delegate .
-	 */
-	void SetReadyConsentNotifDelegate(FReadyConsentNotif OnReadyConsentNotification) { ReadyConsentNotif = OnReadyConsentNotification; };
+	* @brief set invite party response delegate
+	*
+	* @param OnInvitePartyResponse set delegate .
+	*/
+	void SetInvitePartyResponseDelegate(FPartyInviteResponse OnInvitePartyResponse)
+	{
+		PartyInviteResponse = OnInvitePartyResponse;
+	};
 
 	/**
-	 * @brief set rematchmaking notification
-	 *
-	 * @param OnRematchmakingNotification set delegate .
-	 */
-	void SetRematchmakingNotifDelegate(FRematchmakingNotif OnRematchmakingNotification) { RematchmakingNotif = OnRematchmakingNotification; };
+	* @brief set invite party join response
+	*
+	* @param OnInvitePartyJoinResponse set delegate .
+	*/
+	void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse)
+	{
+		PartyJoinResponse = OnInvitePartyJoinResponse;
+	};
 
 	/**
-	 * @brief set ready consent notification
-	 *
-	 * @param OnReadyConsentNotification set delegate .
-	 */
-	void SetDsNotifDelegate(FDsNotif OnDsNotification) { DsNotif = OnDsNotification; };
+	* @brief set invite party kick member reponse
+	*
+	* @param OnInvitePartyKickMemberResponse set delegate .
+	*/
+	void SetInvitePartyKickMemberResponseDelegate(FPartyKickResponse OnInvitePartyKickMemberResponse)
+	{
+		PartyKickResponse = OnInvitePartyKickMemberResponse;
+	};
+
+	// Chat
+	/**
+	* @brief set private message delegate
+	*
+	* @param OnPrivateMessageResponse set delegate .
+	*/
+
+	/**
+	* @brief set private message receive delegate
+	*
+	* @param OnPrivateMessageResponse set delegate .
+	*/
+	void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse)
+	{
+		PersonalChatResponse = OnPrivateMessageResponse;
+	};
+
+	/**
+	* @brief set party message response
+	*
+	* @param OnPartyMessageResponse set delegate .
+	*/
+	void SetPartyMessageResponseDelegate(FPartyChatResponse OnPartyMessageResponse)
+	{
+		PartyChatResponse = OnPartyMessageResponse;
+	};
+
+
+	// Presence
+	/**
+	* @brief set user presence response
+	*
+	* @param OnSetUserPresenceResponse set delegate .
+	*/
+	void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnSetUserPresenceResponse)
+	{
+		SetUserPresenceResponse = OnSetUserPresenceResponse;
+	};
+
+	/**
+	* @brief set info party response
+	*
+	* @param OnGetAllUserPresenceResponse set delegate .
+	*/
+	void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse)
+	{
+		GetAllFriendsStatusResponse = OnGetAllUserPresenceResponse;
+	};
+
+	// Notification
+
+	// Matchmaking
+	/**
+	* @brief set start matchmaking response
+	*
+	* @param OnMatchmakingStart set delegate .
+	*/
+	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart)
+	{
+		MatchmakingStartResponse = OnMatchmakingStart;
+	};
+
+	/**
+	* @brief set cancel matchmaking notification
+	*
+	* @param OnMatchmakingCancel set delegate .
+	*/
+	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel)
+	{
+		MatchmakingCancelResponse = OnMatchmakingCancel;
+	};
+
+	/**
+	* @brief set ready consent response notification
+	*
+	* @param OnReadyConsentResponse set delegate .
+	*/
+	void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse)
+	{
+		ReadyConsentResponse = OnReadyConsentResponse;
+	};
+
+	/**
+	* @brief set matchmaking notification
+	*
+	* @param OnMatchmakingNotification set delegate .
+	*/
+	void SetMatchmakingNotifDelegate(FMatchmakingNotif OnMatchmakingNotification)
+	{
+		MatchmakingNotif = OnMatchmakingNotification;
+	};
+
+	/**
+	* @brief set ready consent notification
+	*
+	* @param OnReadyConsentNotification set delegate .
+	*/
+	void SetReadyConsentNotifDelegate(FReadyConsentNotif OnReadyConsentNotification)
+	{
+		ReadyConsentNotif = OnReadyConsentNotification;
+	};
+
+	/**
+	* @brief set rematchmaking notification
+	*
+	* @param OnRematchmakingNotification set delegate .
+	*/
+	void SetRematchmakingNotifDelegate(FRematchmakingNotif OnRematchmakingNotification)
+	{
+		RematchmakingNotif = OnRematchmakingNotification;
+	};
+
+	/**
+	* @brief set ready consent notification
+	*
+	* @param OnReadyConsentNotification set delegate .
+	*/
+	void SetDsNotifDelegate(FDsNotif OnDsNotification)
+	{
+		DsNotif = OnDsNotification;
+	};
 
 	// Friends
 	/**
-	 * @brief Set request for friends response.
-	 *
-	 * @param OnRequestFriendsResponse Delegate that will be set.
-	 */
-	void SetRequestFriendsResponseDelegate(FRequestFriendsResponse OnRequestFriendsResponse) { RequestFriendsResponse = OnRequestFriendsResponse; };
+	* @brief Set request for friends response.
+	*
+	* @param OnRequestFriendsResponse Delegate that will be set.
+	*/
+	void SetRequestFriendsResponseDelegate(FRequestFriendsResponse OnRequestFriendsResponse)
+	{
+		RequestFriendsResponse = OnRequestFriendsResponse;
+	};
 
 	/**
-	 * @brief Set unfriend response.
-	 *
-	 * @param OnUnfriendResponse Delegate that will be set.
-	 */
-	void SetUnfriendResponseDelegate(FUnfriendResponse OnUnfriendResponse) { UnfriendResponse = OnUnfriendResponse; };
+	* @brief Set unfriend response.
+	*
+	* @param OnUnfriendResponse Delegate that will be set.
+	*/
+	void SetUnfriendResponseDelegate(FUnfriendResponse OnUnfriendResponse)
+	{
+		UnfriendResponse = OnUnfriendResponse;
+	};
 
 	/**
-	 * @brief Set list outgoing request of friend response.
-	 *
-	 * @param OnListOutgoingFriendsResponse Delegate that will be set.
-	 */
-	void SetListOutgoingFriendsResponseDelegate(FListOutgoingFriendsResponse OnListOutgoingFriendsResponse) { ListOutgoingFriendsResponse = OnListOutgoingFriendsResponse; };
+	* @brief Set list outgoing request of friend response.
+	*
+	* @param OnListOutgoingFriendsResponse Delegate that will be set.
+	*/
+	void SetListOutgoingFriendsResponseDelegate(FListOutgoingFriendsResponse OnListOutgoingFriendsResponse)
+	{
+		ListOutgoingFriendsResponse = OnListOutgoingFriendsResponse;
+	};
 
 	/**
-	 * @brief Set cancel request of friend response.
-	 *
-	 * @param OnCancelFriendsResponse Delegate that will be set.
-	 */
-	void SetCancelFriendsResponseDelegate(FCancelFriendsResponse OnCancelFriendsResponse) { CancelFriendsResponse = OnCancelFriendsResponse; };
+	* @brief Set cancel request of friend response.
+	*
+	* @param OnCancelFriendsResponse Delegate that will be set.
+	*/
+	void SetCancelFriendsResponseDelegate(FCancelFriendsResponse OnCancelFriendsResponse)
+	{
+		CancelFriendsResponse = OnCancelFriendsResponse;
+	};
 
 	/**
-	 * @brief Set incoming request of friend response.
-	 *
-	 * @param OnListIncomingFriendsResponse Delegate that will be set.
-	 */
-	void SetListIncomingFriendsResponseDelegate (FListIncomingFriendsResponse OnListIncomingFriendsResponse) { ListIncomingFriendsResponse = OnListIncomingFriendsResponse;  };
+	* @brief Set incoming request of friend response.
+	*
+	* @param OnListIncomingFriendsResponse Delegate that will be set.
+	*/
+	void SetListIncomingFriendsResponseDelegate(FListIncomingFriendsResponse OnListIncomingFriendsResponse)
+	{
+		ListIncomingFriendsResponse = OnListIncomingFriendsResponse;
+	};
 
 	/**
-	 * @brief Set accept friend response.
-	 *
-	 * @param OnAcceptFriendsResponse Delegate that will be set.
-	 */
-	void SetAcceptFriendsResponseDelegate(FAcceptFriendsResponse OnAcceptFriendsResponse) { AcceptFriendsResponse = OnAcceptFriendsResponse; };
+	* @brief Set accept friend response.
+	*
+	* @param OnAcceptFriendsResponse Delegate that will be set.
+	*/
+	void SetAcceptFriendsResponseDelegate(FAcceptFriendsResponse OnAcceptFriendsResponse)
+	{
+		AcceptFriendsResponse = OnAcceptFriendsResponse;
+	};
 
 	/**
-	 * @brief Set reject request for friend response.
-	 *
-	 * @param OnRejectFriendsResponse Delegate that will be set.
-	 */
-	void SetRejectFriendsResponseDelegate(FRejectFriendsResponse OnRejectFriendsResponse) { RejectFriendsResponse = OnRejectFriendsResponse; };
+	* @brief Set reject request for friend response.
+	*
+	* @param OnRejectFriendsResponse Delegate that will be set.
+	*/
+	void SetRejectFriendsResponseDelegate(FRejectFriendsResponse OnRejectFriendsResponse)
+	{
+		RejectFriendsResponse = OnRejectFriendsResponse;
+	};
 
 	/**
-	 * @brief Set load friend list response.
-	 *
-	 * @param OnLoadFriendListResponse Delegate that will be set.
-	 */
-	void SetLoadFriendListResponseDelegate(FLoadFriendListResponse OnLoadFriendListResponse) { LoadFriendListResponse = OnLoadFriendListResponse; };
+	* @brief Set load friend list response.
+	*
+	* @param OnLoadFriendListResponse Delegate that will be set.
+	*/
+	void SetLoadFriendListResponseDelegate(FLoadFriendListResponse OnLoadFriendListResponse)
+	{
+		LoadFriendListResponse = OnLoadFriendListResponse;
+	};
 
 	/**
-	 * @brief Set get friendship status response.
-	 *
-	 * @param OnGetFriendshipStatusResponse Delegate that will be set.
-	 */
-	void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponse OnGetFriendshipStatusResponse) { GetFriendshipStatusResponse = OnGetFriendshipStatusResponse; };
+	* @brief Set get friendship status response.
+	*
+	* @param OnGetFriendshipStatusResponse Delegate that will be set.
+	*/
+	void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponse OnGetFriendshipStatusResponse)
+	{
+		GetFriendshipStatusResponse = OnGetFriendshipStatusResponse;
+	};
 
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor

@@ -29,11 +29,12 @@ namespace Api
 	class Lobby;
 	class GameProfile;
 	class Statistic;
+	class QosManager;
+	class Qos;
 }
 
 namespace GameServerApi
 {
-	class ServerCustomWebServer;
 	class ServerOauth2;
 	class ServerDSM;
 	class ServerStatistic;
@@ -59,7 +60,8 @@ public:
 	static Api::Lobby Lobby;
 	static Api::GameProfile GameProfile;
 	static Api::Statistic Statistic;
-	static GameServerApi::ServerCustomWebServer ServerCustomWebServer;
+	static Api::QosManager QosManager;
+	static Api::Qos Qos;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

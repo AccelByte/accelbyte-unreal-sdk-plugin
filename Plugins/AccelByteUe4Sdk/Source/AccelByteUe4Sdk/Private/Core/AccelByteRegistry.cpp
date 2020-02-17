@@ -15,7 +15,8 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteStatisticApi.h"
-#include "GameServerApi/AccelByteServerCustomWebServerApi.h"
+#include "Api/AccelByteQosManagerApi.h"
+#include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -40,7 +41,8 @@ Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Set
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings);
 Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings);
-GameServerApi::ServerCustomWebServer FRegistry::ServerCustomWebServer;
+Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings);
+Api::Qos FRegistry::Qos;
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);

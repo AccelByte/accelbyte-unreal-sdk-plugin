@@ -8,13 +8,25 @@
 #include "AccelByteDSMModels.generated.h"
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRegisterLocalServerRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterLocalRequest")
+	FString Ip;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterLocalRequest")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterLocalRequest")
+	int32 Port;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsRegisterServerRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
-		FString Pod_name;
+	FString Pod_name;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
-		int32 Port;
+	int32 Port;
 };
 
 USTRUCT(BlueprintType)
@@ -22,19 +34,28 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsShutdownServerRequest
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ShutdownRequest")
-		bool Kill_me;
+	bool Kill_me;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ShutdownRequest")
-		FString Pod_name;
+	FString Pod_name;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ShutdownRequest")
-		FString Session_id;
+	FString Session_id;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDeregisterLocalServerRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DeregisterRequest")
+	FString Name;
+};
+
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUser
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | User")
-		FString User_id;
+	FString User_id;
 };
 
 USTRUCT(BlueprintType)
@@ -42,9 +63,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingParty
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingParty")
-		FString Party_id;
+	FString Party_id;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingParty")
-		TArray<FAccelByteModelsUser> Party_members;
+	TArray<FAccelByteModelsUser> Party_members;
 };
 
 USTRUCT(BlueprintType)
@@ -52,7 +73,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingAlly
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingAlly")
-		TArray<FAccelByteModelsMatchingParty> Matching_parties;
+	TArray<FAccelByteModelsMatchingParty> Matching_parties;
 };
 
 USTRUCT(BlueprintType)
@@ -60,15 +81,29 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingInfoNotif
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-		FString Session_id;
+	FString Session_id;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-		FString Namespace;
+	FString Namespace;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-		FString Game_mode;
+	FString Game_mode;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-		TArray<FAccelByteModelsMatchingAlly> Matching_allies;
+	TArray<FAccelByteModelsMatchingAlly> Matching_allies;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-		FString Pod_name;
+	FString Pod_name;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
+	FString Session_id;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
+	FString Game_mode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
+	TArray<FAccelByteModelsMatchingAlly> Matching_allies;
 };
 
 USTRUCT(BlueprintType)
@@ -76,8 +111,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMMessage
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Message")
-		FString Msg_type;
+	FString Msg_type;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Message")
-		FAccelByteModelsMatchmakingInfoNotif Message;
+	FAccelByteModelsMatchmakingInfoNotif Message;
 };
 
