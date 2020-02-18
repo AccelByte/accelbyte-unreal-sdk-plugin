@@ -16,7 +16,8 @@ $CONFIG_FIELD =
 "GameProfileServerUrl=`"$Env:BASE_URL$Env:GAME_PROFILE_PREFIX`"`r`n" +
 "StatisticServerUrl=`"$Env:BASE_URL$Env:STATISTIC_PREFIX`"`r`n" + 
 "QosManagerServerUrl=`"$Env:BASE_URL$Env:QOS_PREFIX`"`r`n" + 
-"LeaderboardServerUrl=`"$Env:BASE_URL$Env:LEADERBOARD_PREFIX`"`r`n"
+"LeaderboardServerUrl=`"$Env:BASE_URL$Env:LEADERBOARD_PREFIX`"`r`n" +
+"GameTelemetryServerUrl=`"$Env:BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n"
 
 $SERVER_CONFIG_FIELD =
 "[/Script/AccelByteUe4Sdk.AccelByteServerSettings]`r`n" +
