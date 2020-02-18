@@ -47,12 +47,12 @@
 ## Removed
   - CustomWebServer
   - CustomWebServerApi
-    
+
 ## 2.6.1 (2020-02-07)
 ## Fixed
 - Game Client SDK
   - Fix LoginWithOtherPlatform PlatformType
-    
+
 ## 2.6.0 (2020-01-29)
 ## Added
 - Game Client SDK 
