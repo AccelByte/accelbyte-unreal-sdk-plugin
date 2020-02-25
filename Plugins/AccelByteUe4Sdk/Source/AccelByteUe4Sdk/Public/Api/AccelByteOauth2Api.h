@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -90,6 +90,19 @@ public:
 	*/
 	static void GetSessionIdWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
 
+
+	/**
+	* @brief Refresh user session.
+	* he result is FAccelByteModelsOauth2Token.
+	*
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param RefreshId The issued Refresh Id during get user session.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void GetSessionIdWithRefreshId(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	
 	/**
 	* @brief Log user out.
 	* Will make user session id invalid.

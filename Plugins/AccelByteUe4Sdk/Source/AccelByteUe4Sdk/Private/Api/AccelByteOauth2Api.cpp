@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -146,6 +146,36 @@ void Oauth2::GetSessionIdWithPlatformGrant(const FString& ClientId, const FStrin
     FString ContentType     = TEXT("application/x-www-form-urlencoded");
     FString Accept          = TEXT("application/json");
     FString Content         = FString::Printf(TEXT("platform_token=%s"), *PlatformToken);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Oauth2::GetSessionIdWithRefreshId(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
+
+	FString Authorization = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
+	FString Url = FString::Printf(TEXT("%s/v1/sessions/refresh"), *url);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/x-www-form-urlencoded");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("refresh_id=%s"), *RefreshId);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

@@ -54,7 +54,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)], PlatformToken, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)));
+		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
 		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
@@ -88,7 +88,7 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 	Oauth2::GetSessionIdWithPasswordGrant(Settings.ClientId, Settings.ClientSecret, Username, Password, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)));
+		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
 		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
@@ -121,7 +121,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 	Oauth2::GetSessionIdWithDeviceGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)));
+		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
 		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
@@ -164,7 +164,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 
 	Oauth2::GetSessionIdWithAuthorizationCodeGrant(Settings.ClientId, Settings.ClientSecret, AuthorizationCode, Settings.RedirectURI, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result) {
 		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)));
+		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
 		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);

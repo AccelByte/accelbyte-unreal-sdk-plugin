@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -45,7 +45,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	FRegistry::Settings.ClientSecret = "ClientSecret";
 	FRegistry::Settings.Namespace = "game01";
 	FRegistry::Settings.PublisherNamespace = "publisher01";
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 3600.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 3600.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
@@ -147,7 +147,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 //	FRegistry::Settings.Namespace = "game01";
 //	FRegistry::Settings.PublisherNamespace = "publisher01";
 //	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 //	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 //	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 //	auto Ticker = FTicker::GetCoreTicker();
@@ -234,7 +234,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 //	FRegistry::Settings.Namespace = "game01";
 //	FRegistry::Settings.PublisherNamespace = "publisher01";
 //	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 20.0);
+//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 20.0, TEXT("user_refresh_id"));
 //	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 //	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 //	auto Ticker = FTicker::GetCoreTicker();
@@ -273,7 +273,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Disabled.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
 {
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
@@ -331,7 +331,7 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoResponseFor60s_RequestCancelled, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NoResponseFor60s_RequestCancelled", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Parameter)
 {
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
@@ -394,7 +394,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithValidURL_AllCompleted, 
 bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
@@ -448,7 +448,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllComp
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto Ticker = FTicker::GetCoreTicker();
@@ -577,7 +577,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequestsChain_WithValidURLs_AllCompleted
 bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
 
-	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0);
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
 	auto Scheduler = MakeShared<FHttpRetryScheduler>();
 	auto& Ticker = FTicker::GetCoreTicker();
