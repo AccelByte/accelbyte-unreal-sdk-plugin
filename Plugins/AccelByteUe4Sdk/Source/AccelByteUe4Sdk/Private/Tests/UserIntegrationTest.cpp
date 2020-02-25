@@ -107,6 +107,80 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserAutomatedRefreshSessionTest, "AccelByte.Tests.AUser.AutomatedRefreshSession", AutomationFlagMaskUser);
+bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
+	LoginId.ToLowerInline();
+	FString Password = "123SDKTest123";
+	FString DisplayName = "testSDK";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	// set session expired time to 0
+	FString SessionId = FRegistry::Credentials.GetUserSessionId();
+	FString RefreshId = FRegistry::Credentials.GetUserRefreshId();
+	FRegistry::Credentials.SetUserSession(SessionId, 0, RefreshId);
+
+	// wait session to refresh
+	for (int i = 0; i < 3; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+	}
+
+	FString NewSessionId = FRegistry::Credentials.GetUserSessionId();
+	FString NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), GlobalErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
+	check(bLoginSuccessful);
+	check(SessionId != NewSessionId);
+	check(RefreshId != NewRefreshId);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "AccelByte.Tests.AUser.LoginEmail_ThenVerify", AutomationFlagMaskUser);
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {

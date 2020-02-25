@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -34,8 +34,11 @@ public:
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
-	void SetUserSession(const FString& SessionId, double ExpiredTime);
+	void SetUserSession(const FString& SessionId, double ExpiredTime, const FString& RefreshId);
 	void SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace);
+	void PollRefreshToken(double CurrentTime);
+	void ScheduleRefreshToken(double NextRefreshTime);
+	const FString& GetUserRefreshId() const;
 	/**
 	 * @brief Get stored session id.
 	 */
@@ -62,6 +65,11 @@ private:
 	FString UserId;
 	FString UserDisplayName;
 	ESessionState UserSessionState;
+
+	FString UserRefreshId;
+	double UserRefreshTime;
+	double UserExpiredTime;
+	double UserRefreshBackoff;
 };
 
 } // Namespace AccelByte

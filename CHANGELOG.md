@@ -40,6 +40,8 @@
   - Qos & QosM Api
     - GetServerLatencies
     - GetQosServers
+  - Session Management
+    - Automated session refresh
 ## Changed
 - Game Client SDK
   - Lobby

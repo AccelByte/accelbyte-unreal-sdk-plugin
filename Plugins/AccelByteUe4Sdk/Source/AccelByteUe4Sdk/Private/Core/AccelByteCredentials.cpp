@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -24,6 +24,10 @@ Credentials::Credentials()
 	, UserId(TEXT(""))
 	, UserDisplayName(TEXT(""))
 	, UserSessionState(ESessionState::Invalid)
+	, UserRefreshId(TEXT(""))
+	, UserRefreshTime(0.0)
+	, UserExpiredTime(0.0)
+	, UserRefreshBackoff(0.0)
 {
 }
 
@@ -35,6 +39,9 @@ void Credentials::ForgetAll()
 	UserId = FString();
 	UserDisplayName = FString();
 
+	UserRefreshBackoff = 0.0;
+	UserRefreshTime = 0.0;
+	UserExpiredTime = 0.0;
 	UserSessionState = ESessionState::Invalid;
 }
 
@@ -50,10 +57,12 @@ void Credentials::SetClientToken(const FString& AccessToken, double ExpiresIn, c
 	ClientNamespace = Namespace;
 }
 
-void Credentials::SetUserSession(const FString& SessionId, double ExpiredTime)
+void Credentials::SetUserSession(const FString& SessionId, double ExpiredTime, const FString& RefreshId)
 {
 	UserSessionId = SessionId;
 	UserSessionExpire = ExpiredTime;
+	UserRefreshId = RefreshId;
+	UserRefreshTime = ExpiredTime;
 
 	UserSessionState = ESessionState::Valid;
 }
@@ -68,6 +77,11 @@ void Credentials::SetUserLogin(const FString& Id, const FString& DisplayName, co
 const FString& Credentials::GetUserSessionId() const
 {
 	return UserSessionId;
+}
+
+const FString& Credentials::GetUserRefreshId() const
+{
+	return UserRefreshId;
 }
 
 const FString& Credentials::GetUserNamespace() const
@@ -98,6 +112,50 @@ const FString& Credentials::GetClientAccessToken() const
 const FString& Credentials::GetClientNamespace() const
 {
 	return ClientNamespace;
+}
+
+void Credentials::PollRefreshToken(double CurrentTime)
+{
+	switch (UserSessionState)
+	{
+	case ESessionState::Expired:
+	case ESessionState::Valid:
+		if (UserRefreshTime <= CurrentTime)
+		{
+			Oauth2::GetSessionIdWithRefreshId(
+				ClientId, ClientSecret,
+				UserRefreshId,
+				THandler<FOauth2Session>::CreateLambda([this, CurrentTime](const FOauth2Session& Result)
+			{
+				SetUserSession(Result.Session_id, CurrentTime + (Result.Expires_in * FMath::FRandRange(0.7, 0.9)), Result.Refresh_id);
+			}),
+				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				if (UserRefreshBackoff <= 0.0)
+				{
+					UserRefreshBackoff = 10.0;
+				}
+
+				UserRefreshBackoff *= 2.0;
+				UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+				ScheduleRefreshToken(CurrentTime + UserRefreshBackoff);
+
+				UserSessionState = ESessionState::Expired;
+			}));
+
+			UserSessionState = ESessionState::Refreshing;
+		}
+
+		break;
+	case ESessionState::Refreshing:
+	case ESessionState::Invalid:
+		break;
+	}
+}
+
+void Credentials::ScheduleRefreshToken(double RefreshTime)
+{
+	UserRefreshTime = RefreshTime;
 }
 
 } // Namespace AccelByte
