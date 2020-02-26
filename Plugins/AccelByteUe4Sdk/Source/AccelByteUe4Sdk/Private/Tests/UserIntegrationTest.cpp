@@ -454,7 +454,6 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 	bool bUpgradedHeadlessAccountUserIdRemain = false;
 	FString FirstUserId = "";
 	FString SecondUserId = "";
-	FString ThirdUserId = "";
 	double LastTime = 0;
 	FString OldAccessToken = "", RefreshedAccessToken = "";
 
@@ -517,50 +516,32 @@ bool FUpgradeDeviceAccountSuccess::RunTest(const FString & Parameter)
 
 	SecondUserId = FRegistry::Credentials.GetUserId();
 
-#pragma region DeleteUser1
+#pragma region DeleteUser
 
-	bool bDeleteDone1 = false;
-	bool bDeleteSuccessful1 = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
-	DeleteUserById(FirstUserId, FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser"));
+	DeleteUserById(FirstUserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bDeleteSuccessful1 = true;
-		bDeleteDone1 = true;
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
 	}), GlobalErrorHandler);
 
 	FlushHttpRequests();
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	Waiting(bDeleteDone, "Waiting for Deletion...");
 
-#pragma endregion DeleteUser1
-
-#pragma region DeleteUser2
-
-	bool bDeleteDone2 = false;
-	bool bDeleteSuccessful2 = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser2"));
-	DeleteUserById(SecondUserId, FVoidHandler::CreateLambda([&bDeleteDone2, &bDeleteSuccessful2]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bDeleteSuccessful2 = true;
-		bDeleteDone2 = true;
-	}), GlobalErrorHandler);
-
-	FlushHttpRequests();
-	Waiting(bDeleteDone2, "Waiting for Deletion...");
-
-#pragma endregion DeleteUser2
+#pragma endregion DeleteUser
 
 	check(bUpgradeSuccessful);
 	check(bUpgradedHeadlessAccountUserIdRemain);
-	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
+	check(FirstUserId == SecondUserId && FirstUserId != "" && SecondUserId != "");
 	check(bEmailLoginSuccessful);
 	check(bDeviceLoginSuccessful1);
 	check(bDeviceLoginSuccessful2);
 	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
 	check(!OldAccessToken.Equals(RefreshedAccessToken));
-	check(bDeleteSuccessful1);
-	check(bDeleteSuccessful2);
+	check(bDeleteSuccessful);
 	return true;
 }
 
