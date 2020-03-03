@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -19,12 +19,12 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void Waiting(bool& condition, FString text)
+void Waiting(bool& condition, FString Message)
 {
 	while (!condition)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("%s"), *text);
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 }
@@ -407,8 +407,8 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	{
 		EAccelByteItemType::INGAMEITEM,
 		Variables.ExpectedRootItemTitle,
-		EAccelByteEntitlementType::DURABLE,
-		0,
+		EAccelByteEntitlementType::CONSUMABLE,
+		1,
 		0,
 		"",
 		EAccelByteAppType::GAME,//appType
@@ -891,16 +891,27 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 
 void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError)
 {
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 2;
+	AllianceRule.max_number = 2;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 1;
+
+	Matchmaking_Create_Matchmaking_Channel(channel, AllianceRule, OnSuccess, OnError);
+}
+
+void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule , const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError)
+{
 	FMatchmakingCreateRequest RequestBody;
-	RequestBody.description = "1v1 game mode for test";
+	RequestBody.description = channel;
+	RequestBody.find_match_timeout_seconds = 60;
 	RequestBody.game_mode = channel;
-	RequestBody.rule_set.alliance_number = 2;
-	RequestBody.rule_set.symmetric_match = true;
-	RequestBody.rule_set.symmetric_party_number = 1;
+
+	RequestBody.rule_set.alliance = AllianceRule;
 
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
-
+	UE_LOG(LogTemp, Log, TEXT("JSON Content: %s"), *Content);
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *BaseUrl, *FRegistry::Settings.Namespace);
@@ -963,8 +974,9 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content;
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
@@ -1053,25 +1065,6 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void WebServer_Request(const uint16 Port, const FString UrlPath, const FString Action, const FAccelByteModelsDSMMessage ReqBody, const FSimpleDelegate& OnSuccess, const FErrorHandler & OnError)
-{
-	FString BaseUrl = "http://127.0.0.1";
-	FString Url = FString::Printf(TEXT("%s:%d%s"), *BaseUrl, Port, *UrlPath);
-	FString Verb = FString::Printf(TEXT("%s"), *Action);
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Contents;
-	FJsonObjectConverter::UStructToJsonObjectString(ReqBody, Contents);
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetVerb(Verb);
-	Request->SetContentAsString(Contents);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -27,6 +27,7 @@ public:
 	FString CloudStorageServerUrl;
 	FString GameProfileServerUrl;
 	FString StatisticServerUrl;
+	FString QosManagerServerUrl;
 };
 
 } // Namespace AccelByte
@@ -79,6 +80,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString StatisticServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	FString QosManagerServerUrl;
 };
 
 
@@ -124,6 +128,9 @@ public:
 	static FString GetStatisticServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetQosManagerServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -155,5 +162,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetStatisticServerUrl(const FString& StatisticServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetQosManagerServerUrl(const FString& QosManagerServerUrl);
 };
 

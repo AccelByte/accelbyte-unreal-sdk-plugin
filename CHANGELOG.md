@@ -1,5 +1,56 @@
 # Changelog
 
+## 2.7.0 (2020-03-03)
+## Added
+- Game Server SDK
+  - ServerCredentials: stores ClientAccessToken, ClientNamespace, and MatchId
+  - ServerSettings: stores server's settings such as ClientId, ClientSecret, IAM URL, DSM URL, etc.
+  - CustomWebServerApi: to open a WebServer for accept DSM claim request
+  - ServerOauth2Api
+    - LoginWithClientCredentials
+  - ServerDSMApi
+    - RegisterServerToDSM
+    - SendShutdownToDSM
+    - RegisterLocalServerToDSM
+    - DeregisterLocalServerFromDSM
+  - ServerStatisticApi
+    - CreateUserStatItems
+    - IncrementManyUsersStatItems
+    - IncrementUserStatItems
+    - GetAllUserStatItems
+- Game Client SDK 
+  - Statistic
+    - CreateUserStatItems
+    - IncrementUserStatItems
+## Removed
+    - GetUserStatItemsByStatCodes
+    - GetUserStatItemsByTags
+    - BulkAddStatItemValue
+    - BulkAddUserStatItemValue
+    - AddUserStatItemValue
+    
+  - ServerEcommerce
+    - GetUserEntitlementById
+    - GrantUserEntitlements
+    - CreditUserWallet
+- Game Client SDK 
+  - Entitlement
+    - GetUserEntitlementById
+    - ConsumeUserEntitlement
+  - Qos & QosM Api
+    - GetServerLatencies
+    - GetQosServers
+## Changed
+- Game Client SDK
+  - Lobby
+    - SendStartMatchmaking(FString GameMode) -> SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies)
+## Removed
+  - CustomWebServer
+  - CustomWebServerApi
+## Fixed
+- User Integration Test
+  - Fix UpgradeHeadlessDeviceAccount
+
 ## 2.6.1 (2020-02-07)
 ## Fixed
 - Game Client SDK
@@ -10,6 +61,7 @@
 - Game Client SDK 
   - User Api
     - GetUserByOtherPlatformUserId
+
 ## Changed
 - GetUserByEmailAddress -> SearchUser
   - const FString& EmailAddress -> const FString& Query

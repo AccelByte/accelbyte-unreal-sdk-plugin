@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -19,10 +19,10 @@ public:
 	FString Namespace;
 	FString PublisherNamespace;
     FString RedirectURI;
-    FString BaseUrl;
 	FString IamServerUrl;
 	FString DSMServerUrl;
 	FString StatisticServerUrl;
+	FString PlatformServerUrl;
 };
 
 } // Namespace AccelByte
@@ -52,9 +52,6 @@ public:
     UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
     FString RedirectURI;
 
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
-    FString BaseUrl;
-
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString IamServerUrl;
 
@@ -63,6 +60,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString StatisticServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString PlatformServerUrl;
 };
 
 
@@ -96,6 +96,9 @@ public:
 	static FString GetStatisticServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetPlatformServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -109,11 +112,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetIamServerUrl(const FString& IamServerUrl);
-	
+
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetDSMServerUrl(const FString& DSMServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetStatisticServerUrl(const FString& StatisticServerUrl);
-};
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetPlatformServerUrl(const FString& PlatformServerUrl);
+};

@@ -26,6 +26,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "WebSockets",
             "Networking",
             "SSL",
+            "Icmp"
         });
 
         if (Target.bBuildEditor == true)

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #pragma once
@@ -26,7 +26,7 @@ private:
 	const Settings& Settings;
 public:
 	/**
-	* @brief Get list of ownership(s) that belongs to the user.
+	* @brief Get list of user's Entitlement(s).
 	*
 	* @param EntitlementName The name of the entitlement (optional).
 	* @param ItemId Item's id (optional).
@@ -37,7 +37,25 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlement(const FString & EntitlementName, const FString & ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(const FString& EntitlementName, const FString& ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+
+	/**
+	* @brief Get user's Entitlement by the EntitlementId.
+	*
+	* @param EntitlementId The id of the entitlement.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+/**
+	* @brief Consume a use entitlement.
+	*
+	* @param EntitlementId The id of the entitlement.
+	* @param UseCount Number of consumed entitlement.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void ConsumeUserEntitlement(const FString& EntitlementId, const int32& UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Entitlement() = delete;

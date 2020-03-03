@@ -1,20 +1,22 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
+#include "HAL/FileManager.h"
+#include "TestUtilities.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
+#include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteWalletApi.h"
 #include "Api/AccelByteEntitlementApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "Core/AccelByteRegistry.h"
-#include "HAL/FileManager.h"
-#include "Api/AccelByteUserApi.h"
-#include "TestUtilities.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -37,12 +39,13 @@ void FlushHttpRequests();//defined in TestUtilities.cpp
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
+FString SDKCurrencyCode = TEXT("SDKC");
 TMap<FString, FString> LocalizationDescription;
 FCurrencyCreateRequest CurrencyRequest
 {
-	TEXT("SDKC"),
+	SDKCurrencyCode,
 	LocalizationDescription,
-	TEXT("SDKC"),
+	SDKCurrencyCode,
 	EAccelByteItemCurrencyType::VIRTUAL,
 	0,
 	-1,
@@ -75,7 +78,7 @@ const EcommerceExpectedVariable ExpectedVariable{
 	"UE4RootItem",
 	"UE4ChildItem",
 	ArchiveStore,
-	TemporaryStore
+	TemporaryStore,
 };
 
 FString ExpectedRootCategoryPath = ExpectedVariable.ExpectedRootCategoryPath;
@@ -84,6 +87,7 @@ FString ExpectedGrandChildCategoryPath = ExpectedVariable.ExpectedGrandChildCate
 FString ExpectedRootItemTitle = ExpectedVariable.ExpectedRootItemTitle; //"INGAMEITEM", 2 DOGECOIN, 0 Discount
 FString ExpectedChildItemTitle = ExpectedVariable.ExpectedChildItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
 FString ExpectedCurrencyCode = ExpectedVariable.ExpectedCurrency.currencyCode;
+FString ExpectedEntitlementId;
 
 const auto EcommerceErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
@@ -698,6 +702,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	float LastTime = FPlatformTime::Seconds();
 
 #pragma region GetUserOrders
+
 	bool bGetUserOrdersSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserOrders"));
 	FRegistry::Order.GetUserOrders(0, 20, THandler<FAccelByteModelsPagedOrderInfo>::CreateLambda([&](const FAccelByteModelsPagedOrderInfo& Result)
@@ -709,13 +714,13 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetUserOrdersSuccess,"Waiting for get user order...");
 
-#pragma region GetUserOrders
+#pragma endregion GetUserOrders
 
 	check(bGetUserOrdersSuccess);
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E1.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
 bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 {
 	bool bGetWalletSuccess = false;
@@ -733,26 +738,423 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceQueryUserEntitlement, "AccelByte.Tests.Ecommerce.F.QueryUserEntitlementSuccess", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreditUserWallet, "AccelByte.Tests.Ecommerce.E2.CreditUserWallet", AutomationFlagMaskEcommerce);
+bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
+{
+#pragma region GetWalletInfo
+
+	bool bGetWalletSuccess = false;
+	FAccelByteModelsWalletInfo WalletInfo;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
+	FRegistry::Wallet.GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfo, &bGetWalletSuccess](const FAccelByteModelsWalletInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		WalletInfo = Result;
+		bGetWalletSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
+
+#pragma endregion GetWalletInfo
+
+#pragma region ClientLogin
+
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+	{
+		bServerLoginWithClientCredentialsDone = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+#pragma endregion ClientLogin
+
+#pragma region CreditUserWallet
+
+	bool bCreditWalletSuccess = false;
+	bool bBalanceIncrease = false;
+	FAccelByteModelsCreditUserWalletRequest request;
+	request.Amount = 1000;
+	request.Source = EAccelByteCreditUserWalletSource::PURCHASE;
+	request.Reason = TEXT("GameServer Ecommerce CreditUserWallet test.");
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreditUserWallet"));
+	FRegistry::ServerEcommerce.CreditUserWallet(FRegistry::Credentials.GetUserId(), SDKCurrencyCode, request, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfo, &bBalanceIncrease, &request, &bCreditWalletSuccess](const FAccelByteModelsWalletInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bBalanceIncrease = ((WalletInfo.Balance + request.Amount) == Result.Balance);
+		bCreditWalletSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
+
+#pragma endregion CreditUserWallet
+
+	check(bGetWalletSuccess);
+	check(bCreditWalletSuccess);
+	check(bBalanceIncrease);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceEntitlementGrant, "AccelByte.Tests.Ecommerce.F1.EntitlementGrantSuccess", AutomationFlagMaskEcommerce);
+bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
+{
+#pragma region GetItemByCriteria
+
+	FAccelByteModelsItemCriteria ItemCriteria;
+	ItemCriteria.Language = TEXT("en");
+	ItemCriteria.Region = TEXT("US");
+	ItemCriteria.ItemType = EAccelByteItemType::INGAMEITEM;
+	bool bGetItemByCriteriaSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
+	FAccelByteModelsItemPagingSlicedResult Items;
+	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGetItemByCriteriaSuccess = true;
+		Items = Result;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	check(bGetItemByCriteriaSuccess);
+#pragma endregion GetItemByCriteria
+
+#pragma region GrantEntitlement
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+		bClientLoginSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
+	FAccelByteModelsEntitlementGrant GrantedEntitlement;
+	GrantedEntitlement.ItemId = Items.Data[0].ItemId;
+	GrantedEntitlement.ItemNamespace = Items.Data[0].Namespace;
+	GrantedEntitlement.GrantedCode = "123456789";
+	GrantedEntitlement.Quantity = 1;
+	GrantedEntitlement.Source = EAccelByteEntitlementSource::ACHIEVEMENT;
+	GrantedEntitlement.Region = Items.Data[0].Region;
+	GrantedEntitlement.Language = Items.Data[0].Language;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GrantingUserEntitlement"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
+
+	bool bGrantEntitlementSuccess = false;
+	TArray<FAccelByteModelsStackableEntitlementInfo> GrantedEntitlementResult;
+	FRegistry::ServerEcommerce.GrantUserEntitlements(FRegistry::Credentials.GetUserId(), { GrantedEntitlement }, THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>::CreateLambda([&bGrantEntitlementSuccess, &GrantedEntitlementResult](const TArray<FAccelByteModelsStackableEntitlementInfo>& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		GrantedEntitlementResult = Result;
+		bGrantEntitlementSuccess = true;
+		for (auto Entitlement : Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
+		}
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+
+	check(bGrantEntitlementSuccess);
+#pragma endregion GrantEntitlement
+
+#pragma region CheckEntitlementGranted
+	bool bQueryEntitlementSuccess = false;
+	FAccelByteModelsEntitlementPagingSlicedResult UserEntitlement;
+	FRegistry::Entitlement.QueryUserEntitlements("", Items.Data[0].ItemId, 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&bQueryEntitlementSuccess, &UserEntitlement](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		UserEntitlement = Result;
+		bQueryEntitlementSuccess = true;
+	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
+	FlushHttpRequests();
+	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+
+	bool bEntitlementGranted = false;
+	for (auto Entitlement : UserEntitlement.Data)
+	{
+		if (Entitlement.ItemId == GrantedEntitlementResult[0].ItemId && Entitlement.GrantedCode == GrantedEntitlementResult[0].GrantedCode)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Granted Entitlement Found!"));
+			bEntitlementGranted = true;
+			break;
+		}
+	}
+	check(bEntitlementGranted);
+#pragma endregion CheckEntitlementGranted
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceEntitlementGrantInvalid, "AccelByte.Tests.Ecommerce.F2.EntitlementGrantInvalidFailed", AutomationFlagMaskEcommerce);
+bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
+{
+
+#pragma region GrantEntitlement
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+		bClientLoginSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
+	FAccelByteModelsEntitlementGrant GrantedEntitlement;
+	GrantedEntitlement.ItemId = "Invalid";
+	GrantedEntitlement.ItemNamespace = FRegistry::Settings.Namespace;
+	GrantedEntitlement.GrantedCode = "123456789";
+	GrantedEntitlement.Quantity = 1;
+	GrantedEntitlement.Source = EAccelByteEntitlementSource::ACHIEVEMENT;
+	GrantedEntitlement.Region = "US";
+	GrantedEntitlement.Language = "en";
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GrantingUserEntitlement"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
+
+	bool bGrantEntitlementSuccess = false;
+	bool bGrantEntitlementDone = false;
+	FRegistry::ServerEcommerce.GrantUserEntitlements(FRegistry::Credentials.GetUserId(), { GrantedEntitlement }, THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>::CreateLambda([&bGrantEntitlementSuccess, &bGrantEntitlementDone](const TArray<FAccelByteModelsStackableEntitlementInfo>& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGrantEntitlementSuccess = true;
+		bGrantEntitlementDone = true;
+		for (auto Entitlement : Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
+		}
+	}), FErrorHandler::CreateLambda([&bGrantEntitlementDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		if ((ErrorCodes)ErrorCode != ErrorCodes::ItemNotFoundException)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		}
+		else
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+			bGrantEntitlementDone = true;
+		}
+	}));
+	FlushHttpRequests();
+	Waiting(bGrantEntitlementDone, "Waiting for entitlement granted...");
+
+	check(bGrantEntitlementDone);
+	check(!bGrantEntitlementSuccess);
+#pragma endregion GrantEntitlement
+
+#pragma region CheckEntitlementGranted
+	bool bQueryEntitlementSuccess = false;
+	FAccelByteModelsEntitlementPagingSlicedResult UserEntitlement;
+	FRegistry::Entitlement.QueryUserEntitlements("", "Invalid", 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&bQueryEntitlementSuccess, &UserEntitlement](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		UserEntitlement = Result;
+		bQueryEntitlementSuccess = true;
+	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
+	FlushHttpRequests();
+	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+
+	bool bEntitlementGranted = false;
+	for (auto Entitlement : UserEntitlement.Data)
+	{
+		if (Entitlement.ItemId == "Invalid" && Entitlement.GrantedCode == "123456789")
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Granted Entitlement Found!"));
+			bEntitlementGranted = true;
+			break;
+		}
+	}
+	check(!bEntitlementGranted);
+#pragma endregion CheckEntitlementGranted
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceQueryUserEntitlement, "AccelByte.Tests.Ecommerce.F3.QueryUserEntitlementSuccess", AutomationFlagMaskEcommerce);
 bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 {
 	bool bQueryEntitlementSuccess = false;
 	bool bQueryResultTrue = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
-
-	FRegistry::Entitlement.QueryUserEntitlement("", "", 0, 20,
-	THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("QueryUserEntitlementSuccess"));
+	FRegistry::Entitlement.QueryUserEntitlements("", "", 0, 20,
+		THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bQueryEntitlementSuccess = true;
 		bQueryResultTrue = (Result.Data.Num() > 0);
+		ExpectedEntitlementId = Result.Data[0].Id;
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 
 	FlushHttpRequests();
-	Waiting(bQueryEntitlementSuccess,"Waiting for get user entitlement...");
+	Waiting(bQueryEntitlementSuccess, "Waiting for get user entitlement...");
 
 	check(bQueryEntitlementSuccess);
 	check(bQueryResultTrue);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceConsumeUserEntitlement, "AccelByte.Tests.Ecommerce.F4.ConsumeUserEntitlement", AutomationFlagMaskEcommerce);
+bool EcommerceConsumeUserEntitlement::RunTest(const FString& Parameters)
+{
+#pragma region FirstConsumption
+
+	bool bConsumeEntitlement1Success = false;
+	bool bConsumeResult1True = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("FirstConsumeUserEntitlement"));
+	FRegistry::Entitlement.ConsumeUserEntitlement(ExpectedEntitlementId, 1,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&bConsumeResult1True, &bConsumeEntitlement1Success](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bConsumeEntitlement1Success = true;
+		bConsumeResult1True = (Result.Status == EAccelByteEntitlementStatus::CONSUMED);
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+
+#pragma endregion FirstConsumption
+
+#pragma region SecondConsumption
+
+	bool bConsumeEntitlement2Success = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SecondConsumeUserEntitlement"));
+	FRegistry::Entitlement.ConsumeUserEntitlement(ExpectedEntitlementId, 1,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&bConsumeEntitlement2Success](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bConsumeEntitlement2Success = true;
+	}), FErrorHandler::CreateLambda([&bConsumeEntitlement2Success](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bConsumeEntitlement2Success = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+
+#pragma endregion SecondConsumption
+
+	check(bConsumeEntitlement1Success);
+	check(bConsumeResult1True);
+	check(bConsumeEntitlement2Success);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserEntitlementByEntitlementId, "AccelByte.Tests.Ecommerce.F5.GetUserEntitlementSuccess", AutomationFlagMaskEcommerce);
+bool EcommerceGetUserEntitlementByEntitlementId::RunTest(const FString& Parameters)
+{
+	bool bGetEntitlementSuccess = false;
+	bool bGetResultTrue = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
+	FAccelByteModelsEntitlementInfo GetResult;
+	FRegistry::Entitlement.GetUserEntitlementById(ExpectedEntitlementId,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGetEntitlementSuccess = true;
+		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
+		GetResult = Result;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+
+	check(bGetEntitlementSuccess);
+	check(bGetResultTrue);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserEntitlementByEntitlementIdInvalid, "AccelByte.Tests.Ecommerce.F6.GetUserEntitlementInvalid", AutomationFlagMaskEcommerce);
+bool EcommerceGetUserEntitlementByEntitlementIdInvalid::RunTest(const FString& Parameters)
+{
+	bool bGetEntitlementDone = false;
+	bool bGetEntitlementError = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
+	FRegistry::Entitlement.GetUserEntitlementById("Invalid",
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGetEntitlementDone = true;
+	}), FErrorHandler::CreateLambda([&bGetEntitlementError, &bGetEntitlementDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		bGetEntitlementDone = true;
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		if ((ErrorCodes)ErrorCode == ErrorCodes::EntitlementIdNotFoundException)
+		{
+			bGetEntitlementError = true;
+		}
+	}));
+
+	FlushHttpRequests();
+	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
+
+	check(bGetEntitlementError);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceServerGetEntitlementByEntitlementId, "AccelByte.Tests.Ecommerce.F7.ServerGetEntitlementSuccess", AutomationFlagMaskEcommerce);
+bool EcommerceServerGetEntitlementByEntitlementId::RunTest(const FString& Parameters)
+{
+	bool bLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+		bLoginSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+
+	bool bGetEntitlementSuccess = false;
+	bool bGetResultTrue = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
+	FAccelByteModelsEntitlementInfo GetResult;
+	FRegistry::ServerEcommerce.GetUserEntitlementById(ExpectedEntitlementId,
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGetEntitlementSuccess = true;
+		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
+		GetResult = Result;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+
+	check(bGetEntitlementSuccess);
+	check(bGetResultTrue);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceServerGetEntitlementByEntitlementIdInvalid, "AccelByte.Tests.Ecommerce.F8.ServerGetEntitlementInvalid", AutomationFlagMaskEcommerce);
+bool EcommerceServerGetEntitlementByEntitlementIdInvalid::RunTest(const FString& Parameters)
+{
+	bool bLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+		bLoginSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+
+	bool bGetEntitlementDone = false;
+	bool bGetEntitlementError = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
+	FRegistry::ServerEcommerce.GetUserEntitlementById("Invalid",
+		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bGetEntitlementDone = true;
+	}), FErrorHandler::CreateLambda([&bGetEntitlementError, &bGetEntitlementDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		bGetEntitlementDone = true;
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		if ((ErrorCodes)ErrorCode == ErrorCodes::EntitlementIdNotFoundException)
+		{
+			bGetEntitlementError = true;
+		}
+	}));
+
+	FlushHttpRequests();
+	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
+
+	check(bGetEntitlementError);
 	return true;
 }
 
@@ -807,4 +1209,3 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 
 	return bDeleteSuccessful;
 }
-

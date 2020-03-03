@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from Accelbyte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -105,6 +105,19 @@ enum class EAccelByteEntitlementSource : uint8
 	OTHER
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteCreditUserWalletSource : uint8
+{
+	PURCHASE = 0,
+	IAP,
+	PROMOTION,
+	ACHIEVEMENT,
+	REFERRAL_BONUS,
+	REDEEM_CODE,
+	REFUND,
+	OTHER
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -112,7 +125,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemRegionDataItem
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
 		int32 Price;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | RegionData")
 		int32 DiscountPercentage;
@@ -140,7 +153,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemImage
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
 		FString As;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo | Image")
 		FString Caption;
@@ -158,7 +171,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Title;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Description;
@@ -234,7 +247,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Title;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Description;
@@ -348,7 +361,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementItemSnapshot
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo | ItemSnapshot ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo | ItemSnapshot ")
 		FString ItemId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo | ItemSnapshot ")
 		FString AppId;
@@ -400,7 +413,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 		FString Id;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 		FString Namespace;
@@ -454,10 +467,98 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementPagingSlicedResult
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult ")
 		TArray<FAccelByteModelsEntitlementInfo> Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult ")
 		FAccelByteModelsPaging Paging;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsConsumeUserEntitlementRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | ConsumeUserEntitlementRequest")
+		int32 UseCount;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementGrant
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		FString GrantedCode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		FString ItemNamespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		int32 Quantity;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		EAccelByteEntitlementSource Source;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		FString Region;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementGrant")
+		FString Language;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsStackableEntitlementInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		EAccelByteEntitlementClass Clazz;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		EAccelByteEntitlementType Type;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		EAccelByteEntitlementStatus Status;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString AppId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		EAccelByteAppType AppType;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString Sku;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString GrantedCode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString ItemNamespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		int32 UseCount;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		int32 Quantity;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		EAccelByteEntitlementSource Source;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		int32 DistributedQuantity;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FString TargetNamespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | StackableEntitlementInfo")
+		FAccelByteModelsEntitlementItemSnapshot ItemSnapshot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		FString StartDate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		FString EndDate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		bool Stackable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		FDateTime GrantedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		FDateTime CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		FDateTime UpdatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		int32 StackedUseCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | StackableEntitlementInfo ")
+		int32 StackedQuantity;
 };
 
 #pragma endregion EntitlementModelsField
@@ -467,7 +568,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfoPaymentUrl
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | PaymentUrl")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | PaymentUrl")
 		FString PaymentProvider;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | PaymentUrl")
 		FString PaymentUrl;
@@ -483,7 +584,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderCurrencySummary
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | CurrencySummary")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | CurrencySummary")
 		FString CurrencyCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | CurrencySummary")
 		FString CurrencySymbol;
@@ -499,7 +600,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfoTransaction
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | Transaction")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | Transaction")
 		FString TransactionId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo | Transaction")
 		int32 Amount;
@@ -539,7 +640,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
 		FString OrderNo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
 		FString PaymentOrderNo;
@@ -601,7 +702,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPagedOrderInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
 		TArray<FAccelByteModelsOrderInfo> Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderInfo")
 		FAccelByteModelsPaging Paging;
@@ -611,7 +712,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderHistoryInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderHistoryInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderHistoryInfo")
 		FString OrderNo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderHistoryInfo")
 		FString Operator;
@@ -633,7 +734,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsOrderCreate
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
 		FString ItemId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Order | Models | OrderCreate")
 		int32 Quantity;
@@ -659,7 +760,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCategoryInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | CategoryInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | CategoryInfo")
 		FString Namespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | CategoryInfo")
 		FString ParentCategoryPath;
@@ -683,7 +784,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 		FString Id;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 		FString Namespace;
@@ -701,6 +802,18 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 		FDateTime UpdatedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 		EAccelByteItemStatus Status;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditUserWalletRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+		int32 Amount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+		EAccelByteCreditUserWalletSource Source;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+		FString Reason;
 };
 
 #pragma endregion WalletModelsField
