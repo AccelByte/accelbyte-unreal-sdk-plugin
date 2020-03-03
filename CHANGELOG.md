@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+### Added
+- Session Management
+    - Automated session refresh
+
+## 2.7.0 (2020-03-03)
 ## Added
 - Game Server SDK
   - ServerCredentials: stores ClientAccessToken, ClientNamespace, and MatchId
@@ -40,8 +45,6 @@
   - Qos & QosM Api
     - GetServerLatencies
     - GetQosServers
-  - Session Management
-    - Automated session refresh
 ## Changed
 - Game Client SDK
   - Lobby
@@ -49,6 +52,9 @@
 ## Removed
   - CustomWebServer
   - CustomWebServerApi
+## Fixed
+- User Integration Test
+  - Fix UpgradeHeadlessDeviceAccount
 
 ## 2.6.1 (2020-02-07)
 ## Fixed
