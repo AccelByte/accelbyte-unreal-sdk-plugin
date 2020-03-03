@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.7.0 (2020-03-03)
 ## Added
 - Game Server SDK
   - ServerCredentials: stores ClientAccessToken, ClientNamespace, and MatchId
