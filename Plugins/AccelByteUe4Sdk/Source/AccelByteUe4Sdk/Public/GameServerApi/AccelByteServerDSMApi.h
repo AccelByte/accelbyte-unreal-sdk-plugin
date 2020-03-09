@@ -18,6 +18,12 @@ class ServerSettings;
 
 namespace GameServerApi
 {
+enum class EServerType :uint8
+{
+	NONE,
+	CLOUDSERVER,
+	LOCALSERVER
+};
 
 /**
  * @brief DSM API for communicating DS to DSM.
@@ -28,8 +34,6 @@ class ACCELBYTEUE4SDK_API ServerDSM
 public:
 	ServerDSM(const ServerCredentials& Credentials, const ServerSettings& Settings);
 	~ServerDSM();
-	
-public:
 
 	/*
 	 * @brief send register request to DSM
@@ -76,8 +80,9 @@ public:
 	 *
 	 * @param bIsAutomatic true if you want heartbeat triggered automatically, false if you want poll heartbeat manually all the time.
 	 * @param TimeoutSeconds Timeout in seconds when heartbeat automatically triggered.
+	 * @param ErrorRetry Max consecutive heartbeat error, will stop send heartbeat when reach the number.
 	*/
-	void ConfigureHeartBeat(bool bIsAutomatic = true, int TimeoutSeconds = 5);
+	void ConfigureHeartBeat(bool bIsAutomatic = true, int TimeoutSeconds = 5, int ErrorRetry = 5);
 
 	/*
 	 * @brief Poll heartbeat manually. It will raise OnMatchRequest event if DSM send match request data in heartbeat response
@@ -91,6 +96,27 @@ public:
 	*/
 	void SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest> OnMatchRequest);
 
+	/*
+	 * @brief Set handler delegate for OnHeartBeatError event when heartbeat get error in sequence for several times
+	 *
+	 * @param OnHeartBeatError This delegate will be called if heartbeat get error in sequence for several times
+	*/
+	void SetOnHeartBeatErrorDelegate(const FErrorHandler& OnError);
+
+	/*
+	 * @brief This will get the Regional DSM Url based on the smallest latency.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. Will return model FAccelByteModelsDSMClient.
+	 * @param OnError This will be called when the operation failed.
+	*/
+	void GetRegionDSMUrl(const THandler<FAccelByteModelsDSMClient>& OnSuccess, const FErrorHandler& OnError);
+
+	void SetServerName(const FString Name){ ServerName = Name; };
+	void SetServerType(EServerType Type){ ServerType = Type; };
+
+	FString DSMServerUrl;
+	FString DSPubIp;
+
 private:
 	ServerDSM(ServerDSM const&) = delete; // Copy constructor
 	ServerDSM(ServerDSM&&) = delete; // Move constructor
@@ -98,16 +124,26 @@ private:
 	ServerDSM& operator=(ServerDSM &&) = delete; // Move assignment operator
 
 	bool HeartBeatTick(float DeltaTime);
+	void GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
+	void ParseCommandParam();
 
 	FString ServerName = "";
+	FString Provider = "";
+	FString Game_version = "";
+	EServerType ServerType = EServerType::NONE;
 	FHttpRequestCompleteDelegate OnRegisterResponse;
 	FHttpRequestCompleteDelegate OnHeartBeatResponse;
 	THandler<FAccelByteModelsMatchRequest> OnMatchRequest;
 	bool bHeartbeatIsAutomatic = false;
 	int HeartBeatTimeoutSeconds = 0;
+	int HeartBeatErrorRetry = 0;
 	FErrorHandler OnHeartBeatError;
 	FTickerDelegate HeartBeatDelegate;
 	FDelegateHandle HeartBeatDelegateHandle;
+	THandler<TArray<TPair<FString, float>>> GetLatenciesDelegate;
+	THandler<FAccelByteModelsDSMClient> GetServerUrlDelegate;
+	THandler<FAccelByteModelsPubIp> GetPubIpDelegate;
+	int HeartBeatRetryCount = 0;
 };
 
 } // Namespace GameServerApi

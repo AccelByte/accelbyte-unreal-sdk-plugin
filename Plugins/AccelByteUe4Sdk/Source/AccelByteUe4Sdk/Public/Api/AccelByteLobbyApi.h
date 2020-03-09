@@ -20,6 +20,27 @@ class Settings;
 namespace Api
 {
 
+enum class EWebSocketState
+{
+	Closed = 0,
+	Connecting = 1,
+	Connected = 2,
+	Closing = 3,
+	Reconnecting = 4
+};
+
+enum class EWebSocketEvent : uint8
+{
+	None = 0,
+	Connect = 1,
+	Connected = 2,
+	Close = 4,
+	Closed = 8,
+	ConnectionError = 16
+};
+
+ENUM_CLASS_FLAGS(EWebSocketEvent);
+	
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -27,7 +48,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-	Lobby(const Credentials& Credentials, const Settings& Settings);
+	Lobby(const Credentials& Credentials, const Settings& Settings, float PingDelay = 30.f, float InitialBackoffDelay = 1.f, float MaxBackoffDelay = 30.f, float TotalTimeout = 60.f, TSharedPtr<IWebSocket> WebSocket = nullptr);
 	~Lobby();
 private:
 	const Credentials& Credentials;
@@ -765,7 +786,19 @@ private:
     FString GenerateMessageID(FString Prefix = TEXT(""));
     FString LobbyMessageToJson(FString Message);
 
-    FTickerDelegate LobbyTickDelegate;
+	const float LobbyTickPeriod = 0.5;
+	const float PingDelay;
+	const float InitialBackoffDelay;
+	const float MaxBackoffDelay;
+	const float TotalTimeout;
+	float BackoffDelay;
+	float RandomizedBackoffDelay;
+	float TimeSinceLastPing;
+	float TimeSinceLastReconnect;
+	float TimeSinceConnectionLost;
+	EWebSocketState WsState;
+	EWebSocketEvent WsEvents;
+	FTickerDelegate LobbyTickDelegate;
     FDelegateHandle LobbyTickDelegateHandle;
 	TSharedPtr<IWebSocket> WebSocket;
 	FConnectSuccess ConnectSuccess;

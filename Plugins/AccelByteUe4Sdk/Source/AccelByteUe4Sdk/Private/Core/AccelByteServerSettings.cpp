@@ -36,9 +36,9 @@ FString UAccelByteBlueprintsServerSettings::GetIamServerUrl()
 	return FRegistry::ServerSettings.IamServerUrl;
 }
 
-FString UAccelByteBlueprintsServerSettings::GetDSMServerUrl()
+FString UAccelByteBlueprintsServerSettings::GetDSMControllerServerUrl()
 {
-	return FRegistry::ServerSettings.DSMServerUrl;
+	return FRegistry::ServerSettings.DSMControllerServerUrl;
 }
 
 FString UAccelByteBlueprintsServerSettings::GetStatisticServerUrl()
@@ -49,6 +49,11 @@ FString UAccelByteBlueprintsServerSettings::GetStatisticServerUrl()
 FString UAccelByteBlueprintsServerSettings::GetPlatformServerUrl()
 {
 	return FRegistry::ServerSettings.PlatformServerUrl;
+}
+
+FString UAccelByteBlueprintsServerSettings::GetQosManagerServerUrl()
+{
+	return FRegistry::ServerSettings.QosManagerServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
@@ -76,9 +81,9 @@ void UAccelByteBlueprintsServerSettings::SetIamServerUrl(const FString& IamServe
 	FRegistry::ServerSettings.IamServerUrl = IamServerUrl;
 }
 
-void UAccelByteBlueprintsServerSettings::SetDSMServerUrl(const FString& DSMServerUrl)
+void UAccelByteBlueprintsServerSettings::SetDSMControllerServerUrl(const FString& DSMControllerServerUrl)
 {
-	FRegistry::ServerSettings.DSMServerUrl = DSMServerUrl;
+	FRegistry::ServerSettings.DSMControllerServerUrl = DSMControllerServerUrl;
 }
 
 void UAccelByteBlueprintsServerSettings::SetStatisticServerUrl(const FString& StatisticServerUrl)
@@ -89,4 +94,9 @@ void UAccelByteBlueprintsServerSettings::SetStatisticServerUrl(const FString& St
 void UAccelByteBlueprintsServerSettings::SetPlatformServerUrl(const FString& PlatformServerUrl)
 {
 	FRegistry::ServerSettings.PlatformServerUrl = PlatformServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetQosManagerServerUrl(const FString& QosManagerServerUrl)
+{
+	FRegistry::ServerSettings.QosManagerServerUrl = QosManagerServerUrl;
 }
