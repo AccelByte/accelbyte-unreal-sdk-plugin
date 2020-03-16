@@ -4,6 +4,20 @@
 ### Added
 - Session Management
     - Automated session refresh
+- ServerQosManager
+    - GetServerLatencies
+    - GetQosServers
+- ServerDSM
+    - GetRegionDSMUrl
+    - GetPubIp
+
+### Changed
+- Lobby
+    - Fix lobby reconnect backoff retry, reconnect timeout, ping delay
+- ServerDSM
+    - Register Server will check DSMUrl, Provider, and Public Ip first before send request.
+    - Add ErrorRetry param on ConfigureHeartBeat
+    - Will stop sending heartbeat after errorRetry number reached
 
 ## 2.7.0 (2020-03-03)
 ## Added

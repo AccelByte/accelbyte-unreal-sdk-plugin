@@ -29,6 +29,21 @@ void Waiting(bool& condition, FString Message)
 	}
 }
 
+void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, FString Message)
+{
+	double StartTime = FPlatformTime::Seconds();
+	TimeoutSeconds = StartTime + TimeoutSeconds;
+	double LastTickTime = StartTime;
+	
+	while (Condition && !Condition() && (FPlatformTime::Seconds() < TimeoutSeconds))
+	{
+		UE_LOG(LogTemp, Log, TEXT("WaitUntil %s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
+		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
+		LastTickTime = FPlatformTime::Seconds();
+		FPlatformProcess::Sleep(.5f);
+	}
+}
+
 FString GetBaseUrl()
 {
 	const int32 length = 100;
@@ -87,6 +102,65 @@ FString GetAdminAccessToken()
 	FlushHttpRequests();
 
 	return ClientLogin.Access_token;
+}
+
+FString GetSuperUserToken()
+{
+	const int32 length = 100;
+	TCHAR ClientId[length];
+	TCHAR ClientSecret[length];
+	TCHAR UserName[length];
+	TCHAR UserPass[length];
+#if PLATFORM_WINDOWS
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), UserName, length);
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), UserPass, length);
+#elif PLATFORM_LINUX
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), UserName, length);
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), UserPass, length);
+#elif PLATFORM_MAC
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), ClientId, length);
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), ClientSecret, length);
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), UserName, length);
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), UserPass, length);
+#endif
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), ClientId, ClientSecret)));
+	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *BaseUrl);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/x-www-form-urlencoded");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(UserName), *FGenericPlatformHttp::UrlEncode(UserPass));
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	bool bGetTokenSuccess = false;
+	FOauth2Token TokenResult;
+	THandler<FOauth2Token> OnSuccess;
+	OnSuccess.BindLambda([&TokenResult, &bGetTokenSuccess](const FOauth2Token& Result)
+	{
+		TokenResult = Result;
+		bGetTokenSuccess = true;
+	});
+	FErrorHandler OnError;
+	OnError.BindLambda([](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
+	});
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	Waiting(bGetTokenSuccess, "Waiting for get token...");
+	FlushHttpRequests();
+
+	return TokenResult.Access_token;
 }
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
@@ -1070,3 +1144,23 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserToken());
+	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/servers/local/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *podName);
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
