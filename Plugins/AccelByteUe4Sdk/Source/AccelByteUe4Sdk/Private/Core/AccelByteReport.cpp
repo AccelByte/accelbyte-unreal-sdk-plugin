@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -37,13 +37,16 @@ namespace AccelByte
 	{
 		FString LogMessage = "";
 
-		LogMessage += "\nHTTP Response:";
-		LogMessage += "\n---";
-		LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
-		LogMessage += "\nDate: " + GetStandardTime();
-		LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
-		LogMessage += "\n \n" + Response->GetContentAsString();
-		LogMessage += "\n---\n";
+		if (Response.IsValid()) 
+		{
+			LogMessage += "\nHTTP Response:";
+			LogMessage += "\n---";
+			LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
+			LogMessage += "\nDate: " + GetStandardTime();
+			LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
+			LogMessage += "\n \n" + Response->GetContentAsString();
+			LogMessage += "\n---\n";
+		}
 
 		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
 	}

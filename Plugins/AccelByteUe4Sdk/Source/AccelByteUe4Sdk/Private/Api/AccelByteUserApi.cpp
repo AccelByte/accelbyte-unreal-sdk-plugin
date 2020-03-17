@@ -551,10 +551,9 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, con
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	FString PlatformId      = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
-	TCHAR* UrlFormat        = TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s");
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(UrlFormat, *Settings.IamServerUrl, *Settings.Namespace, *PlatformId, *OtherPlatformUserId);
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *PlatformId, *OtherPlatformUserId);
 	FString Verb            = TEXT("GET");
 	FString Accept          = TEXT("application/json");
 

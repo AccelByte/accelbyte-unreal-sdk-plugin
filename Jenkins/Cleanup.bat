@@ -14,3 +14,8 @@ IF EXIST "%WORKSPACE%\artifacts" (
 IF EXIST "%WORKSPACE%\Doxygen" (
     rd /s /q "%WORKSPACE%\Doxygen"
 )
+
+::This directory linux binaries
+IF EXIST "%WORKSPACE%\Plugins\AccelByteUe4Sdk\Binaries\Linux" (
+    rd /s /q "%WORKSPACE%\Plugins\AccelByteUe4Sdk\Binaries\Linux"
+)

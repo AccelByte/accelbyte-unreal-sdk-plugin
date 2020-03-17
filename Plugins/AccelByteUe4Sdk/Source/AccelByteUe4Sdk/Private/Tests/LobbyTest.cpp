@@ -87,7 +87,7 @@ void LobbyConnect(int userCount)
 		{
 			Lobbies[i]->Connect();
 		}
-		FString text = FString::Printf(TEXT("Wait user %d"), i);
+		FString text = FString::Printf(TEXT("LobbyConnect: Wait user %d"), i);
 		while (!Lobbies[i]->IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
@@ -509,8 +509,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool UsersCreationSuccess[TestUserCount];
 	bool UsersLoginSuccess[TestUserCount];
 
-	int i = 0;
-	for (; i < TestUserCount; i++)
+	for (int i = 0; i < TestUserCount; i++)
 	{
 		UsersCreationSuccess[i] = false;
 		UsersLoginSuccess[i] = false;
@@ -619,7 +618,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 0"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 0"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	userResponded[0] = bUsersConnectionSuccess;
@@ -632,7 +631,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	while (!Lobbies[1]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 1"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 1"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	userResponded[1] = bUsersConnectionSuccess;
@@ -658,7 +657,7 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 0"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnectUser: Wait user 0"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -2264,11 +2263,17 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
+		Latencies.Sort(LatenciesPredicate);
 	}), LobbyTestErrorHandler);
 	FlushHttpRequests();
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 	check(bGetServerLatenciesSuccess);
 	check(Latencies.Num() > 0);
+
+	for (int i = 0; i < Latencies.Num(); i++)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Latencies Region: %s %f"), *Latencies[i].Key, Latencies[i].Value);
+	}
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Selected Region: %s"), *Latencies[0].Key);
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0]});

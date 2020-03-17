@@ -40,7 +40,7 @@ void ResetSettings();
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError500Twice_RetryTwice, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError500Twice_RetryTwice", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Parameter)
 {
-	FRegistry::Settings.IamServerUrl = "http://accelbyte.example";
+	FRegistry::Settings.IamServerUrl = "http://got500.accelbyte.example";
 	FRegistry::Settings.ClientId = "ClientID";
 	FRegistry::Settings.ClientSecret = "ClientSecret";
 	FRegistry::Settings.Namespace = "game01";
@@ -51,7 +51,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
-	Ticker.AddTicker(
+	auto TickerDelegate = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -114,7 +114,84 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	check(NumRequestRetry >= 2);
 
 	FRegistry::Credentials.ForgetAll();
+	
+	Ticker.RemoveTicker(TickerDelegate);
+	ResetSettings();
+	return true;
+}
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NetworkError_Retry, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NetworkError_Retry", AutomationFlagMaskHttpRetry);
+bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
+{
+	FRegistry::Settings.IamServerUrl = "http://networkerror.accelbyte.example";
+	FRegistry::Settings.ClientId = "ClientID";
+	FRegistry::Settings.ClientSecret = "ClientSecret";
+	FRegistry::Settings.Namespace = "game01";
+	FRegistry::Settings.PublisherNamespace = "publisher01";
+	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 3600.0, TEXT("user_refresh_id"));
+	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
+	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Ticker = FTicker::GetCoreTicker();
+	double CurrentTime;
+
+	auto TickerDelegate = Ticker.AddTicker(
+		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
+	{
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
+		Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+
+		return true;
+	}),
+		0.2f);
+
+
+	auto Request = FHttpModule::Get().CreateRequest();
+
+	Request->SetURL("http://localhost:11223/connection_refused");
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
+	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
+	bool RequestCompleted = false;
+	int NumRequestRetry = 0;
+
+	//Hijack OnProcessRequestComplete to peek if it's retried or not
+	Request->OnProcessRequestComplete().BindLambda(
+		[&NumRequestRetry, &CurrentTime]
+	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+	{
+		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried"), CurrentTime);
+		NumRequestRetry++;
+	});
+
+	//Official OnProcessRequestComplete
+	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+		[&RequestCompleted, &CurrentTime]
+	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+	{
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed"), CurrentTime);
+		RequestCompleted = true;
+	});
+
+
+	CurrentTime = 10.0;
+	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+
+	while (CurrentTime < 18)
+	{
+		CurrentTime += 0.5;
+		Ticker.Tick(0.5);
+		FPlatformProcess::Sleep(0.5);
+	}
+
+
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
+	check(!RequestCompleted);
+	check(NumRequestRetry >= 2);
+
+	FRegistry::Credentials.ForgetAll();
+
+	Ticker.RemoveTicker(TickerDelegate);
 	ResetSettings();
 	return true;
 }
@@ -279,7 +356,7 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
-	Ticker.AddTicker(
+	auto TickerDelegate = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -323,6 +400,7 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 	check(!Request->GetResponse().IsValid());
 	check(Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError);
 
+	Ticker.RemoveTicker(TickerDelegate);
 	FRegistry::Credentials.ForgetAll();
 
 	return true;
@@ -337,7 +415,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
-	Ticker.AddTicker(
+	auto TickerDelegate = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -385,7 +463,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 	check(Request->GetStatus() == EHttpRequestStatus::Failed);
 
 	FRegistry::Credentials.ForgetAll();
-
+	Ticker.RemoveTicker(TickerDelegate);
 	return true;
 }
 
@@ -400,7 +478,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
-	Ticker.AddTicker(
+	auto TickerDelegate = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -440,6 +518,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 	check(RequestCompleted == 15);
 
 	FRegistry::Credentials.ForgetAll();
+	Ticker.RemoveTicker(TickerDelegate);
 
 	return true;
 }
@@ -454,7 +533,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
-	Ticker.AddTicker(
+	auto TickerDelegate = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -569,6 +648,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	check(RequestSucceeded == 9);
 
 	FRegistry::Credentials.ForgetAll();
+	Ticker.RemoveTicker(TickerDelegate);
 
 	return true;
 }
@@ -593,7 +673,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		Scheduler->ProcessRequest(Request, OnCompleted, CurrentTime);
 	};
 
-	Ticker.AddTicker(
+	auto TickerDelegate1 = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
@@ -603,7 +683,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		}),
 		0.2f);
 
-	Ticker.AddTicker(
+	auto TickerDelegate2 = Ticker.AddTicker(
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Http Module"), CurrentTime);
@@ -673,6 +753,8 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 	check(RequestCompleted == 10)
 
 	FRegistry::Credentials.ForgetAll();
+	Ticker.RemoveTicker(TickerDelegate1);
+	Ticker.RemoveTicker(TickerDelegate2);
 
 	ResetSettings();
 	return true;
