@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.8.0 (2020-03-26)
+### Added
+- Session Management
+    - Automated session refresh
+
 ## 2.7.0 (2020-03-03)
 ## Added
 - Game Server SDK
