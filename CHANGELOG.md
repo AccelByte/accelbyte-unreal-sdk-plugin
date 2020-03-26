@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.8.0 (2020-03-26)
 ### Added
 - Session Management
     - Automated session refresh
