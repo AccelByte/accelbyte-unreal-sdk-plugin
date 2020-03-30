@@ -8,7 +8,7 @@ doDeploy = false
 doTagging = false
 buildCause = env.BUILD_CAUSE
 pushTrigger = env.PUSH_TRIGGER
-manualTrigger = (pushTrigger == null)
+manualTrigger = (pushTrigger == null && env.UPSTREAM_BUILD == null)
 branchName = params.BRANCH_NAME
 grade = "deployment"
 
