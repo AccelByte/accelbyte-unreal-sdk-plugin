@@ -342,6 +342,14 @@ namespace AccelByte
 		OnSuccess.ExecuteIfBound(Response->GetContentAsString());
 	}
 
+	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
+	{
+		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+		FJsonSerializer::Deserialize(Reader, JsonObject);
+		OnSuccess.ExecuteIfBound(*JsonObject.Get());
+	}
+
 	template<typename T>
 	FHttpRequestCompleteDelegate CreateHttpResultHandler(const T& OnSuccess, const FErrorHandler& OnError)
 	{
