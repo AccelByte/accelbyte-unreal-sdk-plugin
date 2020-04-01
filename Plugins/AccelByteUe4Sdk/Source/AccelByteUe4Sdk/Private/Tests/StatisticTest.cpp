@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -104,7 +104,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		bGetStatDone = true;
 	}), FErrorHandler::CreateLambda([&bGetStatDone](int32 ErrorCode, FString ErrorMessage)
 	{
-		if ((ErrorCodes)ErrorCode != ErrorCodes::StatisticNotFoundException)
+		if ((ErrorCodes)ErrorCode != ErrorCodes::StatisticConfigNotFoundException)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		}

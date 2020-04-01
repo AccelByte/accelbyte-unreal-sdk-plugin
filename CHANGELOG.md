@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+### Changed
+- Game Client SDK 
+  - Retry network error request
+### Changed
+- Game Client SDK 
+  - Changed FAccelByteModelsSlot DateAccessed, DateCreated, DateModified from float to FDateTime
+### Fixed
+- Game Client SDK 
+  - Fix Lobby UnbindEvent
+  - Fix Linux compilation error
+  - Fix AccelByteReport response invalid handler
+
 ## 2.8.0 (2020-03-26)
 ### Added
 - Session Management

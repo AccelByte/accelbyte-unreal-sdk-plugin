@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -31,6 +31,7 @@ FHttpRetryScheduler::FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Reque
 	, RequestTime(RequestTime)
 	, NextDelay(NextDelay)
 	, NextRetryTime(RequestTime + NextDelay)
+	, ScheduledRetry(false)
 {
 }
 
@@ -65,16 +66,27 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 			return true;
 		}
 
+        int status = CurrentTask->Request->GetStatus();
+
+		if (CurrentTask->ScheduledRetry)
+		{
+			if (CurrentTime >= CurrentTask->NextRetryTime)
+			{
+				CurrentTask->ScheduledRetry = false;
+				CurrentTask->Request->ProcessRequest();
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		switch (CurrentTask->Request->GetStatus())
 		{
 		case EHttpRequestStatus::Processing:
 			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
 			{
 				CurrentTask->Request->CancelRequest();
-			}
-			else if (CurrentTime >= CurrentTask->NextRetryTime)
-			{
-				CurrentTask->ScheduleNextRetry(CurrentTime);
 			}
 
 			return false;
@@ -85,8 +97,13 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 			case EHttpResponseCodes::BadGateway:
 			case EHttpResponseCodes::ServiceUnavail:
 			case EHttpResponseCodes::GatewayTimeout:
+				if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
+				{
+					CompletedTasks.Add(CurrentTask);
+					return true;
+				}
+
 				CurrentTask->ScheduleNextRetry(CurrentTime);
-				CurrentTask->Request->ProcessRequest();
 
 				return false;
 			case EHttpResponseCodes::Forbidden:
@@ -98,8 +115,17 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 
 				return true;
 			}
-		case EHttpRequestStatus::Failed: //request cancelled
 		case EHttpRequestStatus::Failed_ConnectionError: //network error
+			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
+			{
+				CompletedTasks.Add(CurrentTask);
+				return true;
+			}
+
+			CurrentTask->ScheduleNextRetry(CurrentTime);
+
+			return false;
+		case EHttpRequestStatus::Failed: //request cancelled
 		case EHttpRequestStatus::NotStarted:
 			CompletedTasks.Add(CurrentTask);
 
@@ -133,6 +159,9 @@ void FHttpRetryScheduler::FHttpRetryTask::ScheduleNextRetry(double CurrentTime)
 	{
 		NextRetryTime = RequestTime + FHttpRetryScheduler::TotalTimeout;
 	}
+
+	ScheduledRetry = true;
+
 }
 
 }

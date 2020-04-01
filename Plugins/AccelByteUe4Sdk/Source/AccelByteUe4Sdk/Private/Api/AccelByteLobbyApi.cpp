@@ -435,6 +435,12 @@ namespace Prefix
 		PartyChatNotif.Unbind();
 		FriendStatusNotif.Unbind();
 		ReadyConsentNotif.Unbind();
+		MessageNotif.Unbind();
+		MatchmakingNotif.Unbind();
+		RematchmakingNotif.Unbind();
+		DsNotif.Unbind();
+		AcceptFriendsNotif.Unbind();
+		RequestFriendsNotif.Unbind();
 	}
 
 	void Lobby::OnConnected()

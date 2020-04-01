@@ -1,3 +1,17 @@
+@Library("github.com/AccelByte/jenkins-pipeline-library@master") _
+
+buildByBranch = (currentBuild.getBuildCauses('jenkins.branch.BranchEventCause').size() > 0)
+buildByTimer = (currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').size() > 0)
+buildByUser = (currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').size() > 0)
+version = null
+doDeploy = false
+doTagging = false
+buildCause = env.BUILD_CAUSE
+pushTrigger = env.PUSH_TRIGGER
+manualTrigger = (pushTrigger == null && env.UPSTREAM_BUILD == null)
+branchName = params.BRANCH_NAME
+grade = "deployment"
+
 def FAILED_STAGE = "";
 pipeline {
     agent {
@@ -5,7 +19,38 @@ pipeline {
             label 'master'
         }
     }
+    environment {
+        TEST_LOG = 'AutomationTestLog.log'
+    }
     stages {
+        stage('Preparation') {
+            steps {
+                bitbucketBuildStatus("INPROGRESS", "Bitbucket_Build_AccelByte", "accelbyte")
+                script {
+                    // customer repo will parse customer-related files
+                    if(fileExists('version-customer.json')){
+                        version = readJSON file: "version-customer.json"
+                    }else{
+                        version = readJSON file: "version.json"
+                    }
+                    if(branchName == "master" || env.BRANCH_NAME == "master"){
+                    // manual trigger won't override parameter passed from jenkins dashboard
+                    // webhook trigger will have effect below
+                        if(!manualTrigger){
+                            grade = "production"
+                            if(!buildByTimer) {
+                                doTagging = true
+                                doDeploy = true
+                            }
+                        }
+                    }else{
+                        // same rules for webhook and manual trigger
+                        doTagging = false
+                        doDeploy = false
+                    }
+                }
+            }
+        }
         stage('Cleanup') {
             agent {
                 label "windows-sdk"
@@ -71,7 +116,13 @@ pipeline {
                 label "windows-sdk"
             }
             steps {
-                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
+                script {
+                    if ("${env.USE_PROXY}" == "true") {
+                        powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
+                    } else {
+                        echo 'Proxy is not used'
+                    }
+                }
             }
             post {
                 failure {
@@ -90,9 +141,34 @@ pipeline {
                 bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
             }
             post {
+                always {
+                    archiveArtifacts artifacts: "Saved/Logs/${TEST_LOG}"
+                }
                 failure {
                     script{ 
                         FAILED_STAGE = "Automation Test";
+                        
+                        def file = readFile "${WORKSPACE}/Saved/Logs/${TEST_LOG}"
+                        def errorTests = "" 
+                        def currentTest = ""
+                        def totalTests = "0"
+                        def testExecuted = 0
+                        file.readLines().each { 
+                            if (it.contains("Running Automation:")) {
+                                testExecuted++
+                                currentTest = it.substring(it.indexOf("Running Automation:") + 19)
+                            } else if (it.contains("Error: ...Automation Test Failed")) {
+                                errorTests += currentTest + "\n"
+                            } else if (it.contains("Display: Timeout hit")) {
+                                errorTests += "[TIMEOUT] " + currentTest + "\n"
+                            } else if (it.contains("LogAutomationCommandLine: Display: Found ")) {
+                                n = it.indexOf("LogAutomationCommandLine: Display: Found ") + 41
+                                totalTests = it.substring(n, it.indexOf(" ", n))
+                            }
+                        }
+                        print "Test executed: $testExecuted/$totalTests"
+                        print "===== FAILED TESTS ====="
+                        print errorTests
                     }
                 }
             }
@@ -100,6 +176,9 @@ pipeline {
         stage('Package') {
             agent {
                 label "windows-sdk"
+            }
+            when {
+                expression { return doDeploy }
             }
             steps {
                 bat '%WORKSPACE%\\Jenkins\\Package.bat'
@@ -113,18 +192,16 @@ pipeline {
                 }
             }
         }
-		stage('Archive'){
+        stage('Archive'){
             agent {
                 label "windows-sdk"
             }      
+            when {
+                expression { return doDeploy }
+            }
             steps {
                 script{	
-                    def VERSION = powershell(returnStdout: true, script: '''
-                        $json = Get-Content "$Env:WORKSPACE/version.json" | Out-String | ConvertFrom-Json
-                        $VERSION = $Env:GIT_SHA + "-" + $json.version
-                        Write-Output $VERSION
-                    ''')
-                    VERSION = VERSION.trim()
+                    def VERSION = version
                 }			
                 bat '%WORKSPACE%\\Jenkins\\Archive.bat'
             }
@@ -139,6 +216,9 @@ pipeline {
         stage('Upload Archive'){
             agent {
                 label "windows-sdk"
+            }
+            when {
+                expression { return doDeploy }
             }
             tools {
                 maven "Maven 3.6.1"
@@ -194,16 +274,11 @@ pipeline {
             script{
                 def message = ""
                 message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-                slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
-
-                def turnOff = true       
-                if (turnOff){
-                    node('master'){
-                    sh '''
-                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
-                    '''
-                    }
+                
+                if (grade == "production") {
+                    slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
                 }
+                bitbucketBuildStatus("SUCCESS", "Bitbucket_Build_AccelByte", "accelbyte")
             }
         }
         failure {
@@ -220,15 +295,10 @@ pipeline {
                 echo "gitBranch: ${GIT_BRANCH}"
                 echo "buildURL: ${BUILD_URL}"
 
-                slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
-                def turnOff = true
-                if (turnOff){
-                    node('master'){
-                    sh '''
-                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
-                    '''
-                    }
+                if (grade == "production") {
+                    slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
                 }
+                bitbucketBuildStatus("FAILURE", "Bitbucket_Build_AccelByte", "accelbyte")
             }
         }
     }

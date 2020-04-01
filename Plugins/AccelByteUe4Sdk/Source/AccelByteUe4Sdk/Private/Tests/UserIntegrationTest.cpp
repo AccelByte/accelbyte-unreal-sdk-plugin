@@ -147,15 +147,23 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 	FString RefreshId = FRegistry::Credentials.GetUserRefreshId();
 	FRegistry::Credentials.SetUserSession(SessionId, 0, RefreshId);
 
+	FString NewSessionId = FRegistry::Credentials.GetUserSessionId();
+	FString NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
+
 	// wait session to refresh
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		FPlatformProcess::Sleep(0.5f);
 		FTicker::GetCoreTicker().Tick(0.5f);
-	}
+        
+		NewSessionId = FRegistry::Credentials.GetUserSessionId();
+		NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
 
-	FString NewSessionId = FRegistry::Credentials.GetUserSessionId();
-	FString NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
+		if (SessionId != NewSessionId && RefreshId != NewRefreshId)
+		{
+			break;
+		}
+	}
 
 #pragma region DeleteUserById
 
