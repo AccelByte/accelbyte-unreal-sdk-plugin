@@ -44,6 +44,7 @@ FString UserIds[TestUserCount];
 Credentials UserCreds[TestUserCount];
 TArray<TSharedPtr<Api::User>> LobbyUsers;
 TArray<TSharedPtr<Api::Lobby>> Lobbies;
+TArray<TPair<FString, float>> PreferedLatencies;
 bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bRequestFriendSuccess;
 bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
 bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError;
@@ -573,6 +574,42 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	for (int i = 0; i < TestUserCount; i++)
 	{
 		check(UsersLoginSuccess[i]);
+	}
+
+	TCHAR _preferedDSRegion[1000];
+	_preferedDSRegion[0] = 0;
+#if PLATFORM_WINDOWS
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#elif PLATFORM_LINUX
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#elif PLATFORM_MAC
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#endif
+
+	FString PreferedDSRegion = _preferedDSRegion;
+
+	if (!PreferedDSRegion.IsEmpty()) 
+	{
+		bool bGetServerLatenciesSuccess = false;
+		FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetServerLatenciesSuccess](const TArray<TPair<FString, float>>& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
+			bGetServerLatenciesSuccess = true;
+			PreferedLatencies = Result;
+		}), LobbyTestErrorHandler);
+		FlushHttpRequests();
+		Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
+		check(bGetServerLatenciesSuccess);
+
+		for (int i = 0; i < PreferedLatencies.Num(); i++)
+		{
+			if (PreferedLatencies[i].Key == PreferedDSRegion)
+			{
+				PreferedLatencies[i].Value = 10;
+				PreferedLatencies = { PreferedLatencies[i] };
+				break;
+			}
+		}
 	}
 
 	return true;
@@ -2048,14 +2085,14 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName);
+	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2586,14 +2623,14 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName);
+	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2623,7 +2660,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[2]->SendStartMatchmaking(ChannelName);
+	Lobbies[2]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2930,7 +2967,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 	int matchMakingNotifNum = 0;
 	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobbies 0: Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
 		matchMakingNotifNum++;
 		bMatchmakingNotifSuccess[0] = true;
@@ -2942,7 +2979,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 
 	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobbies 1: Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
 		matchMakingNotifNum++;
 		bMatchmakingNotifSuccess[1] = true;
@@ -3201,7 +3238,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	}
 	for (int i = 0; i < 6; i++)
 	{
-		Lobbies[i]->SendStartMatchmaking(ChannelName);
+		Lobbies[i]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 		Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 		check(!bStartMatchmakingError);
 		bStartMatchmakingSuccess = false;
