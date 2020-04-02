@@ -20,9 +20,10 @@ public:
 	FString PublisherNamespace;
     FString RedirectURI;
 	FString IamServerUrl;
-	FString DSMServerUrl;
+	FString DSMControllerServerUrl;
 	FString StatisticServerUrl;
 	FString PlatformServerUrl;
+	FString QosManagerServerUrl;
 };
 
 } // Namespace AccelByte
@@ -56,13 +57,16 @@ public:
 	FString IamServerUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
-	FString DSMServerUrl;
+	FString DSMControllerServerUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString StatisticServerUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString PlatformServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString QosManagerServerUrl;
 };
 
 
@@ -90,13 +94,16 @@ public:
 	static FString GetIamServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static FString GetDSMServerUrl();
+	static FString GetDSMControllerServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetStatisticServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetPlatformServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetQosManagerServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
@@ -114,11 +121,14 @@ public:
 	static void SetIamServerUrl(const FString& IamServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static void SetDSMServerUrl(const FString& DSMServerUrl);
+	static void SetDSMControllerServerUrl(const FString& DSMControllerServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetStatisticServerUrl(const FString& StatisticServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetPlatformServerUrl(const FString& PlatformServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetQosManagerServerUrl(const FString& PlatformServerUrl);
 };

@@ -24,11 +24,7 @@ class ACCELBYTEUE4SDK_API QosManager
 public:
 	QosManager(const Credentials& Credentials, const Settings& Settings);
 	~QosManager();
-private:
-	const Credentials& Credentials;
-	const Settings& Settings;
 
-public:
 	/**
 	* @brief Get List of Qos Server(s).
 	*
@@ -37,6 +33,9 @@ public:
 	*/
 	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
 private:
+	const Credentials& Credentials;
+	const Settings& Settings;
+
 	QosManager() = delete;
 	QosManager(QosManager const&) = delete;
 	QosManager(QosManager&&) = delete;

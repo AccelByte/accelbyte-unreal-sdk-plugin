@@ -127,9 +127,10 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.PublisherNamespace = GetDefault<UAccelByteServerSettings>()->PublisherNamespace;
 	FRegistry::ServerSettings.RedirectURI = GetDefault<UAccelByteServerSettings>()->RedirectURI;
 	FRegistry::ServerSettings.IamServerUrl = GetDefault<UAccelByteServerSettings>()->IamServerUrl;
-	FRegistry::ServerSettings.DSMServerUrl = GetDefault<UAccelByteServerSettings>()->DSMServerUrl;
+	FRegistry::ServerSettings.DSMControllerServerUrl = GetDefault<UAccelByteServerSettings>()->DSMControllerServerUrl;
 	FRegistry::ServerSettings.StatisticServerUrl = GetDefault<UAccelByteServerSettings>()->StatisticServerUrl;
 	FRegistry::ServerSettings.PlatformServerUrl = GetDefault<UAccelByteServerSettings>()->PlatformServerUrl;
+	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 #endif
 	return true;
