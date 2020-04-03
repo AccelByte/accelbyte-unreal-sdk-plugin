@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -31,7 +31,7 @@ private:
 	const Settings& Settings;
 public:
 	/**
-	 * @brief Get user's profile information. If it doesn't exist, that will be an error.
+	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
@@ -41,6 +41,7 @@ public:
 	/**
 	 * @brief Get other user's public profile information. If it doesn't exist, that will be an error.
 	 *
+	 * @param UserId The id of the user.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPublicUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -57,9 +58,6 @@ public:
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
 	 * 
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
-	 * @param UserId User ID.
 	 * @param ProfileUpdateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
@@ -69,7 +67,7 @@ public:
 	/**
 	 * @brief Update user's current custom attributes profile information. If it doesn't exist, that will be an error.
 	 *
-	 * @param CustomAttributesUpdateRequest Request object which consists custom attributes profile info.
+	 * @param CustomAttributesUpdateRequest Request object which consists custom attributes profile information.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
 	 * @param OnError This will be called when the operation failed.
 	 */
@@ -78,9 +76,6 @@ public:
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
 	 *
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
-	 * @param UserId User ID.
 	 * @param ProfileCreateRequest Request object.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.

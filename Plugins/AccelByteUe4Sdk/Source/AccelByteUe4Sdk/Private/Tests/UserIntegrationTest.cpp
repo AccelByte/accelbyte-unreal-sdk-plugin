@@ -64,15 +64,26 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -111,29 +122,40 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserAutomatedRefreshSessionTest, "AccelByte.Te
 bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString LoginId = "testeraccelbyte+ue4sdk" + FGuid::NewGuid().ToString(EGuidFormats::Digits) + "@game.test";
-	LoginId.ToLowerInline();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
 	FString Password = "123SDKTest123";
-	FString DisplayName = "testSDK";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = true;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(LoginId, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-	FRegistry::User.LoginWithUsername(LoginId, Password, FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
@@ -198,22 +220,33 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	EmailAddress.ToLowerInline();
 	FString Password = "123SDKTest123";
 	const FString Country = "US";
-	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	FRegisterResponse RegisterResult;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&RegisterResult, &bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		RegisterResult = Result;
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::accountRegistration);
 
@@ -272,7 +305,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	check(RegisterResult.DisplayName.Equals(GetDataResult.DisplayName));
 	check(RegisterResult.EmailAddress.Equals(GetDataResult.EmailAddress));
 	check(RegisterResult.UserId.Equals(GetDataResult.UserId));
-
 	return true;
 }
 
@@ -285,20 +317,31 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	EmailAddress.ToLowerInline();
 	FString Password = "1Old_Password1";
 	const FString Country = "US";
-	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -647,9 +690,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //	return true;
 //}
 
-// NOTE:
-// Since we use Steam AppID 480 to do integration tests, LoginWithOtherPlatform() may return 500 response code.
-// It will make test below failed. Please retry your integration tests.
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.AUser.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMaskUser);
 bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 {
@@ -659,29 +699,51 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful1, &bSteamLoginDone1]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone1 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone1 = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bSteamLoginSuccessful1, "Waiting for Login...");
+	Waiting(bSteamLoginDone1, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful1)
+	{
+		return false;
+	}
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful2 = false;
+	bool bSteamLoginDone2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // Second attempt"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful2, &bSteamLoginDone2]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful2 = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone2 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone2](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone2 = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bSteamLoginSuccessful2, "Waiting for Login...");
+	Waiting(bSteamLoginDone2, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful2)
+	{
+		return false;
+	}
 
 	SecondUserId = FRegistry::Credentials.GetUserId();
 
@@ -718,15 +780,26 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful1, &bSteamLoginDone1]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone1 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone1 = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bSteamLoginSuccessful1, "Waiting for Login...");
+	Waiting(bSteamLoginDone1, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful1)
+	{
+		return false;
+	}
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
 
@@ -750,15 +823,26 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful2 = false;
+	bool bSteamLoginDone2 = false; 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // Second Attempt"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful2, &bSteamLoginDone2]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful2 = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone2 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone2](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone2 = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bSteamLoginSuccessful2, "Waiting for Login...");
+	Waiting(bSteamLoginDone2, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful2)
+	{
+		return false;
+	}
 
 	SecondUserId = FRegistry::Credentials.GetUserId();
 
@@ -798,15 +882,26 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	FString OldAccessToken = "", RefreshedAccessToken = "";
 
 	bool bLoginPlatformSuccessful = false;
+	bool bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginPlatformSuccessful = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bLoginPlatformSuccessful, "Waiting for Login...");
+	Waiting(bSteamLoginDone, "Waiting for Login...");
+
+	if (!bLoginPlatformSuccessful)
+	{
+		return false;
+	}
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
 	OldAccessToken = FRegistry::Credentials.GetUserSessionId();
@@ -867,6 +962,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetOtherPublicUserProfileTest, "AccelByte.Test
 bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 {
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
 	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
@@ -884,16 +980,26 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 		DisplayName,
 		Country,
 		DOBString,
-		THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+		THandler<FRegisterResponse>::CreateLambda([&RegisterResponse, &bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 			bRegisterSuccessful = true;
 			RegisterResponse = Result;
+			bRegisterDone = true;
 		}),
-		UserTestErrorHandler);
+		FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+			bRegisterDone = true;
+		}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -1354,15 +1460,26 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
-	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&]()
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful1, &bSteamLoginDone1]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bSteamLoginSuccessful1 = true;
-	}), UserTestErrorHandler);
+		bSteamLoginDone1 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone1 = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bSteamLoginSuccessful1, "Waiting for Login...");
+	Waiting(bSteamLoginDone1, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful1)
+	{
+		return false;
+	}
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
 	FString SteamUserID;
@@ -1429,15 +1546,26 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -1505,15 +1633,26 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
-	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 		bRegisterSuccessful = true;
-	}), UserTestErrorHandler);
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	FlushHttpRequests();
-	Waiting(bRegisterSuccessful, "Waiting for Registered...");
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.10.0 (2020-04-08)
+### Added
+- UserProfile Api
+    - GetCustomAttributes
+    - UpdateCustomAttributes
+### Changed
+- UserProfile Api
+    - UpdateUserProfile success result handler
+- UserProfile Blueprints
+    - UpdateUserProfile success result handler
+
 ## 2.9.0 (2020-04-06)
 ### Added
 - UserProfile Api
