@@ -11,6 +11,7 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Json.h"
 #include "HAL/FileManager.h"
+#include "Misc/Base64.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -154,7 +155,7 @@ FString GetSuperUserToken()
 	FErrorHandler OnError;
 	OnError.BindLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
+		UE_LOG(LogTemp, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
 	});
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	Waiting(bGetTokenSuccess, "Waiting for get token...");

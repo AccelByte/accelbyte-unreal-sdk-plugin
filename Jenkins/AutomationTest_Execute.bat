@@ -1,7 +1,5 @@
 ::Automation test execution
 
-set TEST_LOG="AutomationTestLog.log"
-
 ::::Set an environment variable that will be read by libcurl and libwebsocket 
 if "%USE_PROXY%" == "true" (
     set http_proxy=%PROXY_SERVER%
@@ -34,7 +32,7 @@ If exist %WORKSPACE%\SteamHelper\steamticket.txt (
 )
 
 ::::Run the automation test
-"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=%TEST_LOG%
+"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests %UE4_TESTS%; Quit" -log -log=%TEST_LOG% -provider=baremetal
 
 ::::Obtain the result of the test a.k.a. last exit code
 set EXIT_CODE=%errorlevel%

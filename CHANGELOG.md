@@ -12,6 +12,7 @@
   - Fix Lobby UnbindEvent
   - Fix Linux compilation error
   - Fix AccelByteReport response invalid handler
+  - Fix credentials is not cleared after logout
 
 ## 2.8.0 (2020-03-26)
 ### Added

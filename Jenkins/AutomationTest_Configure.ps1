@@ -25,9 +25,10 @@ $SERVER_CONFIG_FIELD =
 "PublisherNamespace=$Env:PUBLISHER_NAMESPACE`r`n" +
 "RedirectURI=`"http://127.0.0.1`"`r`n" +
 "IamServerUrl=`"$Env:ADMIN_BASE_URL$Env:IAM_PREFIX`"`r`n" +
-"DSMServerUrl=`"$Env:ADMIN_BASE_URL$Env:DSM_PREFIX`"`r`n" +
+"DSMControllerServerUrl=`"$Env:ADMIN_BASE_URL$Env:DSM_PREFIX`"`r`n" +
 "StatisticServerUrl=`"$Env:ADMIN_BASE_URL$Env:STATISTIC_PREFIX`"`r`n" +
-"PlatformServerUrl=`"$Env:ADMIN_BASE_URL$Env:PLATFORM_PREFIX`"`r`n"
+"PlatformServerUrl=`"$Env:ADMIN_BASE_URL$Env:PLATFORM_PREFIX`"`r`n" +
+"QosManagerServerUrl=`"$Env:ADMIN_BASE_URL$Env:QOS_PREFIX`"`r`n"
 
 ##Write the configuration to the targeted config file
 (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\[\/Script\/AccelByteUe4Sdk\.AccelByteSettings\])\r*\n(?:(?!^\[).)*(?=\r*\n)' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8

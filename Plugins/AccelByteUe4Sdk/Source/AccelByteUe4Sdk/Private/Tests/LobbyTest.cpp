@@ -3037,6 +3037,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		bMatchRequestReceived = true;
 	}));
 
+	FRegistry::ServerDSM.ConfigureHeartBeat();
 	bool bRegisterLocalServerToDSMDone = false;
 	FRegistry::ServerDSM.RegisterLocalServerToDSM(
 		LocalIPStr, 
@@ -3084,8 +3085,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
-
-	FRegistry::ServerDSM.PollHeartBeat();
 
 	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
@@ -3714,13 +3713,14 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 	FString UserId = FRegistry::Credentials.GetUserId();
 	Oauth2::Logout(FRegistry::Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([&]() { LogoutDone = true; }), LobbyTestErrorHandler);
 
-	WaitUntil([&]() { return LogoutDone; }, 5);
+	WaitUntil([&]() { return LogoutDone; }, 10);
 
 	WaitUntil([&]() { return bLobbyDisconnected; }, 15);
 
 	check(!Lobby.IsConnected());
 	check(bLobbyDisconnected);
 	check(NumLobbyConnected == 1);
+	check(LogoutDone);
 
 	Lobby.Disconnect();
 

@@ -14,6 +14,7 @@ namespace AccelByte
 		FString LogMessage = "";
 
 		LogMessage += "\nHTTP Request:";
+		LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
 		LogMessage += "\n---";
 		LogMessage += "\n" + Request->GetVerb() + " " + Request->GetURL();
 		LogMessage += "\n";
@@ -40,6 +41,11 @@ namespace AccelByte
 		if (Response.IsValid()) 
 		{
 			LogMessage += "\nHTTP Response:";
+			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
+			if (Request.IsValid())
+			{
+				LogMessage += FString::Printf(TEXT("\nRequest: %s %s"), *Request->GetVerb(), *Request->GetURL());
+			}
 			LogMessage += "\n---";
 			LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
 			LogMessage += "\nDate: " + GetStandardTime();

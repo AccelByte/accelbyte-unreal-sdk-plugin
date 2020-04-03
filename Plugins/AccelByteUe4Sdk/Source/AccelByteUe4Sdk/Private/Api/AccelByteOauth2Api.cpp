@@ -215,7 +215,10 @@ void Oauth2::Logout(const FString& AccessToken, const FVoidHandler& OnSuccess, c
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(FVoidHandler::CreateLambda([OnSuccess]() { 
+		FRegistry::Credentials.ForgetAll();
+		OnSuccess.ExecuteIfBound();
+	}), OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api
