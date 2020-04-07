@@ -44,6 +44,7 @@ FString UserIds[TestUserCount];
 Credentials UserCreds[TestUserCount];
 TArray<TSharedPtr<Api::User>> LobbyUsers;
 TArray<TSharedPtr<Api::Lobby>> Lobbies;
+TArray<TPair<FString, float>> PreferedLatencies;
 bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bRequestFriendSuccess;
 bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
 bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError;
@@ -87,7 +88,7 @@ void LobbyConnect(int userCount)
 		{
 			Lobbies[i]->Connect();
 		}
-		FString text = FString::Printf(TEXT("Wait user %d"), i);
+		FString text = FString::Printf(TEXT("LobbyConnect: Wait user %d"), i);
 		while (!Lobbies[i]->IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
@@ -509,8 +510,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool UsersCreationSuccess[TestUserCount];
 	bool UsersLoginSuccess[TestUserCount];
 
-	int i = 0;
-	for (; i < TestUserCount; i++)
+	for (int i = 0; i < TestUserCount; i++)
 	{
 		UsersCreationSuccess[i] = false;
 		UsersLoginSuccess[i] = false;
@@ -576,6 +576,42 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		check(UsersLoginSuccess[i]);
 	}
 
+	TCHAR _preferedDSRegion[1000];
+	_preferedDSRegion[0] = 0;
+#if PLATFORM_WINDOWS
+	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#elif PLATFORM_LINUX
+	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#elif PLATFORM_MAC
+	FApplePlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
+#endif
+
+	FString PreferedDSRegion = _preferedDSRegion;
+
+	if (!PreferedDSRegion.IsEmpty()) 
+	{
+		bool bGetServerLatenciesSuccess = false;
+		FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetServerLatenciesSuccess](const TArray<TPair<FString, float>>& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
+			bGetServerLatenciesSuccess = true;
+			PreferedLatencies = Result;
+		}), LobbyTestErrorHandler);
+		FlushHttpRequests();
+		Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
+		check(bGetServerLatenciesSuccess);
+
+		for (int i = 0; i < PreferedLatencies.Num(); i++)
+		{
+			if (PreferedLatencies[i].Key == PreferedDSRegion)
+			{
+				PreferedLatencies[i].Value = 10;
+				PreferedLatencies = { PreferedLatencies[i] };
+				break;
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -619,7 +655,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 0"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 0"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	userResponded[0] = bUsersConnectionSuccess;
@@ -632,7 +668,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	while (!Lobbies[1]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 1"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 1"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	userResponded[1] = bUsersConnectionSuccess;
@@ -658,7 +694,7 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait user 0"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnectUser: Wait user 0"));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -2049,14 +2085,14 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName);
+	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2098,6 +2134,202 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
     check(bCreateMatchmakingChannelSuccess);
     check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[0]);
+	check(!bMatchmakingNotifError[1]);
+	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
+	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
+	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
+	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+
+	LobbyDisconnect(2);
+	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_Timeout, "AccelByte.Tests.Lobby.B.MatchmakingStartTimeout", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
+{
+	LobbyConnect(2);
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
+	bool bMatchmakingNotifSuccess[2] = { false };
+	bool bMatchmakingNotifError[2] = { false };
+	bool bMatchmakingNotifTimeout[2] = { false };
+	int matchMakingNotifNum = 0;
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[0] = result;
+		if (result.Status == EAccelByteMatchmakingStatus::Done)
+		{
+			matchMakingNotifNum++;
+		}
+		if (result.Status == EAccelByteMatchmakingStatus::Timeout)
+		{
+			bMatchmakingNotifTimeout[0] = true;
+		}
+		bMatchmakingNotifSuccess[0] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[0] = true;
+		}
+	}));
+
+	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[1] = result;
+		if (result.Status == EAccelByteMatchmakingStatus::Done)
+		{
+			matchMakingNotifNum++;
+		}
+		if (result.Status == EAccelByteMatchmakingStatus::Timeout)
+		{
+			bMatchmakingNotifTimeout[1] = true;
+		}
+		bMatchmakingNotifSuccess[1] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[1] = true;
+		}
+	}));
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+	Lobbies[0]->SendCreatePartyRequest();
+
+	Waiting(bCreatePartySuccess, "Creating Party...");
+
+	check(!bCreatePartyError);
+
+	bGetInfoPartySuccess = false;
+	bGetInfoPartyError = false;
+	Lobbies[1]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		bLeavePartySuccess = false;
+		bLeavePartyError = false;
+		Lobbies[1]->SendLeavePartyRequest();
+
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+	bCreatePartySuccess = false;
+	bCreatePartyError = false;
+	Lobbies[1]->SendCreatePartyRequest();
+
+	Waiting(bCreatePartySuccess, "Creating Party...");
+	check(!bCreatePartyError);
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName);
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	Waiting(bMatchmakingNotifTimeout[0], "Waiting for matchmaking timeout...");
+
+	check(bMatchmakingNotifError[0]);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[0]->SendStartMatchmaking(ChannelName);
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[1]->SendStartMatchmaking(ChannelName);
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < 2)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[1] = readyConsentNotice;
+
+	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
+	check(!bDsNotifError);
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[1]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
 	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
@@ -2264,11 +2496,17 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
+		Latencies.Sort(LatenciesPredicate);
 	}), LobbyTestErrorHandler);
 	FlushHttpRequests();
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 	check(bGetServerLatenciesSuccess);
 	check(Latencies.Num() > 0);
+
+	for (int i = 0; i < Latencies.Num(); i++)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Latencies Region: %s %f"), *Latencies[i].Key, Latencies[i].Value);
+	}
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Selected Region: %s"), *Latencies[0].Key);
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0]});
@@ -2581,14 +2819,14 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName);
+	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2618,7 +2856,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[2]->SendStartMatchmaking(ChannelName);
+	Lobbies[2]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
 	check(!bStartMatchmakingError);
@@ -2799,6 +3037,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		bMatchRequestReceived = true;
 	}));
 
+	FRegistry::ServerDSM.ConfigureHeartBeat();
 	bool bRegisterLocalServerToDSMDone = false;
 	FRegistry::ServerDSM.RegisterLocalServerToDSM(
 		LocalIPStr, 
@@ -2846,8 +3085,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
-
-	FRegistry::ServerDSM.PollHeartBeat();
 
 	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
@@ -2925,7 +3162,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 	int matchMakingNotifNum = 0;
 	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobbies 0: Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
 		matchMakingNotifNum++;
 		bMatchmakingNotifSuccess[0] = true;
@@ -2937,7 +3174,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 
 	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobbies 1: Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
 		matchMakingNotifNum++;
 		bMatchmakingNotifSuccess[1] = true;
@@ -3196,7 +3433,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	}
 	for (int i = 0; i < 6; i++)
 	{
-		Lobbies[i]->SendStartMatchmaking(ChannelName);
+		Lobbies[i]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 		Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 		check(!bStartMatchmakingError);
 		bStartMatchmakingSuccess = false;
@@ -3239,6 +3476,387 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 	LobbyDisconnect(6);
 	resetResponses();
+
+	return true;
+}
+
+enum class WebSocketState
+{
+	None = 0,
+	Connecting = 1,
+	Open = 2,
+	CloseSent = 3,
+	CloseReceived = 4,
+	Closed = 5,
+	Aborted = 6
+};
+
+class WebSocketMock : public IWebSocket
+{
+public:
+	void Connect() override
+	{
+		OnConnectingEvent.ExecuteIfBound();
+	}
+
+	void Close(int32 Code = 1000, const FString& Reason = FString()) override
+	{
+		OnCloseSentEvent.ExecuteIfBound();
+	}
+
+	bool IsConnected() override
+	{
+		return State == WebSocketState::Open;
+	}
+
+	void Send(const FString& Data) override
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Message=%s"), *Data);
+		OnMessageReceivedEvent.Broadcast(Data);
+	}
+
+	void Send(const void* Data, SIZE_T Size, bool bIsBinary = false) override
+	{
+	}
+
+	IWebSocket::FWebSocketConnectedEvent& OnConnected() override
+	{
+		return OnConnectedEvent;
+	}
+
+	IWebSocket::FWebSocketConnectionErrorEvent& OnConnectionError() override
+	{
+		return OnConnectionErrorEvent;
+	}
+
+	IWebSocket::FWebSocketClosedEvent& OnClosed() override
+	{
+		return OnClosedEvent;
+	}
+
+	IWebSocket::FWebSocketMessageEvent& OnMessage() override
+	{
+		return OnMessageEvent;
+	}
+
+	IWebSocket::FWebSocketRawMessageEvent& OnRawMessage() override
+	{
+		return OnRawMessageEvent;
+	}
+
+	FVoidHandler& OnConnecting()
+	{
+		return OnConnectingEvent;
+	}
+
+	FVoidHandler& OnCloseSent()
+	{
+		return OnCloseSentEvent;
+	}
+
+	void Receive(FString Message)
+	{
+		OnMessageEvent.Broadcast(Message);
+	}
+
+	void ReceiveClose(int32 CloseCode, FString Reason)
+	{
+		this->State = WebSocketState::Closed;
+		OnClosedEvent.Broadcast(CloseCode, Reason, true);
+	}
+
+	IWebSocket::FWebSocketMessageEvent& OnMessageReceived()
+	{
+		return OnMessageReceivedEvent;
+	}
+
+	void ReceiveOpen()
+	{
+		this->State = WebSocketState::Open;
+		OnConnectedEvent.Broadcast();
+	}
+
+private:
+	WebSocketState State;
+	IWebSocket::FWebSocketConnectedEvent OnConnectedEvent;
+	IWebSocket::FWebSocketConnectionErrorEvent OnConnectionErrorEvent;
+	IWebSocket::FWebSocketClosedEvent OnClosedEvent;
+	IWebSocket::FWebSocketMessageEvent OnMessageEvent;
+	IWebSocket::FWebSocketRawMessageEvent OnRawMessageEvent;
+	IWebSocket::FWebSocketMessageEvent  OnMessageReceivedEvent;
+	FVoidHandler OnConnectingEvent;
+	FVoidHandler OnCloseSentEvent;
+};
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_GotConnectionClosed_Reconnected, "AccelByte.Tests.Lobby.C.Connected_GotConnectionClosed_Reconnected", AutomationFlagMaskLobby);
+bool LobbyTestConnected_GotConnectionClosed_Reconnected::RunTest(const FString& Parameters)
+{
+	//Arrange
+	AccelByte::Credentials DummyCredentials;
+	AccelByte::Settings DummySettings;
+	TSharedPtr<WebSocketMock> WebSocket = MakeShared<WebSocketMock>();
+	Lobby ALobby(DummyCredentials, DummySettings, 5.f, 1.f, 30.f, 60.f, WebSocket);
+	int NumConnect = 0;
+	WebSocket->OnConnecting().BindLambda([&NumConnect]()
+	{
+		NumConnect++;
+	});
+	ALobby.Connect();
+	WaitUntil([]() { return false; }, 0.5);
+	WebSocket->ReceiveOpen();
+	WaitUntil([]() { return false; }, 0.5);
+
+	//Act
+	WebSocket->ReceiveClose(1000, "abnormal close");
+	WaitUntil([&NumConnect]() { return NumConnect > 1; }, 1.5);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
+
+	WaitUntil([&NumConnect]() { return NumConnect > 2; }, 2.75);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
+
+	WaitUntil([&NumConnect]() { return NumConnect > 3; }, 5.25);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
+
+	WaitUntil([&NumConnect]() { return NumConnect > 4; }, 10.25);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
+
+	WebSocket->ReceiveOpen();
+
+	int NumPing = 0;
+	FDelegateHandle PingHandle = WebSocket->OnMessageReceived().AddLambda([&NumPing](const FString& Message) {
+		if (Message.IsEmpty())
+		{
+			NumPing++;
+		}
+	});
+	WaitUntil([&NumPing]() { return NumPing > 0; }, 10);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumPing=%d"), NumPing);
+
+	//Assert
+	check(NumConnect >= 5);
+	check(NumPing > 0);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout, "AccelByte.Tests.Lobby.C.Reconnected_GotConnectionCLosed_ReconnectTimeout", AutomationFlagMaskLobby);
+bool LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout::RunTest(const FString& Parameters)
+{
+	//Arrange
+	AccelByte::Credentials DummyCredentials;
+	AccelByte::Settings DummySettings;
+	TSharedPtr<WebSocketMock> WebSocket = MakeShared<WebSocketMock>();
+	Lobby ALobby(DummyCredentials, DummySettings, 5.f, 0.5f, 15.f, 30.f, WebSocket);
+	int NumConnect = 0;
+	WebSocket->OnConnecting().BindLambda([&NumConnect]()
+	{
+		NumConnect++;
+	});
+	ALobby.Connect();
+	WaitUntil([]()
+	{
+		return false;
+	}, 0.5);
+	WebSocket->ReceiveOpen();
+	WaitUntil([]()
+	{
+		return false;
+	}, 0.5);
+
+	//Act
+	WebSocket->ReceiveClose(1000, "abnormal close");
+	WaitUntil([](){return false;}, 15);
+	const int firstNumConnect = NumConnect;
+	NumConnect = 0;
+	WebSocket->ReceiveOpen();
+	WebSocket->ReceiveClose(1000, "abnormal close");
+	WaitUntil([](){return false;}, 50);
+	const int secondNumConnect = NumConnect;
+
+	//Assert
+	check(firstNumConnect >= 5);
+	check(secondNumConnect > 4);
+	check(secondNumConnect <= 7);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTokenRevoked_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestTokenRevoked_Disconnected", AutomationFlagMaskLobby);
+bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
+{
+	User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	Lobby& Lobby = FRegistry::Lobby;
+	int NumLobbyConnected = 0;
+	bool bLobbyDisconnected = false;
+	Lobby.SetConnectSuccessDelegate(
+		FSimpleDelegate::CreateLambda([&]()
+		{
+			NumLobbyConnected++;
+		}));
+	Lobby.SetConnectionClosedDelegate(
+		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
+		{
+			bLobbyDisconnected = true;
+		}));
+
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	bool LogoutDone = false;
+	FString UserId = FRegistry::Credentials.GetUserId();
+	Oauth2::Logout(FRegistry::Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([&]() { LogoutDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return LogoutDone; }, 10);
+
+	WaitUntil([&]() { return bLobbyDisconnected; }, 15);
+
+	check(!Lobby.IsConnected());
+	check(bLobbyDisconnected);
+	check(NumLobbyConnected == 1);
+	check(LogoutDone);
+
+	Lobby.Disconnect();
+
+	bool bDeleteDone = false;
+	DeleteUserById(
+		UserId, 
+		FVoidHandler::CreateLambda([&bDeleteDone]()
+		{
+			bDeleteDone = true;
+		}), 
+		LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserDifferentToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserDifferentToken_Disconnected", AutomationFlagMaskLobby);
+bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parameters)
+{
+	AccelByte::Api::User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	int NumLobbyConnected = 0;
+	bool bLobbyDisconnected = false;
+	Lobby.SetConnectSuccessDelegate(
+		FSimpleDelegate::CreateLambda([&]()
+		{
+			NumLobbyConnected++;
+		}));
+	Lobby.SetConnectionClosedDelegate(
+		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
+		{
+			bLobbyDisconnected = true;
+		}));
+
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	User.ForgetAllCredentials();
+
+	bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings };
+
+	OtherLobby.Connect();
+
+	WaitUntil([&]() { return OtherLobby.IsConnected(); }, 5);
+
+	WaitUntil([&]() { return bLobbyDisconnected; }, 15);
+
+	check(!Lobby.IsConnected());
+	check(bLobbyDisconnected);
+	check(OtherLobby.IsConnected());
+	check(NumLobbyConnected == 1);
+
+	Lobby.Disconnect();
+	OtherLobby.Disconnect();
+
+	WaitUntil([&]() { return !OtherLobby.IsConnected() && !Lobby.IsConnected(); }, 15);
+
+	bool bDeleteDone = false;
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	{
+		bDeleteDone = true;
+	}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserSameToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserSameToken_Disconnected", AutomationFlagMaskLobby);
+bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
+{
+	AccelByte::Api::User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	int NumLobbyConnected = 0;
+	bool bLobbyDisconnected = false;
+	Lobby.SetConnectSuccessDelegate(
+		FSimpleDelegate::CreateLambda([&]()
+		{
+			NumLobbyConnected++;
+		}));
+	Lobby.SetConnectionClosedDelegate(
+		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
+		{
+			bLobbyDisconnected = true;
+		}));
+
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings };
+
+	OtherLobby.Connect();
+
+	WaitUntil([&]() { return OtherLobby.IsConnected(); }, 10);
+
+	check(Lobby.IsConnected());
+	check(!bLobbyDisconnected);
+	check(!OtherLobby.IsConnected());
+	check(NumLobbyConnected == 1);
+
+	Lobby.Disconnect();
+	OtherLobby.Disconnect();
+
+	WaitUntil([&]() { return !OtherLobby.IsConnected() && !Lobby.IsConnected(); }, 15);
+
+	bool bDeleteDone = false;
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	{
+		bDeleteDone = true;
+	}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	return true;
 }

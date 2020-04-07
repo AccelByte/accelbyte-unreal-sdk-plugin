@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -14,6 +14,7 @@ namespace AccelByte
 		FString LogMessage = "";
 
 		LogMessage += "\nHTTP Request:";
+		LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
 		LogMessage += "\n---";
 		LogMessage += "\n" + Request->GetVerb() + " " + Request->GetURL();
 		LogMessage += "\n";
@@ -37,13 +38,21 @@ namespace AccelByte
 	{
 		FString LogMessage = "";
 
-		LogMessage += "\nHTTP Response:";
-		LogMessage += "\n---";
-		LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
-		LogMessage += "\nDate: " + GetStandardTime();
-		LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
-		LogMessage += "\n \n" + Response->GetContentAsString();
-		LogMessage += "\n---\n";
+		if (Response.IsValid()) 
+		{
+			LogMessage += "\nHTTP Response:";
+			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
+			if (Request.IsValid())
+			{
+				LogMessage += FString::Printf(TEXT("\nRequest: %s %s"), *Request->GetVerb(), *Request->GetURL());
+			}
+			LogMessage += "\n---";
+			LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
+			LogMessage += "\nDate: " + GetStandardTime();
+			LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
+			LogMessage += "\n \n" + Response->GetContentAsString();
+			LogMessage += "\n---\n";
+		}
 
 		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
 	}

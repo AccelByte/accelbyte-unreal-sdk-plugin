@@ -49,6 +49,13 @@ void FlushHttpRequests();
 
 void Waiting(bool& condition, FString Message);
 
+void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString Message = "");
+
+inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
+{
+	return left.Value < right.Value;
+}
+
 USTRUCT(BlueprintType)
 struct FCurrencyCreateRequest
 {
@@ -469,3 +476,5 @@ void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, c
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
+
+void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);

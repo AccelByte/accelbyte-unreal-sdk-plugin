@@ -1,10 +1,10 @@
 ::Automation test execution
 
-set TEST_LOG="AutomationTestLog.log"
-
 ::::Set an environment variable that will be read by libcurl and libwebsocket 
-set http_proxy=%PROXY_SERVER%
-set https_proxy=http://%PROXY_SERVER%
+if "%USE_PROXY%" == "true" (
+    set http_proxy=%PROXY_SERVER%
+    set https_proxy=http://%PROXY_SERVER%
+)
 
 set STEAM_PATH = %STEAM_PATH%
 set STEAM_ID = %STEAM_ID%
@@ -32,13 +32,10 @@ If exist %WORKSPACE%\SteamHelper\steamticket.txt (
 )
 
 ::::Run the automation test
-"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -unattended -nopause -ExecCmds="Automation RunTests AccelByte.Tests; Quit" -log -log=%TEST_LOG%
+"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests %UE4_TESTS%; Quit" -log -log=%TEST_LOG% -provider=baremetal
 
 ::::Obtain the result of the test a.k.a. last exit code
 set EXIT_CODE=%errorlevel%
-
-::::Print the content of the automation test log file
-type "%WORKSPACE%\Saved\Logs\%TEST_LOG%"
 
 :::::Logout the logged in Steam account
 pushd SteamHelper

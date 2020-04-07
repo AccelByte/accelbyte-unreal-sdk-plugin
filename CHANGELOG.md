@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.9.0 (2020-04-06)
+### Added
+- UserProfile Api
+    - GetCustomAttributes
+    - UpdateCustomAttributes
+- ServerQosManager
+    - GetServerLatencies
+    - GetQosServers
+- ServerDSM
+    - GetRegionDSMUrl
+    - GetPubIp
+### Changed
+- Game Client SDK 
+  - Retry network error request
+  - Changed FAccelByteModelsSlot DateAccessed, DateCreated, DateModified from float to FDateTime
+- Lobby
+    - Fix lobby reconnect backoff retry, reconnect timeout, ping delay
+- ServerDSM
+    - Register Server will check DSMUrl, Provider, and Public Ip first before send request.
+    - Add ErrorRetry param on ConfigureHeartBeat
+    - Will stop sending heartbeat after errorRetry number reached
+### Fixed
+- Game Client SDK 
+  - Fix Lobby UnbindEvent
+  - Fix Linux compilation error
+  - Fix AccelByteReport response invalid handler
+  - Fix credentials is not cleared after logout
+
 ## 2.8.0 (2020-03-26)
 ### Added
 - Session Management

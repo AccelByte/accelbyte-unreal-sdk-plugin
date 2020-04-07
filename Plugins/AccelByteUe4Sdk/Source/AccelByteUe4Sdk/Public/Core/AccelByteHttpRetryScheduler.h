@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -58,6 +58,7 @@ private:
 		const double RequestTime;
 		float NextDelay;
 		double NextRetryTime;
+		bool ScheduledRetry;
 
 		FHttpRetryTask(const FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay);
 		void ScheduleNextRetry(double CurrentTime);

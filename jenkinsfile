@@ -1,189 +1,252 @@
-def FAILED_STAGE = "";
+@Library("github.com/AccelByte/jenkins-pipeline-library@master") _
+
+buildByBranch = (currentBuild.getBuildCauses('jenkins.branch.BranchEventCause').size() > 0)
+buildByTimer = (currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').size() > 0)
+buildByUser = (currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').size() > 0)
+version = null
+doDeploy = false
+doTagging = false
+buildCause = env.BUILD_CAUSE
+pushTrigger = env.PUSH_TRIGGER
+manualTrigger = (pushTrigger == null && env.UPSTREAM_BUILD == null)
+branchName = params.BRANCH_NAME
+grade = "deployment"
+
+FAILED_STAGE = "";
+GIT_BRANCH = env.GIT_BRANCH;
+env.UE4_TESTS = params.UE4_TESTS == null ? "AccelByte.Tests" : params.UE4_TESTS;
 pipeline {
-    agent {
-        node {
-            label 'master'
-        }
+    agent none
+    environment {
+        TEST_LOG = 'AutomationTestLog.log'
+        POD_NAME = "ue4sdktest-${env.BUILD_NUMBER}"
     }
     stages {
-        stage('Cleanup') {
+        stage('Preparation') {
             agent {
-                label "windows-sdk"
+                label 'master'
             }
             steps {
-                bat '%WORKSPACE%\\Jenkins\\Cleanup.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Cleanup";
+                bitbucketBuildStatus("INPROGRESS", "Bitbucket_Build_AccelByte", "accelbyte")
+                script {
+                    GIT_BRANCH = env.GIT_BRANCH
+                    // customer repo will parse customer-related files
+                    if(fileExists('version-customer.json')){
+                        version = readJSON file: "version-customer.json"
+                    }else{
+                        version = readJSON file: "version.json"
                     }
-                }
-            }       
-        }    
-		stage('Generate Project Solution') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Generate Project Solution";
-                    }
-                }
-            }
-        }
-        stage('Build Windows') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\BuildWindows.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Build Windows";
+                    if(branchName == "master" || env.BRANCH_NAME == "master"){
+                    // manual trigger won't override parameter passed from jenkins dashboard
+                    // webhook trigger will have effect below
+                        if(!manualTrigger){
+                            grade = "production"
+                            if(!buildByTimer) {
+                                doTagging = true
+                                doDeploy = true
+                            }
+                        }
+                    }else{
+                        // same rules for webhook and manual trigger
+                        doTagging = false
+                        doDeploy = false
                     }
                 }
             }
         }
-        stage('Build Linux') {
+        stage('Build and Deploy') {
             agent {
                 label "windows-sdk"
             }
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\BuildLinux.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Build Linux";
+            stages {
+                stage('Cleanup') {
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\Cleanup.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Cleanup";
+                            }
+                        }
+                    }       
+                }    
+                stage('Generate Project Solution') {
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Generate Project Solution";
+                            }
+                        }
                     }
                 }
-            }       
-        }
-        stage('ProxySetup') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "ProxySetup";
+                stage('Build Windows') {
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\BuildWindows.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Build Windows";
+                            }
+                        }
                     }
                 }
-            }
-        }
-        stage('Automation Test') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
-                bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Automation Test";
+                stage('Build Linux') {
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\BuildLinux.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Build Linux";
+                            }
+                        }
+                    }       
+                }
+                stage('ProxySetup') {
+                    steps {
+                        script {
+                            if ("${env.USE_PROXY}" == "true") {
+                                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
+                            } else {
+                                echo 'Proxy is not used'
+                            }
+                        }
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "ProxySetup";
+                            }
+                        }
                     }
                 }
-            }
-        }    
-        stage('Package') {
-            agent {
-                label "windows-sdk"
-            }
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\Package.bat'
-                bat '%WORKSPACE%\\Jenkins\\Package_Plugin.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Package";
+                stage('Automation Test') {
+                    steps {
+                        powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
+                        bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: "Saved/Logs/${TEST_LOG}"
+                        }
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Automation Test";
+                                
+                                def file = readFile "${WORKSPACE}/Saved/Logs/${TEST_LOG}"
+                                def errorTests = "" 
+                                def currentTest = ""
+                                def totalTests = "0"
+                                def testExecuted = 0
+                                file.readLines().each { 
+                                    if (it.contains("Running Automation:")) {
+                                        testExecuted++
+                                        currentTest = it.substring(it.indexOf("Running Automation:") + 19)
+                                    } else if (it.contains("Error: ...Automation Test Failed")) {
+                                        errorTests += currentTest + "\n"
+                                    } else if (it.contains("Display: Timeout hit")) {
+                                        errorTests += "[TIMEOUT] " + currentTest + "\n"
+                                    } else if (it.contains("LogAutomationCommandLine: Display: Found ")) {
+                                        n = it.indexOf("LogAutomationCommandLine: Display: Found ") + 41
+                                        totalTests = it.substring(n, it.indexOf(" ", n))
+                                    }
+                                }
+                                print "Test executed: $testExecuted/$totalTests"
+                                print "===== FAILED TESTS ====="
+                                print errorTests
+                            }
+                        }
+                    }
+                }    
+                stage('Package') {
+                    when {
+                        expression { return doDeploy }
+                    }
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\Package.bat'
+                        bat '%WORKSPACE%\\Jenkins\\Package_Plugin.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Package";
+                            }
+                        }
                     }
                 }
-            }
-        }
-		stage('Archive'){
-            agent {
-                label "windows-sdk"
-            }      
-            steps {
-                script{	
-                    def VERSION = powershell(returnStdout: true, script: '''
-                        $json = Get-Content "$Env:WORKSPACE/version.json" | Out-String | ConvertFrom-Json
-                        $VERSION = $Env:GIT_SHA + "-" + $json.version
-                        Write-Output $VERSION
-                    ''')
-                    VERSION = VERSION.trim()
-                }			
-                bat '%WORKSPACE%\\Jenkins\\Archive.bat'
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Archive";
+                stage('Archive'){
+                    when {
+                        expression { return doDeploy }
+                    }
+                    steps {
+                        script{	
+                            def VERSION = version
+                        }			
+                        bat '%WORKSPACE%\\Jenkins\\Archive.bat'
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Archive";
+                            }
+                        }
                     }
                 }
-            }
-        }
-        stage('Upload Archive'){
-            agent {
-                label "windows-sdk"
-            }
-            tools {
-                maven "Maven 3.6.1"
-            }
+                stage('Upload Archive'){
+                    when {
+                        expression { return doDeploy }
+                    }
+                    tools {
+                        maven "Maven 3.6.1"
+                    }
 
-            environment {
-            NEXUS_VERSION = "nexus3"
-            NEXUS_PROTOCOL = "https"
-            NEXUS_URL = "nexus.accelbyte.net"
-            NEXUS_REPOSITORY = "justice-ue4-repository"
-            NEXUS_CREDENTIAL_ID = "nexus-sdk"
-            NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
-            GIT_PATH = "${env.GIT_PATH}"      
-            GIT_SHA = "${env.GIT_COMMIT}"       
-            BUILD_NUMBER = "${env.BUILD_NUMBER}"
-            WORKSPACE = "${env.WORKSPACE}"
-            }
-            
-            steps {
-                bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
-                script{
-                    def PACKAGE = "${env.WORKSPACE}/artifacts/AccelByteUe4SdkPackage-${VERSION}.7z"
-                    nexusArtifactUploader(
-                        nexusVersion: NEXUS_VERSION,
-                        protocol: NEXUS_PROTOCOL,
-                        nexusUrl: NEXUS_URL,
-                        groupId: NEXUS_GROUP_ID,
-                        version: VERSION,
-                        repository: NEXUS_REPOSITORY,
-                        credentialsId: NEXUS_CREDENTIAL_ID,
-                        artifacts: [
-                            [
-                                artifactId: "sdk-ue4",
-                                classifier: '',
-                                file: PACKAGE,
-                                type: "7z"
-                            ]
-                        ]
-                    );
-                }
-            }
-            post {
-                failure {
-                    script{ 
-                        FAILED_STAGE = "Upload Archive";
+                    environment {
+                    NEXUS_VERSION = "nexus3"
+                    NEXUS_PROTOCOL = "https"
+                    NEXUS_URL = "nexus.accelbyte.net"
+                    NEXUS_REPOSITORY = "justice-ue4-repository"
+                    NEXUS_CREDENTIAL_ID = "nexus-sdk"
+                    NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
+                    GIT_PATH = "${env.GIT_PATH}"      
+                    GIT_SHA = "${env.GIT_COMMIT}"       
+                    BUILD_NUMBER = "${env.BUILD_NUMBER}"
+                    WORKSPACE = "${env.WORKSPACE}"
+                    }
+                    
+                    steps {
+                        bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
+                        script{
+                            def PACKAGE = "${env.WORKSPACE}/artifacts/AccelByteUe4SdkPackage-${VERSION}.7z"
+                            nexusArtifactUploader(
+                                nexusVersion: NEXUS_VERSION,
+                                protocol: NEXUS_PROTOCOL,
+                                nexusUrl: NEXUS_URL,
+                                groupId: NEXUS_GROUP_ID,
+                                version: VERSION,
+                                repository: NEXUS_REPOSITORY,
+                                credentialsId: NEXUS_CREDENTIAL_ID,
+                                artifacts: [
+                                    [
+                                        artifactId: "sdk-ue4",
+                                        classifier: '',
+                                        file: PACKAGE,
+                                        type: "7z"
+                                    ]
+                                ]
+                            );
+                        }
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Upload Archive";
+                            }
+                        }
                     }
                 }
             }
@@ -191,42 +254,33 @@ pipeline {
     }
     post {
         success {
-            script{
-                def message = ""
-                message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-                slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
-
-                def turnOff = true       
-                if (turnOff){
-                    node('master'){
-                    sh '''
-                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
-                    '''
+            node('master') {
+                script{
+                    def message = ""
+                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+                    
+                    if (grade == "production") {
+                        slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
                     }
+                    bitbucketBuildStatus("SUCCESS", "Bitbucket_Build_AccelByte", "accelbyte")
                 }
             }
         }
         failure {
-            script{
-                def jobName = "${JOB_NAME}"
-                def buildNumber = "${BUILD_NUMBER}"
-                def gitBranch = "${GIT_BRANCH}"
-                def buildURL = "${BUILD_URL}"
-                def message = ""
-                message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()        
+            node('master') {
+                script{
+                    bitbucketBuildStatus("FAILURE", "Bitbucket_Build_AccelByte", "accelbyte")
 
-                echo "jobName: ${JOB_NAME}"
-                echo "buildNumber: ${BUILD_NUMBER}"
-                echo "gitBranch: ${GIT_BRANCH}"
-                echo "buildURL: ${BUILD_URL}"
+                    def message = ""
+                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()        
 
-                slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
-                def turnOff = true
-                if (turnOff){
-                    node('master'){
-                    sh '''
-                    aws ec2 stop-instances --instance-ids i-${SDK_INSTANCE_ID} 
-                    '''
+                    echo "jobName: ${JOB_NAME}"
+                    echo "buildNumber: ${BUILD_NUMBER}"
+                    echo "gitBranch: ${GIT_BRANCH}"
+                    echo "buildURL: ${BUILD_URL}"
+
+                    if (grade == "production") {
+                        slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
                     }
                 }
             }
