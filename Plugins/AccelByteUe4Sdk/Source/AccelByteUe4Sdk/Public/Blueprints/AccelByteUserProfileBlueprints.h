@@ -1,4 +1,4 @@
-// Copyright (c) 2018 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -21,7 +21,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
 	static void GetUserProfile(const FGetUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
-	DECLARE_DYNAMIC_DELEGATE(FUpdateUserProfileSuccess);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateUserProfileSuccess, const FAccelByteModelsUserProfileInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | UserProfile | Api")
 	static void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FUpdateUserProfileSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 

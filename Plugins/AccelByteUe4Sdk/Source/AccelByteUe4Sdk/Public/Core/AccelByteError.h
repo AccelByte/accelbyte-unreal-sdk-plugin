@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -340,6 +340,14 @@ namespace AccelByte
 	inline void HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound(Response->GetContentAsString());
+	}
+
+	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
+	{
+		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+		FJsonSerializer::Deserialize(Reader, JsonObject);
+		OnSuccess.ExecuteIfBound(*JsonObject.Get());
 	}
 
 	template<typename T>

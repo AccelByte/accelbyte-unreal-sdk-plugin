@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -31,41 +31,53 @@ private:
 	const Settings& Settings;
 public:
 	/**
-	 * @brief Get user's profile information. If it doesn't exist, that will be an error.
+	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
-;
-    /**
-     * @brief Get user's profile information. If it doesn't exist, that will be an error.
-     *
-     * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
-     * @param OnError This will be called when the operation failed.
-     */
-    void GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get other user's public profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param UserId The id of the user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPublicUserProfileInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
 	 * 
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
-	 * @param UserId User ID.
 	 * @param ProfileUpdateRequest Request object.
-	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-    void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Update user's current custom attributes profile information. If it doesn't exist, that will be an error.
+	 *
+	 * @param CustomAttributesUpdateRequest Request object which consists custom attributes profile information.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateCustomAttributes(const FJsonObject& CustomAttributesUpdateRequest, const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Create complete player profile. If it already exist, that will be an error.
 	 *
-	 * @param AccessToken Access token.
-	 * @param Namespace Target.
-	 * @param UserId User ID.
 	 * @param ProfileCreateRequest Request object.
-	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserCreateResponse.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);

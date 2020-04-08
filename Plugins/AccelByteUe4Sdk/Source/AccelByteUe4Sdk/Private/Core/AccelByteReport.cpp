@@ -13,23 +13,26 @@ namespace AccelByte
 	{
 		FString LogMessage = "";
 
-		LogMessage += "\nHTTP Request:";
-		LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
-		LogMessage += "\n---";
-		LogMessage += "\n" + Request->GetVerb() + " " + Request->GetURL();
-		LogMessage += "\n";
-		for (auto a : Request->GetAllHeaders())
+		if (Request.IsValid())
 		{
-			LogMessage += a + "\n";
+			LogMessage += "\nHTTP Request:";
+			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
+			LogMessage += "\n---";
+			LogMessage += "\n" + Request->GetVerb() + " " + Request->GetURL();
+			LogMessage += "\n";
+			for (auto a : Request->GetAllHeaders())
+			{
+				LogMessage += a + "\n";
+			}
+			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
+			LogMessage += "\n\n";
+			for (auto a : Request->GetContent())
+			{
+				LogMessage += static_cast<char>(a);
+			}
+			LogMessage += "\n---";
+			LogMessage += "\n";
 		}
-		LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
-		LogMessage += "\n\n";
-		for (auto a : Request->GetContent())
-		{
-			LogMessage += static_cast<char>(a);
-		}
-		LogMessage += "\n---";
-		LogMessage += "\n";
 		
 		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
 	}
@@ -38,7 +41,7 @@ namespace AccelByte
 	{
 		FString LogMessage = "";
 
-		if (Response.IsValid()) 
+		if (Response.IsValid())
 		{
 			LogMessage += "\nHTTP Response:";
 			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
