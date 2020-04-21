@@ -770,6 +770,15 @@ public:
 		GetFriendshipStatusResponse = OnGetFriendshipStatusResponse;
 	};
 
+	/*
+	* @brief Bulk add friend(s), don't need any confirmation from the player.
+	*
+	* @param UserIds the list of UserId you want to make friend with.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	*/
+	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError);
+
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
