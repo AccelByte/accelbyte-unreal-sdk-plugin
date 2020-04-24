@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.11.0 (2020-04-29)
+### Added
+- Leaderboard Api
+
 ## 2.10.0 (2020-04-08)
 ### Added
 - UserProfile Api

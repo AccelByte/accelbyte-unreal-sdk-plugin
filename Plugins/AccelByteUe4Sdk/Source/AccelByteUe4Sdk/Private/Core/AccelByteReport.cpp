@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteReport.h"
+#include "Runtime/Launch/Resources/Version.h" 
 
 DEFINE_LOG_CATEGORY(AccelByteReportLog);
 
@@ -24,7 +25,10 @@ namespace AccelByte
 			{
 				LogMessage += a + "\n";
 			}
+//INTENTIONAL: Request->GetContent() && Request->GetContentLength() could throw an error if it doesn't have content
+#if ENGINE_MINOR_VERSION != 22 
 			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
+
 			LogMessage += "\n\n";
 			for (auto a : Request->GetContent())
 			{
@@ -32,6 +36,7 @@ namespace AccelByte
 			}
 			LogMessage += "\n---";
 			LogMessage += "\n";
+#endif
 		}
 		
 		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);

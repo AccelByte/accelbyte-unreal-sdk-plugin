@@ -113,6 +113,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.GameProfileServerUrl = GetDefault<UAccelByteSettings>()->GameProfileServerUrl;
 	FRegistry::Settings.StatisticServerUrl = GetDefault<UAccelByteSettings>()->StatisticServerUrl;
 	FRegistry::Settings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
+	FRegistry::Settings.LeaderboardServerUrl = GetDefault<UAccelByteSettings>()->LeaderboardServerUrl;
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
@@ -131,6 +132,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.StatisticServerUrl = GetDefault<UAccelByteServerSettings>()->StatisticServerUrl;
 	FRegistry::ServerSettings.PlatformServerUrl = GetDefault<UAccelByteServerSettings>()->PlatformServerUrl;
 	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
+	FRegistry::ServerSettings.LeaderboardServerUrl = GetDefault<UAccelByteSettings>()->LeaderboardServerUrl;
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 #endif
 	return true;

@@ -24,6 +24,7 @@ public:
 	FString StatisticServerUrl;
 	FString PlatformServerUrl;
 	FString QosManagerServerUrl;
+	FString LeaderboardServerUrl;
 };
 
 } // Namespace AccelByte
@@ -67,6 +68,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString QosManagerServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString LeaderboardServerUrl;
 };
 
 
@@ -106,6 +110,9 @@ public:
 	static FString GetQosManagerServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetLeaderboardServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -131,4 +138,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetQosManagerServerUrl(const FString& PlatformServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetLeaderboardServerUrl(const FString& LeaderboardServerUrl);
 };
