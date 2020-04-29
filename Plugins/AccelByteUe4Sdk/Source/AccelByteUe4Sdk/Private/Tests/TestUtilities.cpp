@@ -73,8 +73,13 @@ FString GetPublisherNamespace()
 	return FString::Printf(TEXT("%s"), Namespace);
 }
 
+FString AdminAccessTokenCache;
 FString GetAdminAccessToken()
 {
+	if (!AdminAccessTokenCache.IsEmpty())
+	{
+		return AdminAccessTokenCache;
+	}
 	const int32 length = 100;
 	TCHAR ClientId[length];
 	TCHAR ClientSecret[length];
@@ -102,11 +107,17 @@ FString GetAdminAccessToken()
 	Waiting(ClientLoginSuccess, "Login with Client...");
 	FlushHttpRequests();
 
+	AdminAccessTokenCache = ClientLogin.Access_token;
 	return ClientLogin.Access_token;
 }
 
-FString GetSuperUserToken()
+FString SuperUserTokenCache;
+FString GetSuperUserTokenCache()
 {
+	if (!SuperUserTokenCache.IsEmpty())
+	{
+		return SuperUserTokenCache;
+	}
 	const int32 length = 100;
 	TCHAR ClientId[length];
 	TCHAR ClientSecret[length];
@@ -161,6 +172,7 @@ FString GetSuperUserToken()
 	Waiting(bGetTokenSuccess, "Waiting for get token...");
 	FlushHttpRequests();
 
+	SuperUserTokenCache = TokenResult.Access_token;
 	return TokenResult.Access_token;
 }
 
@@ -1098,6 +1110,64 @@ void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, c
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Leaderboard_Create_Leaderboard(const FLeaderboardConfigRequest& request, const THandler<FLeaderboardConfigRequest>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(request, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Leaderboard_GetAll_Leaderboard(const FString& leaderboardCode, const THandler<FLeaderboardConfigResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards"), *BaseUrl, *FRegistry::Settings.Namespace, *leaderboardCode);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Leaderboard_Delete_Leaderboard(const FString& leaderboardCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *leaderboardCode);
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
@@ -1149,7 +1219,7 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/servers/local/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *podName);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");

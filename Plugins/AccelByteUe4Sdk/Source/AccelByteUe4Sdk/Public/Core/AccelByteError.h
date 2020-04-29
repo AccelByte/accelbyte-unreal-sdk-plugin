@@ -284,6 +284,10 @@ namespace AccelByte
 		UserStatAlreadyExistException = 70336,
 		StatValueOutOfRangeException = 70337,
 		//
+		//Leaderboard Error Code List
+		//
+		LeaderboardConfigAlreadyExist = 71132,
+		//
 		//Client side Error Code List
 		//
 		UnknownError = 14000,

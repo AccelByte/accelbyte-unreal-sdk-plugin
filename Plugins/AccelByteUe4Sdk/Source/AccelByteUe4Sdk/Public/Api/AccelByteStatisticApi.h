@@ -9,9 +9,6 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteStatisticModels.h"
 
-// Forward declarations
-class IWebSocket;
-
 namespace AccelByte
 {
 	class Credentials;
