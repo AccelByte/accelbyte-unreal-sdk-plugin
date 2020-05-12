@@ -1796,6 +1796,36 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetCountryFromIP, "AccelByte.Tests.AUser.GetCountryFromIP", AutomationFlagMaskUser);
+bool FGetCountryFromIP::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bGetCountryDone = false;
+	FCountryInfo ReceivedCountryInfo;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Get country from IP"));
+	FRegistry::User.GetCountryFromIP(
+		THandler<FCountryInfo>::CreateLambda([&bGetCountryDone, &ReceivedCountryInfo](const FCountryInfo& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bGetCountryDone = true;
+			ReceivedCountryInfo = Result;
+
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("\nCountry Code:%s\nCountry Name:%s\nState:%s\nCity:%s\n"), 
+				*ReceivedCountryInfo.CountryCode,
+				*ReceivedCountryInfo.CountryName,
+				*ReceivedCountryInfo.State,
+				*ReceivedCountryInfo.City);
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetCountryDone, "Waiting for CountryInfo...");
+
+	check(bGetCountryDone);
+	check(ReceivedCountryInfo.CountryCode != "");
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.AUser.SteamTicket", AutomationFlagMaskUser);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {

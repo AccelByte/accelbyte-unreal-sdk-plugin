@@ -28,6 +28,10 @@ namespace AccelByte
 			Credentials& Credentials;
 			Settings& Settings;
 		public:
+			/**
+			* @brief delegate for handling upgrade headless account notification.
+			*/
+			DECLARE_DELEGATE(FUpgradeNotif);
 
 			/**
 			 * @brief Log in with email/phone number account.
@@ -101,6 +105,16 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
+			 * Headless account is an account that doesn't have an email and password.
+			 * If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded. Player Profile will be opened from default browser.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Verify user's email. User should login with email and password first to get access token.
@@ -240,6 +254,14 @@ namespace AccelByte
 			void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, const TArray<FString>& OtherPlatformUserId,
 				const THandler<FBulkPlatformUserIdResponse>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function will get country information from user's IP.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FCountryInfo.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			User() = delete;
 			User(User const&) = delete;
@@ -247,7 +269,16 @@ namespace AccelByte
 
 			void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+			void UpgradeWithPlayerPortalAsync(const FString& ReturnUrl, const THandler<FUpgradeUserRequest>& OnSuccess, const FErrorHandler& OnError);	
+
 			static FString TempUsername;
+			FUpgradeNotif UpgradeNotif;
+
+		public:
+			void SetUpgradeNotifDelegate(const FUpgradeNotif& OnUpgradeNotif)
+			{
+				UpgradeNotif = OnUpgradeNotif;
+			}
 		};
 
 	} // Namespace Api

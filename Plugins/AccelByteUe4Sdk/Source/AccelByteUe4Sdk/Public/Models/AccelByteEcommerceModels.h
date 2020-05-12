@@ -561,6 +561,42 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsStackableEntitlementInfo
 		int32 StackedQuantity;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsAttributes
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | Attributes")
+		FString ServerId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | Attributes")
+		FString ServerName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | Attributes")
+		FString CharacterId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | Attributes")
+		FString CharacterName;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDistributionAttributes
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | DistributionAttributes")
+		FAccelByteModelsAttributes Attributes;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDistributionReceiver
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | DistributionReceiver")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | DistributionReceiver")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | DistributionReceiver")
+		FString ExtUserId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | DistributionReceiver")
+		FAccelByteModelsAttributes Attributes;
+};
+
 #pragma endregion EntitlementModelsField
 
 #pragma region OrderModelsField

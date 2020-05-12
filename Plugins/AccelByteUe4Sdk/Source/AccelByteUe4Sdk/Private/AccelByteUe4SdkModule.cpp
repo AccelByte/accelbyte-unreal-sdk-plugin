@@ -105,6 +105,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
 	FRegistry::Settings.RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
 	FRegistry::Settings.BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
+	FRegistry::Settings.NonApiBaseUrl = GetDefault<UAccelByteSettings>()->NonApiBaseUrl;
 	FRegistry::Settings.IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
 	FRegistry::Settings.PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
 	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;

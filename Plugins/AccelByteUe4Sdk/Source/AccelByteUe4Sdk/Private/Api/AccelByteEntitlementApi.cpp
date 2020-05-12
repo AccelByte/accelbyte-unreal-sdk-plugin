@@ -126,5 +126,113 @@ void Entitlement::ConsumeUserEntitlement(const FString& EntitlementId, const int
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Entitlement::CreateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ExtUserId);
+
+	FAccelByteModelsDistributionAttributes DistributionAttributes;
+	DistributionAttributes.Attributes = Attributes;
+
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(DistributionAttributes, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Entitlement::DeleteDistributionReceiver(const FString& ExtUserId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *UserId, *ExtUserId);
+
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Entitlement::GetDistributionReceiver(const FString& PublisherNamespace, const FString& PublisherUserId, const THandler<TArray<FAccelByteModelsDistributionReceiver>>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers"), *Settings.PlatformServerUrl, *PublisherNamespace, *PublisherUserId);
+	
+	FString Query = TEXT("");
+	if (!Credentials.GetUserNamespace().IsEmpty())
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("targetNamespace=%s"), *Credentials.GetUserNamespace()));
+	}
+	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Entitlement::UpdateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ExtUserId);
+
+	FAccelByteModelsDistributionAttributes DistributionAttributes;
+	DistributionAttributes.Attributes = Attributes;
+
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(DistributionAttributes, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 } // Namespace Api
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.15.0 (2020-06-03)
+### Added
+- Game Client SDK
+  - User
+    - Add UpgradeWithPlayerPortal 
+    - Add GetCountryFromIP
+  - Entitlement
+    - Add CreateDistributionReceiver
+    - Add GetDistributionReceiver
+    - Add DeleteDistributionReceiver
+    - Add UpdateDistributionReceiver
+
 ## 2.14.0 (2020-05-29)
 ### Added
 - ServerTelemetry Api
