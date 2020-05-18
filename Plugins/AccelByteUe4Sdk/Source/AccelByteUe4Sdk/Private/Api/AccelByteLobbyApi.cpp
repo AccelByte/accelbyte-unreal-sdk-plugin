@@ -8,6 +8,7 @@
 #include "WebSocketsModule.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -447,6 +448,36 @@ void Lobby::GetFriendshipStatus(FString UserId)
 
 	SendRawRequest(LobbyRequest::GetFriendshipStatus, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
+}
+
+void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString url;
+	url = FRegistry::Settings.IamServerUrl;
+	if (url.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *url, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Contents;
+	FJsonObjectConverter::UStructToJsonObjectString(UserIds, Contents);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Contents);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::UnbindEvent()

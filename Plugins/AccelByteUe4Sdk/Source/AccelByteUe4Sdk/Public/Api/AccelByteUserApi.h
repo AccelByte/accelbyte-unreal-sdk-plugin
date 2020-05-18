@@ -220,6 +220,26 @@ namespace AccelByte
 			 */
 			void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function for update user account info within the game.
+			 *
+			 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will get user(s) by other platform user id(s) it linked to.
+			 *
+			 * @param PlatformType Other platform type .
+			 * @param OtherPlatformUserId Targeted user's ID(s).
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FBulkPlatformUserIdResponse.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, const TArray<FString>& OtherPlatformUserId,
+				const THandler<FBulkPlatformUserIdResponse>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			User() = delete;
 			User(User const&) = delete;

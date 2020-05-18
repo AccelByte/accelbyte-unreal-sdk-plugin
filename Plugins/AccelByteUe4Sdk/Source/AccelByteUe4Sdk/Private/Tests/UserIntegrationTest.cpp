@@ -1532,6 +1532,87 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkGetUserBySteamUserIDTest, "AccelByte.Tests.AUser.BulkGetUserBySteamUserID", AutomationFlagMaskUser);
+bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString ABUserId = "";
+	double LastTime = 0;
+
+	bool bSteamLoginSuccessful1 = false;
+	bool bSteamLoginDone1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bSteamLoginSuccessful1, &bSteamLoginDone1]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bSteamLoginSuccessful1 = true;
+		bSteamLoginDone1 = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone1 = true;
+	}));
+
+	FlushHttpRequests();
+	Waiting(bSteamLoginDone1, "Waiting for Login...");
+
+	if (!bSteamLoginSuccessful1)
+	{
+		return false;
+	}
+
+	ABUserId = FRegistry::Credentials.GetUserId();
+	FString SteamUserID;
+
+	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
+#if ENGINE_MINOR_VERSION > 20
+	SteamUserID = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"));
+#else
+	TCHAR data[100];
+	FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), data, 100);
+	SteamUserID = FString::Printf(TEXT("%s"), data);
+#endif
+
+	bool bGetUserDone = false;
+	FBulkPlatformUserIdResponse ReceivedUserData;
+	FRegistry::User.BulkGetUserByOtherPlatformUserIds(
+		EAccelBytePlatformType::Steam,
+		{ SteamUserID },
+		THandler<FBulkPlatformUserIdResponse>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FBulkPlatformUserIdResponse& UserData)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetUserDone = true;
+		ReceivedUserData = UserData;
+	}),
+		UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetUserDone, "Waiting for Login...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	check(bSteamLoginSuccessful1);
+	check(bDeleteSuccessful);
+	check(ReceivedUserData.UserIdPlatforms.Num() != 0);
+	check(ReceivedUserData.UserIdPlatforms[0].UserId == ABUserId);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserByEmailAddressTest, "AccelByte.Tests.AUser.GetUserByEmailAddress", AutomationFlagMaskUser);
 bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 {

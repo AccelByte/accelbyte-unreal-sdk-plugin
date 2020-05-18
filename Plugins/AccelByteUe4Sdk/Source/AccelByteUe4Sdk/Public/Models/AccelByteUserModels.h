@@ -266,3 +266,27 @@ struct ACCELBYTEUE4SDK_API FPagedPlatformLinks
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PagedLinkedPlatform")
 		FAccelByteModelsPaging Paging;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdRequest")
+		TArray<FString> PlatformUserIDs;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FPlatformUserIdMap
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformUserIdMap")
+		FString UserId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdResponse")
+		TArray<FPlatformUserIdMap> UserIdPlatforms;
+};
