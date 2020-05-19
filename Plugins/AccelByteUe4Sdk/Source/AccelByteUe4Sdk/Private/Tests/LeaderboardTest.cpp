@@ -250,51 +250,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 	}
 	TestUsersID = LoginUserIDs;
 
-	// DELETE ALL USER STAT ITEMs
-	for (auto& code : TestLeaderboardCodes)
-	{
-		bool bGetRankingDone = false;
-		TArray<FAccelByteModelsLeaderboardRankingResult> getRankingResult;
-		THandler<FAccelByteModelsLeaderboardRankingResult> getRankingHandler = THandler<FAccelByteModelsLeaderboardRankingResult>::CreateLambda([&](const FAccelByteModelsLeaderboardRankingResult& result)
-			{
-				if (result.data.Num() == 0)
-				{
-					bGetRankingDone = true;
-				}
-				else
-				{
-					getRankingResult.Add(result);
-					FRegistry::Leaderboard.GetRankings(code, EAccelByteLeaderboardTimeFrame::ALL_TIME, result.data.Num(), 999, getRankingHandler, LeaderboardTestErrorHandler);
-				}
-			});
-			FRegistry::Leaderboard.GetRankings(code, EAccelByteLeaderboardTimeFrame::ALL_TIME, 0, 999, getRankingHandler, FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
-			{
-				bGetRankingDone = true;
-				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-			}));
-		FlushHttpRequests();
-		Waiting(bGetRankingDone, "Waiting for all stat item deletion item deletion...");
-		
-		for (auto& page : getRankingResult)
-		{
-			for (auto& entry : page.data)
-			{
-				bool bDeleteStatItemDone = false;
-				Statistic_Delete_StatItem(entry.userId, code, FSimpleDelegate::CreateLambda([&]()
-					{
-						bDeleteStatItemDone = true;
-					}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
-					{
-						bDeleteStatItemDone = true;
-						UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-					}));
-
-				FlushHttpRequests();
-				Waiting(bDeleteStatItemDone, "Waiting for user stat item deletion...");
-			}
-		}
-	}
-
 	// ASSERTION
 	for (size_t i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
 	{
@@ -315,27 +270,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LeaderboardTearDown, "AccelByte.Tests.Leaderboard.Z.Teardown", AutomationFlagMaskLeaderboard);
 bool LeaderboardTearDown::RunTest(const FString& Parameters)
 {
-	for (auto& userId : TestUsersID)
-	{
-		// DELETE USER STAT ITEMs
-		for (auto& statCode : TestStatCodes)
-		{
-			bool bDeleteStatItemDone = false;
-
-			Statistic_Delete_StatItem(userId, statCode, FSimpleDelegate::CreateLambda([&]()
-				{
-					bDeleteStatItemDone = true;
-				}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
-				{
-					bDeleteStatItemDone = true;
-					UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-				}));
-
-			FlushHttpRequests();
-			Waiting(bDeleteStatItemDone, "Waiting for user stat item deletion...");
-		}
-	}
-
 	// DELETE LEADERBOARD CODE
 	for (auto& leaderboardCode : TestLeaderboardCodes)
 	{
