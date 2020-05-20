@@ -1,11 +1,15 @@
 # Changelog
 
-## 2.11.0 (Unreleased)
+## 2.12.0 (2020-05-20)
 ### Added
 - Lobby
     - Adding Bulk Friend Request
 - User
     - Adding BulkGetUserByOtherPlatformId function
+
+## 2.11.0 (2020-04-29)
+### Added
+- Leaderboard Api
 
 ## 2.10.0 (2020-04-08)
 ### Added

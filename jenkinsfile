@@ -11,6 +11,7 @@ pushTrigger = env.PUSH_TRIGGER
 manualTrigger = (pushTrigger == null && env.UPSTREAM_BUILD == null)
 branchName = params.BRANCH_NAME
 grade = "deployment"
+bitbucketSSHCreds = ""
 
 FAILED_STAGE = "";
 GIT_BRANCH = env.GIT_BRANCH;
@@ -30,6 +31,7 @@ pipeline {
                 bitbucketBuildStatus("INPROGRESS", "Bitbucket_Build_AccelByte", "accelbyte")
                 script {
                     GIT_BRANCH = env.GIT_BRANCH
+                    bitbucketSSHCreds = env.BITBUCKET_SSH_CREDS
                     // customer repo will parse customer-related files
                     if(fileExists('version-customer.json')){
                         version = readJSON file: "version-customer.json"
@@ -163,6 +165,21 @@ pipeline {
                         }
                     }
                 }    
+                stage('Tag') {
+                     when {
+                        expression { return doTagging }
+                    }
+                    steps {
+                        tagVersion(version, bitbucketSSHCreds)
+                    }
+                    post {
+                        failure {
+                            script{ 
+                                FAILED_STAGE = "Tag";
+                            }
+                        }
+                    }
+                }
                 stage('Package') {
                     when {
                         expression { return doDeploy }
