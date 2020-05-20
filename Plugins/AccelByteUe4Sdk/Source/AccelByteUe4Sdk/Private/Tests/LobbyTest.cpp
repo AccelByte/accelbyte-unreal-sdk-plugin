@@ -1974,7 +1974,75 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_BulkFriendRequest, "AccelByte.Tests.Lobby.B.FriendBulkFriendRequest", AutomationFlagMaskLobby);
+bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsBulkFriendsRequest FriendUserIds;
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		FriendUserIds.FriendIds.Add(UserIds[i]);
+	}
 
+	bool bBulkAddFriendSuccess = false;
+	Lobbies[0]->BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess]()
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Bulk Add Friend Success!"));
+		bBulkAddFriendSuccess = true;
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bBulkAddFriendSuccess, "Waiting Bulk Add Friend...");
+	
+	LobbyConnect(1);
+
+	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	Lobbies[0]->LoadFriendsList();
+	Waiting(bLoadFriendListSuccess, "Waiting Load Friend List...!");
+
+	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+
+	for (auto FriendId : FriendUserIds.FriendIds)
+	{
+		check(loadFriendListResponse.friendsId.Contains(FriendId));
+		Lobbies[0]->Unfriend(FriendId);
+		Waiting(bUnfriendSuccess, "Waiting Unfriend...");
+		check(!bUnfriendError);
+		bUnfriendError = false;
+		bUnfriendSuccess = false;
+	}
+
+	LobbyDisconnect(1);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed, "AccelByte.Tests.Lobby.B.FriendBulkFriendRequest_Failed", AutomationFlagMaskLobby);
+bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsBulkFriendsRequest FriendUserIds;
+	FriendUserIds.FriendIds.Add(UserIds[0]);
+
+	bool bBulkAddFriendSuccess = false;
+	bool bBulkAddFriendError = false;
+	bool bBulkAddFriendDone = false;
+	Lobbies[0]->BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess, &bBulkAddFriendDone]()
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Bulk Add Friend Success!"));
+		bBulkAddFriendSuccess = true;
+		bBulkAddFriendDone = true;
+	}), FErrorHandler::CreateLambda([&bBulkAddFriendDone, &bBulkAddFriendError](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Error! Code: %d | Message: %s"), Code, *Message);
+		bBulkAddFriendError = true;
+		bBulkAddFriendDone = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bBulkAddFriendDone, "Waiting Bulk Add Friend...");
+
+	check(bBulkAddFriendError);
+	check(!bBulkAddFriendSuccess);
+
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStart", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
