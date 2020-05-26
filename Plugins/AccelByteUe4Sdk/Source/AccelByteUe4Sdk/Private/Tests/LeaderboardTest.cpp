@@ -187,7 +187,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
 
 	TArray<FString> LoginUserIDs;
-	for (size_t i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
+	for (int i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
 	{
 		// USER CREATION
 		UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("USER CREATION...%d out of %d"), i + 1, LeaderboardTestUserInfo_.UserCount);
@@ -251,7 +251,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 	TestUsersID = LoginUserIDs;
 
 	// ASSERTION
-	for (size_t i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
+	for (int i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
 	{
 		check(UsersCreationSuccess[i]);
 		check(UsersLoginSuccess[i]);
@@ -301,7 +301,7 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 	
 	for (auto& statCode : TestStatCodes)
 	{
-		for (size_t i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
+		for (int i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
 		{
 			float increment = (i == USER_ID_WINNER_INDEX) ? WINNER_SCORE : COMMONER_SCORE;
 			request.Add({ increment, TestUsersID[i], statCode });
