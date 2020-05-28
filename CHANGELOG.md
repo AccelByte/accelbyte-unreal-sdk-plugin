@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.12.1 (2020-05-28)
+### Added
+- User
+    - added `ps4` and xbox `live` enum for 3rd party login
+
 ## 2.12.0 (2020-05-20)
 ### Added
 - Lobby

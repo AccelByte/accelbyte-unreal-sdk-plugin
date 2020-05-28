@@ -15,6 +15,8 @@ UENUM(BlueprintType)
 enum class EAccelBytePlatformType : uint8
 {
 	Steam,
+	PS4,
+	Live,
 	Google,
 	Facebook,
 	Android,
