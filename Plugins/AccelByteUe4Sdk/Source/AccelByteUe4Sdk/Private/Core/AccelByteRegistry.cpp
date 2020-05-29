@@ -18,6 +18,7 @@
 #include "Api/AccelByteQosManagerApi.h"
 #include "Api/AccelByteQos.h"
 #include "Api/AccelByteLeaderboardApi.h"
+#include "Api/AccelByteGameTelemetryApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -46,6 +47,7 @@ Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings)
 Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings);
 Api::Qos FRegistry::Qos;
 Api::Leaderboard FRegistry::Leaderboard(FRegistry::Credentials, FRegistry::Settings);
+Api::GameTelemetry FRegistry::GameTelemetry(FRegistry::Credentials, FRegistry::Settings);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);
