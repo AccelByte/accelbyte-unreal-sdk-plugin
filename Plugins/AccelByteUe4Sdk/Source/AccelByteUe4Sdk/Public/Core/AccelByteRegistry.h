@@ -42,6 +42,7 @@ namespace GameServerApi
 	class ServerStatistic;
 	class ServerEcommerce;
 	class ServerQosManager;
+	class ServerGameTelemetry;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -72,6 +73,7 @@ public:
 	static GameServerApi::ServerStatistic ServerStatistic;
 	static GameServerApi::ServerEcommerce ServerEcommerce;
 	static GameServerApi::ServerQosManager ServerQosManager;
+	static GameServerApi::ServerGameTelemetry ServerGameTelemetry;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

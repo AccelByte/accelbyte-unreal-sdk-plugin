@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.14.0 (2020-05-29)
+### Added
+- ServerTelemetry Api
+
 ## 2.13.0 (2020-05-29)
 ### Added
 - GameTelemetry Api

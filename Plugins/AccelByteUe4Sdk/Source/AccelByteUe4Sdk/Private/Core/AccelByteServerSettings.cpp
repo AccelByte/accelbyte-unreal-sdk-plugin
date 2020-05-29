@@ -61,6 +61,11 @@ FString UAccelByteBlueprintsServerSettings::GetLeaderboardServerUrl()
 	return FRegistry::ServerSettings.LeaderboardServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetGameTelemetryServerUrl()
+{
+	return FRegistry::ServerSettings.GameTelemetryServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -109,4 +114,9 @@ void UAccelByteBlueprintsServerSettings::SetQosManagerServerUrl(const FString& Q
 void UAccelByteBlueprintsServerSettings::SetLeaderboardServerUrl(const FString& LeaderboardServerUrl)
 {
 	FRegistry::ServerSettings.LeaderboardServerUrl = LeaderboardServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetGameTelemetryServerUrl(const FString& GameTelemetryServerUrl)
+{
+	FRegistry::ServerSettings.GameTelemetryServerUrl = GameTelemetryServerUrl;
 }

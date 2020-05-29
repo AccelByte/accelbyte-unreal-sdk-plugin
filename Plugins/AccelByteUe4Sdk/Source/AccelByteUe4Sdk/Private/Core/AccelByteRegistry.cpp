@@ -24,6 +24,7 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
+#include "GameServerApi/AccelByteServerGameTelemetryApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -53,3 +54,4 @@ GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FReg
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerEcommerce FRegistry::ServerEcommerce(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerQosManager FRegistry::ServerQosManager(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry(FRegistry::ServerCredentials, FRegistry::ServerSettings);
