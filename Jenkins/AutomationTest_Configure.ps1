@@ -30,7 +30,8 @@ $SERVER_CONFIG_FIELD =
 "DSMControllerServerUrl=`"$Env:ADMIN_BASE_URL$Env:DSM_PREFIX`"`r`n" +
 "StatisticServerUrl=`"$Env:ADMIN_BASE_URL$Env:STATISTIC_PREFIX`"`r`n" +
 "PlatformServerUrl=`"$Env:ADMIN_BASE_URL$Env:PLATFORM_PREFIX`"`r`n" +
-"QosManagerServerUrl=`"$Env:ADMIN_BASE_URL$Env:QOS_PREFIX`"`r`n"
+"QosManagerServerUrl=`"$Env:ADMIN_BASE_URL$Env:QOS_PREFIX`"`r`n" +
+"GameTelemetryServerUrl=`"$Env:ADMIN_BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" 
 
 ##Write the configuration to the targeted config file
 (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\[\/Script\/AccelByteUe4Sdk\.AccelByteSettings\])\r*\n(?:(?!^\[).)*(?=\r*\n)' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8
