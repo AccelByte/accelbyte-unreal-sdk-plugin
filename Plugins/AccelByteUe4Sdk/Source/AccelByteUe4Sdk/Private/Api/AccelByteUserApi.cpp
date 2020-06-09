@@ -5,6 +5,7 @@
 #include "Api/AccelByteUserApi.h"
 
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
@@ -22,6 +23,7 @@ User::User(AccelByte::Credentials& Credentials, AccelByte::Settings& Setting) : 
 User::~User()
 {}
 
+static HttpListenerExtension ListenerExtension;
 FString User::TempUsername;
 
 static FString PlatformStrings[] = {
@@ -376,6 +378,56 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 		FPlatformTime::Seconds());
 }
 
+void User::UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	const auto HttpNotifDelegate = HttpListenerExtension::FHttpNotif::CreateLambda([this](){
+		UpgradeNotif.ExecuteIfBound();
+	});
+
+	ListenerExtension = HttpListenerExtension();
+	ListenerExtension.SetHttpNotifDelegate(HttpNotifDelegate);
+	ListenerExtension.GetAvailableLocalUrl();
+	FString LocalUrl = ListenerExtension.AvailableLocalUrl;
+
+	User::UpgradeWithPlayerPortalAsync(LocalUrl, THandler<FUpgradeUserRequest>::CreateLambda([this, OnSuccess](const FUpgradeUserRequest& Result)
+	{
+		FString Url = FString::Printf(TEXT("%s/upgrade-account-from-sdk?temporary_session_id=%s"), *Settings.NonApiBaseUrl, *Result.Temporary_session_id);
+		FPlatformProcess::LaunchURL(*Url, NULL, NULL);
+
+		ListenerExtension.StartHttpListener();
+
+		OnSuccess.ExecuteIfBound();
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) {
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void User::UpgradeWithPlayerPortalAsync(const FString& ReturnUrl, const THandler<FUpgradeUserRequest>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/v1/public/temporarysessions"), *Settings.BaseUrl);
+	FString Verb            = TEXT("POST");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = FString::Printf(TEXT("{ \"return_url\": \"%s\", \"ttl\": %i}"), *ReturnUrl, ListenerExtension.TTL);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
@@ -597,6 +649,25 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, con
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *PlatformId, *OtherPlatformUserId);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/location/country"), *Settings.BaseUrl);
 	FString Verb            = TEXT("GET");
 	FString Accept          = TEXT("application/json");
 

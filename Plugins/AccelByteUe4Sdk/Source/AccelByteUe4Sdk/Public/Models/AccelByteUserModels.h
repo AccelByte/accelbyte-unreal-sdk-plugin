@@ -292,3 +292,29 @@ struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdResponse")
 		TArray<FPlatformUserIdMap> UserIdPlatforms;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FCountryInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
+        FString CountryCode;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
+        FString CountryName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
+        FString State;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
+        FString City;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUpgradeUserRequest
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
+		FString Temporary_session_id;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
+		int32 Expires_in;
+};

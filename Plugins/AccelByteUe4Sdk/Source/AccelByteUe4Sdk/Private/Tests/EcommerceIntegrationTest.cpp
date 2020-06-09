@@ -399,6 +399,179 @@ bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateDistributionReceiverSuccess, "AccelByte.Tests.Ecommerce.D.CreateDistributionReceiver", AutomationFlagMaskEcommerce);
+bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Parameters)
+{
+#pragma region CreateDistributionReceiver
+	FString ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
+
+	FAccelByteModelsAttributes Attributes;
+	Attributes.ServerId = "70391cb5af52427e896e05290bc65832";
+	Attributes.ServerName = "testserver";
+	Attributes.CharacterId = "32aaf2eabcbb45d096e06be8a4584320";
+	Attributes.CharacterName = "newcharacter";
+
+	bool bCreateDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Create Distribution Receiver"));
+	FRegistry::Entitlement.CreateDistributionReceiver(ExtUserId, Attributes, FVoidHandler::CreateLambda([&bCreateDistributionSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bCreateDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bCreateDistributionSuccess,"Waiting for create distribution receiver...");
+
+#pragma endregion CreateDistributionReceiver
+#pragma region GetDistributionReceiver
+	bool bGetDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	{
+		for (auto Data : Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("\n\nAttributes:\nServer Id:%s\nServer Name:%s\nCharacter Id:%s\nCharacter Name:%s\nExtUserId:%s\nUser Id:%s\nNamespace:%s\n"), 
+				*Data.Attributes.ServerId,
+				*Data.Attributes.ServerName,
+				*Data.Attributes.CharacterId,
+				*Data.Attributes.CharacterName,
+				*Data.ExtUserId,
+				*Data.UserId,
+				*Data.Namespace);
+		}
+		bGetDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
+#pragma endregion GetDistributionReceiver
+#pragma region DeleteDistributionReceiver
+	bool bDeleteDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Delete Distribution Receiver"));
+	FRegistry::Entitlement.DeleteDistributionReceiver(ExtUserId, FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDistributionSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bDeleteDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
+#pragma endregion DeleteDistributionReceiver
+
+	check(bCreateDistributionSuccess);
+	check(bGetDistributionSuccess);
+	check(bDeleteDistributionSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceUpdateDistributionReceiverSuccess, "AccelByte.Tests.Ecommerce.D.UpdateDistributionReceiver", AutomationFlagMaskEcommerce);
+bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Parameters)
+{
+#pragma region CreateDistributionReceiver
+	FString ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
+
+	FAccelByteModelsAttributes Attributes;
+	Attributes.ServerId = "70391cb5af52427e896e05290bc65832";
+	Attributes.ServerName = "testserver";
+	Attributes.CharacterId = "32aaf2eabcbb45d096e06be8a4584320";
+	Attributes.CharacterName = "newcharacter";
+
+	bool bCreateDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Create Distribution Receiver"));
+	FRegistry::Entitlement.CreateDistributionReceiver(ExtUserId, Attributes, FVoidHandler::CreateLambda([&bCreateDistributionSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bCreateDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bCreateDistributionSuccess,"Waiting for create distribution receiver...");
+
+#pragma endregion CreateDistributionReceiver
+#pragma region GetDistributionReceiver
+	bool bGetDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	{
+		for (auto Data : Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("\n\nAttributes:\nServer Id:%s\nServer Name:%s\nCharacter Id:%s\nCharacter Name:%s\nExtUserId:%s\nUser Id:%s\nNamespace:%s\n"), 
+				*Data.Attributes.ServerId,
+				*Data.Attributes.ServerName,
+				*Data.Attributes.CharacterId,
+				*Data.Attributes.CharacterName,
+				*Data.ExtUserId,
+				*Data.UserId,
+				*Data.Namespace);
+		}
+		bGetDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
+#pragma endregion GetDistributionReceiver
+#pragma region UpdateDistributionReceiver
+	Attributes.ServerId = "70391cb5af52427e896e05290bc65831";
+	Attributes.ServerName = "updatedtestserver";
+	Attributes.CharacterId = "32aaf2eabcbb45d096e06be8a4584321";
+	Attributes.CharacterName = "updatednewcharacter";
+
+	bool bUpdateDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Update Distribution Receiver"));
+	FRegistry::Entitlement.UpdateDistributionReceiver(ExtUserId, Attributes, FVoidHandler::CreateLambda([&bUpdateDistributionSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bUpdateDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bUpdateDistributionSuccess,"Waiting for update distribution receiver...");
+
+#pragma endregion UpdateDistributionReceiver
+#pragma region GetDistributionReceiver
+	bGetDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	{
+		for (auto Data : Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("\n\nAttributes:\nServer Id:%s\nServer Name:%s\nCharacter Id:%s\nCharacter Name:%s\nExtUserId:%s\nUser Id:%s\nNamespace:%s\n"), 
+				*Data.Attributes.ServerId,
+				*Data.Attributes.ServerName,
+				*Data.Attributes.CharacterId,
+				*Data.Attributes.CharacterName,
+				*Data.ExtUserId,
+				*Data.UserId,
+				*Data.Namespace);
+		}
+		bGetDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
+#pragma endregion GetDistributionReceiver
+#pragma region DeleteDistributionReceiver
+	bool bDeleteDistributionSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Delete Distribution Receiver"));
+	FRegistry::Entitlement.DeleteDistributionReceiver(ExtUserId, FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDistributionSuccess]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bDeleteDistributionSuccess = true;
+	}), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
+#pragma endregion DeleteDistributionReceiver
+
+	check(bCreateDistributionSuccess);
+	check(bGetDistributionSuccess);
+	check(bUpdateDistributionSuccess);
+	check(bDeleteDistributionSuccess);
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateOrderSuccess, "AccelByte.Tests.Ecommerce.D1.CreateOrder", AutomationFlagMaskEcommerce);
 bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 {
