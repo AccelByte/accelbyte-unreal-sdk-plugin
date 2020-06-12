@@ -13,6 +13,15 @@
 #include "ISettingsSection.h"
 #endif
 
+FString GetDefaultServerUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
+{
+	if (SpecificServerUrl.IsEmpty()) 
+	{
+		return FString::Printf(TEXT("%s/%s"), *FRegistry::Settings.BaseUrl, *DefaultServerPath);
+	}
+
+	return SpecificServerUrl;
+}
 
 class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 {
@@ -116,6 +125,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
 	FRegistry::Settings.LeaderboardServerUrl = GetDefault<UAccelByteSettings>()->LeaderboardServerUrl;
 	FRegistry::Settings.GameTelemetryServerUrl = GetDefault<UAccelByteSettings>()->GameTelemetryServerUrl;
+	FRegistry::Settings.AgreementServerUrl = GetDefaultServerUrl(GetDefault<UAccelByteSettings>()->AgreementServerUrl, TEXT("agreement"));
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
