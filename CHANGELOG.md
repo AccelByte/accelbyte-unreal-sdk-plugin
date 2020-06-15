@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.17.0 (2020-06-19)
+### Added
+- Agones SDK UE4 plugin
+
 ## 2.16.0 (2020-06-16)
 ### Added
 - Agreement Api
