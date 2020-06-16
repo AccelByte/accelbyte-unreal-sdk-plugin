@@ -27,7 +27,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "Networking",
             "SSL",
             "Icmp",
-			"Agones"
+            "Agones"
         });
 
         if (Target.bBuildEditor == true)

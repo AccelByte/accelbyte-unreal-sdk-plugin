@@ -38,6 +38,10 @@
 		{
 			"Name": "WebBrowserWidget",
 			"Enabled": true
+		},
+		{
+			"Name": "Agones",
+			"Enabled": true
 		}
 	]
 }

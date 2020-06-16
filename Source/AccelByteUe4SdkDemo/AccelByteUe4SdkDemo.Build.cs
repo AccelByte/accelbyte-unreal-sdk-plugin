@@ -10,7 +10,7 @@ public class AccelByteUe4SdkDemo : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk",  "Json", "JsonUtilities", "Http", "WebSockets",});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk", "Agones", "Json", "JsonUtilities", "Http", "WebSockets",});
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
         DynamicallyLoadedModuleNames.AddRange(new string[] { "OnlineSubsystemSteam", }

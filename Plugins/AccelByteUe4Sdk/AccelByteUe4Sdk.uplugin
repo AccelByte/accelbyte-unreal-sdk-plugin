@@ -13,12 +13,18 @@
 	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"Installed": false,
-  "Modules": [
-    {
-      "Name": "AccelByteUe4Sdk",
-      "Type": "Runtime",
-      "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms" :  [ "Win32" , "Win64" , "Linux" ]
-    },
-  ]     
+	"Modules": [
+		{
+			"Name": "AccelByteUe4Sdk",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [ "Win32", "Win64", "Linux" ]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "Agones",
+			"Enabled": true
+		}
+	]
 }
