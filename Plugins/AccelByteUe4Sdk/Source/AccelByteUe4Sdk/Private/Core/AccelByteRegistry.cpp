@@ -18,6 +18,7 @@
 #include "Api/AccelByteQosManagerApi.h"
 #include "Api/AccelByteQos.h"
 #include "Api/AccelByteLeaderboardApi.h"
+#include "Api/AccelByteCloudSaveApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
@@ -47,6 +48,7 @@ Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings);
 Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings);
 Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings);
+Api::CloudSave FRegistry::CloudSave(FRegistry::Credentials, FRegistry::Settings);
 Api::Qos FRegistry::Qos;
 Api::Leaderboard FRegistry::Leaderboard(FRegistry::Credentials, FRegistry::Settings);
 Api::GameTelemetry FRegistry::GameTelemetry(FRegistry::Credentials, FRegistry::Settings);

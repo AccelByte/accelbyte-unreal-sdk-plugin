@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.18.0 (2020-06-22)
+### Added
+- CloudSave
+      - Add SaveUserRecord
+      - Add ReplaceUserRecord
+      - Add GetUserRecord
+      - Add GetPublicUserRecord
+      - Add DeleteUserRecord
+      - Add SaveGameRecord
+      - Add ReplaceGameRecord
+      - Add GetGameRecord
+      - Add DeleteGameRecord
+      
 ## 2.17.0 (2020-06-19)
 ### Added
 - Agones SDK UE4 plugin

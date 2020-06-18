@@ -108,6 +108,7 @@ namespace AccelByte
 		StatusNetworkAuthenticationRequired = 511, // Reference: RFC 6585, Section 6
 
 		UserEmailAlreadyUsedException = 10133,
+		UserDisplayNameAlreadyUsedException = 10180,
 
 		// Platform error
 		PlatformInternalServerErrorException = 20000,
