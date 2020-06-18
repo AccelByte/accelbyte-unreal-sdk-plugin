@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modifications copyright (C) 2020 < AccelByte Inc. / jonathan@accelbyte.net >
+//  * JsonObject->TryGetNumberField has different function signature on UE4.18
+//  * Runtime/Launch/Resources/Version.h added to get the UE4 minor version
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "SpecHealth.generated.h"
 
 USTRUCT()
@@ -42,8 +47,19 @@ struct AGONES_API FHealth
 	FHealth(TSharedPtr<FJsonObject> JsonObject)
 	{
 		JsonObject->TryGetBoolField(TEXT("disabled"), bDisabled);
+#if ENGINE_MINOR_VERSION > 20
 		JsonObject->TryGetNumberField(TEXT("period_seconds"), PeriodSeconds);
 		JsonObject->TryGetNumberField(TEXT("failure_threshold"), FailureThreshold);
 		JsonObject->TryGetNumberField(TEXT("initial_delay_seconds"), InitialDelaySeconds);
+
+#else
+		double outPeriodSeconds, outFailureThreshold, outInitialDelaySeconds = 0.f;
+		JsonObject->TryGetNumberField(TEXT("period_seconds"), outPeriodSeconds);
+		PeriodSeconds = outPeriodSeconds;
+		JsonObject->TryGetNumberField(TEXT("failure_threshold"), outFailureThreshold);
+		FailureThreshold = outFailureThreshold;
+		JsonObject->TryGetNumberField(TEXT("initial_delay_seconds"), outInitialDelaySeconds);
+		InitialDelaySeconds = outInitialDelaySeconds;
+#endif
 	}
 };

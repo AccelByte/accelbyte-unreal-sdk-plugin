@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modifications copyright (C) 2020 < AccelByte Inc. / jonathan@accelbyte.net >
+//  * GetSidecarAddress() modified to support previous engine version of GetEnvironmentVariable signature
+//  * Runtime/Launch/Resources/Version.h added to get the UE4 minor version
+
 #include "AgonesHook.h"
 #include "AgonesSettings.h"
 #include "HttpRetrySystem.h"
@@ -23,13 +27,20 @@
 #include "Model/KeyValuePair.h"
 #include "Runtime/Online/HTTP/Public/Http.h"
 #include "Serialization/JsonSerializer.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 #define LOCTEXT_NAMESPACE "AgonesHook"
 DEFINE_LOG_CATEGORY(LogAgonesHook);
 
 static FString GetSidecarAddress()
 {
+#if ENGINE_MINOR_VERSION > 20
 	FString port = FPlatformMisc::GetEnvironmentVariable(TEXT("AGONES_SDK_HTTP_PORT"));
+#else
+	TCHAR portChar[100];
+	FPlatformMisc::GetEnvironmentVariable(TEXT("AGONES_SDK_HTTP_PORT"), portChar, 100);
+	FString port = FString::Printf(TEXT("%s"), portChar);
+#endif
 	return FString(TEXT("http://localhost:")) + (!port.IsEmpty() ? port : FString(TEXT("9358")));
 }
 

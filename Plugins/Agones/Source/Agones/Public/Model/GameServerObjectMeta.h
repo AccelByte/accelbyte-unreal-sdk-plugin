@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modifications copyright (C) 2020 < AccelByte Inc. / jonathan@accelbyte.net >
+//  * JsonObject->TryGetNumberField has different function signature on UE4.18
+//  * Runtime/Launch/Resources/Version.h added to get the UE4 minor version
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "GameServerObjectMeta.generated.h"
 
 USTRUCT()
@@ -60,9 +65,19 @@ struct AGONES_API FObjectMeta
 		JsonObject->TryGetStringField(TEXT("namespace"), Namespace);
 		JsonObject->TryGetStringField(TEXT("uid"), Uid);
 		JsonObject->TryGetStringField(TEXT("resource_version"), ResourceVersion);
+#if ENGINE_MINOR_VERSION > 20
 		JsonObject->TryGetNumberField(TEXT("generation"), Generation);
 		JsonObject->TryGetNumberField(TEXT("creation_timestamp"), CreationTimestamp);
 		JsonObject->TryGetNumberField(TEXT("deletion_timestamp"), DeletionTimestamp);
+#else
+		double outGeneration, outCreationTimestamp, outDeletionTimestamp = 0.f;
+		JsonObject->TryGetNumberField(TEXT("generation"), outGeneration);
+		Generation = outGeneration;
+		JsonObject->TryGetNumberField(TEXT("creation_timestamp"), outCreationTimestamp);
+		CreationTimestamp = outCreationTimestamp;
+		JsonObject->TryGetNumberField(TEXT("deletion_timestamp"), outDeletionTimestamp);
+		DeletionTimestamp = outDeletionTimestamp;
+#endif
 		const TSharedPtr<FJsonObject>* AnnotationsJsonObject;
 		if (JsonObject->TryGetObjectField(TEXT("annotations"), AnnotationsJsonObject))
 		{
