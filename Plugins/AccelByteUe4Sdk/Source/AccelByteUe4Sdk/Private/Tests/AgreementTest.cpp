@@ -10,7 +10,6 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
-#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
 #include "HAL/FileManager.h"
 
@@ -31,103 +30,78 @@ const auto AgreementTestErrorHandler = FErrorHandler::CreateLambda([](int32 Erro
 
 struct AgreementTestUserInfo
 {
-	const FString EmailPrefix = "Agreement_UE4SDKTest";
-	const FString EmailSuffix = "@example.com";
+	const FString EmailAddress = "Agreement_UE4SDKTest@example.com";
 	const FString Password = "Password+123";
 	const FString CountryCode = "MG";
 	const FString DisplayName = "AgreeMan";
-};
-const AgreementTestUserInfo AgreementTestUserInfo_;
-
-struct AgreementUser
-{
-	FString EmailAddress;
 	FString UserId;
 };
-
-static const int UserCount = 2;
-static TArray<AgreementUser> TestUsers;
+static AgreementTestUserInfo AgreementTestUserInfo_;
 
 static FString PolicyId;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementSetup, "AccelByte.Tests.Agreement.A.Setup", AutomationFlagMaskAgreement);
 bool AgreementSetup::RunTest(const FString& Parameters)
 {
-	bool bServerClientLoginSuccess = false;
+	bool UsersDeletionDone = false;
+	bool UsersCreationSuccess = false;
+	bool UsersLoginSuccess = false;
 
-	// SERVER LOGIN
-	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bServerClientLoginSuccess]()
-		{
-			bServerClientLoginSuccess = true;
-			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tClient Successfully Login."));
-		}), AgreementTestErrorHandler);
+	// CLEAN UP PREVIOUS USER
+	User_Delete_By_Email_Address(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&UsersDeletionDone]() {
+		UsersDeletionDone = true;
+	}), FErrorHandler::CreateLambda([&UsersDeletionDone](int32 Code, FString Message) {
+		UsersDeletionDone = true;
+	}));
 	FlushHttpRequests();
-	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
+	Waiting(UsersDeletionDone, "Waiting for cleanup previous user...");
 
-	TestUsers.AddDefaulted(UserCount);
-	for (int i = 0; i < UserCount; i++)
+	// USER CREATION
+	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user creation ..."));
+
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21 + 7));
+	const FString DoB_String = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bUsersCreationDone = false;
+	FRegistry::User.Register(AgreementTestUserInfo_.EmailAddress, AgreementTestUserInfo_.Password, AgreementTestUserInfo_.DisplayName, AgreementTestUserInfo_.CountryCode, DoB_String, THandler<FRegisterResponse>::CreateLambda([&UsersCreationSuccess, &bUsersCreationDone](const FRegisterResponse& Response)
 	{
-		bool UsersDeletionDone = false;
-		bool UsersCreationSuccess = false;
-		bool UsersLoginSuccess = false;
-
-		FString EmailAddress = FString::Printf(TEXT("%s+%d%s"), *AgreementTestUserInfo_.EmailPrefix, i, *AgreementTestUserInfo_.EmailSuffix);
-		TestUsers[i].EmailAddress = EmailAddress;
-		User_Delete_By_Email_Address(EmailAddress, FSimpleDelegate::CreateLambda([&UsersDeletionDone]() {
-			UsersDeletionDone = true;
-		}), FErrorHandler::CreateLambda([&UsersDeletionDone](int32 Code, FString Message) {
-			UsersDeletionDone = true;
-		}));
-		FlushHttpRequests();
-		Waiting(UsersDeletionDone, "Waiting for cleanup previous user...");
-
-		// USER CREATION
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user creation (%d/%d)..."), i, UserCount);
-
-		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21 + 7));
-		const FString DoB_String = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-
-		bool bUsersCreationDone = false;
-		FRegistry::User.Register(EmailAddress, AgreementTestUserInfo_.Password, AgreementTestUserInfo_.DisplayName, AgreementTestUserInfo_.CountryCode, DoB_String, THandler<FRegisterResponse>::CreateLambda([&UsersCreationSuccess, &bUsersCreationDone](const FRegisterResponse& Response)
+		UsersCreationSuccess = true;
+		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is successfuly created."));
+		bUsersCreationDone = true;
+	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+	{
+		if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
 		{
 			UsersCreationSuccess = true;
-			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is successfuly created."));
-			bUsersCreationDone = true;
-		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is already created."));
+		}
+		else
 		{
-			if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
-			{
-				UsersCreationSuccess = true;
-				UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is already created."));
-			}
-			else
-			{
-				UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User can't be created"));
-			}
-			bUsersCreationDone = true;
-		}));
-		FlushHttpRequests();
-		Waiting(bUsersCreationDone, "Waiting for user created...");
+			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User can't be created"));
+		}
+		bUsersCreationDone = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bUsersCreationDone, "Waiting for user created...");
 
-		// USER LOG IN
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login (%d/%d)..."), i, UserCount);
+	// USER LOG IN
+	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login..."));
 
-		FRegistry::User.LoginWithUsername(
-			EmailAddress,
-			AgreementTestUserInfo_.Password,
-			FVoidHandler::CreateLambda([&UsersLoginSuccess, i]()
-		{
-			TestUsers[i].UserId = FRegistry::Credentials.GetUserId();
-			UsersLoginSuccess = true;
-			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
-		}), AgreementTestErrorHandler);
-		FlushHttpRequests();
-		Waiting(UsersLoginSuccess, "Waiting for login with user name...");
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
+	FRegistry::User.LoginWithUsername(
+		AgreementTestUserInfo_.EmailAddress,
+		AgreementTestUserInfo_.Password,
+		FVoidHandler::CreateLambda([&UsersLoginSuccess]()
+	{
+		AgreementTestUserInfo_.UserId = FRegistry::Credentials.GetUserId();
+		UsersLoginSuccess = true;
+		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
+	}), AgreementTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(UsersLoginSuccess, "Waiting for login with user name...");
+	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
-		check(UsersCreationSuccess);
-		check(UsersLoginSuccess);
-	}
+	check(UsersCreationSuccess);
+	check(UsersLoginSuccess);
 
 	bool bGetBasePoliciesSuccess = false;
 	TArray<FAgreementBasePolicy> basePolicies;
@@ -298,23 +272,21 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementTearDown, "AccelByte.Tests.Agreement.Z.Teardown", AutomationFlagMaskAgreement);
 bool AgreementTearDown::RunTest(const FString& Parameters)
 {
-	for (int i = 0; i < UserCount; i++)
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+
+	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(AgreementTestUserInfo_.UserId, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
-		bool bDeleteDone = false;
-		bool bDeleteSuccessful = false;
+		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), AgreementTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for deletion...");
 
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("DeleteUserById"));
-		DeleteUserById(TestUsers[i].UserId, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
-		{
-			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("    Success"));
-			bDeleteSuccessful = true;
-			bDeleteDone = true;
-		}), AgreementTestErrorHandler);
-		FlushHttpRequests();
-		Waiting(bDeleteDone, "Waiting for deletion...");
+	check(bDeleteSuccessful);
 
-		check(bDeleteSuccessful);
-	}
 	return true;
 }
 
@@ -340,17 +312,6 @@ bool AgreementGetLegalPoliciesByCountry::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions, "AccelByte.Tests.Agreement.C.GetLegalPoliciesAndBulkAcceptPolicyVersions", AutomationFlagMaskAgreement);
 bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString& Parameters)
 {
-	bool UsersLoginSuccess = false;
-	FRegistry::User.LoginWithUsername(
-		TestUsers[0].EmailAddress,
-		AgreementTestUserInfo_.Password,
-		FVoidHandler::CreateLambda([&UsersLoginSuccess]()
-	{
-		UsersLoginSuccess = true;
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
-	}), AgreementTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(UsersLoginSuccess, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	bool bGetPoliciesSuccess = false;
@@ -404,17 +365,6 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesAndAcceptPolicyVersion, "AccelByte.Tests.Agreement.C.GetLegalPoliciesAndAcceptPolicyVersion", AutomationFlagMaskAgreement);
 bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Parameters)
 {
-	bool UsersLoginSuccess = false;
-	FRegistry::User.LoginWithUsername(
-		TestUsers[1].EmailAddress,
-		AgreementTestUserInfo_.Password,
-		FVoidHandler::CreateLambda([&UsersLoginSuccess]()
-	{
-		UsersLoginSuccess = true;
-		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
-	}), AgreementTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(UsersLoginSuccess, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	bool bGetPoliciesSuccess = false;
