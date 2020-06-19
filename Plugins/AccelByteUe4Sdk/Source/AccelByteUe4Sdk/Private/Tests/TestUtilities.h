@@ -434,6 +434,44 @@ struct FVerificationCode
 		FString passwordReset;
 };
 
+USTRUCT(BlueprintType)
+struct FUserResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		bool DeletionStatus;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString EmailAddress; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		bool EmailVerified;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		bool Enabled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		TArray<FString> Roles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserResponse")
+		FString UserId;
+};
+
+USTRUCT(BlueprintType)
+struct FUserSearchResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserSearchResponse")
+		TArray<FUserResponse> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserSearchResponse")
+		FAccelByteModelsPaging Paging;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -510,6 +548,136 @@ struct FLeaderboardConfigRequest
 using FLeaderboardConfigResponse = FLeaderboardConfigRequest;
 #pragma endregion LEADERBOARD_MODEL
 
+#pragma region AGREEMENT_MODEL
+USTRUCT(BlueprintType)
+struct FAgreementBasePolicyCreate
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		FString TypeId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		FString BasePolicyName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		TArray<FString> AffectedCountries;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		TArray<FString> AffectedClientIds;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		bool IsMandatory;
+};
+USTRUCT(BlueprintType)
+struct FAgreementPolicyTypeObject
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyTypeObject")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyTypeObject")
+		FString PolicyTypeName;
+	// contains more fields but unused for test
+};
+USTRUCT(BlueprintType)
+struct FAgreementPolicyObject
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
+		FString CountryCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyObject")
+		FString PolicyName;
+	// contains more fields but unused for test
+};
+USTRUCT(BlueprintType)
+struct FAgreementBasePolicy
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
+		FString BasePolicyName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicy")
+		TArray<FAgreementPolicyObject> Policies;
+	// contains more fields but unused for test
+};
+USTRUCT(BlueprintType)
+struct FAgreementPolicyVersionCreate
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		FString DisplayVersion;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		bool IsCrucial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		bool IsCommitted;
+};
+USTRUCT(BlueprintType)
+struct FAgreementPolicyVersion
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		FString DisplayVersion;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		FString BasePolicyId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		bool IsCrucial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | PolicyVersion")
+		bool IsInEffect;
+	// contains more fields but unused for test
+};
+USTRUCT(BlueprintType)
+struct FAgreementCountryPolicy
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
+		FString CountryCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
+		FString PolicyName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
+		bool IsCrucial;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | CountryPolicy")
+		TArray<FAgreementPolicyVersion> PolicyVersions;
+	// contains more fields but unused for test
+};
+USTRUCT(BlueprintType)
+struct FAgreementLocalizedPolicyCreate
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
+		FString LocaleCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
+		FString ContentType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicyCreate")
+		FString Description;
+};
+USTRUCT(BlueprintType)
+struct FAgreementLocalizedPolicy
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
+		FString LocaleCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
+		FString ContentType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
+		FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | LocalizedPolicy")
+		FString AttachmentLocation;
+};
+
+#pragma endregion AGREEMENT_MODEL
+
 void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
@@ -544,5 +712,16 @@ void Leaderboard_Delete_Leaderboard(const FString& leaderboardCode, const FSimpl
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
+void User_Get_By_Email_Address(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError);
+void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
 void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPolicyVersionCreate& CreateRequest, const THandler<FAgreementPolicyVersion>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Create_Localized_Policy(const FString& PolicyVersionId, const FAgreementLocalizedPolicyCreate& CreateRequest, const THandler<FAgreementLocalizedPolicy>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Publish_Policy_Version(const FString& PolicyVersionId, bool ShouldNotify, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Get_Country_Base_Policy(const FString& PolicyId, const FString& CountryCode, const THandler<FAgreementCountryPolicy>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject>>& OnSuccess, const FErrorHandler& OnError);
+void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THandler<TArray<FAgreementLocalizedPolicy>>& OnSuccess, const FErrorHandler& OnError);

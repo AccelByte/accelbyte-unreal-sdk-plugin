@@ -31,6 +31,7 @@ public:
 	FString QosManagerServerUrl;
 	FString LeaderboardServerUrl;
 	FString GameTelemetryServerUrl;
+	FString AgreementServerUrl;
 };
 
 } // Namespace AccelByte
@@ -95,6 +96,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString GameTelemetryServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	FString AgreementServerUrl;
 };
 
 

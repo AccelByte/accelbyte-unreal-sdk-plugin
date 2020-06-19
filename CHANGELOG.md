@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.16.0 (2020-06-16)
+### Added
+- Agreement Api
+### Fixed
+- Fix third party platform string
+
 ## 2.15.0 (2020-06-03)
 ### Added
 - Game Client SDK

@@ -29,6 +29,8 @@ FString User::TempUsername;
 static FString PlatformStrings[] = {
 	TEXT("steam"),
 	TEXT("google"),
+	TEXT("ps4"),
+	TEXT("live"),
 	TEXT("facebook"),
 	TEXT("android"),
 	TEXT("ios"),
