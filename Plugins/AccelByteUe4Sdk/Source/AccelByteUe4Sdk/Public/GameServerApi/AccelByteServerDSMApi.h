@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
+#include "Agones.h"
 
 class IWebSocket;
 
@@ -23,6 +24,16 @@ enum class EServerType :uint8
 	NONE,
 	CLOUDSERVER,
 	LOCALSERVER
+};
+
+enum class EProvider : uint8
+{
+	AGONES,
+	AMPD,
+	AWS,
+	BAREMETAL,
+	I3D,
+	DEFAULT
 };
 
 /**
@@ -90,6 +101,11 @@ public:
 	void PollHeartBeat();
 
 	/*
+	 * @brief Poll agones heartbeat manually. It will raise OnMatchRequest event if DSM send match request data in heartbeat response
+	*/
+	void PollAgonesHeartBeat();
+
+	/*
 	 * @brief Set handler delegate for OnMatchRequest event when DSM send match request data in heartbeat response
 	 *
 	 * @param OnMatchRequest This delegate will be called if DSM send match request data in heartbeat response
@@ -126,13 +142,17 @@ private:
 	bool HeartBeatTick(float DeltaTime);
 	void GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
 	void ParseCommandParam();
+	void InitiateAgones();
 
 	FString ServerName = "";
-	FString Provider = "";
+	EProvider Provider = EProvider::DEFAULT;
 	FString Game_version = "";
 	EServerType ServerType = EServerType::NONE;
 	FHttpRequestCompleteDelegate OnRegisterResponse;
 	FHttpRequestCompleteDelegate OnHeartBeatResponse;
+	FGameServerRequestCompleteDelegate OnAgonesHeartBeatResponse;
+	FGameServerRequestCompleteDelegate OnAgonesHealthCheckResponse;
+	FTickerDelegate OnAgonesHealthCheckTimeup;
 	THandler<FAccelByteModelsMatchRequest> OnMatchRequest;
 	bool bHeartbeatIsAutomatic = false;
 	int HeartBeatTimeoutSeconds = 0;
@@ -144,6 +164,8 @@ private:
 	THandler<FAccelByteModelsDSMClient> GetServerUrlDelegate;
 	THandler<FAccelByteModelsPubIp> GetPubIpDelegate;
 	int HeartBeatRetryCount = 0;
+	
+	TMap<EProvider, FString> PROVIDER_TABLE;
 };
 
 } // Namespace GameServerApi
