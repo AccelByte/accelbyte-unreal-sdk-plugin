@@ -76,6 +76,11 @@ FString UAccelByteBlueprintsSettings::GetLeaderboardServerUrl()
 	return FRegistry::Settings.LeaderboardServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetCloudSaveServerUrl()
+{
+	return FRegistry::Settings.CloudSaveServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetGameTelemetryServerUrl()
 {
 	return FRegistry::Settings.GameTelemetryServerUrl;
@@ -144,6 +149,11 @@ void UAccelByteBlueprintsSettings::SetQosManagerServerUrl(const FString& QosMana
 void UAccelByteBlueprintsSettings::SetLeaderboardServerUrl(const FString& LeaderboardServerUrl)
 {
 	FRegistry::Settings.LeaderboardServerUrl = LeaderboardServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetCloudSaveServerUrl(const FString& CloudSaveServerUrl)
+{
+	FRegistry::Settings.CloudSaveServerUrl = CloudSaveServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetGameTelemetryServerUrl(const FString& GameTelemetryServerUrl)
