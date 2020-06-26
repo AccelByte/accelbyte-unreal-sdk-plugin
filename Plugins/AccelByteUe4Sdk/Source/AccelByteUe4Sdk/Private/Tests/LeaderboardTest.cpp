@@ -458,17 +458,11 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 			if (userRankingResult.userId == TestUsersID[USER_ID_WINNER_INDEX])
 			{
 				check(userRankingResult.allTime.rank == 1)
-				check(userRankingResult.monthly.rank == 1)
-				check(userRankingResult.weekly.rank == 1)
-				check(userRankingResult.daily.rank == 1)
 				check(userRankingResult.current.rank == 1)
 			}
 			else
 			{
 				check(userRankingResult.allTime.rank != 1)
-				check(userRankingResult.monthly.rank != 1)
-				check(userRankingResult.weekly.rank != 1)
-				check(userRankingResult.daily.rank != 1)
 				check(userRankingResult.current.rank != 1)
 			}
 		}

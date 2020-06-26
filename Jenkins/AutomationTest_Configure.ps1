@@ -21,6 +21,7 @@ $CONFIG_FIELD =
 "LeaderboardServerUrl=`"$Env:BASE_URL$Env:LEADERBOARD_PREFIX`"`r`n" +
 "GameTelemetryServerUrl=`"$Env:BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" +
 "CloudSaveServerUrl=`"$Env:BASE_URL$Env:CLOUD_SAVE_PREFIX`"`r`n"
+"AgreementServerUrl=`"$Env:BASE_URL$Env:AGREEMENT_PREFIX`"`r`n"
 
 $SERVER_CONFIG_FIELD =
 "[/Script/AccelByteUe4Sdk.AccelByteServerSettings]`r`n" +

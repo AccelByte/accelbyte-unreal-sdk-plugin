@@ -39,6 +39,7 @@ struct AgreementTestUserInfo
 static AgreementTestUserInfo AgreementTestUserInfo_;
 
 static FString PolicyId;
+static TArray<FString> PolicyTags = TArray<FString>({ TEXT("tag1"), TEXT("tag2") });;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementSetup, "AccelByte.Tests.Agreement.A.Setup", AutomationFlagMaskAgreement);
 bool AgreementSetup::RunTest(const FString& Parameters)
@@ -290,12 +291,14 @@ bool AgreementTearDown::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesByCountry, "AccelByte.Tests.Agreement.B.GetLegalPoliciesByCountry", AutomationFlagMaskAgreement);
-bool AgreementGetLegalPoliciesByCountry::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesByCountryWithoutTag, "AccelByte.Tests.Agreement.B.GetLegalPoliciesByCountryWithoutTag", AutomationFlagMaskAgreement);
+bool AgreementGetLegalPoliciesByCountryWithoutTag::RunTest(const FString& Parameters)
 {
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, false, 
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+
+	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
 		policies = Policies;
 		bGetPoliciesDone = true;
@@ -309,6 +312,70 @@ bool AgreementGetLegalPoliciesByCountry::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesByCountryWithSomeTags, "AccelByte.Tests.Agreement.B.GetLegalPoliciesByCountryWithSomeTags", AutomationFlagMaskAgreement);
+bool AgreementGetLegalPoliciesByCountryWithSomeTags::RunTest(const FString& Parameters)
+{
+	bool bGetPoliciesDone = false;
+	TArray<FAccelByteModelsPublicPolicy> policies;
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+
+	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, PolicyTags, false, 
+		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
+		policies = Policies;
+		bGetPoliciesDone = true;
+	}), AgreementTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+
+	check(policies.Num() > 0);
+	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesByCountryWithOneTag, "AccelByte.Tests.Agreement.B.GetLegalPoliciesByCountryWithOneTag", AutomationFlagMaskAgreement);
+bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parameters)
+{
+	bool bGetPoliciesDone = false;
+	TArray<FAccelByteModelsPublicPolicy> policies;
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	TArray<FString> Tags = TArray<FString> { TEXT("%S"), PolicyTags[0] };
+
+	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
+		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
+		policies = Policies;
+		bGetPoliciesDone = true;
+	}), AgreementTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+
+	check(policies.Num() > 0);
+	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesByCountryWithUnmatchTag, "AccelByte.Tests.Agreement.B.GetLegalPoliciesByCountryWithUnmatchTag", AutomationFlagMaskAgreement);
+bool AgreementGetLegalPoliciesByCountryWithUnmatchTag::RunTest(const FString& Parameters)
+{
+	bool bGetPoliciesDone = false;
+	TArray<FAccelByteModelsPublicPolicy> policies;
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	TArray<FString> Tags = TArray<FString> {TEXT("tag3")};
+
+	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
+		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
+		policies = Policies;
+		bGetPoliciesDone = true;
+	}), AgreementTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+
+	check(policies.Num() == 0);
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions, "AccelByte.Tests.Agreement.C.GetLegalPoliciesAndBulkAcceptPolicyVersions", AutomationFlagMaskAgreement);
 bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString& Parameters)
 {
@@ -316,7 +383,9 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 
 	bool bGetPoliciesSuccess = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	FRegistry::Agreement.GetLegalPolicies(false,
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+
+	FRegistry::Agreement.GetLegalPolicies(AgreementPolicyType, false,
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesSuccess, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
 		policies = Policies;
 		bGetPoliciesSuccess = true;
@@ -369,7 +438,9 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 
 	bool bGetPoliciesSuccess = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	FRegistry::Agreement.GetLegalPolicies(false,
+	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+
+	FRegistry::Agreement.GetLegalPolicies(AgreementPolicyType, false,
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesSuccess, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
 		policies = Policies;
 		bGetPoliciesSuccess = true;

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.18.4 (2020-07-03)
+### Changed
+- Agreement
+    - GetLegalPolicies
+        - Add policyType and tags param
+    - GetLegalPoliciesByCountry
+        - Add policyType and tags param
+
 ## 2.18.3 (2020-07-03)
 ### Fix
 - Lobby Api Blueprint
