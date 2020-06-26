@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.18.1 (2020-06-25)
+### Fixed
+- Server DSM Api
+  - Move args parsing from constructor
+
 ## 2.18.0 (2020-06-22)
 ### Added
 - CloudSave

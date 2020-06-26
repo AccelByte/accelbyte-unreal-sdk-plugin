@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -25,10 +25,12 @@ namespace AccelByte
 		const FString AGONES_MATCH_DETAILS_ANNOTATION = "match-details";
 		const float AGONES_INITIAL_HEALTH_CHECK_TIMEOUT_SECOND = 8.0f;
 
-        void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-        {
-            Report report;
-            report.GetFunctionLog(FString(__FUNCTION__));
+		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		{
+			Report report;
+			report.GetFunctionLog(FString(__FUNCTION__));
+			ParseCommandParam();
+
 			if (ServerType != EServerType::NONE)
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server already registered."));
@@ -448,6 +450,7 @@ namespace AccelByte
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
+		// Should not be called from constructor, FCommandLine::Get() is not ready.
 		void ServerDSM::ParseCommandParam()
 		{
 			const auto CommandParams = FCommandLine::Get();
@@ -496,7 +499,6 @@ namespace AccelByte
 			PROVIDER_TABLE.Add(EProvider::I3D, "i3d");
 			PROVIDER_TABLE.Add(EProvider::DEFAULT, "");
 
-			ParseCommandParam();
 			HeartBeatDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::HeartBeatTick);
 
 			// Agones has different heartbeat request-response. See ServerDSM::PollAgonesHeartBeat()
