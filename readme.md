@@ -208,3 +208,8 @@ doxygen
 
 The documentation will be in `/Doxygen` folder.
 Open `/Doxygen/html/index.html` on your browser.
+
+# Commit Message Standardization
+We are following Conventional Commits as a standard to follow for writing commit messages. The details of the rules can be found in the [conventional commits website](https://www.conventionalcommits.org/en/v1.0.0/). 
+
+We optionally provide a git commit-hook that will be triggered when you do a commit through the terminal that will execute an interactive cli that can guide you to write commit message that follows the standard, to enable this, run `make SetupCommitHook`

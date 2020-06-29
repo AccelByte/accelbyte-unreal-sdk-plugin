@@ -89,3 +89,9 @@ Doxygen/*
 SteamHelper/steamticket.txt
 SteamHelper/SteamTicketHelper.pid
 *.orig
+
+# pre commit hook
+node_modules
+yarn.lock
+package.json
+.idea
