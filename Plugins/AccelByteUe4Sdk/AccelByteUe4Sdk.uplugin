@@ -22,9 +22,5 @@
 		}
 	],
 	"Plugins": [
-		{
-			"Name": "Agones",
-			"Enabled": true
-		}
 	]
 }

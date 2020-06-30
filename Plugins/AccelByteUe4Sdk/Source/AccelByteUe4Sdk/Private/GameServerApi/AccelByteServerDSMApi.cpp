@@ -353,33 +353,43 @@ namespace AccelByte
 			Report report;
 			report.GetFunctionLog(FString(__FUNCTION__));
 			OnAgonesHeartBeatResponse.BindLambda([&](TSharedPtr<FGameServer> GameServer, bool bSuccess)
-			{
-				if (bSuccess)
 				{
-					if (GameServer.IsValid())
+					if (bSuccess)
 					{
-						FString MatchDetails = GameServer->ObjectMeta.Annotations[AGONES_MATCH_DETAILS_ANNOTATION];
-						FAccelByteModelsMatchRequest StructResponse;
-						bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(MatchDetails, &StructResponse, 0, 0);
-						if (bParseSuccess)
+						if (GameServer.IsValid())
 						{
-							OnMatchRequest.ExecuteIfBound(StructResponse);
+							UE_LOG(LogTemp, Log, TEXT("OnAgonesHeartBeatResponse"));
+							TArray<FString> ListOfKey;
+							GameServer->ObjectMeta.Annotations.GetKeys(ListOfKey);
+							if (ListOfKey.Contains(AGONES_MATCH_DETAILS_ANNOTATION))
+							{
+								FString MatchDetails = GameServer->ObjectMeta.Annotations[AGONES_MATCH_DETAILS_ANNOTATION];
+								FAccelByteModelsMatchRequest StructResponse;
+								bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(MatchDetails, &StructResponse, 0, 0);
+								if (bParseSuccess)
+								{
+									OnMatchRequest.ExecuteIfBound(StructResponse);
+								}
+								else
+								{
+									OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong."));
+								}
+							}
+							else
+							{
+								OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is not found."));
+							}
 						}
 						else
 						{
-							OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong/not found."));
+							OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer request is complete. But GameServer is not found."));
 						}
 					}
 					else
 					{
-						OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer request is complete. But GameServer is not found."));
+						OnHeartBeatError.ExecuteIfBound(404, TEXT("Failed to get Agones FGameServer."));
 					}
-				}
-				else
-				{
-					OnHeartBeatError.ExecuteIfBound(404, TEXT("Failed to get Agones FGameServer."));
-				}
-			});
+				});
 			FAgonesModule::GetHook().GetGameServer(OnAgonesHeartBeatResponse);
 		}
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.18.2 (2020-06-30)
+### Fix
+- Telemetry Api
+  - #include header path not complete
+- Server DSM Api
+  - Agones preprocessor
+  - ServerDSMApi warning C4458 signature hides class member
+
 ## 2.18.1 (2020-06-25)
 ### Fixed
 - Server DSM Api
