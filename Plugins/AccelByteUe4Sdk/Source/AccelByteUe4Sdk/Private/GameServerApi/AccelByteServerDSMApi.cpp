@@ -204,7 +204,7 @@ namespace AccelByte
 			}
         }
 
-        void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+        void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
         {
             Report report;
             report.GetFunctionLog(FString(__FUNCTION__));
@@ -214,7 +214,7 @@ namespace AccelByte
 			}
 			else
 			{
-				this->ServerName = ServerName;
+				this->ServerName = ServerName_;
 				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
 				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
@@ -222,7 +222,7 @@ namespace AccelByte
 				FString Accept = TEXT("application/json");
 				const FAccelByteModelsRegisterLocalServerRequest Register{
 					IPAddress,
-					ServerName,
+					ServerName_,
 					Port
 				};
 				FString Contents;
@@ -265,7 +265,7 @@ namespace AccelByte
 			}
         }
 
-        void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+        void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
         {
             Report report;
             report.GetFunctionLog(FString(__FUNCTION__));
@@ -281,7 +281,7 @@ namespace AccelByte
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
 				const FAccelByteModelsDeregisterLocalServerRequest Deregister{
-					ServerName,
+					ServerName_
 				};
 				FString Contents;
 				FJsonObjectConverter::UStructToJsonObjectString(Deregister, Contents);
@@ -353,9 +353,9 @@ namespace AccelByte
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, OnHeartBeatResponse, FPlatformTime::Seconds());
 		}
 
-		void ServerDSM::SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest> OnMatchRequest)
+		void ServerDSM::SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest> OnMatchRequest_)
 		{
-			this->OnMatchRequest = OnMatchRequest;
+			this->OnMatchRequest = OnMatchRequest_;
 		}
 
 		void ServerDSM::SetOnHeartBeatErrorDelegate(const FErrorHandler& OnError)
