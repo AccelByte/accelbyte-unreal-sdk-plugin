@@ -1,9 +1,14 @@
-// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 using UnrealBuildTool;
 using System.IO;
+using System;
+using System.Collections.Generic;
+
+namespace UnrealBuildTool.Rules
+{
 
 public class AccelByteUe4Sdk : ModuleRules
 {
@@ -13,6 +18,11 @@ public class AccelByteUe4Sdk : ModuleRules
 
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
         PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
+
+        bool isAgonesFound = Directory.Exists(Path.Combine(ModuleDirectory, "..", "..", "..", "Agones"));
+
+        Definitions.Add(string.Format("AGONES_PLUGIN_FOUND={0}", (isAgonesFound ? 1 : 0)));
+        if (isAgonesFound) { PublicDependencyModuleNames.AddRange(new string[] {"Agones"}); }
 
         PublicDependencyModuleNames.AddRange(new string[]
         {
@@ -26,8 +36,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "WebSockets",
             "Networking",
             "SSL",
-            "Icmp",
-            "Agones"
+            "Icmp"
         });
 
         if (Target.bBuildEditor == true)
@@ -38,4 +47,6 @@ public class AccelByteUe4Sdk : ModuleRules
             });
         }
     }
+
+}
 }

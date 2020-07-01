@@ -2,7 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteGameTelemetryApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"

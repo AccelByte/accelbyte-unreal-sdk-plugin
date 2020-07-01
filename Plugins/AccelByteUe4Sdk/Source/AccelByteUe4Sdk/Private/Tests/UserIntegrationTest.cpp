@@ -14,6 +14,7 @@
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 using namespace std;
 

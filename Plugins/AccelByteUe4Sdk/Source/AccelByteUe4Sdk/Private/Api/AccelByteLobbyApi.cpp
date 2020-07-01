@@ -701,7 +701,7 @@ void Lobby::OnMessage(const FString& Message)
 		return;
 	}
 	FString lobbyResponseType = JsonParsed->GetStringField("type");
-	int lobbyResponseCode;
+	int lobbyResponseCode = 0;
 	if (lobbyResponseType.Contains("Response"))
 		lobbyResponseCode = JsonParsed->GetIntegerField("code");
 	UE_LOG(LogTemp, Display, TEXT("Type: %s"), *lobbyResponseType);

@@ -8,7 +8,9 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
+#if AGONES_PLUGIN_FOUND
 #include "Agones.h"
+#endif
 
 class IWebSocket;
 
@@ -101,11 +103,6 @@ public:
 	void PollHeartBeat();
 
 	/*
-	 * @brief Poll agones heartbeat manually. It will raise OnMatchRequest event if DSM send match request data in heartbeat response
-	*/
-	void PollAgonesHeartBeat();
-
-	/*
 	 * @brief Set handler delegate for OnMatchRequest event when DSM send match request data in heartbeat response
 	 *
 	 * @param OnMatchRequest This delegate will be called if DSM send match request data in heartbeat response
@@ -142,7 +139,6 @@ private:
 	bool HeartBeatTick(float DeltaTime);
 	void GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
 	void ParseCommandParam();
-	void InitiateAgones();
 
 	FString ServerName = "";
 	EProvider Provider = EProvider::DEFAULT;
@@ -150,9 +146,6 @@ private:
 	EServerType ServerType = EServerType::NONE;
 	FHttpRequestCompleteDelegate OnRegisterResponse;
 	FHttpRequestCompleteDelegate OnHeartBeatResponse;
-	FGameServerRequestCompleteDelegate OnAgonesHeartBeatResponse;
-	FGameServerRequestCompleteDelegate OnAgonesHealthCheckResponse;
-	FTickerDelegate OnAgonesHealthCheckTimeup;
 	THandler<FAccelByteModelsMatchRequest> OnMatchRequest;
 	bool bHeartbeatIsAutomatic = false;
 	int HeartBeatTimeoutSeconds = 0;
@@ -166,6 +159,23 @@ private:
 	int HeartBeatRetryCount = 0;
 	
 	TMap<EProvider, FString> PROVIDER_TABLE;
+
+
+
+#if AGONES_PLUGIN_FOUND
+public:
+	/*
+	 * @brief Poll agones heartbeat manually. It will raise OnMatchRequest event if DSM send match request data in heartbeat response
+	*/
+	void PollAgonesHeartBeat();
+
+private:
+	void InitiateAgones(FVoidHandler OnSuccess);
+	void ShutdownAgones(FVoidHandler OnSuccess);
+	FGameServerRequestCompleteDelegate OnAgonesHeartBeatResponse;
+	FGameServerRequestCompleteDelegate OnAgonesHealthCheckResponse;
+	FTickerDelegate OnAgonesHealthCheckTimeup;
+#endif
 };
 
 } // Namespace GameServerApi

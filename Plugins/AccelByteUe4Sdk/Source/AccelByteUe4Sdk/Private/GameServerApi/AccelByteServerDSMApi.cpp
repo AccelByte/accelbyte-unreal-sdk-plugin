@@ -55,14 +55,12 @@ namespace AccelByte
 			}
 			else if (Provider == EProvider::AGONES)
 			{
-				InitiateAgones();
-				FTicker::GetCoreTicker().RemoveTicker(HeartBeatDelegateHandle);
-				SetServerType(EServerType::CLOUDSERVER);
-				if (bHeartbeatIsAutomatic)
-				{
-					HeartBeatDelegateHandle = FTicker::GetCoreTicker().AddTicker(HeartBeatDelegate, HeartBeatTimeoutSeconds);
-				}
-				OnSuccess.ExecuteIfBound();
+#if AGONES_PLUGIN_FOUND
+				InitiateAgones(OnSuccess);
+#else
+				UE_LOG(LogTemp, Fatal, TEXT("Agones library not found"));
+				OnError.ExecuteIfBound(404, TEXT("Agones argument provided but the library is not found!"));
+#endif
 				return;
 			}
 			else
@@ -170,9 +168,12 @@ namespace AccelByte
 			}
 			else if (Provider == EProvider::AGONES && ServerType != EServerType::LOCALSERVER)
 			{
-				FAgonesModule::GetHook().Shutdown();
-				ServerType = EServerType::NONE;
-				OnSuccess.ExecuteIfBound();
+#if AGONES_PLUGIN_FOUND
+				ShutdownAgones(OnSuccess);
+#else
+				UE_LOG(LogTemp, Fatal, TEXT("Agones library not found"));
+				OnError.ExecuteIfBound(404, TEXT("Agones provider argument provided but the library is not found!"));
+#endif
 				return;
 			}
 			else
@@ -203,7 +204,7 @@ namespace AccelByte
 			}
         }
 
-        void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+        void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
         {
             Report report;
             report.GetFunctionLog(FString(__FUNCTION__));
@@ -213,7 +214,7 @@ namespace AccelByte
 			}
 			else
 			{
-				this->ServerName = ServerName;
+				this->ServerName = ServerName_;
 				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
 				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
@@ -221,7 +222,7 @@ namespace AccelByte
 				FString Accept = TEXT("application/json");
 				const FAccelByteModelsRegisterLocalServerRequest Register{
 					IPAddress,
-					ServerName,
+					ServerName_,
 					Port
 				};
 				FString Contents;
@@ -264,7 +265,7 @@ namespace AccelByte
 			}
         }
 
-        void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+        void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
         {
             Report report;
             report.GetFunctionLog(FString(__FUNCTION__));
@@ -280,7 +281,7 @@ namespace AccelByte
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
 				const FAccelByteModelsDeregisterLocalServerRequest Deregister{
-					ServerName,
+					ServerName_
 				};
 				FString Contents;
 				FJsonObjectConverter::UStructToJsonObjectString(Deregister, Contents);
@@ -304,7 +305,11 @@ namespace AccelByte
             report.GetFunctionLog(FString(__FUNCTION__));
 			if (Provider == EProvider::AGONES && ServerType != EServerType::LOCALSERVER)
 			{
+#if AGONES_PLUGIN_FOUND
 				PollAgonesHeartBeat();
+#else
+				UE_LOG(LogTemp, Fatal, TEXT("Agones library not found"));
+#endif
 			}
 			else
 			{
@@ -348,44 +353,9 @@ namespace AccelByte
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, OnHeartBeatResponse, FPlatformTime::Seconds());
 		}
 
-		void ServerDSM::PollAgonesHeartBeat()
+		void ServerDSM::SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest> OnMatchRequest_)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
-			OnAgonesHeartBeatResponse.BindLambda([&](TSharedPtr<FGameServer> GameServer, bool bSuccess)
-			{
-				if (bSuccess)
-				{
-					if (GameServer.IsValid())
-					{
-						FString MatchDetails = GameServer->ObjectMeta.Annotations[AGONES_MATCH_DETAILS_ANNOTATION];
-						FAccelByteModelsMatchRequest StructResponse;
-						bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(MatchDetails, &StructResponse, 0, 0);
-						if (bParseSuccess)
-						{
-							OnMatchRequest.ExecuteIfBound(StructResponse);
-						}
-						else
-						{
-							OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong/not found."));
-						}
-					}
-					else
-					{
-						OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer request is complete. But GameServer is not found."));
-					}
-				}
-				else
-				{
-					OnHeartBeatError.ExecuteIfBound(404, TEXT("Failed to get Agones FGameServer."));
-				}
-			});
-			FAgonesModule::GetHook().GetGameServer(OnAgonesHeartBeatResponse);
-		}
-
-		void ServerDSM::SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest> OnMatchRequest)
-		{
-			this->OnMatchRequest = OnMatchRequest;
+			this->OnMatchRequest = OnMatchRequest_;
 		}
 
 		void ServerDSM::SetOnHeartBeatErrorDelegate(const FErrorHandler& OnError)
@@ -538,8 +508,12 @@ namespace AccelByte
 
         ServerDSM::~ServerDSM() {}
 
-		void ServerDSM::InitiateAgones()
+#if AGONES_PLUGIN_FOUND
+		void ServerDSM::InitiateAgones(FVoidHandler OnSuccess)
 		{
+			Report report;
+			report.GetFunctionLog(FString(__FUNCTION__));
+
 			FAgonesModule::GetHook().Ready();
 
 			// We check the game server in few seconds, if there's no game server obtained then shutting down.
@@ -563,6 +537,69 @@ namespace AccelByte
 				return false;
 			});
 			*AgonesInitialHealthCheckHandle = FTicker::GetCoreTicker().AddTicker(OnAgonesHealthCheckTimeup, AGONES_INITIAL_HEALTH_CHECK_TIMEOUT_SECOND);
+
+			FTicker::GetCoreTicker().RemoveTicker(HeartBeatDelegateHandle);
+			SetServerType(EServerType::CLOUDSERVER);
+			if (bHeartbeatIsAutomatic)
+			{
+				HeartBeatDelegateHandle = FTicker::GetCoreTicker().AddTicker(HeartBeatDelegate, HeartBeatTimeoutSeconds);
+			}
+			OnSuccess.ExecuteIfBound();
 		}
+
+		void ServerDSM::ShutdownAgones(FVoidHandler OnSuccess)
+		{
+			Report report;
+			report.GetFunctionLog(FString(__FUNCTION__));
+			FAgonesModule::GetHook().Shutdown();
+			ServerType = EServerType::NONE;
+			OnSuccess.ExecuteIfBound();
+		}
+
+		void ServerDSM::PollAgonesHeartBeat()
+		{
+			Report report;
+			report.GetFunctionLog(FString(__FUNCTION__));
+			OnAgonesHeartBeatResponse.BindLambda([&](TSharedPtr<FGameServer> GameServer, bool bSuccess)
+				{
+					if (bSuccess)
+					{
+						if (GameServer.IsValid())
+						{
+							TArray<FString> ListOfKey;
+							GameServer->ObjectMeta.Annotations.GetKeys(ListOfKey);
+							if (ListOfKey.Contains(AGONES_MATCH_DETAILS_ANNOTATION))
+							{
+								FString MatchDetails = GameServer->ObjectMeta.Annotations[AGONES_MATCH_DETAILS_ANNOTATION];
+								FAccelByteModelsMatchRequest StructResponse;
+								bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(MatchDetails, &StructResponse, 0, 0);
+								if (bParseSuccess)
+								{
+									OnMatchRequest.ExecuteIfBound(StructResponse);
+								}
+								else
+								{
+									OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong."));
+								}
+							}
+							else
+							{
+								OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is not found."));
+							}
+						}
+						else
+						{
+							OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer request is complete. But GameServer is not found."));
+						}
+					}
+					else
+					{
+						OnHeartBeatError.ExecuteIfBound(404, TEXT("Failed to get Agones FGameServer."));
+					}
+				});
+			FAgonesModule::GetHook().GetGameServer(OnAgonesHeartBeatResponse);
+			FAgonesModule::GetHook().Health();
+		}
+#endif
     } // Namespace GameServerApi
 } // Namespace AccelByte

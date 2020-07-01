@@ -79,7 +79,7 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d is successfuly created."), i+1, GameProfileTestUserCount);
 		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 		{
-			if (Code == EHttpResponseCodes::Conflict)
+			if (Code == (int32)AccelByte::ErrorCodes::UserEmailAlreadyUsedException)
 			{
 				UsersCreationSuccess[i] = true;
 				UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d is already created."), i+1, GameProfileTestUserCount);
