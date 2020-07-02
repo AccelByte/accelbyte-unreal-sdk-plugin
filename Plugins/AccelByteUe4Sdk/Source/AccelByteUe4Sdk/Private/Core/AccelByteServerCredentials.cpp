@@ -29,10 +29,10 @@ void ServerCredentials::ForgetAll()
 	ClientSessionState = ESessionState::Invalid;
 }
 
-void ServerCredentials::SetClientCredentials(const FString& ClientId, const FString& ClientSecret)
+void ServerCredentials::SetClientCredentials(const FString& ClientId_, const FString& ClientSecret_)
 {
-	this->ClientId = ClientId;
-	this->ClientSecret = ClientSecret;
+	ClientId = ClientId_;
+	ClientSecret = ClientSecret_;
 }
 
 void ServerCredentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)

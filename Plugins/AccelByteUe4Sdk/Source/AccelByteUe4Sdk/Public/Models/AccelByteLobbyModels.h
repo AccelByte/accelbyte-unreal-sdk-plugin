@@ -511,11 +511,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetFriendshipStatusResponse
 USTRUCT(BlueprintType)
 struct FAccelByteModelsGetFriendshipStatusStringResponse
 {
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, NotBlueprintType)
-		FString Code;
-	UPROPERTY(EditAnywhere, NotBlueprintType)
-		FString friendshipStatus;
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere, NotBlueprintType, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusStringResponse")
+        FString Code;
+    UPROPERTY(EditAnywhere, NotBlueprintType, Category = "AccelByte | Lobby | Models | Friends | GetFriendshipStatusStringResponse")
+        FString friendshipStatus;
 };
 
 UENUM(BlueprintType)

@@ -8,6 +8,7 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
@@ -576,17 +577,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		check(UsersLoginSuccess[i]);
 	}
 
-	TCHAR _preferedDSRegion[1000];
-	_preferedDSRegion[0] = 0;
-#if PLATFORM_WINDOWS
-	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
-#elif PLATFORM_LINUX
-	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
-#elif PLATFORM_MAC
-	FApplePlatformMisc::GetEnvironmentVariable(TEXT("PREFERED_DS_REGION"), _preferedDSRegion, 1000);
-#endif
-
-	FString PreferedDSRegion = _preferedDSRegion;
+	FString PreferedDSRegion = Environment::GetEnvironmentVariable("PREFERED_DS_REGION", 1000);
 
 	if (!PreferedDSRegion.IsEmpty()) 
 	{
@@ -3638,6 +3629,13 @@ public:
 		return OnMessageReceivedEvent;
 	}
 
+#if ENGINE_MINOR_VERSION > 24
+	IWebSocket::FWebSocketMessageSentEvent& OnMessageSent()
+	{
+		return OnMessageSentEvent;
+	}
+#endif
+
 	void ReceiveOpen()
 	{
 		this->State = WebSocketState::Open;
@@ -3651,7 +3649,10 @@ private:
 	IWebSocket::FWebSocketClosedEvent OnClosedEvent;
 	IWebSocket::FWebSocketMessageEvent OnMessageEvent;
 	IWebSocket::FWebSocketRawMessageEvent OnRawMessageEvent;
-	IWebSocket::FWebSocketMessageEvent  OnMessageReceivedEvent;
+	IWebSocket::FWebSocketMessageEvent OnMessageReceivedEvent;
+#if ENGINE_MINOR_VERSION > 24
+	IWebSocket::FWebSocketMessageSentEvent OnMessageSentEvent;
+#endif
 	FVoidHandler OnConnectingEvent;
 	FVoidHandler OnCloseSentEvent;
 };

@@ -9,12 +9,12 @@
         - Add policyType and tags param
 
 ## 2.18.3 (2020-07-03)
-### Fix
+### Fixed
 - Lobby Api Blueprint
   - Fix delegate notif not executed
 
 ## 2.18.2 (2020-06-30)
-### Fix
+### Fixed
 - Telemetry Api
   - #include header path not complete
 - Server DSM Api

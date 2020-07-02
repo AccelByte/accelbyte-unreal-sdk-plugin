@@ -144,8 +144,8 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.DSMControllerServerUrl = GetDefault<UAccelByteServerSettings>()->DSMControllerServerUrl;
 	FRegistry::ServerSettings.StatisticServerUrl = GetDefault<UAccelByteServerSettings>()->StatisticServerUrl;
 	FRegistry::ServerSettings.PlatformServerUrl = GetDefault<UAccelByteServerSettings>()->PlatformServerUrl;
-	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
-	FRegistry::ServerSettings.LeaderboardServerUrl = GetDefault<UAccelByteSettings>()->LeaderboardServerUrl;
+	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl;
+	FRegistry::ServerSettings.LeaderboardServerUrl = GetDefault<UAccelByteServerSettings>()->LeaderboardServerUrl;
 	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl;
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 #endif

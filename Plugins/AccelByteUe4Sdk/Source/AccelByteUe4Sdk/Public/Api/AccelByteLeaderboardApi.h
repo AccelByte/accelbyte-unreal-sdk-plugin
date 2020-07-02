@@ -11,23 +11,22 @@
 
 namespace AccelByte
 {
-	class Credentials;
-	class Settings;
-	namespace Api
-	{
+class Credentials;
+class Settings;
+namespace Api
+{
 
-		/**
-		 * @brief Leaderboard API to obtain player's ranking in a namespace.
-		 */
-		class ACCELBYTEUE4SDK_API Leaderboard
-		{
-		public:
-			Leaderboard(const Credentials& Credentials, const Settings& Settings);
-			~Leaderboard();
-		private:
-			const Credentials& Credentials;
-			const Settings& Settings;
-
+/**
+ * @brief Leaderboard API to obtain player's ranking in a namespace.
+ */
+class ACCELBYTEUE4SDK_API Leaderboard
+{
+public:
+	Leaderboard(const Credentials& Credentials, const Settings& Settings);
+	~Leaderboard();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
 public:
 	/**
 	* @brief Get leaderboard rankings in a specified timeframe.

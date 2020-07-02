@@ -11,6 +11,7 @@
 #include "Api/AccelByteUserApi.h"
 #include "Models/AccelByteUserProfileModels.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteEnvironment.h"
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
@@ -1483,16 +1484,9 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 	}
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
-	FString SteamUserID;
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-#if ENGINE_MINOR_VERSION > 20
-	SteamUserID = FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"));
-#else
-	TCHAR data[100];
-	FPlatformMisc::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), data, 100);
-	SteamUserID = FString::Printf(TEXT("%s"), data);
-#endif
+	FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
 
 	bool bGetUserDone = false;
 	FUserData ReceivedUserData;
