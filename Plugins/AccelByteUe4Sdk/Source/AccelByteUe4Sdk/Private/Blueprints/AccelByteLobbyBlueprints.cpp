@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -409,6 +409,7 @@ void UAccelByteBlueprintsLobby::SetReadyConsentResponseDelegate(FReadyConsentRes
 {
 	AccelByte::Api::Lobby::FReadyConsentResponse OnReadyConsentResponseDelegate =
 		AccelByte::Api::Lobby::FReadyConsentResponse::CreateLambda([OnReadyConsentResponse](const FAccelByteModelsReadyConsentRequest& Result){
+		OnReadyConsentResponse.ExecuteIfBound(Result);
 	});
 	FRegistry::Lobby.SetReadyConsentResponseDelegate(OnReadyConsentResponseDelegate);
 }
@@ -426,6 +427,7 @@ void UAccelByteBlueprintsLobby::SetReadyConsentNotifDelegate(FReadyConsentNotice
 {
 	AccelByte::Api::Lobby::FReadyConsentNotif OnReadyConsentNotifDelegate =
 		AccelByte::Api::Lobby::FReadyConsentNotif::CreateLambda([OnReadyConsentNotice](const FAccelByteModelsReadyConsentNotice& Result) {
+		OnReadyConsentNotice.ExecuteIfBound(Result);
 	});
 	FRegistry::Lobby.SetReadyConsentNotifDelegate(OnReadyConsentNotifDelegate);
 }
@@ -434,6 +436,7 @@ void UAccelByteBlueprintsLobby::SetRematchmakingNotifDelegate(FRematchmakingNoti
 {
 	AccelByte::Api::Lobby::FRematchmakingNotif OnRematchmakingNotifDelegate =
 		AccelByte::Api::Lobby::FRematchmakingNotif::CreateLambda([OnRematchmakingNotice](const FAccelByteModelsRematchmakingNotice& Result) {
+		OnRematchmakingNotice.ExecuteIfBound(Result);
 	});
 	FRegistry::Lobby.SetRematchmakingNotifDelegate(OnRematchmakingNotifDelegate);
 }
@@ -442,6 +445,7 @@ void UAccelByteBlueprintsLobby::SetDsNotifDelegate(FDsNotice OnDsNotice)
 {
 	AccelByte::Api::Lobby::FDsNotif OnDsNotifDelegate =
 		AccelByte::Api::Lobby::FDsNotif::CreateLambda([OnDsNotice](const FAccelByteModelsDsNotice& Result) {
+		OnDsNotice.ExecuteIfBound(Result);
 	});
 	FRegistry::Lobby.SetDsNotifDelegate(OnDsNotifDelegate);
 }

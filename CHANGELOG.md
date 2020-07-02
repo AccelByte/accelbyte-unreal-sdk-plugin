@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.18.3 (2020-07-03)
+### Fix
+- Lobby Api Blueprint
+  - Fix delegate notif not executed
+
 ## 2.18.2 (2020-06-30)
 ### Fix
 - Telemetry Api
