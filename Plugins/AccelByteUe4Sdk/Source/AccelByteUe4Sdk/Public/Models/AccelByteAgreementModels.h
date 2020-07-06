@@ -8,6 +8,14 @@
 #include "AccelByteGeneralModels.h"
 #include "AccelByteAgreementModels.generated.h"
 
+UENUM(BlueprintType)
+enum class EAccelByteAgreementPolicyType : uint8
+{
+	EMPTY,
+	LEGAL_DOCUMENT_TYPE,
+	MARKETING_PREFERENCE_TYPE
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAcceptAgreementRequest
 {

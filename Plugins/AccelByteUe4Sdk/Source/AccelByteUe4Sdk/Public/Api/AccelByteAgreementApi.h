@@ -32,21 +32,47 @@ public:
 	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
 	*
+	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPolicies(bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
+	*
+	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
+	* @param Tags Filter the responded policy by tags.
+	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief Retrieve all active latest policies based on a country.
 	*
 	* @param CountryCode Requested policy country code.
+	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPoliciesByCountry(const FString& CountryCode, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	
+
+	/**
+	* @brief Retrieve all active latest policies based on a country.
+	*
+	* @param CountryCode Requested policy country code.
+	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
+	* @param Tags Filter the responded policy by tags.
+	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief Accepts many legal policy versions all at once. Supply with localized version policy id to accept an agreement.

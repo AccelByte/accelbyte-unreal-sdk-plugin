@@ -566,6 +566,8 @@ struct FAgreementBasePolicyCreate
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
 		TArray<FString> AffectedClientIds;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
+		TArray<FString> Tags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Agreement | BasePolicyCreate")
 		bool IsMandatory;
 };
 USTRUCT(BlueprintType)

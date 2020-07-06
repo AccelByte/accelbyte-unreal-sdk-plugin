@@ -20,13 +20,32 @@ Agreement::Agreement(const AccelByte::Credentials& Credentials, const AccelByte:
 Agreement::~Agreement()
 {}
 
-void Agreement::GetLegalPolicies(bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	FString AgreementPolicyTypeString = "";
+	switch (AgreementPolicyType)
+	{
+	case EAccelByteAgreementPolicyType::EMPTY:
+		AgreementPolicyTypeString = "";
+		break;
+	case EAccelByteAgreementPolicyType::LEGAL_DOCUMENT_TYPE:
+		AgreementPolicyTypeString = "LEGAL_DOCUMENT_TYPE";
+		break;
+	case EAccelByteAgreementPolicyType::MARKETING_PREFERENCE_TYPE:
+		AgreementPolicyTypeString = "MARKETING_PREFERENCE_TYPE";
+		break;
+	default:
+		break;
+	}
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?defaultOnEmpty=%s"), *Settings.AgreementServerUrl, *Settings.Namespace, 
+	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&defaultOnEmpty=%s"), 
+		*Settings.AgreementServerUrl, 
+		*Settings.Namespace, 
+		*AgreementPolicyTypeString,
 		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -42,13 +61,128 @@ void Agreement::GetLegalPolicies(bool DefaultOnEmpty, const THandler<TArray<FAcc
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	FString AgreementPolicyTypeString = "";
+	switch (AgreementPolicyType)
+	{
+	case EAccelByteAgreementPolicyType::EMPTY:
+		AgreementPolicyTypeString = "";
+		break;
+	case EAccelByteAgreementPolicyType::LEGAL_DOCUMENT_TYPE:
+		AgreementPolicyTypeString = "LEGAL_DOCUMENT_TYPE";
+		break;
+	case EAccelByteAgreementPolicyType::MARKETING_PREFERENCE_TYPE:
+		AgreementPolicyTypeString = "MARKETING_PREFERENCE_TYPE";
+		break;
+	default:
+		break;
+	}
+
+	FString TagsString = "";
+	for (int i = 0 ; i < Tags.Num() ; i++)
+	{
+		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
+	}
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?defaultOnEmpty=%s"), *Settings.AgreementServerUrl, *CountryCode,
+	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
+		*Settings.AgreementServerUrl, 
+		*Settings.Namespace, 
+		*AgreementPolicyTypeString,
+		*TagsString,
+		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString AgreementPolicyTypeString = "";
+	switch (AgreementPolicyType)
+	{
+	case EAccelByteAgreementPolicyType::EMPTY:
+		AgreementPolicyTypeString = "";
+		break;
+	case EAccelByteAgreementPolicyType::LEGAL_DOCUMENT_TYPE:
+		AgreementPolicyTypeString = "LEGAL_DOCUMENT_TYPE";
+		break;
+	case EAccelByteAgreementPolicyType::MARKETING_PREFERENCE_TYPE:
+		AgreementPolicyTypeString = "MARKETING_PREFERENCE_TYPE";
+		break;
+	default:
+		break;
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&defaultOnEmpty=%s"), 
+		*Settings.AgreementServerUrl, 
+		*CountryCode,
+		*AgreementPolicyTypeString,
+		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString AgreementPolicyTypeString = "";
+	switch (AgreementPolicyType)
+	{
+	case EAccelByteAgreementPolicyType::EMPTY:
+		AgreementPolicyTypeString = "";
+		break;
+	case EAccelByteAgreementPolicyType::LEGAL_DOCUMENT_TYPE:
+		AgreementPolicyTypeString = "LEGAL_DOCUMENT_TYPE";
+		break;
+	case EAccelByteAgreementPolicyType::MARKETING_PREFERENCE_TYPE:
+		AgreementPolicyTypeString = "MARKETING_PREFERENCE_TYPE";
+		break;
+	default:
+		break;
+	}
+
+	FString TagsString = "";
+	for (int i = 0 ; i < Tags.Num() ; i++)
+	{
+		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
+		*Settings.AgreementServerUrl, 
+		*CountryCode,
+		*AgreementPolicyTypeString,
+		*TagsString,
 		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
