@@ -164,21 +164,6 @@ pipeline {
                             }
                         }
                     }
-                }    
-                stage('Tag') {
-                     when {
-                        expression { return doTagging }
-                    }
-                    steps {
-                        tagVersion(version, bitbucketSSHCreds)
-                    }
-                    post {
-                        failure {
-                            script{ 
-                                FAILED_STAGE = "Tag";
-                            }
-                        }
-                    }
                 }
                 stage('Package') {
                     when {
