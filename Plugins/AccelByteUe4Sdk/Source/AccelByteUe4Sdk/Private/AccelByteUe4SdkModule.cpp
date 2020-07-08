@@ -127,6 +127,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.GameTelemetryServerUrl = GetDefault<UAccelByteSettings>()->GameTelemetryServerUrl;
 	FRegistry::Settings.AgreementServerUrl = GetDefaultServerUrl(GetDefault<UAccelByteSettings>()->AgreementServerUrl, TEXT("agreement"));
 	FRegistry::Settings.CloudSaveServerUrl = GetDefault<UAccelByteSettings>()->CloudSaveServerUrl;
+	FRegistry::Settings.AchievementServerUrl = GetDefault<UAccelByteSettings>()->AchievementServerUrl;
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
@@ -146,6 +147,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.PlatformServerUrl = GetDefault<UAccelByteServerSettings>()->PlatformServerUrl;
 	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl;
 	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl;
+	FRegistry::ServerSettings.AchievementServerUrl = GetDefault<UAccelByteServerSettings>()->AchievementServerUrl;
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 #endif
 	return true;

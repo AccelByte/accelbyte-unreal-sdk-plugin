@@ -21,7 +21,8 @@ $CONFIG_FIELD =
 "LeaderboardServerUrl=`"$Env:BASE_URL$Env:LEADERBOARD_PREFIX`"`r`n" +
 "GameTelemetryServerUrl=`"$Env:BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" +
 "CloudSaveServerUrl=`"$Env:BASE_URL$Env:CLOUD_SAVE_PREFIX`"`r`n" +
-"AgreementServerUrl=`"$Env:BASE_URL$Env:AGREEMENT_PREFIX`"`r`n"
+"AgreementServerUrl=`"$Env:BASE_URL$Env:AGREEMENT_PREFIX`"`r`n" +
+"AchievementServerUrl=`"$Env:BASE_URL$Env:ACHIEVEMENT_PREFIX`"`r`n"
 
 $SERVER_CONFIG_FIELD =
 "[/Script/AccelByteUe4Sdk.AccelByteServerSettings]`r`n" +
@@ -35,7 +36,8 @@ $SERVER_CONFIG_FIELD =
 "StatisticServerUrl=`"$Env:ADMIN_BASE_URL$Env:SERVER_STATISTIC_PREFIX`"`r`n" +
 "PlatformServerUrl=`"$Env:ADMIN_BASE_URL$Env:PLATFORM_PREFIX`"`r`n" +
 "QosManagerServerUrl=`"$Env:ADMIN_BASE_URL$Env:QOS_PREFIX`"`r`n" +
-"GameTelemetryServerUrl=`"$Env:ADMIN_BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" 
+"GameTelemetryServerUrl=`"$Env:ADMIN_BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" +
+"AchievementServerUrl=`"$Env:ADMIN_BASE_URL$Env:ACHIEVEMENT_PREFIX`"`r`n"
 
 ##Write the configuration to the targeted config file
 (get-content -raw $CONFIG_FILE) -replace '(?ms)^(\[\/Script\/AccelByteUe4Sdk\.AccelByteSettings\])\r*\n(?:(?!^\[).)*(?=\r*\n)' , $CONFIG_FIELD | out-file $CONFIG_FILE -Encoding UTF8

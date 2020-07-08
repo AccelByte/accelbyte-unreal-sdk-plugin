@@ -7,6 +7,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Models/AccelByteStatisticModels.h"
+#include "Models/AccelByteAchievementModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
@@ -680,6 +681,70 @@ struct FAgreementLocalizedPolicy
 
 #pragma endregion AGREEMENT_MODEL
 
+USTRUCT(BlueprintType)
+struct FAchievementRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		FString AchievementCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		FString DefaultLanguage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		TMap<FString, FString> Name; // "Language" : "Name"
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		TMap<FString, FString> Description; // "Language" : "Description"
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		bool Hidden;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		TArray<FString> Tags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		bool Incremental;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		int32 GoalValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
+		FString StatCode;
+};
+
+USTRUCT(BlueprintType)
+struct FAchievementResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString AchievementCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString DefaultLanguage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		TMap<FString, FString> Name; // "Language" : "Name"
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		TMap<FString, FString> Description; // "Language" : "Description"
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		bool Hidden;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		int32 ListOrder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		TArray<FString> Tags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		bool Incremental;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		int32 GoalValue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString StatCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
+		FString UpdatedAt;
+};
+
 void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
@@ -727,3 +792,6 @@ void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& O
 void Agreement_Get_Country_Base_Policy(const FString& PolicyId, const FString& CountryCode, const THandler<FAgreementCountryPolicy>& OnSuccess, const FErrorHandler& OnError);
 void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject>>& OnSuccess, const FErrorHandler& OnError);
 void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THandler<TArray<FAgreementLocalizedPolicy>>& OnSuccess, const FErrorHandler& OnError);
+
+void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError);
+void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);

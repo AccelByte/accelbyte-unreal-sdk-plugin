@@ -1408,3 +1408,44 @@ void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THan
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString(AchievementRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *AchievementCode);
+	FString Verb = TEXT("DELETE");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
