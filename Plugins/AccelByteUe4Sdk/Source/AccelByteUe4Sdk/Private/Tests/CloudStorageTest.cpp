@@ -112,9 +112,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageUpdateMetadataSlot, "AccelByte.Test
 bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 {
 	FString UpdateFileName = "metadataUpdate.txt";
-	TArray<FString> UpdateTags;
-	UpdateTags.Add("tagOne");
-	UpdateTags.Add("tagTwo");
+	UpdateTags[0] = (TEXT("tagOne"));
+	UpdateTags[1] = (TEXT("tagTwo"));
 	FString UpdateLabel = "metadataLabel";
 	FString UpdateCustomAttribute = TEXT("This is a custom attribute");
 

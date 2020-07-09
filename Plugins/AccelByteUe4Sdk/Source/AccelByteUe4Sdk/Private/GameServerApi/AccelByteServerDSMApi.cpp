@@ -11,6 +11,7 @@
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Http.h"
 #include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
@@ -65,25 +66,7 @@ namespace AccelByte
 			}
 			else
 			{
-#if ENGINE_MINOR_VERSION > 20
-#if PLATFORM_WINDOWS
-				ServerName = FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
-#elif PLATFORM_LINUX
-				ServerName = FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
-#elif PLATFORM_MAC
-				ServerName = FApplePlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"));
-#endif
-#else
-				TCHAR data[100];
-#if PLATFORM_WINDOWS
-				FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"), data, 100);
-#elif PLATFORM_LINUX
-				FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"), data, 100);
-#elif PLATFORM_MAC
-				FApplePlatformMisc::GetEnvironmentVariable(TEXT("POD_NAME"), data, 100)
-#endif
-					ServerName = FString::Printf(TEXT("%s"), data);
-#endif
+				ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
 				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
 				FString Url = FString::Printf(TEXT("%s/dsm/namespaces/%s/servers/register"), *DSMServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
 				FString Verb = TEXT("POST");

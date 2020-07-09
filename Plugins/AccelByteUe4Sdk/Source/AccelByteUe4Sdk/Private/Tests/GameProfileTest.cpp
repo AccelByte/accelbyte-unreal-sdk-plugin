@@ -39,13 +39,13 @@ FAccelByteModelsGameProfileRequest GenerateGameProfileRequest(int32 AttributesLe
 	{
 		Attributes.Add(FString::Printf(TEXT("%s%d"), *AttributeKeyPrefix, i), FString::Printf(TEXT("%s%d"), *AttributeValuePrefix, i));
 	}
-	TArray<FString> Tags;
+	TArray<FString> Tags_;
 	for (int i = 0; i < TagsLength; i++)
 	{
-		Tags.Add(FString::Printf(TEXT("%s%d"), *TagPrefix, i));
+		Tags_.Add(FString::Printf(TEXT("%s%d"), *TagPrefix, i));
 	}
 
-	FAccelByteModelsGameProfileRequest Request{ Attributes, AvatarUrl, Label, ProfileName, Tags };
+	FAccelByteModelsGameProfileRequest Request{ Attributes, AvatarUrl, Label, ProfileName, Tags_ };
 	return Request;
 }
 

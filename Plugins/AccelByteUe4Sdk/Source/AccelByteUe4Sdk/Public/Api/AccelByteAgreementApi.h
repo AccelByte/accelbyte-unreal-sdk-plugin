@@ -11,30 +11,29 @@
 
 namespace AccelByte
 {
-	class Credentials;
-	class Settings;
-	namespace Api
-	{
+class Credentials;
+class Settings;
+namespace Api
+{
 
-		/**
-		 * @brief Agreement API to obtain player's ranking in a namespace.
-		 */
-		class ACCELBYTEUE4SDK_API Agreement
-		{
-		public:
-			Agreement(const Credentials& Credentials, const Settings& Settings);
-			~Agreement();
-		private:
-			const Credentials& Credentials;
-			const Settings& Settings;
-
+/**
+ * @brief Agreement API to obtain and accept legal in a namespace.
+ */
+class ACCELBYTEUE4SDK_API Agreement
+{
+public:
+	Agreement(const Credentials& Credentials, const Settings& Settings);
+	~Agreement();
+private:
+	const Credentials& Credentials;
+	const Settings& Settings;
 public:
 	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
 	*
 	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
@@ -45,7 +44,7 @@ public:
 	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param Tags Filter the responded policy by tags.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
@@ -56,12 +55,11 @@ public:
 	* @param CountryCode Requested policy country code.
 	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
 	
-
 	/**
 	* @brief Retrieve all active latest policies based on a country.
 	*
@@ -69,7 +67,7 @@ public:
 	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
 	* @param Tags Filter the responded policy by tags.
 	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
-	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsPublicPolicy.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);

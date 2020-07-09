@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
 
@@ -139,15 +140,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	TCHAR AuthorizationCode[1000];
-	AuthorizationCode[0] = 0;
-#if PLATFORM_WINDOWS
-	FWindowsPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
-#elif PLATFORM_LINUX
-	FLinuxPlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
-#elif PLATFORM_MAC
-	FApplePlatformMisc::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), AuthorizationCode, 1000);
-#endif
+	FString AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
 
 	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
 	{

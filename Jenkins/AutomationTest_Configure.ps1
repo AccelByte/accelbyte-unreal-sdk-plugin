@@ -20,7 +20,7 @@ $CONFIG_FIELD =
 "QosManagerServerUrl=`"$Env:BASE_URL$Env:QOS_PREFIX`"`r`n" + 
 "LeaderboardServerUrl=`"$Env:BASE_URL$Env:LEADERBOARD_PREFIX`"`r`n" +
 "GameTelemetryServerUrl=`"$Env:BASE_URL$Env:GAMETELEMETRY_PREFIX`"`r`n" +
-"CloudSaveServerUrl=`"$Env:BASE_URL$Env:CLOUD_SAVE_PREFIX`"`r`n"
+"CloudSaveServerUrl=`"$Env:BASE_URL$Env:CLOUD_SAVE_PREFIX`"`r`n" +
 "AgreementServerUrl=`"$Env:BASE_URL$Env:AGREEMENT_PREFIX`"`r`n"
 
 $SERVER_CONFIG_FIELD =
