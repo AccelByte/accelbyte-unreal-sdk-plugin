@@ -996,7 +996,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
+	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1014,7 +1014,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/stats"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1036,7 +1036,7 @@ void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuc
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
+	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1054,7 +1054,7 @@ void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, c
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/statistic/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *statCode);
+	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *statCode);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
