@@ -31,6 +31,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSlot
 		FString OriginalName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
 		FString SlotId;
+	UPROPERTY(meta = (DeprecatedNode, DeprecationMessage = "Status member is deprecated on new cloudstorage service."))
+		FString Status_DEPRECATED;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
 		FString StoredName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
@@ -39,4 +41,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSlot
 		FString UserId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
 		int32 Size;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateMetadataRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
+		FString Label;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
+		TArray<FString> Tags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
+		FString CustomAttribute;
 };

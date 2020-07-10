@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -152,44 +152,31 @@ namespace Api
 		UE_LOG(LogTemp, Log, TEXT("[AccelByte] Cloud Storage Start uploading..."));
 	}
 
-	void CloudStorage::UpdateSlotMetadata(FString SlotID, const FString& FileName, const TArray<FString> & Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot> & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
+	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotID);
-
-		if (Tags.Num() != 0 || !Label.IsEmpty())
-		{
-			Url.Append(TEXT("?"));
-		}
-
-		if (Tags.Num() != 0)
-		{
-			for (int i = 0; i < Tags.Num(); i++)
-			{
-				Url.Append(FString::Printf(TEXT("tags=%s&"), *FGenericPlatformHttp::UrlEncode(Tags[i])));
-			}
-		}
-		if (!Label.IsEmpty())
-		{
-			Url.Append(FString::Printf(TEXT("label=%s"), *FGenericPlatformHttp::UrlEncode(Label)));
-		}
-
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotId);
 		FString Verb            = TEXT("PUT");
-		FString Accept          = TEXT("*/*");
-		FString BoundaryGuid    = FGuid::NewGuid().ToString();
-		TArray<uint8> Content   = CustomAttributeFormDataBuilder(CustomAttribute, BoundaryGuid, true);
+		FString Accept          = TEXT("application/json");
+		FString ContentType     = TEXT("application/json");
+		FString Content;
+		FAccelByteModelsUpdateMetadataRequest UpdateMedataRequest;
+		UpdateMedataRequest.Tags = Tags;
+		UpdateMedataRequest.Label = Label;
+		UpdateMedataRequest.CustomAttribute = CustomAttribute;
+		FJsonObjectConverter::UStructToJsonObjectString(UpdateMedataRequest, Content);
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
 		Request->SetHeader(TEXT("Authorization"), Authorization);
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Accept"), Accept);
-		Request->SetHeader(TEXT("Content-Type"), FString::Printf(TEXT("multipart/form-data; boundary=%s"), *BoundaryGuid));
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		
-		Request->SetContent(Content);
+		Request->SetContentAsString(Content);
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
