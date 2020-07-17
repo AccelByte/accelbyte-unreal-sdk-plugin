@@ -43,6 +43,7 @@ public:
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is the tags that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -57,6 +58,7 @@ public:
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is the tags that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -70,6 +72,7 @@ public:
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is an array of tag that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -82,6 +85,7 @@ public:
 	 * @param SlotId This is specific slot that will be updated.
 	 * @param Tags This is an array of tag that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -93,7 +97,6 @@ public:
 	 *
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<uint8>&.
-	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetSlot(FString SlotId, const THandler<TArray<uint8>>& OnSuccess, const FErrorHandler& OnError);
