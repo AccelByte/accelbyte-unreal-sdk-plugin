@@ -76,7 +76,6 @@ namespace Api
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetHeader(TEXT("Content-Type"), FString::Printf(TEXT("multipart/form-data; boundary=%s"), *BoundaryGuid));
-
 		Request->SetContent(Content);
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
@@ -144,7 +143,6 @@ namespace Api
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetHeader(TEXT("Content-Type"), FString::Printf(TEXT("multipart/form-data; boundary=%s"), *BoundaryGuid));
-
 		Request->SetContent(Content);
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
@@ -154,14 +152,19 @@ namespace Api
 
 	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
+		UpdateSlotMetadata(SlotId, Tags, Label, CustomAttribute, OnSuccess, OnProgress, OnError);
+	}
+
+	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
+	{
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotId);
-		FString Verb            = TEXT("PUT");
-		FString Accept          = TEXT("application/json");
-		FString ContentType     = TEXT("application/json");
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Url           = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *SlotId);
+		FString Verb          = TEXT("PUT");
+		FString Accept        = TEXT("application/json");
+		FString ContentType   = TEXT("application/json");
 		FString Content;
 		FAccelByteModelsUpdateMetadataRequest UpdateMedataRequest;
 		UpdateMedataRequest.Tags = Tags;
@@ -175,7 +178,6 @@ namespace Api
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		
 		Request->SetContentAsString(Content);
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
