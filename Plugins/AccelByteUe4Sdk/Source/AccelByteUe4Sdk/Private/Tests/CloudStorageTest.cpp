@@ -111,14 +111,13 @@ bool CloudStorageUpdateSlot::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudStorageUpdateMetadataSlot, "AccelByte.Tests.CloudStorage.C.UpdateMetadata", AutomationFlagMaskCloudStorage);
 bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 {
-	FString UpdateFileName = "metadataUpdate.txt";
 	UpdateTags[0] = (TEXT("tagOne"));
 	UpdateTags[1] = (TEXT("tagTwo"));
 	FString UpdateLabel = "metadataLabel";
 	FString UpdateCustomAttribute = TEXT("This is a custom attribute");
 
 	bool bMetadataUpdatedResult = false;
-	FRegistry::CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateFileName, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+	FRegistry::CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 		bMetadataUpdatedResult = true;

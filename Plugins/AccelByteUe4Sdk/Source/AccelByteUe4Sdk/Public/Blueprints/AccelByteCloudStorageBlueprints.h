@@ -31,11 +31,12 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateSlotSuccess, const FAccelByteModelsSlot&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
 	static void UpdateSlot(const FString& SlotId, const FString& FileName, const TArray<uint8>& Data, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-		
+	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateSlotMetadataSuccess, const FAccelByteModelsSlot&, Result);
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ", meta = (DeprecatedFunction,
+		DeprecationMessage = "Filename parameter will be igonred"))
 	static void UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotMetadataSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
-
+	
 	DECLARE_DYNAMIC_DELEGATE(FDeleteSlotSuccees);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | CloudStorage | Api ")
 	static void DeleteSlot(const FString& SlotId, const FDeleteSlotSuccees& OnSuccess, const FBlueprintErrorHandler& OnError);
