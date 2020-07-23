@@ -318,3 +318,46 @@ struct ACCELBYTEUE4SDK_API FUpgradeUserRequest
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
 		int32 Expires_in;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountLinkedPlatform
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
+		FString PlatformUserId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountLinkPublisherAccount
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+		TArray<FAccountLinkedPlatform> LinkedPlatforms;
+
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountLinkConflictMessageVariables
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConfictMessageVariables")
+		FString PlatformUserID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConfictMessageVariables")
+		TArray<FAccountLinkPublisherAccount> PublisherAccounts;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLinkPlatformAccountRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkPlatformAccountRequest")
+		FString PlatformId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkPlatformAccountRequest")
+		FString PlatformUserId;
+};

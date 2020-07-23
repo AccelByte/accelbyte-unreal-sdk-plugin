@@ -29,6 +29,8 @@ FString User::TempUsername;
 
 static FString PlatformStrings[] = {
 	TEXT("steam"),
+	TEXT("ps4"),
+	TEXT("live"),
 	TEXT("google"),
 	TEXT("ps4"),
 	TEXT("live"),
@@ -517,13 +519,15 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
@@ -540,10 +544,42 @@ void User::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, c
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
+
+	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+
+	FLinkPlatformAccountRequest linkRequest;
+	linkRequest.PlatformId = PlatformId;
+	linkRequest.PlatformUserId = PlatformUserId;
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms/link"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString(linkRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
