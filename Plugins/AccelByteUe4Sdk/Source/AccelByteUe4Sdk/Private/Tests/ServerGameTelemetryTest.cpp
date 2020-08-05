@@ -32,7 +32,7 @@ const auto ServerTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 Er
 	UE_LOG(LogAccelByteServerGameTelemetryTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerGameTelemetryTestSendProtectedEvent, "AccelByte.Tests.ServerGameTelemetry.SendProtectedEvent", AutomationFlagMaskServerGameTelemetry);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerGameTelemetryTestSendProtectedEvent, "AccelByte.Tests.ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK", AutomationFlagMaskServerGameTelemetry);
 bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccessful = false;
@@ -44,33 +44,46 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Client Login...");
 	
-	FJsonObject Payload;
-	Payload.SetStringField("someString", "someString");
-	Payload.SetNumberField("someInt", 7.77);
-	Payload.SetBoolField("someBool", true);
+	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
+	FRegistry::ServerGameTelemetry.SetImmediateEventList({});
+	const int EVENT_COUNT = 999;
+	int SuccessResultCount = 0;
+	bool allEventDone = false;
+	for (int i = 0; i < EVENT_COUNT; i++)
+	{
+		FJsonObject Payload;
+		Payload.SetStringField("someString", "someString");
+		Payload.SetNumberField("someInt", i);
+		Payload.SetBoolField("someBool", true);
+		FAccelByteModelsTelemetryBody TelemetryBody;
+		TelemetryBody.EventName = "ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK";
+		TelemetryBody.EventNamespace = "SDK Test UE4";
+		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
-	bool bTelemetryEventSent = false;
+		bool bTelemetryEventSent = false;
+	
+		FRegistry::ServerGameTelemetry.Send(
+			TelemetryBody,
+			FVoidHandler::CreateLambda([&]()
+			{
+				SuccessResultCount++;
+				if (SuccessResultCount == EVENT_COUNT)
+				{
+					allEventDone = true;
+				}
+			}), ServerTelemetryErrorHandler);
+	}
 
-	FRegistry::ServerGameTelemetry.SendProtectedEvent(
-		"someeventname", 
-		std::move(Payload),
-		FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("Single protected event sent"));
-			bTelemetryEventSent = true;
-		}), 
-		ServerTelemetryErrorHandler);;
-
-	Waiting(bTelemetryEventSent, "Sending single protected event");
+	Waiting(allEventDone, "Sending batch telemetry event");
 
 	FRegistry::ServerCredentials.ForgetAll();
 	
-	check(bTelemetryEventSent);
+	check(SuccessResultCount == EVENT_COUNT);
 
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerGameTelemetryTestSendMultipleProtectedEvents, "AccelByte.Tests.ServerGameTelemetry.SendMultipleProtectedEvents", AutomationFlagMaskServerGameTelemetry);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerGameTelemetryTestSendMultipleProtectedEvents, "AccelByte.Tests.ServerGameTelemetry.Send_ImmediateEvent_ReturnsOK", AutomationFlagMaskServerGameTelemetry);
 bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccessful = false;
@@ -82,35 +95,42 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Client Login...");
 
-	TMap<FString, TSharedPtr<FJsonObject>> Events;
-	auto Payload1 = MakeShared<FJsonObject>();
-	Payload1->SetStringField("someString", "someString");
-	Payload1->SetNumberField("someInt", 7.77);
-	Payload1->SetBoolField("someBool", true);
+	FString CurrentImmediateEventName = "SDK UE4 Immediate Event";
+	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
+	FRegistry::ServerGameTelemetry.SetImmediateEventList({ CurrentImmediateEventName });
+	const int EVENT_COUNT = 3;
+	int SuccessResultCount = 0;
+	bool allEventDone = false;
+	for (int i = 0; i < EVENT_COUNT; i++)
+	{
+		FJsonObject Payload;
+		Payload.SetStringField("someString", "someString");
+		Payload.SetNumberField("someInt", i);
+		Payload.SetBoolField("someBool", true);
+		FAccelByteModelsTelemetryBody TelemetryBody;
+		TelemetryBody.EventName = CurrentImmediateEventName;
+		TelemetryBody.EventNamespace = "SDK Test UE4";
+		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
-	Events.Add("someeventname", Payload1);
+		bool bTelemetryEventSent = false;
 
-	auto Payload2 = MakeShared<FJsonObject>();
-	Payload2->SetStringField("anotherString", "anotherString");
-	Payload2->SetBoolField("someBool", true);
+		FRegistry::ServerGameTelemetry.Send(
+			TelemetryBody,
+			FVoidHandler::CreateLambda([&]()
+				{
+					SuccessResultCount++;
+					if (SuccessResultCount == EVENT_COUNT)
+					{
+						allEventDone = true;
+					}
+				}), ServerTelemetryErrorHandler);
+	}
 
-	Events.Add("othereventname", Payload1);
-
-	bool bTelemetryEventSent = false;
-	FRegistry::ServerGameTelemetry.SendProtectedEvents(
-		std::move(Events),
-		FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("Multiple protected events sent"));
-			bTelemetryEventSent = true;
-		}),
-		ServerTelemetryErrorHandler);;
-
-	Waiting(bTelemetryEventSent, "Sending multiple protected events");
+	Waiting(allEventDone, "Sending multiple immediate telemetry events");
 
 	FRegistry::ServerCredentials.ForgetAll();
 
-	check(bTelemetryEventSent);
+	check(SuccessResultCount == EVENT_COUNT);
 
 	return true;
 }
