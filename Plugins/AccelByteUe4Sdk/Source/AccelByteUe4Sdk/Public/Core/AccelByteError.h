@@ -277,13 +277,13 @@ namespace AccelByte
 		//
 		//Statistic Error Code List
 		//
-		StatisticConfigNotFoundException = 70131,
-		StatisticNotFoundException = 70331,
-		InvalidStatOperatorException = 70330,
-		StatNotDecreasableException = 70334,
-		UserStatsNotFoundException = 70335,
-		UserStatAlreadyExistException = 70336,
-		StatValueOutOfRangeException = 70337,
+		StatisticConfigNotFoundException = 12241,
+		StatisticNotFoundException = 12241,
+		InvalidStatOperatorException = 12221,
+		StatNotDecreasableException = 12273,
+		UserStatsNotFoundException = 12242,
+		UserStatAlreadyExistException = 12274,
+		StatValueOutOfRangeException = 12275,
 		//
 		//Leaderboard Error Code List
 		//

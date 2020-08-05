@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -43,6 +43,7 @@ public:
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is the tags that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -57,6 +58,7 @@ public:
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is the tags that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
@@ -64,24 +66,38 @@ public:
 	void UpdateSlot(FString SlotId, const TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 	
 	/**
-	 * @brief This function updates stored slot's metadata.
+	 * @brief This function updates stored slot's metadata. This function is DEPRECATED.
 	 *
 	 * @param SlotId This is specific slot that will be updated.
 	 * @param FileName This is the filename of the item that saved in the slot.
 	 * @param Tags This is an array of tag that will be stored in the slot.
 	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void UpdateSlotMetadata(FString SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+	DEPRECATED(2.21, "Use UpdateSlotMetadata(const FString&, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead.")
+	void UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
+
+	/**
+	 * @brief This function updates stored slot's metadata.
+	 *
+	 * @param SlotId This is specific slot that will be updated.
+	 * @param Tags This is an array of tag that will be stored in the slot.
+	 * @param Label This is the label that will be stored in the slot.
+	 * @param CustomAttribute The custom attribute for the slot.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsSlot&.
+	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void UpdateSlotMetadata(const FString& SlotId, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
 	/**
 	 * @brief This function gets the data that stored in the slot.
 	 *
 	 * @param SlotId Specify the slot.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const TArray<uint8>&.
-	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void GetSlot(FString SlotId, const THandler<TArray<uint8>>& OnSuccess, const FErrorHandler& OnError);
@@ -93,7 +109,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-    void DeleteSlot(FString SlotId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteSlot(FString SlotId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	CloudStorage() = delete;

@@ -63,7 +63,7 @@ void UAccelByteBlueprintsCloudStorage::UpdateSlot(const FString& SlotId, const F
 
 void UAccelByteBlueprintsCloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const FUpdateSlotMetadataSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
-	FRegistry::CloudStorage.UpdateSlotMetadata(SlotId, FileName, Tags, Label, CustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
+	FRegistry::CloudStorage.UpdateSlotMetadata(SlotId, Tags, Label, CustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([OnSuccess](const FAccelByteModelsSlot& UpdatedSlot)
 	{
 		OnSuccess.ExecuteIfBound(UpdatedSlot);
 	}), nullptr,

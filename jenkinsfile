@@ -32,6 +32,11 @@ pipeline {
                 script {
                     GIT_BRANCH = env.GIT_BRANCH
                     bitbucketSSHCreds = env.BITBUCKET_SSH_CREDS
+                    if(env.SDK_TMP_SOCIAL_SERVICE == "on") {
+                        env.CLOUD_STORAGE_PREFIX="/temp"+env.CLOUD_STORAGE_PREFIX
+                        env.GAME_PROFILE_PREFIX="/temp"+env.GAME_PROFILE_PREFIX
+                        env.STATISTIC_PREFIX="/temp"+env.STATISTIC_PREFIX
+                    }
                     // customer repo will parse customer-related files
                     if(fileExists('version-customer.json')){
                         version = readJSON file: "version-customer.json"
