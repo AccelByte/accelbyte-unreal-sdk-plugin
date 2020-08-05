@@ -9,6 +9,9 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerAchievementApi.h"
+#include "Api/AccelByteStatisticApi.h"
+#include "GameServerApi/AccelByteServerStatisticApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteCredentials.h"
@@ -30,6 +33,12 @@ void FlushHttpRequests();
 
 FAchievementRequest achievement1;
 FAchievementRequest achievement2;
+FAchievementRequest achievementIncrementalClient;
+FAchievementRequest achievementIncrementalServer;
+FStatCreateRequest achievementStatisticClientRequest;
+FStatCreateRequest achievementStatisticServerRequest;
+TArray<FStatCreateRequest> allStatisticRequest;
+TArray<FAchievementRequest> allAchievementRequests;
 
 const auto AchievementErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
@@ -39,6 +48,33 @@ const auto AchievementErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorC
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AchievementSetup, "AccelByte.Tests.Achievement.A.Setup", AutomationFlagMaskAchievement);
 bool AchievementSetup::RunTest(const FString& Parameters)
 {
+	// statistic client
+	{
+		achievementStatisticClientRequest.defaultValue = 0;
+		achievementStatisticClientRequest.description = "StatCode for SDK Test purpose";
+		achievementStatisticClientRequest.incrementOnly = true;
+		achievementStatisticClientRequest.maximum = 999999;
+		achievementStatisticClientRequest.minimum = 0;
+		achievementStatisticClientRequest.name = "Achievement Incremental Testing Client";
+		achievementStatisticClientRequest.setAsGlobal = false;
+		achievementStatisticClientRequest.setBy = EAccelByteStatisticSetBy::CLIENT;
+		achievementStatisticClientRequest.statCode = "incremental-testing-client";
+		achievementStatisticClientRequest.tags = { "nothing" };
+	}
+	// statistic server
+	{
+		achievementStatisticServerRequest.defaultValue = 0;
+		achievementStatisticServerRequest.description = "StatCode for SDK Test purpose";
+		achievementStatisticServerRequest.incrementOnly = true;
+		achievementStatisticServerRequest.maximum = 999999;
+		achievementStatisticServerRequest.minimum = 0;
+		achievementStatisticServerRequest.name = "Achievement Incremental Testing Server";
+		achievementStatisticServerRequest.setAsGlobal = false;
+		achievementStatisticServerRequest.setBy = EAccelByteStatisticSetBy::SERVER;
+		achievementStatisticServerRequest.statCode = "incremental-testing-server";
+		achievementStatisticServerRequest.tags = { "nothing" };
+	}
+
 	// achievement1
 	{
 		achievement1.AchievementCode = TEXT("UE4AchievementCode1");
@@ -75,6 +111,37 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 		achievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
 		achievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
 	}
+	// achievementStatisticClientRequest
+	{
+		achievementIncrementalClient.AchievementCode = TEXT("UE4AchievementCode4");
+		achievementIncrementalClient.DefaultLanguage = TEXT("en");
+		achievementIncrementalClient.Description.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
+		achievementIncrementalClient.GoalValue = 100;
+		achievementIncrementalClient.Hidden = true;
+		achievementIncrementalClient.Incremental = true;
+		achievementIncrementalClient.LockedIcons.Add({ TEXT("This is locked icon 4 url"), TEXT("This is locked icon 4 slug") });
+		achievementIncrementalClient.Name.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
+		achievementIncrementalClient.Tags.Add(TEXT("Tags4"));
+		achievementIncrementalClient.UnlockedIcons.Add({ TEXT("This is unlocked icon 4 url"), TEXT("This is unlocked icon 4 slug") });
+		achievementIncrementalClient.StatCode = achievementStatisticClientRequest.statCode;
+	}
+	// achievementStatisticServerRequest
+	{
+		achievementIncrementalServer.AchievementCode = TEXT("UE4AchievementCode3");
+		achievementIncrementalServer.DefaultLanguage = TEXT("en");
+		achievementIncrementalServer.Description.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
+		achievementIncrementalServer.GoalValue = 100;
+		achievementIncrementalServer.Hidden = true;
+		achievementIncrementalServer.Incremental = true;
+		achievementIncrementalServer.LockedIcons.Add({ TEXT("This is locked icon 3 url"), TEXT("This is locked icon 3 slug") });
+		achievementIncrementalServer.Name.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
+		achievementIncrementalServer.Tags.Add(TEXT("Tags3"));
+		achievementIncrementalServer.UnlockedIcons.Add({ TEXT("This is unlocked icon 3 url"), TEXT("This is unlocked icon 3 slug") });
+		achievementIncrementalServer.StatCode = achievementStatisticServerRequest.statCode;
+	}
+
+	allStatisticRequest = { achievementStatisticClientRequest, achievementStatisticServerRequest };
+	allAchievementRequests = { achievement1, achievement2, achievementIncrementalClient, achievementIncrementalServer };
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
@@ -104,62 +171,64 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bNewUserLoginSuccess, "Waiting for Login new user ...");
 
-	bool bDeleteAchievement1Done = false;
-	Achievement_Delete(achievement1.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievement1Done]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement 1 success"));
-		bDeleteAchievement1Done = true;
-	}), FErrorHandler::CreateLambda([&bDeleteAchievement1Done](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bDeleteAchievement1Done = true;
-	}));
-	FlushHttpRequests();
-	Waiting(bDeleteAchievement1Done, "Waiting for deleting achievement 1 ...");
-
-	bool bDeleteAchievement2Done = false;
-	Achievement_Delete(achievement2.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievement2Done]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement 2 success"));
-		bDeleteAchievement2Done = true;
-	}), FErrorHandler::CreateLambda([&bDeleteAchievement2Done](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bDeleteAchievement2Done = true;
-	}));
-	FlushHttpRequests();
-	Waiting(bDeleteAchievement2Done, "Waiting for deleting achievement 2 ...");
-
-	bool bCreateAchievement1Success= false;
-	Achievement_Create(achievement1, THandler<FAchievementResponse>::CreateLambda([&bCreateAchievement1Success](FAchievementResponse achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement 1 success"));
-		bCreateAchievement1Success = true;
-	}), AchievementErrorHandler);
-	FlushHttpRequests();
-	Waiting(bCreateAchievement1Success, "Waiting for creating achievement 1 ...");
-
-	bool bCreateAchievement2Success = false;
-	Achievement_Create(achievement2, THandler<FAchievementResponse>::CreateLambda([&bCreateAchievement2Success](FAchievementResponse achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement 2 success"));
-		bCreateAchievement2Success = true;
-	}), AchievementErrorHandler);
-	FlushHttpRequests();
-	Waiting(bCreateAchievement2Success, "Waiting for creating achievement 1 ...");
-
+	// Client Login
 	bool bClientLoginSuccess = false;
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Client login Success"));
-		bClientLoginSuccess = true;
-	}), AchievementErrorHandler);
+		{
+			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Client login Success"));
+			bClientLoginSuccess = true;
+		}), AchievementErrorHandler);
 	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
-
-	check(bCreateAchievement1Success);
-	check(bCreateAchievement2Success);
 	check(bClientLoginSuccess);
+
+	for (auto statisticRequest : allStatisticRequest)
+	{
+		bool bCreateStatDone = false;
+
+		// Even though it fails, as long as it exists in the namespace should not be a problem.
+		Statistic_Create_Stat(statisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
+		{
+			bCreateStatDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
+		FlushHttpRequests();
+		Waiting(bCreateStatDone, "Waiting for Create statistic code...");
+
+		bool bCreateUserStatItemDone = false;
+		FRegistry::Statistic.CreateUserStatItems({ statisticRequest.statCode }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
+			{
+				bCreateUserStatItemDone = true;
+			}), AchievementErrorHandler);
+		FlushHttpRequests();
+		Waiting(bCreateUserStatItemDone, "Waiting for create user stat item...");
+	}
+
+	for (auto achievementRequest : allAchievementRequests)
+	{
+		bool bDeleteAchievementDone = false;
+		Achievement_Delete(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
+				bDeleteAchievementDone = true;
+			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not eelete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+				bDeleteAchievementDone = true;
+			}));
+		FlushHttpRequests();
+		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
+
+		bool bCreateAchievementSuccess = false;
+		Achievement_Create(achievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
+				bCreateAchievementSuccess = true;
+			}), AchievementErrorHandler);
+		FlushHttpRequests();
+		Waiting(bCreateAchievementSuccess, "Waiting for creating achievement ...");
+		check(bCreateAchievementSuccess);
+	}
+
 	return true;
 }
 
@@ -772,26 +841,160 @@ bool QueryUserAchievementsLimit1::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UnlockIncrementalAchievement_ClientUpdateStat, "AccelByte.Tests.Achievement.G.UnlockIncrementalAchievement_ClientUpdateStat", AutomationFlagMaskAchievement);
+bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Parameters)
+{
+	// Arrange
+	FString currentStatCode = achievementIncrementalClient.StatCode;
+	FAchievementRequest currentAchievementRequest = achievementIncrementalClient;
+	bool bGetUserStatItemSuccess = false;
+	FAccelByteModelsUserStatItemPagingSlicedResult getUserStatItemResult;
+	FRegistry::Statistic.GetUserStatItems({ currentStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+		{
+			bGetUserStatItemSuccess = true;
+			getUserStatItemResult = Result;
+		}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
+	for (auto entry : getUserStatItemResult.Data)
+	{
+		if (entry.StatCode == currentStatCode)
+		{
+			check(entry.Value == 0.0f);
+		}
+	}
+
+	// Act
+	FAccelByteModelsBulkStatItemInc UpdateStat;
+	UpdateStat.inc = currentAchievementRequest.GoalValue;
+	UpdateStat.statCode = currentStatCode;
+	bool bIncrementUserStatDone = false;
+	TArray<FAccelByteModelsBulkStatItemOperationResult> bulkAddUserStatItemResult;
+	FRegistry::Statistic.IncrementUserStatItems({ UpdateStat }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
+		{
+			bIncrementUserStatDone = true;
+			bulkAddUserStatItemResult = Result;
+		}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bIncrementUserStatDone, "Waiting for increment user stat item ...");
+
+	WaitUntil([]() { return false; }, 6.66f, "Waiting for KAFKA");
+
+	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
+	bool bQueryAchievementsSuccess = false;
+	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
+		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
+				paginatedAchievements = achievements;
+				bQueryAchievementsSuccess = true;
+			}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
+
+	// Assert
+	bool bIncrementalAchievementUnlocked = false;
+	for (auto userAchievement : paginatedAchievements.Data)
+	{
+		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode)
+		{
+			bIncrementalAchievementUnlocked = true;
+		}
+	}
+
+	check(bIncrementalAchievementUnlocked);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UnlockIncrementalAchievement_ServerUpdateStat, "AccelByte.Tests.Achievement.G.UnlockIncrementalAchievement_ServerUpdateStat", AutomationFlagMaskAchievement);
+bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Parameters)
+{
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+		{
+			bClientLoginSuccess = true;
+		}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
+	// Arrange
+	FString currentStatCode = achievementIncrementalServer.StatCode;
+	FAchievementRequest currentAchievementRequest = achievementIncrementalServer;
+	bool bGetUserStatItemSuccess = false;
+	FAccelByteModelsUserStatItemPagingSlicedResult getUserStatItemResult;
+	FRegistry::Statistic.GetUserStatItems({ currentStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+		{
+			bGetUserStatItemSuccess = true;
+			getUserStatItemResult = Result;
+		}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
+	for (auto entry : getUserStatItemResult.Data)
+	{
+		if (entry.StatCode == currentStatCode)
+		{
+			check(entry.Value == 0.0f);
+		}
+	}
+
+	// Act
+	bool bIncrementStatDone = false;
+	TArray<FAccelByteModelsBulkStatItemOperationResult> IncrementResult;
+	FRegistry::ServerStatistic.IncrementUserStatItems(
+		FRegistry::Credentials.GetUserId(),
+		{ { (float) currentAchievementRequest.GoalValue, currentStatCode } },
+		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
+			{
+				bIncrementStatDone = true;
+			}),
+		AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bIncrementStatDone, "Waiting for increment user stat items...");
+
+	WaitUntil([]() { return false; }, 6.66f, "Waiting for KAFKA");
+
+	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
+	bool bQueryAchievementsSuccess = false;
+	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
+		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
+				paginatedAchievements = achievements;
+				bQueryAchievementsSuccess = true;
+			}), AchievementErrorHandler);
+	FlushHttpRequests();
+	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
+
+	// Assert
+	bool bIncrementalAchievementUnlocked = false;
+	for (auto userAchievement : paginatedAchievements.Data)
+	{
+		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode)
+		{
+			bIncrementalAchievementUnlocked = true;
+		}
+	}
+
+	check(bIncrementalAchievementUnlocked);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AchievementTearDown, "AccelByte.Tests.Achievement.Z.TearDown", AutomationFlagMaskAchievement);
 bool AchievementTearDown::RunTest(const FString& Parameters)
 {
-	bool bDeleteAchievement1Success = false;
-	Achievement_Delete(achievement1.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievement1Success]()
+	TArray<bool> deleteAchievementResults;
+	for (auto achievementRequest : allAchievementRequests)
 	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement 1 success"));
-		bDeleteAchievement1Success = true;
-	}), AchievementErrorHandler);
-	FlushHttpRequests();
-	Waiting(bDeleteAchievement1Success, "Waiting for deleting achievement 1 ...");
-
-	bool bDeleteAchievement2Success = false;
-	Achievement_Delete(achievement2.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievement2Success]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement 2 success"));
-		bDeleteAchievement2Success = true;
-	}), AchievementErrorHandler);
-	FlushHttpRequests();
-	Waiting(bDeleteAchievement2Success, "Waiting for deleting achievement 1 ...");
+		bool bDeleteAchievementSuccess = false;
+		Achievement_Delete(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
+				bDeleteAchievementSuccess = true;
+				deleteAchievementResults.Add(true);
+			}), AchievementErrorHandler);
+		FlushHttpRequests();
+		Waiting(bDeleteAchievementSuccess, "Waiting for deleting achievement ...");
+	}
 
 	bool bDeleteSuccess = false;
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
@@ -802,8 +1005,10 @@ bool AchievementTearDown::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
-	check(bDeleteAchievement1Success);
-	check(bDeleteAchievement2Success);
+	for(auto bDeleteAchievementSuccess : deleteAchievementResults)
+	{
+		check(bDeleteAchievementSuccess);
+	}
 	check(bDeleteSuccess);
 	return true;
 }
