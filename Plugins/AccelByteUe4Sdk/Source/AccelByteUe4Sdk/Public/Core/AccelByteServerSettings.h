@@ -24,7 +24,6 @@ public:
 	FString StatisticServerUrl;
 	FString PlatformServerUrl;
 	FString QosManagerServerUrl;
-	FString LeaderboardServerUrl;
 	FString GameTelemetryServerUrl;
 };
 
@@ -71,9 +70,6 @@ public:
 	FString QosManagerServerUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
-	FString LeaderboardServerUrl;
-
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString GameTelemetryServerUrl;
 };
 
@@ -114,9 +110,6 @@ public:
 	static FString GetQosManagerServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static FString GetLeaderboardServerUrl();
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetGameTelemetryServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -145,9 +138,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetQosManagerServerUrl(const FString& PlatformServerUrl);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
-	static void SetLeaderboardServerUrl(const FString& LeaderboardServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetGameTelemetryServerUrl(const FString& GameTelemetryServerUrl);
