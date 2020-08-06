@@ -25,6 +25,7 @@ public:
 	FString PlatformServerUrl;
 	FString QosManagerServerUrl;
 	FString GameTelemetryServerUrl;
+	FString AchievementServerUrl;
 };
 
 } // Namespace AccelByte
@@ -71,6 +72,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString GameTelemetryServerUrl;
+	
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString AchievementServerUrl;
 };
 
 
@@ -111,6 +115,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetGameTelemetryServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetAchievementServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
@@ -141,4 +148,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetGameTelemetryServerUrl(const FString& GameTelemetryServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetAchievementServerUrl(const FString& AchievementServerUrl);
 };
