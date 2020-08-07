@@ -8,6 +8,9 @@ public class AccelByteUe4SdkDemo : ModuleRules
 {
 	public AccelByteUe4SdkDemo(ReadOnlyTargetRules Target) : base(Target)
 	{
+#if UE_4_24_OR_LATER
+		bLegacyPublicIncludePaths = false;
+#endif
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AccelByteUe4Sdk", "Agones", "Json", "JsonUtilities", "Http", "WebSockets",});

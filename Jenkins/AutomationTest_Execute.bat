@@ -60,7 +60,7 @@ SET AGONES_EXE=sdk-server.windows.amd64.exe
 start %AGONES_DIRECTORY%\\%AGONES_EXE% --local -f %AGONES_DIRECTORY%\\gameserver.yaml
 
 :::::Agones provider test
-"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests %UE4_TESTS%.DSM; Quit" -log -log=%TEST_LOG% -provider=agones
+"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests %UE4_TESTS%.DSM; Quit" -log -log=Agones%TEST_LOG% -provider=agones
 
 :::::Agones local server shutdown
 taskkill /F /IM %AGONES_EXE%
