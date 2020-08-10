@@ -15,6 +15,9 @@ public class AccelByteUe4Sdk : ModuleRules
     public AccelByteUe4Sdk(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+#if UE_4_24_OR_LATER
+        bLegacyPublicIncludePaths = false;
+#endif
 
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
         PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));

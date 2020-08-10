@@ -52,7 +52,7 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 		Payload.SetBoolField("someBool", true);
 		FAccelByteModelsTelemetryBody TelemetryBody;
 		TelemetryBody.EventName = "ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK";
-		TelemetryBody.EventNamespace = "SDK Test UE4";
+		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
 		bool bTelemetryEventSent = false;
@@ -86,7 +86,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 
 	Waiting(bLoginSuccessful, "LoginWithDeviceId");
 
-	FString CurrentImmediateEventName = "SDK UE4 Immediate Event";
+	FString CurrentImmediateEventName = "SDK_UE4_Immediate_Event";
 	FRegistry::GameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
 	FRegistry::GameTelemetry.SetImmediateEventList({ CurrentImmediateEventName });
 	const int EVENT_COUNT = 3;
@@ -100,7 +100,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 		Payload.SetBoolField("someBool", true);
 		FAccelByteModelsTelemetryBody TelemetryBody;
 		TelemetryBody.EventName = CurrentImmediateEventName;
-		TelemetryBody.EventNamespace = "SDK Test UE4";
+		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
 		bool bTelemetryEventSent = false;

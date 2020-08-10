@@ -77,7 +77,11 @@ public:
 	 * @param OnProgress This is delegate called per tick to update an Http request upload or download size progress.
 	 * @param OnError This will be called when the operation failed.
 	 */
+#if ENGINE_MINOR_VERSION >= 22
+	UE_DEPRECATED(2.21, "Use UpdateSlotMetadata(const FString&, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead.")
+#else
 	DEPRECATED(2.21, "Use UpdateSlotMetadata(const FString&, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead.")
+#endif
 	void UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError);
 
 	/**
