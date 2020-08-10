@@ -348,7 +348,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
     FString MatchId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    EAccelByteMatchmakingStatus Status;
+    EAccelByteMatchmakingStatus Status{EAccelByteMatchmakingStatus::Unknown};
 };
 
 // DS Notification

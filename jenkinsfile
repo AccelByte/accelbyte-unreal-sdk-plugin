@@ -13,6 +13,8 @@ branchName = params.BRANCH_NAME
 grade = "deployment"
 bitbucketSSHCreds = ""
 
+ue4_version="default"
+
 FAILED_STAGE = "";
 GIT_BRANCH = env.GIT_BRANCH;
 env.UE4_TESTS = params.UE4_TESTS == null ? "AccelByte.Tests" : params.UE4_TESTS;
@@ -57,6 +59,12 @@ pipeline {
                         // same rules for webhook and manual trigger
                         doTagging = false
                         doDeploy = false
+                    }
+                    
+                    ue4_version = params.UE4_VERSION == null ? "default" : params.UE4_VERSION
+                    config = readJSON file: "jenkins.config.json"
+                    config.build.targets."${ue4_version}".env_vars.each() {
+                        env."${it.key}" = "${it.value}"
                     }
                 }
             }

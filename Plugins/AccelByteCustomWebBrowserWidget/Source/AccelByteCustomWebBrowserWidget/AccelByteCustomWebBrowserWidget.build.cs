@@ -8,6 +8,9 @@ namespace UnrealBuildTool.Rules
 	{
 		public AccelByteCustomWebBrowserWidget(ReadOnlyTargetRules Target) : base(Target)
 		{
+#if UE_4_21_OR_LATER
+			PrivatePCHHeaderFile = "Public/AccelByteCustomWebBrowserWidget.h";
+#endif
             PrivateDependencyModuleNames.AddRange(new string[] { "AccelByteUe4Sdk" });
 
             PublicDependencyModuleNames.AddRange(
