@@ -12,11 +12,11 @@ AccelByte SDK is compatible with these AccelByte backend services:
 
 | Service              | Version              |
 |----------------------|----------------------|
-| IAM                  | v2.1.0               |
-| Platform/E-Commerce  | v1.3.0-80            |
-| Basic                | v1.0.0               |
-| cloudstorage-service | v0.3.0               |
-| lobby-server         | v0.2.2.528           |
+| IAM                  | v3.23.0              |
+| Platform/E-Commerce  | v3.11.0              |
+| Basic                | v1.13.0              |
+| social-service       | v1.7.0               |
+| lobby-server         | v1.15.0              |
 
 ## Features
 
@@ -84,7 +84,7 @@ Here's how to get it up and running quickly.
 
 `1.` The first step is to download and install [Visual Studio 2017](https://visualstudio.microsoft.com/downloads/).
 
-`2.` Download and install [Unreal Engine 4.18](https://www.unrealengine.com).
+`2.` Download and install [Unreal Engine 4.20](https://www.unrealengine.com).
 
 `3.` If you want to run the examples, skip to step 7.
 
