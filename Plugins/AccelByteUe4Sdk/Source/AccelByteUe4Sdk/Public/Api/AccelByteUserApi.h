@@ -5,8 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
-#include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
+#include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteError.h"
 
 
 namespace AccelByte
@@ -188,23 +188,35 @@ namespace AccelByte
 			 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
 			 * The browser will redirect the URL to a site with a code in form of parameter URL.
 			 *
-			 * @param PlatformId The PlatformId.
+			 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 			 * @param Ticket The Ticket.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
+
+			/**
+			 * @brief This function forced links user's current account to their other account in other platform. Use this only if the general LinkOtherPlatform get conflicted and getting confirmation from user.
+			 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch platform).
+			 * The browser will redirect the URL to a site with a code in form of parameter URL.
+			 *
+			 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
+			 * @param PlatformUserId The UserId from the other platfrom you want to link.
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError);
 
 			/**
 			 * @brief This function links user's current account to their other account in other platform
 			 * Ticket for each platform (PlatformToken) can be obtained from browser with platform linking URL (e.g. Facebook, Google, Twitch).
 			 * The browser will redirect the URL to a site with a code in form of parameter URL.
 			 *
-			 * @param PlatformId The PlatformId.
+			 * @param PlatformType The PlatformType (Steam, PS4, Xbox, etc).
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void UnlinkOtherPlatform(const FString& PlatformId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will search user by their Email Address or Display Name.

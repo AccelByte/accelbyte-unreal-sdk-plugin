@@ -60,8 +60,8 @@ public:
 	static void GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+	static void LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
-	static void UnlinkOtherPlatform(const FString& PlatformId, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+	static void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 };

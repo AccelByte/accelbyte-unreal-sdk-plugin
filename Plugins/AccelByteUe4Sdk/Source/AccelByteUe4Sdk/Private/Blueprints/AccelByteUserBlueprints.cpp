@@ -134,20 +134,20 @@ void UBPUser::GetPlatformLinks(const FDPlatformLinksHandler& OnSuccess, const FD
 	);
 }
 
-void UBPUser::LinkOtherPlatform(const FString& PlatformId, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	FRegistry::User.LinkOtherPlatform(
-		PlatformId, Ticket,
+		PlatformType, Ticket,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& MessageVariables) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 	
-void UBPUser::UnlinkOtherPlatform(const FString& PlatformId, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
 {
 	
 	FRegistry::User.UnlinkOtherPlatform(
-		PlatformId,
+		PlatformType,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
