@@ -2,4 +2,5 @@ Jenkins
 SteamHelper
 TestUtilities
 jenkinsfile
+jenkins.config.json
 Plugins/AccelByteUe4Sdk/Source/AccelByteUe4Sdk/Private/Tests
