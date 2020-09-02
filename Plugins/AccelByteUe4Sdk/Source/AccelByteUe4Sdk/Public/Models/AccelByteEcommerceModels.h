@@ -220,6 +220,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TArray<FString> Tags;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TArray<FString> Features;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 MaxCountPerUser;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 MaxCount;
@@ -296,6 +298,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TArray<FString> Tags;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TArray<FString> Features;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 MaxCountPerUser;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 MaxCount;
@@ -349,6 +353,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteria
 		FString BaseAppId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 		TArray<FString> Tags;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TArray<FString> Features;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 		FString SortBy;
 };
@@ -479,6 +485,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsConsumeUserEntitlementRequest
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | ConsumeUserEntitlementRequest")
 		int32 UseCount;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementOwnership
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+		bool Owned;
 };
 
 USTRUCT(BlueprintType)

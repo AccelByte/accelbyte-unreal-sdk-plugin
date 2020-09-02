@@ -2,9 +2,12 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Api/AccelByteUserApi.h"
 
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteItemApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
@@ -709,6 +712,89 @@ void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErro
 	Request->SetHeader(TEXT("Accept"), Accept);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	auto onGetAppIdEntitlement = THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&, OnSuccess, OnError](const FAccelByteModelsEntitlementOwnership& output)
+	{
+		if (output.Owned)
+		{
+			OnSuccess.ExecuteIfBound(true);
+		}
+		else
+		{
+			CheckUserSubEntitlement(OnSuccess, OnError);
+		}
+	});
+
+	auto onAppIdEntitlementError = FErrorHandler::CreateLambda([&, OnSuccess, OnError](int32 ErrorCode, FString ErrorString)
+	{
+		CheckUserSubEntitlement(OnSuccess, OnError);
+	});
+	
+	FRegistry::Entitlement.GetUserEntitlementOwnershipByAppId(FRegistry::Settings.AppId, onGetAppIdEntitlement, onAppIdEntitlementError);
+}
+
+void User::CheckUserSubEntitlement(const THandler<bool>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	auto onGetItemInfo = THandler<FAccelByteModelsItemInfo>::CreateLambda([this, OnSuccess, OnError](const FAccelByteModelsItemInfo ItemInfo)
+	{
+		CheckSubEntitlementFromItemInfo(OnSuccess, OnError, ItemInfo);
+	});
+
+	FRegistry::Item.GetItemByAppId(FRegistry::Settings.AppId, "", "", onGetItemInfo, FErrorHandler::CreateLambda([OnError](int32 ErrorCode, FString ErrorString)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorString);
+	}));
+}
+
+void User::CheckSubEntitlementFromItemInfo(const THandler<bool>& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsItemInfo& ItemInfo)
+{
+	int featureNum = ItemInfo.Features.Num();
+	// no subscription featuring this app, and player don't have the app already so return false
+	if (featureNum <= 0)
+	{
+		OnSuccess.ExecuteIfBound(false);
+	}
+
+
+	TSharedRef<int> responseCountRef = MakeShared<int>();
+	TSharedRef<bool> isOwnedFoundRef = MakeShared<bool>();
+
+	for (int i = 0; i < featureNum; ++i)
+	{
+		FRegistry::Entitlement.GetUserEntitlementOwnershipBySku(ItemInfo.Features[i],
+			THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError, responseCountRef, featureNum, isOwnedFoundRef](const FAccelByteModelsEntitlementOwnership& Ownership)
+		{
+			*responseCountRef += 1;
+			if (Ownership.Owned)
+			{
+				*isOwnedFoundRef = true;
+				OnSuccess.ExecuteIfBound(true);
+			}
+			// checked all subscription featuring this app and player doesn't have any of it.
+			else if(*responseCountRef >= featureNum && !*isOwnedFoundRef)
+			{
+				OnSuccess.ExecuteIfBound(false);
+			}
+		}),
+			FErrorHandler::CreateLambda([OnError, responseCountRef, featureNum](int32 ErrorCode, FString ErrorString)
+		{
+			*responseCountRef += 1;
+
+			if (*responseCountRef >= featureNum)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorString);
+			}
+		}));
+	}
 }
 
 } // Namespace Api

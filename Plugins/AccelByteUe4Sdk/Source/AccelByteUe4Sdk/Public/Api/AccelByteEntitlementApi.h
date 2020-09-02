@@ -47,7 +47,25 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Get user's Entitlement ownership of the AppId.
+	*
+	* @param AppId The App ID.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipByAppId(const FString& AppId, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler& OnError);
 	
+	/**
+	* @brief Get user's Entitlement ownership of the sku.
+	*
+	* @param Sku The item's SKU.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipBySku(const FString & Sku, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler & OnError);
+
 	/**
 	* @brief Consume a use entitlement.
 	*

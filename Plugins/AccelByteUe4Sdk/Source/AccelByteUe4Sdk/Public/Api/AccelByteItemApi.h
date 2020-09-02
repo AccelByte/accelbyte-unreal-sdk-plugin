@@ -37,6 +37,17 @@ public:
 	void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsPopulatedItemInfo>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Get one item information from an online store.
+	 *
+	 * @param AppId The App ID.
+	 * @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	 * @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	 void GetItemByAppId(const FString & AppId, const FString & Language, const FString & Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler & OnError);
+
+	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
 	 *
 	 * @param ItemCriteria should be contain some parameters for query.

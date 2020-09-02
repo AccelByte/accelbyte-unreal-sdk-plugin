@@ -128,6 +128,7 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.AgreementServerUrl = GetDefaultServerUrl(GetDefault<UAccelByteSettings>()->AgreementServerUrl, TEXT("agreement"));
 	FRegistry::Settings.CloudSaveServerUrl = GetDefault<UAccelByteSettings>()->CloudSaveServerUrl;
 	FRegistry::Settings.AchievementServerUrl = GetDefault<UAccelByteSettings>()->AchievementServerUrl;
+	FRegistry::Settings.AppId = GetDefault<UAccelByteSettings>()->AppId;
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
