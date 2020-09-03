@@ -33,6 +33,9 @@ const auto SubscriptionErrorHandler = FErrorHandler::CreateLambda([](int32 Error
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedAppId", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 {
+	FString oriAppId = FRegistry::Settings.AppId;
+	FRegistry::Settings.AppId = "abshooterid123123";
+
 	bool bLoginFinish = false;
 	FRegistry::User.LoginWithUsername("fauzan+canada5@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
@@ -54,6 +57,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	check(bCheckEligibleResult);
+	FRegistry::Settings.AppId = oriAppId;
 
 	return true;
 }
@@ -61,6 +65,9 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSku, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedSku", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 {
+	FString oriAppId = FRegistry::Settings.AppId;
+	FRegistry::Settings.AppId = "abshooterid123123";
+
 	bool bLoginFinish = false;
 	FRegistry::User.LoginWithUsername("fauzan+canada3@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
@@ -82,6 +89,7 @@ bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	check(bCheckEligibleResult);
+	FRegistry::Settings.AppId = oriAppId;
 
 	return true;
 }
@@ -89,6 +97,9 @@ bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
+	FString oriAppId = FRegistry::Settings.AppId;
+	FRegistry::Settings.AppId = "abshooterid123123";
+
 	bool bLoginFinish = false;
 	FRegistry::User.LoginWithUsername("fauzan+canada4@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
@@ -110,7 +121,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	check(!bCheckEligibleResult);
-
+	FRegistry::Settings.AppId = oriAppId;
 	return true;
 }
 
