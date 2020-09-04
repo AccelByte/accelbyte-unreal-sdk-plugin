@@ -30,7 +30,7 @@ const auto SubscriptionErrorHandler = FErrorHandler::CreateLambda([](int32 Error
 });
 
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedAppId", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedAppIdSuccess", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 {
 	FString oriAppId = FRegistry::Settings.AppId;
@@ -62,7 +62,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSku, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedSku", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSku, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedSkuSuccess", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 {
 	FString oriAppId = FRegistry::Settings.AppId;
@@ -94,7 +94,7 @@ bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedNoneFailed", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
 	FString oriAppId = FRegistry::Settings.AppId;
