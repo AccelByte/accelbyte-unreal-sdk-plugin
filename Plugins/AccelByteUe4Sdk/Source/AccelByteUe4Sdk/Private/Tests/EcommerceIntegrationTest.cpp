@@ -1240,7 +1240,7 @@ bool EcommerceGetUserEntitlementByEntitlementIdInvalid::RunTest(const FString& P
 	bool bGetEntitlementDone = false;
 	bool bGetEntitlementError = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
-	FRegistry::Entitlement.GetUserEntitlementById("Invalid",
+	FRegistry::Entitlement.GetUserEntitlementById("440e4476-19a4-4658-a95f-d6607204c478",
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
