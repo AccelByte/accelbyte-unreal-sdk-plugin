@@ -3753,6 +3753,12 @@ bool LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout::RunTest(const FS
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTokenRevoked_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestTokenRevoked_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 {
+	// Temporary disable, will be removed
+	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
+	{
+		return true;
+	}
+	
 	User& User = FRegistry::User;
 	bool bLoginDone = false;
 
@@ -3811,6 +3817,12 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserDifferentToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserDifferentToken_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parameters)
 {
+	// Temporary disable, will be removed
+	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
+	{
+		return true;
+	}
+	
 	AccelByte::Api::User& User = FRegistry::User;
 	bool bLoginDone = false;
 
