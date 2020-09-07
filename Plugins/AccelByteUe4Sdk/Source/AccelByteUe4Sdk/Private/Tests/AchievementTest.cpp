@@ -541,7 +541,7 @@ bool GetInvalidAchievementId::RunTest(const FString& Parameters)
 	FAccelByteModelsMultiLanguageAchievement getAchievement;
 	bool bGetAchievementSuccess = false;
 	bool bGetAchievementDone = false;
-	FRegistry::Achievement.GetAchievement(TEXT("Invalid"),
+	FRegistry::Achievement.GetAchievement(TEXT("1fdcacd5-eb94-4e18-a3af-7d8c007a0d89"),
 		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&bGetAchievementSuccess, &bGetAchievementDone, &getAchievement](FAccelByteModelsMultiLanguageAchievement achievement)
 	{
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Get invalid achievement success"));

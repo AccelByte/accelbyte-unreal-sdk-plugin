@@ -2,9 +2,12 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Api/AccelByteUserApi.h"
 
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteItemApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
@@ -709,6 +712,33 @@ void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErro
 	Request->SetHeader(TEXT("Accept"), Accept);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda([this, OnSuccess, OnError](const FAccelByteModelsItemInfo& itemInfoResult) {
+		
+		TArray<FString> itemIds;
+		TArray<FString> skus = itemInfoResult.Features;
+		TArray<FString> appIds;
+		appIds.Init(*Settings.AppId, 1);
+
+		FRegistry::Entitlement.GetUserEntitlementOwnershipAny(itemIds, appIds, skus, THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([OnSuccess, OnError](FAccelByteModelsEntitlementOwnership ownership)
+		{
+			OnSuccess.ExecuteIfBound(ownership.Owned);
+		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMsg)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
+		}));
+	});
+
+	FRegistry::Item.GetItemByAppId(*Settings.AppId, "", "", onItemInfoGot, FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMsg)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMsg);
+	}));
 }
 
 } // Namespace Api

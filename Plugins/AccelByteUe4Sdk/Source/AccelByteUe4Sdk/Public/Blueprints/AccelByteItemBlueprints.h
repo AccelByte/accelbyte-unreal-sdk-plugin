@@ -20,6 +20,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
 	static void GetItemById(const FString& ItemId, const FString& Region, const FString& Language, const FGetItemByIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemByAppIdSuccess, const FAccelByteModelsItemInfo&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
+	void GetItemByAppId(const FString& AppId, const FString& Region, const FString& Language, const FGetItemByAppIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetItemsByCriteriaSuccess, const FAccelByteModelsItemPagingSlicedResult&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Item | Api ")
 	static void GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);

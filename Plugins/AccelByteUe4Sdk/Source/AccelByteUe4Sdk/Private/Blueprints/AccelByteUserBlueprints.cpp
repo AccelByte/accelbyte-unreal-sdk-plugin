@@ -152,3 +152,11 @@ void UBPUser::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FDH
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
+
+void UBPUser::GetUserEligibleToPlay(const FDUserEligiblePlayHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	FRegistry::User.GetUserEligibleToPlay(
+		THandler<bool>::CreateLambda([OnSuccess](bool result) {OnSuccess.ExecuteIfBound(result); }),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+	);
+}

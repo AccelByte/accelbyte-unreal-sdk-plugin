@@ -79,6 +79,45 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Item::GetItemByAppId(const FString& AppId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId?appId=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *AppId);
+	if (!Region.IsEmpty() || !Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&")));
+		if (!Region.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("region=%s"), *Region));
+			if (!Language.IsEmpty())
+			{
+				Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+			}
+		}
+		else if (!Language.IsEmpty())
+		{
+			Url.Append(FString::Printf(TEXT("language=%s"), *Language));
+		}
+	}
+
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Item::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
@@ -153,6 +192,21 @@ void Item::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, 
 		for (int i = 0; i < ItemCriteria.Tags.Num(); i++)
 		{
 			Url.Append((i == 0) ? TEXT("tags=") : TEXT(",")).Append(ItemCriteria.Tags[i]);
+		}
+	}
+	if (ItemCriteria.Features.Num() > 0)
+	{
+		if (bIsNotFirst)
+		{
+			Url.Append("&");
+		}
+		else
+		{
+			bIsNotFirst = true; Url.Append("?");
+		}
+		for (int i = 0; i < ItemCriteria.Features.Num(); i++)
+		{
+			Url.Append((i == 0) ? TEXT("features=") : TEXT(",")).Append(ItemCriteria.Features[i]);
 		}
 	}
 	if (Offset > 0)

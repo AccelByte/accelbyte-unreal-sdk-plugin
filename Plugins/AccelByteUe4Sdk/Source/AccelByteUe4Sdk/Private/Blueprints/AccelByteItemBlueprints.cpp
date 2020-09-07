@@ -25,6 +25,17 @@ void UAccelByteBlueprintsItem::GetItemById(const FString& ItemId, const FString&
 	}));
 }
 
+void UAccelByteBlueprintsItem::GetItemByAppId(const FString& AppId, const FString& Region, const FString& Language, const FGetItemByAppIdSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
+{
+	FRegistry::Item.GetItemByAppId(AppId, Language, Region, THandler<FAccelByteModelsItemInfo>::CreateLambda([OnSuccess](const FAccelByteModelsItemInfo& Result)
+	{
+		OnSuccess.ExecuteIfBound(Result);
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
 void UAccelByteBlueprintsItem::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const FGetItemsByCriteriaSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, Offset, Limit, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsItemPagingSlicedResult& Result)

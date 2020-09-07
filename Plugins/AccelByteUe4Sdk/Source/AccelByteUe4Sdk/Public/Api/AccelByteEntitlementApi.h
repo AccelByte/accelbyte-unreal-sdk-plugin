@@ -47,7 +47,36 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Get user's Entitlement ownership of the AppId.
+	*
+	* @param AppId The App ID.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipByAppId(const FString& AppId, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler& OnError);
 	
+	/**
+	* @brief Get user's Entitlement ownership of the sku.
+	*
+	* @param Sku The item's SKU.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipBySku(const FString & Sku, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler & OnError);
+
+	/**
+	* @brief Get user's Entitlement ownership for multiple checks.
+	*
+	* @param ItemIds The item's IDs to check.
+	* @param AppIds the app IDs to check.
+	* @param Skus the skus to check
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership will return true if any one parameters are owned.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipAny(const TArray<FString> ItemIds, const TArray<FString> AppIds, const TArray<FString> Skus, const THandler<FAccelByteModelsEntitlementOwnership> OnSuccess, const FErrorHandler & Error);
+
 	/**
 	* @brief Consume a use entitlement.
 	*

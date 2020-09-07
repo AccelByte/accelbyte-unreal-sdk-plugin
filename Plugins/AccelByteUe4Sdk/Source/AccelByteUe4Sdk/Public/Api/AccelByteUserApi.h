@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteUserModels.h"
+#include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
 
 
@@ -15,7 +16,8 @@ namespace AccelByte
 	class Settings;
 	namespace Api
 	{
-
+		class Entitlement;
+		class Item;
 		/**
 		 * @brief User management API for creating user, verifying user, and resetting password.
 		 */
@@ -274,6 +276,15 @@ namespace AccelByte
 			 */
 			void GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function will check whether user can play the game by having it purchased or subscribed.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded. The result is boolean.
+			 * @param OnError This will be called when the operation failed.
+			*/
+			void GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
+
+
 		private:
 			User() = delete;
 			User(User const&) = delete;
@@ -282,6 +293,10 @@ namespace AccelByte
 			void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			void UpgradeWithPlayerPortalAsync(const FString& ReturnUrl, const THandler<FUpgradeUserRequest>& OnSuccess, const FErrorHandler& OnError);	
+			
+			void CheckUserSubEntitlement(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
+
+			void CheckSubEntitlementFromItemInfo(const THandler<bool>& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsItemInfo& itemInfo);
 
 			static FString TempUsername;
 			FUpgradeNotif UpgradeNotif;
