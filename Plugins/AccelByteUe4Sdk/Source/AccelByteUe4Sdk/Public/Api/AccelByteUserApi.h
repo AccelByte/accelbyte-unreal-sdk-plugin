@@ -36,9 +36,9 @@ namespace AccelByte
 			DECLARE_DELEGATE(FUpgradeNotif);
 
 			/**
-			 * @brief Log in with email/phone number account.
+			 * @brief Log in with email/username account.
 			 *
-			 * @param Username User email address.
+			 * @param Username User email address or username.
 			 * @param Password Password.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
@@ -79,13 +79,29 @@ namespace AccelByte
 			/**
 			 * @brief This function will register a new user with email-based account.
 			 *
-			 * @param Username User email address or phone number.
+			 * @param Username Email address of the user, can be used as login username.
 			 * @param Password The Password.
 			 * @param DisplayName The DisplayName.
+			 * @param Country User's country, ISO3166-1 alpha-2 two letter, e.g. US.
+			 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will register a new user with email-based account.
+			 *
+			 * @param EmailAddress Email address of the user, can be used as login username.
+			 * @param Username The username can be used as login username, case insensitive, alphanumeric with allowed symbols underscore (_) and dot (.).
+			 * @param Password The Password.
+			 * @param DisplayName The DisplayName.
+			 * @param Country User's country, ISO3166-1 alpha-2 two letter, e.g. US.
+			 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void Registerv2(const FString& EmailAddress, const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will get data of currently logged in user.
@@ -101,12 +117,26 @@ namespace AccelByte
 			 * If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
 			 * Therefore, the function requests user’s Username and Password for parameters.
 			 *
-			 * @param Username The Username.
+			 * @param Username The EmailAddress of the user.
 			 * @param Password The Password.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
+			 * Headless account is an account that doesn't have an email and password.
+			 * If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
+			 * Therefore, the function requests user’s Username and Password for parameters.
+			 *
+			 * @param EmailAddress The EmailAddress of the user.
+			 * @param Username The Username.
+			 * @param Password The Password.
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -221,9 +251,9 @@ namespace AccelByte
 			void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief This function will search user by their Email Address or Display Name.
+			 * @brief This function will search user by their Email Address, Username, or Display Name.
 			 *
-			 * @param Query Targeted user's Email Address or Display Name.
+			 * @param Query Targeted user's Email Address, Username, or Display Name.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 			 * @param OnError This will be called when the operation failed.
 			 */

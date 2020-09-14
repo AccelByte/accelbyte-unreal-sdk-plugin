@@ -46,6 +46,26 @@ struct ACCELBYTEUE4SDK_API FRegisterRequest
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FRegisterRequestv2
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString AuthType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString Password;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
+		FString Username;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterResponse
 {
 	GENERATED_BODY()
@@ -63,6 +83,8 @@ struct ACCELBYTEUE4SDK_API FRegisterResponse
 		FString DateOfBirth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
 		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
+		FString Username;
 };
 
 USTRUCT(BlueprintType)
@@ -79,6 +101,8 @@ struct ACCELBYTEUE4SDK_API FUserUpdateRequest
 		FString EmailAddress; // Optional
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
 		FString LanguageTag; // Optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
+		FString Username; // Optional
 };
 
 USTRUCT(BlueprintType)
@@ -247,6 +271,8 @@ struct ACCELBYTEUE4SDK_API FPublicUserInfo
 		FString PhoneNumber;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
 		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
+		FString UserName;
 };
 
 USTRUCT(BlueprintType)
