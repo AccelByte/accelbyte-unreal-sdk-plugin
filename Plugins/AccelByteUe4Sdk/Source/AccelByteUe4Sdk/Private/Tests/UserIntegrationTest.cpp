@@ -120,6 +120,75 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterv2Test, "AccelByte.Tests.AUser.RegisterUsername_ThenLogin", AutomationFlagMaskUser);
+bool FUserRegisterv2Test::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Registerv2(EmailAddress, Username, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	FlushHttpRequests();
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
+	check(bLoginSuccessful);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserAutomatedRefreshSessionTest, "AccelByte.Tests.AUser.AutomatedRefreshSession", AutomationFlagMaskUser);
 bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 {
@@ -954,6 +1023,94 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	check(bLoginPlatformSuccessful);
 	check(bUpgradeSuccessful);
 	check(bLoginEmailSuccessful);
+	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
+	check(!OldAccessToken.Equals(RefreshedAccessToken));
+	check(bDeleteSuccessful1);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountv2Success, "AccelByte.Tests.AUser.UpgradeHeadlessSteamAccountv2", AutomationFlagMaskUser);
+bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString Email = TEXT("testSDKsteam@game.test");
+	FString Username = TEXT("testSDKsteam");
+	FString Password = TEXT("123SDKTest123");
+	double LastTime = 0;
+	FString FirstUserId = TEXT("");
+	FString OldAccessToken = "", RefreshedAccessToken = "";
+
+	bool bLoginPlatformSuccessful = false;
+	bool bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	FlushHttpRequests();
+	Waiting(bSteamLoginDone, "Waiting for Login...");
+
+	if (!bLoginPlatformSuccessful)
+	{
+		return false;
+	}
+
+	FirstUserId = FRegistry::Credentials.GetUserId();
+	OldAccessToken = FRegistry::Credentials.GetUserSessionId();
+
+	bool bUpgradeSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
+	FRegistry::User.Upgradev2(Email, Username, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bUpgradeSuccessful = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginUsernameSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginUsernameSuccessful = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginUsernameSuccessful, "Waiting for Login...");
+
+	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
+
+#pragma region DeleteUser1
+
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful1 = true;
+		bDeleteDone1 = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone1, "Waiting for Deletion...");
+
+#pragma endregion DeleteUser1
+
+	check(FirstUserId == FRegistry::Credentials.GetUserId());
+	check(bLoginPlatformSuccessful);
+	check(bUpgradeSuccessful);
+	check(bLoginUsernameSuccessful);
 	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
 	check(!OldAccessToken.Equals(RefreshedAccessToken));
 	check(bDeleteSuccessful1);
@@ -2313,6 +2470,102 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 		}
 	}
 	check(bIsDisplayNameFound);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserByUsernameTest, "AccelByte.Tests.AUser.GetUserByUsername", AutomationFlagMaskUser);
+bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + Username + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Registerv2(EmailAddress, Username, Password, "", Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	FlushHttpRequests();
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+
+	bool bGetUserDone = false;
+	FPagedPublicUsersInfo ReceivedUserData;
+	FRegistry::User.SearchUsers(
+		Username,
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetUserDone = true;
+		ReceivedUserData = Result;
+		for (auto Data : ReceivedUserData.Data)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+		}
+	}),
+		UserTestErrorHandler);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	check(bLoginSuccessful);
+	check(bGetUserDone);
+	check(bDeleteSuccessful);
+	check(ReceivedUserData.Data.Num() != 0);
+	bool bIsUsernameFound = false;
+	for (int i = 0; i < ReceivedUserData.Data.Num(); i++)
+	{
+		if (ReceivedUserData.Data[i].UserName == Username)
+		{
+			bIsUsernameFound = true;
+			break;
+		}
+	}
+	check(bIsUsernameFound);
 	return true;
 }
 

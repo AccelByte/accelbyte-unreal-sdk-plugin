@@ -167,7 +167,8 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) {
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
@@ -197,6 +198,37 @@ void User::Register(const FString& Username, const FString& Password, const FStr
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::Registerv2(const FString& EmailAddress, const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FRegisterRequestv2 NewUserRequest;
+	NewUserRequest.DisplayName = DisplayName;
+	NewUserRequest.Password = Password;
+	NewUserRequest.EmailAddress = EmailAddress;
+	NewUserRequest.Username = Username;
+	NewUserRequest.AuthType = TEXT("EMAILPASSWD");
+	NewUserRequest.Country = Country;
+	NewUserRequest.DateOfBirth = DateOfBirth;
+
+	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users"), *Settings.IamServerUrl, *Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
 
@@ -310,7 +342,7 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 		TEXT(""),
 		Username
 	};
-	
+
 	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
 }
 
@@ -342,7 +374,7 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 				{
 					OnSuccess.ExecuteIfBound(UserData);
 				}),
-				OnError),
+			OnError),
 		FPlatformTime::Seconds());
 }
 
@@ -374,7 +406,39 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 				{
 					OnSuccess.ExecuteIfBound(UserData);
 				}),
-				OnError),
+			OnError),
+		FPlatformTime::Seconds());
+}
+
+void User::Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("{ \"emailAddress\": \"%s\", \"password\": \"%s\", \"username\": \"%s\"}"), *EmailAddress, *Password, *Username);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			THandler<FUserData>::CreateLambda(
+				[OnSuccess](const FUserData& UserData)
+				{
+					OnSuccess.ExecuteIfBound(UserData);
+				}),
+			OnError),
 		FPlatformTime::Seconds());
 }
 
@@ -383,7 +447,8 @@ void User::UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHa
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	const auto HttpNotifDelegate = HttpListenerExtension::FHttpNotif::CreateLambda([this](){
+	const auto HttpNotifDelegate = HttpListenerExtension::FHttpNotif::CreateLambda([this]()
+	{
 		UpgradeNotif.ExecuteIfBound();
 	});
 
@@ -400,7 +465,8 @@ void User::UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHa
 		ListenerExtension.StartHttpListener();
 
 		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) {
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
 }
@@ -719,8 +785,9 @@ void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHa
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda([this, OnSuccess, OnError](const FAccelByteModelsItemInfo& itemInfoResult) {
-		
+	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda([this, OnSuccess, OnError](const FAccelByteModelsItemInfo& itemInfoResult)
+	{
+
 		TArray<FString> itemIds;
 		TArray<FString> skus = itemInfoResult.Features;
 		TArray<FString> appIds;
