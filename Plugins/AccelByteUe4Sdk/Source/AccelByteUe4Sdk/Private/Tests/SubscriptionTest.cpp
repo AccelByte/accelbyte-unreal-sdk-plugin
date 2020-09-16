@@ -37,7 +37,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 	FRegistry::Settings.AppId = "abshooterid123123";
 
 	bool bLoginFinish = false;
-	FRegistry::User.LoginWithUsername("fauzan+canada5@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
+	FRegistry::User.LoginWithUsername("narendra+sdksub1@accelbyte.net", "narendra+sub1", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
@@ -69,7 +69,7 @@ bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 	FRegistry::Settings.AppId = "abshooterid123123";
 
 	bool bLoginFinish = false;
-	FRegistry::User.LoginWithUsername("fauzan+canada3@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
+	FRegistry::User.LoginWithUsername("narendra+sdksub2@accelbyte.net", "narendra+sub2", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
@@ -101,7 +101,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 	FRegistry::Settings.AppId = "abshooterid123123";
 
 	bool bLoginFinish = false;
-	FRegistry::User.LoginWithUsername("fauzan+canada4@accelbyte.net", "fauzan123$", FVoidHandler::CreateLambda([&bLoginFinish]()
+	FRegistry::User.LoginWithUsername("narendra+sdksub3@accelbyte.net", "narendra+sub3", FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
