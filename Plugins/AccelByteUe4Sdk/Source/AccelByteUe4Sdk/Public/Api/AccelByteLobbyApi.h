@@ -136,6 +136,21 @@ public:
      */
     DECLARE_DELEGATE_OneParam(FPartyChatNotif, const FAccelByteModelsPartyMessageNotice&);              // Passive
     
+	/**
+	 * @brief delegate for handling join default channel message event response
+	 */
+	DECLARE_DELEGATE_OneParam(FJoinDefaultChannelChatResponse, const FAccelByteModelsJoinDefaultChannelResponse&);
+
+	/**
+	 * @brief delegate for handling channel message event response
+	 */
+	DECLARE_DELEGATE_OneParam(FChannelChatResponse, const FAccelByteModelsChannelMessageResponse&);
+
+	/**
+	 * @brief delegate for handling channel message event notification
+	 */
+	DECLARE_DELEGATE_OneParam(FChannelChatNotif, const FAccelByteModelsChannelMessageNotice&);
+
     // Presence
     /**
      * @brief delegate for handling user change presence status
@@ -288,6 +303,15 @@ public:
 	 */
     FString SendPartyMessage(const FString& Message);
 	
+	/**
+	 * @brief Request to join the default channel chat.
+	 */
+	FString SendJoinDefaultChannelChatRequest();
+
+	/**
+	 * @brief Send a message to joined channel chat.
+	 */
+	FString SendChannelMessage(const FString& Message);
 
     //------------------------
     // Party
@@ -563,12 +587,6 @@ public:
 	*
 	* @param OnPrivateMessageResponse set delegate .
 	*/
-
-	/**
-	* @brief set private message receive delegate
-	*
-	* @param OnPrivateMessageResponse set delegate .
-	*/
 	void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse)
 	{
 		PersonalChatResponse = OnPrivateMessageResponse;
@@ -584,6 +602,35 @@ public:
 		PartyChatResponse = OnPartyMessageResponse;
 	};
 
+	/**
+	* @brief set join channel chat response
+	*
+	* @param OnJoinDefaultChannelResponse set delegate.
+	*/
+	void SetJoinChannelChatResponseDelegate(FJoinDefaultChannelChatResponse OnJoinDefaultChannelResponse)
+	{
+		JoinDefaultChannelResponse = OnJoinDefaultChannelResponse;
+	};
+
+	/**
+	* @brief set channel message response
+	*
+	* @param OnChannelMessageResponse set delegate.
+	*/
+	void SetChannelMessageResponseDelegate(FChannelChatResponse OnChannelMessageResponse)
+	{
+		ChannelChatResponse = OnChannelMessageResponse;
+	};
+
+	/**
+	* @brief set channel message notif
+	*
+	* @param OnChannelMessageNotif set delegate.
+	*/
+	void SetChannelMessageNotifDelegate(FChannelChatNotif OnChannelMessageNotif)
+	{
+		ChannelChatNotif = OnChannelMessageNotif;
+	}
 
 	// Presence
 	/**
@@ -805,6 +852,7 @@ private:
 	float TimeSinceLastPing;
 	float TimeSinceLastReconnect;
 	float TimeSinceConnectionLost;
+	FString ChannelSlug;
 	EWebSocketState WsState;
 	EWebSocketEvent WsEvents;
 	FTickerDelegate LobbyTickDelegate;
@@ -833,6 +881,9 @@ private:
     FPersonalChatNotif PersonalChatNotif;
     FPartyChatResponse PartyChatResponse;
     FPartyChatNotif PartyChatNotif;
+	FJoinDefaultChannelChatResponse JoinDefaultChannelResponse;
+	FChannelChatResponse ChannelChatResponse;
+	FChannelChatNotif ChannelChatNotif;
 
     // Presence
     FSetUserPresenceResponse SetUserPresenceResponse;

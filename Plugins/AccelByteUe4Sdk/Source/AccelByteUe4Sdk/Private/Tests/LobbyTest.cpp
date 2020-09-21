@@ -729,6 +729,108 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived, "AccelByte.Tests.Lobby.B.SendChannelChat", AutomationFlagMaskLobby);
+bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FString& Parameters)
+{
+	LobbyConnect(TestUserCount);
+
+	int receivedChatCount = 0;
+	const int chatMultiplier = 5;
+	bool bChatAllReceived = false;
+
+	for (int i = 0; i < TestUserCount; i++)
+	{
+		Lobbies[i]->SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, chatMultiplier](const FAccelByteModelsChannelMessageNotice& result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Payload : %s"), *result.Payload);
+			FPlatformAtomics::InterlockedIncrement(&receivedChatCount);
+			if (receivedChatCount == TestUserCount * TestUserCount * chatMultiplier)
+			{
+				bChatAllReceived = true;
+			}
+		}));
+
+		bool bJoinedChannel = false;
+		Lobbies[i]->SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
+		{
+			bJoinedChannel = true;
+		}));
+		Lobbies[i]->SendJoinDefaultChannelChatRequest();
+		Waiting(bJoinedChannel, TEXT("Waiting for join..."));
+	}
+
+	for (int j = 0; j < chatMultiplier; j++)
+	{
+		for (int i = 0; i < TestUserCount; i++)
+		{
+			FString chatMessage = "Hello Chat, from " + UserCreds[i].GetUserDisplayName();
+			Lobbies[i]->SendChannelMessage(chatMessage);
+		}
+	}
+
+	FString text = FString::Printf(TEXT("Wait receiving message : %d"), receivedChatCount);
+	Waiting(bChatAllReceived, text);
+
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Received Message : %d"), receivedChatCount);
+	check(receivedChatCount == (TestUserCount * TestUserCount * chatMultiplier));
+
+	LobbyDisconnect(TestUserCount);
+	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage, "AccelByte.Tests.Lobby.B.SendChannelChatReconnected", AutomationFlagMaskLobby);
+bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FString& Parameters)
+{
+	const int playerCount = 2;
+	LobbyConnect(playerCount);
+
+	int receivedChatCount = 0;
+	bool bChatAllReceived = false;
+
+	for (int i = 0; i < playerCount; i++)
+	{
+		Lobbies[i]->SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, playerCount](const FAccelByteModelsChannelMessageNotice& result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Payload : %s"), *result.Payload);
+			FPlatformAtomics::InterlockedIncrement(&receivedChatCount);
+			if (receivedChatCount == (playerCount * playerCount)-1)
+			{
+				bChatAllReceived = true;
+			}
+		}));
+
+		bool bJoinedChannel = false;
+		Lobbies[i]->SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
+		{
+			bJoinedChannel = true;
+		}));
+		Lobbies[i]->SendJoinDefaultChannelChatRequest();
+		Waiting(bJoinedChannel, TEXT("Waiting for join..."));
+	}
+
+	FString chatMessage = "Hello Chat, from " + UserCreds[0].GetUserDisplayName();
+	Lobbies[0]->SendChannelMessage(chatMessage);
+	WaitUntil([](){ return false; }, 3);
+
+	Lobbies[1]->Disconnect();
+	WaitUntil([](){ return false; }, 0.5);
+	Lobbies[1]->Connect();
+	WaitUntil([](){ return false; }, 0.5);
+
+	Lobbies[0]->SendChannelMessage(chatMessage);
+
+	FString text = FString::Printf(TEXT("Wait receiving message : %d"), receivedChatCount);
+	Waiting(bChatAllReceived, text);
+
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Received Message : %d"), receivedChatCount);
+	check(receivedChatCount == (playerCount * playerCount) - 1);
+
+	LobbyDisconnect(playerCount);
+	resetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers, "AccelByte.Tests.Lobby.B.ListOnlineFriends", AutomationFlagMaskLobby);
 bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(const FString& Parameters)
 {
