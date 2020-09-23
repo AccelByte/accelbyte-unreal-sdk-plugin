@@ -28,6 +28,8 @@ namespace Api
 		// Chat
 		const FString PersonalChat = TEXT("personalChatRequest");
 		const FString PartyChat = TEXT("partyChatRequest");
+		const FString JoinChannelChat = TEXT("joinDefaultChannelRequest");
+		const FString ChannelChat = TEXT("sendChannelChatRequest");
 
 		// Presence
 		const FString SetPresence = TEXT("setUserStatusRequest");
@@ -77,6 +79,9 @@ namespace Api
 		const FString PersonalChatNotif = TEXT("personalChatNotif");
 		const FString PartyChat = TEXT("partyChatResponse");
 		const FString PartyChatNotif = TEXT("partyChatNotif");
+		const FString JoinChannelChat = TEXT("joinDefaultChannelResponse");
+		const FString ChannelChat = TEXT("sendChannelChatResponse");
+		const FString ChannelChatNotif = TEXT("channelChatNotif");
 
 		// Presence
 		const FString SetUserPresence = TEXT("setUserStatusResponse");
@@ -165,6 +170,7 @@ void Lobby::Disconnect()
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	ChannelSlug = "";
 	if (LobbyTickDelegateHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
@@ -223,6 +229,36 @@ FString Lobby::SendPartyMessage(const FString& Message)
 
 	return SendRawRequest(LobbyRequest::PartyChat, Prefix::Chat,
 		FString::Printf(TEXT("payload: %s\n"), *Message));
+}
+
+FString Lobby::SendJoinDefaultChannelChatRequest()
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::JoinChannelChat, Prefix::Chat);
+}
+
+FString Lobby::SendChannelMessage(const FString& Message)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	if (!ChannelSlug.IsEmpty())
+	{
+		return SendRawRequest(LobbyRequest::ChannelChat, Prefix::Chat,
+			FString::Printf(TEXT("channelSlug: %s\npayload: %s\n"), *ChannelSlug, *Message));
+	}
+	else
+	{
+		FAccelByteModelsChannelMessageResponse ErrorResult
+		{
+			(int)ErrorCodes::InvalidRequest,
+			"You're not in any chat channel."
+		};
+		ChannelChatResponse.ExecuteIfBound(ErrorResult);
+		return "";
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -500,6 +536,7 @@ void Lobby::UnbindEvent()
 	DsNotif.Unbind();
 	AcceptFriendsNotif.Unbind();
 	RequestFriendsNotif.Unbind();
+	ChannelChatNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -569,6 +606,7 @@ bool Lobby::Tick(float DeltaTime)
 		}
 		else if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
 		{
+			ChannelSlug = "";
 			TimeSinceLastPing = FPlatformTime::Seconds();
 			WsState = EWebSocketState::Connected;
 		}
@@ -744,6 +782,19 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChatNotif, FAccelByteModelsPersonalMessageNotice, PersonalChatNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyChatResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyChatNotif, FAccelByteModelsPartyMessageNotice, PartyChatNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::ChannelChat, FAccelByteModelsChannelMessageResponse, ChannelChatResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::ChannelChatNotif, FAccelByteModelsChannelMessageNotice, ChannelChatNotif);
+	if (lobbyResponseType.Equals(LobbyResponse::JoinChannelChat))
+	{
+		FAccelByteModelsJoinDefaultChannelResponse Result;
+		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		if (bParseSuccess)
+		{
+			ChannelSlug = Result.ChannelSlug;
+			JoinDefaultChannelResponse.ExecuteIfBound(Result);
+			return;
+		}
+	}
 
 	// Presence
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);

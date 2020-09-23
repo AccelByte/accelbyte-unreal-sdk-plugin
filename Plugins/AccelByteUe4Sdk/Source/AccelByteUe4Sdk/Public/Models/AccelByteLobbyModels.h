@@ -232,6 +232,51 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyMessageNotice
 	FString ReceivedAt;
 };
 
+// join default channel chat
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsJoinDefaultChannelResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString ChannelSlug;
+};
+
+// send channel chat request
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChannelMessageRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString ChannelSlug;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString payload;
+};
+
+// Receive channel chat
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChannelMessageNotice
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString From;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString ChannelSlug;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString Payload;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString SentAt;
+};
+
+// Send channel chat
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsChannelMessageResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		int32 Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString Message;
+};
 
 // ------------------------------------------------------------------------------------------------
 // Presence 
