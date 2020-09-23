@@ -27,6 +27,11 @@ enum class EAccelBytePlatformType : uint8
 	Twitter
 };
 
+enum class EAccelByteSearchType : uint8
+{
+	ALL, EMAILADDRESS, DISPLAYNAME, USERNAME
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterRequest
 {
