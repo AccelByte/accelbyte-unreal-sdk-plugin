@@ -29,7 +29,8 @@ AccelByte UE4 SDK features:
   - User profile (create, update, view).
   - Ecommerce (get item categories, get items, create orders, etc.)
   - Lobby (chatting, party management)
-- Maybe server API in the future.
+- Server API.
+- Supported UE4 versions: 4.20 - 4.25.3
 
 ## Architecture
 
@@ -128,74 +129,21 @@ also in `/Source/MyAwesomeGame/MyAwesomeGame.Build.cs`.
 
 ![](Documentation/images/setup_002.png)
 
+# Blueprint
 
-## How to run the examples
+**Note**: We halts support for blueprints, new features will be added with no blueprint. Please contact us if you want to use new features on the blueprints.
 
-Open the `/AccelByteUe4SdkDemo.uproject` in Unreal Engine 4 Editor. 
-
-![](Documentation/images/qsg_001.png)
-
-Play in standalone game mode.
-
-![](Documentation/images/qsg_002.png)
-
-The examples include how to implement the following functionalities in blueprint:
-
-**General**
-- Error screen based on numeric error code
-- Loading screen
-
-**User authentication**
-- Login with client credentials **We are planning to remove this. This is for game server/confidential client only!**
-- Login with device ID (anonymous login)
-- Login with username and password
-- Login with Steam session ticket
-- Refresh token
-- Logout
-
-![](Documentation/images/qsg_003.png)
-
-**User management**
-- Create user account
-- Verify user account
-- Request password reset
-- Verify password reset
-
-![](Documentation/images/qsg_004.png)
-
-**User profile**
-- Get user profile
-- Update user profile
-- Create user profile
-
-**Ecommerce**
-- List all categories in an online store
-- List all items in a category
-- View item information
-- Create order
-
-![](Documentation/images/qsg_005.png)
-
-**Lobby**
-- Connect to and disconnect from lobby server
-- Send ping regularly
-- Chat
-    - Party chat
-    - Private message (PM)
-- Party
-    - Get information about current party
-    - Create a party
-    - Leave current party
-    - Invite someone to party
-    - Accept a party invitation
-    - Kick a party member
-- Notification
-    - Party invitation notice (Someone has invited you to party)
-    - Party invitation acceptance notice (someone has accepted your invitation to the party)
-Presence
-    - Get all online users
-
-![](Documentation/images/qsg_006.png)
+Supported features:
+* Achievement
+* Could Storage
+* Entitlement
+* Store Category
+* Store Item
+* Lobby
+* Order
+* Statistic
+* User
+* Wallet
 
 # Build Documentation
 
