@@ -29,7 +29,7 @@ AccelByte UE4 SDK features:
   - User profile (create, update, view).
   - Ecommerce (get item categories, get items, create orders, etc.)
   - Lobby (chatting, party management)
-- Server API in the future.
+- Server API.
 - Supported UE4 versions: 4.20 - 4.25.3
 
 ## Architecture
@@ -130,6 +130,9 @@ also in `/Source/MyAwesomeGame/MyAwesomeGame.Build.cs`.
 ![](Documentation/images/setup_002.png)
 
 # Blueprint
+
+**Note**: We halts support for blueprints, new features will be added with no blueprint. Please contact us if you want to use new features on the blueprints.
+
 Supported features:
 * Achievement
 * Could Storage
@@ -141,8 +144,6 @@ Supported features:
 * Statistic
 * User
 * Wallet
-
-**Note**: We halts support for blueprints, new features will be added with no blueprint. Please contact us if you want to use new features on the blueprints.
 
 # Build Documentation
 
