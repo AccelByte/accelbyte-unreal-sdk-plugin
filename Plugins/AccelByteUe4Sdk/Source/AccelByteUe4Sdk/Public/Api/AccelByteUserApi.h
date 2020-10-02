@@ -260,6 +260,16 @@ namespace AccelByte
 			void SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
+			 * @brief This function will search user by their Email Address, Username, or Display Name.
+			 *
+			 * @param Query Targeted user's Email Address, Username, or Display Name.
+			 * @param By Filter the responded PagedPublicUsersInfo by SearchType. Choose the SearchType.ALL if you want to be responded with all query type.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
 			 * @brief This function will search user by userId.
 			 *
 			 * @param UserId Targeted user's ID.

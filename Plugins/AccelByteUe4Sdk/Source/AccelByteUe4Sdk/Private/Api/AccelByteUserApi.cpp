@@ -46,6 +46,13 @@ static FString PlatformStrings[] = {
 	TEXT("twitter"),
 };
 
+static FString SearchStrings[] = {
+	TEXT(""),
+	TEXT("emailAddress"),
+	TEXT("displayName"),
+	TEXT("username")
+};
+
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
@@ -697,7 +704,7 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -709,6 +716,12 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	FString Accept          = TEXT("application/json");
 	FString Content;
 
+	if (By != EAccelByteSearchType::ALL)
+	{
+		FString SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
+		Url.Append(FString::Printf(TEXT("&by=%s"), *SearchId));
+	}
+
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
@@ -718,6 +731,11 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
 void User::GetUserByUserId(const FString& UserID, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
