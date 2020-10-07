@@ -60,7 +60,7 @@ pipeline {
                         doTagging = false
                         doDeploy = false
                     }
-                    
+
                     ue4_version = params.UE4_VERSION == null ? "default" : params.UE4_VERSION
                     config = readJSON file: "jenkins.config.json"
                     config.build.targets."${ue4_version}".env_vars.each() {
@@ -80,19 +80,19 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Cleanup";
                             }
                         }
-                    }       
-                }    
+                    }
+                }
                 stage('Generate Project Solution') {
                     steps {
                         bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Generate Project Solution";
                             }
                         }
@@ -104,7 +104,7 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Build Windows";
                             }
                         }
@@ -116,11 +116,11 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Build Linux";
                             }
                         }
-                    }       
+                    }
                 }
                 stage('ProxySetup') {
                     steps {
@@ -134,7 +134,7 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "ProxySetup";
                             }
                         }
@@ -150,15 +150,15 @@ pipeline {
                             archiveArtifacts artifacts: "Saved/Logs/${TEST_LOG}"
                         }
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Automation Test";
-                                
+
                                 def file = readFile "${WORKSPACE}/Saved/Logs/${TEST_LOG}"
-                                def errorTests = "" 
+                                def errorTests = ""
                                 def currentTest = ""
                                 def totalTests = "0"
                                 def testExecuted = 0
-                                file.readLines().each { 
+                                file.readLines().each {
                                     if (it.contains("Running Automation:")) {
                                         testExecuted++
                                         currentTest = it.substring(it.indexOf("Running Automation:") + 19)
@@ -188,7 +188,7 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Package";
                             }
                         }
@@ -199,14 +199,14 @@ pipeline {
                         expression { return doDeploy }
                     }
                     steps {
-                        script{	
+                        script{
                             def VERSION = version
-                        }			
+                        }
                         bat '%WORKSPACE%\\Jenkins\\Archive.bat'
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Archive";
                             }
                         }
@@ -227,12 +227,12 @@ pipeline {
                     NEXUS_REPOSITORY = "justice-ue4-repository"
                     NEXUS_CREDENTIAL_ID = "nexus-sdk"
                     NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
-                    GIT_PATH = "${env.GIT_PATH}"      
-                    GIT_SHA = "${env.GIT_COMMIT}"       
+                    GIT_PATH = "${env.GIT_PATH}"
+                    GIT_SHA = "${env.GIT_COMMIT}"
                     BUILD_NUMBER = "${env.BUILD_NUMBER}"
                     WORKSPACE = "${env.WORKSPACE}"
                     }
-                    
+
                     steps {
                         bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
                         script{
@@ -258,7 +258,7 @@ pipeline {
                     }
                     post {
                         failure {
-                            script{ 
+                            script{
                                 FAILED_STAGE = "Upload Archive";
                             }
                         }
@@ -273,9 +273,13 @@ pipeline {
                 script{
                     def message = ""
                     message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-                    
+                    gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
+
                     if (grade == "production") {
                         slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
+                    }
+                    if (buildByTimer) {
+                        slackSend (channel: "#automation-monitoring", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.BRANCH_NAME}` \n `${gitHash}`: ${message} ")
                     }
                     bitbucketBuildStatus("SUCCESS", "Bitbucket_Build_AccelByte", "accelbyte")
                 }
@@ -287,7 +291,8 @@ pipeline {
                     bitbucketBuildStatus("FAILURE", "Bitbucket_Build_AccelByte", "accelbyte")
 
                     def message = ""
-                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()        
+                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+                    gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
 
                     echo "jobName: ${JOB_NAME}"
                     echo "buildNumber: ${BUILD_NUMBER}"
@@ -296,6 +301,9 @@ pipeline {
 
                     if (grade == "production") {
                         slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
+                    }
+                    if (buildByTimer) {
+                        slackSend (channel: "#automation-monitoring", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nFail Log : <${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log|Jenkin's #${env.BUILD_NUMBER} Artifact> \nProject: `${env.JOB_NAME}` \nBranch: `${env.BRANCH_NAME}` \nCommit: `${gitHash}`: ${message}")
                     }
                 }
             }
