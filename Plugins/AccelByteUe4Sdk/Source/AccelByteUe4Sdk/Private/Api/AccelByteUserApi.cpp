@@ -30,28 +30,47 @@ User::~User()
 static HttpListenerExtension ListenerExtension;
 FString User::TempUsername;
 
-static FString PlatformStrings[] = {
-	TEXT("steam"),
-	TEXT("ps4"),
-	TEXT("live"),
-	TEXT("google"),
-	TEXT("ps4"),
-	TEXT("live"),
-	TEXT("facebook"),
-	TEXT("android"),
-	TEXT("ios"),
-	TEXT("device"),
-	TEXT("twitch"),
-	TEXT("oculus"),
-	TEXT("twitter"),
-};
-
 static FString SearchStrings[] = {
 	TEXT(""),
 	TEXT("emailAddress"),
 	TEXT("displayName"),
 	TEXT("username")
 };
+
+static FString GetPlatformString(EAccelBytePlatformType PlatformType)
+{
+	switch (PlatformType)
+	{
+	case EAccelBytePlatformType::Steam:
+		return "steam";
+	case EAccelBytePlatformType::PS4:
+		return "ps4";
+	case EAccelBytePlatformType::Live:
+		return "live";
+	case EAccelBytePlatformType::Google:
+		return "google";
+	case EAccelBytePlatformType::Facebook:
+		return "facebook";
+	case EAccelBytePlatformType::Android:
+		return "android";
+	case EAccelBytePlatformType::iOS:
+		return "ios";
+	case EAccelBytePlatformType::Device:
+		return "device";
+	case EAccelBytePlatformType::Twitch:
+		return "twitch";
+	case EAccelBytePlatformType::Oculus:
+		return "oculus";
+	case EAccelBytePlatformType::Twitter:
+		return "twitter";
+	case EAccelBytePlatformType::EpicGames:
+		return "epicgames";
+	case EAccelBytePlatformType::Stadia:
+		return "stadia";
+	default:
+		return "unknown";
+	}
+}
 
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
@@ -66,7 +85,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 	}
-	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)], PlatformToken, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
@@ -301,7 +320,7 @@ void AccelByte::Api::User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformT
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	const FString PlatformString = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+	const FString PlatformString = GetPlatformString(PlatformType);
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
@@ -578,7 +597,7 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, cons
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -600,7 +619,7 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString&
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+	auto PlatformId = GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
@@ -625,7 +644,7 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FS
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+	auto PlatformId = GetPlatformString(PlatformType);
 
 	FLinkPlatformAccountRequest linkRequest;
 	linkRequest.PlatformId = PlatformId;
@@ -655,10 +674,10 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidH
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+	auto PlatformId = GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
 	FString Verb            = TEXT("DELETE");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -763,7 +782,7 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, con
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
-	FString PlatformId      = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
+	FString PlatformId      = GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *PlatformId, *OtherPlatformUserId);

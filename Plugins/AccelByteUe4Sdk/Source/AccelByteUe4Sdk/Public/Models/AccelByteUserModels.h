@@ -24,7 +24,9 @@ enum class EAccelBytePlatformType : uint8
 	Device,
 	Twitch,
 	Oculus,
-	Twitter
+	Twitter,
+	EpicGames,
+	Stadia
 };
 
 enum class EAccelByteSearchType : uint8

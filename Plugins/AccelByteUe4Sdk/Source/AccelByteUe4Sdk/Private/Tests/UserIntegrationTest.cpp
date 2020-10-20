@@ -1237,6 +1237,21 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 	FlushHttpRequests();
 	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
 
+	bool bGetPlatformLinks = false;
+	bool bGetPlatformLinksSuccess = false;
+	FRegistry::User.GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda ([&bGetPlatformLinks, &bGetPlatformLinksSuccess](const FPagedPlatformLinks& res)
+	{
+		bGetPlatformLinks = true;
+		bGetPlatformLinksSuccess = true;
+	}),  FErrorHandler::CreateLambda([&bGetPlatformLinks](int32 Code, const FString& Message)
+	{
+		bGetPlatformLinks = true;
+		UE_LOG(LogAccelByteUserTest, Error, TEXT("GetPlatformLinks..! Error: %d | Message: %s"), Code, *Message);
+	}));
+
+	FlushHttpRequests();
+	Waiting(bGetPlatformLinks, "Waiting for GetPlatformLinks...");
+
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1297,6 +1312,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 
 	check(bLoginPlatformSuccessful);
 	check(bLinkSteamSuccess);
+	check(bGetPlatformLinksSuccess);
 	check(bLoginSuccessful);
 	check(UserData.UserId == UserData2.UserId);
 	check(UserData.EmailAddress == UserData2.EmailAddress);
