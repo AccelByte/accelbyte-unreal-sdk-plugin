@@ -578,7 +578,7 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, cons
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetClientNamespace());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -658,7 +658,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidH
 	auto PlatformId = PlatformStrings[static_cast<std::underlying_type<EAccelBytePlatformType>::type>(PlatformType)];
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId);
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
 	FString Verb            = TEXT("DELETE");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
