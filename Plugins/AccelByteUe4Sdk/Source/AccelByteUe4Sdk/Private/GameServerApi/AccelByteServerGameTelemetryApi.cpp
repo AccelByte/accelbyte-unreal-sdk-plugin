@@ -21,8 +21,11 @@ ServerGameTelemetry::ServerGameTelemetry(const AccelByte::ServerCredentials & Cr
 
 ServerGameTelemetry::~ServerGameTelemetry()
 {
-	FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
-	GameTelemetryTickDelegateHandle.Reset();
+	if(UObjectInitialized())
+	{
+		FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
+		GameTelemetryTickDelegateHandle.Reset();
+	}
 }
 
 void ServerGameTelemetry::SetBatchFrequency(FTimespan Interval)
