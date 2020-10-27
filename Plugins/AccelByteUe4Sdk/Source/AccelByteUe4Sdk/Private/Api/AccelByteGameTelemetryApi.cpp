@@ -22,8 +22,11 @@ GameTelemetry::GameTelemetry(const AccelByte::Credentials & Credentials, const A
 
 GameTelemetry::~GameTelemetry()
 {
-	FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
-	GameTelemetryTickDelegateHandle.Reset();
+	if(UObjectInitialized())
+	{
+		FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
+		GameTelemetryTickDelegateHandle.Reset();
+	}
 }
 
 void GameTelemetry::SetBatchFrequency(FTimespan Interval)
