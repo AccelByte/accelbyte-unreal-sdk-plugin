@@ -12,6 +12,8 @@ namespace AccelByte
 
 	void Report::GetHttpRequest(const FHttpRequestPtr & Request)
 	{
+		if (!UObjectInitialized()) return;
+
 		FString LogMessage = "";
 
 		if (Request.IsValid())
@@ -44,6 +46,8 @@ namespace AccelByte
 
 	void Report::GetHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response)
 	{
+		if (!UObjectInitialized()) return;
+
 		FString LogMessage = "";
 
 		if (Response.IsValid())
@@ -67,6 +71,8 @@ namespace AccelByte
 
 	void Report::GetFunctionLog(FString FunctionMacroName) 
 	{
+		if (!UObjectInitialized()) return;
+
 		int count = 0;
 		
 		FString FunctionName = FunctionMacroName;

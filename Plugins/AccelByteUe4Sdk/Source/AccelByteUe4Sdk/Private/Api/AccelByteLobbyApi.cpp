@@ -866,7 +866,11 @@ Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Setting
 
 Lobby::~Lobby()
 {
-	Disconnect();
+	// only disconnect when engine is still valid
+	if(UObjectInitialized())
+	{
+		Disconnect();
+	}
 }
 
 } // Namespace Api
