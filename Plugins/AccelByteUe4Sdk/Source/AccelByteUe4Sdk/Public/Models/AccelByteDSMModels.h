@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Dom/JsonObject.h" 
 #include "AccelByteDSMModels.generated.h"
 
 USTRUCT(BlueprintType)
@@ -64,62 +65,24 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUser
 	FString User_id;
 };
 
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingParty
 {
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingParty")
 	FString Party_id;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingParty")
 	TArray<FAccelByteModelsUser> Party_members;
+	FJsonObject Party_attributes;
 };
 
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingAlly
 {
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchingAlly")
 	TArray<FAccelByteModelsMatchingParty> Matching_parties;
 };
 
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingInfoNotif
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-	FString Session_id;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-	FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-	FString Game_mode;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-	TArray<FAccelByteModelsMatchingAlly> Matching_allies;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchmakingInfo")
-	FString Pod_name;
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchRequest
 {
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
 	FString Session_id;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
 	FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
 	FString Game_mode;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | MatchRequest")
 	TArray<FAccelByteModelsMatchingAlly> Matching_allies;
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMMessage
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Message")
-	FString Msg_type;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Message")
-	FAccelByteModelsMatchmakingInfoNotif Message;
 };
 
 USTRUCT(BlueprintType)

@@ -542,7 +542,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 			{
 				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Code=%d"), Code);
-				if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException) //email already used
+				if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException || (ErrorCodes)Code == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
 				{
 					UsersCreationSuccess[i] = true;
 					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is already"), i, TestUserCount);
@@ -2305,6 +2305,194 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	LobbyDisconnect(2);
 	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_withPartyAttributes, "AccelByte.Tests.Lobby.B.MatchmakingStartPartyAttributes", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Parameters)
+{
+	const FString ServerName = "UE4SDKLocalServer";
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		bClientLoginSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Login Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Login client...");
+	check(bClientLoginSuccess);
+
+	bool bOnMatchResultGet = false;
+	FAccelByteModelsMatchRequest MatchResult;
+	FRegistry::ServerDSM.SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest>::CreateLambda([&MatchResult, &bOnMatchResultGet](const FAccelByteModelsMatchRequest& Result)
+	{
+		MatchResult = Result;
+		bOnMatchResultGet = true;
+	}));
+	bool bServerRegisterSuccess = false;
+	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
+	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
+	{
+		bServerRegisterSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Register Success..!"));
+	}), FErrorHandler::CreateLambda([&ServerName, &bServerRegisterSuccess](int32 Code, const FString& Message)
+	{
+		if ((ErrorCodes)Code == ErrorCodes::StatusConflict || (ErrorCodes)Code == ErrorCodes::DsRegistrationConflict)
+		{
+			FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess, &ServerName]()
+			{
+				FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess, &ServerName]()
+				{
+					bServerRegisterSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Register Success..!"));
+				}), LobbyTestErrorHandler);
+			}), LobbyTestErrorHandler);
+		}
+		else
+		{
+			UE_LOG(LogAccelByteLobbyTest, Fatal, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+		}
+	}));
+	FlushHttpRequests();
+	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
+	check(bServerRegisterSuccess);
+
+	LobbyConnect(1);
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse;
+	bool bMatchmakingNotifSuccess = false;
+	bool bMatchmakingNotifError = false;
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse = result;
+		bMatchmakingNotifSuccess = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError = true;
+		}
+	}));
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 1;
+	AllianceRule.max_number = 1;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 1;
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+	Lobbies[0]->SendCreatePartyRequest();
+
+	Waiting(bCreatePartySuccess, "Creating Party...");
+
+	check(!bCreatePartyError);
+
+	bool bGetLatenciesSuccess = false;
+	FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetLatenciesSuccess](const TArray < TPair<FString, float>>& Result)
+	{
+		bGetLatenciesSuccess = true;
+	}), LobbyTestErrorHandler);
+	Waiting(bGetLatenciesSuccess, "Getting Latencies...");
+	FlushHttpRequests();
+
+	FJsonObject PartyAttributes;
+	PartyAttributes.SetStringField("GameMap", "BasicTutorial");
+	PartyAttributes.SetNumberField("Timeout", 100);
+	PartyAttributes.SetStringField("Label", "New Island");
+	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", FRegistry::Qos.Latencies, PartyAttributes);
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	Waiting(bMatchmakingNotifSuccess, "Waiting for Matchmaking Notification...");
+
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse;
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse.MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse = readyConsentNotice;
+
+	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
+	check(!bDsNotifError);
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
+	check(!bMatchmakingNotifError);
+	check(!matchmakingNotifResponse.MatchId.IsEmpty());
+	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Done);
+	check(readyConsentNoticeResponse.MatchId == matchmakingNotifResponse.MatchId);
+
+	Waiting(bOnMatchResultGet, "Waiting for match result...");
+	
+	for (auto Ally : MatchResult.Matching_allies)
+	{
+		for (auto Party : Ally.Matching_parties)
+		{
+			for (auto partyAttribute : PartyAttributes.Values)
+			{
+				auto Value = Party.Party_attributes.Values.Find(partyAttribute.Key);
+				check(Value->IsValid());
+				check(Value->Get()->AsString() == partyAttribute.Value->AsString());
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *(Value->Get()->AsString()));
+			}
+		}
+	}
+
+	LobbyDisconnect(1);
+	resetResponses();
+
+	bool bServerShutdownSuccess = false;
+	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
+	{
+		bServerShutdownSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Shutdown Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bServerShutdownSuccess, "Waiting for shutdown server Url...");
+	check(bServerShutdownSuccess);
+
 	return true;
 }
 

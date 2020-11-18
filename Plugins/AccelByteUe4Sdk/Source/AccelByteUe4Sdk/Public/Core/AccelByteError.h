@@ -297,7 +297,11 @@ namespace AccelByte
 		JsonDeserializationFailed = 14001,
 		InvalidRequest = 14003,
 		NetworkError = 14005,
-		WebSocketConnectFailed = 14201
+		WebSocketConnectFailed = 14201,
+		//
+		//GameServer-side Error Code List
+		//
+		DsRegistrationConflict = 9014143
 	};
 
 

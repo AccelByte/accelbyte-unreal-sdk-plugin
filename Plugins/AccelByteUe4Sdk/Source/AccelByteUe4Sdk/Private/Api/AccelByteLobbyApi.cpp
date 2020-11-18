@@ -354,7 +354,7 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies)
+FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, FJsonObject PartyAttributes)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -381,6 +381,21 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 		}
 		ServerLatencies.Append(TEXT("}"));
 		Contents.Append(FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies));
+	}
+
+	if (PartyAttributes.Values.Num() > 0)
+	{
+		FString Content;
+		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(PartyAttributes);
+		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+		FString Trimmed = Content.ReplaceCharWithEscapedChar();
+		Trimmed.ReplaceInline(TEXT("\\r"), TEXT(""));
+		Trimmed.ReplaceInline(TEXT("\\n"), TEXT(""));
+		Trimmed.ReplaceInline(TEXT("\\t"), TEXT(""));
+		Trimmed.ReplaceInline(TEXT("\\"), TEXT(""));
+		Trimmed.ReplaceInline(TEXT(": "), TEXT(":"));
+		Contents.Append(FString::Printf(TEXT("partyAttributes: %s"), *Trimmed));
 	}
 
 	return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,

@@ -383,8 +383,9 @@ public:
 	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
 	* @param ClientVersion The version of DS, fill it blank to choose the default version.
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	* @param PartyAttributes custom attributes to be added on matchmaking, added information like game map, private room code, etc. also will be passed to ds too.
 	*/
-	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>());
+	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), FJsonObject PartyAttributes = FJsonObject());
 
 	/**
 	* @brief cancel the currently running matchmaking process
