@@ -2311,53 +2311,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_withPartyAttributes, "AccelByte.Tests.Lobby.B.MatchmakingStartPartyAttributes", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Parameters)
 {
-	const FString ServerName = "UE4SDKLocalServer";
-	bool bClientLoginSuccess = false;
-	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
-	{
-		bClientLoginSuccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Login Success..!"));
-	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
-
-	bool bOnMatchResultGet = false;
-	FAccelByteModelsMatchRequest MatchResult;
-	FRegistry::ServerDSM.SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest>::CreateLambda([&MatchResult, &bOnMatchResultGet](const FAccelByteModelsMatchRequest& Result)
-	{
-		MatchResult = Result;
-		bOnMatchResultGet = true;
-	}));
-	bool bServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
-	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
-	{
-		bServerRegisterSuccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Register Success..!"));
-	}), FErrorHandler::CreateLambda([&ServerName, &bServerRegisterSuccess](int32 Code, const FString& Message)
-	{
-		if ((ErrorCodes)Code == ErrorCodes::StatusConflict || (ErrorCodes)Code == ErrorCodes::DsRegistrationConflict)
-		{
-			FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess, &ServerName]()
-			{
-				FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess, &ServerName]()
-				{
-					bServerRegisterSuccess = true;
-					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Register Success..!"));
-				}), LobbyTestErrorHandler);
-			}), LobbyTestErrorHandler);
-		}
-		else
-		{
-			UE_LOG(LogAccelByteLobbyTest, Fatal, TEXT("Error code: %d\nError message:%s"), Code, *Message);
-		}
-	}));
-	FlushHttpRequests();
-	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
-	check(bServerRegisterSuccess);
-
-	LobbyConnect(1);
+	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
@@ -2371,21 +2325,49 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
 
-	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse;
-	bool bMatchmakingNotifSuccess = false;
-	bool bMatchmakingNotifError = false;
+	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
+	bool bMatchmakingNotifSuccess[2] = { false };
+	bool bMatchmakingNotifError[2] = { false };
+	int matchMakingNotifNum = 0;
 	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
-	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
-		matchmakingNotifResponse = result;
-		bMatchmakingNotifSuccess = true;
-		if (result.MatchId.IsEmpty())
 		{
-			bMatchmakingNotifError = true;
-		}
-	}));
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+			matchmakingNotifResponse[0] = result;
+			matchMakingNotifNum++;
+			bMatchmakingNotifSuccess[0] = true;
+			if (result.MatchId.IsEmpty())
+			{
+				bMatchmakingNotifError[0] = true;
+			}
+		}));
+
+	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+			matchmakingNotifResponse[1] = result;
+			matchMakingNotifNum++;
+			bMatchmakingNotifSuccess[1] = true;
+			if (result.MatchId.IsEmpty())
+			{
+				bMatchmakingNotifError[1] = true;
+			}
+		}));
 
 	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
 	Lobbies[0]->SendInfoPartyRequest();
 
@@ -2393,17 +2375,12 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
-	FAllianceRule AllianceRule;
-	AllianceRule.min_number = 1;
-	AllianceRule.max_number = 1;
-	AllianceRule.player_min_number = 1;
-	AllianceRule.player_max_number = 1;
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-	{
-		bCreateMatchmakingChannelSuccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-	}), LobbyTestErrorHandler);
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+		{
+			bCreateMatchmakingChannelSuccess = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+		}), LobbyTestErrorHandler);
 
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
@@ -2419,80 +2396,158 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	check(!bCreatePartyError);
 
-	bool bGetLatenciesSuccess = false;
-	FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetLatenciesSuccess](const TArray < TPair<FString, float>>& Result)
-	{
-		bGetLatenciesSuccess = true;
-	}), LobbyTestErrorHandler);
-	Waiting(bGetLatenciesSuccess, "Getting Latencies...");
-	FlushHttpRequests();
+	bGetInfoPartySuccess = false;
+	bGetInfoPartyError = false;
+	Lobbies[1]->SendInfoPartyRequest();
 
-	FJsonObject PartyAttributes;
-	PartyAttributes.SetStringField("GameMap", "BasicTutorial");
-	PartyAttributes.SetNumberField("Timeout", 100);
-	PartyAttributes.SetStringField("Label", "New Island");
-	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", FRegistry::Qos.Latencies, PartyAttributes);
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		bLeavePartySuccess = false;
+		bLeavePartyError = false;
+		Lobbies[1]->SendLeavePartyRequest();
+
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+	bCreatePartySuccess = false;
+	bCreatePartyError = false;
+	Lobbies[1]->SendCreatePartyRequest();
+
+	Waiting(bCreatePartySuccess, "Creating Party...");
+	check(!bCreatePartyError);
+
+	//GameServer SDK / Local DS
+	FString ServerName = "ue4SdkTestServerName" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+			{
+				bServerLoginWithClientCredentialsDone = true;
+			}),
+		LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+	TMap<FString, FString> PartyAttributes;
+	PartyAttributes.Add("GameMap", "BasicTutorial");
+	PartyAttributes.Add("SomeInt", "100");
+	PartyAttributes.Add("Label", "New Island");
+
+	bool canBind = false;
+	TSharedRef<FInternetAddr> LocalIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, canBind);
+	FString LocalIPStr = LocalIp->IsValid() ? LocalIp->ToString(false) : "";
+
+	bool bMatchRequestReceived = false;
+	FAccelByteModelsMatchRequest MatchResult;
+	FRegistry::ServerDSM.SetOnMatchRequest(THandler<FAccelByteModelsMatchRequest>::CreateLambda([&](const FAccelByteModelsMatchRequest& MatchRequest) {
+		bMatchRequestReceived = true;
+		MatchResult = MatchRequest;
+		}));
+
+	FRegistry::ServerDSM.ConfigureHeartBeat();
+	bool bRegisterLocalServerToDSMDone = false;
+	FRegistry::ServerDSM.RegisterLocalServerToDSM(
+		LocalIPStr,
+		7777,
+		ServerName,
+		FVoidHandler::CreateLambda([&bRegisterLocalServerToDSMDone]()
+			{
+				bRegisterLocalServerToDSMDone = true;
+			}),
+		LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
-	Waiting(bMatchmakingNotifSuccess, "Waiting for Matchmaking Notification...");
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 
-	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse;
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse.MatchId);
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < 2)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
 	check(!bReadyConsentNotifError);
-	readyConsentNoticeResponse = readyConsentNotice;
+	readyConsentNoticeResponse[0] = readyConsentNotice;
 
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[1] = readyConsentNotice;
+
+	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
+	bool bDeregisterLocalServerFromDSMDone = false;
+	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(
+		ServerName,
+		FVoidHandler::CreateLambda([&bDeregisterLocalServerFromDSMDone]()
+			{
+				bDeregisterLocalServerFromDSMDone = true;
+			}),
+		LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeregisterLocalServerFromDSMDone, "Waiting Deregister Local DS From DSM");
+
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
-	{
-		bDeleteMatchmakingChannelSuccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
-	}), LobbyTestErrorHandler);
+		{
+			bDeleteMatchmakingChannelSuccess = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+		}), LobbyTestErrorHandler);
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
 	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError);
-	check(!matchmakingNotifResponse.MatchId.IsEmpty());
-	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse.MatchId == matchmakingNotifResponse.MatchId);
+	check(!bMatchmakingNotifError[0]);
+	check(!bMatchmakingNotifError[1]);
+	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
+	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
+	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
+	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
-	Waiting(bOnMatchResultGet, "Waiting for match result...");
-	
 	for (auto Ally : MatchResult.Matching_allies)
 	{
 		for (auto Party : Ally.Matching_parties)
 		{
-			for (auto partyAttribute : PartyAttributes.Values)
+			for (auto partyAttribute : PartyAttributes)
 			{
-				auto Value = Party.Party_attributes.Values.Find(partyAttribute.Key);
-				check(Value->IsValid());
-				check(Value->Get()->AsString() == partyAttribute.Value->AsString());
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *(Value->Get()->AsString()));
+				bool bKeyFound = Party.Party_attributes.Contains(partyAttribute.Key);
+				check(bKeyFound);
+				auto Value = Party.Party_attributes[partyAttribute.Key];
+				check(Value == partyAttribute.Value);
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *Value);
 			}
 		}
 	}
 
-	LobbyDisconnect(1);
+	LobbyDisconnect(2);
 	resetResponses();
-
-	bool bServerShutdownSuccess = false;
-	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
-	{
-		bServerShutdownSuccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Shutdown Success..!"));
-	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bServerShutdownSuccess, "Waiting for shutdown server Url...");
-	check(bServerShutdownSuccess);
-
 	return true;
 }
 
