@@ -444,6 +444,39 @@ namespace AccelByte
 			}
 		}
 
+		void RemoveMemberAttributeFromBackend(FJsonObject& jsonObject)
+		{
+			if (jsonObject.HasField("matching_allies"))
+			{
+				const TArray<TSharedPtr<FJsonValue>>* matching_allies;
+				if (jsonObject.TryGetArrayField("matching_allies", matching_allies))
+				{
+					for (int i = 0; i < matching_allies->Num(); i++)
+					{
+						const TArray<TSharedPtr<FJsonValue>>* matching_parties;
+						if ((*matching_allies)[i]->AsObject()->TryGetArrayField("matching_parties", matching_parties))
+						{
+							for (int j = 0; j < matching_parties->Num(); j++)
+							{
+								const TSharedPtr<FJsonObject>* matching_party;
+								if ((*matching_parties)[j]->TryGetObject(matching_party))
+								{
+									const TSharedPtr<FJsonObject>* partyAttribute;
+									if ((*matching_party)->TryGetObjectField("party_attributes", partyAttribute))
+									{
+										if ((*partyAttribute)->HasField("member_attributes"))
+										{
+											(*partyAttribute)->RemoveField("member_attributes");
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
 		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings)
 		{
 			PROVIDER_TABLE.Add(EProvider::AGONES, "agones");
@@ -467,40 +500,16 @@ namespace AccelByte
 					{
 						HandleHttpResultOk(Response, THandler<FJsonObject>::CreateLambda([OnSuccess = OnMatchRequest](const FJsonObject& jsonObject)
 						{
+							FJsonObject copyJsonObject = FJsonObject(jsonObject);
+							RemoveMemberAttributeFromBackend(copyJsonObject);
+							TSharedRef<FJsonObject> JsonObjectRef = MakeShared<FJsonObject>(copyJsonObject);
 							FAccelByteModelsMatchRequest MatchRequest;
-							jsonObject.TryGetStringField("session_id", MatchRequest.Session_id);
-							jsonObject.TryGetStringField("namespace", MatchRequest.Namespace);
-							jsonObject.TryGetStringField("game_mode", MatchRequest.Game_mode);
-							const TArray<TSharedPtr<FJsonValue>> *Allies;
-							bool bMatchingAlliesFound = jsonObject.TryGetArrayField("matching_allies", Allies);
-							if (bMatchingAlliesFound)
+							bool bParseSuccess = FJsonObjectConverter::JsonObjectToUStruct<FAccelByteModelsMatchRequest>(JsonObjectRef, &MatchRequest, 0, 0);
+
+							if (bParseSuccess)
 							{
-								for (auto Ally : *Allies)
-								{
-									FAccelByteModelsMatchingAlly MatchAlly;
-									const TArray<TSharedPtr<FJsonValue>> *Parties;
-									Ally->AsObject()->TryGetArrayField("matching_parties", Parties);
-									for (auto Party : *Parties)
-									{
-										FAccelByteModelsMatchingParty MatchParty;
-										Party->AsObject()->TryGetStringField("party_id", MatchParty.Party_id);
-										const TSharedPtr<FJsonObject> *PartyAttributes;
-										Party->AsObject()->TryGetObjectField("party_attributes", PartyAttributes);
-										MatchParty.Party_attributes = *PartyAttributes->ToSharedRef();
-										const TArray<TSharedPtr<FJsonValue>> *Members;
-										Party->AsObject()->TryGetArrayField("party_members", Members);
-										for (auto Member : *Members)
-										{
-											FAccelByteModelsUser User;
-											Member->AsObject()->TryGetStringField("user_id", User.User_id);
-											MatchParty.Party_members.Add(User);
-										}
-										MatchAlly.Matching_parties.Add(MatchParty);
-									}
-									MatchRequest.Matching_allies.Add(MatchAlly);
-								}
+								OnSuccess.ExecuteIfBound(MatchRequest);
 							}
-							OnSuccess.ExecuteIfBound(MatchRequest);
 						}));
 					}
 
@@ -590,57 +599,28 @@ namespace AccelByte
 							GameServer->ObjectMeta.Annotations.GetKeys(ListOfKey);
 							if (ListOfKey.Contains(AGONES_MATCH_DETAILS_ANNOTATION))
 							{
+								FAccelByteModelsMatchRequest MatchRequestDeserialized;
 								FString MatchDetails = GameServer->ObjectMeta.Annotations[AGONES_MATCH_DETAILS_ANNOTATION];
-								TSharedPtr<FJsonObject> jsonObject = MakeShareable(new FJsonObject);
-								TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(MatchDetails);
 
-								if (FJsonSerializer::Deserialize(Reader, jsonObject))
+								TSharedPtr<FJsonObject> jsonObjectPtr = MakeShareable(new FJsonObject);
+								TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(MatchDetails);
+								bool bDeserializeSuccess = FJsonSerializer::Deserialize(Reader, jsonObjectPtr);
+								TSharedRef<FJsonObject> jsonObjectRef = jsonObjectPtr.ToSharedRef();
+								RemoveMemberAttributeFromBackend(jsonObjectRef.Get());
+
+								bool bParseSuccess = FJsonObjectConverter::JsonObjectToUStruct<FAccelByteModelsMatchRequest>(jsonObjectRef, &MatchRequestDeserialized, 0, 0);
+
+								if (bParseSuccess == false)
+								{
+									OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong."));
+								}
+								if (MatchRequestDeserialized.Session_id == "")
 								{
 									OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong."));
 								}
 								else
 								{
-									FAccelByteModelsMatchRequest MatchRequest;
-									jsonObject->TryGetStringField("session_id", MatchRequest.Session_id);
-									jsonObject->TryGetStringField("namespace", MatchRequest.Namespace);
-									jsonObject->TryGetStringField("game_mode", MatchRequest.Game_mode);
-									const TArray<TSharedPtr<FJsonValue>> *Allies;
-									bool bMatchingAlliesFound = jsonObject->TryGetArrayField("matching_allies", Allies);
-									if (bMatchingAlliesFound)
-									{
-										for (auto Ally : *Allies)
-										{
-											FAccelByteModelsMatchingAlly MatchAlly;
-											const TArray<TSharedPtr<FJsonValue>> *Parties;
-											Ally->AsObject()->TryGetArrayField("matching_parties", Parties);
-											for (auto Party : *Parties)
-											{
-												FAccelByteModelsMatchingParty MatchParty;
-												Party->AsObject()->TryGetStringField("party_id", MatchParty.Party_id);
-												const TSharedPtr<FJsonObject> *PartyAttributes;
-												Party->AsObject()->TryGetObjectField("party_attributes", PartyAttributes);
-												MatchParty.Party_attributes = *PartyAttributes->ToSharedRef();
-												const TArray<TSharedPtr<FJsonValue>> *Members;
-												Party->AsObject()->TryGetArrayField("party_members", Members);
-												for (auto Member : *Members)
-												{
-													FAccelByteModelsUser User;
-													Member->AsObject()->TryGetStringField("user_id", User.User_id);
-													MatchParty.Party_members.Add(User);
-												}
-												MatchAlly.Matching_parties.Add(MatchParty);
-											}
-											MatchRequest.Matching_allies.Add(MatchAlly);
-										}
-									}
-									if (MatchRequest.Session_id == "")
-									{
-										OnHeartBeatError.ExecuteIfBound(404, TEXT("Agones GetGameServer's match-details annotation is wrong."));
-									}
-									else
-									{
-										OnMatchRequest.ExecuteIfBound(MatchRequest);
-									}
+									OnMatchRequest.ExecuteIfBound(MatchRequestDeserialized);
 								}
 							}
 							else
