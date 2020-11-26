@@ -718,29 +718,94 @@ FString Lobby::LobbyMessageToJson(FString Message)
 	for (int i = 0; i < Out.Num(); i++)
 	{
 		FString CurrentLine = Out[i];
-		if (CurrentLine.Contains("["))
+
+		FString Key;
+		FString Value;
+
+		CurrentLine.Split(": ", &Key, &Value);
+		Json += FString::Printf(TEXT("\"%s\":"), *Key);
+		Value.TrimStartAndEndInline();
+
+		if (Value.StartsWith("["))
 		{
-			Json += "\"";
-			CurrentLine.ReplaceInline(TEXT(": "), TEXT("\":"));
-			if (!CurrentLine.Contains("[]"))
+			if (Value.Equals("[]"))
 			{
-				CurrentLine.ReplaceInline(TEXT("["), TEXT("[\""));
-				CurrentLine.ReplaceInline(TEXT(",]"), TEXT("\"]"));
-				CurrentLine.ReplaceInline(TEXT(","), TEXT("\",\""));
+				Json += Value;
 			}
-			Json += CurrentLine;
+			else
+			{
+				bool Quote = false;
+				bool ElementStart = false;
+				FString Element;
+				Json += "[";
+				for (int j = 1; j < Value.Len() - 1; j++)
+				{
+					if (!ElementStart)
+					{
+						if (Value[j] == ' ') 
+						{
+							continue;
+						}
+
+						ElementStart = true;
+						Element.AppendChar('"');
+						if (Value[j] == '"')
+						{
+							Quote = true;
+							continue;
+						}
+					}
+
+					if (!Quote && Value[j] == ',')
+					{
+						ElementStart = false;
+						Element.TrimEndInline();
+						Json += Element;
+
+						if (!Element.EndsWith("\""))
+						{
+							Json.AppendChar('"');
+						}
+						Element = "";
+
+						if (j == Value.Len() - 2) 
+						{
+							break;
+						}
+					}
+
+					Element.AppendChar(Value[j]);
+
+					if (Quote && Value[j] == '\\')
+					{
+						Element.AppendChar(Value[++j]);
+					}
+					else if (Value[j] == '"')
+					{
+						Quote = false;
+					}
+				}
+
+				if (!Element.IsEmpty())
+				{
+					Json += Element;
+					if (!Element.EndsWith("\""))
+					{
+						Json.AppendChar('"');
+					}
+				}
+				Json += "]";
+			}
+		}
+		else if (Value.StartsWith("{"))
+		{
+			Json += Value;
 		}
 		else
 		{
-			Json += "\"";
-			FString Left;
-			FString Right;
-			CurrentLine.Split(": ", &Left, &Right);
-			Json += Left;
-			Json += "\":\"";
-			Json += Right;
-			Json += "\"";
+			Json += FString::Printf(TEXT("\"%s\""), *Value);
 		}
+
 		if (i < Out.Num() - 1)
 		{
 			Json += ",";
@@ -865,8 +930,9 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, RequestFriendsNotif);
 
 #undef HANDLE_LOBBY_MESSAGE
+#ifdef DEBUG_LOBBY_MESSAGE
 	ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Warning: Unhandled message %s, Raw: %s"), *lobbyResponseType, *ParsedJson));
-
+#endif
 }
 
 Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, float PingDelay, float InitialBackoffDelay, float MaxBackoffDelay, float TotalTimeout, TSharedPtr<IWebSocket> WebSocket)

@@ -631,6 +631,46 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestMessage, "AccelByte.Tests.Lobby.B.LobbyMessage", AutomationFlagMaskLobby);
+bool LobbyTestMessage::RunTest(const FString& Parameters)
+{
+	struct LobbyMessageTest
+	{
+		FString Message;
+		FString ExpectedJSON;
+		LobbyMessageTest(const FString& message, const FString& expectedJSON)
+			: Message(message)
+			, ExpectedJSON(expectedJSON){}
+	};
+
+	const LobbyMessageTest LobbyMessageArray("type: array\narray: [test, foo, bar]", R"({"type":"array","array":["test","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayWithTrailingComma("type: array\narray: [test, foo, bar,]", R"({"type":"array","array":["test","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayQuoteComma("type: array\narray: [\"test,string\", foo, bar,]", R"({"type":"array","array":["test,string","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayQuoteEscape("type: array\narray: [\"test\\\"string\", foo, bar,]", R"({"type":"array","array":["test\"string","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageObject("type: object\nexample: {\"key\":\"value\"}", R"({"type":"object","example":{"key":"value"}})");
+	const LobbyMessageTest LobbyMessageKeyValue("type: keyval\nkey: value\nkey2: value2", R"({"type":"keyval","key":"value","key2":"value2"})");
+	const LobbyMessageTest LobbyMessageWithBracket("type: test\nmessage: this is message with[] {bracket}", R"({"type":"test","message":"this is message with[] {bracket}"})");
+
+	TArray<LobbyMessageTest> TestData = {
+		LobbyMessageArray,
+		LobbyMessageArrayWithTrailingComma,
+		LobbyMessageArrayQuoteComma,
+		LobbyMessageArrayQuoteEscape,
+		LobbyMessageObject,
+		LobbyMessageKeyValue,
+		LobbyMessageWithBracket,
+	};
+
+	for (const auto& Data : TestData)
+	{
+		FString MessageJSON = Lobby::LobbyMessageToJson(*Data.Message);
+		UE_LOG(LogTemp, Log, TEXT("%s -> %s"), *Data.Message, *MessageJSON);
+		check(Data.ExpectedJSON.Equals(MessageJSON));
+	}
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnect2Users, "AccelByte.Tests.Lobby.B.ConnectUsers2", AutomationFlagMaskLobby);
 bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 {

@@ -827,6 +827,8 @@ public:
 	*/
 	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError);
 
+	static FString LobbyMessageToJson(FString Message);
+
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
@@ -841,7 +843,6 @@ private:
     FString SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload = TEXT(""));
     bool Tick(float DeltaTime);
     FString GenerateMessageID(FString Prefix = TEXT(""));
-    FString LobbyMessageToJson(FString Message);
 
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
