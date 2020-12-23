@@ -107,6 +107,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMClient
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Client")
 		FString Region;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Client")
+		FString Provider;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Client")
 		FString Status;
 };
 

@@ -2,6 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#include "AccelByteEnvironment.h"
 #include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
@@ -15,6 +16,8 @@
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
+
+#define ENABLE_RUN_COULD_SERVER_TESTS 0
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteDSMTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteDSMTest);
@@ -30,6 +33,25 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMGetServerLatencies, "AccelByte.Tests.DSM.A.G
 bool DSMGetServerLatencies::RunTest(const FString& Parameters)
 {
 	bool bGetServerUrlSuccess = false;
+	const auto PrevCommandParams = FCommandLine::Get();
+
+	FString Region = Environment::GetEnvironmentVariable(TEXT("SDK_TEST_REGION"), 100);
+	FString Provider = Environment::GetEnvironmentVariable(TEXT("SDK_TEST_PROVIDER"), 100);
+
+	if (Region.IsEmpty())
+	{
+		Region = TEXT("us-west-2");
+	}
+
+	if (Provider.IsEmpty())
+	{
+		Provider = TEXT("aws");
+	}
+
+	FCommandLine::Set(*FString::Printf(TEXT("-region=%s -provider=%s"), *Region, *Provider));
+	// force parse command line
+	FRegistry::ServerDSM.ParseCommandParam();
+
 	FAccelByteModelsDSMClient DSMServer;
 	FRegistry::ServerDSM.GetRegionDSMUrl(THandler<FAccelByteModelsDSMClient>::CreateLambda([&bGetServerUrlSuccess, &DSMServer](const FAccelByteModelsDSMClient& Result)
 	{
@@ -38,12 +60,17 @@ bool DSMGetServerLatencies::RunTest(const FString& Parameters)
 		DSMServer = Result;
 	}), DSMTestErrorHandler);
 	FlushHttpRequests();
+
+	// set to previous state
+	FCommandLine::Set(PrevCommandParams);
+
 	Waiting(bGetServerUrlSuccess, "Waiting for get server Url...");
 	check(bGetServerUrlSuccess);
 	return true;
 }
 
-//need to add arg -provider=baremetal when run the test
+#if ENABLE_RUN_COULD_SERVER_TESTS
+//need to add arg -provider=baremetal when run the test, need to run on cloud
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterStaticServer, "AccelByte.Tests.DSM.A.RegisterStaticServer", AutomationFlagMaskDSM);
 bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 {
@@ -80,47 +107,7 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterLocalServer, "AccelByte.Tests.DSM.A.RegisterLocalServer", AutomationFlagMaskDSM);
-bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
-{
-	FString ServerName = TEXT("AccelByteTesting");
-	bool bClientLoginSuccess = false;
-	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
-	{
-		bClientLoginSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
-
-	bool bServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
-	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
-	{
-		bServerRegisterSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bServerRegisterSuccess, "Waiting for register local server Url...");
-	check(bServerRegisterSuccess);
-	WaitUntil([]()
-	{
-		return false;
-	}, 15);
-	bool bServerShutdownSuccess = false;
-	FRegistry::ServerDSM.DeregisterLocalServerFromDSM( ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
-	{
-		bServerShutdownSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
-	check(bServerShutdownSuccess);
-	return true;
-}
-
-//need to add arg -provider=baremetal when run the test
+//need to add arg -provider=baremetal when run the test, need to run on cloud
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterAsTwoDifferentServerFailed, "AccelByte.Tests.DSM.B.RegisterTwice", AutomationFlagMaskDSM);
 bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 {
@@ -198,6 +185,47 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bCloudServerShutdownSuccess, "Waiting for shutdown server Url...");
 	check(bCloudServerShutdownSuccess);
+	return true;
+}
+#endif
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterLocalServer, "AccelByte.Tests.DSM.A.RegisterLocalServer", AutomationFlagMaskDSM);
+bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
+{
+	FString ServerName = TEXT("AccelByteTesting");
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		bClientLoginSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
+	}), DSMTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Login client...");
+	check(bClientLoginSuccess);
+
+	bool bServerRegisterSuccess = false;
+	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
+	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
+	{
+		bServerRegisterSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
+	}), DSMTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bServerRegisterSuccess, "Waiting for register local server Url...");
+	check(bServerRegisterSuccess);
+	WaitUntil([]()
+	{
+		return false;
+	}, 15);
+	bool bServerShutdownSuccess = false;
+	FRegistry::ServerDSM.DeregisterLocalServerFromDSM( ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
+	{
+		bServerShutdownSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
+	}), DSMTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
+	check(bServerShutdownSuccess);
 	return true;
 }
 

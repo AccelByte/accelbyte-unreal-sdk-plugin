@@ -296,6 +296,7 @@ namespace AccelByte
 		UnknownError = 14000,
 		JsonDeserializationFailed = 14001,
 		InvalidRequest = 14003,
+		InvalidResponse = 14004,
 		NetworkError = 14005,
 		WebSocketConnectFailed = 14201,
 		//

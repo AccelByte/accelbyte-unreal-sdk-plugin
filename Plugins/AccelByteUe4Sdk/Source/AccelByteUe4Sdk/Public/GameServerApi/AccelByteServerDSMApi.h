@@ -130,6 +130,11 @@ public:
 	FString DSMServerUrl;
 	FString DSPubIp;
 
+	/*
+	* @brief Update values from command line arguments. Used for tests.
+	*/
+	void ParseCommandParam();
+
 private:
 	ServerDSM(ServerDSM const&) = delete; // Copy constructor
 	ServerDSM(ServerDSM&&) = delete; // Move constructor
@@ -138,10 +143,10 @@ private:
 
 	bool HeartBeatTick(float DeltaTime);
 	void GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
-	void ParseCommandParam();
 
 	FString ServerName = "";
-	EProvider Provider = EProvider::DEFAULT;
+	FString Provider = "";
+	FString Region = "";
 	FString Game_version = "";
 	EServerType ServerType = EServerType::NONE;
 	FHttpRequestCompleteDelegate OnRegisterResponse;
