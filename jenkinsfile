@@ -10,6 +10,7 @@ buildCause = env.BUILD_CAUSE
 pushTrigger = env.PUSH_TRIGGER
 manualTrigger = (pushTrigger == null && env.UPSTREAM_BUILD == null)
 branchName = params.BRANCH_NAME
+buildTarget = params.BUILD_TARGET.toUpperCase()
 grade = "deployment"
 bitbucketSSHCreds = ""
 
@@ -45,21 +46,45 @@ pipeline {
                     }else{
                         version = readJSON file: "version.json"
                     }
-                    if(branchName == "master" || env.BRANCH_NAME == "master"){
+                    if (branchName == "master" || env.BRANCH_NAME == "master") {
                     // manual trigger won't override parameter passed from jenkins dashboard
                     // webhook trigger will have effect below
-                        if(!manualTrigger){
+                        if (!manualTrigger) {
                             grade = "production"
-                            if(!buildByTimer) {
+                            // merge trigger
+                            if (!buildByTimer) {
                                 doTagging = true
                                 doDeploy = true
+                                def tags = sh (returnStdout: true, script: "git describe --tags")
+                                def isRelease = (tags ==~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/)
+                                if (isRelease) {
+                                    buildTarget = "DEMO"
+                                } else {
+                                    buildTarget = "DEV"
+                                }
+                            } else {
+                                buildTarget = "DEMO"
                             }
                         }
-                    }else{
+                    } else {
                         // same rules for webhook and manual trigger
                         doTagging = false
                         doDeploy = false
+                        if (!manualTrigger) {
+                            buildTarget = "DEV"
+                        }
                     }
+                    env.BASE_URL = env."BASE_URL_${buildTarget}"
+                    env.ADMIN_BASE_URL = env."ADMIN_BASE_URL_${buildTarget}"
+                    env.CLIENT_ID = env."CLIENT_ID_${buildTarget}"
+                    env.CLIENT_SECRET = env."CLIENT_SECRET_${buildTarget}"
+                    env.SERVER_CLIENT_ID = env."SERVER_CLIENT_ID_${buildTarget}"
+                    env.SERVER_CLIENT_SECRET = env."SERVER_CLIENT_SECRET_${buildTarget}"
+                    env.ADMIN_CLIENT_ID = env."ADMIN_CLIENT_ID_${buildTarget}"
+                    env.ADMIN_CLIENT_SECRET = env."ADMIN_CLIENT_SECRET_${buildTarget}"
+                    env.ADMIN_USER_NAME = env."ADMIN_USER_NAME_${buildTarget}"
+                    env.ADMIN_USER_PASS = env."ADMIN_USER_PASS_${buildTarget}"
+                    env.LOBBY_SERVER_URL = env."LOBBY_SERVER_URL_${buildTarget}"
 
                     ue4_version = params.UE4_VERSION == null ? "default" : params.UE4_VERSION
                     config = readJSON file: "jenkins.config.json"

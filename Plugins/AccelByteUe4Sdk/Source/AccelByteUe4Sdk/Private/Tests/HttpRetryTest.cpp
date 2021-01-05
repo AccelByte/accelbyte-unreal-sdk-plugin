@@ -176,7 +176,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
-	while (CurrentTime < 18)
+	while (CurrentTime < 30 && NumRequestRetry < 2)
 	{
 		CurrentTime += 0.5;
 		Ticker.Tick(0.5);
@@ -700,18 +700,23 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 
 	SendMockyRequest(0, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 0"), CurrentTime);
 		RequestCompleted++;
 		SendMockyRequest(1, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
+			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 1"), CurrentTime);
 			RequestCompleted++;
 			SendMockyRequest(2, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 			{
+				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 2"), CurrentTime);
 				RequestCompleted++;
 				SendMockyRequest(3, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 				{
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 3"), CurrentTime);
 					RequestCompleted++;
 					SendMockyRequest(4, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 					{
+						UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 4"), CurrentTime);
 						RequestCompleted++;
 					}));
 				}));
