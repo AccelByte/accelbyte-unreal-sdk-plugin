@@ -22,7 +22,7 @@ GameTelemetry::GameTelemetry(const AccelByte::Credentials & Credentials, const A
 
 GameTelemetry::~GameTelemetry()
 {
-	if(UObjectInitialized && GameTelemetryTickDelegateHandle.IsValid())
+	if(UObjectInitialized() && GameTelemetryTickDelegateHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
 		GameTelemetryTickDelegateHandle.Reset();
