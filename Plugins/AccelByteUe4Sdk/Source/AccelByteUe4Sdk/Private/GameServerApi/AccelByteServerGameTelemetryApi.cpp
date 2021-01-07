@@ -21,7 +21,7 @@ ServerGameTelemetry::ServerGameTelemetry(const AccelByte::ServerCredentials & Cr
 
 ServerGameTelemetry::~ServerGameTelemetry()
 {
-	if(UObjectInitialized())
+	if(UObjectInitialized() && GameTelemetryTickDelegateHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
 		GameTelemetryTickDelegateHandle.Reset();
