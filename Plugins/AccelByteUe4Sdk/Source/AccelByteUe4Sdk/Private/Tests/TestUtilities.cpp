@@ -67,6 +67,9 @@ FString GetAdminAccessToken()
 	}
 	FString ClientId = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), 100);
 	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
+	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
+		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environemnt variable."));
+
 	FOauth2Token ClientLogin;
 	bool ClientLoginSuccess = false;
 	Api::Oauth2::GetAccessTokenWithClientCredentialsGrant(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
@@ -96,6 +99,10 @@ FString GetSuperUserTokenCache()
 	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
 	FString UserName = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), 100);
 	FString UserPass = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), 100);
+	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
+		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environemnt variable."));
+	if (UserName.IsEmpty() || UserPass.IsEmpty())
+		UE_LOG(LogTemp, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environemnt variable."));
 
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
