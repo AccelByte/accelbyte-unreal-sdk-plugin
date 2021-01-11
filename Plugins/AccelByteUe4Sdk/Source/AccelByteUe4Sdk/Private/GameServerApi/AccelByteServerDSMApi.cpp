@@ -559,7 +559,7 @@ namespace AccelByte
 
 				if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 				{
-					if (Response->GetContentLength() > 0)
+					if (Response->GetContent().Num() > 0)
 					{
 						HandleHttpResultOk(Response, THandler<FJsonObject>::CreateLambda([OnSuccess = OnMatchRequest](const FJsonObject& jsonObject)
 						{
