@@ -164,8 +164,10 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 
 void FAccelByteUe4SdkModule::NullCheckConfig(FString value, FString configField)
 {
-	if(value.IsEmpty())
-		UE_LOG(LogTemp, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"),*configField);
+	if (value.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
+	}
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

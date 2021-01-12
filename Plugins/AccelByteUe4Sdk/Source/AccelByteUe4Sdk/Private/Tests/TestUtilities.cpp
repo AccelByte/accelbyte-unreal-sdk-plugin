@@ -49,12 +49,20 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, FString Messa
 FString GetBaseUrl()
 {
 	FString BaseUrl = Environment::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), 100);
+	if (BaseUrl.IsEmpty()) 
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Base URL is not found.\nPlease check your Environment variable."));
+	}
 	return FString::Printf(TEXT("%s"), *BaseUrl);
 }
 
 FString GetPublisherNamespace()
 {
 	FString Namespace = Environment::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), 100);
+	if (Namespace.IsEmpty())
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Namespace is not found.\nPlease check your Environment variable."));
+	}
 	return FString::Printf(TEXT("%s"), *Namespace);
 }
 
@@ -67,8 +75,10 @@ FString GetAdminAccessToken()
 	}
 	FString ClientId = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), 100);
 	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
-	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
-		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environemnt variable."));
+	if (ClientId.IsEmpty() || ClientSecret.IsEmpty()) 
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
+	}
 
 	FOauth2Token ClientLogin;
 	bool ClientLoginSuccess = false;
@@ -100,9 +110,13 @@ FString GetSuperUserTokenCache()
 	FString UserName = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), 100);
 	FString UserPass = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), 100);
 	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
-		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environemnt variable."));
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
+	}
 	if (UserName.IsEmpty() || UserPass.IsEmpty())
-		UE_LOG(LogTemp, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environemnt variable."));
+	{
+		UE_LOG(LogTemp, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environment variable."));
+	}
 
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
