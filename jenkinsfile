@@ -268,6 +268,28 @@ pipeline {
         }
     }
     post {
+        always {
+          node('master') {
+            script{
+              if (buildByTimer) {
+                version = sh(returnStdout: true, script: 'cat version.json | grep "version" | tr -d \' "version": "\'').trim()
+
+                withAWS(
+                  credentials: "accelbyte_deployment",
+                  region: "us-west-2") {
+                    sh """
+                      ./jenkinsTestMetrics.sh \
+                        -s ${env.JOB_NAME} \
+                        -v ${version} \
+                        -j ${env.BUILD_URL}console \
+                        -r ${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log \
+                        -p ${currentBuild.currentResult}
+                    """
+                  }
+              }
+            }
+          }
+        }
         success {
             node('master') {
                 script{
