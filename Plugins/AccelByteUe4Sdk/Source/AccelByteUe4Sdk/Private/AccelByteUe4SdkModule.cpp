@@ -34,6 +34,7 @@ class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 
 	bool LoadSettingsFromConfigUobject();
 	bool LoadServerSettingsFromConfigUobject();
+	void NullCheckConfig(FString value, FString configField);
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -129,6 +130,10 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.CloudSaveServerUrl = GetDefault<UAccelByteSettings>()->CloudSaveServerUrl;
 	FRegistry::Settings.AchievementServerUrl = GetDefault<UAccelByteSettings>()->AchievementServerUrl;
 	FRegistry::Settings.AppId = GetDefault<UAccelByteSettings>()->AppId;
+	NullCheckConfig(*FRegistry::Settings.ClientId, "Client ID");
+	NullCheckConfig(*FRegistry::Settings.Namespace, "Namespace");
+	NullCheckConfig(*FRegistry::Settings.BaseUrl, "Base URL");
+	NullCheckConfig(*FRegistry::Settings.NonApiBaseUrl, "Non-API Base URL");
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
@@ -150,8 +155,19 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl;
 	FRegistry::ServerSettings.AchievementServerUrl = GetDefault<UAccelByteServerSettings>()->AchievementServerUrl;
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+
+	NullCheckConfig(*FRegistry::ServerSettings.ClientId, "Client ID");
+	NullCheckConfig(*FRegistry::ServerSettings.ClientSecret, "Client Secret");
 #endif
 	return true;
+}
+
+void FAccelByteUe4SdkModule::NullCheckConfig(FString value, FString configField)
+{
+	if (value.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
+	}
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)
