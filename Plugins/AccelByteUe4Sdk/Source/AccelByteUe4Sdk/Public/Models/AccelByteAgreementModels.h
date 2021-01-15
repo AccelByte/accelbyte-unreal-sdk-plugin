@@ -131,3 +131,33 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicPolicy
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | PublicPolicy")
 		bool IsDefaultSelection;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRetrieveUserEligibilitiesResponse 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString ReadableId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString PolicyName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString PolicyType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString CountryCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString CountryGrupCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		TArray<FString> BaseUrls;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		TArray<FAccelByteModelsPolicyVersionWithLocalizedVersionObject> PolicyVersions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		FString PolicyId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		bool IsMandatory;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | RetrieveUserEligibilitiesResponse")
+		bool IsAccepted;
+};

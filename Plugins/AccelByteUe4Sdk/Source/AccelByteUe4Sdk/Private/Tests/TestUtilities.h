@@ -52,6 +52,8 @@ void Waiting(bool& condition, FString Message);
 
 void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString Message = "");
 
+FString GetPublisherNamespace();
+
 inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
 {
 	return left.Value < right.Value;

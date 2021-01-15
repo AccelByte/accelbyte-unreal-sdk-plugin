@@ -39,6 +39,17 @@ public:
 	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	* @brief Retrieve all active latest policies based on a namespace and country. The namespace can be filled with namespace or publisher namespace. The country will be read from user token.
+	*
+	* @param Namespace Filter the responded policy by namespace.
+	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
+	* @param DefaultOnEmpty Specify with true if you want to be responded with default country-specific policy if your requested country is not exist.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetLegalPolicies(const FString& Namespace, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
 	*
 	* @param AgreementPolicyType Filter the responded policy by policy type. Choose the EAccelByteAgreementPolicyType::EMPTY if you want to be responded with all policy type.
@@ -90,6 +101,23 @@ public:
 	*/
 	void AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	* @brief Query all player's legal eligibilities on a namespace, use to check is player already commited to legal or not.
+	*
+	* @param Namespace Filter the eligibilities by namespace.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<RetrieveUserEligibilitiesResponse>.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void QueryLegalEligibilities(const FString& Namespace, const THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>& OnSuccess, const FErrorHandler& OnError);
+
+	/*
+	* @brief Get the content of the legal document.
+	*
+	* @param Url The url of the legal document, you can get it from GetLegalPolicies query.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a string.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetLegalDocument(const FString& Url, const THandler<FString>& OnSuccess, const FErrorHandler& OnError);
 private:
 	Agreement() = delete;
 	Agreement(Agreement const&) = delete;
