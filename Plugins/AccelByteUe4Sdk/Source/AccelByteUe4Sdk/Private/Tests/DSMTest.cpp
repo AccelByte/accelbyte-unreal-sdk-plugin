@@ -2,7 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "AccelByteEnvironment.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"

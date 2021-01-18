@@ -12,12 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Modifications copyright (C) 2020 AccelByte Inc
+//  * TSharedRef<IHttpRequest> typedef
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "HttpRetrySystem.h"
 #include "Model/GameServer.h"
 #include "Tickable.h"
+
+#if ENGINE_MINOR_VERSION > 25
+using TAgonesHttpPtr = TSharedRef<IHttpRequest, ESPMode::ThreadSafe>;
+#else
+using TAgonesHttpPtr = TSharedRef<IHttpRequest>;
+#endif
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAgonesHook, Verbose, All);
 
@@ -102,9 +111,9 @@ public:
 private:
 
 	/** Helper function to create requests */
-	TSharedRef<class IHttpRequest> MakeRequest(const FString& URL, const FString& JsonContent, const FHttpVerb Verb, const bool bRetryOnFailure);
+	TAgonesHttpPtr MakeRequest(const FString& URL, const FString& JsonContent, const FHttpVerb Verb, const bool bRetryOnFailure);
 	/** Helper function to send requests with default debug output */
-	TSharedRef<class IHttpRequest> SendRequest(TSharedRef<IHttpRequest> Req);
+	TAgonesHttpPtr SendRequest(TAgonesHttpPtr Req);
 	/** Retry manager to retry failed http requests */
 	TSharedPtr<class FHttpRetrySystem::FManager> HttpRetryManager;
 
