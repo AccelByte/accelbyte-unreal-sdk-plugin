@@ -43,7 +43,7 @@ The classes are categorized as follow:
 
 ## Packaging
 
-- `/Plugins` The actual plugin is located in `/Plugins/AccelByteUe4Sdk`. The custom web browser widget plugin `/Plugins/AccelByteCustomWebBrowserWidget` is experimental and untested. Please don't use.
+- `/Plugins` The actual plugin is located in `/Plugins/AccelByteUe4Sdk`.
 - `/Content` This contains example widget blueprints and other asset.
 - `/Source` This contains C++ source code for the examples.
 - `/Documentation` This contains Doxyfile and this documentation.
