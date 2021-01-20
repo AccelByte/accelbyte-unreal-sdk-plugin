@@ -10,6 +10,6 @@ public class AccelByteUe4SdkDemoTarget : TargetRules
     public AccelByteUe4SdkDemoTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Game;
-        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk", "Agones", "AccelByteCustomWebBrowserWidget" } );
+        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk", "Agones" } );
     }
 }

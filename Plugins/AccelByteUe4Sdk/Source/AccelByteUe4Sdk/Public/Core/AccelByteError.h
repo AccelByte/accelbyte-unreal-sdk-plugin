@@ -33,11 +33,17 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 
 namespace AccelByte
 {
-
+#if ENGINE_MINOR_VERSION > 25
+	template <typename T> using THandler = TDelegate<void(const T&)>;
+	using FVoidHandler = TDelegate<void()>;
+	using FErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */)>;
+	using FCustomErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */)>;
+#else
 	template <typename T> using THandler = TBaseDelegate<void, const T&>;
 	using FVoidHandler = TBaseDelegate<void>;
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 	using FCustomErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */>;
+#endif
 
 	UENUM(BlueprintType)
 	enum class ErrorCodes : int32

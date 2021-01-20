@@ -10,6 +10,6 @@ public class AccelByteUe4SdkDemoEditorTarget : TargetRules
     public AccelByteUe4SdkDemoEditorTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Editor;
-        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk", "AccelByteCustomWebBrowserWidget" } );
+        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk" } );
     }
 }
