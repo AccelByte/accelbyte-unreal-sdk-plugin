@@ -192,6 +192,12 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 		FString Username; //optional
 };
 
+// backward compatibility with previous AccelByte SDK codes
+// remove this if you are using FUserData from Unreal PhysicsCore
+#if ENGINE_MINOR_VERSION < 26
+using FUserData = FAccountUserData;
+#endif
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FResetPasswordRequest
 {

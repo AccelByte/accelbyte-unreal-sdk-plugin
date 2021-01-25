@@ -28,6 +28,8 @@ using AccelByte::HandleHttpError;
 using AccelByte::Api::User;
 using AccelByte::Api::UserProfile;
 
+using FUserData = FAccountUserData;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUserTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
