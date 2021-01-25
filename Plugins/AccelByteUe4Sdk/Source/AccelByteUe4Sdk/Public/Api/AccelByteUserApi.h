@@ -84,7 +84,7 @@ namespace AccelByte
 			 * @param DisplayName The DisplayName.
 			 * @param Country User's country, ISO3166-1 alpha-2 two letter, e.g. US.
 			 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
@@ -98,7 +98,7 @@ namespace AccelByte
 			 * @param DisplayName The DisplayName.
 			 * @param Country User's country, ISO3166-1 alpha-2 two letter, e.g. US.
 			 * @param DateOfBirth User's date of birth, valid values are between 1905-01-01 until current date.
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void Registerv2(const FString& EmailAddress, const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
@@ -106,10 +106,10 @@ namespace AccelByte
 			/**
 			 * @brief This function will get data of currently logged in user.
 			 *
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -122,7 +122,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void Upgrade(const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -136,7 +136,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
@@ -205,7 +205,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function gets user's platform accounts linked to user’s account.
@@ -273,29 +273,29 @@ namespace AccelByte
 			 * @brief This function will search user by userId.
 			 *
 			 * @param UserId Targeted user's ID.
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetUserByUserId(const FString& UserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void GetUserByUserId(const FString& UserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will get user by other platform user id it linked to.
 			 *
 			 * @param PlatformType Other platform type .
 			 * @param OtherPlatformUserId Targeted user's ID.
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function for update user account info within the game.
 			 *
 			 * @param UpdateRequest The data you want to update. for DateOfBirth, the format is YYYY-MM-DD.
-			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError);
+			void UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will get user(s) by other platform user id(s) it linked to.

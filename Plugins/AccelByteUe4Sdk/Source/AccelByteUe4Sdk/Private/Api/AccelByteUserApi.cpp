@@ -89,7 +89,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
 			OnSuccess.ExecuteIfBound();
@@ -121,7 +121,7 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
 			OnSuccess.ExecuteIfBound();
@@ -152,7 +152,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
 			OnSuccess.ExecuteIfBound();
@@ -185,7 +185,7 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	Oauth2::GetSessionIdWithAuthorizationCodeGrant(Settings.ClientId, Settings.ClientSecret, AuthorizationCode, Settings.RedirectURI, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result) {
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FUserData>::CreateLambda([this, OnSuccess, session](const FUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
 			OnSuccess.ExecuteIfBound();
@@ -268,7 +268,7 @@ void User::Registerv2(const FString& EmailAddress, const FString& Username, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -291,7 +291,7 @@ void User::GetData(const THandler<FUserData>& OnSuccess, const FErrorHandler& On
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -372,7 +372,7 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 	SendVerificationCode(SendUpgradeVerificationCodeRequest, OnSuccess, OnError);
 }
 
-void User::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -395,8 +395,8 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 	FRegistry::HttpRetryScheduler.ProcessRequest(
 		Request,
 		CreateHttpResultHandler(
-			THandler<FUserData>::CreateLambda(
-				[OnSuccess](const FUserData& UserData)
+			THandler<FAccountUserData>::CreateLambda(
+				[OnSuccess](const FAccountUserData& UserData)
 				{
 					OnSuccess.ExecuteIfBound(UserData);
 				}),
@@ -404,7 +404,7 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 		FPlatformTime::Seconds());
 }
 
-void User::Upgrade(const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::Upgrade(const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -427,8 +427,8 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 	FRegistry::HttpRetryScheduler.ProcessRequest(
 		Request,
 		CreateHttpResultHandler(
-			THandler<FUserData>::CreateLambda(
-				[OnSuccess](const FUserData& UserData)
+			THandler<FAccountUserData>::CreateLambda(
+				[OnSuccess](const FAccountUserData& UserData)
 				{
 					OnSuccess.ExecuteIfBound(UserData);
 				}),
@@ -436,7 +436,7 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 		FPlatformTime::Seconds());
 }
 
-void User::Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -459,8 +459,8 @@ void User::Upgradev2(const FString& EmailAddress, const FString& Username, const
 	FRegistry::HttpRetryScheduler.ProcessRequest(
 		Request,
 		CreateHttpResultHandler(
-			THandler<FUserData>::CreateLambda(
-				[OnSuccess](const FUserData& UserData)
+			THandler<FAccountUserData>::CreateLambda(
+				[OnSuccess](const FAccountUserData& UserData)
 				{
 					OnSuccess.ExecuteIfBound(UserData);
 				}),
@@ -757,7 +757,7 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
-void User::GetUserByUserId(const FString& UserID, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::GetUserByUserId(const FString& UserID, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -778,7 +778,7 @@ void User::GetUserByUserId(const FString& UserID, const THandler<FUserData>& OnS
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
