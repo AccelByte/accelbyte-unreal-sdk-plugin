@@ -10,7 +10,7 @@
 #include "AccelByteUe4Sdk/Public/Models/AccelByteUserModels.h"
 #include "AccelByteUserBlueprints.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FUserData&, Result);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserDataHandler, const FAccountUserData&, Result);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserRegisterHandler, const FRegisterResponse&, Result);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPlatformLinksHandler, const FPagedPlatformLinks&, PlatformLinks);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDUserEligiblePlayHandler, const bool, Result);

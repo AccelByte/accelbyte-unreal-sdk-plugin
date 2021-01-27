@@ -296,6 +296,7 @@ namespace AccelByte
 		//Leaderboard Error Code List
 		//
 		LeaderboardConfigAlreadyExist = 71132,
+		LeaderboardRankingNotFound = 71235,
 		//
 		//Client side Error Code List
 		//

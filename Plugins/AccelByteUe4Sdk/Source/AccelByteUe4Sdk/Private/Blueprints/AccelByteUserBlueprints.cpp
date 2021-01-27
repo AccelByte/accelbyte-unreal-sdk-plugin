@@ -66,7 +66,7 @@ void UBPUser::Upgrade(const FString& Username, const FString& Password, const FD
 {
 	FRegistry::User.Upgrade(
 		Username, Password,
-		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
+		THandler<FAccountUserData>::CreateLambda([OnSuccess](const FAccountUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
@@ -84,7 +84,7 @@ void UBPUser::UpgradeAndVerify(const FString& Username, const FString& Password,
 {
 	FRegistry::User.UpgradeAndVerify(
 		Username, Password, VerificationCode,
-		THandler<FUserData>::CreateLambda([OnSuccess](const FUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
+		THandler<FAccountUserData>::CreateLambda([OnSuccess](const FAccountUserData& Result) { OnSuccess.ExecuteIfBound(Result); }),
 		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
