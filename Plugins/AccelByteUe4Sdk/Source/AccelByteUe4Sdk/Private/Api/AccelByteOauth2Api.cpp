@@ -111,7 +111,7 @@ void Oauth2::GetSessionIdWithDeviceGrant(const FString& ClientId, const FString&
 	}
 
 	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url             = FString::Printf(TEXT("%s/v1/login/platforms/device"), *url);;
+	FString Url             = FString::Printf(TEXT("%s/v3/login/platforms/device"), *url);;
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
@@ -141,7 +141,7 @@ void Oauth2::GetSessionIdWithPlatformGrant(const FString& ClientId, const FStrin
 	}
 
     FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-    FString Url             = FString::Printf(TEXT("%s/v1/login/platforms/%s"), *url, *PlatformId);
+    FString Url             = FString::Printf(TEXT("%s/v3/login/platforms/%s"), *url, *PlatformId);
     FString Verb            = TEXT("POST");
     FString ContentType     = TEXT("application/x-www-form-urlencoded");
     FString Accept          = TEXT("application/json");
