@@ -28,8 +28,6 @@ using AccelByte::HandleHttpError;
 using AccelByte::Api::User;
 using AccelByte::Api::UserProfile;
 
-using FUserData = FAccountUserData;
-
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUserTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
@@ -347,9 +345,9 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 	Waiting(bVerifyUserSuccessful, "Waiting for Verfying Account...");
 
 	bool bGetDataSuccessful = false;
-	FUserData GetDataResult;
+	FAccountUserData GetDataResult;
 	FRegistry::User.GetData(
-		THandler<FUserData>::CreateLambda([&](const FUserData& Result) 
+		THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result) 
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 			bGetDataSuccessful = true;
@@ -675,7 +673,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //
 //	bool bUpgradeSuccessful = false;
 //	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-//	FRegistry::User.Upgrade(Email, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+//	FRegistry::User.Upgrade(Email, Password, THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
 //	{
 //		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 //		bUpgradeSuccessful = true;
@@ -982,7 +980,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	FRegistry::User.Upgrade(Email, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	FRegistry::User.Upgrade(Email, Password, THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
@@ -1070,7 +1068,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
-	FRegistry::User.Upgradev2(Email, Username, Password, THandler<FUserData>::CreateLambda([&](const FUserData& Result)
+	FRegistry::User.Upgradev2(Email, Username, Password, THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
@@ -1208,9 +1206,9 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
-	FUserData UserData;
+	FAccountUserData UserData;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
 	{
 		UserData = Result;
 		bGetUserData = true;
@@ -1281,9 +1279,9 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 	}
 
 	bGetUserData = false;
-	FUserData UserData2;
+	FAccountUserData UserData2;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData2](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData2](const FAccountUserData& Result)
 	{
 		UserData2 = Result;
 		bGetUserData = true;
@@ -1394,9 +1392,9 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
-	FUserData UserData;
+	FAccountUserData UserData;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
 	{
 		UserData = Result;
 		bGetUserData = true;
@@ -1452,9 +1450,9 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 	}
 
 	bGetUserData = false;
-	FUserData UserData2;
+	FAccountUserData UserData2;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData2](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData2](const FAccountUserData& Result)
 	{
 		UserData2 = Result;
 		bGetUserData = true;
@@ -1564,9 +1562,9 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
-	FUserData UserData;
+	FAccountUserData UserData;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
 	{
 		UserData = Result;
 		bGetUserData = true;
@@ -1626,9 +1624,9 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 	}
 
 	bGetUserData = false;
-	FUserData UserData2;
+	FAccountUserData UserData2;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
-	FRegistry::User.GetData(THandler<FUserData>::CreateLambda([&bGetUserData, &UserData2](const FUserData& Result)
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData2](const FAccountUserData& Result)
 	{
 		UserData2 = Result;
 		bGetUserData = true;
@@ -2196,11 +2194,11 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 	FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
 
 	bool bGetUserDone = false;
-	FUserData ReceivedUserData;
+	FAccountUserData ReceivedUserData;
 	FRegistry::User.GetUserByOtherPlatformUserId(
 		EAccelBytePlatformType::Steam, 
 		SteamUserID,
-		THandler<FUserData>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FUserData& UserData)
+		THandler<FAccountUserData>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FAccountUserData& UserData)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bGetUserDone = true;
