@@ -91,6 +91,11 @@ pipeline {
                     config.build.targets."${ue4_version}".env_vars.each() {
                         env."${it.key}" = "${it.value}"
                     }
+
+                    def DisabledTests = (params?.AB_UE4_SDK_DISABLED_TESTS?.trim());
+                    if (DisabledTests != null && DisabledTests != "") {
+                        env.AB_UE4_SDK_DISABLED_TESTS = params.AB_UE4_SDK_DISABLED_TESTS
+                    }
                 }
             }
         }

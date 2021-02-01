@@ -13,6 +13,7 @@
 #include "HAL/FileManager.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
+#include "TestUtilities.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -526,6 +527,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 
 	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
