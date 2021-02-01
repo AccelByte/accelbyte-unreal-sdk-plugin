@@ -102,7 +102,13 @@ void Oauth2::GetSessionIdWithDeviceGrant(const FString& ClientId, const FString&
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString DeviceId        = FGenericPlatformMisc::GetDeviceId();
+	const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+	FString MacAddressString;
+	for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
+	{
+		MacAddressString += FString::Printf(TEXT("%02x"),*it);
+	}
+	FString DeviceId        = FMD5::HashAnsiString(*MacAddressString);
 	FString url;
 	url = FRegistry::Settings.IamServerUrl;
 	if (FRegistry::Settings.IamServerUrl.Contains("/iam"))
