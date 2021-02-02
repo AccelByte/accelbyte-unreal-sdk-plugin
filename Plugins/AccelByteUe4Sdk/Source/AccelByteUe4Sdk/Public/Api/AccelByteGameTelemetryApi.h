@@ -53,6 +53,16 @@ public:
 	 */
 	void Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	* @brief Startup module
+	*/
+	void Startup();
+
+	/**
+	* @brief Shutdown module
+	*/
+	void Shutdown();
+
 private:
 	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 	bool PeriodicTelemetry(float DeltaTime);
@@ -71,6 +81,8 @@ private:
 	const FTimespan MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
 	FDelegateHandle GameTelemetryTickDelegateHandle;
+
+	bool ShuttingDown;
 };
 
 } // Namespace Api

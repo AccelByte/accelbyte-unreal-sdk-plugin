@@ -94,6 +94,27 @@ Credentials::ESessionState Credentials::GetSessionState() const
 	return UserSessionState;
 }
 
+void Credentials::Startup()
+{
+	PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(
+        FTickerDelegate::CreateLambda([this](float DeltaTime)
+        {
+            PollRefreshToken(FPlatformTime::Seconds());
+
+            return true;
+        }),
+        0.2f);
+}
+
+void Credentials::Shutdown()
+{
+	if (PollRefreshTokenHandle.IsValid())
+	{
+		FTicker::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
+		PollRefreshTokenHandle.Reset();
+	}
+}
+
 const FString& Credentials::GetUserId() const
 {
 	return UserId;

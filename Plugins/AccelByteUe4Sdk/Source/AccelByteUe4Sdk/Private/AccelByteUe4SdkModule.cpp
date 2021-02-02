@@ -6,6 +6,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
+#include "Api/AccelByteGameTelemetryApi.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
 #if WITH_EDITOR
@@ -42,29 +43,17 @@ void FAccelByteUe4SdkModule::StartupModule()
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
 	LoadServerSettingsFromConfigUobject();
-	FTicker& Ticker = FTicker::GetCoreTicker();
 
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([](float DeltaTime)
-		{
-			FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
-
-			return true;
-		}),
-		0.2f);
-
-	Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([](float DeltaTime)
-		{
-			FRegistry::Credentials.PollRefreshToken(FPlatformTime::Seconds());
-
-			return true;
-		}),
-		0.2f);
+	FRegistry::HttpRetryScheduler.Startup();
+	FRegistry::Credentials.Startup();
+	FRegistry::GameTelemetry.Startup();
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
+	FRegistry::GameTelemetry.Shutdown();
+	FRegistry::Credentials.Shutdown();
+	FRegistry::HttpRetryScheduler.Shutdown();
 	UnregisterSettings();
 }
 

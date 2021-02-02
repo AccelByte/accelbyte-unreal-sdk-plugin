@@ -53,6 +53,9 @@ public:
 	const FString& GetUserNamespace() const;
 	ESessionState GetSessionState() const;
 
+	void Startup();
+	void Shutdown();
+
 private:
 	FString ClientId;
 	FString ClientSecret;
@@ -70,6 +73,8 @@ private:
 	double UserRefreshTime;
 	double UserExpiredTime;
 	double UserRefreshBackoff;
+
+	FDelegateHandle PollRefreshTokenHandle;
 };
 
 } // Namespace AccelByte

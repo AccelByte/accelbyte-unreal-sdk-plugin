@@ -49,6 +49,9 @@ public:
 	bool ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 	bool PollRetry(double CurrentTime, Credentials& UserCredentials);
 
+	void Startup();
+	void Shutdown();
+
 private:
 	class FHttpRetryTask
 	{
@@ -66,6 +69,7 @@ private:
 
 private:
 	TArray<TSharedRef<FHttpRetryTask>> RetryList;
+	FDelegateHandle PollRetryHandle;
 };
 
 }

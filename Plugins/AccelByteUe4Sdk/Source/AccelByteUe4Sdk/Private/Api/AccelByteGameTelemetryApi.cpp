@@ -17,16 +17,13 @@ namespace Api
 GameTelemetry::GameTelemetry(const AccelByte::Credentials & Credentials, const AccelByte::Settings & Settings)
 : Credentials(Credentials)
 , Settings(Settings)
+, ShuttingDown(false)
 {
 }
 
 GameTelemetry::~GameTelemetry()
 {
-	if(UObjectInitialized() && GameTelemetryTickDelegateHandle.IsValid())
-	{
-		FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
-		GameTelemetryTickDelegateHandle.Reset();
-	}
+	Shutdown();
 }
 
 void GameTelemetry::SetBatchFrequency(FTimespan Interval)
@@ -49,6 +46,11 @@ void GameTelemetry::SetImmediateEventList(const TArray<FString>& EventNames)
 
 void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
+	if (ShuttingDown)
+	{
+		return;
+	}
+
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
@@ -65,6 +67,26 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoi
 			GameTelemetryTickDelegate = FTickerDelegate::CreateRaw(this, &GameTelemetry::PeriodicTelemetry);
 			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, (float)TelemetryInterval.GetSeconds());
 		}
+	}
+}
+
+void GameTelemetry::Startup()
+{
+	ShuttingDown = false;
+}
+
+void GameTelemetry::Shutdown()
+{
+	ShuttingDown = true;
+	if(UObjectInitialized())
+	{
+		if (GameTelemetryTickDelegateHandle.IsValid())
+		{
+			FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
+			GameTelemetryTickDelegateHandle.Reset();
+		}
+		// flush events
+		PeriodicTelemetry(0);
 	}
 }
 
@@ -108,6 +130,11 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 
 void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
+	if (ShuttingDown)
+	{
+		return;
+	}
+
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 

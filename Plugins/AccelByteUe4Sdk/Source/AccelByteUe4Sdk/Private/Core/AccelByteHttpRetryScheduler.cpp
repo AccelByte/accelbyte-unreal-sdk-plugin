@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteReport.h"
-#include <algorithm>
+#include "Core/AccelByteRegistry.h"
 
 using namespace std;
 
@@ -141,6 +141,35 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredent
 	}
 
 	return true;
+}
+
+void FHttpRetryScheduler::Startup()
+{
+	PollRetryHandle = FTicker::GetCoreTicker().AddTicker(
+        FTickerDelegate::CreateLambda([this](float DeltaTime)
+        {
+            PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+
+            return true;
+        }),
+        0.2f);
+}
+
+void FHttpRetryScheduler::Shutdown()
+{
+	if (PollRetryHandle.IsValid())
+	{
+		FTicker::GetCoreTicker().RemoveTicker(PollRetryHandle);
+		PollRetryHandle.Reset();
+	}
+
+	// flush http requests
+	if (RetryList.Num() == 0)
+	{
+		FHttpModule::Get().GetHttpManager().Flush(false);
+		FHttpModule::Get().GetHttpManager().Tick(0);
+		PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+	};
 }
 
 void FHttpRetryScheduler::FHttpRetryTask::ScheduleNextRetry(double CurrentTime)
