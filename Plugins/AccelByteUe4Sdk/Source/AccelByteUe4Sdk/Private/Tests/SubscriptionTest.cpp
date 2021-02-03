@@ -33,6 +33,8 @@ const auto SubscriptionErrorHandler = FErrorHandler::CreateLambda([](int32 Error
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedAppIdSuccess", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = "abshooterid123123";
 
@@ -65,6 +67,8 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSku, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedSkuSuccess", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = "abshooterid123123";
 
@@ -97,6 +101,8 @@ bool CheckUserEligibleOwnedSku::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.CheckUserEligibleOwnedNoneFailed", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = "abshooterid123123";
 
