@@ -21,6 +21,46 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
+TArray<FString> GetDisabledTestList()
+{
+	TArray<FString> DisabledTest;
+	const FString DisabledTestString = Environment::GetEnvironmentVariable(TEXT("AB_UE4_SDK_DISABLED_TESTS"), 1000);
+	DisabledTestString.ParseIntoArray(DisabledTest, TEXT(";"), true);
+	return DisabledTest;
+}
+
+bool IsAccelByteTestEnabled(const FString& TestName)
+{
+	static TArray<FString> DisabledTests = GetDisabledTestList();
+	for (const FString& DisabledTest : DisabledTests)
+	{
+		if (DisabledTest.StartsWith("\"") && DisabledTest.EndsWith("\""))
+		{
+			return !DisabledTest.Equals(TestName);
+		}
+		if (DisabledTest.StartsWith("*") && TestName.EndsWith(DisabledTest))
+		{
+			return false;
+		}
+		if (TestName.StartsWith(DisabledTest))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool AccelByteSkipTest(const FString& TestName)
+{
+	if (IsAccelByteTestEnabled(TestName))
+	{
+		UE_LOG(LogTemp, Log, TEXT("=== Skipping test `%s`"), *TestName);
+		return true;
+	}
+
+	return false;
+}
+
 void Waiting(bool& condition, FString Message)
 {
 	while (!condition)

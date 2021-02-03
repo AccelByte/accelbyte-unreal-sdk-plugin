@@ -747,6 +747,12 @@ struct FAchievementResponse
 		FString UpdatedAt;
 };
 
+TArray<FString> GetDisabledTestList();
+bool IsAccelByteTestEnabled(const FString& TestName);
+bool AccelByteSkipTest(const FString& TestName);
+
+#define AB_TEST_SKIP_WHEN_DISABLED() if (AccelByteSkipTest(GetTestName())) return true
+
 void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 

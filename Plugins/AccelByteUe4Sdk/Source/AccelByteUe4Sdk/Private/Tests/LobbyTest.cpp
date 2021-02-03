@@ -2180,6 +2180,8 @@ bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStart", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2351,6 +2353,8 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_withPartyAttributes, "AccelByte.Tests.Lobby.B.MatchmakingStartPartyAttributes", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2594,6 +2598,8 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_Timeout, "AccelByte.Tests.Lobby.B.MatchmakingStartTimeout", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2790,6 +2796,8 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingLatencies_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingLatenciesStart", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3023,6 +3031,8 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCancelMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingCancel", AutomationFlagMaskLobby);
 bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(1);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3087,6 +3097,8 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingRematch", AutomationFlagMaskLobby);
 bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(3);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[3];
@@ -3353,6 +3365,8 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestLocalDSWithMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.LocalDSWithMatchmaking", AutomationFlagMaskLobby);
 bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3574,6 +3588,8 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk, "AccelByte.Tests.Lobby.B.LocalDSWithMatchmakingAutoHeartBeat", AutomationFlagMaskLobby);
 bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3799,6 +3815,8 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking3vs3_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStart3vs3", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	LobbyConnect(6);
 	for (int i = 0; i < 6; i++)
 	{

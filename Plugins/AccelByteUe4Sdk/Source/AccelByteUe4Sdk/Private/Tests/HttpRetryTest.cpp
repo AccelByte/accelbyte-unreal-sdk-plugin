@@ -13,6 +13,7 @@
 #include "HAL/FileManager.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
+#include "TestUtilities.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -176,7 +177,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
-	while (CurrentTime < 18)
+	while (CurrentTime < 30 && NumRequestRetry < 2)
 	{
 		CurrentTime += 0.5;
 		Ticker.Tick(0.5);
@@ -526,6 +527,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 
 	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
@@ -700,18 +702,23 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 
 	SendMockyRequest(0, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 0"), CurrentTime);
 		RequestCompleted++;
 		SendMockyRequest(1, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 		{
+			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 1"), CurrentTime);
 			RequestCompleted++;
 			SendMockyRequest(2, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 			{
+				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 2"), CurrentTime);
 				RequestCompleted++;
 				SendMockyRequest(3, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 				{
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 3"), CurrentTime);
 					RequestCompleted++;
 					SendMockyRequest(4, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 					{
+						UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 4"), CurrentTime);
 						RequestCompleted++;
 					}));
 				}));

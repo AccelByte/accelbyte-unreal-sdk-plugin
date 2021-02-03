@@ -100,7 +100,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			bGetStatDone = true;
 		}), FErrorHandler::CreateLambda([&bStatIsExist, &bGetStatDone](int32 ErrorCode, FString ErrorMessage)
 		{
-			if (ErrorCode != 70131)
+			if (ErrorCode != 70131 && ErrorCode != 12241)
 			{
 				UE_LOG(LogAccelByteServerStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			}
