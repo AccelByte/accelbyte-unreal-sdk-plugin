@@ -534,7 +534,8 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		-1,
 		"",
 		0,
-		""
+		"",
+		FRecurring { }
 	};
 	bool bRootItemCreated = false;
 	Ecommerce_Item_Create(RootItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRootItemCreated](const FItemFullInfo& Result)
@@ -596,7 +597,8 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		-1,
 		"",
 		0,
-		"classless"
+		"classless",
+		FRecurring { }
 	};
 	bool bChildItemCreated = false;
 	Ecommerce_Item_Create(ChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bChildItemCreated](const FItemFullInfo& Result)
@@ -658,7 +660,8 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 		-1,
 		"",
 		0,
-		"classless"
+		"classless",
+		FRecurring { }
 	};
 	bool bGrandchildItemCreated = false;
 	Ecommerce_Item_Create(grandChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bGrandchildItemCreated](const FItemFullInfo& Result)
@@ -825,11 +828,11 @@ void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSu
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+void Ecommerce_PublishedStore_Get(const FString& Namespace, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError) 
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -844,6 +847,12 @@ void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const F
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	Ecommerce_PublishedStore_Get(Namespace, OnSuccess, OnError);
 }
 
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
@@ -867,11 +876,11 @@ void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FEr
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+void Ecommerce_Store_Create(const FString& Namespace, FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError) 
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -887,6 +896,12 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	Ecommerce_Store_Create(Namespace, Store, OnSuccess, OnError);
 }
 
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
@@ -931,11 +946,11 @@ void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, c
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void Ecommerce_Store_Clone(const FString& Namespace, FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError) 
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *BaseUrl, *FRegistry::Settings.Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *BaseUrl, *Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -950,6 +965,12 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	Ecommerce_Store_Clone(Namespace, Source, Target, OnSuccess, OnError);
 }
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
@@ -973,11 +994,17 @@ void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError) 
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	Ecommerce_Item_Create(Namespace, Item, StoreId, OnSuccess, OnError);
+}
+
+void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *BaseUrl, *Namespace, *StoreId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -992,6 +1019,61 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_GetItem_BySKU(const FString& Namespace, const FString& StoreId, const FString& SKU, const bool& ActiveOnly, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError) 
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items/bySku?storeId=%s&sku=%s&activeOnly=%s"), *BaseUrl, *Namespace, *StoreId, *SKU, ActiveOnly ? TEXT("true") : TEXT("false"));
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/entitlements"), *BaseUrl, *Namespace, *UserId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Contents = "[";
+	for (int i = 0; i < EntitlementGrant.Num(); i++)
+	{
+		FString Content;
+		FJsonObjectConverter::UStructToJsonObjectString(EntitlementGrant[i], Content);
+		Contents += Content;
+		if (i < EntitlementGrant.Num() - 1)
+		{
+			Contents += ",";
+		}
+		else
+		{
+			Contents += "]";
+		}
+	}
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Contents);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
@@ -1507,6 +1589,28 @@ void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& O
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/subscriptions/platformSubscribe"), *BaseUrl, *FRegistry::Settings.PublisherNamespace, *UserId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString(BodyRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

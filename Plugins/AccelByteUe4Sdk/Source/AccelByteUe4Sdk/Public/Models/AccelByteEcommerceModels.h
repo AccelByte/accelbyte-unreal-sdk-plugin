@@ -17,7 +17,8 @@ enum class EAccelByteItemType : uint8
 	COINS,
 	INGAMEITEM,
 	BUNDLE,
-	CODE
+	CODE,
+	SUBSCRIPTION
 };
 
 UENUM(BlueprintType)
@@ -116,6 +117,15 @@ enum class EAccelByteCreditUserWalletSource : uint8
 	REDEEM_CODE,
 	REFUND,
 	OTHER
+};
+
+UENUM(BlueprintType) 
+enum class EAccelByteSubscriptionCycle : uint8 
+{
+	WEEKLY = 0,
+	MONTHLY,
+	QUARTERLY,
+	YEARLY
 };
 
 #pragma endregion EnumField

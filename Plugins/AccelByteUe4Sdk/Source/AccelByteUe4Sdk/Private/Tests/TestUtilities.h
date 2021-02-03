@@ -216,6 +216,20 @@ struct FRegionDataUS
 };
 
 USTRUCT(BlueprintType)
+struct FRecurring
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		EAccelByteSubscriptionCycle cycle = EAccelByteSubscriptionCycle::WEEKLY;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		int fixedFreeDays = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		int fixedTrialCycles = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		int graceDays = 1; // min val = 1
+};
+
+USTRUCT(BlueprintType)
 struct FItemCreateRequest
 {
 	GENERATED_BODY()
@@ -267,6 +281,8 @@ struct FItemCreateRequest
 		int displayOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString clazz;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		FRecurring recurring;
 };
 
 USTRUCT(BlueprintType)
@@ -747,6 +763,24 @@ struct FAchievementResponse
 		FString UpdatedAt;
 };
 
+USTRUCT(BlueprintType)
+struct FFreeSubscriptionRequest 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		int32 GrantDays;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		FString Source;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		FString Reason;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		FString Region;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Subscriptions | SubscriptionRequest")
+		FString Language;
+};
+
 TArray<FString> GetDisabledTestList();
 bool IsAccelByteTestEnabled(const FString& TestName);
 bool AccelByteSkipTest(const FString& TestName);
@@ -760,17 +794,23 @@ void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDel
 void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
+void Ecommerce_PublishedStore_Get(const FString& Namespace, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
 void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError);
+void Ecommerce_Store_Create(const FString& Namespace, FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void Ecommerce_Store_Clone(const FString& Namespace, FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError);
 
 void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
+void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
+void Ecommerce_GetItem_BySKU(const FString& Namespace, const FString& StoreId, const FString& SKU, const bool& ActiveOnly, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
+void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError);
 
 void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError);
@@ -803,3 +843,5 @@ void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THan
 
 void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError);
 void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+
+void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
