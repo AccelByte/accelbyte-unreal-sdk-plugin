@@ -45,6 +45,9 @@ static FString GetPlatformString(EAccelBytePlatformType PlatformType)
 		return "steam";
 	case EAccelBytePlatformType::PS4:
 		return "ps4";
+	case EAccelBytePlatformType::PS4CrossGen:
+	case EAccelBytePlatformType::PS5:
+		return "ps5";
 	case EAccelBytePlatformType::Live:
 		return "live";
 	case EAccelBytePlatformType::Google:

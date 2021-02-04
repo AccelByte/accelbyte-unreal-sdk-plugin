@@ -16,6 +16,8 @@ enum class EAccelBytePlatformType : uint8
 {
 	Steam,
 	PS4,
+	PS4CrossGen,
+	PS5,
 	Live,
 	Google,
 	Facebook,
