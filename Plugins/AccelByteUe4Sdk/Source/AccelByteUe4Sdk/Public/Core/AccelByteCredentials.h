@@ -36,6 +36,7 @@ public:
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void SetUserSession(const FString& SessionId, double ExpiredTime, const FString& RefreshId);
 	void SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace);
+	void SetUserEmailAddress(const FString& EmailAddress);
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
 	const FString& GetUserRefreshId() const;
@@ -51,6 +52,7 @@ public:
 	const FString& GetUserId() const;
 	const FString& GetUserDisplayName() const;
 	const FString& GetUserNamespace() const;
+	const FString& GetUserEmailAddress() const;
 	ESessionState GetSessionState() const;
 
 	void Startup();
@@ -67,6 +69,7 @@ private:
 	FString UserNamespace;
 	FString UserId;
 	FString UserDisplayName;
+	FString UserEmailAddress;
 	ESessionState UserSessionState;
 
 	FString UserRefreshId;
@@ -93,5 +96,7 @@ public:
 	static FString GetUserDisplayName();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserNamespace();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetUserEmailAddress();
 };
 

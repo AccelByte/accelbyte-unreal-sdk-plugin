@@ -197,6 +197,14 @@ namespace AccelByte
 			void SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
+			 * @brief Send request verification code with Change email context. User should login with email and password first to get access token.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
 			 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
 			 *
 			 * @param LoginId Email or phone number that will be used to upgrade the headless account.
@@ -296,6 +304,15 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function for update user account info within the game.
+			 *
+			 * @param UpdateEmailRequest Set verify code and new user email address.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will get user(s) by other platform user id(s) it linked to.

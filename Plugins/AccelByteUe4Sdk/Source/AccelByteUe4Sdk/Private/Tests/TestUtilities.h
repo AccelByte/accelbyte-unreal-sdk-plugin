@@ -451,6 +451,8 @@ struct FVerificationCode
 		FString accountUpgrade;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
 		FString passwordReset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | VerificationCode")
+		FString updateEmail;
 };
 
 USTRUCT(BlueprintType)

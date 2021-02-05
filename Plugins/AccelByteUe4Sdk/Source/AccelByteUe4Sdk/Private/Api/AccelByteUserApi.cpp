@@ -112,6 +112,7 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	User::TempUsername = Username;
+	Credentials.SetUserEmailAddress(Username);
 	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
 	{
 		Oauth2::Logout(Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([](){}), 
@@ -299,6 +300,12 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountU
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	if (!UpdateRequest.EmailAddress.IsEmpty())
+	{
+		OnError.ExecuteIfBound(400, TEXT("Cannot update user email using this function. Use UpdateEmail instead."));
+		return;
+	}
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb = TEXT("PUT");
@@ -318,7 +325,31 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountU
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AccelByte::Api::User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, const TArray<FString>& OtherPlatformUserId, const THandler<FBulkPlatformUserIdResponse>& OnSuccess, const FErrorHandler & OnError)
+void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, const FVoidHandler & OnSuccess, const FErrorHandler & OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email"), *Settings.IamServerUrl, *Settings.Namespace);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(UpdateEmailRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, const TArray<FString>& OtherPlatformUserId, const THandler<FBulkPlatformUserIdResponse>& OnSuccess, const FErrorHandler & OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -350,11 +381,36 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandl
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
+	if (Credentials.GetUserEmailAddress().IsEmpty())
+	{
+		OnError.ExecuteIfBound(400, TEXT("User email address cannot be empty"));
+	}
+
 	FVerificationCodeRequest SendVerificationCodeRequest
 	{
 		EVerificationContext::UserAccountRegistration,
 		TEXT(""),
-		User::TempUsername
+		Credentials.GetUserEmailAddress()
+	};
+
+	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
+}
+
+void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	if (Credentials.GetUserEmailAddress().IsEmpty())
+	{
+		OnError.ExecuteIfBound(400, TEXT("User email address cannot be empty"));
+	}
+
+	FVerificationCodeRequest SendVerificationCodeRequest
+	{
+		EVerificationContext::UpdateEmailAddress,
+		TEXT(""),
+		Credentials.GetUserEmailAddress()
 	};
 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);

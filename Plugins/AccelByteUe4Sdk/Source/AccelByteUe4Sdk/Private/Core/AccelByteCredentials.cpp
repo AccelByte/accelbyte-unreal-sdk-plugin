@@ -74,6 +74,11 @@ void Credentials::SetUserLogin(const FString& Id, const FString& DisplayName, co
 	UserNamespace = Namespace;
 }
 
+void Credentials::SetUserEmailAddress(const FString& EmailAddress)
+{
+	UserEmailAddress = EmailAddress;
+}
+
 const FString& Credentials::GetUserSessionId() const
 {
 	return UserSessionId;
@@ -123,6 +128,11 @@ const FString& Credentials::GetUserId() const
 const FString& Credentials::GetUserDisplayName() const
 {
 	return UserDisplayName;
+}
+
+const FString& Credentials::GetUserEmailAddress() const
+{
+	return UserEmailAddress;
 }
 
 const FString& Credentials::GetClientAccessToken() const
@@ -201,4 +211,9 @@ FString UAccelByteBlueprintsCredentials::GetUserDisplayName()
 FString UAccelByteBlueprintsCredentials::GetUserNamespace()
 {
 	return FRegistry::Credentials.GetUserNamespace();
+}
+
+FString UAccelByteBlueprintsCredentials::GetUserEmailAddress()
+{
+	return FRegistry::Credentials.GetUserEmailAddress();
 }

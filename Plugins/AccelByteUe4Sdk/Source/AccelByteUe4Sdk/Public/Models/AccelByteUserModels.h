@@ -251,7 +251,7 @@ struct ACCELBYTEUE4SDK_API FVerificationCodeRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
 		FString LanguageTag;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
-		FString LoginID;
+		FString EmailAddress;
 };
 
 USTRUCT(BlueprintType)
@@ -401,4 +401,14 @@ struct ACCELBYTEUE4SDK_API FLinkPlatformAccountRequest
 		FString PlatformId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkPlatformAccountRequest")
 		FString PlatformUserId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUpdateEmailRequest
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+		FString EmailAddress;
 };

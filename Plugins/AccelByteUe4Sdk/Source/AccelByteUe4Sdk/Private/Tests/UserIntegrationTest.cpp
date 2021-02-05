@@ -43,7 +43,8 @@ enum class EVerificationCode : uint8
 {
 	accountRegistration,
 	accountUpgrade,
-	passwordReset
+	passwordReset,
+	updateEmail
 };
 
 FString GetVerificationCode(const FString& userId, EVerificationCode code);
@@ -2755,6 +2756,202 @@ bool FGetCountryFromIP::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterThenVerifyByRequestVerification, "AccelByte.Tests.AUser.RegisterThenVerifyByRequestVerification", AutomationFlagMaskUser);
+bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 22));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	FRegisterResponse RegisterResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Register User"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &RegisterResult](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Register User"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+		RegisterResult = Result;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	FlushHttpRequests();
+	Waiting(bRegisterDone, "Waiting for Registered...");
+	check(bRegisterSuccessful);
+
+	bool bLoginSuccessful = false;
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login User"));
+		bLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+	check(bLoginSuccessful);
+
+	bool bSuccessSendVerifCode = false;
+	FRegistry::User.SendVerificationCode(FVoidHandler::CreateLambda([&bSuccessSendVerifCode]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Request Verification Code"));
+		bSuccessSendVerifCode = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bSuccessSendVerifCode, "Waiting send verification code");
+	check(bSuccessSendVerifCode);
+
+	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::accountRegistration);
+	check(!VerificationCode.IsEmpty());
+
+	bool bSuccessVerifyUser = false;
+	FRegistry::User.Verify(VerificationCode, FVoidHandler::CreateLambda([&bSuccessVerifyUser]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify User"));
+		bSuccessVerifyUser = true;
+	}), UserTestErrorHandler);
+	Waiting(bSuccessVerifyUser, "Waiting verify user");
+	check(bSuccessVerifyUser);
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Delete User"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+	check(bDeleteSuccessful);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdateUserEmail, "AccelByte.Tests.AUser.UpdateUserEmail", AutomationFlagMaskUser);
+bool FUpdateUserEmail::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString NewDisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString NewEmailAddress = "test+u4esdk+" + NewDisplayName + "@game.test";
+	NewEmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 22));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccess = false;
+	bool bRegisterDone = false;
+	FRegisterResponse RegisterResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Register User"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess, &bRegisterDone, &RegisterResult](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Register User"));
+		bRegisterSuccess = true;
+		bRegisterDone = true;
+		RegisterResult = Result;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bRegisterDone, "Waiting for Registered...");
+	check(bRegisterSuccess);
+
+	bool bLoginSuccess = false;
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login User"));
+		bLoginSuccess = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bLoginSuccess, "Waiting for Login...");
+	check(bLoginSuccess);
+
+	bool bSendChangeEmailSuccess = false;
+	FRegistry::User.SendUpdateEmailVerificationCode(FVoidHandler::CreateLambda([&bSendChangeEmailSuccess]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Change Email Verification Request"));
+		bSendChangeEmailSuccess = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bSendChangeEmailSuccess, "Waiting for Send Verification Request...");
+	check(bSendChangeEmailSuccess);
+
+	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
+	check(!VerificationCode.IsEmpty());
+
+	FUpdateEmailRequest updateEmailRequest;
+	updateEmailRequest.Code = VerificationCode;
+	updateEmailRequest.EmailAddress = NewEmailAddress;
+	bool bUpdateEmailSuccess = false;
+	FRegistry::User.UpdateEmail(updateEmailRequest, FVoidHandler::CreateLambda([&bUpdateEmailSuccess]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Update New Users Email"));
+		bUpdateEmailSuccess = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bUpdateEmailSuccess, "Waiting for Update Email...");
+	check(bUpdateEmailSuccess);
+
+	const FString NewEmailVerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
+	check(!NewEmailVerificationCode.IsEmpty());
+
+	bool bVerifyNewEmailSuccess = false;
+	FRegistry::User.Verify(NewEmailVerificationCode, FVoidHandler::CreateLambda([&bVerifyNewEmailSuccess]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify New Email"));
+		bVerifyNewEmailSuccess = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bVerifyNewEmailSuccess, "Waiting for Verify on New Email...");
+	check(bVerifyNewEmailSuccess);
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginSuccess = false;
+	FRegistry::User.LoginWithUsername(NewEmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login New Email"));
+		bLoginSuccess = true;
+	}), UserTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bLoginSuccess, "Waiting for Login New Email...");
+	check(bLoginSuccess);
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Delete User"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+	check(bDeleteSuccessful);
+
+	FRegistry::User.ForgetAllCredentials();
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.AUser.SteamTicket", AutomationFlagMaskUser);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
@@ -2781,6 +2978,7 @@ FString GetVerificationCode(const FString& userId, EVerificationCode code)
 	case EVerificationCode::accountRegistration: return verificationCode.accountRegistration;
 	case EVerificationCode::accountUpgrade: return verificationCode.accountUpgrade;
 	case EVerificationCode::passwordReset: return verificationCode.passwordReset;
+	case EVerificationCode::updateEmail: return verificationCode.updateEmail;
 	}
 	return FString("");
 }
