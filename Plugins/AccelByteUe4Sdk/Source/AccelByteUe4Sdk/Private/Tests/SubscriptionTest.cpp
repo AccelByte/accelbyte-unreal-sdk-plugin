@@ -42,6 +42,8 @@ static FString userPassword = "Password+123";
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionSetup, "AccelByte.Tests.Subscription.A.SubscriptionSetup", AutomationFlagMaskSubscription);
 bool SubscriptionSetup::RunTest(const FString& Parameters) 
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString gameNamespace = FRegistry::Settings.Namespace;
 	FString publisherNamespace = FRegistry::Settings.PublisherNamespace;
 	FString language = "en-US";
@@ -477,6 +479,8 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.B.CheckUserEligibleOwnedAppId", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 
@@ -513,6 +517,8 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSubs, "AccelByte.Tests.Subscription.C.CheckUserEligibleOwnedSubs", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 
@@ -555,6 +561,8 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.E.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FString oriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 
@@ -590,5 +598,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionTeardown, "AccelByte.Tests.Subscription.Z.SubscriptionTeardown", AutomationFlagMaskSubscription);
 bool SubscriptionTeardown::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	return true;
 }
