@@ -2840,6 +2840,8 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdateUserEmail, "AccelByte.Tests.AUser.UpdateUserEmail", AutomationFlagMaskUser);
 bool FUpdateUserEmail::RunTest(const FString & Parameter)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	FRegistry::User.ForgetAllCredentials();
 	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
