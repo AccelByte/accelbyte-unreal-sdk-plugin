@@ -101,8 +101,9 @@ void Oauth2::GetSessionIdWithDeviceGrant(const FString& ClientId, const FString&
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
-
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	FString MacAddressString;
 	for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
 	{
