@@ -15,6 +15,7 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "TestUtilities.h"
 #include "HAL/FileManager.h"
+#include "JsonObjectWrapper.h"
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
@@ -2581,11 +2582,18 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		{
 			for (auto partyAttribute : PartyAttributes)
 			{
-				bool bKeyFound = Party.Party_attributes.Contains(partyAttribute.Key);
+				FString Value;
+				bool bKeyFound = Party.Party_attributes.JsonObject->TryGetStringField(partyAttribute.Key, Value);
 				check(bKeyFound);
-				auto Value = Party.Party_attributes[partyAttribute.Key];
-				check(Value == partyAttribute.Value);
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *Value);
+				if (bKeyFound)
+				{
+					check(*Value == partyAttribute.Value);
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *Value);
+				}
+				else
+				{
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | not found"), *partyAttribute.Key);
+				}
 			}
 		}
 	}

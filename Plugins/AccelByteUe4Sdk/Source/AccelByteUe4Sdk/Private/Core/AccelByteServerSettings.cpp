@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -66,6 +66,11 @@ FString UAccelByteBlueprintsServerSettings::GetAchievementServerUrl()
 	return FRegistry::ServerSettings.AchievementServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetMatchmakingServerUrl()
+{
+	return FRegistry::ServerSettings.MatchmakingServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -119,4 +124,9 @@ void UAccelByteBlueprintsServerSettings::SetGameTelemetryServerUrl(const FString
 void UAccelByteBlueprintsServerSettings::SetAchievementServerUrl(const FString& AchievementServerUrl)
 {
 	FRegistry::ServerSettings.AchievementServerUrl = AchievementServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetMatchmakingServerUrl(const FString& MatchmakingServerUrl)
+{
+	FRegistry::ServerSettings.MatchmakingServerUrl = MatchmakingServerUrl;
 }

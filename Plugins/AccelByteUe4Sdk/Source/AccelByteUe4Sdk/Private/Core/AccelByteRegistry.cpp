@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -29,6 +29,7 @@
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 #include "GameServerApi/AccelByteServerGameTelemetryApi.h"
 #include "GameServerApi/AccelByteServerAchievementApi.h"
+#include "GameServerApi/AccelByteServerMatchmakingApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -63,3 +64,4 @@ GameServerApi::ServerEcommerce FRegistry::ServerEcommerce(FRegistry::ServerCrede
 GameServerApi::ServerQosManager FRegistry::ServerQosManager(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerAchievement FRegistry::ServerAchievement(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerCredentials, FRegistry::ServerSettings);

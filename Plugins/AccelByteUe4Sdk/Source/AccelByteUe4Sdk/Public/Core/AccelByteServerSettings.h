@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -27,6 +27,7 @@ public:
 	FString QosManagerServerUrl;
 	FString GameTelemetryServerUrl;
 	FString AchievementServerUrl;
+	FString MatchmakingServerUrl;
 };
 
 } // Namespace AccelByte
@@ -79,6 +80,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString AchievementServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString MatchmakingServerUrl;
 };
 
 
@@ -124,6 +128,9 @@ public:
 	static FString GetAchievementServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetMatchmakingServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -155,4 +162,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetAchievementServerUrl(const FString& AchievementServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetMatchmakingServerUrl(const FString& AchievementServerUrl);
 };

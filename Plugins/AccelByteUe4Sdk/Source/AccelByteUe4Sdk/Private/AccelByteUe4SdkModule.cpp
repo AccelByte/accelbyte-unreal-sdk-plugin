@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -165,6 +165,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.QosManagerServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl, TEXT("qosm"));
 	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
 	FRegistry::ServerSettings.AchievementServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->AchievementServerUrl, TEXT("achievement"));
+	FRegistry::ServerSettings.MatchmakingServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->MatchmakingServerUrl, TEXT("matchmaking"));
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 
 #endif
