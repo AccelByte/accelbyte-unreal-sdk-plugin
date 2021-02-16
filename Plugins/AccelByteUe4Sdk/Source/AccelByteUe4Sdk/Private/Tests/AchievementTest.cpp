@@ -878,7 +878,7 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 	FlushHttpRequests();
 	Waiting(bIncrementUserStatDone, "Waiting for increment user stat item ...");
 
-	WaitUntil([]() { return false; }, 6.66f, "Waiting for KAFKA");
+	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
 
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
 	bool bQueryAchievementsSuccess = false;
@@ -951,7 +951,7 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 	FlushHttpRequests();
 	Waiting(bIncrementStatDone, "Waiting for increment user stat items...");
 
-	WaitUntil([]() { return false; }, 6.66f, "Waiting for KAFKA");
+	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
 
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
 	bool bQueryAchievementsSuccess = false;

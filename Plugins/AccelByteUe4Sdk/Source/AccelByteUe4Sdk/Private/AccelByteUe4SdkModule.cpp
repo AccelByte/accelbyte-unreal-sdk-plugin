@@ -14,11 +14,21 @@
 #include "ISettingsSection.h"
 #endif
 
-FString GetDefaultServerUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
+FString GetDefaultAPIUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
 {
 	if (SpecificServerUrl.IsEmpty()) 
 	{
 		return FString::Printf(TEXT("%s/%s"), *FRegistry::Settings.BaseUrl, *DefaultServerPath);
+	}
+
+	return SpecificServerUrl;
+}
+
+FString GetDefaultServerAPIUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
+{
+	if (SpecificServerUrl.IsEmpty())
+	{
+		return FString::Printf(TEXT("%s/%s"), *FRegistry::ServerSettings.BaseUrl, *DefaultServerPath);
 	}
 
 	return SpecificServerUrl;
@@ -105,24 +115,31 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
 	FRegistry::Settings.BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
 	FRegistry::Settings.NonApiBaseUrl = GetDefault<UAccelByteSettings>()->NonApiBaseUrl;
-	FRegistry::Settings.IamServerUrl = GetDefault<UAccelByteSettings>()->IamServerUrl;
-	FRegistry::Settings.PlatformServerUrl = GetDefault<UAccelByteSettings>()->PlatformServerUrl;
-	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
-	FRegistry::Settings.BasicServerUrl = GetDefault<UAccelByteSettings>()->BasicServerUrl;
-	FRegistry::Settings.CloudStorageServerUrl = GetDefault<UAccelByteSettings>()->CloudStorageServerUrl;
-	FRegistry::Settings.GameProfileServerUrl = GetDefault<UAccelByteSettings>()->GameProfileServerUrl;
-	FRegistry::Settings.StatisticServerUrl = GetDefault<UAccelByteSettings>()->StatisticServerUrl;
-	FRegistry::Settings.QosManagerServerUrl = GetDefault<UAccelByteSettings>()->QosManagerServerUrl;
-	FRegistry::Settings.LeaderboardServerUrl = GetDefault<UAccelByteSettings>()->LeaderboardServerUrl;
-	FRegistry::Settings.GameTelemetryServerUrl = GetDefault<UAccelByteSettings>()->GameTelemetryServerUrl;
-	FRegistry::Settings.AgreementServerUrl = GetDefaultServerUrl(GetDefault<UAccelByteSettings>()->AgreementServerUrl, TEXT("agreement"));
-	FRegistry::Settings.CloudSaveServerUrl = GetDefault<UAccelByteSettings>()->CloudSaveServerUrl;
-	FRegistry::Settings.AchievementServerUrl = GetDefault<UAccelByteSettings>()->AchievementServerUrl;
-	FRegistry::Settings.AppId = GetDefault<UAccelByteSettings>()->AppId;
+
 	NullCheckConfig(*FRegistry::Settings.ClientId, "Client ID");
 	NullCheckConfig(*FRegistry::Settings.Namespace, "Namespace");
 	NullCheckConfig(*FRegistry::Settings.BaseUrl, "Base URL");
 	NullCheckConfig(*FRegistry::Settings.NonApiBaseUrl, "Non-API Base URL");
+
+	FRegistry::Settings.IamServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->IamServerUrl, TEXT("iam"));
+	FRegistry::Settings.PlatformServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->PlatformServerUrl, TEXT("platform"));
+	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
+	if (FRegistry::Settings.LobbyServerUrl.IsEmpty())
+	{
+		const FString BaseUrl = FRegistry::Settings.NonApiBaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+		FRegistry::Settings.LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *BaseUrl, TEXT("lobby/"));
+	}
+	FRegistry::Settings.BasicServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->BasicServerUrl, TEXT("basic"));
+	FRegistry::Settings.CloudStorageServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->CloudStorageServerUrl, TEXT("binary-store"));
+	FRegistry::Settings.GameProfileServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->GameProfileServerUrl, TEXT("soc-profile"));
+	FRegistry::Settings.StatisticServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->StatisticServerUrl, TEXT("statistic"));
+	FRegistry::Settings.QosManagerServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->QosManagerServerUrl, TEXT("qosm"));
+	FRegistry::Settings.LeaderboardServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->LeaderboardServerUrl, TEXT("leaderboard"));
+	FRegistry::Settings.GameTelemetryServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
+	FRegistry::Settings.AgreementServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->AgreementServerUrl, TEXT("agreement"));
+	FRegistry::Settings.CloudSaveServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->CloudSaveServerUrl, TEXT("cloudsave"));
+	FRegistry::Settings.AchievementServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->AchievementServerUrl, TEXT("achievement"));
+	FRegistry::Settings.AppId = GetDefault<UAccelByteSettings>()->AppId;
 	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 	
 	return true;
@@ -136,17 +153,20 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.Namespace = GetDefault<UAccelByteServerSettings>()->Namespace;
 	FRegistry::ServerSettings.PublisherNamespace = GetDefault<UAccelByteServerSettings>()->PublisherNamespace;
 	FRegistry::ServerSettings.RedirectURI = GetDefault<UAccelByteServerSettings>()->RedirectURI;
-	FRegistry::ServerSettings.IamServerUrl = GetDefault<UAccelByteServerSettings>()->IamServerUrl;
-	FRegistry::ServerSettings.DSMControllerServerUrl = GetDefault<UAccelByteServerSettings>()->DSMControllerServerUrl;
-	FRegistry::ServerSettings.StatisticServerUrl = GetDefault<UAccelByteServerSettings>()->StatisticServerUrl;
-	FRegistry::ServerSettings.PlatformServerUrl = GetDefault<UAccelByteServerSettings>()->PlatformServerUrl;
-	FRegistry::ServerSettings.QosManagerServerUrl = GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl;
-	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl;
-	FRegistry::ServerSettings.AchievementServerUrl = GetDefault<UAccelByteServerSettings>()->AchievementServerUrl;
-	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+	FRegistry::ServerSettings.BaseUrl = GetDefault<UAccelByteServerSettings>()->BaseUrl;
 
 	NullCheckConfig(*FRegistry::ServerSettings.ClientId, "Client ID");
 	NullCheckConfig(*FRegistry::ServerSettings.ClientSecret, "Client Secret");
+
+	FRegistry::ServerSettings.IamServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->IamServerUrl, TEXT("iam"));
+	FRegistry::ServerSettings.DSMControllerServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->DSMControllerServerUrl, TEXT("dsmcontroller"));
+	FRegistry::ServerSettings.StatisticServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->StatisticServerUrl, TEXT("social"));
+	FRegistry::ServerSettings.PlatformServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->PlatformServerUrl, TEXT("platform"));
+	FRegistry::ServerSettings.QosManagerServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl, TEXT("qosm"));
+	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
+	FRegistry::ServerSettings.AchievementServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->AchievementServerUrl, TEXT("achievement"));
+	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+
 #endif
 	return true;
 }
