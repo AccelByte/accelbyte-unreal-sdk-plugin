@@ -71,6 +71,11 @@ FString UAccelByteBlueprintsServerSettings::GetMatchmakingServerUrl()
 	return FRegistry::ServerSettings.MatchmakingServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetLobbyServerUrl()
+{
+	return FRegistry::ServerSettings.LobbyServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -129,4 +134,9 @@ void UAccelByteBlueprintsServerSettings::SetAchievementServerUrl(const FString& 
 void UAccelByteBlueprintsServerSettings::SetMatchmakingServerUrl(const FString& MatchmakingServerUrl)
 {
 	FRegistry::ServerSettings.MatchmakingServerUrl = MatchmakingServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetLobbyServerUrl(const FString & LobbyServerUrl)
+{
+	FRegistry::ServerSettings.LobbyServerUrl = LobbyServerUrl;
 }

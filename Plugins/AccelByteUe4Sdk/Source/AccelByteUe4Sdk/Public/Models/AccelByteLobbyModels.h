@@ -38,6 +38,28 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsInfoPartyResponse
         FString InvitationToken;
 };
 
+
+// Get current party data
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDataPartyResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TMap<FString, FString> custom_attribute;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString updatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString partyId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString leaderId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TArray<FString> members;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TArray<FString> invitees;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString invitationToken;
+};
+
 //Create new party
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCreatePartyResponse

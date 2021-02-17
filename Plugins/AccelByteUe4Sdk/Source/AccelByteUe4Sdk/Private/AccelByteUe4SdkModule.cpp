@@ -166,6 +166,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
 	FRegistry::ServerSettings.AchievementServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->AchievementServerUrl, TEXT("achievement"));
 	FRegistry::ServerSettings.MatchmakingServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->MatchmakingServerUrl, TEXT("matchmaking"));
+	FRegistry::ServerSettings.LobbyServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->LobbyServerUrl, TEXT("lobby"));
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 
 #endif
