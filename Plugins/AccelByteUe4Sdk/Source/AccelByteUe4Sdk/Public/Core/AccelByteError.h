@@ -309,7 +309,12 @@ namespace AccelByte
 		//
 		//GameServer-side Error Code List
 		//
-		DsRegistrationConflict = 9014143
+		DsRegistrationConflict = 9014143,
+		//
+		//PartyStorage Error Code List
+		// 
+		PartyStorageOutdatedUpdateData = 11903,
+		PartyNotFound = 11901,
 	};
 
 

@@ -5,6 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
+#include "Dom/JsonValue.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
 // Emulate namespace with long class names
@@ -619,4 +622,54 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkFriendsRequest
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BulkFriendsRequest")
 		TArray<FString> FriendIds;
+};
+// ------------------------------------------------------------------------------------------------
+// Party Storage
+// ------------------------------------------------------------------------------------------------
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyDataNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString PartyId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString LeaderId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TArray<FString> Members;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TArray<FString> Invitees;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FJsonObjectWrapper Custom_attribute;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString UpdatedAt;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyDataUpdateRequest
+{
+	GENERATED_BODY()
+		int64 UpdatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FJsonObjectWrapper Custom_attribute;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyDataUpdateStringRequest
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString UpdatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FJsonObjectWrapper Custom_attribute;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsActivePartiesData
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		TArray<FAccelByteModelsPartyDataNotif> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FAccelByteModelsPaging Paging;
 };

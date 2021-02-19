@@ -6,6 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
+#include "Models/AccelByteGeneralModels.h"
+#include "Models/AccelByteLobbyModels.h"
 
 namespace AccelByte
 {
@@ -32,7 +34,27 @@ namespace GameServerApi
 		*/
 		void GetPartyDataByUserId(const FString& UserId, const THandler<FAccelByteModelsDataPartyResponse> OnSuccess, const FErrorHandler& OnError);
 
+		void WritePartyStorage(const FString& PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, uint32 RetryAttempt = 1);
+
+		void GetPartyStorage(const FString& PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError);
+
+		void GetActiveParties(const int32& Limit, const int32& Offset, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError);
+
 	private:
+
+		struct PartyStorageWrapper
+		{
+			FString PartyId;
+			int RemainingAttempt;
+			THandler<FAccelByteModelsPartyDataNotif> OnSuccess;
+			FErrorHandler OnError;
+			TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier;
+		};
+
+		void RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted = NULL);
+
+		void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
+
 		const ServerCredentials& Credentials;
 		const ServerSettings& Settings;
 
