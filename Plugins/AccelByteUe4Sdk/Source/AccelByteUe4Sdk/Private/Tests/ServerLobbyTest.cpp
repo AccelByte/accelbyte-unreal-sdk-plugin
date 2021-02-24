@@ -298,7 +298,7 @@ bool ComparePartyData(const FJsonObjectWrapper& PartyData)
 	if (!(ComparedData->GetNumberField("multiplier") == ExpectedData->GetNumberField("multiplier"))) { return false; }
 	if (!ComparedData->GetStringField("symbol1").Equals(ExpectedData->GetStringField("symbol1"), ESearchCase::CaseSensitive)) { return false; }
 
-	if (!ComparedData->GetArrayField("bosses").Num() == ExpectedData->GetArrayField("bosses").Num()) { return false; }
+	if (!(ComparedData->GetArrayField("bosses").Num() == ExpectedData->GetArrayField("bosses").Num())) { return false; }
 
 	TArray<TSharedPtr<FJsonValue>> ExpectedBosses = ExpectedData->GetArrayField("bosses");
 	TArray<TSharedPtr<FJsonValue>> ComparedBosses = ComparedData->GetArrayField("bosses");
