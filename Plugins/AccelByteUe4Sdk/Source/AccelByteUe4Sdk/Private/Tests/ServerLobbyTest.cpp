@@ -33,6 +33,7 @@ FJsonObjectWrapper SPartyStorageData;
 bool bSUsersConnected, bSUsersConnectionSuccess, bSUsersConnectionError;
 bool bSCreatePartySuccess, bSCreatePartyError, bSInvitePartySuccess, bSGetInvitedNotifSuccess, bSGetInvitedNotifError, bSGetInfoPartySuccess, bSGetInfoPartyError;
 bool bSJoinPartySuccess, bSJoinPartyError, bSLeavePartySuccess, bSLeavePartyError, bSKickPartyMemberSuccess, bSKickPartyMemberError, bSKickedFromPartySuccess;
+bool bSCleanupLeaveParty;
 
 FAccelByteModelsInfoPartyResponse SinfoPartyResponse;
 FAccelByteModelsPartyGetInvitedNotice SinvitedToPartyResponse;
@@ -195,6 +196,12 @@ const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([
 	{
 		bSKickedFromPartySuccess = true;
 	}
+});
+
+const auto SCleanupLeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAccelByteModelsLeavePartyResponse result)
+{
+	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Cleanup Leave Party Success!"));
+	bSCleanupLeaveParty = true;
 });
 
 void CleanPartyBeforeTest(const FSimpleDelegate& OnSuccess)
@@ -392,6 +399,19 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 	}), ServerLobbyErrorHandler);
 	FlushHttpRequests();
 	Waiting(bLoginServerSuccess, "Waiting for Client Login...");
+
+	SLobbyConnect(4);
+
+	for (int i = 0; i < SLobbies.Num(); i++)
+	{
+		bSCleanupLeaveParty = false;
+		SLobbies[i]->SetLeavePartyResponseDelegate(SCleanupLeavePartyDelegate);
+		SLobbies[i]->SendLeavePartyRequest();
+		Waiting(bSCleanupLeaveParty, "Leaving Party...");
+	}
+
+	SLobbyDisconnect(4);
+	ResetResponses();
 
 	// setup custom party storage data
 	SPartyStorageData.JsonObject = MakeShared<FJsonObject>();
