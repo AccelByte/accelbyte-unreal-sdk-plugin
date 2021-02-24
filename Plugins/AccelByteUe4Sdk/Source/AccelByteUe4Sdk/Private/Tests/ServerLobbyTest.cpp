@@ -1461,10 +1461,10 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 	check(PartiesData1.Data.Num() == 2);
 	check(PartiesData2.Data.Num() == 2);
 	TSet<FString> HashSet;
-	const bool bHasRepetitivePartyId = false;
+	bool bHasRepetitivePartyId = false;
 	for (auto& PartyData : PartiesData1.Data)
 	{
-		HashSet.Add(PartyData.PartyId, bHasRepetitivePartyId);
+		HashSet.Add(PartyData.PartyId, &bHasRepetitivePartyId);
 	}
 	check(!bHasRepetitivePartyId);
 
@@ -1584,10 +1584,10 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 	check(PartiesData4.Data[0].PartyId == FirstPartyId);
 
 	TSet<FString> HashSet;
-	const bool bHasRepetitivePartyId = false;
+	bool bHasRepetitivePartyId = false;
 	for (auto& PartyData : PartiesData1.Data)
 	{
-		HashSet.Add(PartyData.PartyId, bHasRepetitivePartyId);
+		HashSet.Add(PartyData.PartyId, &bHasRepetitivePartyId);
 	}
 	check(!bHasRepetitivePartyId);
 
