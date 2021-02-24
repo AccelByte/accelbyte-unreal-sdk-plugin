@@ -114,6 +114,11 @@ public:
      */
     DECLARE_DELEGATE_OneParam(FPartyKickNotif, const FAccelByteModelsGotKickedFromPartyNotice&);   // Passive
 
+	/**
+	 * @brief delegate for handling member kicked from party event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
+
 
     // Chat
     /**
@@ -582,6 +587,11 @@ public:
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
 	};
 
+	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
+	{
+		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
+	}
+
 	// Chat
 	/**
 	* @brief set private message delegate
@@ -818,7 +828,7 @@ public:
 		GetFriendshipStatusResponse = OnGetFriendshipStatusResponse;
 	};
 
-	/*
+	/**
 	* @brief Bulk add friend(s), don't need any confirmation from the player.
 	*
 	* @param UserIds the list of UserId you want to make friend with.
@@ -826,6 +836,28 @@ public:
 	* @param OnError This will be called when the operation failed. 
 	*/
 	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError);
+
+	/**
+	* @brief  Get party storage (attributes) by party ID.
+	*
+	* @param PartyId Targeted party Id.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsPartyDataNotif model.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetPartyStorage(const FString& PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief  Write party storage (attributes) data to the targeted party ID.
+	* Beware:
+	* Object will not be write immediately, please take care of the original object until it written.
+	*
+	* @param PartyId Targeted party Id.
+	* @param PayloadModifier Function to modify the latest party data with your customized modifier.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsPartyDataNotif model.
+	* @param OnError This will be called when the operation failed.
+	* @param RetryAttempt the number of retry to do when there is an error in writing to party storage (likely due to write conflicts).
+	*/
+	void WritePartyStorage(const FString& PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, uint32 RetryAttempt = 1);
 
 	static FString LobbyMessageToJson(FString Message);
 
@@ -877,6 +909,7 @@ private:
     FPartyJoinNotif PartyJoinNotif;
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
+	FPartyDataUpdateNotif PartyDataUpdateNotif;
 
     // Chat
     FPersonalChatResponse PersonalChatResponse;
@@ -918,6 +951,19 @@ private:
 	// Friends + Notification
 	FAcceptFriendsNotif AcceptFriendsNotif;
 	FRequestFriendsNotif RequestFriendsNotif;
+
+	struct PartyStorageWrapper
+	{
+		FString PartyId;
+		int RemainingAttempt;
+		THandler<FAccelByteModelsPartyDataNotif> OnSuccess;
+		FErrorHandler OnError;
+		TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier;
+	};
+
+	void RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted = NULL);
+
+	void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
 };
 
 } // Namespace Api

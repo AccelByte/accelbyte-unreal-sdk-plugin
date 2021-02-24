@@ -76,16 +76,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request,
-			CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](FJsonObject result)
-			{
-				FAccelByteModelsPartyDataNotif PartyData;
-				PartyData.UpdatedAt = result.GetStringField("updatedAt");
-				TSharedRef<FJsonObject> JsonObjectRef = MakeShared<FJsonObject>(result);
-				FJsonObjectConverter::JsonObjectToUStruct(JsonObjectRef, &PartyData, 0, 0);
-				OnSuccess.Execute(PartyData);
-			}), OnError),
-			FPlatformTime::Seconds());
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::GetActiveParties(const int32& Limit, const int32& Offset, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError)
@@ -109,6 +100,95 @@ namespace GameServerApi
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
+		FString Query = TEXT("");
+
+		if (Limit >= 0)
+		{
+			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		}
+		if (Offset >= 0)
+		{
+			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		}
+		Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerLobby::GetActiveParties(const FAccelByteModelsPaging& Paging, const EAccelBytePaginationType& PaginationType, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler & OnError)
+	{
+
+		FString PagingUrl;
+		switch (PaginationType)
+		{
+			case EAccelBytePaginationType::FIRST:
+				PagingUrl = Paging.First;
+				break;
+			case EAccelBytePaginationType::NEXT:
+				PagingUrl = Paging.Next;
+				break;
+			case EAccelBytePaginationType::PREVIOUS:
+				PagingUrl = Paging.Previous;
+				break;
+		}
+
+		int QuestionMarkIndex = PagingUrl.Find("?");
+		if (PagingUrl.IsEmpty() || QuestionMarkIndex == -1)
+		{
+			OnError.ExecuteIfBound(404, TEXT("Provided pagination type is empty."));
+			return;
+		}
+
+		PagingUrl = PagingUrl.RightChop((QuestionMarkIndex + 1));
+
+		int Limit = 0;
+		int Offset = 0;
+
+		TArray<FString> Param;
+		PagingUrl.ParseIntoArray(Param, TEXT("&"), true);
+		for (auto& String : Param)
+		{
+			int LimitIndex = String.Find("limit=");
+			int OffsetIndex = String.Find("offset=");
+			if (LimitIndex > -1)
+			{
+				FString LimitStr = String.RightChop(LimitIndex + 6);
+				Limit = FCString::Atoi(*LimitStr);
+			}
+			else if (OffsetIndex > -1)
+			{
+				FString OffsetStr = String.RightChop(OffsetIndex + 7);
+				Offset = FCString::Atoi(*OffsetStr);
+			}
+		}
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace());
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Query = TEXT("");
+
+		if (Limit >= 0)
+		{
+			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		}
+		if (Offset >= 0)
+		{
+			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		}
+		Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"), *Query));
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
