@@ -114,6 +114,12 @@ void LobbyDisconnect(int userCount)
 	{
 		Lobbies[i]->UnbindEvent();
 		Lobbies[i]->Disconnect();
+		while (Lobbies[i]->IsConnected())
+		{
+			FPlatformProcess::Sleep(.5f);
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("disconecting lobby %d"), i);
+			FTicker::GetCoreTicker().Tick(.5f);
+		}
 	}
 }
 
