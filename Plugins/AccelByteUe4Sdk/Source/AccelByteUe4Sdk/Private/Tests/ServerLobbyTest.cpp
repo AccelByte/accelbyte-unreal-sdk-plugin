@@ -80,6 +80,12 @@ void SLobbyDisconnect(int userCount)
 	{
 		SLobbies[i]->UnbindEvent();
 		SLobbies[i]->Disconnect();
+		while (SLobbies[i]->IsConnected())
+		{
+			FPlatformProcess::Sleep(.5f);
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("disconecting lobby %d"), i);
+			FTicker::GetCoreTicker().Tick(.5f);
+		}
 	}
 }
 
@@ -908,18 +914,16 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 	Waiting(bSGetInvitedNotifSuccess, "Waiting party invitation");
 
 	TArray< FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
-	TArray<bool> PartyDataNotifDone;
-	PartyDataNotifDone.SetNum(2);
+	//TArray<bool> PartyDataNotifDone;
 
 	for (int i = 0; i < PartySize; i++)
 	{
 		int index = i;
-		PartyDataNotifDone[i] = false;
-		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &PartyDataNotifDone, &index](FAccelByteModelsPartyDataNotif result)
+		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
 			PartyDataNotifResults.Add(result);
-			PartyDataNotifDone[index] = true;
+			//PartyDataNotifDone.Add(true);
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 	}
@@ -983,7 +987,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		check(ServerPartyData.Members.Num() == PartySize);
 	}
 
-	WaitUntil([&PartyDataNotifDone]() { return !PartyDataNotifDone.Contains(false); }, 2.0);
+	WaitUntil([&PartyDataNotifResults]() { return (PartyDataNotifResults.Num() == 2); }, 2.0);
 
 	for (auto& PartyDataNotif : PartyDataNotifResults)
 	{

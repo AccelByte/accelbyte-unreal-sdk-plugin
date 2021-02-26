@@ -516,15 +516,8 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString url;
-	url = FRegistry::Settings.IamServerUrl;
-	if (url.Contains("/iam"))
-	{
-		url.RemoveFromEnd("/iam");
-	}
-
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *url, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -546,15 +539,8 @@ void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteMo
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString url;
-	url = FRegistry::Settings.IamServerUrl;
-	if (url.Contains("/iam"))
-	{
-		url.RemoveFromEnd("/iam");
-	}
-
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *url, *Credentials.GetUserNamespace(), *PartyId);
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -982,15 +968,8 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteMod
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString url;
-	url = FRegistry::Settings.IamServerUrl;
-	if (url.Contains("/iam"))
-	{
-		url.RemoveFromEnd("/iam");
-	}
-
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *url, *Credentials.GetUserNamespace(), *PartyId);
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
