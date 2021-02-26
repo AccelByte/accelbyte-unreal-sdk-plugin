@@ -1173,18 +1173,14 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	Waiting(bSJoinPartySuccess, "Waiting join party");
 
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
-	TArray<bool> PartyDataNotifDone;
-	PartyDataNotifDone.SetNum(PartySize);
 
 	for (int i = 0; i < PartySize; i++)
 	{
 		int index = i;
-		PartyDataNotifDone[i] = false;
-		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &PartyDataNotifDone, &index](FAccelByteModelsPartyDataNotif result)
+		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
 			PartyDataNotifResults.Add(result);
-			PartyDataNotifDone[index] = true;
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 	}
