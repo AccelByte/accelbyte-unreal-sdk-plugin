@@ -685,7 +685,7 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString&
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
-	FString Content         = FString::Printf(TEXT("ticket=%s"), *Ticket);
+	FString Content         = FString::Printf(TEXT("ticket=%s"), *FGenericPlatformHttp::UrlEncode(*Ticket));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
