@@ -914,7 +914,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 	Waiting(bSGetInvitedNotifSuccess, "Waiting party invitation");
 
 	TArray< FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
-	//TArray<bool> PartyDataNotifDone;
 
 	for (int i = 0; i < PartySize; i++)
 	{
@@ -923,7 +922,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
 			PartyDataNotifResults.Add(result);
-			//PartyDataNotifDone.Add(true);
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 	}
@@ -1053,18 +1051,14 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 	Waiting(bSJoinPartySuccess, "Waiting join party");
 
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
-	TArray<bool> PartyDataNotifDone;
-	PartyDataNotifDone.SetNum(PartySize);
 
 	for (int i = 0; i < PartySize; i++)
 	{
 		int index = i;
-		PartyDataNotifDone[i] = false;
-		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &PartyDataNotifDone, &index](FAccelByteModelsPartyDataNotif result)
+		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
 			PartyDataNotifResults.Add(result);
-			PartyDataNotifDone[index] = true;
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 	}
