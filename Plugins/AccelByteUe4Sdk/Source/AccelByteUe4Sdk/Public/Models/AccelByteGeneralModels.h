@@ -7,6 +7,14 @@
 #include "CoreMinimal.h"
 #include "AccelByteGeneralModels.generated.h"
 
+UENUM(BlueprintType)
+enum class EAccelBytePaginationType : uint8
+{
+	FIRST = 0,
+	NEXT,
+	PREVIOUS
+};
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {

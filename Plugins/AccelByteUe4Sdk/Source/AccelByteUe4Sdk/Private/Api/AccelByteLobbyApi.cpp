@@ -73,6 +73,7 @@ namespace Api
 		const FString PartyJoinNotif = TEXT("partyJoinNotif");
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
+		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatResponse");
@@ -515,15 +516,8 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString url;
-	url = FRegistry::Settings.IamServerUrl;
-	if (url.Contains("/iam"))
-	{
-		url.RemoveFromEnd("/iam");
-	}
-
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *url, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -538,6 +532,38 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError, uint32 RetryAttempt)
+{
+	TSharedPtr<PartyStorageWrapper> Wrapper = MakeShared<PartyStorageWrapper>();
+	Wrapper->PartyId = PartyId;
+	Wrapper->OnSuccess = OnSuccess;
+	Wrapper->OnError = OnError;
+	Wrapper->RemainingAttempt = RetryAttempt;
+	Wrapper->PayloadModifier = PayloadModifier;
+	WritePartyStorageRecursive(Wrapper);
 }
 
 void Lobby::UnbindEvent()
@@ -561,6 +587,7 @@ void Lobby::UnbindEvent()
 	AcceptFriendsNotif.Unbind();
 	RequestFriendsNotif.Unbind();
 	ChannelChatNotif.Unbind();
+	PartyDataUpdateNotif.Unbind();
 }
 
 void Lobby::OnConnected()
@@ -865,6 +892,7 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoin, FAccelByteModelsPartyJoinReponse, PartyJoinResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, PartyDataUpdateNotif);
 
 	// Chat
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);
@@ -933,6 +961,75 @@ return; \
 #ifdef DEBUG_LOBBY_MESSAGE
 	ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Warning: Unhandled message %s, Raw: %s"), *lobbyResponseType, *ParsedJson));
 #endif
+}
+
+void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FString Contents = "{\n";
+	FString CustomAttribute;
+	FJsonObjectConverter::UStructToJsonObjectString(Data.Custom_attribute, CustomAttribute);
+	FString UpdatedAt = FString::Printf(TEXT("\"updatedAt\": %lld"), Data.UpdatedAt);
+	FString CustomString = FString::Printf(TEXT("\"custom_attribute\": %s"), *CustomAttribute);
+	Contents += UpdatedAt;
+	Contents += ",\n";
+	Contents += CustomString;
+	Contents += "}";
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Contents);
+
+	FErrorHandler ErrorHandler = AccelByte::FErrorHandler::CreateLambda([OnConflicted](int32 Code, FString Message)
+	{
+		if (Code == (int32)ErrorCodes::StatusPreconditionFailed || Code == (int32)ErrorCodes::PartyStorageOutdatedUpdateData)
+		{
+			OnConflicted.ExecuteIfBound();
+		}
+	});
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
+}
+
+void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
+{
+	if (DataWrapper->RemainingAttempt <= 0)
+	{
+		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
+	}
+
+	GetPartyStorage(DataWrapper->PartyId,
+		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([this, DataWrapper](FAccelByteModelsPartyDataNotif Result)
+		{
+			Result.Custom_attribute = DataWrapper->PayloadModifier(Result.Custom_attribute);
+
+			FAccelByteModelsPartyDataUpdateRequest PartyStorageBodyRequest;
+
+			PartyStorageBodyRequest.UpdatedAt = FCString::Atoi64(*Result.UpdatedAt);
+			PartyStorageBodyRequest.Custom_attribute = Result.Custom_attribute;
+
+			RequestWritePartyStorage(DataWrapper->PartyId, PartyStorageBodyRequest, DataWrapper->OnSuccess, DataWrapper->OnError, FSimpleDelegate::CreateLambda([this, DataWrapper]() {
+				DataWrapper->RemainingAttempt--;
+				WritePartyStorageRecursive(DataWrapper);
+			}));
+		}),
+		FErrorHandler::CreateLambda([DataWrapper](int32 ErrorCode, FString ErrorMessage)
+		{
+			DataWrapper->OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		})
+		);
 }
 
 Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, float PingDelay, float InitialBackoffDelay, float MaxBackoffDelay, float TotalTimeout, TSharedPtr<IWebSocket> WebSocket)

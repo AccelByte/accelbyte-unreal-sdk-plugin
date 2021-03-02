@@ -14,6 +14,7 @@
 
 #include "Core/AccelByteReport.h"
 #include "Models/AccelByteUserModels.h"
+#include "Models/AccelByteLobbyModels.h"
 #include "AccelByteError.generated.h"
 
 DECLARE_DYNAMIC_DELEGATE(FDHandler);
@@ -309,7 +310,12 @@ namespace AccelByte
 		//
 		//GameServer-side Error Code List
 		//
-		DsRegistrationConflict = 9014143
+		DsRegistrationConflict = 9014143,
+		//
+		//PartyStorage Error Code List
+		// 
+		PartyStorageOutdatedUpdateData = 11903,
+		PartyNotFound = 11901,
 	};
 
 
@@ -438,6 +444,35 @@ namespace AccelByte
 	inline void HandleHttpResultOk<FString>(FHttpResponsePtr Response, const THandler<FString>& OnSuccess)
 	{
 		OnSuccess.ExecuteIfBound(Response->GetContentAsString());
+	}
+
+	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess)
+	{
+		// custom http result for LobbyServer.GetPartyStorage
+		FString jsonString = Response->GetContentAsString();
+		int index = jsonString.Find("\"updatedAt\"");
+		int startIndex = 0, endIndex = 0;
+
+		bool foundFirst = false;
+		bool foundLast = false;
+		for (int32 i = index; i < jsonString.Len(); i++)
+		{
+			if (FChar::IsDigit(jsonString[i]) && !foundFirst)
+			{
+				startIndex = i;
+				foundFirst = true;
+			}
+			else if (!FChar::IsDigit(jsonString[i]) && foundFirst && !foundLast)
+			{
+				endIndex = (i + 1);
+				foundLast = true;
+			}
+		}
+		jsonString.InsertAt(startIndex, "\"");
+		jsonString.InsertAt(endIndex, "\"");
+		FAccelByteModelsPartyDataNotif PartyData;
+		FJsonObjectConverter::JsonObjectStringToUStruct(jsonString, &PartyData, 0, 0);
+		OnSuccess.ExecuteIfBound(PartyData);
 	}
 
 	inline void HandleHttpResultOk(FHttpResponsePtr Response, const THandler<FJsonObject>& OnSuccess)
