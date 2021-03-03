@@ -1417,7 +1417,9 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bLinkSteamAcc = true;
 	}), FCustomErrorHandler::CreateLambda([&bLinkSteamAcc](int32 Code, const FString& Message, const FJsonObject& MessageVariables)
 	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("Link Account Failed..! Error: %d | Message: %s | PlatformUserId: %s"), Code, *Message, *MessageVariables.GetStringField("platformUserId"));
+		FString MsgVar;
+		MessageVariables.TryGetStringField("publisherAccounts", MsgVar);
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Link Account Failed..! Error: %d | Message: %s | PlatformUserId: %s"), Code, *Message, *MsgVar);
 		bLinkSteamAcc = true;
 	}));
 
