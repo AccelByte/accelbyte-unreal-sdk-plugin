@@ -17,8 +17,7 @@
 		{
 			"Name": "AccelByteUe4Sdk",
 			"Type": "Runtime",
-			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": [ "Win32", "Win64", "Linux" ]
+			"LoadingPhase": "PreDefault"
 		}
 	],
 	"Plugins": [
