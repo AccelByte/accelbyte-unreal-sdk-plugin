@@ -377,11 +377,16 @@ namespace AccelByte
 		{
 			OutMessage += " " + Error.ErrorMessage;
 		}
-
-		TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
-		TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-		FJsonSerializer::Deserialize(Reader, JsonObject);
-		OutMessageVariables = *JsonObject.Get()->TryGetField("messageVariables")->AsObject();
+		if (Response.IsValid())
+		{
+			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
+			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+			FJsonSerializer::Deserialize(Reader, JsonObject);
+			if (JsonObject.Get()->HasField("messageVariables"))
+			{
+				OutMessageVariables = *JsonObject.Get()->TryGetField("messageVariables")->AsObject();
+			}
+		}
 
 		// Debug message. Delete this code section for production
 #if UE_BUILD_DEBUG

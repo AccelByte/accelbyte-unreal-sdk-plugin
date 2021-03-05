@@ -372,6 +372,22 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		BMatchId = Result.MatchId;
 	}));
 
+	bool leavePartyDoneA = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneA = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDoneA, "wait leaving party A");
+
+	bool leavePartyDoneB = false;
+	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneB = true;
+	}));
+	lobbyB->SendLeavePartyRequest();
+	Waiting(leavePartyDoneB, "wait leaving party B");
+
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
 	Waiting(isDSRegistered, "Waiting DS Register...");
@@ -484,6 +500,14 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
 		lobbyA->SendReadyConsentRequest(Result.MatchId);
 	}));
+
+	bool leavePartyDoneA = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneA = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDoneA, "wait leaving party A");
 
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
@@ -670,6 +694,22 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
 		lobbyA->SendReadyConsentRequest(Result.MatchId);
 	}));
+
+	bool leavePartyDoneA = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneA = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDoneA, "wait leaving party A");
+
+	bool leavePartyDoneB = false;
+	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneB = true;
+	}));
+	lobbyB->SendLeavePartyRequest();
+	Waiting(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
@@ -899,6 +939,22 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		BMatchId = Result.MatchId;
 	}));
 
+	bool leavePartyDoneA = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneA](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneA = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDoneA, "wait leaving party A");
+
+	bool leavePartyDoneB = false;
+	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDoneB = true;
+	}));
+	lobbyB->SendLeavePartyRequest();
+	Waiting(leavePartyDoneB, "wait leaving party B");
+
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
 	Waiting(isDSRegistered, "Waiting DS Register...");
@@ -1013,6 +1069,14 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("A Received Matchmaking Completed, MatchID %s"), *Result.MatchId);
 		lobbyA->SendReadyConsentRequest(Result.MatchId);
 	}));
+
+	bool leavePartyDone = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDone](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDone = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDone, "wait leaving party");
 
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
@@ -1206,6 +1270,15 @@ bool JoinableSessionTestActivateSessionPolling::RunTest(const FString& Parameter
 		lobbyA->SendReadyConsentRequest(Result.MatchId);
 	}));
 
+	bool leavePartyDone = false;
+	lobbyA->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDone](const FAccelByteModelsLeavePartyResponse& result)
+	{
+		leavePartyDone = true;
+	}));
+	lobbyA->SendLeavePartyRequest();
+	Waiting(leavePartyDone, "wait leaving party");
+
+
 	// register local DS & set heartbeat
 	isDSRegistered = RegisterDS();
 	Waiting(isDSRegistered, "Waiting DS Register...");
@@ -1303,10 +1376,10 @@ bool JoinableSessionTestActivateSessionPolling::RunTest(const FString& Parameter
 	WaitUntil([]()
 	{
 		return false;
-	}, 3);
+	}, 5);
 
 	FRegistry::ServerMatchmaking.DeactivateStatusPolling();
-	check(QueryCount >= 6);
+	check(QueryCount >= 5);
 	check(MatchStatusResponse.Status == EAccelByteMatchmakingSessionStatus::Done);
 
 	return TestCleanUp();
