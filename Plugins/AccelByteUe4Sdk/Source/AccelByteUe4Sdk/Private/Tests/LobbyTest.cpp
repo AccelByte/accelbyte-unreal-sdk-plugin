@@ -4358,3 +4358,82 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSignalingP2P, "AccelByte.Tests.Lobby.D.LobbyTestSignalingP2P", AutomationFlagMaskLobby);
+bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
+{
+	bool userResponded[2], userConnected[2];
+	const FString Message("MESSAGESIGNALINGTEST");
+	bool P2PMessageAvailable = false;	
+	FString P2PMessage;
+	FString P2PDestinationId;
+	auto OnP2PDelegate = AccelByte::Api::Lobby::FSignalingP2P::CreateLambda([&P2PMessageAvailable, &P2PMessage, &P2PDestinationId](const FString &UserId, const FString &Message)
+	{
+		P2PMessageAvailable = true;
+		P2PDestinationId = UserId;
+		P2PMessage = Message;
+	});
+
+	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	Lobbies[1]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	Lobbies[0]->SetConnectFailedDelegate(ConnectFailedDelegate);
+	Lobbies[1]->SetConnectFailedDelegate(ConnectFailedDelegate);
+
+	Lobbies[0]->Connect();
+
+	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestSignalingP2P: Wait user 0"));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+	userResponded[0] = bUsersConnectionSuccess;
+	userConnected[0] = bUsersConnected;
+	bUsersConnectionSuccess = false;
+	bUsersConnected = false;
+
+	Lobbies[1]->Connect();
+
+	while (!Lobbies[1]->IsConnected() || !bUsersConnectionSuccess)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestSignalingP2P: Wait user 1"));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+	userResponded[1] = bUsersConnectionSuccess;
+	userConnected[1] = bUsersConnected;
+
+	for (int i = 0; i < 2; i++)
+	{
+		check(userConnected[i]);
+		check(userResponded[i]);
+	}
+
+	Lobbies[0]->SetSignalingP2PDelegate(OnP2PDelegate);
+	Lobbies[1]->SetSignalingP2PDelegate(OnP2PDelegate);
+	
+	Lobbies[0]->SendSignalingMessage(UserCreds[1].GetUserId(), Message);
+	WaitUntil([&P2PMessageAvailable]() ->bool
+	{
+		return P2PMessageAvailable;
+	});
+
+	check(P2PMessageAvailable);
+	check(P2PMessage == Message);
+	check(P2PDestinationId == UserCreds[0].GetUserId());
+
+	P2PMessageAvailable = false;
+	Lobbies[1]->SendSignalingMessage(UserCreds[0].GetUserId(), Message);
+	WaitUntil([&P2PMessageAvailable]() ->bool
+	{
+		return P2PMessageAvailable;
+	});
+
+	check(P2PMessageAvailable);
+	check(P2PMessage == Message);
+	check(P2PDestinationId == UserCreds[1].GetUserId());
+	
+	LobbyDisconnect(2);
+	resetResponses();
+	return true;
+}

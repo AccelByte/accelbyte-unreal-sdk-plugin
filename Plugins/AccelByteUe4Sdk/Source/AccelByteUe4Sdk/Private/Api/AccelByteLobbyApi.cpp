@@ -52,6 +52,9 @@ namespace Api
 		const FString RejectFriends = TEXT("rejectFriendsRequest");
 		const FString LoadFriendList = TEXT("listOfFriendsRequest");
 		const FString GetFriendshipStatus = TEXT("getFriendshipStatusRequest");
+
+		//Signaling
+		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
 	}
 
 	namespace LobbyResponse
@@ -115,6 +118,9 @@ namespace Api
 		// Friends + Notification
 		const FString AcceptFriendsNotif = TEXT("acceptFriendsNotif");
 		const FString RequestFriendsNotif = TEXT("requestFriendsNotif");
+
+		//Signaling
+		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
 	}
 
 	namespace Prefix
@@ -124,6 +130,7 @@ namespace Api
 		const FString Presence = TEXT("presence");
 		const FString Matchmaking = TEXT("matchmaking");
 		const FString Friends = TEXT("friends");
+		const FString Signaling = TEXT("signaling");
 	}
 
 void Lobby::Connect()
@@ -566,6 +573,18 @@ void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrap
 	WritePartyStorageRecursive(Wrapper);
 }
 
+//-------------------------------------------------------------------------------------------------
+// Signaling
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SendSignalingMessage(const FString& UserId, const FString& Message) 
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+	
+	return SendRawRequest(LobbyRequest::SignalingP2PNotif, Prefix::Signaling,
+		FString::Printf(TEXT("destinationId: %s\nmessage: %s\n"), *UserId, *Message));
+}
+
 void Lobby::UnbindEvent()
 {
 	Report report;
@@ -956,6 +975,13 @@ return; \
 	// Friends + Notification
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif, AcceptFriendsNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, RequestFriendsNotif);
+
+	// Signaling
+	if (lobbyResponseType.Equals(LobbyResponse::SignalingP2PNotif))
+	{
+		SignalingP2P.ExecuteIfBound(JsonParsed->GetStringField(TEXT("destinationId")), JsonParsed->GetStringField(TEXT("message")));
+		return;
+	}
 
 #undef HANDLE_LOBBY_MESSAGE
 #ifdef DEBUG_LOBBY_MESSAGE

@@ -267,6 +267,12 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FRequestFriendsNotif, const FAccelByteModelsRequestFriendsNotif&);
 
+	//Signaling
+	/**
+	 * @brief delegate for handling signaling P2P message
+	 */
+	DECLARE_DELEGATE_TwoParams(FSignalingP2P, const FString&, const FString&);
+
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	
@@ -459,6 +465,14 @@ public:
 	* @param UserId Targeted user ID.
 	*/
 	void GetFriendshipStatus(FString UserId);
+
+	/**
+	 * @brief Send a signaling message to another user.
+	 *
+	 * @param UserId The recipient's user ID.
+	 * @param Message Signaling message to be sent.
+	 */
+	FString SendSignalingMessage(const FString& UserId, const FString& Message);
 
 	/**
 	* @brief Unbind all delegates set previously.
@@ -829,6 +843,16 @@ public:
 	};
 
 	/**
+	* @brief Set SignalingP2P delegate.
+	*
+	* @param OnSignalingP2P Delegate that will be set.
+	*/
+	void SetSignalingP2PDelegate(FSignalingP2P OnSignalingP2P)
+	{
+		SignalingP2P = OnSignalingP2P;
+	};
+
+	/**
 	* @brief Bulk add friend(s), don't need any confirmation from the player.
 	*
 	* @param UserIds the list of UserId you want to make friend with.
@@ -964,6 +988,9 @@ private:
 	void RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted = NULL);
 
 	void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
+
+	//Signaling P2P
+	FSignalingP2P SignalingP2P;
 };
 
 } // Namespace Api
