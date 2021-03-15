@@ -22,6 +22,7 @@
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
+#include "Api/AccelByteSessionBrowserApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -58,6 +59,7 @@ Api::Leaderboard FRegistry::Leaderboard(FRegistry::Credentials, FRegistry::Setti
 Api::GameTelemetry FRegistry::GameTelemetry(FRegistry::Credentials, FRegistry::Settings);
 Api::Agreement FRegistry::Agreement(FRegistry::Credentials, FRegistry::Settings);
 Api::Achievement FRegistry::Achievement(FRegistry::Credentials, FRegistry::Settings);
+Api::SessionBrowser FRegistry::SessionBrowser(FRegistry::Credentials, FRegistry::Settings);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);

@@ -91,6 +91,11 @@ FString UAccelByteBlueprintsSettings::GetAchievementServerUrl()
 	return FRegistry::Settings.AchievementServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetSessionBrowserServerUrl()
+{
+	return FRegistry::Settings.SessionBrowserServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -174,6 +179,11 @@ void UAccelByteBlueprintsSettings::SetGameTelemetryServerUrl(const FString& Game
 void UAccelByteBlueprintsSettings::SetAchievementServerUrl(const FString& AchievementServerUrl)
 {
 	FRegistry::Settings.AchievementServerUrl = AchievementServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl)
+{
+	FRegistry::Settings.SessionBrowserServerUrl = SessionBrowserServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)

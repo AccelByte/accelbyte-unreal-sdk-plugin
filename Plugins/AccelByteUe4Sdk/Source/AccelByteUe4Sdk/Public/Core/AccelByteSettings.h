@@ -34,6 +34,7 @@ public:
 	FString GameTelemetryServerUrl;
 	FString AgreementServerUrl;
 	FString AchievementServerUrl;
+	FString SessionBrowserServerUrl;
 	FString AppId;
 };
 
@@ -110,6 +111,9 @@ public:
 	FString AchievementServerUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	FString SessionBrowserServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString AppId;
 };
 
@@ -171,6 +175,9 @@ public:
 	static FString GetAchievementServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetSessionBrowserServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -220,6 +227,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAchievementServerUrl(const FString& CloudSaveServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);

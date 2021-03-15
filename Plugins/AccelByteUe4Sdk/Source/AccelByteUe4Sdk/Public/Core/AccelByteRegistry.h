@@ -36,6 +36,7 @@ namespace Api
 	class GameTelemetry;
 	class Agreement;
 	class Achievement;
+	class SessionBrowser;
 }
 
 namespace GameServerApi
@@ -77,6 +78,7 @@ public:
 	static Api::GameTelemetry GameTelemetry;
 	static Api::Agreement Agreement;
 	static Api::Achievement Achievement;
+	static Api::SessionBrowser SessionBrowser;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
