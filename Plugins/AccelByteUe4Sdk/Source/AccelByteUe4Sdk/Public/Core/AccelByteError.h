@@ -493,7 +493,7 @@ namespace AccelByte
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError]
-		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
+		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
 			Report report;
 			report.GetHttpResponse(Request, Response);
@@ -501,6 +501,12 @@ namespace AccelByte
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				HandleHttpResultOk(Response, OnSuccess);
+				return;
+			}
+
+			if (!bFinished)
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.");
 				return;
 			}
 
@@ -516,7 +522,7 @@ namespace AccelByte
 	{
 		return FHttpRequestCompleteDelegate::CreateLambda(
 			[OnSuccess, OnError]
-		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
+		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
 			Report report;
 			report.GetHttpResponse(Request, Response);
@@ -527,6 +533,13 @@ namespace AccelByte
 				return;
 			}
 
+
+			if (!bFinished)
+			{
+                OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.", FJsonObject{});
+                return;
+            }
+
 			int32 Code;
 			FString Message;
 			FJsonObject MessageVariables;
@@ -534,5 +547,4 @@ namespace AccelByte
 			OnError.ExecuteIfBound(Code, Message, MessageVariables);
 		});
 	}
-
 } // Namespace AccelByte
