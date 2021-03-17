@@ -9,6 +9,12 @@ DEFINE_LOG_CATEGORY(AccelByteReportLog);
 
 namespace AccelByte
 {
+	/*static*/ void Report::SetLogVerbosity(ELogVerbosity::Type Verbosity)
+	{
+#ifndef NO_LOGGING
+		AccelByteReportLog.SetVerbosity(Verbosity);
+#endif // NO_LOGGING
+	}
 
 	void Report::GetHttpRequest(const FHttpRequestPtr & Request)
 	{
