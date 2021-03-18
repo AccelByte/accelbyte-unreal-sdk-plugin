@@ -906,7 +906,7 @@ private:
 	const float InitialBackoffDelay;
 	const float MaxBackoffDelay;
 	const float TotalTimeout;
-	bool bWasWebsocketError = false;
+	bool bWasWsConnectionError = false;
 	float BackoffDelay;
 	float RandomizedBackoffDelay;
 	float TimeSinceLastPing;

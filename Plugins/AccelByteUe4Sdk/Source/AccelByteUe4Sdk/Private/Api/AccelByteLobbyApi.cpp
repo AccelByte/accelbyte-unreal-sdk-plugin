@@ -141,8 +141,9 @@ void Lobby::Connect()
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (!WebSocket.IsValid())
+	if (!WebSocket.IsValid() || bWasWsConnectionError)
 	{
+		bWasWsConnectionError = false;
 		WebSocket = CreateWebSocket();
 	}
 
@@ -619,7 +620,7 @@ void Lobby::OnConnected()
 void Lobby::OnConnectionError(const FString& Error)
 {
 	WsEvents |= EWebSocketEvent::ConnectionError;
-	bWasWebsocketError = true;
+	bWasWsConnectionError = true;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Error connecting: %s"), *Error);
 	ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 }
@@ -735,9 +736,9 @@ bool Lobby::Tick(float DeltaTime)
 				BackoffDelay *= 2;
 			}
 			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
-			if (bWasWebsocketError)
+			if (bWasWsConnectionError)
 			{
-				bWasWebsocketError = false;
+				bWasWsConnectionError = false;
 				// websocket state is error can't be reconnect, need to create a new instance
 				WebSocket = CreateWebSocket();
 			}
