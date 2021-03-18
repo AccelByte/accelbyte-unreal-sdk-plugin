@@ -141,15 +141,20 @@ void Lobby::Connect()
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (!WebSocket.IsValid() || bWasWsConnectionError)
+	if (!WebSocket.IsValid())
 	{
-		bWasWsConnectionError = false;
-		WebSocket = CreateWebSocket();
+		CreateWebSocket();
 	}
 
 	if (WebSocket->IsConnected())
 	{
 		return;
+	}
+
+	if (bWasWsConnectionError)
+	{
+		// websocket state is error can't be reconnect, need to create a new instance
+		CreateWebSocket();
 	}
 
 	if (LobbyTickDelegateHandle.IsValid())
@@ -158,15 +163,6 @@ void Lobby::Connect()
 		LobbyTickDelegateHandle.Reset();
 	}
 
-	WebSocket->OnMessage().Clear();
-	WebSocket->OnConnected().Clear();
-	WebSocket->OnConnectionError().Clear();
-	WebSocket->OnClosed().Clear();
-
-	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
-	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
-	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
-	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	LobbyTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(LobbyTickDelegate, LobbyTickPeriod);
 
 	WebSocket->Connect();
@@ -194,7 +190,7 @@ void Lobby::Disconnect()
 		WebSocket->OnClosed().Clear();
 		WebSocket->Close();
 
-		WebSocket = nullptr;
+		WebSocket.Reset();
 	}
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
@@ -738,9 +734,8 @@ bool Lobby::Tick(float DeltaTime)
 			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
 			if (bWasWsConnectionError)
 			{
-				bWasWsConnectionError = false;
 				// websocket state is error can't be reconnect, need to create a new instance
-				WebSocket = CreateWebSocket();
+				CreateWebSocket();
 			}
 
 			WebSocket->Connect();
@@ -765,12 +760,29 @@ FString Lobby::GenerateMessageID(FString Prefix)
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
 }
 
-TSharedPtr<IWebSocket> Lobby::CreateWebSocket()
+void Lobby::CreateWebSocket()
 {
+	bWasWsConnectionError = false;
+
+	if(WebSocket.IsValid())
+	{
+		WebSocket->OnMessage().Clear();
+		WebSocket->OnConnected().Clear();
+		WebSocket->OnConnectionError().Clear();
+		WebSocket->OnClosed().Clear();
+		WebSocket->Close();
+		WebSocket.Reset();
+	}
+
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	return FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
+
+	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
+	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
+	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
+	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 }
 
 FString Lobby::LobbyMessageToJson(FString Message)

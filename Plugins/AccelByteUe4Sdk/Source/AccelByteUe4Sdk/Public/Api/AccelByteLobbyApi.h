@@ -899,7 +899,7 @@ private:
     FString SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload = TEXT(""));
     bool Tick(float DeltaTime);
     FString GenerateMessageID(FString Prefix = TEXT(""));
-	TSharedPtr<IWebSocket> CreateWebSocket();
+	void CreateWebSocket();
 
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
