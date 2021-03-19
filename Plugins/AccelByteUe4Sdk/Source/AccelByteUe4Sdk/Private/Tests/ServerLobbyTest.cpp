@@ -327,6 +327,7 @@ void OverwritePartyStorage(const FString& PartyId, FJsonObjectWrapper PartyData,
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyTestSetup, "AccelByte.Tests.ServerLobby.A.Setup", AutomationFlagMaskServerLobby);
 bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bClientLoginSuccess = false;
 	bool UsersCreationSuccess[STestUserCount];
 	bool UsersLoginSuccess[STestUserCount];
@@ -440,6 +441,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyTestTeardown, "AccelByte.Tests.ServerLobby.Z.Teardown", AutomationFlagMaskServerLobby);
 bool ServerLobbyTestTeardown::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bDeleteUsersSuccessful[STestUserCount];
 	SLobbies.Reset(0);
 
@@ -465,6 +467,7 @@ bool ServerLobbyTestTeardown::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_WritePartyStorage_ValidParty, "AccelByte.Tests.ServerLobby.B.WritePartyStorageValidParty_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bPartyFormed = false;
 	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
 	Waiting(bPartyFormed, "Waiting for Party Formed");
@@ -500,6 +503,7 @@ bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_WriteEmptyPartyStorage_ValidParty, "AccelByte.Tests.ServerLobby.B.WriteEmptyPartyStorageValidParty_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bPartyFormed = false;
 	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
 	Waiting(bPartyFormed, "Waiting for Party Formed");
@@ -537,6 +541,7 @@ bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_WritePartyStorage_NonExistParty, "AccelByte.Tests.ServerLobby.B.WritePartyStorageInValidParty_Fail", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_WritePartyStorage_NonExistParty::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	FString PartyId = "InvalidParty01234ID";
 	FAccelByteModelsPartyDataNotif WriteNotif;
 	bool bWritePartyStorageSuccess = false;
@@ -563,6 +568,7 @@ bool PartyStorageTest_WritePartyStorage_NonExistParty::RunTest(const FString& Pa
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetPartyStorage_NonExistParty, "AccelByte.Tests.ServerLobby.B.GetPartyStorage_NonExistParty_Fail", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_GetPartyStorage_NonExistParty::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bGetPartyStorageSuccess = false;
 	bool bGetPartyStorageDone = false;
 	FString DummyPartyId = "thisPartyNeverExisted";
@@ -587,6 +593,7 @@ bool PartyStorageTest_GetPartyStorage_NonExistParty::RunTest(const FString& Para
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.GetPartyStorage_ValidPartyStorage_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bPartyFormed = false;
 	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
 	Waiting(bPartyFormed, "Waiting for Party Formed");
@@ -635,6 +642,7 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification, "AccelByte.Tests.ServerLobby.B.OverwritePartyStorage_PartyFormed_SuccessGotNotification", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bPartyFormed = false;
 	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
 	Waiting(bPartyFormed, "Waiting for Party Formed");
@@ -693,6 +701,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_Throttle, "AccelByte.Tests.ServerLobby.B.OverwritePartyStorage_PartyFormed_SuccessGotNotification_Throttle", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_Throttle::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	SLobbyConnect(1);
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);
@@ -757,6 +766,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_T
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif, "AccelByte.Tests.ServerLobby.B.AllPartyState_ShouldGetPartyStorageNotif", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 2;
 	SLobbyConnect(PartySize);
 
@@ -825,6 +835,7 @@ bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FS
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.SomeoneCreateParty_GameClientAndServerGetPartyStorage_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	SLobbyConnect(1);
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);
@@ -885,6 +896,7 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.SomeoneJoinParty_GameClientAndServerGetPartyStorage_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 2;
 	SLobbyConnect(PartySize);
 
@@ -1010,6 +1022,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 3;
 	SLobbyConnect(PartySize);
 
@@ -1123,6 +1136,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.SomeoneKicked_GameClientAndServerGetPartyStorage_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 3;
 	SLobbyConnect(PartySize);
 
@@ -1241,6 +1255,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientWritePartyStorage_Success, "AccelByte.Tests.ServerLobby.B.ClientWritePartyStorage", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	SLobbyConnect(1);
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);
@@ -1288,6 +1303,7 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientWritePartyStorageConcurrent, "AccelByte.Tests.ServerLobby.B.ClientWritePartyStorageConcurrent", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 2;
 	SLobbyConnect(PartySize);
 
@@ -1339,6 +1355,7 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetActivesPartyAfterPartyCreated, "AccelByte.Tests.ServerLobby.B.GetActivesPartyAfterPartyCreated_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bPartyFormed = false;
 	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
 	Waiting(bPartyFormed, "Waiting for Party Formed");
@@ -1400,6 +1417,7 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam, "AccelByte.Tests.ServerLobby.B.GetActivesParty_CheckLimitAndOffsetParam", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 4;
 	SLobbyConnect(PartySize);
 
@@ -1470,6 +1488,7 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetActivesParty_UsingPagination, "AccelByte.Tests.ServerLobby.B.GetActivesParty_UsingPagination", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	int PartySize = 4;
 	SLobbyConnect(PartySize);
 
@@ -1593,6 +1612,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success, "AccelByte.Tests.ServerLobby.B.WriteRacingCondition_6ServersAtOnce_Success", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	SLobbyConnect(1);
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);
@@ -1661,6 +1681,7 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyQueryPartyByUserId, "AccelByte.Tests.ServerLobby.C.QueryPartyByUserId_AllOk", AutomationFlagMaskServerLobby);
 bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	SLobbyConnect(2);
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);

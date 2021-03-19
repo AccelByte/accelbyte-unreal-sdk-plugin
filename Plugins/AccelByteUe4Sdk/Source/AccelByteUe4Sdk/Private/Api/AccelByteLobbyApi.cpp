@@ -11,6 +11,9 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteLobby);
+
 namespace AccelByte
 {
 namespace Api
@@ -140,15 +143,18 @@ void Lobby::Connect()
 
 	if (!WebSocket.IsValid())
 	{
-		TMap<FString, FString> Headers;
-		Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
-		FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-		WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
+		CreateWebSocket();
 	}
 
 	if (WebSocket->IsConnected())
 	{
 		return;
+	}
+
+	if (bWasWsConnectionError)
+	{
+		// websocket state is error can't be reconnect, need to create a new instance
+		CreateWebSocket();
 	}
 
 	if (LobbyTickDelegateHandle.IsValid())
@@ -157,20 +163,11 @@ void Lobby::Connect()
 		LobbyTickDelegateHandle.Reset();
 	}
 
-	WebSocket->OnMessage().Clear();
-	WebSocket->OnConnected().Clear();
-	WebSocket->OnConnectionError().Clear();
-	WebSocket->OnClosed().Clear();
-
-	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
-	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
-	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
-	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 	LobbyTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(LobbyTickDelegate, LobbyTickPeriod);
 
 	WebSocket->Connect();
 	WsEvents |= EWebSocketEvent::Connect;
-	UE_LOG(LogTemp, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
 }
 
 void Lobby::Disconnect()
@@ -193,10 +190,10 @@ void Lobby::Disconnect()
 		WebSocket->OnClosed().Clear();
 		WebSocket->Close();
 
-		WebSocket = nullptr;
+		WebSocket.Reset();
 	}
 
-	if (GEngine) UE_LOG(LogTemp, Display, TEXT("Disconnected"));
+	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
 }
 
 bool Lobby::IsConnected() const
@@ -355,7 +352,7 @@ void Lobby::GetAllAsyncNotification()
 	{
 		FString Content = FString::Printf(TEXT("type: offlineNotificationRequest\nid:%s"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
 		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Get async notification (id=%s)"), *Content)
+		UE_LOG(LogAccelByteLobby, Display, TEXT("Get async notification (id=%s)"), *Content)
 	}
 }
 
@@ -612,14 +609,15 @@ void Lobby::UnbindEvent()
 void Lobby::OnConnected()
 {
 	WsEvents |= EWebSocketEvent::Connected;
-	UE_LOG(LogTemp, Display, TEXT("Connected"));
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
 	ConnectSuccess.ExecuteIfBound();
 }
 
 void Lobby::OnConnectionError(const FString& Error)
 {
 	WsEvents |= EWebSocketEvent::ConnectionError;
-	UE_LOG(LogTemp, Display, TEXT("Error connecting: %s"), *Error);
+	bWasWsConnectionError = true;
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Error connecting: %s"), *Error);
 	ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 }
 
@@ -634,7 +632,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 		WsEvents |= EWebSocketEvent::Closed;
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
 
@@ -649,7 +647,7 @@ FString Lobby::SendRawRequest(FString MessageType, FString MessageIDPrefix, FStr
 			Content.Append(FString::Printf(TEXT("\n%s"), *CustomPayload));
 		}
 		WebSocket->Send(Content);
-		UE_LOG(LogTemp, Display, TEXT("Sending request: %s"), *Content);
+		UE_LOG(LogAccelByteLobby, Display, TEXT("Sending request: %s"), *Content);
 		return MessageID;
 	}
 	return TEXT("");
@@ -701,7 +699,7 @@ bool Lobby::Tick(float DeltaTime)
 			TimeSinceConnectionLost = FPlatformTime::Seconds();
 			BackoffDelay = InitialBackoffDelay;
 			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
-			WebSocket->Connect();
+			Connect();
 			WsState = EWebSocketState::Reconnecting;
 		}
 		else if ((FPlatformTime::Seconds() - TimeSinceLastPing) >= PingDelay)
@@ -734,6 +732,12 @@ bool Lobby::Tick(float DeltaTime)
 				BackoffDelay *= 2;
 			}
 			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
+			if (bWasWsConnectionError)
+			{
+				// websocket state is error can't be reconnect, need to create a new instance
+				CreateWebSocket();
+			}
+
 			WebSocket->Connect();
 			TimeSinceLastReconnect = FPlatformTime::Seconds();
 		}
@@ -754,6 +758,31 @@ bool Lobby::Tick(float DeltaTime)
 FString Lobby::GenerateMessageID(FString Prefix)
 {
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
+}
+
+void Lobby::CreateWebSocket()
+{
+	bWasWsConnectionError = false;
+
+	if(WebSocket.IsValid())
+	{
+		WebSocket->OnMessage().Clear();
+		WebSocket->OnConnected().Clear();
+		WebSocket->OnConnectionError().Clear();
+		WebSocket->OnClosed().Clear();
+		WebSocket->Close();
+		WebSocket.Reset();
+	}
+
+	TMap<FString, FString> Headers;
+	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
+	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
+	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
+
+	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
+	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
+	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
+	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
 }
 
 FString Lobby::LobbyMessageToJson(FString Message)
@@ -863,21 +892,21 @@ FString Lobby::LobbyMessageToJson(FString Message)
 
 void Lobby::OnMessage(const FString& Message)
 {
-	UE_LOG(LogTemp, Display, TEXT("Raw Lobby Response\n%s"), *Message);
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Raw Lobby Response\n%s"), *Message);
 	FString ParsedJson = LobbyMessageToJson(Message);
-	UE_LOG(LogTemp, Display, TEXT("JSON Version: %s"), *ParsedJson);
+	UE_LOG(LogAccelByteLobby, Display, TEXT("JSON Version: %s"), *ParsedJson);
 	TSharedPtr<FJsonObject> JsonParsed;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParsedJson);
 	if (!FJsonSerializer::Deserialize(JsonReader, JsonParsed))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJson);
+		UE_LOG(LogAccelByteLobby, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJson);
 		return;
 	}
 	FString lobbyResponseType = JsonParsed->GetStringField("type");
 	int lobbyResponseCode = 0;
 	if (lobbyResponseType.Contains("Response"))
 		lobbyResponseCode = JsonParsed->GetIntegerField("code");
-	UE_LOG(LogTemp, Display, TEXT("Type: %s"), *lobbyResponseType);
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Type: %s"), *lobbyResponseType);
 
 #define HANDLE_LOBBY_MESSAGE(MessageType, Model, ResponseCallback) \
 if (lobbyResponseType.Equals(MessageType)) \
