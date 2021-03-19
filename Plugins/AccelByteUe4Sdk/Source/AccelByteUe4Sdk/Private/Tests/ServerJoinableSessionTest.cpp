@@ -189,6 +189,7 @@ bool RegisterSessionAsync(const FString MatchId)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestSetup, "AccelByte.Tests.Joinable.A.Setup", AutomationFlagMaskJoinable);
 bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Create Users
 	bool bClientLoginSuccess = false;
 	bool UsersCreationSuccess[ActiveUserCount];
@@ -295,6 +296,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestTeardown, "AccelByte.Tests.Joinable.Z.Teardown", AutomationFlagMaskJoinable);
 bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Delete Users
 	bool bDeleteUsersSuccessful[ActiveUserCount];
 	ActiveLobbies.Reset(0);
@@ -343,6 +345,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestTwoPartyMatchmake, "AccelByte.Tests.Joinable.B.TwoPartyMatchmake_JoinableSession_SameSession", AutomationFlagMaskJoinable);
 bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
@@ -480,6 +483,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerManual, "AccelByte.Tests.Joinable.B.AddRemovePlayerManual_JoinableSession_AllOk", AutomationFlagMaskJoinable);
 bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 
@@ -673,6 +677,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerPartyParam, "AccelByte.Tests.Joinable.B.AddRemovePlayerManual_JoinableSession_WithOptionalPartyParam_AllOk", AutomationFlagMaskJoinable);
 bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
@@ -904,6 +909,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestNonJoinable, "AccelByte.Tests.Joinable.B.TwoPartyMatchmake_NonJoinableSession_DifferentSession", AutomationFlagMaskJoinable);
 bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 	TSharedPtr<Lobby> lobbyB = CreateLobby(ActiveUserCreds[1]);
@@ -1049,6 +1055,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestAddRemovePlayerNonJoinable, "AccelByte.Tests.Joinable.B.AddRemovePlayerManual_NonJoinableSession_AddFailed_RemoveOk", AutomationFlagMaskJoinable);
 bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 
@@ -1249,6 +1256,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(JoinableSessionTestActivateSessionPolling, "AccelByte.Tests.Joinable.B.Activate_Session_Polling", AutomationFlagMaskJoinable);
 bool JoinableSessionTestActivateSessionPolling::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	TSharedPtr<Lobby> lobbyA = CreateLobby(ActiveUserCreds[0]);
 

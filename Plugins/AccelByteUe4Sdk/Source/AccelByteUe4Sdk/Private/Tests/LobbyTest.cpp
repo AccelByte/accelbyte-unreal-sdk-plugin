@@ -514,6 +514,7 @@ const auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([](FAccelByteMod
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSetup, "AccelByte.Tests.Lobby.A.Setup", AutomationFlagMaskLobby);
 bool LobbyTestSetup::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bClientLoginSuccess = false;
 	bool UsersCreationSuccess[TestUserCount];
 	bool UsersLoginSuccess[TestUserCount];
@@ -616,6 +617,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.Tests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
 bool LobbyTestTeardown::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bDeleteUsersSuccessful[TestUserCount];
 	Lobbies.Reset(0);
 
@@ -641,6 +643,7 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestMessage, "AccelByte.Tests.Lobby.B.LobbyMessage", AutomationFlagMaskLobby);
 bool LobbyTestMessage::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	struct LobbyMessageTest
 	{
 		FString Message;
@@ -681,6 +684,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnect2Users, "AccelByte.Tests.Lobby.B.ConnectUsers2", AutomationFlagMaskLobby);
 bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool userResponded[2], userConnected[2];
 
 	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
@@ -725,6 +729,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnectUser, "AccelByte.Tests.Lobby.B.ConnectUser", AutomationFlagMaskLobby);
 bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
 	Lobbies[0]->SetConnectFailedDelegate(ConnectFailedDelegate);
 
@@ -747,6 +752,7 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived, "AccelByte.Tests.Lobby.B.SendPrivateChat", AutomationFlagMaskLobby);
 bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(TestUserCount);
 
 	int receivedChatCount = 0;
@@ -779,6 +785,7 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived, "AccelByte.Tests.Lobby.B.SendChannelChat", AutomationFlagMaskLobby);
 bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(TestUserCount);
 
 	int receivedChatCount = 0;
@@ -829,6 +836,7 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage, "AccelByte.Tests.Lobby.B.SendChannelChatReconnected", AutomationFlagMaskLobby);
 bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	const int playerCount = 2;
 	LobbyConnect(playerCount);
 
@@ -881,6 +889,7 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers, "AccelByte.Tests.Lobby.B.ListOnlineFriends", AutomationFlagMaskLobby);
 bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(TestUserCount);
 
 	Lobbies[0]->SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
@@ -931,6 +940,7 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestGetPartyInfo_NoParty_ReturnError, "AccelByte.Tests.Lobby.B.GetPartyInfoError", AutomationFlagMaskLobby);
 bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(1);
 
 	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
@@ -952,6 +962,7 @@ bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameter
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestGetPartyInfo_PartyCreated_ReturnOk, "AccelByte.Tests.Lobby.B.GetPartyInfo", AutomationFlagMaskLobby);
 bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(1);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -987,6 +998,7 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCreateParty_PartyAlreadyCreated_ReturnError, "AccelByte.Tests.Lobby.B.CreatePartyError", AutomationFlagMaskLobby);
 bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(1);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -1021,6 +1033,7 @@ bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestInviteToParty_InvitationAccepted_CanChat, "AccelByte.Tests.Lobby.B.PartyChat", AutomationFlagMaskLobby);
 bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -1127,6 +1140,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestPartyMember_Kicked, "AccelByte.Tests.Lobby.B.PartyKicked", AutomationFlagMaskLobby);
 bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	FAccelByteModelsPartyGetInvitedNotice invitedToParty[2];
 	FAccelByteModelsPartyJoinReponse joinParty[2];
 	LobbyConnect(3);
@@ -1271,6 +1285,7 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect, "AccelByte.IgnoredTests.Lobby.B.Connect1Mins", AutomationFlagMaskLobby);
 bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(1);
 	for (int i = 0; i < 100; i += 5)
 	{
@@ -1288,6 +1303,7 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetAsyncNotification, "AccelByte.Tests.Lobby.B.NotifAsync", AutomationFlagMaskLobby);
 bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool bSendNotifSucccess = false;
 	FString notification = "this is a notification";
 	UAccelByteBlueprintsTest::SendNotif(UserCreds[0].GetUserId(), notification, true, FVoidHandler::CreateLambda([&]()
@@ -1318,6 +1334,7 @@ bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Paramete
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetSyncNotification, "AccelByte.Tests.Lobby.B.NotifSync", AutomationFlagMaskLobby);
 bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	const int repetition = 2;
 	FString payloads[repetition];
 	bool bSendNotifSucccess[repetition] = { false };
@@ -1359,6 +1376,7 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSetUserStatus_CheckedByAnotherUser, "AccelByte.Tests.Lobby.B.SetUserStatus", AutomationFlagMaskLobby);
 bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	Availability expectedUserStatus = Availability::Availabe;
 
 	LobbyConnect(2);
@@ -1416,6 +1434,7 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestChangeUserStatus_CheckedByAnotherUser, "AccelByte.Tests.Lobby.B.ChangeUserStatus", AutomationFlagMaskLobby);
 bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	Availability expectedUserStatus = Availability::Busy;
 
 	LobbyConnect(2);
@@ -1480,6 +1499,7 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Request_Accept, "AccelByte.Tests.Lobby.B.FriendRequest", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
@@ -1572,6 +1592,7 @@ bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Notification_Request_Accept, "AccelByte.Tests.Lobby.B.FriendNotifRequest", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Notification_Request_Accept::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[1]->SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
@@ -1633,6 +1654,7 @@ bool LobbyTestFriends_Notification_Request_Accept::RunTest(const FString& Parame
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Request_Unfriend, "AccelByte.Tests.Lobby.B.FriendRequestUnfriend", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
@@ -1746,6 +1768,7 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Request_Reject, "AccelByte.Tests.Lobby.B.FriendRequestReject", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
@@ -1844,6 +1867,7 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Request_Cancel, "AccelByte.Tests.Lobby.B.FriendRequestCancel", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
@@ -1942,6 +1966,7 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_Complete_Scenario, "AccelByte.Tests.Lobby.B.FriendComplete", AutomationFlagMaskLobby);
 bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
 
 	Lobbies[1]->SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
@@ -2117,6 +2142,7 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_BulkFriendRequest, "AccelByte.Tests.Lobby.B.FriendBulkFriendRequest", AutomationFlagMaskLobby);
 bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	FAccelByteModelsBulkFriendsRequest FriendUserIds;
 	for (int i = 1; i < TestUserCount; i++)
 	{
@@ -2158,6 +2184,7 @@ bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed, "AccelByte.Tests.Lobby.B.FriendBulkFriendRequest_Failed", AutomationFlagMaskLobby);
 bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	FAccelByteModelsBulkFriendsRequest FriendUserIds;
 	FriendUserIds.FriendIds.Add(UserIds[0]);
 
@@ -2188,7 +2215,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_ReturnOk, "AccelByte.
 bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2361,7 +2387,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_withPartyAttributes, 
 bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2613,7 +2638,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_Timeout, "AccelByte.T
 bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -2811,7 +2835,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingLatencies_ReturnOk, "A
 bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3046,7 +3069,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCancelMatchmaking_ReturnOk, "AccelByte
 bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(1);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3112,7 +3134,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReMatchmaking_ReturnOk, "AccelByte.Tes
 bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(3);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[3];
@@ -3380,7 +3401,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestLocalDSWithMatchmaking_ReturnOk, "Acce
 bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3603,7 +3623,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestLocalDSWithMatchmakingAutoHeartBeat_Re
 bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(2);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
@@ -3830,7 +3849,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking3vs3_ReturnOk, "AccelB
 bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-
 	LobbyConnect(6);
 	for (int i = 0; i < 6; i++)
 	{
@@ -4077,6 +4095,7 @@ private:
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_GotConnectionClosed_Reconnected, "AccelByte.Tests.Lobby.C.Connected_GotConnectionClosed_Reconnected", AutomationFlagMaskLobby);
 bool LobbyTestConnected_GotConnectionClosed_Reconnected::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	AccelByte::Credentials DummyCredentials;
 	AccelByte::Settings DummySettings;
@@ -4128,6 +4147,7 @@ bool LobbyTestConnected_GotConnectionClosed_Reconnected::RunTest(const FString& 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout, "AccelByte.Tests.Lobby.C.Reconnected_GotConnectionCLosed_ReconnectTimeout", AutomationFlagMaskLobby);
 bool LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	//Arrange
 	AccelByte::Credentials DummyCredentials;
 	AccelByte::Settings DummySettings;
@@ -4170,6 +4190,7 @@ bool LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout::RunTest(const FS
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTokenRevoked_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestTokenRevoked_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	// Temporary disable, will be removed
 	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
 	{
@@ -4234,6 +4255,7 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserDifferentToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserDifferentToken_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	// Temporary disable, will be removed
 	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
 	{
@@ -4306,6 +4328,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserSameToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserSameToken_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	AccelByte::Api::User& User = FRegistry::User;
 	bool bLoginDone = false;
 
@@ -4362,6 +4385,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSignalingP2P, "AccelByte.Tests.Lobby.D.LobbyTestSignalingP2P", AutomationFlagMaskLobby);
 bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	bool userResponded[2], userConnected[2];
 	const FString Message("MESSAGESIGNALINGTEST");
 	bool P2PMessageAvailable = false;	
