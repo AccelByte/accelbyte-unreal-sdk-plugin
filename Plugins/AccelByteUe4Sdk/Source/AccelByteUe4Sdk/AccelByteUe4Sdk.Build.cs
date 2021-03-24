@@ -24,14 +24,6 @@ public class AccelByteUe4Sdk : ModuleRules
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
         PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 
-        bool isAgonesFound = Directory.Exists(Path.Combine(ModuleDirectory, "..", "..", "..", "Agones"));
-#if UE_4_19_OR_LATER
-        PublicDefinitions.Add(string.Format("AGONES_PLUGIN_FOUND={0}", (isAgonesFound ? 1 : 0)));
-#else
-        Definitions.Add(string.Format("AGONES_PLUGIN_FOUND={0}", (isAgonesFound ? 1 : 0)));
-#endif
-        if (isAgonesFound) { PublicDependencyModuleNames.AddRange(new string[] {"Agones"}); }
-
         PublicDependencyModuleNames.AddRange(new string[]
         {
             "Core",
