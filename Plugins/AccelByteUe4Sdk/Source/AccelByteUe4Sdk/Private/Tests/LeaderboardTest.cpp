@@ -32,6 +32,7 @@ const auto LeaderboardTestErrorHandler = FErrorHandler::CreateLambda([](int32 Er
 
 const FString TestStatCodePrefix = "atestleaderboardstatcode";
 const int TestStatCodeCount = 2;
+FDateTime LeaderboardStartTime;
 TArray<FString> TestStatCodes;
 TArray<FString> TestLeaderboardCodes;
 
@@ -151,7 +152,8 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 		createRequest.seasonPeriod = 31 + 5; // minimum is 31 day
 
 		//Intentional: start time supposed to be in the future. 10 seconds added. It will takes effect in 10 seconds.
-		createRequest.startTime = (FDateTime::UtcNow() + FTimespan::FromSeconds(10)).ToIso8601();
+		LeaderboardStartTime = FDateTime::UtcNow() + FTimespan::FromSeconds(10);
+		createRequest.startTime = LeaderboardStartTime.ToIso8601();
 
 		TestLeaderboardCodes.Add(createRequest.leaderboardCode);
 
@@ -308,6 +310,12 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 		}
 	}
 
+	UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Waiting leaderboard start for %f seconds"), (LeaderboardStartTime - FDateTime::UtcNow()).GetTotalSeconds() );
+	while(FDateTime::UtcNow() < LeaderboardStartTime)
+	{
+		FPlatformProcess::Sleep(1.0f);
+	}
+
 	bool bIncrementManyUsersStatItemsSuccess = false;
 	FRegistry::ServerStatistic.IncrementManyUsersStatItems(
 		request,
@@ -434,6 +442,12 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 			float increment = (userId == TestUsersID[USER_ID_WINNER_INDEX]) ? WINNER_SCORE : COMMONER_SCORE;
 			request.Add({ increment, userId, statCode });
 		}
+	}
+
+	UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Waiting leaderboard start for %f seconds"), (LeaderboardStartTime - FDateTime::UtcNow()).GetTotalSeconds() );
+	while(FDateTime::UtcNow() < LeaderboardStartTime)
+	{
+		FPlatformProcess::Sleep(1.0f);
 	}
 
 	bool bIncrementManyUsersStatItemsSuccess = false;

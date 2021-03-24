@@ -26,6 +26,10 @@ TArray<FString> GetDisabledTestList()
 	TArray<FString> DisabledTest;
 	const FString DisabledTestString = Environment::GetEnvironmentVariable(TEXT("AB_UE4_SDK_DISABLED_TESTS"), 1000);
 	DisabledTestString.ParseIntoArray(DisabledTest, TEXT(";"), true);
+	DisabledTest.RemoveAll([](const FString& Test) -> bool
+	{
+		return Test.IsEmpty();
+	});
 	return DisabledTest;
 }
 
@@ -52,7 +56,7 @@ bool IsAccelByteTestEnabled(const FString& TestName)
 
 bool AccelByteSkipTest(const FString& TestName)
 {
-	if (IsAccelByteTestEnabled(TestName))
+	if (!IsAccelByteTestEnabled(TestName))
 	{
 		UE_LOG(LogTemp, Log, TEXT("=== Skipping test `%s`"), *TestName);
 		return true;
