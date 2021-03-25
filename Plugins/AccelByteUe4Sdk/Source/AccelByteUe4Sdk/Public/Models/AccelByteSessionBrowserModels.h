@@ -9,6 +9,38 @@
 #include "AccelByteSessionBrowserModels.generated.h"
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserGameSetting
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FString Mode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FString Map_name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	int Num_bot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	int Max_player;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	int Current_player;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	bool Allow_join_in_progress;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserCreateRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FString Username;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FString Game_version;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FAccelByteModelsSessionBrowserGameSetting Game_session_setting;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserData
 {
 	GENERATED_BODY()
@@ -19,23 +51,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
 		FString User_id;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		FString User_name;
+		FString Username;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
 		FString Session_type;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
 		FString Game_version;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		FString Game_mode;
+		bool Joinable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		FString Game_map_name;
+	FAccelByteModelsSessionBrowserGameSetting Game_session_setting;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserUpdateRequest
+{
+	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		int Game_num_bot;
+	int Game_current_player;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		int Game_max_player;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		int Game_current_player;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
-		bool Game_allow_join_in_progress;
+	int Game_max_player;
 };
 
 USTRUCT(BlueprintType)

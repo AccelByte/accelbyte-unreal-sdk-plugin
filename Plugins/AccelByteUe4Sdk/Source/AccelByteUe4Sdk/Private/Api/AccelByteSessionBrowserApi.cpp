@@ -21,7 +21,7 @@ namespace Api
 		return Settings.SessionBrowserServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/sessionbrowser"), *Settings.BaseUrl) : Settings.SessionBrowserServerUrl;
 	}
 
-	void SessionBrowser::CreateGameSession(const FString& SessionType, const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
+	void SessionBrowser::CreateGameSession(const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
@@ -38,16 +38,14 @@ namespace Api
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 
-		FAccelByteModelsSessionBrowserData NewGameSession;
-		NewGameSession.User_id = Credentials.GetUserId();
-		NewGameSession.User_name = Credentials.GetUserDisplayName();
+		FAccelByteModelsSessionBrowserCreateRequest NewGameSession;
+		NewGameSession.Username = Credentials.GetUserDisplayName();
 		NewGameSession.Namespace = Credentials.GetUserNamespace();
-		NewGameSession.Game_mode = GameMode;
-		NewGameSession.Game_map_name = GameMapName;
-		NewGameSession.Session_type = SessionType;
-		NewGameSession.Game_num_bot = BotCount;
-		NewGameSession.Game_max_player = MaxPlayer;
-		NewGameSession.Game_current_player = 1;
+		NewGameSession.Game_session_setting.Mode = GameMode;
+		NewGameSession.Game_session_setting.Map_name = GameMapName;
+		NewGameSession.Game_session_setting.Num_bot = BotCount;
+		NewGameSession.Game_session_setting.Max_player = MaxPlayer;
+		NewGameSession.Game_session_setting.Current_player = 1;
 		NewGameSession.Game_version = GameVersion;
 		FString Content;
 		FJsonObjectConverter::UStructToJsonObjectString(NewGameSession, Content);
@@ -84,7 +82,7 @@ namespace Api
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 
-		FAccelByteModelsSessionBrowserData NewGameSession;
+		FAccelByteModelsSessionBrowserUpdateRequest NewGameSession;
 		NewGameSession.Game_max_player = MaxPlayer;
 		NewGameSession.Game_current_player = CurrentPlayerCount;
 		FString Content;

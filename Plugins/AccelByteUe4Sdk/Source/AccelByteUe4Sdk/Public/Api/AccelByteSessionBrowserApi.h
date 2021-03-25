@@ -33,7 +33,6 @@ public:
 	/**
 	* @brief Create the session to Session Browser.
 	*
-	* @param SessionType is the type of session type, p2p or dedicated.
 	* @param GameMode game mode of the game.
 	* @param GameMapName map of the game.
 	* @param GameVersion version of the played game.
@@ -42,7 +41,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateGameSession(const FString &SessionType, const FString &GameMode, const FString &GameMapName, const FString &GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void CreateGameSession(const FString &GameMode, const FString &GameMapName, const FString &GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Update the session to Session Browser.

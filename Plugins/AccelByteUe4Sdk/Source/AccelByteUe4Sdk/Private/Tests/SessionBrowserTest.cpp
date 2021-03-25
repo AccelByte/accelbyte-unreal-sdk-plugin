@@ -173,7 +173,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 	int UpdatedPlayerCount = 4;
 	int UpdatedMaxPlayer = 8;
 	//Create game session
-	SessionBrowsers[0]->CreateGameSession(SessionType, GameMode, GameMap, GameVersion, 1, 8,
+	SessionBrowsers[0]->CreateGameSession(GameMode, GameMap, GameVersion, 1, 8,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bCreated, &Result](const FAccelByteModelsSessionBrowserData &Data)
 	{
 		bCreated = true;
@@ -195,8 +195,8 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bUpdated, "Waiting for session browser updated...");
 	check(bUpdated);
-	check(ResultUpdated.Game_max_player == UpdatedMaxPlayer);
-	check(ResultUpdated.Game_current_player == UpdatedPlayerCount);
+	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
+	check(ResultUpdated.Game_session_setting.Current_player == UpdatedPlayerCount);
 
 	//Query game session
 	bool bQueried = false;
@@ -223,7 +223,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 		}
 	}
 	check(bFounded);
-	check(Founded.Game_current_player == ResultUpdated.Game_current_player);
+	check(Founded.Game_session_setting.Current_player == ResultUpdated.Game_session_setting.Current_player);
 
 	//Remove game session
 	bool bRemoved = false;
@@ -235,8 +235,8 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRemoved, "Waiting for session browser removed...");
 	check(bUpdated);
-	check(ResultUpdated.Game_max_player == UpdatedMaxPlayer);
-	check(ResultUpdated.Game_current_player == UpdatedPlayerCount);
+	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
+	check(ResultUpdated.Game_session_setting.Current_player == UpdatedPlayerCount);
 
 	//Check again if game session really removed
 	SessionBrowsers[1]->GetGameSessions(SessionType, GameMode,
