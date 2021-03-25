@@ -262,6 +262,9 @@ namespace AccelByte
 	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)
 	{
 		FErrorInfo Error;
+		Error.NumericErrorCode = -1;
+		Error.ErrorCode = -1;
+		Error.Code = -1;
 		int32 Code = 0;
 		OutMessage = "";
 		if (Response.IsValid())
@@ -275,6 +278,14 @@ namespace AccelByte
 				else if (Error.ErrorCode != -1)
 				{
 					Code = Error.ErrorCode;
+				}
+				else if (Error.Code != -1)
+				{
+					Code = Error.Code;
+				}
+				else
+				{
+					Code = Response->GetResponseCode();
 				}
 			}
 			else
@@ -296,6 +307,10 @@ namespace AccelByte
 		if (!Error.ErrorMessage.IsEmpty())
 		{
 			OutMessage += " " + Error.ErrorMessage;
+		}
+		else if (!Error.Message.IsEmpty())
+		{
+			OutMessage += " " + Error.Message;
 		}
 
 		// Debug message. Delete this code section for production

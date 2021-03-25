@@ -36,7 +36,7 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccessful = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]() { bLoginSuccessful = true; }), GameTelemetryErrorHandler);
-	
+	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "LoginWithDeviceId");
 	
 	FRegistry::GameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
@@ -67,9 +67,17 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 						allEventDone = true;
 					}
 				}), GameTelemetryErrorHandler);
+		FlushHttpRequests();
 	}
 
-	Waiting(allEventDone, "Sending batch telemetry event");
+	WaitUntil([&allEventDone]()
+	{
+		if (!allEventDone)
+		{
+			FlushHttpRequests();
+		}
+		return allEventDone;
+	}, 100, "Sending batch telemetry event");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -83,7 +91,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 {
 	bool bLoginSuccessful = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]() { bLoginSuccessful = true; }), GameTelemetryErrorHandler);
-
+	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "LoginWithDeviceId");
 
 	FString CurrentImmediateEventName = "SDK_UE4_Immediate_Event";
@@ -115,6 +123,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 						allEventDone = true;
 					}
 				}), GameTelemetryErrorHandler);
+		FlushHttpRequests();
 	}
 
 	Waiting(allEventDone, "Sending multiple immediate telemetry events");

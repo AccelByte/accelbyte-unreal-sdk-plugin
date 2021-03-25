@@ -655,6 +655,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c6cc89d370000d808fa2fdd?mocky-delay=1s&id=%d"), Id));
 		Request->SetVerb(TEXT("GET"));
 		Scheduler->ProcessRequest(Request, OnCompleted, CurrentTime);
+		FHttpModule::Get().GetHttpManager().Flush(false);
 	};
 
 	auto TickerDelegate1 = Ticker.AddTicker(
@@ -707,11 +708,13 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 			}));
 		}));
 	}));
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SendMockyRequest(5, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
 		RequestCompleted++;
 	}));
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SendMockyRequest(6, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
@@ -725,13 +728,15 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 			}));
 		}));
 	}));
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
 	SendMockyRequest(9, Del::CreateLambda([&RequestCompleted, &Scheduler, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
 		RequestCompleted++;
 	}));
+	FHttpModule::Get().GetHttpManager().Flush(false);
 
-	while (CurrentTime < 20.0)
+	while (CurrentTime < 50.0)
 	{
 		CurrentTime += 0.5;
 		Ticker.Tick(0.5);

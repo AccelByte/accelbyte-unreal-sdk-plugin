@@ -135,8 +135,8 @@ FString GetAdminAccessToken()
 	{
 		UE_LOG(LogTemp, Log, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
 	}));
-	Waiting(ClientLoginSuccess, "Login with Client...");
 	FlushHttpRequests();
+	Waiting(ClientLoginSuccess, "Login with Client...");
 
 	AdminAccessTokenCache = ClientLogin.Access_token;
 	return ClientLogin.Access_token;
@@ -192,8 +192,8 @@ FString GetSuperUserTokenCache()
 		UE_LOG(LogTemp, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
 	});
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	Waiting(bGetTokenSuccess, "Waiting for get token...");
 	FlushHttpRequests();
+	Waiting(bGetTokenSuccess, "Waiting for get token...");
 
 	SuperUserTokenCache = TokenResult.Access_token;
 	return TokenResult.Access_token;
@@ -267,8 +267,8 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 		userMap = Result;
 		bGetUserMapSuccess = true;
 	}), OnError);
-	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 	FlushHttpRequests();
+	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());

@@ -65,6 +65,29 @@ public:
 	void ReplaceUserRecord(const FString& Key, FJsonObject RecordRequest, bool IsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one, but will failed if lastUpdated is not up-to-date.
+	 * 
+	 * @param Key Key of record.
+	 * @param LastUpdated last time the record is updated. Retrieve it from GetGameRecord.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceUserRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. Beware: Function will try to get the latest value, put it in the custom modifier and request to replace the record. will retry it again when the record is updated by other user, until exhaust all the attempt.
+	 * 
+	 * @param TryAttempt Attempt to try to replace the game record.
+	 * @param Key Key of record.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param PayloadModifier Function to modify the latest record value with your customized modifier.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	
+	/**
 	 * @brief Delete a record under the given key in user-level.
 	 *
 	 * @param Key Key of record.
@@ -102,6 +125,29 @@ public:
 	 */
 	void ReplaceGameRecord(const FString& Key, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	 /**
+	 * @brief Replace a record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one, but will failed if lastUpdated is not up-to-date.
+	 *
+	 * @param Key Key of record.
+	 * @param LastUpdated last time the record is updated. Retrieve it from GetGameRecord.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceGameRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Replace a record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. Beware: Function will try to get the latest value, put it in the custom modifier and request to replace the record. will retry it again when the record is updated by other user, until exhaust all the attempt.
+	 *
+	 * @param TryAttempt Attempt to try to replace the game record.
+	 * @param Key Key of record.
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param PayloadModifier Function to modify the latest record value with your customized modifier.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	
 	/**
 	 * @brief Delete a record under the given key in namespace-level.
 	 *
@@ -118,6 +164,9 @@ private:
 	CloudSave() = delete;
 	CloudSave(CloudSave const&) = delete;
 	CloudSave(CloudSave&&) = delete;
+
+	void ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 };
 
 } // Namespace Api

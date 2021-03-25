@@ -2,13 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Core/AccelByteEnvironment.h"
+
 #include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Models/AccelByteDSMModels.h"
 #include "TestUtilities.h"
 #include "HAL/FileManager.h"
@@ -272,10 +273,14 @@ bool DSMStopHeartBeatAfterFewRetries::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bDeleteServerSuccess, "Waiting for delete server...");
 
-	WaitUntil([]()
+	WaitUntil([&bHeartBeatErrorGet]()
 	{
-		return false;
-	}, 20);
+		if (!bHeartBeatErrorGet)
+		{
+			FlushHttpRequests();
+		}
+		return bHeartBeatErrorGet;
+	}, 50, "Heartbeat Error");
 	check(bHeartBeatErrorGet);
 	bool bServerShutdownSuccess = false;
 	FRegistry::ServerDSM.SendShutdownToDSM(false, "", FVoidHandler::CreateLambda([&bServerShutdownSuccess]()

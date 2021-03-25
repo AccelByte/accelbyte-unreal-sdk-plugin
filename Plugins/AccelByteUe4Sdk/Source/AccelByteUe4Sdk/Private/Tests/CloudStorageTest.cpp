@@ -48,7 +48,7 @@ bool CloudStorageSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("User Login Success"));
 		bUserLoginResult = true;
 	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bUserLoginResult, "Waiting for Login...");
 
 	check(bUserLoginResult);
@@ -85,7 +85,7 @@ bool CloudStorageCreateSlot::RunTest(const FString& Parameters)
 		CreatedSlot = Result;
 		bSlotCreatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bSlotCreatedResult, "Waiting for slot created...");
 	
 	check(bSlotCreatedResult);
@@ -101,7 +101,7 @@ bool CloudStorageUpdateSlot::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
 		bSlotUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bSlotUpdatedResult, "Waiting for slot updated...");
 	
 	check(bSlotUpdatedResult);
@@ -122,7 +122,7 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 		bMetadataUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bMetadataUpdatedResult, "Waiting for meta updated...");
 	check(bMetadataUpdatedResult);
 
@@ -141,7 +141,7 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 			}
 		}
 	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bGetSlotAfterUpdateResult, "Waiting for get slot...");
 	check(bGetSlotAfterUpdateResult);
 
@@ -159,7 +159,7 @@ bool CloudStorageGetAllSlots::RunTest(const FString& Parameter)
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 
 	bool bUpdatedSlotFound = false;
@@ -187,7 +187,7 @@ bool CloudStorageGetSlot::RunTest(const FString& Parameters)
 		bGetSlotResult = true;
 		bSlotContentUpdated = (UAccelByteBlueprintsTest::BytesToFString(Data) == Payloads[1]);
 	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bGetSlotResult, "Waiting for get slot...");
 
 	check(bGetSlotResult);
@@ -206,7 +206,7 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
+	FlushHttpRequests();
 	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 	check(bGetAllSlotsResult);
 
@@ -221,7 +221,7 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 		{
 			bDeleteSlotResults.Add(false);
 		}));
-		FHttpModule::Get().GetHttpManager().Flush(false);
+		FlushHttpRequests();
 		Waiting(bDeleteSlotResults[i], "Waiting for slot deletion...");
 	}
 	check(!bDeleteSlotResults.Contains(false));

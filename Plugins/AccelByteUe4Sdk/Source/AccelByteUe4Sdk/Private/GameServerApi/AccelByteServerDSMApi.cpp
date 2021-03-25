@@ -578,8 +578,10 @@ namespace AccelByte
 
 					return;
 				}
-
-				if (Response->GetResponseCode() >= 400 && Response->GetResponseCode() < 500)
+				int32 Code;
+				FString Message;
+				HandleHttpError(Request, Response, Code, Message);
+				if (((Code >= 400 && Code < 500) || Code == (int32)ErrorCodes::DedicatedServerNotFoundException))
 				{
 					if (HeartBeatRetryCount <= HeartBeatErrorRetry)
 					{

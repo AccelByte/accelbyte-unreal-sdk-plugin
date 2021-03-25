@@ -29,7 +29,11 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		int32 ErrorCode = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
+		int32 Code = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString ErrorMessage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
+		FString Message;
 };
 
 namespace AccelByte
@@ -299,6 +303,24 @@ namespace AccelByte
 		LeaderboardConfigAlreadyExist = 71132,
 		LeaderboardRankingNotFound = 71235,
 		//
+		//CloudSave Error Code List
+		//
+		GameRecordNotFoundException = 18003,
+		GetGameRecordBadRequestException = 18004,
+		CreateGameRecordValueTooBigException = 18015,
+		PlayerRecordNotFoundException = 18022,
+		PlayerRecordGetterIsNotOwnerException = 18023,
+		PlayerRecordEditorIsNotOwnerException = 18035,
+		PlayerPublicRecordNotFoundException = 18081,
+		GameRecordValidationErrorException = 18055,
+		GameRecordPreconditionFailedException = 18056,
+		PlayerPublicRecordValidationErrorException = 18102,
+		PlayerRecordPreconditionFailedException = 18103,
+		//
+		//DSM Error Code List
+		//
+		DedicatedServerNotFoundException = 9014183,
+		//
 		//Client side Error Code List
 		//
 		UnknownError = 14000,
@@ -338,6 +360,7 @@ namespace AccelByte
 		FErrorInfo Error;
 		Error.NumericErrorCode = -1;
 		Error.ErrorCode = -1;
+		Error.Code = -1;
 		int32 Code = 0;
 		OutMessage = "";
 		if (Response.IsValid())
@@ -351,6 +374,10 @@ namespace AccelByte
 				else if (Error.ErrorCode != -1)
 				{
 					Code = Error.ErrorCode;
+				}
+				else if (Error.Code != -1)
+				{
+					Code = Error.Code;
 				}
 				else
 				{

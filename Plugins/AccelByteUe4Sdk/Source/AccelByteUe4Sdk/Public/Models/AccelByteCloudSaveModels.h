@@ -12,6 +12,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 	FString Key;
 	FString Namespace;
 	FString UserId;
+	bool IsPublic;
+	FDateTime CreatedAt;
+	FDateTime UpdatedAt;
 	FJsonObject Value;
 };
 
@@ -19,5 +22,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 {
 	FString Key;
 	FString Namespace;
+	FDateTime CreatedAt;
+	FDateTime UpdatedAt;
+	FJsonObject Value;
+};
+
+struct ACCELBYTEUE4SDK_API FAccelByteModelsConcurrentReplaceRequest
+{
+	FDateTime UpdatedAt;
 	FJsonObject Value;
 };

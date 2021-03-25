@@ -1312,6 +1312,7 @@ bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Paramete
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bSendNotifSucccess, "Sending Notification...");
 
 	LobbyConnect(1);
@@ -1355,6 +1356,7 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
 		}), LobbyTestErrorHandler);
 
+		FlushHttpRequests();
 		Waiting(bSendNotifSucccess[i], "Sending Notification...");
 
 		Waiting(bGetNotifSuccess, "Getting All Notifications...");
@@ -2286,6 +2288,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 		
+	FlushHttpRequests();
     Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -2365,6 +2368,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
     Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
     check(bCreateMatchmakingChannelSuccess);
@@ -2458,6 +2462,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 		}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -2571,7 +2576,14 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
-	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
+	WaitUntil([&bMatchRequestReceived]()
+	{
+		if (!bMatchRequestReceived)
+		{
+			FlushHttpRequests();
+		}
+		return bMatchRequestReceived;
+	}, 50, "Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
@@ -2594,6 +2606,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 		}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -2724,6 +2737,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -2814,6 +2828,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -2944,6 +2959,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -3045,6 +3061,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bIsTheRightRegion[0]);
@@ -3251,6 +3268,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
     Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	Lobbies[0]->SendInfoPartyRequest();
@@ -3383,6 +3401,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
     Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
     check(bCreateMatchmakingChannelSuccess);
@@ -3472,6 +3491,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -3578,7 +3598,14 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
-	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
+	WaitUntil([&bMatchRequestReceived]()
+	{
+		if (!bMatchRequestReceived)
+		{
+			FlushHttpRequests();
+		}
+		return bMatchRequestReceived;
+	}, 50, "Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
@@ -3601,6 +3628,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -3694,6 +3722,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -3801,7 +3830,14 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
-	Waiting(bMatchRequestReceived, "Waiting for Match Request from DSM");
+	WaitUntil([&bMatchRequestReceived]()
+	{
+		if (!bMatchRequestReceived)
+		{
+			FlushHttpRequests();
+		}
+		return bMatchRequestReceived;
+	}, 50, "Match Request from DSM");
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
 	check(!bDsNotifError);
 
@@ -3827,6 +3863,7 @@ bool LobbyTestLocalDSWithMatchmakingAutoHeartBeat_ReturnOk::RunTest(const FStrin
 		}), 
 		LobbyTestErrorHandler);
 
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -3899,6 +3936,8 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 	for (int i = 0; i < 6; i++)
 	{
@@ -3957,6 +3996,8 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	check(bCreateMatchmakingChannelSuccess);
 	check(bDeleteMatchmakingChannelSuccess);
