@@ -793,7 +793,7 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 		int DictIndex = i;
 		FJsonObject UpdatedRecord;
 		UpdatedRecord.SetNumberField(FString::Printf(TEXT("key_%d"), DictIndex), DictIndex);
-		FRegistry::CloudSave.ReplaceUserRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, TBaseDelegate<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
+		FRegistry::CloudSave.ReplaceUserRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
 		{
 			if (!LatestRecord.HasField(FString::Printf(TEXT("key_%d"), DictIndex)))
 			{
@@ -871,7 +871,7 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		int DictIndex = i;
 		FJsonObject UpdatedRecord;
 		UpdatedRecord.SetNumberField(FString::Printf(TEXT("key_%d"), DictIndex), DictIndex);
-		FRegistry::CloudSave.ReplaceUserRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, TBaseDelegate<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
+		FRegistry::CloudSave.ReplaceUserRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
 		{
 			if (!LatestRecord.HasField(FString::Printf(TEXT("key_%d"), DictIndex)))
 			{
@@ -1170,7 +1170,7 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 		int DictIndex = i;
 		FJsonObject UpdatedRecord;
 		UpdatedRecord.SetNumberField(FString::Printf(TEXT("key_%d"), DictIndex), DictIndex);
-		FRegistry::CloudSave.ReplaceGameRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, TBaseDelegate<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
+		FRegistry::CloudSave.ReplaceGameRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
 		{
 			if (!LatestRecord.HasField(FString::Printf(TEXT("key_%d"), DictIndex)))
 			{
@@ -1248,7 +1248,7 @@ bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		int DictIndex = i;
 		FJsonObject UpdatedRecord;
 		UpdatedRecord.SetNumberField(FString::Printf(TEXT("key_%d"), DictIndex), DictIndex);
-		FRegistry::CloudSave.ReplaceGameRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, TBaseDelegate<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
+		FRegistry::CloudSave.ReplaceGameRecordCheckLatest(TryAttempt, ConcurrentKey, UpdatedRecord, THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda([DictIndex](FJsonObject LatestRecord)
 		{
 			if (!LatestRecord.HasField(FString::Printf(TEXT("key_%d"), DictIndex)))
 			{

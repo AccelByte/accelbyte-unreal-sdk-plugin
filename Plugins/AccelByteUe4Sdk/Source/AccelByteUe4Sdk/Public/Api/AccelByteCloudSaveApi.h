@@ -85,7 +85,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Delete a record under the given key in user-level.
@@ -146,7 +146,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Delete a record under the given key in namespace-level.
@@ -165,8 +165,8 @@ private:
 	CloudSave(CloudSave const&) = delete;
 	CloudSave(CloudSave&&) = delete;
 
-	void ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-	void ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 };
 
 } // Namespace Api

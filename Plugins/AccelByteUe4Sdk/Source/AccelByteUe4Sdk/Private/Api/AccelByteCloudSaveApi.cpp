@@ -155,7 +155,7 @@ void CloudSave::ReplaceUserRecord(const FString& Key, FJsonObject RecordRequest,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -209,10 +209,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(const FString& Key, const FDateTime
 		RecordRequest
 	};
 
-	CloudSave::ReplaceUserRecord(0, Key, Request, TBaseDelegate<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -377,7 +377,7 @@ void CloudSave::ReplaceGameRecord(const FString& Key, FJsonObject RecordRequest,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -431,10 +431,10 @@ void CloudSave::ReplaceGameRecordCheckLatest(const FString& Key, const FDateTime
 		RecordRequest
 	};
 
-	CloudSave::ReplaceGameRecord(0, Key, Request, TBaseDelegate<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const TBaseDelegate<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	if (TryAttempt <= 0)
 	{

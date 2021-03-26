@@ -40,11 +40,13 @@ namespace AccelByte
 {
 #if ENGINE_MINOR_VERSION > 25
 	template <typename T> using THandler = TDelegate<void(const T&)>;
+	template <typename T1, typename T2> using THandlerPayloadModifier = TDelegate<T1(T2)>;
 	using FVoidHandler = TDelegate<void()>;
 	using FErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */)>;
 	using FCustomErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */)>;
 #else
 	template <typename T> using THandler = TBaseDelegate<void, const T&>;
+	template <typename T1, typename T2> using THandlerPayloadModifier = TBaseDelegate<T1, T2>;
 	using FVoidHandler = TBaseDelegate<void>;
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
 	using FCustomErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */>;
