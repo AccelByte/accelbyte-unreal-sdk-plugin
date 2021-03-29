@@ -13,6 +13,6 @@ public class AccelByteUe4SdkDemoTarget : TargetRules
         DefaultBuildSettings = BuildSettingsVersion.V2;
 #endif
         Type = TargetType.Game;
-        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk", "Agones" } );
+        ExtraModuleNames.AddRange( new string[] { "AccelByteUe4SdkDemo", "AccelByteUe4Sdk" } );
     }
 }

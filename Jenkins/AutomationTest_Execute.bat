@@ -50,26 +50,3 @@ taskkill /F /IM Steam.exe
 
 :::::If the result of the test is not 0, then something wrong happen with the test
 if NOT %EXIT_CODE% == 0 (exit 1)
-
-:::DSM additional provider test cases
-::::AGONES
-SET AGONES_DIRECTORY=%WORKSPACE%\\AgonesSdkServer
-SET AGONES_EXE=sdk-server.windows.amd64.exe
-
-:::::Agones local server execution
-start %AGONES_DIRECTORY%\\%AGONES_EXE% --local -f %AGONES_DIRECTORY%\\gameserver.yaml
-
-:::::Agones provider test
-"%ENGINE_PATH%\Engine\Binaries\Win64\UE4Editor-Cmd.exe" "%WORKSPACE%\AccelByteUe4SdkDemo.uproject" -Server -stdout -unattended -nopause -ExecCmds="Automation RunTests %UE4_TESTS%.DSM; Quit" -log -log=Agones%TEST_LOG% -provider=agones
-
-:::::Agones local server shutdown
-taskkill /F /IM %AGONES_EXE%
-
-:::::Obtain the test result
-set EXIT_CODE=%errorlevel%
-
-:::::If the result of the test is not 0, then something wrong happen with the test
-if NOT %EXIT_CODE% == 0 (exit 1)
-
-
-
