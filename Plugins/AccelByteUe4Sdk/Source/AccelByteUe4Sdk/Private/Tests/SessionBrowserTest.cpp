@@ -172,8 +172,12 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 	FAccelByteModelsSessionBrowserData Result;
 	int UpdatedPlayerCount = 4;
 	int UpdatedMaxPlayer = 8;
+	auto SettingJson = MakeShared<FJsonObject>();
+	SettingJson->SetStringField(TEXT("CUSTOM1"), TEXT("CUSTOM1"));
+	SettingJson->SetNumberField(TEXT("CUSTOM2"), 20);
+	
 	//Create game session
-	SessionBrowsers[0]->CreateGameSession(GameMode, GameMap, GameVersion, 1, 8,
+	SessionBrowsers[0]->CreateGameSession(GameMode, GameMap, GameVersion, 1, 8, SettingJson,
 		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bCreated, &Result](const FAccelByteModelsSessionBrowserData &Data)
 	{
 		bCreated = true;
@@ -222,6 +226,8 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 			Founded = QueryResult.Sessions[i];
 		}
 	}
+	check(Founded.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM1").Equals(TEXT("CUSTOM1")));
+	check(Founded.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2") == 20);
 	check(bFounded);
 	check(Founded.Game_session_setting.Current_player == ResultUpdated.Game_session_setting.Current_player);
 

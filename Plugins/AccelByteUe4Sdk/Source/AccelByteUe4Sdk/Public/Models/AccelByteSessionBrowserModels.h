@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "AccelByteGeneralModels.h"
+#include "JsonObjectWrapper.h"
 #include "AccelByteSessionBrowserModels.generated.h"
 
 USTRUCT(BlueprintType)
@@ -24,6 +25,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserGameSetting
 	int Current_player;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
 	bool Allow_join_in_progress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FJsonObjectWrapper Settings;
 };
 
 USTRUCT(BlueprintType)

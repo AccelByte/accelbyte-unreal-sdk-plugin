@@ -5,9 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteSessionBrowserModels.h"
+
+class FJsonObject;
 
 namespace AccelByte
 {
@@ -38,10 +39,11 @@ public:
 	* @param GameVersion version of the played game.
 	* @param BotCount number of bot.
 	* @param MaxPlayer maximum number of player can join the session.
+	* @param OtherSettings other setting in json format
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateGameSession(const FString &GameMode, const FString &GameMapName, const FString &GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void CreateGameSession(const FString &GameMode, const FString &GameMapName, const FString &GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Update the session to Session Browser.

@@ -21,7 +21,7 @@ namespace Api
 		return Settings.SessionBrowserServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/sessionbrowser"), *Settings.BaseUrl) : Settings.SessionBrowserServerUrl;
 	}
 
-	void SessionBrowser::CreateGameSession(const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
+	void SessionBrowser::CreateGameSession(const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
@@ -46,6 +46,7 @@ namespace Api
 		NewGameSession.Game_session_setting.Num_bot = BotCount;
 		NewGameSession.Game_session_setting.Max_player = MaxPlayer;
 		NewGameSession.Game_session_setting.Current_player = 1;
+		NewGameSession.Game_session_setting.Settings.JsonObject = OtherSettings;
 		NewGameSession.Game_version = GameVersion;
 		FString Content;
 		FJsonObjectConverter::UStructToJsonObjectString(NewGameSession, Content);
