@@ -331,7 +331,7 @@ pipeline {
                         slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
                     }
                     if (buildByTimer) {
-                        slackSend (channel: "#automation-monitoring", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.BRANCH_NAME}` \n `${gitHash}`: ${message} ")
+                        slackSend (channel: "#product-justice-automation-monitoring", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.BRANCH_NAME}` \n `${gitHash}`: ${message} ")
                     }
                     bitbucketBuildStatus("SUCCESS", "Bitbucket_Build_AccelByte", "accelbyte")
                 }
@@ -355,7 +355,7 @@ pipeline {
                         slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
                     }
                     if (buildByTimer) {
-                        slackSend (channel: "#automation-monitoring", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nFail Log : <${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log|Jenkin's #${env.BUILD_NUMBER} Artifact> \nProject: `${env.JOB_NAME}` \nBranch: `${env.BRANCH_NAME}` \nCommit: `${gitHash}`: ${message}")
+                        slackSend (channel: "#product-justice-automation-monitoring", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nFail Log : <${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log|Jenkin's #${env.BUILD_NUMBER} Artifact> \nProject: `${env.JOB_NAME}` \nBranch: `${env.BRANCH_NAME}` \nCommit: `${gitHash}`: ${message}")
                     }
                 }
             }
