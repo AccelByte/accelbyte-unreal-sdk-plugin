@@ -904,5 +904,31 @@ void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHa
 	}));
 }
 
+void User::GetJsonWebToken(const THandler<FJsonWebTokenResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString url;
+	url = Settings.IamServerUrl;
+	if (Settings.IamServerUrl.Contains("/iam"))
+	{
+		url.RemoveFromEnd("/iam");
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/sessions/%s"), *url, *Settings.Namespace, *Credentials.GetUserId(), *Credentials.GetUserSessionId());
+	FString Verb = TEXT("GET");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 } // Namespace Api
 } // Namespace AccelByte

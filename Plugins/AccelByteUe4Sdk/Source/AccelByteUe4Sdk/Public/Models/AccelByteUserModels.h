@@ -413,3 +413,13 @@ struct ACCELBYTEUE4SDK_API FUpdateEmailRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
 		FString EmailAddress;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FJsonWebTokenResponse
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+		FString Jwt_token;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+		FString Session_id;
+};
