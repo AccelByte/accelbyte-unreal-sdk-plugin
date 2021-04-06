@@ -7,6 +7,9 @@
 #include "Core/AccelByteRegistry.h"
 #include <algorithm>
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetry, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
+
 using namespace std;
 
 namespace AccelByte
@@ -168,11 +171,29 @@ void FHttpRetryScheduler::Shutdown()
 	}
 
 	// flush http requests
-	if (RetryList.Num() == 0)
+	if (RetryList.Num() != 0)
 	{
-		FHttpModule::Get().GetHttpManager().Flush(false);
+		double MaxFlushTimeSeconds = -1.0;
+		GConfig->GetDouble(TEXT("HTTP"), TEXT("MaxFlushTimeSeconds"), MaxFlushTimeSeconds, GEngineIni);
+
+		if (MaxFlushTimeSeconds <= 0)
+		{
+			UE_LOG(LogAccelByteHttpRetry, Log, TEXT("HTTP MaxFlushTimeSeconds is not configured, it may prevent the shutdown, until all requests flushed"));
+		}
+
+		// try flush once
+		FHttpModule::Get().GetHttpManager().Flush(true);
 		FHttpModule::Get().GetHttpManager().Tick(0);
 		PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+		// cancel unfinished http requests, so don't hinder the shutdown
+		for (auto& Task : RetryList)
+		{
+			if (Task->Request.IsValid() && Task->Request->GetStatus() == EHttpRequestStatus::Processing)
+			{
+				Task->Request->CancelRequest();
+			}
+		}
+		RetryList.Empty();
 	};
 }
 
