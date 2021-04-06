@@ -254,6 +254,7 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::UnknownError), TEXT("Unknown error.") },
 		{ static_cast<int32>(ErrorCodes::JsonDeserializationFailed), TEXT("JSON deserialization failed.") },
 		{ static_cast<int32>(ErrorCodes::NetworkError), TEXT("There is no response.") },
+		{ static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in.") },
 		{ static_cast<int32>(ErrorCodes::WebSocketConnectFailed), TEXT("WebSocket connect failed.") },
 
 

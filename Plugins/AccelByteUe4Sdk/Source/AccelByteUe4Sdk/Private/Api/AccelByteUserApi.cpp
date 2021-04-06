@@ -88,14 +88,32 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 	}
-	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Session>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			OnSuccess.ExecuteIfBound();
+			GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FPagedPlatformLinks& Result)
+			{
+				if (Result.Data.Num() > 0)
+				{
+					for (auto& data : Result.Data)
+					{
+						if (data.PlatformId == GetPlatformString(PlatformType))
+						{
+							AccelByte::Api::User::Credentials.SetPlatformInfo(data.PlatformUserId);
+							OnSuccess.ExecuteIfBound();
+							return;
+						}
+					}
+				}
+				OnError.ExecuteIfBound((int32)ErrorCodes::InvalidResponse, ErrorMessages::Default.at((int32)ErrorCodes::InvalidResponse));
+			}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
 		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);

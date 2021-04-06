@@ -327,5 +327,53 @@ void Entitlement::UpdateDistributionReceiver(const FString& ExtUserId, const FAc
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString PlatformText = TEXT("");
+	FString Content = TEXT("{}");
+	FString platformUserId = Credentials.GetPlatformBoundUserId();
+
+	switch (PlatformType)
+	{
+	case EAccelBytePlatformSync::STEAM:
+		PlatformText = TEXT("steam");
+		if (platformUserId.IsEmpty()) {
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
+			return;
+		}
+		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": %s}"), *Credentials.GetPlatformBoundUserId(), *Settings.AppId);
+		break;
+	case EAccelBytePlatformSync::XBOX_LIVE:
+		PlatformText = TEXT("xbl");
+		break;
+	case EAccelBytePlatformSync::PLAYSTATION:
+		PlatformText = TEXT("psn");
+		break;
+	default:
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform Sync Type is not found"));
+		return;
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *PlatformText);
+
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 } // Namespace Api
 }

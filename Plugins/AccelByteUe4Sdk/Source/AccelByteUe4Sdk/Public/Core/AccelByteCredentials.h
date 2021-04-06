@@ -37,6 +37,7 @@ public:
 	void SetUserSession(const FString& SessionId, double ExpiredTime, const FString& RefreshId);
 	void SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace);
 	void SetUserEmailAddress(const FString& EmailAddress);
+	void SetPlatformInfo(const FString& PlatformUserId);
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
 	const FString& GetUserRefreshId() const;
@@ -50,6 +51,7 @@ public:
 	const FString& GetClientAccessToken() const;
 	const FString& GetClientNamespace() const;
 	const FString& GetUserId() const;
+	const FString& GetPlatformBoundUserId() const;
 	const FString& GetUserDisplayName() const;
 	const FString& GetUserNamespace() const;
 	const FString& GetUserEmailAddress() const;
@@ -78,6 +80,8 @@ private:
 	double UserRefreshBackoff;
 
 	FDelegateHandle PollRefreshTokenHandle;
+
+	FString PlatformBoundUserId;
 };
 
 } // Namespace AccelByte

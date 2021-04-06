@@ -338,7 +338,7 @@ namespace AccelByte
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded. The result is boolean.
 			 * @param OnError This will be called when the operation failed.
-			*/
+			 */
 			void GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
 
 			/**

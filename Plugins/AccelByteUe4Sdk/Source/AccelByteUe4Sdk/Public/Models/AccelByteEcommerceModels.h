@@ -128,6 +128,17 @@ enum class EAccelByteSubscriptionCycle : uint8
 	YEARLY
 };
 
+UENUM(BlueprintType)
+enum class EAccelBytePlatformSync : uint8
+{
+	STEAM = 0,
+	XBOX_LIVE,
+	PLAYSTATION,
+	STADIA,
+	EPIC_GAMES,
+	OTHER
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField

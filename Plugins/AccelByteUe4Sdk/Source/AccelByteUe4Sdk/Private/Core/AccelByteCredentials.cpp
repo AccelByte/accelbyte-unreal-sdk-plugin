@@ -28,6 +28,7 @@ Credentials::Credentials()
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
 	, UserRefreshBackoff(0.0)
+	, PlatformBoundUserId(TEXT(""))
 {
 }
 
@@ -38,6 +39,7 @@ void Credentials::ForgetAll()
 	UserNamespace = FString();
 	UserId = FString();
 	UserDisplayName = FString();
+	PlatformBoundUserId = FString();
 
 	UserRefreshBackoff = 0.0;
 	UserRefreshTime = 0.0;
@@ -74,6 +76,11 @@ void Credentials::SetUserLogin(const FString& Id, const FString& DisplayName, co
 	UserNamespace = Namespace;
 }
 
+void Credentials::SetPlatformInfo(const FString& PlatformUserId)
+{
+	PlatformBoundUserId = PlatformUserId;
+}
+
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 {
 	UserEmailAddress = EmailAddress;
@@ -92,6 +99,11 @@ const FString& Credentials::GetUserRefreshId() const
 const FString& Credentials::GetUserNamespace() const
 {
 	return UserNamespace;
+}
+
+const FString& Credentials::GetPlatformBoundUserId() const
+{
+	return PlatformBoundUserId;
 }
 
 Credentials::ESessionState Credentials::GetSessionState() const

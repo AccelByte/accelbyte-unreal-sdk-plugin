@@ -330,6 +330,7 @@ namespace AccelByte
 		InvalidRequest = 14003,
 		InvalidResponse = 14004,
 		NetworkError = 14005,
+		IsNotLoggedIn = 14006,
 		WebSocketConnectFailed = 14201,
 		//
 		//GameServer-side Error Code List

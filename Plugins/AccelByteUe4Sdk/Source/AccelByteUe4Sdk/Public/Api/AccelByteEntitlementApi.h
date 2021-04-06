@@ -127,6 +127,14 @@ public:
 	*/
 	void UpdateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Sync entitlement from 3rd party platform purchase.
+	 *
+	 * @param PlatformType The platform type identifier for sync entitlement.
+	 * @param OnSuccess This will be called when the operation success.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;

@@ -233,6 +233,8 @@ struct ACCELBYTEUE4SDK_API FPlatformLink
 		FString PlatformUserId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
 		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
+		FString AccountGroup;
 };
 
 UENUM(BlueprintType)
