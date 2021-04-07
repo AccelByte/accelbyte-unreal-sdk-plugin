@@ -322,6 +322,7 @@ namespace AccelByte
 		//DSM Error Code List
 		//
 		DedicatedServerNotFoundException = 9014183,
+		DedicatedServerConfigNotFoundException = 9014123,
 		//
 		//Client side Error Code List
 		//
