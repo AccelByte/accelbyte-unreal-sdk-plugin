@@ -713,7 +713,7 @@ bool AgreementGetEligibilityBulkAcceptPolicyVersionsIndirectGetEligibility::RunT
 	// Bulk Accept Policy
 	bool bAcceptPoliciesSuccess = false;
 	bool bProceed = false;
-	FRegistry::Agreement.BulkAcceptPolicyVersions(AcceptAgreementRequests,
+	FRegistry::Agreement.BulkAcceptPolicyVersionsIndirect(AcceptAgreementRequests,
 		THandler<FAccelByteModelsAcceptAgreementResponse>::CreateLambda([&bProceed, &bAcceptPoliciesSuccess](const FAccelByteModelsAcceptAgreementResponse& Response) 
 	{
 		bProceed = Response.Proceed;

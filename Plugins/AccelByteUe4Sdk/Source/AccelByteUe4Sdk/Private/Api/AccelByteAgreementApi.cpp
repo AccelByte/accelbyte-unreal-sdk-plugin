@@ -228,6 +228,31 @@ void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgre
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Agreement::BulkAcceptPolicyVersionsIndirect(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/public/agreements/policies/users/me"), *Settings.AgreementServerUrl);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FAccelByteUtilities::TArrayUStructToJsonString(AgreementRequests, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) 
 {
 	Report report;

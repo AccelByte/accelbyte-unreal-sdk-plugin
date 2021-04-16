@@ -93,6 +93,16 @@ public:
 	void BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
+	* @brief Accepts many legal policy versions all at once. Supply with localized version policy id to accept an agreement.
+	* This endpoint used by APIGateway during new user registration and user login.
+	* 
+	* @param AgreementRequests List of localized policy versions to accept.
+	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsAcceptAgreementResponse.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void BulkAcceptPolicyVersionsIndirect(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	* @brief Accepts a legal policy version. Supply with localized version policy id to accept an agreement.
 	*
 	* @param LocalizedPolicyVersionId A localized policy version Id to accept.
