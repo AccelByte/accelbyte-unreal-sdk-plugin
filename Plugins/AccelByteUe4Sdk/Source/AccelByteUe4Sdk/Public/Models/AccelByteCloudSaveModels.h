@@ -6,6 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h" 
+#include "Models/AccelByteGeneralModels.h"
+#include "AccelByteCloudSaveModels.generated.h"
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 {
@@ -31,4 +33,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsConcurrentReplaceRequest
 {
 	FDateTime UpdatedAt;
 	FJsonObject Value;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedRecordsKey
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
+	TArray<FString> Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
+	FAccelByteModelsPaging Paging;
 };

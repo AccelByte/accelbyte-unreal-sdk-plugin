@@ -32,6 +32,7 @@
 #include "GameServerApi/AccelByteServerAchievementApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "GameServerApi/AccelByteServerLobby.h"
+#include "GameServerApi/AccelByteServerCloudSaveApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -69,3 +70,4 @@ GameServerApi::ServerGameTelemetry FRegistry::ServerGameTelemetry(FRegistry::Ser
 GameServerApi::ServerAchievement FRegistry::ServerAchievement(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerLobby FRegistry::ServerLobby(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCredentials, FRegistry::ServerSettings);

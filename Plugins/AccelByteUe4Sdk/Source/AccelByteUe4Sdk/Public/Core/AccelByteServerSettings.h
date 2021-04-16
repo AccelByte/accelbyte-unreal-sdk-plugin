@@ -29,6 +29,7 @@ public:
 	FString AchievementServerUrl;
 	FString MatchmakingServerUrl;
 	FString LobbyServerUrl;
+	FString CloudSaveServerUrl;
 };
 
 } // Namespace AccelByte
@@ -87,6 +88,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString LobbyServerUrl;
+
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString CloudSaveServerUrl;
 };
 
 
@@ -138,6 +142,9 @@ public:
 	static FString GetLobbyServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetCloudSaveServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
@@ -175,4 +182,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetCloudSaveServerUrl(const FString& CloudServerUrl);
 };

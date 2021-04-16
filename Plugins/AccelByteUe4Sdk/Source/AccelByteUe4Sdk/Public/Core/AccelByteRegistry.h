@@ -50,6 +50,7 @@ namespace GameServerApi
 	class ServerAchievement;
 	class ServerMatchmaking;
 	class ServerLobby;
+	class ServerCloudSave;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -88,6 +89,7 @@ public:
 	static GameServerApi::ServerAchievement ServerAchievement;
 	static GameServerApi::ServerMatchmaking ServerMatchmaking;
 	static GameServerApi::ServerLobby ServerLobby;
+	static GameServerApi::ServerCloudSave ServerCloudSave;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

@@ -76,6 +76,11 @@ FString UAccelByteBlueprintsServerSettings::GetLobbyServerUrl()
 	return FRegistry::ServerSettings.LobbyServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetCloudSaveServerUrl()
+{
+	return FRegistry::ServerSettings.CloudSaveServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -139,4 +144,9 @@ void UAccelByteBlueprintsServerSettings::SetMatchmakingServerUrl(const FString& 
 void UAccelByteBlueprintsServerSettings::SetLobbyServerUrl(const FString & LobbyServerUrl)
 {
 	FRegistry::ServerSettings.LobbyServerUrl = LobbyServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetCloudSaveServerUrl(const FString & CloudSaveServerUrl)
+{
+	FRegistry::ServerSettings.CloudSaveServerUrl = CloudSaveServerUrl;
 }

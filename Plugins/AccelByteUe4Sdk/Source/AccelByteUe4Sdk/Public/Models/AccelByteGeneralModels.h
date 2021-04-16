@@ -19,7 +19,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {
 	GENERATED_BODY()
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
         FString First;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
         FString Last;
