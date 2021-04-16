@@ -324,6 +324,11 @@ void OverwritePartyStorage(const FString& PartyId, FJsonObjectWrapper PartyData,
 	FRegistry::ServerLobby.WritePartyStorage(PartyId, [PartyData](FJsonObjectWrapper) { return PartyData; }, OnSuccess, OnError, 3);
 }
 
+void GameClientOverwritePartyStorage(Api::Lobby* lobby, const FString& PartyId, FJsonObjectWrapper PartyData, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError)
+{
+	lobby->WritePartyStorage(PartyId, [PartyData](FJsonObjectWrapper) { return PartyData; }, OnSuccess, OnError, 3);
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyTestSetup, "AccelByte.Tests.ServerLobby.A.Setup", AutomationFlagMaskServerLobby);
 bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 {
@@ -586,6 +591,43 @@ bool PartyStorageTest_GetPartyStorage_NonExistParty::RunTest(const FString& Para
 	Waiting(bGetPartyStorageDone, "Waiting for get result");
 
 	check(!bGetPartyStorageSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success, "AccelByte.Tests.ServerLobby.B.GetPartyStorage_ValidPartyButEmptyStorage_Success", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bPartyFormed = false;
+	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
+	Waiting(bPartyFormed, "Waiting for Party Formed");
+
+	bSGetInfoPartySuccess = false;
+	SLobbies[0]->SendInfoPartyRequest();
+	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+
+	FString PartyId = SinfoPartyResponse.PartyId;
+
+	bool bGetPartyStorageSuccess = false;
+	FAccelByteModelsPartyDataNotif PartyData;
+
+	FRegistry::ServerLobby.GetPartyStorage(PartyId, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bGetPartyStorageSuccess, &PartyData](FAccelByteModelsPartyDataNotif result)
+		{
+			bGetPartyStorageSuccess = true;
+			PartyData = result;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	
+	check(bGetPartyStorageSuccess);
+	check(PartyData.Custom_attribute.JsonObject->Values.Num() == 0);
+
+	bool bCleanUpDone = false;
+	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
+	Waiting(bCleanUpDone, "Waiting for clean up done");
+	SLobbyDisconnect(4);
+	ResetResponses();
 
 	return true;
 }
@@ -1252,6 +1294,182 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientGetPartyStorage_NonExistParty, "AccelByte.Tests.ServerLobby.B.ClientGetPartyStorage_NonExistParty_Fail", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientGetPartyStorage_NonExistParty::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bGetPartyStorageSuccess = false;
+	bool bGetPartyStorageDone = false;
+	FString DummyPartyId = "thisPartyNeverExisted";
+
+	FAccelByteModelsPartyDataNotif PartyData;
+	SLobbies[0]->GetPartyStorage(DummyPartyId, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bGetPartyStorageDone, &bGetPartyStorageSuccess](FAccelByteModelsPartyDataNotif result)
+		{
+			bGetPartyStorageDone = true;
+			bGetPartyStorageSuccess = true;
+		}), FErrorHandler::CreateLambda([&bGetPartyStorageDone](int32 ErrorCode, FString ErrorMessage)
+			{
+				bGetPartyStorageDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bGetPartyStorageDone, "Waiting for get result");
+
+	check(!bGetPartyStorageSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success, "AccelByte.Tests.ServerLobby.B.ClientGetPartyStorage_ValidPartyButEmptyStorage_Success", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bPartyFormed = false;
+	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
+	Waiting(bPartyFormed, "Waiting for Party Formed");
+
+	bSGetInfoPartySuccess = false;
+	SLobbies[0]->SendInfoPartyRequest();
+	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+
+	FString PartyId = SinfoPartyResponse.PartyId;
+
+	bool bGetPartyStorageSuccess = false;
+	FAccelByteModelsPartyDataNotif PartyData;
+
+	SLobbies[0]->GetPartyStorage(PartyId, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bGetPartyStorageSuccess, &PartyData](FAccelByteModelsPartyDataNotif result)
+		{
+			bGetPartyStorageSuccess = true;
+			PartyData = result;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+
+	check(bGetPartyStorageSuccess);
+	check(PartyData.Custom_attribute.JsonObject->Values.Num() == 0);
+
+	bool bCleanUpDone = false;
+	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
+	Waiting(bCleanUpDone, "Waiting for clean up done");
+	SLobbyDisconnect(4);
+	ResetResponses();
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success, "AccelByte.Tests.ServerLobby.B.ClientGetPartyStorage_ValidPartyStorage_Success", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bPartyFormed = false;
+	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
+	Waiting(bPartyFormed, "Waiting for Party Formed");
+
+	bSGetInfoPartySuccess = false;
+	SLobbies[0]->SendInfoPartyRequest();
+	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+
+	FString PartyId = SinfoPartyResponse.PartyId;
+
+	FAccelByteModelsPartyDataNotif WriteNotif;
+	bool bWritePartyStorageSuccess = false;
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
+			WriteNotif = notifResult;
+			bWritePartyStorageSuccess = true;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+
+	check(bWritePartyStorageSuccess);
+
+	bool bGetPartyStorageSuccess = false;
+	FAccelByteModelsPartyDataNotif PartyData;
+
+	SLobbies[0]->GetPartyStorage(PartyId, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bGetPartyStorageSuccess, &PartyData](FAccelByteModelsPartyDataNotif result)
+		{
+			bGetPartyStorageSuccess = true;
+			PartyData = result;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+
+	check(bGetPartyStorageSuccess);
+
+	bool bCleanUpDone = false;
+	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
+	Waiting(bCleanUpDone, "Waiting for clean up done");
+	SLobbyDisconnect(4);
+	ResetResponses();
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientWritePartyStorage_NonExistParty, "AccelByte.Tests.ServerLobby.B.ClientWritePartyStorageInValidParty_Fail", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientWritePartyStorage_NonExistParty::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	FString PartyId = "InvalidParty2434ID";
+	FAccelByteModelsPartyDataNotif WriteNotif;
+	bool bWritePartyStorageSuccess = false;
+	bool bWritePartyStorageDone = false;
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageDone, &bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
+			WriteNotif = notifResult;
+			bWritePartyStorageSuccess = true;
+			bWritePartyStorageDone = true;;
+		}), FErrorHandler::CreateLambda([&bWritePartyStorageDone](int32 ErrorCode, FString ErrorMessage)
+			{
+				UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+				bWritePartyStorageDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bWritePartyStorageDone, "Waiting for write result");
+
+	check(!bWritePartyStorageSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty, "AccelByte.Tests.ServerLobby.B.ClientWriteEmptyPartyStorageValidParty_Success", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bPartyFormed = false;
+	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
+	Waiting(bPartyFormed, "Waiting for Party Formed");
+
+	bSGetInfoPartySuccess = false;
+	SLobbies[0]->SendInfoPartyRequest();
+	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+
+	FString PartyId = SinfoPartyResponse.PartyId;
+
+	FAccelByteModelsPartyDataNotif WriteNotif;
+	bool bWritePartyStorageSuccess = false;
+	FJsonObjectWrapper EmptyStorage;
+	EmptyStorage.JsonObject = MakeShared<FJsonObject>();
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, EmptyStorage, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
+			WriteNotif = notifResult;
+			bWritePartyStorageSuccess = true;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+
+	check(bWritePartyStorageSuccess);
+
+	bool bCleanUpDone = false;
+	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
+	Waiting(bCleanUpDone, "Waiting for clean up done");
+	SLobbyDisconnect(4);
+	ResetResponses();
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientWritePartyStorage_Success, "AccelByte.Tests.ServerLobby.B.ClientWritePartyStorage", AutomationFlagMaskServerLobby);
 bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Parameters)
 {
@@ -1277,12 +1495,12 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 	FString PartyId = ScreatePartyResponse.PartyId;
 	FAccelByteModelsPartyDataNotif WriteNotif;
 	bool bWritePartyStorageSuccess = false;
-	SLobbies[0]->WritePartyStorage(PartyId, [](FJsonObjectWrapper) { return SPartyStorageData; }, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
-	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
-		WriteNotif = notifResult;
-		bWritePartyStorageSuccess = true;
-	}), ServerLobbyErrorHandler);
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
+			WriteNotif = notifResult;
+			bWritePartyStorageSuccess = true;
+		}), ServerLobbyErrorHandler);
 	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 	Waiting(bGetPartyDataNotif, "Waiting get party data notif");
@@ -1330,7 +1548,7 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 
 	for (int i = 0; i < PartySize; i++)
 	{
-		SLobbies[i]->WritePartyStorage(PartyId, [](FJsonObjectWrapper) { return SPartyStorageData; }, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&WriteSuccessCount,&ResultCount](FAccelByteModelsPartyDataNotif notifResult)
+		GameClientOverwritePartyStorage(SLobbies[i].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&WriteSuccessCount, &ResultCount](FAccelByteModelsPartyDataNotif notifResult)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
 			ResultCount++;
@@ -1349,6 +1567,65 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 	// rarely happen
 	check(WriteSuccessCount == 1 || WriteSuccessCount == 2);
 	check(WriteFailCount == 1 || WriteFailCount == 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotification, "AccelByte.Tests.ServerLobby.B.ClientOverwritePartyStorage_PartyFormed_SuccessGotNotification", AutomationFlagMaskServerLobby);
+bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotification::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	bool bPartyFormed = false;
+	FormParty(FSimpleDelegate::CreateLambda([&]() { bPartyFormed = true; }));
+	Waiting(bPartyFormed, "Waiting for Party Formed");
+
+	TQueue<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
+	int UpdateCount = 0;
+	const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &UpdateCount](FAccelByteModelsPartyDataNotif result)
+		{
+			UpdateCount++;
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
+			PartyDataNotifResults.Enqueue(result);
+		});
+	for (int i = 0; i < SLobbies.Num(); i++)
+	{
+		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
+	}
+
+	bSGetInfoPartySuccess = false;
+	SLobbies[0]->SendInfoPartyRequest();
+	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+
+	FString PartyId = SinfoPartyResponse.PartyId;
+
+	FAccelByteModelsPartyDataNotif WriteNotif;
+	bool bWritePartyStorageSuccess = false;
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
+			WriteNotif = notifResult;
+			bWritePartyStorageSuccess = true;
+		}), ServerLobbyErrorHandler);
+	FlushHttpRequests();
+	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+
+	WaitUntil([&UpdateCount]() { return UpdateCount == 4; }, 5);
+
+	check(bSGetInfoPartySuccess);
+	check(bWritePartyStorageSuccess);
+
+	while (!PartyDataNotifResults.IsEmpty())
+	{
+		FAccelByteModelsPartyDataNotif PartyData;
+		PartyDataNotifResults.Dequeue(PartyData);
+		check(ComparePartyData(PartyData.Custom_attribute));
+	}
+
+	bool bCleanUpDone = false;
+	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
+	Waiting(bCleanUpDone, "Waiting for clean up done");
+	SLobbyDisconnect(4);
+	ResetResponses();
+
 	return true;
 }
 
