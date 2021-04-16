@@ -57,6 +57,7 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FRegistry::HttpRetryScheduler.Startup();
 	FRegistry::Credentials.Startup();
 	FRegistry::GameTelemetry.Startup();
+	FRegistry::ServerCredentials.Startup();
 }
 
 void FAccelByteUe4SdkModule::ShutdownModule()
@@ -64,6 +65,8 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 	FRegistry::GameTelemetry.Shutdown();
 	FRegistry::Credentials.Shutdown();
 	FRegistry::HttpRetryScheduler.Shutdown();
+	FRegistry::ServerCredentials.Shutdown();
+
 	UnregisterSettings();
 }
 

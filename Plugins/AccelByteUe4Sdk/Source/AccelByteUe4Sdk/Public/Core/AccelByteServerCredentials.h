@@ -34,13 +34,20 @@ public:
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
+	void ScheduleRefreshToken(double RefreshTime);
 	void SetMatchId(const FString& GivenMatchId);
+
+	void Startup();
+	void Shutdown();
+	void PollRefreshToken(double CurrentTime);
 
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */
 	const FString& GetClientAccessToken() const;
 	const FString& GetClientNamespace() const;
+	const double GetExpireTime() const;
+	const double GetRefreshTime() const;
 	const FString& GetMatchId() const;
 	ESessionState GetSessionState() const;
 
@@ -49,9 +56,17 @@ private:
 	FString ClientSecret;
 	FString ClientAccessToken;
 	FString ClientNamespace;
+
+	double ClientExpireTime;
+	double ClientRefreshTime;
+	double ClientRefreshBackoff;
+
 	FString MatchId;
 	
 	ESessionState ClientSessionState;
+
+	FDelegateHandle PollRefreshTokenHandle;
+	void RemoveFromTicker(FDelegateHandle& handle);
 };
 
 } // Namespace AccelByte
