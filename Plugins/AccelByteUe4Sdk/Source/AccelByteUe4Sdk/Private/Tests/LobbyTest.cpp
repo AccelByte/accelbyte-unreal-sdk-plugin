@@ -545,6 +545,7 @@ TSharedRef<FDsmConfig> GetNewDsmConfig()
 	dsmConfig.Buffer_count = 0;
 	dsmConfig.Allow_version_override = false;
 	dsmConfig.Ports = GetNewCustomPorts().Get();
+	dsmConfig.Protocol = "udp";
 
 	TSharedRef<FDsmConfig> sharedResult = MakeShared<FDsmConfig>(dsmConfig);
 	return sharedResult;

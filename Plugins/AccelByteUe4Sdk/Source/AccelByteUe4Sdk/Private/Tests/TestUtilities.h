@@ -878,6 +878,8 @@ struct FDsmConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
 	TMap<FString, int32> Ports;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
+	FString Protocol;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
 	TArray<FString> Providers;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
 	int32 Session_timeout;
