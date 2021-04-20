@@ -24,3 +24,16 @@ void UAccelByteBlueprintsEntitlement::QueryUserEntitlements(const FString & Enti
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}), EntitlementClass = EAccelByteEntitlementClass::NONE, AppType = EAccelByteAppType::NONE);
 }
+
+void UAccelByteBlueprintsEntitlement::QueryUserEntitlementsMany(const FString& EntitlementName,
+    const TArray<FString>& ItemIds, int32 Page, int32 Size, const FQueryUserEntitlementSuccess& OnSuccess,
+    const FBlueprintErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
+{
+	FRegistry::Entitlement.QueryUserEntitlements(EntitlementName, ItemIds, Page, Size, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([OnSuccess](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+    {
+        OnSuccess.ExecuteIfBound(Result);
+    }), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+    {
+        OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+    }), EntitlementClass = EAccelByteEntitlementClass::NONE, AppType = EAccelByteAppType::NONE);
+}

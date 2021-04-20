@@ -20,4 +20,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api ")
 		static void QueryUserEntitlements(const FString & EntitlementName, const FString & ItemId, int32 Page, int32 Size, const FQueryUserEntitlementSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement | Api ")
+        static void QueryUserEntitlementsMany(const FString & EntitlementName, const TArray<FString> & ItemIds, int32 Page, int32 Size, const FQueryUserEntitlementSuccess& OnSuccess, const FBlueprintErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+
 };
