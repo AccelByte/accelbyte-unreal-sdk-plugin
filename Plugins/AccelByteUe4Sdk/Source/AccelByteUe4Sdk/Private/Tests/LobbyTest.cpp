@@ -3363,6 +3363,243 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingTempParty_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartTempParty", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Parameters)
+{
+	LobbyConnect(2);
+
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
+	bool bMatchmakingNotifSuccess[2] = { false };
+	bool bMatchmakingNotifError[2] = { false };
+	int matchMakingNotifNum = 0;
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[0] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[0] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[0] = true;
+		}
+	}));
+
+	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[1] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[1] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[1] = true;
+		}
+	}));
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
+	{UserCreds[0].GetUserId()});
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[1]->SendStartMatchmaking(ChannelName, TArray<FString>
+	{UserCreds[1].GetUserId()});
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < 2)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	check(!bReadyConsentNotifError);
+	readyConsentNoticeResponse[1] = readyConsentNotice;
+
+	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
+	check(!bDsNotifError);
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
+	check(!bMatchmakingNotifError[0]);
+	check(!bMatchmakingNotifError[1]);
+	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
+	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
+	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
+	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+
+	LobbyDisconnect(2);
+	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartTempPartyOfTwo", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Parameters)
+{
+	const int UserNum = 4;
+	LobbyConnect(UserNum);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[UserNum];
+	bool bMatchmakingNotifSuccess[UserNum] = { false };
+	bool bMatchmakingNotifError[UserNum] = { false };
+	int matchMakingNotifNum = 0;
+	for (int i = 0; i < UserNum; i++)
+	{
+		Lobbies[i]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+		Lobbies[i]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+		Lobbies[i]->SetDsNotifDelegate(DsNotifDelegate);
+
+		Lobbies[i]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&, i](FAccelByteModelsMatchmakingNotice result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+			matchmakingNotifResponse[i] = result;
+			matchMakingNotifNum++;
+			if (result.Status != EAccelByteMatchmakingStatus::Start)
+			{
+				bMatchmakingNotifSuccess[i] = true;
+				if (result.MatchId.IsEmpty())
+				{
+					bMatchmakingNotifError[i] = true;
+				}
+			}
+		}));
+
+		Lobbies[i]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	}
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 2;
+	AllianceRule.max_number = 2;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 2;
+
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
+	{UserCreds[0].GetUserId(), UserCreds[1].GetUserId()});
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[2]->SendStartMatchmaking(ChannelName, TArray<FString>
+	{UserCreds[2].GetUserId(), UserCreds[3].GetUserId()});
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	while (matchMakingNotifNum < UserNum)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[UserNum];
+	for (int i = 0; i < UserNum; i++)
+	{
+		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+
+		Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+		check(!bReadyConsentNotifError);
+		readyConsentNoticeResponse[i] = readyConsentNotice;
+
+		bReadyConsentNotifSuccess = false;
+		bReadyConsentNotifError = false;
+	}
+
+	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
+	check(!bDsNotifError);
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
+	for (int i = 0; i < UserNum; i++)
+	{
+		check(!bMatchmakingNotifError[i]);
+		check(!matchmakingNotifResponse[i].MatchId.IsEmpty());
+		check(matchmakingNotifResponse[i].Status == EAccelByteMatchmakingStatus::Done);
+		check(readyConsentNoticeResponse[i].MatchId == matchmakingNotifResponse[i].MatchId);
+	}
+
+	LobbyDisconnect(UserNum);
+	resetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCancelMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingCancel", AutomationFlagMaskLobby);
 bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
@@ -3422,6 +3659,73 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	/*Waiting(bMatchmakingNotifSuccess, "Waiting or Matchmaking Notification...");
 	check(!bMatchmakingNotifError);
 	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
+
+	LobbyDisconnect(1);
+	resetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCancelMatchmakingTempParty_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingCancelTempParty", AutomationFlagMaskLobby);
+bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parameters)
+{
+	LobbyConnect(1);
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[0]->SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse;
+	bool bMatchmakingNotifSuccess = false;
+	bool bMatchmakingNotifError = false;
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse = result;
+		bMatchmakingNotifSuccess = true;
+		if (result.Status != EAccelByteMatchmakingStatus::Cancel)
+		{
+			bMatchmakingNotifError = true;
+		}
+	}));
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 1;
+	AllianceRule.max_number = 2;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 1;
+
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>{UserCreds[0].GetUserId()});
+
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	check(!bStartMatchmakingError);
+
+	Lobbies[0]->SendCancelMatchmaking(ChannelName, true);
+
+	Waiting(bCancelMatchmakingSuccess, "Cancelling Matchmaking...");
+	check(!bCancelMatchmakingError);
+
+	/*Waiting(bMatchmakingNotifSuccess, "Waiting or Matchmaking Notification...");
+	check(!bMatchmakingNotifError);
+	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	LobbyDisconnect(1);
 	resetResponses();

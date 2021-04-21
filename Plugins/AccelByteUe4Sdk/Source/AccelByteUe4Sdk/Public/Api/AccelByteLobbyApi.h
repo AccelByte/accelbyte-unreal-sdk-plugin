@@ -395,15 +395,53 @@ public:
 	* @param ClientVersion The version of DS, fill it blank to choose the default version.
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
 	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
 	*/
-	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>());
+	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> TempPartyUserIds = TArray<FString>());
+
+	/**
+	* @brief start the matchmaking
+	*
+	* @param GameMode The mode that party member want to play.
+	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	*/
+	FString SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>());
+
+	/**
+	* @brief start the matchmaking
+	*
+	* @param GameMode The mode that party member want to play.
+	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	*/
+	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> TempPartyUserIds = TArray<FString>());
+
+	/**
+	* @brief start the matchmaking
+	*
+	* @param GameMode The mode that party member want to play.
+	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	*/
+	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>());
 
 	/**
 	* @brief cancel the currently running matchmaking process
 	*
 	* @param GameMode The mode that party member want to cancel.
+	* @param IsTemParty Is canceling matchmaking that was started using temporary party.
 	*/
-	FString SendCancelMatchmaking(FString GameMode);
+	FString SendCancelMatchmaking(FString GameMode, bool IsTempParty = false);
 
 	/**
 	* @brief send ready consent request
