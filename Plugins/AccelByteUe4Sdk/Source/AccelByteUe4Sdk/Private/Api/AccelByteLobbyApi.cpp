@@ -359,7 +359,7 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes)
+FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -412,17 +412,46 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}"), *partyAttributeSerialized));
 	}
 
+	if (TempPartyUserIds.Num() > 0)
+	{
+		FString STempParty = TEXT("");
+		for (int i = 0; i < TempPartyUserIds.Num(); i++)
+		{
+			STempParty.Append(FString::Printf(TEXT("%s"), *TempPartyUserIds[i]));
+			if (i + 1 < TempPartyUserIds.Num())
+			{
+				STempParty.Append(TEXT(","));
+			}
+		}
+		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
+	}
+
 	return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
 		Contents);
 }
 
-FString Lobby::SendCancelMatchmaking(FString GameMode)
+FString Lobby::SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes)
+{
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+}
+
+FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TArray<FString> TempPartyUserIds)
+{
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+}
+
+FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies)
+{
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+}
+
+FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
-		FString::Printf(TEXT("gameMode: %s\n"), *GameMode));
+		FString::Printf(TEXT("gameMode: %s\nisTempParty: %s"), *GameMode, (IsTempParty ? TEXT("true") : TEXT("false"))));
 }
 
 FString Lobby::SendReadyConsentRequest(FString MatchId)
