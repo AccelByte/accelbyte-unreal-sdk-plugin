@@ -30,46 +30,6 @@ const auto DSMTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode,
 	UE_LOG(LogAccelByteDSMTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMGetServerLatencies, "AccelByte.Tests.DSM.A.GetServerUrl", AutomationFlagMaskDSM);
-bool DSMGetServerLatencies::RunTest(const FString& Parameters)
-{
-	bool bGetServerUrlSuccess = false;
-	const auto PrevCommandParams = FCommandLine::Get();
-
-	FString Region = Environment::GetEnvironmentVariable(TEXT("SDK_TEST_REGION"), 100);
-	FString Provider = Environment::GetEnvironmentVariable(TEXT("SDK_TEST_PROVIDER"), 100);
-
-	if (Region.IsEmpty())
-	{
-		Region = TEXT("us-west-2");
-	}
-
-	if (Provider.IsEmpty())
-	{
-		Provider = TEXT("aws");
-	}
-
-	FCommandLine::Set(*FString::Printf(TEXT("-region=%s -provider=%s"), *Region, *Provider));
-	// force parse command line
-	FRegistry::ServerDSM.ParseCommandParam();
-
-	FAccelByteModelsDSMClient DSMServer;
-	FRegistry::ServerDSM.GetRegionDSMUrl(THandler<FAccelByteModelsDSMClient>::CreateLambda([&bGetServerUrlSuccess, &DSMServer](const FAccelByteModelsDSMClient& Result)
-	{
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Get Server Url Success! Address: %s | Region: %s | Status: %s"), *Result.Host_address, *Result.Region, *Result.Status);
-		bGetServerUrlSuccess = true;
-		DSMServer = Result;
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-
-	// set to previous state
-	FCommandLine::Set(PrevCommandParams);
-
-	Waiting(bGetServerUrlSuccess, "Waiting for get server Url...");
-	check(bGetServerUrlSuccess);
-	return true;
-}
-
 #if ENABLE_RUN_COULD_SERVER_TESTS
 //need to add arg -provider=baremetal when run the test, need to run on cloud
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterStaticServer, "AccelByte.Tests.DSM.A.RegisterStaticServer", AutomationFlagMaskDSM);
@@ -86,7 +46,6 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 	check(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
 	FRegistry::ServerDSM.RegisterServerToDSM(7777, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
 	{
 		bServerRegisterSuccess = true;
@@ -95,7 +54,7 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
 	check(bServerRegisterSuccess);
-	WaitUntil([](){ return false;}, 15);
+	WaitUntil([](){ return false;}, 5);
 	bool bServerShutdownSuccess = false;
 	FRegistry::ServerDSM.SendShutdownToDSM(false, "", FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
 	{
@@ -124,7 +83,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 	check(bClientLoginSuccess);
 
 	bool bLocalServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
 	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bLocalServerRegisterSuccess]()
 	{
 		bLocalServerRegisterSuccess = true;
@@ -205,7 +163,6 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 	check(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 2);
 	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
 	{
 		bServerRegisterSuccess = true;
@@ -227,72 +184,5 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
 	check(bServerShutdownSuccess);
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMStopHeartBeatAfterFewRetries, "AccelByte.Tests.DSM.A.HeartBeatRetry", AutomationFlagMaskDSM);
-bool DSMStopHeartBeatAfterFewRetries::RunTest(const FString& Parameters)
-{
-	FString ServerName = TEXT("DSMTest");
-	bool bClientLoginSuccess = false;
-	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
-	{
-		bClientLoginSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
-
-	bool bServerRegisterSuccess = false;
-	FRegistry::ServerDSM.ConfigureHeartBeat(true, 1);
-	bool bHeartBeatErrorGet = false;
-	FRegistry::ServerDSM.SetOnHeartBeatErrorDelegate(FErrorHandler::CreateLambda([&bHeartBeatErrorGet](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		bHeartBeatErrorGet = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
-	}));
-	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
-	{
-		bServerRegisterSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Success..!"));
-	}), FErrorHandler::CreateLambda([&bServerRegisterSuccess](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		bServerRegisterSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
-	}));
-	FlushHttpRequests();
-	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
-
-	bool bDeleteServerSuccess = false;
-	DSM_Delete_Server(ServerName, FVoidHandler::CreateLambda([&bDeleteServerSuccess]()
-	{
-		bDeleteServerSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Delete Server Success..!"));
-	}), DSMTestErrorHandler);
-	FlushHttpRequests();
-	Waiting(bDeleteServerSuccess, "Waiting for delete server...");
-
-	WaitUntil([&bHeartBeatErrorGet]()
-	{
-		if (!bHeartBeatErrorGet)
-		{
-			FlushHttpRequests();
-		}
-		return bHeartBeatErrorGet;
-	}, 50, "Heartbeat Error");
-	check(bHeartBeatErrorGet);
-	bool bServerShutdownSuccess = false;
-	FRegistry::ServerDSM.SendShutdownToDSM(false, "", FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
-	{
-		bServerShutdownSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Shutdown Success..!"));
-	}), FErrorHandler::CreateLambda([&bServerShutdownSuccess](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		bServerShutdownSuccess = true;
-		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
-	}));
-	FlushHttpRequests();
-	Waiting(bServerShutdownSuccess, "Waiting for shutdown server Url...");
 	return true;
 }

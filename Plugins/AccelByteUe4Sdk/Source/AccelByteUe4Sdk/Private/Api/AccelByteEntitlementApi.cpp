@@ -76,6 +76,69 @@ void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const FS
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const TArray<FString>& ItemIds,
+	const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess,
+	const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	
+	FString Query = TEXT("");
+	if (!EntitlementName.IsEmpty())
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("entitlementName=%s"), *EntitlementName));
+	}
+	for (const FString& ItemId : ItemIds)
+	{
+		if (!ItemId.IsEmpty())
+		{
+			Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+			Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
+		}
+	}
+	if (Offset>=0)
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+	}
+	if (Limit>=0)
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+	}
+	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("entitlementClazz=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass)));
+	}
+	if (AppType != EAccelByteAppType::NONE)
+	{
+		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
+		Query.Append(FString::Printf(TEXT("appType=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType)));
+	}
+
+	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	
+	FString Verb            = TEXT("GET");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Entitlement::GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
