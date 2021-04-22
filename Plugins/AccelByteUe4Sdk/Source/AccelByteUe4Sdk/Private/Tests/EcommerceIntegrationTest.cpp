@@ -1454,10 +1454,10 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = true;
-	for (auto Entitlement : UserEntitlement.Data)
+	for (auto Grant : GrantedEntitlements)
 	{
 		bool bIsFound = false;
-		for (auto Grant : GrantedEntitlements)
+		for (auto Entitlement : UserEntitlement.Data)
 		{
 			if (Entitlement.ItemId == Grant.ItemId && Entitlement.GrantedCode == Grant.GrantedCode)
 			{
