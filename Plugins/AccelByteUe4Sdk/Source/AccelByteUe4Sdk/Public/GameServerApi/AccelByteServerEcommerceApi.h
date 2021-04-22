@@ -53,6 +53,18 @@ public:
 	 * @param OnError This will be called when the operation fails.
 	 */
 	void CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+	
+	/**
+	* @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
+	*
+	* @param UserId The user who will receive credit.
+	* @param WalletId The wallet id.
+	* @param DebitUserWalletRequest The request to debit a user wallet.
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsWalletInfo&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void DebitUserWallet(const FString& UserId, const FString& WalletId, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+
 
 private:
 	const ServerCredentials& Credentials;

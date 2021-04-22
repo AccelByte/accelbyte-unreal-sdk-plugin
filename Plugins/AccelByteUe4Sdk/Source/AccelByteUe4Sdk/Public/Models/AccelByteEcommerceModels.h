@@ -887,4 +887,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditUserWalletRequest
 		FString Reason;
 };
 
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+	int32 Amount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+	FString Reason;
+};
+
 #pragma endregion WalletModelsField

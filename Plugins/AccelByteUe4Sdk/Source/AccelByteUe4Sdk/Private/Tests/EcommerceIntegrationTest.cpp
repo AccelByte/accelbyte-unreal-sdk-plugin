@@ -970,6 +970,84 @@ bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceDebitUserWallet, "AccelByte.Tests.Ecommerce.E3.DebitUserWallet", AutomationFlagMaskEcommerce)
+bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
+{
+#pragma region GetWalletInfo
+
+	bool bGetWalletSuccess = false;
+	FAccelByteModelsWalletInfo WalletInfo;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
+	FRegistry::Wallet.GetWalletInfoByCurrencyCode(ExpectedCurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfo, &bGetWalletSuccess](const FAccelByteModelsWalletInfo& Result)
+    {
+        UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+        WalletInfo = Result;
+        bGetWalletSuccess = true;
+    }), EcommerceErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
+	check(bGetWalletSuccess)
+#pragma endregion GetWalletInfo
+
+#pragma region ServerLogin
+
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+        FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+    {
+        bServerLoginWithClientCredentialsDone = true;
+    }), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+	check(bServerLoginWithClientCredentialsDone)
+#pragma endregion ServerLogin
+
+#pragma region CreditUserWallet
+
+	bool bCreditWalletSuccess = false;
+	bool bBalanceIncrease = false;
+	FAccelByteModelsCreditUserWalletRequest request;
+	request.Amount = 1000;
+	request.Source = EAccelByteCreditUserWalletSource::PURCHASE;
+	request.Reason = TEXT("GameServer Ecommerce CreditUserWallet test.");
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreditUserWallet"));
+	FRegistry::ServerEcommerce.CreditUserWallet(FRegistry::Credentials.GetUserId(), SDKCurrencyCode, request, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfo, &bBalanceIncrease, &request, &bCreditWalletSuccess](const FAccelByteModelsWalletInfo& Result)
+    {
+        UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+        bBalanceIncrease = ((WalletInfo.Balance + request.Amount) == Result.Balance);
+        bCreditWalletSuccess = true;
+		WalletInfo = Result;
+    }), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
+	check(bCreditWalletSuccess)
+#pragma endregion CreditUserWallet
+	
+#pragma region DebitUserWallet
+
+	bool bDebitWalletSuccess = false;
+	bool bWalletDecreased = false;
+	FAccelByteModelsDebitUserWalletRequest DebitRequest;
+	DebitRequest.Amount = 50;
+	DebitRequest.Reason = TEXT("Integration Test");
+	FRegistry::ServerEcommerce.DebitUserWallet(FRegistry::Credentials.GetUserId(), WalletInfo.Id,
+		DebitRequest, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&bDebitWalletSuccess, &WalletInfo, &DebitRequest, &bWalletDecreased](const FAccelByteModelsWalletInfo& Result)
+	{
+		bWalletDecreased = ((WalletInfo.Balance - DebitRequest.Amount) == Result.Balance);
+		bDebitWalletSuccess = true;
+	}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDebitWalletSuccess, "Waiting for debiting the user wallet");
+
+	check(bWalletDecreased)
+#pragma endregion DebitUserWallet
+	
+	return true;
+}
+
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceEntitlementGrant, "AccelByte.Tests.Ecommerce.F1.EntitlementGrantSuccess", AutomationFlagMaskEcommerce);
 bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 {
