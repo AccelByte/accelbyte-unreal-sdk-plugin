@@ -267,6 +267,38 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FRequestFriendsNotif, const FAccelByteModelsRequestFriendsNotif&);
 
+	//Block
+	/**
+	 * @brief delegate for handling block player response
+	 */
+	DECLARE_DELEGATE_OneParam(FBlockPlayerResponse, const FAccelByteModelsBlockPlayerResponse&);
+
+	/**
+	 * @brief delegate for handling unblock player response
+	 */
+	DECLARE_DELEGATE_OneParam(FUnblockPlayerResponse, const FAccelByteModelsUnblockPlayerResponse&);
+	
+	/**
+	 * @brief delegate for handling list blocked user response
+	 */
+	DECLARE_DELEGATE_OneParam(FListBlockedUserResponse, const FAccelByteModelsListBlockedUserResponse&);
+
+	/**
+	 * @brief delegate for handling list blocker response
+	 */
+	DECLARE_DELEGATE_OneParam(FListBlockerResponse, const FAccelByteModelsListBlockerResponse&);
+
+	// Block + Notif
+	/**
+	 * @brief delegate for handling notification when you block a player
+	 */
+	DECLARE_DELEGATE_OneParam(FBlockPlayerNotif, const FAccelByteModelsBlockPlayerNotif&);
+
+	/**
+	 * @brief delegate for handling notification when you unblock a player
+	 */
+	DECLARE_DELEGATE_OneParam(FUnblockPlayerNotif, const FAccelByteModelsUnblockPlayerNotif&);
+
 	//Signaling
 	/**
 	 * @brief delegate for handling signaling P2P message
@@ -513,6 +545,44 @@ public:
 	* @param UserId Targeted user ID.
 	*/
 	void GetFriendshipStatus(FString UserId);
+
+
+	/*
+	 * @brief Block specified player from being able to do certain action against current user
+	 * the specified player will be removed from friend list
+	 * 
+	 * Action that blocked player can't do : 
+	 * -Add Friend
+	 * -Direct Chat
+	 * -Invite to Party
+	 * -Invite to Group
+	 * -Matchmaking as one alliance
+	 * 
+	 *	Additional Limitation : 
+	 *	Blocked Player can't access blocker/current user's user ID
+	 *  
+	 * @param UserID the specified player's user ID. (Target to block)
+	 * 
+	 */
+	 void BlockPlayer(const FString& UserId);
+
+	 /**
+	  * @brief Unblock specified player enabling them to do certain action against current user
+	  *
+	  * Action that unblocked player can do :
+	  * -Add Friend
+	  * -Direct Chat
+	  * -Invite to Party
+	  * -Invite to Group
+	  * -Matchmaking as one alliance
+	  *  
+	  *	Additional Limitation :
+	  *	Unblocked Player can now access blocker/current user's user ID
+	  *
+	  * @param UserID the specified player's user ID. (Target to block)
+	  *
+	  */
+	 void UnblockPlayer(const FString& UserId);
 
 	/**
 	 * @brief Send a signaling message to another user.
@@ -902,6 +972,38 @@ public:
 		GetFriendshipStatusResponse = OnGetFriendshipStatusResponse;
 	};
 
+	// Player
+
+	void SetBlockPlayerResponseDelegate(FBlockPlayerResponse OnBlockPlayerResponse)
+	{
+		BlockPlayerResponse = OnBlockPlayerResponse;
+	};
+
+	void SetUnblockPlayerResponseDelegate(FUnblockPlayerResponse OnUnblockPlayerResponse)
+	{
+		UnblockPlayerResponse = OnUnblockPlayerResponse;
+	};
+
+	void SetListBlockedUserResponseDelegate(FListBlockedUserResponse OnListBlockedUserResponse)
+	{
+		ListBlockedUserResponse = OnListBlockedUserResponse;
+	};
+
+	void SetListBlockerResponseDelegate(FListBlockerResponse OnListBlockerResponse)
+	{
+		ListBlockerResponse = OnListBlockerResponse;
+	};
+
+	void SetBlockPlayerNotifDelegate(FBlockPlayerNotif OnBlockPlayerNotif)
+	{
+		BlockPlayerNotif = OnBlockPlayerNotif;
+	};
+
+	void SetUnblockPlayerNotifDelegate(FUnblockPlayerNotif OnUnblockPlayerNotif)
+	{
+		UnblockPlayerNotif = OnUnblockPlayerNotif;
+	};
+
 	/**
 	* @brief Set SignalingP2P delegate.
 	*
@@ -939,6 +1041,43 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void GetPartyStorage(const FString& PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief  List Blocked User's Id
+	*
+	* @param UserId User Id of the Player.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError);
+
+	/*
+	* @brief List Blocked User's Id, override of GetListOfBlockedUser,
+	* will get current user's List of Blocked User's Id
+	*
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief List Id of Player that blocks an User.
+	*
+	* @param UserId User Id of the Player.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
+
+	/*
+	* @brief List Blockers User's Id, override of GetListOfBlocker,
+	* will get current user's List of Blocker User's Id
+	*
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+	* @param OnError This will be called when the operation failed.
+	*/
+
+	void GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief  Write party storage (attributes) data to the targeted party ID.
@@ -1057,6 +1196,16 @@ private:
 	// Friends + Notification
 	FAcceptFriendsNotif AcceptFriendsNotif;
 	FRequestFriendsNotif RequestFriendsNotif;
+
+	// Block
+	FBlockPlayerResponse BlockPlayerResponse;
+	FUnblockPlayerResponse UnblockPlayerResponse;
+	FListBlockedUserResponse ListBlockedUserResponse;
+	FListBlockerResponse ListBlockerResponse;
+
+	// Block + Notification
+	FBlockPlayerNotif BlockPlayerNotif;
+	FUnblockPlayerNotif UnblockPlayerNotif;
 
 	struct PartyStorageWrapper
 	{
