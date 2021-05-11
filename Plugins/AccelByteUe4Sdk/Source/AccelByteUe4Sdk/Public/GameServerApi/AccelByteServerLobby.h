@@ -28,7 +28,7 @@ namespace GameServerApi
 		/**
 			* @brief Get party data by User Id.
 			*
-			* @param UserId The id of the user who will receive achievement.
+			* @param UserId The id of the user.
 			* @param OnSuccess This will be called when the operation succeeded.
 			* @param OnError This will be called when the operation failed.
 		*/

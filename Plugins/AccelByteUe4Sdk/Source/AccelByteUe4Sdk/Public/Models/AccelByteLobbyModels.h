@@ -676,3 +676,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsActivePartiesData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 		FAccelByteModelsPaging Paging;
 };
+
+// ------------------------------------------------------------------------------------------------
+// Session Attribute
+// ------------------------------------------------------------------------------------------------
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSetSessionAttributesResponse
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString Code;
+};

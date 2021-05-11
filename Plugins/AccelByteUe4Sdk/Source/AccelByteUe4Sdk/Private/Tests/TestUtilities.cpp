@@ -1092,7 +1092,12 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpl
 	Matchmaking_Create_Matchmaking_Channel(channel, AllianceRule, OnSuccess, OnError, joinable);
 }
 
-void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule , const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError, bool joinable)
+void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
+{
+	Matchmaking_Create_Matchmaking_Channel(channel, AllianceRule, TArray<FMatchingRule>(), OnSuccess, OnError, joinable);
+}
+
+void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate & OnSuccess, const FErrorHandler& OnError, bool joinable)
 {
 	FMatchmakingCreateRequest RequestBody;
 	RequestBody.description = channel;
@@ -1100,6 +1105,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 	RequestBody.game_mode = channel;
 
 	RequestBody.rule_set.alliance = AllianceRule;
+	RequestBody.rule_set.matching_rule = MatchingRules;
 	RequestBody.joinable = joinable;
 
 	FString Content;

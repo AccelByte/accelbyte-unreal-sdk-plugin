@@ -58,6 +58,9 @@ namespace Api
 
 		//Signaling
 		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
+
+		//Session Attribute
+		const FString SetSessionAttribute = TEXT("setSessionAttributeRequest");
 	}
 
 	namespace LobbyResponse
@@ -124,6 +127,9 @@ namespace Api
 
 		//Signaling
 		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
+
+		//Session Attribute
+		const FString SessionAttributeSet = TEXT("setSessionAttributeResponse");
 	}
 
 	namespace Prefix
@@ -134,6 +140,7 @@ namespace Api
 		const FString Matchmaking = TEXT("matchmaking");
 		const FString Friends = TEXT("friends");
 		const FString Signaling = TEXT("signaling");
+		const FString Attribute = TEXT("attribute");
 	}
 
 void Lobby::Connect()
@@ -359,7 +366,7 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 // Matchmaking
 //-------------------------------------------------------------------------------------------------
-FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds)
+FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, TArray<FString> ExtraAttributes)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -426,23 +433,37 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
 	}
 
+	if (ExtraAttributes.Num() > 0)
+	{
+		FString SExtraAttributes = TEXT("");
+		for (int i = 0; i < ExtraAttributes.Num(); i++)
+		{
+			SExtraAttributes.Append(FString::Printf(TEXT("%s"), *ExtraAttributes[i]));
+			if (i + 1 < ExtraAttributes.Num())
+			{
+				SExtraAttributes.Append(TEXT(","));
+			}
+		}
+		Contents.Append(FString::Printf(TEXT("extraAttributes: %s\n"), *SExtraAttributes));
+	}
+
 	return SendRawRequest(LobbyRequest::StartMatchmaking, Prefix::Matchmaking,
 		Contents);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes)
+FString Lobby::SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> ExtraAttributes)
 {
-	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds, ExtraAttributes);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TArray<FString> TempPartyUserIds)
+FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TArray<FString> TempPartyUserIds, TArray<FString> ExtraAttributes)
 {
-	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds, ExtraAttributes);
 }
 
-FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies)
+FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TArray<FString> ExtraAttributes)
 {
-	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds);
+	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds, ExtraAttributes);
 }
 
 FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
@@ -609,6 +630,18 @@ FString Lobby::SendSignalingMessage(const FString& UserId, const FString& Messag
 	
 	return SendRawRequest(LobbyRequest::SignalingP2PNotif, Prefix::Signaling,
 		FString::Printf(TEXT("destinationId: %s\nmessage: %s\n"), *UserId, *Message));
+}
+
+//-------------------------------------------------------------------------------------------------
+// Session Attributes
+//-------------------------------------------------------------------------------------------------
+FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::SetSessionAttribute, Prefix::Attribute,
+		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetClientNamespace(), *Key, *Value));
 }
 
 void Lobby::UnbindEvent()
@@ -1040,6 +1073,9 @@ return; \
 		SignalingP2P.ExecuteIfBound(JsonParsed->GetStringField(TEXT("destinationId")), JsonParsed->GetStringField(TEXT("message")));
 		return;
 	}
+
+	// Session Attribute
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse)
 
 #undef HANDLE_LOBBY_MESSAGE
 #ifdef DEBUG_LOBBY_MESSAGE

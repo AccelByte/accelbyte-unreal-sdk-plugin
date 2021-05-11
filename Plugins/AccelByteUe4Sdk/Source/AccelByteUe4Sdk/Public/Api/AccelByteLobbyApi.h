@@ -273,6 +273,11 @@ public:
 	 */
 	DECLARE_DELEGATE_TwoParams(FSignalingP2P, const FString&, const FString&);
 
+	/**
+	 * @brief delegate for handling response when setting session attribute
+	 */
+	DECLARE_DELEGATE_OneParam(FSetSessionAttributeResponse, const FAccelByteModelsSetSessionAttributesResponse&);
+
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	
@@ -396,8 +401,9 @@ public:
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
 	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
 	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	* @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
 	*/
-	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> TempPartyUserIds = TArray<FString>());
+	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> TempPartyUserIds = TArray<FString>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
 	* @brief start the matchmaking
@@ -408,8 +414,9 @@ public:
 	* @param ClientVersion The version of DS, fill it blank to choose the default version.
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
 	* @param PartyAttributes String map custom attributes to be added on matchmaking and also will be passed to ds too. Example: {"Map":"Dungeon1", "Rank":"B", "Stage":"04"}
+	* @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
 	*/
-	FString SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>());
+	FString SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
 	* @brief start the matchmaking
@@ -420,8 +427,9 @@ public:
 	* @param ClientVersion The version of DS, fill it blank to choose the default version.
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
 	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
+	* @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
 	*/
-	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> TempPartyUserIds = TArray<FString>());
+	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> TempPartyUserIds = TArray<FString>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
 	* @brief start the matchmaking
@@ -432,8 +440,9 @@ public:
 	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
 	* @param ClientVersion The version of DS, fill it blank to choose the default version.
 	* @param Latencies list of servers and their latencies to client, DSM will created the server on one of this list. Fill it blank if you use Local DS.
+	* @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
 	*/
-	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>());
+	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
 	* @brief cancel the currently running matchmaking process
@@ -511,6 +520,14 @@ public:
 	 * @param Message Signaling message to be sent.
 	 */
 	FString SendSignalingMessage(const FString& UserId, const FString& Message);
+
+	/**
+	 * @brief Set user attribute to lobby session. 
+	 *
+	 * @param Key the attribute's key.
+	 * @param Value the attribute's value.
+	 */
+	FString SetSessionAttribute(const FString& Key, const FString& Value);
 
 	/**
 	* @brief Unbind all delegates set previously.
@@ -891,6 +908,16 @@ public:
 	};
 
 	/**
+	* @brief Set SetSessionAttribute delegate.
+	*
+	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	*/
+	void SetSetSessionAttributeDelegate(FSetSessionAttributeResponse OnSetSessionAttributeResponse)
+	{
+		SetSessionAttributeResponse = OnSetSessionAttributeResponse;
+	};
+
+	/**
 	* @brief Bulk add friend(s), don't need any confirmation from the player.
 	*
 	* @param UserIds the list of UserId you want to make friend with.
@@ -1031,6 +1058,9 @@ private:
 
 	//Signaling P2P
 	FSignalingP2P SignalingP2P;
+
+	//Session Attribute
+	FSetSessionAttributeResponse SetSessionAttributeResponse;
 };
 
 } // Namespace Api
