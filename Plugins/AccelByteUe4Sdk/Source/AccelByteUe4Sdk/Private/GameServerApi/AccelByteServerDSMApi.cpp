@@ -12,6 +12,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteUtilities.h"
 #include "Http.h"
 #include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
@@ -41,7 +42,7 @@ namespace AccelByte
 					DSPubIp = Result.Ip;
 					RegisterServerToDSM(Port, OnSuccess, OnError);
 				});
-				GetPubIp(GetPubIpDelegate, OnError);
+				FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
 			}
 			else
 			{
@@ -112,7 +113,7 @@ namespace AccelByte
 					DSPubIp = Result.Ip;
 					SendShutdownToDSM(KillMe, MatchId, OnSuccess, OnError);
 				});
-				GetPubIp(GetPubIpDelegate, OnError);
+				FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
 			}
 			else
 			{
@@ -196,6 +197,18 @@ namespace AccelByte
 			}
 		}
 
+		void ServerDSM::RegisterLocalServerToDSM(const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		{
+			Report report;
+			report.GetFunctionLog(FString(__FUNCTION__));
+
+			GetPubIpDelegate.BindLambda([this, Port, ServerName_, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
+			{
+				RegisterLocalServerToDSM(Result.Ip, Port, ServerName_, OnSuccess, OnError);
+			});
+			FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
+		}
+
 		void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
 			Report report;
@@ -242,23 +255,6 @@ namespace AccelByte
 			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 			Request->SetURL(Url);
 			Request->SetHeader(TEXT("Authorization"), Authorization);
-			Request->SetVerb(Verb);
-			Request->SetHeader(TEXT("Content-Type"), ContentType);
-			Request->SetHeader(TEXT("Accept"), Accept);
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-		}
-
-		void ServerDSM::GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
-		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
-			FString Url = FString::Printf(TEXT("https://api.ipify.org?format=json"));
-			FString Verb = TEXT("GET");
-			FString ContentType = TEXT("application/json");
-			FString Accept = TEXT("application/json");
-
-			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-			Request->SetURL(Url);
 			Request->SetVerb(Verb);
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);

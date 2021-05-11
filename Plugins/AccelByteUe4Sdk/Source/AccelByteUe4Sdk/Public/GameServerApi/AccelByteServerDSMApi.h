@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
+#include "Core/AccelByteUtilities.h"
 
 class IWebSocket;
 
@@ -55,6 +56,15 @@ public:
     void RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/*
+	 * @brief send register local server to DSM using public IP
+	 *
+	 * @param Port the port where your game server run.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	*/
+	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/*
 	 * @brief send shutdown request to DSM
 	 *
 	 * @param KillMe true if you want DSM to kill your DS. false if your DS already on shutting down state.
@@ -99,8 +109,6 @@ private:
 	ServerDSM(ServerDSM&&) = delete; // Move constructor
 	ServerDSM& operator=(ServerDSM const&) = delete; // Copy assignment operator
 	ServerDSM& operator=(ServerDSM &&) = delete; // Move assignment operator
-
-	void GetPubIp(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
 
 	FString ServerName = "";
 	FString Provider = "";

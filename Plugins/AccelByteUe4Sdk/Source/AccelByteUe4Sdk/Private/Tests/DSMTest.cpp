@@ -186,3 +186,39 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 	check(bServerShutdownSuccess);
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSMRegisterLocalServerWithPublicIP, "AccelByte.Tests.DSM.A.RegisterLocalServerWithPublicIp", AutomationFlagMaskDSM);
+bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
+{
+	FString ServerName = TEXT("AccelByteTesting");
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+	{
+		bClientLoginSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
+	}), DSMTestErrorHandler);
+	Waiting(bClientLoginSuccess, "Waiting for Login client...");
+	check(bClientLoginSuccess);
+
+	bool bServerRegisterSuccess = false;
+	FRegistry::ServerDSM.RegisterLocalServerToDSM(7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
+	{
+		bServerRegisterSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local with public IP Success..!"));
+	}), DSMTestErrorHandler);
+	Waiting(bServerRegisterSuccess, "Waiting for Register Local with public IP...");
+	check(bServerRegisterSuccess);
+	WaitUntil([]()
+	{
+		return false;
+	}, 15);
+	bool bServerShutdownSuccess = false;
+	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
+	{
+		bServerShutdownSuccess = true;
+		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
+	}), DSMTestErrorHandler);
+	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
+	check(bServerShutdownSuccess);
+	return true;
+}

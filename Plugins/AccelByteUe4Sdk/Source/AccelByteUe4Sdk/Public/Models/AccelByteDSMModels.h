@@ -115,14 +115,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMClient
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPubIp
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | Ip")
-		FString Ip;
-};
-
-USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsServerInfo
 {
 	GENERATED_BODY()
