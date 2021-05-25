@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.35.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/2.35.0%0D2.34.0) (2021-05-25)
+
+
+### Features
+
+* **dsm:** add RegisterLocalServer with public ip address & moved GetPublicIp to AccelByteUtilites ([62a2d53](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/62a2d53395e8a462ee0cc39ecaa10bb04e5c2711)), closes [#307](https://accelbyte.atlassian.net/browse/307)
+* **lobby:** add SetSessionAttribute function & matchmaking with extra attribute field ([3f3dcdc](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/3f3dcdc69df550905a12cd2bdb3aeda8de18c677)), closes [#303](https://accelbyte.atlassian.net/browse/303)
+
+
+### Bug Fixes
+
+* **Utilities:** fix FAccelByteModelsPubIp undefined in UE4 4.20 ([8495c02](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/8495c02526ce04c5a7b9706b2956af24c1659658)), closes [#310](https://accelbyte.atlassian.net/browse/310)
+
 ## [2.34.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/2.34.0%0D2.33.0) (2021-04-28)
 
 
