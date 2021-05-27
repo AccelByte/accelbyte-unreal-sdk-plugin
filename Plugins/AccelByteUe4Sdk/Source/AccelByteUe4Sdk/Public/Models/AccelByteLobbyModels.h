@@ -767,3 +767,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsListBlockerResponse
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 		TArray<FBlockerData> Data;
 };
+
+// ------------------------------------------------------------------------------------------------
+// General
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbySessionId
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | General | LobbySessionId")
+	FString LobbySessionID;
+};
