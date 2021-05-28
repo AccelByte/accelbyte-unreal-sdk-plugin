@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -272,6 +272,9 @@ namespace AccelByte
 		ExceedMaxRedeemCountPerCodeException = 37174,
 		ExceedMaxRedeemCountPerUserException = 37175,
 		CodeHasBeenRedeemedException = 37176,
+		CodeRedeemptionNotStartedException = 37177,
+		CodeRedeemptionAlreadyEndedException = 37178,
+		MaxRedeemCountPerCodePerCampaignExceededException = 37179,
 		//
 		//Social Error Code List
 		//Activity

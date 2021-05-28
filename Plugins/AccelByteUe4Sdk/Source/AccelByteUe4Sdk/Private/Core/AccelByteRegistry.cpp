@@ -11,6 +11,7 @@
 #include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteWalletApi.h"
+#include "Api/AccelByteFulfillmentApi.h"
 #include "Api/AccelByteCloudStorageApi.h"
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteGameProfileApi.h"
@@ -49,6 +50,7 @@ Api::Entitlement FRegistry::Entitlement(FRegistry::Credentials, FRegistry::Setti
 Api::Order FRegistry::Order(FRegistry::Credentials, FRegistry::Settings);
 Api::Item FRegistry::Item(FRegistry::Credentials, FRegistry::Settings);
 Api::Wallet FRegistry::Wallet(FRegistry::Credentials, FRegistry::Settings);
+Api::Fulfillment FRegistry::Fulfillment(FRegistry::Credentials, FRegistry::Settings);
 Api::CloudStorage FRegistry::CloudStorage(FRegistry::Credentials, FRegistry::Settings);
 Api::Lobby FRegistry::Lobby(FRegistry::Credentials, FRegistry::Settings);
 Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Settings);
