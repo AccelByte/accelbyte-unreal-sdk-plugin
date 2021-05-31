@@ -4794,6 +4794,7 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 	Lobby& Lobby = FRegistry::Lobby;
 	int NumLobbyConnected = 0;
 	bool bLobbyDisconnected = false;
+	FAccelByteModelsDisconnectNotif DisconnectNotifResponse;
 	Lobby.SetConnectSuccessDelegate(
 		FSimpleDelegate::CreateLambda([&]()
 		{
@@ -4803,6 +4804,11 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
 		{
 			bLobbyDisconnected = true;
+		}));
+	Lobby.SetDisconnectNotifDelegate(Lobby::FDisconnectNotif::CreateLambda([&](const FAccelByteModelsDisconnectNotif& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DisconnectNotif: %s"), *Result.Message);
+			DisconnectNotifResponse = Result;
 		}));
 
 	Lobby.Connect();
@@ -4820,6 +4826,7 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 	check(!Lobby.IsConnected());
 	check(bLobbyDisconnected);
 	check(NumLobbyConnected == 1);
+	check(DisconnectNotifResponse.Message == "session deleted");
 	check(LogoutDone);
 
 	Lobby.Disconnect();
@@ -4859,6 +4866,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
 	int NumLobbyConnected = 0;
 	bool bLobbyDisconnected = false;
+	FAccelByteModelsDisconnectNotif DisconnectNotifResponse;
 	Lobby.SetConnectSuccessDelegate(
 		FSimpleDelegate::CreateLambda([&]()
 		{
@@ -4868,6 +4876,11 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
 		{
 			bLobbyDisconnected = true;
+		}));
+	Lobby.SetDisconnectNotifDelegate(Lobby::FDisconnectNotif::CreateLambda([&](const FAccelByteModelsDisconnectNotif& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DisconnectNotif: %s"), *Result.Message);
+			DisconnectNotifResponse = Result;
 		}));
 
 	Lobby.Connect();
@@ -4894,6 +4907,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 	check(bLobbyDisconnected);
 	check(OtherLobby.IsConnected());
 	check(NumLobbyConnected == 1);
+	check(DisconnectNotifResponse.Message == "multiple session login detected");
 
 	Lobby.Disconnect();
 	OtherLobby.Disconnect();

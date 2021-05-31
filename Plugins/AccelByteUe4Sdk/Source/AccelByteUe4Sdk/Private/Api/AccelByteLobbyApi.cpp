@@ -685,6 +685,7 @@ void Lobby::OnConnectionError(const FString& Error)
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
+	OnMessage(Reason);
 	if (StatusCode >= 4000)
 	{
 		Disconnect();
@@ -990,6 +991,7 @@ else \
 return; \
 }\
 
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::DisconnectNotif, FAccelByteModelsDisconnectNotif, DisconnectNotif);
     // Party
     HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, PartyInfoResponse);
     HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyCreate, FAccelByteModelsCreatePartyResponse, PartyCreateResponse);
@@ -1150,6 +1152,22 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 			DataWrapper->OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		})
 		);
+}
+
+void Lobby::SetRetryParameters(int32 TotalTimeout, int32 BackoffDelay, int32 MaxDelay)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	if (WebSocket.IsValid())
+	{
+		UE_LOG(LogAccelByteLobby, Log, TEXT("Can't change retry parameters! Lobby is already connected."));
+		return;
+	}
+
+	Lobby::TotalTimeout = TotalTimeout;
+	Lobby::InitialBackoffDelay = BackoffDelay;
+	Lobby::MaxBackoffDelay = MaxDelay;
 }
 
 Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, float PingDelay, float InitialBackoffDelay, float MaxBackoffDelay, float TotalTimeout, TSharedPtr<IWebSocket> WebSocket)

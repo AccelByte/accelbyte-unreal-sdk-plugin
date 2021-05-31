@@ -279,6 +279,7 @@ public:
 	DECLARE_DELEGATE_OneParam(FSetSessionAttributeResponse, const FAccelByteModelsSetSessionAttributesResponse&);
 
 	DECLARE_DELEGATE(FConnectSuccess);
+	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
 	
 public:
@@ -541,6 +542,10 @@ public:
 	void SetConnectFailedDelegate(const FErrorHandler& OnConnectError)
 	{
 		ConnectError = OnConnectError;
+	}
+	void SetDisconnectNotifDelegate(const FDisconnectNotif OnDisconnectNotice)
+	{
+		DisconnectNotif = OnDisconnectNotice;
 	}
 	void SetConnectionClosedDelegate(const FConnectionClosed& OnConnectionClosed)
 	{
@@ -948,6 +953,15 @@ public:
 	*/
 	void WritePartyStorage(const FString& PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, uint32 RetryAttempt = 1);
 
+	/**
+	* @brief Change the delay parameters to maintain connection in the lobby before lobby connected.
+	*
+	* @param TotalTimeout Time limit until stop to re-attempt.
+	* @param BackoffDelay Initial delay time.
+	* @param MaxDelay Maximum delay time.
+	*/
+	void SetRetryParameters(int32 TotalTimeout = 60000, int32 BackoffDelay = 1000, int32 MaxDelay = 30000);
+	
 	static FString LobbyMessageToJson(FString Message);
 
 private:
@@ -968,9 +982,9 @@ private:
 
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
-	const float InitialBackoffDelay;
-	const float MaxBackoffDelay;
-	const float TotalTimeout;
+	float InitialBackoffDelay;
+	float MaxBackoffDelay;
+	float TotalTimeout;
 	bool bWasWsConnectionError = false;
 	float BackoffDelay;
 	float RandomizedBackoffDelay;
@@ -986,6 +1000,7 @@ private:
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
     FErrorHandler ParsingError;
+	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
 	
     // Party 

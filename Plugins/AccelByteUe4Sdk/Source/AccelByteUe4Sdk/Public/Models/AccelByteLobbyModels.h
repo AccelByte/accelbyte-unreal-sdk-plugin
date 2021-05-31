@@ -486,6 +486,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRematchmakingNotice
 	int32 BanDuration;
 };
 
+// Lobby Disconnect Notice
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDisconnectNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | General | DisconnectNotif")
+	FString Message;
+};
+
 // ------------------------------------------------------------------------------------------------
 // Friends
 // ------------------------------------------------------------------------------------------------
