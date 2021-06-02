@@ -25,6 +25,7 @@ namespace Api
 	class Order;
 	class Item;
 	class Wallet;
+	class Fulfillment;
 	class CloudStorage;
 	class Lobby;
 	class GameProfile;
@@ -68,6 +69,7 @@ public:
 	static Api::Order Order;
 	static Api::Item Item;
 	static Api::Wallet Wallet;
+	static Api::Fulfillment Fulfillment;
 	static Api::CloudStorage CloudStorage;
 	static Api::Lobby Lobby;
 	static Api::GameProfile GameProfile;

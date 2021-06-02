@@ -322,7 +322,7 @@ void FlushHttpRequests()
 	FHttpModule::Get().GetHttpManager().Flush(false);
 }
 
-void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	/*
 	 Check the currency that expected for integration test. If it's already created, it doesn't need to be created again.
@@ -677,6 +677,70 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	Waiting(bGrandchildItemCreated, "Waiting for grand child item created...");
 	check(bGrandchildItemCreated);
 
+#pragma region CreateRedeemableInGameItem
+
+	FLocalization redeemableItemLocalization
+	{
+		Variables.redeemableItemTitle,
+		"Redeemable item",
+		"Redeemable item, virtual currency, free"
+	};
+	TMap<FString, FLocalization> redeemableItemLocalizations;
+	redeemableItemLocalizations.Add("en", redeemableItemLocalization);
+
+	FCreateRegionDataItem redeemableItemRegionData
+	{
+		0,
+		0,
+		0,
+		0,
+		"SDKC",
+		EAccelByteItemCurrencyType::VIRTUAL,
+		FRegistry::Settings.Namespace,
+		FDateTime::UtcNow().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601(),
+		FDateTime::UtcNow().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601()
+	};
+	FItemCreateRequest redeemableItemRequest
+	{
+		EAccelByteItemType::INGAMEITEM,
+		Variables.redeemableItemTitle,
+		EAccelByteEntitlementType::CONSUMABLE,
+		1,
+		false,
+		"",
+		EAccelByteAppType::GAME,
+		"",
+		Variables.ExpectedCurrency.currencyCode,
+		FRegistry::Settings.Namespace,
+		Variables.ExpectedRootCategoryPath,
+		redeemableItemLocalizations,
+		EAccelByteItemStatus::ACTIVE,
+		"skuReedemableItem",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
+		FRegionDataUS{{redeemableItemRegionData}},
+		emptyStrings,
+		emptyStrings,
+		-1,
+		-1,
+		"",
+		0,
+		"classless"
+	};
+	bool bRedeemableItemCreated = false;
+	Ecommerce_Item_Create(redeemableItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRedeemableItemCreated, &Variables](const FItemFullInfo& Result)
+		{
+			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM redeemable is created"));
+			Variables.redeemableItem = Result;
+			bRedeemableItemCreated = true;
+		}), OnError);
+	FlushHttpRequests();
+	Waiting(bRedeemableItemCreated, "Waiting for child item created...");
+	check(bRedeemableItemCreated);
+#pragma endregion
+
 	/*
 	 Publish this store, CreatedTemporaryStoreInfo.
 	*/
@@ -690,10 +754,340 @@ void SetupEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& 
 	Waiting(bPublishTemporaryStoreSuccess, "Waiting for publish temp store...");
 	check(bPublishTemporaryStoreSuccess);
 
+
+#pragma region CreateCampaign
+	bool bGetCampaignSuccess = false;
+	FCampaignPagingSlicedResult GetCampaignResult;
+	Ecommerce_Campaign_Get_ByName(
+		Variables.campaignName,
+		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result) 
+			{
+				GetCampaignResult = Result;
+				bGetCampaignSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetCampaignSuccess, "Waiting for get Campaign Info...");
+
+	check(bGetCampaignSuccess);
+
+	FRedeemableItem redeemableItem = FRedeemableItem
+	{
+		Variables.redeemableItem.itemId,
+		Variables.redeemableItemTitle,
+		1
+	};
+
+	if (GetCampaignResult.data.Num() == 0)
+	{
+		FCampaignCreateModel campaignCreate
+		{
+			Variables.campaignName,
+			"UE4 Campaign Test",
+			TArray<FString>(),
+			"ACTIVE",
+			-1,
+			1,
+			-1,
+			-1,
+			FDateTime::UtcNow().ToIso8601(),
+			FDateTime::MaxValue().ToIso8601(),
+			"ITEM",
+			TArray<FRedeemableItem>{ redeemableItem }
+		};
+
+		bool bCreateCampaignSuccess = false;
+		Ecommerce_Campaign_Create(
+			campaignCreate,
+			THandler<FCampaignInfo>::CreateLambda([&bCreateCampaignSuccess, &Variables](const FCampaignInfo& Result) 
+				{
+					Variables.campaignResult = Result;
+					bCreateCampaignSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bCreateCampaignSuccess, "Waiting for Campaign Created...");
+
+		check(bCreateCampaignSuccess);
+	}
+	else
+	{
+		FCampaignUpdateModel campaignUpdate
+		{
+			Variables.campaignName,
+			"UE4 Campaign Test",
+			TArray<FString>(),
+			"ACTIVE",
+			-1,
+			1,
+			-1,
+			-1,
+			FDateTime::UtcNow().ToIso8601(),
+			FDateTime::MaxValue().ToIso8601(),
+			"ITEM",
+			TArray<FRedeemableItem>{ redeemableItem }
+		};
+
+		bool bUpdateCampaignSuccess = false;
+		Ecommerce_Campaign_Update(
+			GetCampaignResult.data[0].id,
+			campaignUpdate,
+			THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &Variables](const FCampaignInfo& Result)
+				{
+					Variables.campaignResult = Result;
+					bUpdateCampaignSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bUpdateCampaignSuccess, "Waiting for Campaign Update...");
+		
+		check(bUpdateCampaignSuccess);
+	}
+
+	bGetCampaignSuccess = false;
+	Ecommerce_Campaign_Get_ByName(
+		Variables.expiredCampaignName,
+		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result) 
+			{
+				GetCampaignResult = Result;
+				bGetCampaignSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetCampaignSuccess, "Waiting for get Campaign Info...");
+
+	check(bGetCampaignSuccess);
+
+	if (GetCampaignResult.data.Num() == 0)
+	{
+		FCampaignCreateModel campaignCreate
+		{
+			Variables.expiredCampaignName,
+			"UE4 Expired Campaign Test",
+			TArray<FString>(),
+			"ACTIVE",
+			-1,
+			-1,
+			-1,
+			-1,
+			FDateTime::MinValue().ToIso8601(),
+			FDateTime::MinValue().ToIso8601(),
+			"ITEM",
+			TArray<FRedeemableItem>()
+		};
+
+		bool bCreateExpiredCampaignSuccess = false;
+		Ecommerce_Campaign_Create(
+			campaignCreate,
+			THandler<FCampaignInfo>::CreateLambda([&bCreateExpiredCampaignSuccess, &Variables](const FCampaignInfo& Result)
+				{
+					Variables.expiredCampaignResult = Result;
+					bCreateExpiredCampaignSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bCreateExpiredCampaignSuccess, "Waiting for Campaign Created...");
+
+		check(bCreateExpiredCampaignSuccess);
+	}
+	else
+	{
+		Variables.expiredCampaignResult = GetCampaignResult.data[0];
+	}
+
+	bool bGetNotStartedCampaignSuccess = false;
+	Ecommerce_Campaign_Get_ByName(
+		Variables.notStartedCampaignName,
+		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result)
+			{
+				GetCampaignResult = Result;
+				bGetNotStartedCampaignSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetNotStartedCampaignSuccess, "Waiting for get Campaign Info...");
+
+	check(bGetNotStartedCampaignSuccess);
+
+	if (GetCampaignResult.data.Num() == 0)
+	{
+		FCampaignCreateModel campaignCreate
+		{
+			Variables.notStartedCampaignName,
+			"UE4 Not Started Campaign Test",
+			TArray<FString>(),
+			"ACTIVE",
+			-1,
+			-1,
+			-1,
+			-1,
+			FDateTime::MaxValue().ToIso8601(),
+			FDateTime::MaxValue().ToIso8601(),
+			"ITEM",
+			TArray<FRedeemableItem>()
+		};
+		bool bCreateNotStartedCampaignSuccess = false;
+		Ecommerce_Campaign_Create(
+			campaignCreate,
+			THandler<FCampaignInfo>::CreateLambda([&bCreateNotStartedCampaignSuccess, &Variables](const FCampaignInfo& Result)
+				{
+					Variables.notStartedCampaignResult = Result;
+					bCreateNotStartedCampaignSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bCreateNotStartedCampaignSuccess, "Waiting for Campaign Created...");
+
+		check(bCreateNotStartedCampaignSuccess);
+	}
+	else
+	{
+		Variables.notStartedCampaignResult = GetCampaignResult.data[0];
+	}
+#pragma endregion CreateCampaign
+
+#pragma region CreateCampaignCode
+
+	FCampaignCodeCreateModel campaignCodesCreate = FCampaignCodeCreateModel{ 1 };
+	FCampaignCodeCreateResult createCampaignCodesResult;
+	bool bCreateCampaignCodesSuccess = false;
+	Ecommerce_CampaignCodes_Create(
+		Variables.campaignResult.id,
+		campaignCodesCreate,
+		THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result) 
+			{
+				createCampaignCodesResult = Result;
+				bCreateCampaignCodesSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bCreateCampaignCodesSuccess, "Waiting fore create Campaign Code...");
+
+	check(bCreateCampaignCodesSuccess);
+
+	FCodeInfoPagingSlicedResult getCampaignCodesResult;
+	bool bGetCampaignCodeSuccess = false;
+	Ecommerce_CampaignCodes_Get(
+		Variables.campaignResult.id,
+		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result) 
+			{
+				getCampaignCodesResult = Result;
+				bGetCampaignCodeSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetCampaignCodeSuccess, "Waiting for Get Campaign Code...");
+	
+	check(bGetCampaignCodeSuccess);
+	
+	for (auto codeInfo : getCampaignCodesResult.data) 
+	{
+		bool bCodeFound = false;
+		for (auto codeItem : codeInfo.items) 
+		{
+			if(codeItem.itemId == Variables.redeemableItem.itemId)
+			{
+				Variables.codeInfo = codeInfo;
+				bCodeFound = true;
+				break;
+			}
+		}
+		if (bCodeFound) break;
+	}
+
+	check(!Variables.codeInfo.id.IsEmpty());
+
+	bool bGetExpiredCampaignCodeSuccess = false;
+	Ecommerce_CampaignCodes_Get(
+		Variables.expiredCampaignResult.id,
+		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetExpiredCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result)
+			{
+				getCampaignCodesResult = Result;
+				bGetExpiredCampaignCodeSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetExpiredCampaignCodeSuccess, "Waiting for Get Campaign Code...");
+
+	check(bGetExpiredCampaignCodeSuccess);
+
+	if (getCampaignCodesResult.data.Num() == 0)
+	{
+		bool bCreateExpiredCampaignCodesSuccess = false;
+		Ecommerce_CampaignCodes_Create(
+			Variables.expiredCampaignResult.id,
+			campaignCodesCreate,
+			THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateExpiredCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result)
+				{
+					createCampaignCodesResult = Result;
+					bCreateExpiredCampaignCodesSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bCreateExpiredCampaignCodesSuccess, "Waiting fore create Campaign Code...");
+
+		check(bCreateExpiredCampaignCodesSuccess);
+
+		bGetExpiredCampaignCodeSuccess = false;
+		Ecommerce_CampaignCodes_Get(
+			Variables.expiredCampaignResult.id,
+			THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetExpiredCampaignCodeSuccess, &getCampaignCodesResult, &Variables](const FCodeInfoPagingSlicedResult& Result)
+				{
+					getCampaignCodesResult = Result;
+					Variables.expiredCodeInfo = getCampaignCodesResult.data[0];
+					bGetExpiredCampaignCodeSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bGetExpiredCampaignCodeSuccess, "Waiting for Get Campaign Code...");
+
+		check(bGetExpiredCampaignCodeSuccess);
+	}
+	else
+	{
+		Variables.expiredCodeInfo = getCampaignCodesResult.data[0];
+	}
+
+	bool bGetNotStartedCampaignCodeSuccess = false;
+	Ecommerce_CampaignCodes_Get(
+		Variables.notStartedCampaignResult.id,
+		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result)
+			{
+				getCampaignCodesResult = Result;
+				bGetNotStartedCampaignCodeSuccess = true;
+			}), OnError);
+	FlushHttpRequests();
+	Waiting(bGetNotStartedCampaignCodeSuccess, "Waiting for Get Campaign Code...");
+
+	check(bGetExpiredCampaignCodeSuccess);
+
+	if (getCampaignCodesResult.data.Num() == 0)
+	{
+		bool bCreateNotStartedCampaignCodesSuccess = false;
+		Ecommerce_CampaignCodes_Create(
+			Variables.notStartedCampaignResult.id,
+			campaignCodesCreate,
+			THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateNotStartedCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result)
+				{
+					createCampaignCodesResult = Result;
+					bCreateNotStartedCampaignCodesSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bCreateNotStartedCampaignCodesSuccess, "Waiting fore create Campaign Code...");
+
+		check(bCreateNotStartedCampaignCodesSuccess);
+
+		bGetNotStartedCampaignCodeSuccess = false;
+		Ecommerce_CampaignCodes_Get(
+			Variables.notStartedCampaignResult.id,
+			THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignCodeSuccess, &getCampaignCodesResult, &Variables](const FCodeInfoPagingSlicedResult& Result)
+				{
+					getCampaignCodesResult = Result;
+					Variables.notStartedCodeInfo = getCampaignCodesResult.data[0];
+					bGetNotStartedCampaignCodeSuccess = true;
+				}), OnError);
+		FlushHttpRequests();
+		Waiting(bGetNotStartedCampaignCodeSuccess, "Waiting for Get Campaign Code...");
+
+		check(bGetNotStartedCampaignCodeSuccess);
+	}
+	else
+	{
+		Variables.notStartedCodeInfo = getCampaignCodesResult.data[0];
+	}
+#pragma endregion CreateCampaignCode
 	OnSuccess.ExecuteIfBound();
 }
 
-void TearDownEcommerce(EcommerceExpectedVariable Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	// Delete testing currency
 	bool bCurrencyDeleted = false;
@@ -1078,6 +1472,138 @@ void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& Us
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Campaign_Create(FCampaignCreateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Campaign_Update(FString campaignId, FCampaignUpdateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_CampaignCodes_Create(FString campaignId, FCampaignCodeCreateModel body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Campaign_Get_ByName(FString name, const THandler<FCampaignPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *BaseUrl, *FRegistry::Settings.Namespace);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Query = FString::Printf(TEXT("?name=%s"), *name);
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+	Url.Append(name.IsEmpty() ? TEXT("") : FString::Printf(TEXT("%s"), *Query));
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_CampaignCodes_Get(FString campaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_CampaignCode_Disable(FString code, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *BaseUrl, *FRegistry::Settings.Namespace, *code);
+	FString Verb = TEXT("PUT");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 

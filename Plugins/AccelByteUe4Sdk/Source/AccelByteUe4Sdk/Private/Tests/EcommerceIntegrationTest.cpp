@@ -14,6 +14,7 @@
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteWalletApi.h"
 #include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteFulfillmentApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "Core/AccelByteRegistry.h"
@@ -70,15 +71,35 @@ FStoreCreateRequest TemporaryStore
 	"en",
 	"US"
 };
-const EcommerceExpectedVariable ExpectedVariable{
+FItemFullInfo EmptyItem;
+FCampaignInfo EmptyCampaignInfo;
+FCodeInfo EmptyCodeInfo;
+EcommerceExpectedVariable ExpectedVariable{
 	"/UE4RootCategory",
 	"/UE4RootCategory/UE4ChildCategory",
 	"/UE4RootCategory/UE4ChildCategory/UE4GrandChildCategory",
 	CurrencyRequest,
+	"", // CampaignCode
+	"UE4CampaignTest", // CampaignName
+	"UE4ExpiredCampaignTest", // ExpiredCaimpaignName
+	"UE4NotStartedCampaignTest", // NotStartedCampaignName
+	"UE4RedeemableItem", // RedeemableItemTitle
 	"UE4RootItem",
 	"UE4ChildItem",
 	ArchiveStore,
 	TemporaryStore,
+	1000, // LootCoin Quantity
+	EmptyItem, // RedeemableItem Result
+	EmptyItem, // LootItem Result
+	EmptyItem, // LootCoin Result
+	EmptyItem, // Lootbox Result
+	EmptyItem, // Bundle Result
+	EmptyCampaignInfo, // Campaign Result
+	EmptyCampaignInfo, // ExpiredCampaign Result
+	EmptyCampaignInfo, // NotStartedCampaign Result
+	EmptyCodeInfo, // CodeInfo Result
+	EmptyCodeInfo, // ExpiredCodeInfo Result
+	EmptyCodeInfo // NotStartedCodeInfo Result
 };
 
 FString ExpectedRootCategoryPath = ExpectedVariable.ExpectedRootCategoryPath;
@@ -1553,6 +1574,271 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 	check(bEntitlementGranted);
 #pragma endregion CheckEntitlementGranted
 	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemCode, "AccelByte.Tests.Ecommerce.Fulfillment.1.RedeemCodeSuccess", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemCode::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.codeInfo.value,
+		"US",
+		"en",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result) 
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+			}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bRedeemCodeSuccess, "Waiting for redeem code...");
+
+	check(fulfillmentResult.EntitlementSummaries[0].ItemId == ExpectedVariable.redeemableItem.itemId);
+
+	FAccelByteModelsEntitlementInfo getUserEntitlementByIdResult;
+	bool bGetEntitlementSuccess = false;
+	FRegistry::Entitlement.GetUserEntitlementById(fulfillmentResult.EntitlementSummaries[0].Id, THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&bGetEntitlementSuccess, &getUserEntitlementByIdResult](const FAccelByteModelsEntitlementInfo& Result)
+		{
+			getUserEntitlementByIdResult = Result;
+			bGetEntitlementSuccess = true;
+		}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetEntitlementSuccess, "Waiting for get entitlement...");
+
+	check(getUserEntitlementByIdResult.Id == fulfillmentResult.EntitlementSummaries[0].Id);
+	check(getUserEntitlementByIdResult.ItemId == ExpectedVariable.redeemableItem.itemId);
+	check(getUserEntitlementByIdResult.Source == EAccelByteEntitlementSource::REDEEM_CODE);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemMaxCountExeceeded, "AccelByte.Tests.Ecommerce.Fulfillment.2.RedeemCodeMaxRedeemCountPerCodePerUserExceeded", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemMaxCountExeceeded::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.codeInfo.value,
+		"",
+		"",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone , &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}), 
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::ExceedMaxRedeemCountPerUserException);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemCampaignInactive, "AccelByte.Tests.Ecommerce.Fulfillment.3.RedeemCodeCampaignInactive_Failed", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
+{
+	FCampaignUpdateModel campaignUpdate
+	{
+		ExpectedVariable.campaignName,
+		"UE4 Campaign Test",
+		TArray<FString>(),
+		"INACTIVE",
+		-1,
+		1,
+		-1,
+		-1,
+		FDateTime::UtcNow().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601(),
+		"ITEM",
+		TArray<FRedeemableItem>()
+	};
+	FCampaignInfo updateCampaignResult;
+	bool bUpdateCampaignSuccess = false;
+	Ecommerce_Campaign_Update(
+		ExpectedVariable.campaignResult.id,
+		campaignUpdate,
+		THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &updateCampaignResult](const FCampaignInfo& Result) 
+			{
+				updateCampaignResult = Result;
+				bUpdateCampaignSuccess = true;
+			}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bUpdateCampaignSuccess, "Waiting for update campaign...");
+
+	check(bUpdateCampaignSuccess);
+
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.codeInfo.value,
+		"",
+		"",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}),
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::CampaignIsInactiveException);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemCampaignCodeInactive, "AccelByte.Tests.Ecommerce.Fulfillment.4.RedeemCodeCampaignCodeInactive_Failed", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemCampaignCodeInactive::RunTest(const FString& Parameters)
+{
+	FCodeInfo disableCodeResult;
+	bool bDisableCodeSuccess = false;
+	Ecommerce_CampaignCode_Disable(
+		ExpectedVariable.codeInfo.value,
+		THandler<FCodeInfo>::CreateLambda([&bDisableCodeSuccess, &disableCodeResult](const FCodeInfo& Result) 
+			{
+				disableCodeResult = Result;
+				bDisableCodeSuccess = true;
+			}), EcommerceErrorHandler);
+	FlushHttpRequests();
+	Waiting(bDisableCodeSuccess, "Waiting for disabling code...");
+	
+	check(bDisableCodeSuccess);
+
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.codeInfo.value,
+		"",
+		"",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}),
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::CodeIsInactiveException);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemCodeDoesNotExistInNamespace, "AccelByte.Tests.Ecommerce.Fulfillment.1.CodeDoesNotExistInNamespace_Failed", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemCodeDoesNotExistInNamespace::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		"InvalidCode",
+		"US",
+		"en",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}),
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::CodeNotFoundException);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemRedeemptionNotStarted, "AccelByte.Tests.Ecommerce.Fulfillment.1.RedeemptionNotStarted_Failed", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemRedeemptionNotStarted::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.notStartedCodeInfo.value,
+		"US",
+		"en",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}),
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::CodeRedeemptionNotStartedException);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemRedeemptionAlreadyEnded, "AccelByte.Tests.Ecommerce.Fulfillment.1.RedeemptionAlreadyEnded_Failed", AutomationFlagMaskEcommerce);
+bool ECommerceRedeemRedeemptionAlreadyEnded::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsFulfillmentResult fulfillmentResult;
+	bool bRedeemCodeSuccess = false;
+	bool bRedeemCodeDone = false;
+	int32 ErrorCode;
+	FRegistry::Fulfillment.RedeemCode(
+		ExpectedVariable.expiredCodeInfo.value,
+		"US",
+		"en",
+		THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bRedeemCodeSuccess, &bRedeemCodeDone, &fulfillmentResult](const FAccelByteModelsFulfillmentResult& Result)
+			{
+				fulfillmentResult = Result;
+				bRedeemCodeSuccess = true;
+				bRedeemCodeDone = true;
+			}),
+		FErrorHandler::CreateLambda([&bRedeemCodeDone, &ErrorCode](int32 Code, const FString Message)
+			{
+				ErrorCode = Code;
+				bRedeemCodeDone = true;
+			}));
+	FlushHttpRequests();
+	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+
+	check(!bRedeemCodeSuccess);
+	check(bRedeemCodeDone);
+	check(ErrorCode == (int32)ErrorCodes::CodeRedeemptionAlreadyEndedException);
 	return true;
 }
 
