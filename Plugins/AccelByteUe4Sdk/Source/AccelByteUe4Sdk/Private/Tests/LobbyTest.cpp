@@ -56,20 +56,37 @@ bool bUserPresenceError, bUserPresenceNotifSuccess, bUserPresenceNotifError, bUn
 bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendError, bListIncomingFriendSuccess, bListIncomingFriendError;
 bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSuccess, bOnIncomingRequestNotifError, bOnRequestAcceptedNotifSuccess, bOnRequestAcceptedNotifError;
 bool bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError, bStartMatchmakingSuccess, bStartMatchmakingError;
+// Block 
+bool bBlockPlayerSuccess, bBlockPlayerError, bUnblockPlayerSuccess, bUnblockPlayerError;
+bool bListBlockedUserListSuccess,  bListBlockerUserListError, bListBlockerListSuccess, bListBlockerListError; 
+// Block Notif
+bool bBlockPlayerNotifSuccess, bUnblockPlayerNotifSuccess, bBlockPlayerNotifError, bUnblockPlayerNotifError;
+// Matchmaking
 bool bCancelMatchmakingSuccess, bCancelMatchmakingError, bReadyConsentResponseSuccess, bReadyConsentResponseError, bReadyConsentNotifSuccess, bReadyConsentNotifError;
 bool bDsNotifSuccess, bDsNotifError;
+
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
 FAccelByteModelsPartyJoinReponse joinPartyResponse;
+
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
 FAccelByteModelsNotificationMessage getNotifResponse;
 FAccelByteModelsUsersPresenceNotice userPresenceNotifResponse;
+
 FAccelByteModelsGetFriendshipStatusResponse getFriendshipStatusResponse;
 FAccelByteModelsListOutgoingFriendsResponse listOutgoingFriendResponse;
 FAccelByteModelsListIncomingFriendsResponse listIncomingFriendResponse;
 FAccelByteModelsLoadFriendListResponse loadFriendListResponse;
 FAccelByteModelsRequestFriendsNotif requestFriendNotifResponse;
 FAccelByteModelsAcceptFriendsNotif acceptFriendNotifResponse;
+
+FAccelByteModelsBlockPlayerNotif blockPlayerNotifResponse;
+FAccelByteModelsUnblockPlayerNotif unblockPlayerNotifResponse;
+FAccelByteModelsBlockPlayerResponse blockPlayerResponse;
+FAccelByteModelsUnblockPlayerResponse unblockPlayerResponse;
+FAccelByteModelsListBlockedUserResponse listBlockedUserResponse;
+FAccelByteModelsListBlockerResponse listBlockerResponse;
+
 FAccelByteModelsMatchmakingResponse matchmakingResponse;
 FAccelByteModelsReadyConsentNotice readyConsentNotice;
 FAccelByteModelsDsNotice dsNotice;
@@ -133,6 +150,22 @@ void resetResponses()
 	bRequestFriendError = false;
 	bAcceptFriendSuccess = false;
 	bAcceptFriendError = false;
+
+	// Block
+	bBlockPlayerSuccess = false;
+	bBlockPlayerError = false;
+	bUnblockPlayerSuccess = false;
+	bUnblockPlayerError = false;
+	bListBlockedUserListSuccess = false;
+	bListBlockerUserListError = false;
+	bListBlockerListSuccess = false;
+	bListBlockerListError = false;
+	// Block Notifications
+	bBlockPlayerNotifSuccess = false;
+	bBlockPlayerNotifError = false;
+	bUnblockPlayerNotifSuccess = false;
+	bUnblockPlayerNotifError = false;
+
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
 	bInvitePartySuccess = false;
@@ -455,6 +488,61 @@ const auto CancelFriendDelegate = Api::Lobby::FCancelFriendsResponse::CreateLamb
 		bCancelFriendError = true;
 	}
 });
+
+const auto BlockPlayerDelegate = Api::Lobby::FBlockPlayerResponse::CreateLambda([](FAccelByteModelsBlockPlayerResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Block Player Success!"));
+	bBlockPlayerSuccess = true;
+	if (result.Code != "0")
+	{
+		bBlockPlayerError = true;
+	}
+});
+
+const auto UnblockPlayerDelegate = Api::Lobby::FUnblockPlayerResponse::CreateLambda([](FAccelByteModelsUnblockPlayerResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Unblock Player Success!"));
+	bUnblockPlayerSuccess = true;
+	if (result.Code != "0")
+	{
+		bUnblockPlayerError = true;
+	}
+});
+
+const auto ListBlockedUserDelegate = Api::Lobby::FListBlockedUserResponse::CreateLambda([](FAccelByteModelsListBlockedUserResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("List Blocked User Success!"));
+	bListBlockedUserListSuccess = true;
+	listBlockedUserResponse = result;
+});
+
+const auto ListBlockerDelegate = Api::Lobby::FListBlockerResponse::CreateLambda([](FAccelByteModelsListBlockerResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("List Blocker User Success!"));
+	bListBlockerListSuccess = true;
+	listBlockerResponse = result;
+});
+
+const auto BlockPlayerNotifDelegate = Api::Lobby::FBlockPlayerNotif::CreateLambda([](FAccelByteModelsBlockPlayerNotif result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Block Player Notif Success!"));
+		bBlockPlayerNotifSuccess = true;
+		if (result.BlockedUserId.IsEmpty())
+		{
+			bBlockPlayerNotifError = true;
+		}
+	});
+
+const auto UnblockPlayerNotifDelegate = Api::Lobby::FUnblockPlayerNotif::CreateLambda([](FAccelByteModelsUnblockPlayerNotif result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Unblock Player Notif Success!"));
+	bUnblockPlayerNotifSuccess = true;
+	if (result.UnblockedUserId.IsEmpty())
+	{
+		bUnblockPlayerNotifError = true;
+	}
+});
+
 
 const auto StartMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
 {
@@ -2296,6 +2384,181 @@ bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FStr
 	check(bBulkAddFriendError);
 	check(!bBulkAddFriendSuccess);
 
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestPlayer_BlockPlayer, "AccelByte.Tests.Lobby.B.Player.BlockPlayer", AutomationFlagMaskLobby);
+bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(2);
+
+	// Set Block Player Delegates
+	Lobbies[0]->SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
+
+	Lobbies[1]->SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
+
+	Lobbies[0]->SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
+
+	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
+
+	Lobbies[0]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
+
+	Lobbies[0]->SetListBlockerResponseDelegate(ListBlockerDelegate);
+
+	Lobbies[1]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
+
+	Lobbies[1]->SetListBlockerResponseDelegate(ListBlockerDelegate);
+
+	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+
+	Waiting(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
+	check(bListBlockedUserListSuccess);
+	auto CurrentListBlockedUser = listBlockedUserResponse;
+	
+	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	Waiting(bBlockPlayerSuccess, "Player 0 Blocks Player 1...");
+	check(!bBlockPlayerError);
+
+	FBlockedData BlockedUserData;
+	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
+	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
+	check(bListBlockedUserListSuccess);
+	bool bFound;
+	for (auto ResponseData : listBlockedUserResponse.Data)
+	{
+		if (ResponseData.BlockedUserId.Equals(BlockedUserData.BlockedUserId))
+		{
+			bFound = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocked User Found in the List"));
+		}
+	}
+	check(bFound);
+	bFound = false;
+
+	FBlockerData BlockerUserData;
+	BlockerUserData.UserId = UserCreds[0].GetUserId();
+	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
+	Waiting(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
+	check(bListBlockerListSuccess);
+	for (auto ResponseData : listBlockerResponse.Data)
+	{
+		if (ResponseData.UserId.Equals(BlockerUserData.UserId))
+		{
+			bFound = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocker Found in the List"));
+		}
+	}
+	check(bFound);
+	bFound = false;
+
+	bool bRequestFriendAttemptDone = false;
+	bool bBlockedFriendRequestPassed = false;
+	Lobbies[1]->SetRequestFriendsResponseDelegate(Lobby::FRequestFriendsResponse::CreateLambda([&bRequestFriendAttemptDone, &bBlockedFriendRequestPassed](FAccelByteModelsRequestFriendsResponse Result)
+	{
+		bRequestFriendAttemptDone = true;
+		// Should be changed to something to signify blocked user response, but for now we'll use != 0
+		if (Result.Code != "0")
+		{
+			bBlockedFriendRequestPassed = true;
+		}
+	}));
+	Lobbies[1]->RequestFriend(UserCreds[0].GetUserId());
+	Waiting(bRequestFriendAttemptDone, "Checking if Player 1 has been blocked from Requesting Friend Request properly.");
+	check(bBlockedFriendRequestPassed);
+	bRequestFriendAttemptDone = false;
+	bBlockedFriendRequestPassed = false;
+
+	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
+	Waiting(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
+	check(!bUnblockPlayerError);
+
+	LobbyDisconnect(2);
+	resetResponses();
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestPlayer_BlockPlayerReblockPlayer, "AccelByte.Tests.Lobby.B.Player.BlockReblockPlayer", AutomationFlagMaskLobby);
+bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(2);
+
+	// Set Block Player Delegates
+	Lobbies[0]->SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
+
+	Lobbies[1]->SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
+
+	Lobbies[0]->SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
+
+	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
+
+	Lobbies[0]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
+
+	Lobbies[0]->SetListBlockerResponseDelegate(ListBlockerDelegate);
+
+	Lobbies[1]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
+
+	Lobbies[1]->SetListBlockerResponseDelegate(ListBlockerDelegate);
+
+	// Start Test
+	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+
+	Waiting(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
+	check(bListBlockedUserListSuccess);
+	auto CurrentListBlockedUser = listBlockedUserResponse;
+
+	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	Waiting(bBlockPlayerSuccess, "Requesting Friend...");
+	check(!bBlockPlayerError);
+
+	FBlockedData BlockedUserData;
+	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
+	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
+	check(bListBlockedUserListSuccess);
+	bool bFound;
+	for(auto ResponseData : listBlockedUserResponse.Data)
+	{
+		if (ResponseData.BlockedUserId.Equals(BlockedUserData.BlockedUserId))
+		{
+			bFound = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocked User Found in the List"));
+		}
+	}
+	check(bFound);
+	bFound = false;
+
+	FBlockerData BlockerUserData;
+	BlockerUserData.UserId = UserCreds[0].GetUserId();
+	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
+	Waiting(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
+	check(bListBlockerListSuccess);
+	for (auto ResponseData : listBlockerResponse.Data)
+	{
+		if (ResponseData.UserId.Equals(BlockerUserData.UserId))
+		{
+			bFound = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocker User Found in the List"));
+		}
+	}
+	check(bFound);
+	bFound = false;
+
+	// reblock should result in success
+	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	Waiting(bBlockPlayerSuccess, "Player 0 Blocks Player 1 Again");
+	check(!bBlockPlayerError);
+
+	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
+	Waiting(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
+	check(!bUnblockPlayerError);
+
+	LobbyDisconnect(2);
+	resetResponses();
 	return true;
 }
 

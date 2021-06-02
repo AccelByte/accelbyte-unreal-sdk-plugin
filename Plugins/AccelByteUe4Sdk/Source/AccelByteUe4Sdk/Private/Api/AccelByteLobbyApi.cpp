@@ -56,6 +56,10 @@ namespace Api
 		const FString LoadFriendList = TEXT("listOfFriendsRequest");
 		const FString GetFriendshipStatus = TEXT("getFriendshipStatusRequest");
 
+		// Block Users
+		const FString BlockPlayer = TEXT("blockPlayerRequest");
+		const FString UnblockPlayer = TEXT("unblockPlayerRequest");
+
 		//Signaling
 		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
 
@@ -125,6 +129,14 @@ namespace Api
 		const FString AcceptFriendsNotif = TEXT("acceptFriendsNotif");
 		const FString RequestFriendsNotif = TEXT("requestFriendsNotif");
 
+		// Block
+		const FString BlockPlayer = TEXT("blockPlayerResponse");
+		const FString UnblockPlayer = TEXT("unblockPlayerResponse");
+
+		// Block + Notification
+		const FString BlockPlayerNotif = TEXT("blockPlayerNotif");
+		const FString UnblockPlayerNotif = TEXT("unblockPlayerNotif");
+
 		//Signaling
 		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
 
@@ -139,6 +151,7 @@ namespace Api
 		const FString Presence = TEXT("presence");
 		const FString Matchmaking = TEXT("matchmaking");
 		const FString Friends = TEXT("friends");
+		const FString Block = TEXT("blocks");
 		const FString Signaling = TEXT("signaling");
 		const FString Attribute = TEXT("attribute");
 	}
@@ -609,6 +622,91 @@ void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteMo
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *UserId);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *Settings.BaseUrl, *Credentials.GetUserNamespace());
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+
+}
+
+void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *UserId);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *Settings.BaseUrl, *Credentials.GetUserNamespace());
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError, uint32 RetryAttempt)
 {
 	TSharedPtr<PartyStorageWrapper> Wrapper = MakeShared<PartyStorageWrapper>();
@@ -618,6 +716,28 @@ void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrap
 	Wrapper->RemainingAttempt = RetryAttempt;
 	Wrapper->PayloadModifier = PayloadModifier;
 	WritePartyStorageRecursive(Wrapper);
+}
+
+//-------------------------------------------------------------------------------------------------
+// Block
+//-------------------------------------------------------------------------------------------------
+
+void Lobby::BlockPlayer(const FString& UserId)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	SendRawRequest(LobbyRequest::BlockPlayer, Prefix::Block,
+		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetUserNamespace()));
+}
+
+void Lobby::UnblockPlayer(const FString& UserId)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	SendRawRequest(LobbyRequest::UnblockPlayer, Prefix::Friends,
+		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetUserNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -664,6 +784,8 @@ void Lobby::UnbindEvent()
 	DsNotif.Unbind();
 	AcceptFriendsNotif.Unbind();
 	RequestFriendsNotif.Unbind();
+	BlockPlayerNotif.Unbind();
+	UnblockPlayerNotif.Unbind();
 	ChannelChatNotif.Unbind();
 	PartyDataUpdateNotif.Unbind();
 }
@@ -1068,6 +1190,14 @@ return; \
 	// Friends + Notification
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif, AcceptFriendsNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, RequestFriendsNotif);
+
+	// Block
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::BlockPlayer, FAccelByteModelsBlockPlayerResponse, BlockPlayerResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::UnblockPlayer, FAccelByteModelsUnblockPlayerResponse, UnblockPlayerResponse);
+
+	// Block + Notification
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif, BlockPlayerNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif, UnblockPlayerNotif);
 
 	// Signaling
 	if (lobbyResponseType.Equals(LobbyResponse::SignalingP2PNotif))
