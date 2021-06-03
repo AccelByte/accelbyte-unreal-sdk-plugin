@@ -636,9 +636,9 @@ struct FUserMapResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-	FString Namespace;
+		FString userId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-	FString userId;
+		FString Namespace;
 };
 
 USTRUCT(BlueprintType)

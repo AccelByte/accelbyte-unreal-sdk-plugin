@@ -2426,7 +2426,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
 	check(bListBlockedUserListSuccess);
-	bool bFound;
+	bool bFound = false;
 	for (auto ResponseData : listBlockedUserResponse.Data)
 	{
 		if (ResponseData.BlockedUserId.Equals(BlockedUserData.BlockedUserId))
@@ -2520,7 +2520,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
 	check(bListBlockedUserListSuccess);
-	bool bFound;
+	bool bFound = false;
 	for(auto ResponseData : listBlockedUserResponse.Data)
 	{
 		if (ResponseData.BlockedUserId.Equals(BlockedUserData.BlockedUserId))

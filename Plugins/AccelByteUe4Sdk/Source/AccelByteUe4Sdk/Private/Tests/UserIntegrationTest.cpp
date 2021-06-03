@@ -33,7 +33,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
 const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-void FlushHttpRequests();//defined in TestUtilities.cpp
+
 void Waiting(bool& condition, FString text);
 
 UENUM(BlueprintType)
@@ -80,7 +80,6 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -96,7 +95,6 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
@@ -111,7 +109,6 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -149,7 +146,6 @@ bool FUserRegisterv2Test::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -165,7 +161,6 @@ bool FUserRegisterv2Test::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
@@ -180,7 +175,6 @@ bool FUserRegisterv2Test::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -199,25 +193,24 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 	EmailAddress.ToLowerInline();
 	FString Password = "123SDKTest123";
 	const FString Country = "US";
-	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 20));
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
-	bool bRegisterDone = true;
+	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
 	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-		bRegisterSuccessful = true;
-		bRegisterDone = true;
-	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-		bRegisterDone = true;
-	}));
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -228,12 +221,11 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bLoginSuccessful = true;
-	}), UserTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	// set session expired time to 0
@@ -271,7 +263,6 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -312,7 +303,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -330,7 +320,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bVerifyUserSuccessful = false;
@@ -341,7 +330,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		bVerifyUserSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bVerifyUserSuccessful, "Waiting for Verfying Account...");
 
 	bool bGetDataSuccessful = false;
@@ -355,7 +343,6 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		}),
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetDataSuccessful, "Waiting for Get Data...");
 
 	bool bDeleteDone = false;
@@ -368,14 +355,12 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	check(bGetDataSuccessful);
 	check(bLoginSuccessful);
 	check(bDeleteSuccessful);
 	check(RegisterResult.DisplayName.Equals(GetDataResult.DisplayName));
-	check(RegisterResult.EmailAddress.Equals(GetDataResult.EmailAddress));
 	check(RegisterResult.UserId.Equals(GetDataResult.UserId));
 	return true;
 }
@@ -407,7 +392,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -423,7 +407,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bForgotPasswordSuccessful = false; 
@@ -435,7 +418,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bForgotPasswordSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
 
 	bool bGetVerificationCodeSuccess = false;
@@ -447,7 +429,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bGetVerificationCodeSuccess = true;
 	}), UserTestErrorHandler);
 	Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
-	FlushHttpRequests();
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
@@ -461,7 +442,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bResetPasswordSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bResetPasswordSuccessful, "Waiting for Reset...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
@@ -476,7 +456,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
@@ -491,7 +470,6 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -520,7 +498,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		
 		bDeviceLoginSuccessful1 = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
 	
 	FirstUserId = FRegistry::Credentials.GetUserId();
@@ -533,7 +511,6 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
 		bDeviceLoginSuccessful2 = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
 
 	SecondUserId = FRegistry::Credentials.GetUserId();
@@ -551,7 +528,6 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Delete...");
 
 #pragma endregion DeleteUserById
@@ -579,7 +555,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeviceLoginSuccessful1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
 
 	FirstUserId = FRegistry::Credentials.GetUserId();
@@ -596,7 +571,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -611,7 +585,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeviceLoginSuccessful2 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
 
 	SecondUserId = FRegistry::Credentials.GetUserId();
@@ -628,7 +601,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeleteDone2 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone2, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -664,7 +636,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bDeviceLoginSuccessful1 = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
 //	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
 //
 //	FirstUserId = FRegistry::Credentials.GetUserId();
@@ -679,7 +650,6 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bUpgradeSuccessful = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
 //	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
 //
 //	FRegistry::User.ForgetAllCredentials();
@@ -692,7 +662,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bEmailLoginSuccessful = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
+
 //	Waiting(bEmailLoginSuccessful, "Waiting for Login...");
 //
 //	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
@@ -710,7 +680,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bDeviceLoginSuccessful2 = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
+
 //	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
 //
 //	SecondUserId = FRegistry::Credentials.GetUserId();
@@ -727,7 +697,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bDeleteDone1 = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
+
 //	Waiting(bDeleteDone1, "Waiting for Deletion...");
 //
 //#pragma endregion DeleteUser1
@@ -744,7 +714,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //		bDeleteDone2 = true;
 //	}), UserTestErrorHandler);
 //
-//	FlushHttpRequests();
+
 //	Waiting(bDeleteDone2, "Waiting for Deletion...");
 //
 //#pragma endregion DeleteUser2
@@ -784,7 +754,6 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone1 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
@@ -809,7 +778,6 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone2 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone2, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful2)
@@ -831,7 +799,6 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -865,7 +832,6 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		bSteamLoginDone1 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
@@ -887,7 +853,6 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -908,7 +873,6 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		bSteamLoginDone2 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone2, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful2)
@@ -930,7 +894,6 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		bDeleteDone2 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone2, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -967,7 +930,6 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -985,7 +947,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
 
 	FRegistry::User.ForgetAllCredentials();
@@ -998,7 +960,6 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		bLoginEmailSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginEmailSuccessful, "Waiting for Login...");
 
 	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
@@ -1015,7 +976,6 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser1
@@ -1055,7 +1015,6 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1073,7 +1032,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bUpgradeSuccessful = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
 
 	FRegistry::User.ForgetAllCredentials();
@@ -1086,7 +1045,6 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 		bLoginUsernameSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginUsernameSuccessful, "Waiting for Login...");
 
 	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
@@ -1103,7 +1061,6 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser1
@@ -1137,7 +1094,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1157,7 +1113,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserSteam
@@ -1186,7 +1141,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -1202,7 +1156,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
@@ -1218,7 +1171,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 	bool bLinkSteamAcc = false;
@@ -1235,7 +1187,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bLinkSteamAcc = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
 
 	bool bGetPlatformLinks = false;
@@ -1250,7 +1201,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("GetPlatformLinks..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetPlatformLinks, "Waiting for GetPlatformLinks...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
@@ -1270,7 +1220,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1291,7 +1240,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
@@ -1306,7 +1254,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
@@ -1316,7 +1263,6 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 	check(bGetPlatformLinksSuccess);
 	check(bLoginSuccessful);
 	check(UserData.UserId == UserData2.UserId);
-	check(UserData.EmailAddress == UserData2.EmailAddress);
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -1340,7 +1286,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1372,7 +1317,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -1388,7 +1332,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
@@ -1404,7 +1347,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 	bool bLinkSteamAcc = false;
@@ -1423,7 +1365,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bLinkSteamAcc = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
@@ -1443,7 +1384,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1464,7 +1404,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
@@ -1479,7 +1418,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
@@ -1488,7 +1426,6 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 	check(!bLinkSteamSuccess);
 	check(bLoginSuccessful);
 	check(UserData.UserId != UserData2.UserId);
-	check(UserData.EmailAddress != UserData2.EmailAddress);
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -1512,7 +1449,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1544,7 +1480,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -1560,7 +1495,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
@@ -1576,7 +1510,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 	FString SteamUserID;
@@ -1597,7 +1530,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bLinkSteamAcc = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
@@ -1617,7 +1549,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bSteamLoginDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
@@ -1638,7 +1569,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
@@ -1653,7 +1583,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 		bDeleteDone1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
@@ -1662,7 +1591,6 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 	check(bLinkSteamSuccess);
 	check(bLoginSuccessful);
 	check(UserData.UserId == UserData2.UserId);
-	check(UserData.EmailAddress == UserData2.EmailAddress);
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -1702,7 +1630,6 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 			bRegisterDone = true;
 		}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -1711,20 +1638,14 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	}
 
 	bool bLoginSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
-
-	FRegistry::User.LoginWithUsername(
-		EmailAddress,
-		Password,
-		FVoidHandler::CreateLambda([&]()
+	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
-		}),
-		UserTestErrorHandler);
+		}), UserTestErrorHandler);
 
-	FlushHttpRequests();
-	Waiting(bLoginSuccessful, "Waiting for Registered...");
+	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
 	ProfileCreate.FirstName = "Jirolu";
@@ -1764,7 +1685,6 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 			}
 		}));
 
-	FlushHttpRequests();
 	Waiting(bCreateProfileDone, "Waiting for Create Profile...");
 
 	FRegistry::User.ForgetAllCredentials();
@@ -1779,7 +1699,6 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 		}),
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful, "Waiting for Create Profile...");
 
 	bool bGetProfileSuccessful = false;
@@ -1795,34 +1714,30 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 		}),
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetProfileSuccessful, "Waiting for Get Profile...");
 
 	FRegistry::User.ForgetAllCredentials();
 
-	FRegistry::User.LoginWithUsername(
-		EmailAddress,
-		Password,
-		FVoidHandler::CreateLambda([&]()
+	bLoginSuccessful = false;
+	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
-		}),
-		UserTestErrorHandler);
+		}), UserTestErrorHandler);
 
-	FlushHttpRequests();
-	Waiting(bLoginSuccessful, "Waiting for Registered...");
+	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserProfile
 	bool bDeleteProfileDone = false;
 	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
 	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bDeleteProfileSuccessful = true;
-		bDeleteProfileDone = true;
-	}), UserTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteProfileSuccessful = true;
+			bDeleteProfileDone = true;
+		}), UserTestErrorHandler);
 
 	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
 #pragma endregion DeleteUserProfile
@@ -1833,13 +1748,12 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bDeleteSuccessful = true;
-		bDeleteDone = true;
-	}), UserTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -1873,7 +1787,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		bDeviceLoginSuccessful1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
 
 	bool bCreateProfileSuccessful1 = false;
@@ -1907,7 +1820,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		}
 	}));
 	
-	FlushHttpRequests();
 	Waiting(bCreateProfileSuccessful1, "Waiting for Create Profile...");
 
 	bool bGetProfileSuccessful1 = false;
@@ -1918,7 +1830,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		bGetProfileSuccessful1 = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetProfileSuccessful1, "Waiting for Get Profile...");
 
 	bool bUpdateProfileSuccessful = false;
@@ -1932,7 +1843,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		}), 
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bUpdateProfileSuccessful, "Waiting for Update...");
 
 	bool bGetProfileSuccessful2 = false;
@@ -1944,7 +1854,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		UpdatedDateOfBirth = Result.DateOfBirth;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetProfileSuccessful2, "Waiting for Get Profile...");
 
 #pragma region DeleteUserProfile
@@ -1973,13 +1882,12 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
 	check(bDeviceLoginSuccessful1);
-	check(bGetProfileSuccessful2);
+	check(bGetProfileSuccessful1);
 	check(bUpdateProfileSuccessful);
 	check(UpdatedDateOfBirth == ProfileUpdate.DateOfBirth);
 	check(bGetProfileSuccessful2);
@@ -2002,7 +1910,6 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 		bDeviceLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeviceLoginSuccessful, "Waiting for Login...");
 
 	//Delete profile regardless if it's exist or not (test cleanup double check)
@@ -2063,7 +1970,6 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 			}
 		}));
 
-	FlushHttpRequests();
 	Waiting(bCreateProfileSuccessful, "Waiting for Create Profile...");
 
 	bool bUpdateCustomAttributeSuccessful = false;
@@ -2086,7 +1992,6 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 		bUpdateCustomAttributeSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
 
 	bool bGetCustomAttributeSuccessful = false;
@@ -2108,8 +2013,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 		bGetCustomAttributeSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
-	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
+	Waiting(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
 
 	int32 getNumberAttribute;
 	getCustomAttribute.TryGetNumberField("Two", getNumberAttribute);
@@ -2144,7 +2048,6 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2182,7 +2085,6 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		bSteamLoginDone1 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
@@ -2208,7 +2110,6 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		}),
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetUserDone, "Waiting for Login...");	
 
 #pragma region DeleteUserById
@@ -2223,7 +2124,6 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2255,7 +2155,6 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		bSteamLoginDone1 = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
@@ -2282,7 +2181,6 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 	}),
 		UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetUserDone, "Waiting for Login...");
 
 #pragma region DeleteUserById
@@ -2297,7 +2195,6 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2336,7 +2233,6 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -2352,7 +2248,6 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserDone = false;
@@ -2366,7 +2261,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 		ReceivedUserData = Result;
 		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
 		}
 	}),
 		UserTestErrorHandler);
@@ -2383,7 +2278,6 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2392,7 +2286,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 	check(bGetUserDone);
 	check(bDeleteSuccessful);
 	check(ReceivedUserData.Data.Num() != 0);
-	check(ReceivedUserData.Data[0].EmailAddress == EmailAddress);
+	check(ReceivedUserData.Data[0].DisplayName == DisplayName);
 	return true;
 }
 
@@ -2423,7 +2317,6 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -2439,7 +2332,6 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserDone = false;
@@ -2453,7 +2345,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 		ReceivedUserData = Result;
 		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
 		}
 	}),
 		UserTestErrorHandler);
@@ -2470,7 +2362,6 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2519,7 +2410,6 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -2535,7 +2425,6 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserDone = false;
@@ -2549,7 +2438,7 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 		ReceivedUserData = Result;
 		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
 		}
 	}),
 		UserTestErrorHandler);
@@ -2566,7 +2455,6 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2618,7 +2506,6 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -2644,7 +2531,6 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
@@ -2660,7 +2546,6 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserDone = false;
@@ -2675,7 +2560,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		ReceivedUserData = Result;
 		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, Email: %s, DisplayName: %s, UserId: %s"), *Data.EmailAddress, *Data.DisplayName, *Data.UserId);
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
 		}
 	}),
 		UserTestErrorHandler);
@@ -2692,7 +2577,6 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	bDeleteDone = false;
@@ -2705,7 +2589,6 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
@@ -2748,7 +2631,6 @@ bool FGetCountryFromIP::RunTest(const FString & Parameter)
 				*ReceivedCountryInfo.City);
 		}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetCountryDone, "Waiting for CountryInfo...");
 
 	check(bGetCountryDone);
@@ -2785,7 +2667,6 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 		bRegisterDone = true;
 	}));
 
-	FlushHttpRequests();
 	Waiting(bRegisterDone, "Waiting for Registered...");
 	check(bRegisterSuccessful);
 
@@ -2796,7 +2677,6 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 	check(bLoginSuccessful);
 
@@ -2807,7 +2687,6 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 		bSuccessSendVerifCode = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bSuccessSendVerifCode, "Waiting send verification code");
 	check(bSuccessSendVerifCode);
 
@@ -2832,7 +2711,6 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 	check(bDeleteSuccessful);
 
@@ -2871,7 +2749,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 		bRegisterDone = true;
 	}));
-	FlushHttpRequests();
+
 	Waiting(bRegisterDone, "Waiting for Registered...");
 	check(bRegisterSuccess);
 
@@ -2881,7 +2759,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login User"));
 		bLoginSuccess = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bLoginSuccess, "Waiting for Login...");
 	check(bLoginSuccess);
 
@@ -2891,7 +2769,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Change Email Verification Request"));
 		bSendChangeEmailSuccess = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bSendChangeEmailSuccess, "Waiting for Send Verification Request...");
 	check(bSendChangeEmailSuccess);
 
@@ -2907,7 +2785,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Update New Users Email"));
 		bUpdateEmailSuccess = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bUpdateEmailSuccess, "Waiting for Update Email...");
 	check(bUpdateEmailSuccess);
 
@@ -2920,7 +2798,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify New Email"));
 		bVerifyNewEmailSuccess = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bVerifyNewEmailSuccess, "Waiting for Verify on New Email...");
 	check(bVerifyNewEmailSuccess);
 
@@ -2932,7 +2810,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login New Email"));
 		bLoginSuccess = true;
 	}), UserTestErrorHandler);
-	FlushHttpRequests();
+
 	Waiting(bLoginSuccess, "Waiting for Login New Email...");
 	check(bLoginSuccess);
 
@@ -2945,7 +2823,6 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 		bDeleteDone = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 	check(bDeleteSuccessful);
 
@@ -3009,7 +2886,6 @@ bool FLoginThenRetrieveJWTToGetAccountData::RunTest(const FString & Parameter)
 		bLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 	check(bLoginSuccessful);
 	
@@ -3022,7 +2898,6 @@ bool FLoginThenRetrieveJWTToGetAccountData::RunTest(const FString & Parameter)
 		bJwtRetrieved = true;
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bJwtRetrieved, "Waiting for getting JsonWebToken...");
 	check(bJwtRetrieved);
 
@@ -3037,7 +2912,6 @@ bool FLoginThenRetrieveJWTToGetAccountData::RunTest(const FString & Parameter)
 		}
 	}), UserTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bSameUserId, "Waiting to retrieve my data using JsonWebToken...");
 	check(bSameUserId);
 

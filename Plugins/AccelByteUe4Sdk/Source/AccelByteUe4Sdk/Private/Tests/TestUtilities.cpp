@@ -267,7 +267,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 		userMap = Result;
 		bGetUserMapSuccess = true;
 	}), OnError);
-	FlushHttpRequests();
+	
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
 	FString BaseUrl = GetBaseUrl();

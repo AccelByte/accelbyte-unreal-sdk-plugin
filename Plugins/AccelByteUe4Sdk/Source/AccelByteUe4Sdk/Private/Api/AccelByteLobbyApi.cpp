@@ -1284,7 +1284,7 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 		);
 }
 
-void Lobby::SetRetryParameters(int32 TotalTimeout, int32 BackoffDelay, int32 MaxDelay)
+void Lobby::SetRetryParameters(int32 InTotalTimeout, int32 InBackoffDelay, int32 InMaxDelay)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
@@ -1295,9 +1295,9 @@ void Lobby::SetRetryParameters(int32 TotalTimeout, int32 BackoffDelay, int32 Max
 		return;
 	}
 
-	Lobby::TotalTimeout = TotalTimeout;
-	Lobby::InitialBackoffDelay = BackoffDelay;
-	Lobby::MaxBackoffDelay = MaxDelay;
+	Lobby::TotalTimeout = InTotalTimeout;
+	Lobby::InitialBackoffDelay = InBackoffDelay;
+	Lobby::MaxBackoffDelay = InMaxDelay;
 }
 
 Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, float PingDelay, float InitialBackoffDelay, float MaxBackoffDelay, float TotalTimeout, TSharedPtr<IWebSocket> WebSocket)
