@@ -400,7 +400,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	}
 
 	bool bLoginSuccessful = false;
-	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
@@ -448,7 +448,7 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 	FRegistry::User.ForgetAllCredentials();
 
 	bLoginSuccessful = false;
-	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 	{
@@ -1638,7 +1638,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	}
 
 	bool bLoginSuccessful = false;
-	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
@@ -1719,7 +1719,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	FRegistry::User.ForgetAllCredentials();
 
 	bLoginSuccessful = false;
-	UE_LOG(LogTemp, Log, TEXT("LoginWithUsernameAndPassword"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));

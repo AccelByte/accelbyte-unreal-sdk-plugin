@@ -1095,11 +1095,11 @@ public:
 	/**
 	* @brief Change the delay parameters to maintain connection in the lobby before lobby connected.
 	*
-	* @param TotalTimeout Time limit until stop to re-attempt.
-	* @param BackoffDelay Initial delay time.
-	* @param MaxDelay Maximum delay time.
+	* @param NewTotalTimeout new Time limit until stop to re-attempt.
+	* @param NewBackoffDelay new Initial delay time.
+	* @param NewMaxDelay new Maximum delay time.
 	*/
-	void SetRetryParameters(int32 InTotalTimeout = 60000, int32 InBackoffDelay = 1000, int32 InMaxDelay = 30000);
+	void SetRetryParameters(int32 NewTotalTimeout = 60000, int32 NewBackoffDelay = 1000, int32 NewMaxDelay = 30000);
 	
 	static FString LobbyMessageToJson(FString Message);
 

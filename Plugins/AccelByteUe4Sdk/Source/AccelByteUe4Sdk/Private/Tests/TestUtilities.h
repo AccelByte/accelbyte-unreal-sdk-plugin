@@ -48,7 +48,7 @@ void DeleteUserProfile(
 
 void FlushHttpRequests();
 
-void Waiting(bool& condition, FString Message);
+void Waiting(bool& bcondition, FString Message);
 
 void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString Message = "");
 
