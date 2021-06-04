@@ -961,6 +961,7 @@ void Lobby::CreateWebSocket()
 
 	TMap<FString, FString> Headers;
 	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
+	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
 
@@ -1112,6 +1113,16 @@ else \
 } \
 return; \
 }\
+
+	if(lobbyResponseType.Equals(LobbyResponse::ConnectedNotif))
+	{
+		FAccelByteModelsLobbySessionId SessionId;
+		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &SessionId, 0, 0);
+		if(bSuccess)
+		{
+			LobbySessionId = SessionId;
+		}
+	}
 
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::DisconnectNotif, FAccelByteModelsDisconnectNotif, DisconnectNotif);
     // Party

@@ -5246,6 +5246,62 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReconnect_SameToken_withSessionIdHeader, "AccelByte.Tests.Lobby.C.Reconnect_SameToken_withSessionIdHeader", AutomationFlagMaskLobby);
+bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	//Arrange
+	AccelByte::Api::User& User = FRegistry::User;
+	
+	User.ForgetAllCredentials();
+
+	bool bLoginDone = false;
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	int NumLobbyConnected = 0;
+	Lobby.SetConnectSuccessDelegate(
+		FSimpleDelegate::CreateLambda([&]()
+			{
+				NumLobbyConnected++;
+			}));
+
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+	
+	//Act
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	bool bIsLobbyConnected = Lobby.IsConnected();
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, 15);
+
+	bool bDeleteDone = false;
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+		{
+			bDeleteDone = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+	
+	check(bIsLobbyConnected);
+	check(NumLobbyConnected > 1);
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSignalingP2P, "AccelByte.Tests.Lobby.D.LobbyTestSignalingP2P", AutomationFlagMaskLobby);
 bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 {

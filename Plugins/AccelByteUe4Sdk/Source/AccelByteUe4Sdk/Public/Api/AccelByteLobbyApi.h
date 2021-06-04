@@ -1136,6 +1136,7 @@ private:
 	FTickerDelegate LobbyTickDelegate;
     FDelegateHandle LobbyTickDelegateHandle;
 	TSharedPtr<IWebSocket> WebSocket;
+	FAccelByteModelsLobbySessionId LobbySessionId;
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
     FErrorHandler ParsingError;
