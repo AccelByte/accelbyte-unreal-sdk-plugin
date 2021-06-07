@@ -65,13 +65,14 @@ bool AccelByteSkipTest(const FString& TestName)
 	return false;
 }
 
-void Waiting(bool& condition, FString Message)
+void Waiting(bool& bcondition, FString Message)
 {
-	while (!condition)
+	while (!bcondition)
 	{
-		FPlatformProcess::Sleep(.5f);
+		FPlatformProcess::Sleep(.2f);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
-		FTicker::GetCoreTicker().Tick(.5f);
+		FHttpModule::Get().GetHttpManager().Tick(.2f);
+		FTicker::GetCoreTicker().Tick(.2f);
 	}
 }
 
@@ -83,10 +84,11 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, FString Messa
 	
 	while (Condition && !Condition() && (FPlatformTime::Seconds() < TimeoutSeconds))
 	{
-		UE_LOG(LogTemp, Log, TEXT("WaitUntil %s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
+		UE_LOG(LogTemp, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
 		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
+		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
-		FPlatformProcess::Sleep(.5f);
+		FPlatformProcess::Sleep(.2f);
 	}
 }
 
@@ -267,7 +269,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 		userMap = Result;
 		bGetUserMapSuccess = true;
 	}), OnError);
-	FlushHttpRequests();
+	
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
 	FString BaseUrl = GetBaseUrl();

@@ -48,7 +48,7 @@ void DeleteUserProfile(
 
 void FlushHttpRequests();
 
-void Waiting(bool& condition, FString Message);
+void Waiting(bool& bcondition, FString Message);
 
 void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString Message = "");
 
@@ -636,9 +636,9 @@ struct FUserMapResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-	FString Namespace;
+		FString userId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | User | UserMapResponse")
-	FString userId;
+		FString Namespace;
 };
 
 USTRUCT(BlueprintType)
