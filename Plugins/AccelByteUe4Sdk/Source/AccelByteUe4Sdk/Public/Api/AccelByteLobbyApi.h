@@ -267,6 +267,21 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FRequestFriendsNotif, const FAccelByteModelsRequestFriendsNotif&);
 
+	/**
+	 * @brief delegate for handling unfriend notification
+	 */
+	DECLARE_DELEGATE_OneParam(FUnfriendNotif, const FAccelByteModelsUnfriendNotif&);
+	
+	/**
+	 * @brief delegate for handling cancel friend notification
+	 */
+	DECLARE_DELEGATE_OneParam(FCancelFriendsNotif, const FAccelByteModelsCancelFriendsNotif&);
+
+	/**
+	 * @brief delegate for handling reject friend notification
+	 */
+	DECLARE_DELEGATE_OneParam(FRejectFriendsNotif, const FAccelByteModelsRejectFriendsNotif&);
+	
 	//Block
 	/**
 	 * @brief delegate for handling block player response
@@ -664,6 +679,18 @@ public:
 	void SetOnIncomingRequestFriendsNotifDelegate(const FRequestFriendsNotif& OnRequestFriendsNotif)
 	{
 		RequestFriendsNotif = OnRequestFriendsNotif;
+	}
+	void SetOnUnfriendNotifDelegate(const FUnfriendNotif& OnUnfriendNotif)
+	{
+		UnfriendNotif = OnUnfriendNotif;
+	}
+	void SetOnCancelFriendsNotifDelegate(const FCancelFriendsNotif& OnCancelFriendsNotif)
+	{
+		CancelFriendsNotif = OnCancelFriendsNotif;
+	}
+	void SetOnRejectFriendsNotifDelegate(const FRejectFriendsNotif& OnRejectFriendsNotif) 
+	{
+		RejectFriendsNotif = OnRejectFriendsNotif;
 	}
 	void SetParsingErrorDelegate(const FErrorHandler& OnParsingError)
 	{
@@ -1197,6 +1224,9 @@ private:
 	// Friends + Notification
 	FAcceptFriendsNotif AcceptFriendsNotif;
 	FRequestFriendsNotif RequestFriendsNotif;
+	FUnfriendNotif UnfriendNotif;
+	FCancelFriendsNotif CancelFriendsNotif;
+	FRejectFriendsNotif RejectFriendsNotif;
 
 	// Block
 	FBlockPlayerResponse BlockPlayerResponse;

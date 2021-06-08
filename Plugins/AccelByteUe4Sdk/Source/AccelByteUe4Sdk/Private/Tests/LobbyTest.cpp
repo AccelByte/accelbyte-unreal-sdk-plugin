@@ -47,23 +47,28 @@ Credentials UserCreds[TestUserCount];
 TArray<TSharedPtr<Api::User>> LobbyUsers;
 TArray<TSharedPtr<Api::Lobby>> Lobbies;
 TArray<TPair<FString, float>> PreferedLatencies;
-bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bRequestFriendSuccess;
-bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
-bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError;
-bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
-bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bGetNotifSuccess, bUserPresenceSuccess;
-bool bUserPresenceError, bUserPresenceNotifSuccess, bUserPresenceNotifError, bUnfriendSuccess, bUnfriendError, bGetFriendshipStatusSuccess;
+//General
+bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess;
+//Friends
+bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bRequestFriendSuccess, bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError;
 bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendError, bListIncomingFriendSuccess, bListIncomingFriendError;
 bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSuccess, bOnIncomingRequestNotifError, bOnRequestAcceptedNotifSuccess, bOnRequestAcceptedNotifError;
-bool bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError, bStartMatchmakingSuccess, bStartMatchmakingError;
+bool bUnfriendNotifSuccess, bCancelFriendNotifSuccess, bRejectFriendNotifSuccess;
+//Party
+bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySuccess, bRejectPartyError, bGetInvitedNotifSuccess, bGetInvitedNotifError, bGetInvitationRejectedNotifSuccess, bGetInvitationRejectedNotifError;
+bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
+bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
+//Matchmaking
+bool bStartMatchmakingSuccess, bStartMatchmakingError, bCancelMatchmakingSuccess, bCancelMatchmakingError;
+bool bReadyConsentResponseSuccess, bReadyConsentResponseError, bReadyConsentNotifSuccess, bReadyConsentNotifError;
+bool bDsNotifSuccess, bDsNotifError;
+//Presence
+bool bUserPresenceError, bUserPresenceNotifSuccess, bUserPresenceNotifError, bUnfriendSuccess, bUnfriendError, bGetFriendshipStatusSuccess, bGetNotifSuccess, bUserPresenceSuccess;
 // Block 
 bool bBlockPlayerSuccess, bBlockPlayerError, bUnblockPlayerSuccess, bUnblockPlayerError;
 bool bListBlockedUserListSuccess,  bListBlockerUserListError, bListBlockerListSuccess, bListBlockerListError; 
 // Block Notif
 bool bBlockPlayerNotifSuccess, bUnblockPlayerNotifSuccess, bBlockPlayerNotifError, bUnblockPlayerNotifError;
-// Matchmaking
-bool bCancelMatchmakingSuccess, bCancelMatchmakingError, bReadyConsentResponseSuccess, bReadyConsentResponseError, bReadyConsentNotifSuccess, bReadyConsentNotifError;
-bool bDsNotifSuccess, bDsNotifError;
 
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
@@ -79,6 +84,9 @@ FAccelByteModelsListIncomingFriendsResponse listIncomingFriendResponse;
 FAccelByteModelsLoadFriendListResponse loadFriendListResponse;
 FAccelByteModelsRequestFriendsNotif requestFriendNotifResponse;
 FAccelByteModelsAcceptFriendsNotif acceptFriendNotifResponse;
+FAccelByteModelsUnfriendNotif UnfriendNotifResponse;
+FAccelByteModelsCancelFriendsNotif CancelFriendNotifResponse;
+FAccelByteModelsRejectFriendsNotif RejectFriendNotifResponse;
 
 FAccelByteModelsBlockPlayerNotif blockPlayerNotifResponse;
 FAccelByteModelsUnblockPlayerNotif unblockPlayerNotifResponse;
@@ -190,6 +198,7 @@ void resetResponses()
 	bUserPresenceNotifError = false;
 	bUnfriendSuccess = false;
 	bUnfriendError = false;
+	bUnfriendNotifSuccess = false;
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	bListOutgoingFriendSuccess = false;
@@ -204,8 +213,10 @@ void resetResponses()
 	bOnRequestAcceptedNotifError = false;
 	bRejectFriendSuccess = false;
 	bRejectFriendError = false;
+	bRejectFriendNotifSuccess = false;
 	bCancelFriendSuccess = false;
 	bCancelFriendError = false;
+	bCancelFriendNotifSuccess = false;
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	bCancelMatchmakingSuccess = false;
@@ -218,6 +229,7 @@ void resetResponses()
 	bDsNotifError = false;
 }
 
+#pragma region GeneralDelegate
 const auto ConnectSuccessDelegate = Api::Lobby::FConnectSuccess::CreateLambda([]()
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User connected!"));
@@ -238,13 +250,16 @@ const auto GetMessageDelegate = Api::Lobby::FPersonalChatNotif::CreateLambda([](
 	bGetMessage = true;
 });
 
-const auto GetAllUsersPresenceDelegate = Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](FAccelByteModelsGetOnlineUsersResponse result)
+const auto GetNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([](FAccelByteModelsNotificationMessage result)
 {
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("GetAllUserPresence Success!"));
-	bGetAllUserPresenceSuccess = true;
-	onlineUserResponse = result;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Notification!"));
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s"), *result.From, *result.Payload);
+	getNotifResponse = result;
+	bGetNotifSuccess = true;
 });
+#pragma endregion
 
+#pragma region FriendsDelegate
 const auto RequestFriendDelegate = Api::Lobby::FRequestFriendsResponse::CreateLambda([](FAccelByteModelsRequestFriendsResponse result)
 {
 	bRequestFriendSuccess = true;
@@ -262,133 +277,6 @@ const auto AcceptFriendsDelegate = Api::Lobby::FAcceptFriendsResponse::CreateLam
 	if (result.Code != "0")
 	{
 		bAcceptFriendError = true;
-	}
-});
-
-const auto GetInfoPartyDelegate = Api::Lobby::FPartyInfoResponse::CreateLambda([](FAccelByteModelsInfoPartyResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Info Party Success!"));
-	bGetInfoPartySuccess = true;
-	if (!result.PartyId.IsEmpty())
-	{
-		infoPartyResponse = result;
-	}
-	else
-	{
-		bGetInfoPartyError = true;
-	}
-});
-
-const auto LeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAccelByteModelsLeavePartyResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Leave Party Success!"));
-	bLeavePartySuccess = true;
-	if (result.Code != "0")
-	{
-		bLeavePartyError = true;
-	}
-});
-
-const auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda([](FAccelByteModelsCreatePartyResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Party Success!"));
-	bCreatePartySuccess = true;
-	if (result.PartyId.IsEmpty())
-	{
-		bCreatePartyError = true;
-	}
-});
-
-const auto InvitePartyDelegate = Api::Lobby::FPartyInviteResponse::CreateLambda([](FAccelByteModelsPartyInviteResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Invite Party Success!"));
-	bInvitePartySuccess = true;
-});
-
-const auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](FAccelByteModelsPartyGetInvitedNotice result)
-{
-	invitedToPartyResponse = result;
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Party Invitation!"));
-	bGetInvitedNotifSuccess = true;
-	if (result.PartyId.IsEmpty())
-	{
-		bGetInvitedNotifError = true;
-	}
-});
-
-const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Join Party Success! Member : %d"), result.Members.Num());
-	joinPartyResponse = result;
-	bJoinPartySuccess = true;
-	if (result.Code != "0")
-	{
-		bJoinPartyError = false;
-	}
-});
-
-const auto PartyChatNotifDelegate = Api::Lobby::FPartyChatNotif::CreateLambda([](FAccelByteModelsPartyMessageNotice result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get a Party Message!"));
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s | At : %s"), *result.From, *result.Payload, *result.ReceivedAt);
-	bReceivedPartyChatSuccess = true;
-});
-
-const auto PartyChatSendDelegate = Api::Lobby::FPartyChatResponse::CreateLambda([](FAccelByteModelsPartyMessageResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Send Party Chat Success!"));
-	bSendPartyChatSuccess = true;
-	if (result.Code != "0")
-	{
-		bSendPartyChatError = true;
-	}
-});
-
-const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kick Party Member Success!"));
-	bKickPartyMemberSuccess = true;
-	if (result.Code != "0")
-	{
-		bKickPartyMemberError = true;
-	}
-});
-
-const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kicked From Party!"));
-	{
-		bKickedFromPartySuccess = true;
-	}
-});
-
-const auto GetNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([](FAccelByteModelsNotificationMessage result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Notification!"));
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s"), *result.From, *result.Payload);
-	getNotifResponse = result;
-	bGetNotifSuccess = true;
-});
-
-const auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([](FAccelByteModelsSetOnlineUsersResponse result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Presence Changed!"));
-	bUserPresenceSuccess = true;
-	if (result.Code != "0")
-	{
-		bUserPresenceError = true;
-	}
-});
-
-const auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLambda([](FAccelByteModelsUsersPresenceNotice result)
-{
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Changed Their Presence!"));
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("ID: %s | Status: %s | Activity: %s"), *result.UserID, *result.Availability, *result.Activity);
-	userPresenceNotifResponse = result;
-	bUserPresenceNotifSuccess = true;
-	if (result.UserID.IsEmpty())
-	{
-		bUserPresenceNotifError = true;
 	}
 });
 
@@ -489,6 +377,128 @@ const auto CancelFriendDelegate = Api::Lobby::FCancelFriendsResponse::CreateLamb
 	}
 });
 
+const auto UnfriendNotifDelegate = Api::Lobby::FUnfriendNotif::CreateLambda([](FAccelByteModelsUnfriendNotif result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Unfriend Notif!"));
+	UnfriendNotifResponse = result;
+	bUnfriendNotifSuccess = true;
+});
+
+const auto CancelFriendNotifDelegate = Api::Lobby::FCancelFriendsNotif::CreateLambda([](FAccelByteModelsCancelFriendsNotif result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Cancel Friend Notif!"));
+	CancelFriendNotifResponse = result;
+	bCancelFriendNotifSuccess = true;
+});
+
+const auto RejectFriendNotifDelegate = Api::Lobby::FRejectFriendsNotif::CreateLambda([](FAccelByteModelsRejectFriendsNotif result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Reject Friend Notif!"));
+	RejectFriendNotifResponse = result;
+	bRejectFriendNotifSuccess = true;
+});
+#pragma endregion
+
+#pragma region PartyDelegate
+const auto GetInfoPartyDelegate = Api::Lobby::FPartyInfoResponse::CreateLambda([](FAccelByteModelsInfoPartyResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Info Party Success!"));
+	bGetInfoPartySuccess = true;
+	if (!result.PartyId.IsEmpty())
+	{
+		infoPartyResponse = result;
+	}
+	else
+	{
+		bGetInfoPartyError = true;
+	}
+});
+
+const auto LeavePartyDelegate = Api::Lobby::FPartyLeaveResponse::CreateLambda([](FAccelByteModelsLeavePartyResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Leave Party Success!"));
+	bLeavePartySuccess = true;
+	if (result.Code != "0")
+	{
+		bLeavePartyError = true;
+	}
+});
+
+const auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda([](FAccelByteModelsCreatePartyResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Party Success!"));
+	bCreatePartySuccess = true;
+	if (result.PartyId.IsEmpty())
+	{
+		bCreatePartyError = true;
+	}
+});
+
+const auto InvitePartyDelegate = Api::Lobby::FPartyInviteResponse::CreateLambda([](FAccelByteModelsPartyInviteResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Invite Party Success!"));
+	bInvitePartySuccess = true;
+});
+
+const auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](FAccelByteModelsPartyGetInvitedNotice result)
+{
+	invitedToPartyResponse = result;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Party Invitation!"));
+	bGetInvitedNotifSuccess = true;
+	if (result.PartyId.IsEmpty())
+	{
+		bGetInvitedNotifError = true;
+	}
+});
+
+const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Join Party Success! Member : %d"), result.Members.Num());
+	joinPartyResponse = result;
+	bJoinPartySuccess = true;
+	if (result.Code != "0")
+	{
+		bJoinPartyError = false;
+	}
+});
+
+const auto PartyChatNotifDelegate = Api::Lobby::FPartyChatNotif::CreateLambda([](FAccelByteModelsPartyMessageNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get a Party Message!"));
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("From : %s | Message : %s | At : %s"), *result.From, *result.Payload, *result.ReceivedAt);
+	bReceivedPartyChatSuccess = true;
+});
+
+const auto PartyChatSendDelegate = Api::Lobby::FPartyChatResponse::CreateLambda([](FAccelByteModelsPartyMessageResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Send Party Chat Success!"));
+	bSendPartyChatSuccess = true;
+	if (result.Code != "0")
+	{
+		bSendPartyChatError = true;
+	}
+});
+
+const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kick Party Member Success!"));
+	bKickPartyMemberSuccess = true;
+	if (result.Code != "0")
+	{
+		bKickPartyMemberError = true;
+	}
+});
+
+const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kicked From Party!"));
+	{
+		bKickedFromPartySuccess = true;
+	}
+});
+#pragma endregion
+
+#pragma region BlocksDelegate
 const auto BlockPlayerDelegate = Api::Lobby::FBlockPlayerResponse::CreateLambda([](FAccelByteModelsBlockPlayerResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Block Player Success!"));
@@ -542,8 +552,9 @@ const auto UnblockPlayerNotifDelegate = Api::Lobby::FUnblockPlayerNotif::CreateL
 		bUnblockPlayerNotifError = true;
 	}
 });
+#pragma endregion
 
-
+#pragma region MatchmakingDegelate
 const auto StartMatchmakingDelegate = Api::Lobby::FMatchmakingResponse::CreateLambda([](FAccelByteModelsMatchmakingResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Start Matchmaking Success!"));
@@ -589,16 +600,47 @@ const auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([](FAccelByteMod
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s"), *result.MatchId, *result.Message, *result.Status);
 	dsNotice = result;
-	
-    if (dsNotice.Status == "READY" || dsNotice.Status == "BUSY")
-    {
-        bDsNotifSuccess = true;
-    }
+	if (dsNotice.Status == "READY" || dsNotice.Status == "BUSY")
+	{
+		bDsNotifSuccess = true;
+	}
 	if (result.MatchId.IsEmpty())
 	{
 		bDsNotifError = true;
 	}
 });
+#pragma endregion
+
+#pragma region PresenceDelegate
+const auto GetAllUsersPresenceDelegate = Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](FAccelByteModelsGetOnlineUsersResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("GetAllUserPresence Success!"));
+	bGetAllUserPresenceSuccess = true;
+	onlineUserResponse = result;
+});
+
+const auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([](FAccelByteModelsSetOnlineUsersResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Presence Changed!"));
+	bUserPresenceSuccess = true;
+	if (result.Code != "0")
+	{
+		bUserPresenceError = true;
+	}
+});
+
+const auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLambda([](FAccelByteModelsUsersPresenceNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Changed Their Presence!"));
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("ID: %s | Status: %s | Activity: %s"), *result.UserID, *result.Availability, *result.Activity);
+	userPresenceNotifResponse = result;
+	bUserPresenceNotifSuccess = true;
+	if (result.UserID.IsEmpty())
+	{
+		bUserPresenceNotifError = true;
+	}
+});
+#pragma endregion
 
 TSharedRef<TMap<FString, int32>> GetNewCustomPorts()
 {
@@ -1853,6 +1895,8 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
+	Lobbies[1]->SetOnUnfriendNotifDelegate(UnfriendNotifDelegate);
+
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	check(!bGetFriendshipStatusError);
 	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
@@ -1914,6 +1958,11 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 	Waiting(bUnfriendSuccess, "Waiting Unfriend...");
 	check(!bUnfriendError);
 
+	Waiting(bUnfriendNotifSuccess, "Waiting Unfriend Notif...");
+	check(bUnfriendNotifSuccess);
+
+	check(UnfriendNotifResponse.friendId == UserCreds[0].GetUserId());
+
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[0]->LoadFriendsList();
@@ -1961,6 +2010,8 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
+	Lobbies[0]->SetOnRejectFriendsNotifDelegate(RejectFriendNotifDelegate);
+
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	check(!bGetFriendshipStatusError);
 	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
@@ -2002,6 +2053,10 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 
 	Waiting(bRejectFriendSuccess, "Rejecting Friend Request...");
 	check(!bRejectFriendError);
+
+	Waiting(bRejectFriendNotifSuccess, "Getting Reject Friend Notif...");
+	check(bRejectFriendNotifSuccess);
+	check(RejectFriendNotifResponse.userId == UserCreds[1].GetUserId());
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
@@ -2064,6 +2119,8 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
+	Lobbies[1]->SetOnCancelFriendsNotifDelegate(CancelFriendNotifDelegate);
+
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	check(!bGetFriendshipStatusError);
 	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
@@ -2105,6 +2162,10 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 
 	Waiting(bCancelFriendSuccess, "Cancelling Friend Request...");
 	check(!bCancelFriendError);
+
+	Waiting(bCancelFriendNotifSuccess, "Getting Cancel Friend Notif...");
+	check(bCancelFriendNotifSuccess);
+	check(CancelFriendNotifResponse.userId == UserCreds[0].GetUserId());
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;

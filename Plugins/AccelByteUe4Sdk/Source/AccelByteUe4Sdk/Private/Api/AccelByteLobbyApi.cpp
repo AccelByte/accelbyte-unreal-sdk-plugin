@@ -128,6 +128,9 @@ namespace Api
 		// Friends + Notification
 		const FString AcceptFriendsNotif = TEXT("acceptFriendsNotif");
 		const FString RequestFriendsNotif = TEXT("requestFriendsNotif");
+		const FString UnfriendNotif = TEXT("unfriendNotif");
+		const FString CancelFriendsNotif = TEXT("cancelFriendsNotif");
+		const FString RejectFriendsNotif = TEXT("rejectFriendsNotif");
 
 		// Block
 		const FString BlockPlayer = TEXT("blockPlayerResponse");
@@ -1201,6 +1204,9 @@ return; \
 	// Friends + Notification
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif, AcceptFriendsNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, RequestFriendsNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::UnfriendNotif, FAccelByteModelsUnfriendNotif, UnfriendNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::CancelFriendsNotif, FAccelByteModelsCancelFriendsNotif, CancelFriendsNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::RejectFriendsNotif, FAccelByteModelsRejectFriendsNotif, RejectFriendsNotif);
 
 	// Block
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::BlockPlayer, FAccelByteModelsBlockPlayerResponse, BlockPlayerResponse);

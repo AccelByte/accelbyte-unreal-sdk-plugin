@@ -635,6 +635,31 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkFriendsRequest
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BulkFriendsRequest")
 		TArray<FString> FriendIds;
 };
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsUnfriendNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnfriendNotif")
+		FString friendId;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsCancelFriendsNotif
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | CancelFriendNotif")
+		FString userId;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsRejectFriendsNotif
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RejectFriendNotif")
+		FString userId;
+};
+		
 // ------------------------------------------------------------------------------------------------
 // Party Storage
 // ------------------------------------------------------------------------------------------------
