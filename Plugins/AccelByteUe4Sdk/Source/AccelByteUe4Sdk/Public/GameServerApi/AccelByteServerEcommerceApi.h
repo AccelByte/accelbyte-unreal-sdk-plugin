@@ -25,6 +25,23 @@ public:
 	~ServerEcommerce();
 
 	/**
+	* @brief Get list of user's Entitlement(s).
+	*
+	* @param UserId The user id who have the entitlements
+	* @param bActiveOnly Set as true if you want to search the active only, and vice-versa.
+	* @param EntitlementName The name of the entitlement (optional).
+	* @param ItemIds Item's id (optional).
+	* @param Offset Offset of the list that has been sliced based on Limit parameter (optional, default = 0).
+	* @param Limit The limit of item on page (optional).
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementPagingSlicedResult.
+	* @param OnError This will be called when the operation failed.
+	* @param EntitlementClass Class of the entitlement (optional).
+	* @param AppType This is the type of application that entitled (optional).
+	*/
+	void QueryUserEntitlements(const FString& UserId, bool bActiveOnly, const FString& EntitlementName, const TArray<FString>& ItemIds, const int32& Offset, const int32& Limit,
+		const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+
+	/**
 	* @brief Get Entitlement's Info by the EntitlementId.
 	*
 	* @param EntitlementId The id of the entitlement.
@@ -33,6 +50,16 @@ public:
 	*/
 	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Get Entitlement info by the UserId and EntitlementId
+	 *
+	 * @param UserId The user id who have the entitlements
+	 * @param EntitlementId The id of the entitlement
+	 * @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserEntitlementById(const FString& UserId, const FString& EntitlementId, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+	
 	/**
 	 * @brief Granting Entitlement(s) to a user.
 	 *
@@ -53,7 +80,58 @@ public:
 	 * @param OnError This will be called when the operation fails.
 	 */
 	void CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Revoke Entitlement from a User (Many)
+	 *
+	 * @param UserId The user id who have the entitlements
+	 * @param EntitlementIds The ids of the entitlements
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsBulkRevokeEntitlements&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void RevokeUserEntitlements(const FString& UserId, const TArray<FString>& EntitlementIds, const THandler<FAccelByteModelsBulkRevokeEntitlements>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Revoke Entitlement from a User (Single)
+	*
+	* @param UserId The user id who have the entitlement
+	* @param EntitlementId The id of the entitlements
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void RevokeUserEntitlement(const FString& UserId, const FString& EntitlementId, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Consume Entitlement from a User
+	*
+	* @param UserId The user id who have the entitlement
+	* @param EntitlementId The id of the entitlements
+	* @param UseCount How many that will be consumed
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void ConsumeUserEntitlement(const FString& UserId, const FString& EntitlementId, int32 UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	* @brief Disable Entitlement from a User. Like a revoke, but it can be enabled by calling func EnableUserEntitlement
+	*
+	* @param UserId The user id who have the entitlement
+	* @param EntitlementId The id of the entitlements
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsEntitlementInfo&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void DisableUserEntitlement(const FString& UserId, const FString& EntitlementId, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
 	
+	/**
+	* @brief Enable Entitlement that has been disabled
+	*
+	* @param UserId The user id who have the entitlement
+	* @param EntitlementId The id of the entitlements
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsBulkRevokeEntitlements&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void EnableUserEntitlement(const FString& UserId, const FString& EntitlementId, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+
 	/**
 	* @brief Debit a user wallet by currency code, if the wallet does not exist, it will create a new wallet.
 	*

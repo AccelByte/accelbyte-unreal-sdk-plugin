@@ -185,7 +185,7 @@ const auto SJoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](
 	}
 });
 
-const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
+const auto ServerKickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambda([](FAccelByteModelsKickPartyMemberResponse result)
 {
 	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Kick Party Member Success!"));
 	bSKickPartyMemberSuccess = true;
@@ -196,7 +196,7 @@ const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambd
 });
 
 
-const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
+const auto ServerKickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([](FAccelByteModelsGotKickedFromPartyNotice result)
 {
 	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Kicked From Party!"));
 	{
@@ -1191,8 +1191,8 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		SLobbies[i]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 	}
 
-	SLobbies[0]->SetInvitePartyKickMemberResponseDelegate(KickPartyMemberDelegate);
-	SLobbies[1]->SetPartyKickNotifDelegate(KickedFromPartyDelegate);
+	SLobbies[0]->SetInvitePartyKickMemberResponseDelegate(ServerKickPartyMemberDelegate);
+	SLobbies[1]->SetPartyKickNotifDelegate(ServerKickedFromPartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
 	Waiting(bSCreatePartySuccess, "Creating party");

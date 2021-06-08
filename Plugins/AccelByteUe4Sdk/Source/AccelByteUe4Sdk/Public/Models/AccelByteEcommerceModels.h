@@ -645,6 +645,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDistributionReceiver
 		FAccelByteModelsAttributes Attributes;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkRevokeEntitlements
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | BulkRevokeEntitlements")
+	int32 Affected;
+};
+
 #pragma endregion EntitlementModelsField
 
 #pragma region OrderModelsField

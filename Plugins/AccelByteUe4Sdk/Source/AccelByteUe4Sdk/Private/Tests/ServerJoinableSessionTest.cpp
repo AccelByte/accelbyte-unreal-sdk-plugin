@@ -409,25 +409,25 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
-	bool bCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bool bIsCreatePartySuccess = false;
+	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby A creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
-	bool bStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bool bIsStartMatchmakingSuccess = false;
+	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
@@ -447,25 +447,25 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
-	bCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bIsCreatePartySuccess = false;
+	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby B creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
-	bStartMatchmakingSuccess = false;
-	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bIsStartMatchmakingSuccess = false;
+	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		BMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyB->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
@@ -526,25 +526,25 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
-	bool bCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bool bIsCreatePartySuccess = false;
+	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby A creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
-	bool bStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bool bIsStartMatchmakingSuccess = false;
+	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
@@ -725,25 +725,25 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
-	bool bCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bool bIsCreatePartySuccess = false;
+	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby A creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
-	bool bStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bool bIsStartMatchmakingSuccess = false;
+	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
@@ -766,14 +766,14 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
-	bCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bIsCreatePartySuccess = false;
+	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby B creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
 
 	bool bAddUserSuccess = false;
 	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
@@ -965,25 +965,25 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
-	bool bCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bool bIsCreatePartySuccess = false;
+	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby A creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
-	bool bStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bool bIsStartMatchmakingSuccess = false;
+	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
@@ -1006,25 +1006,25 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
-	bCreatePartySuccess = false;
-	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bIsCreatePartySuccess = false;
+	lobbyB->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&BCreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		BCreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby B creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
-	bStartMatchmakingSuccess = false;
-	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bIsStartMatchmakingSuccess = false;
+	lobbyB->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&BMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		BMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyB->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
@@ -1085,25 +1085,25 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
-	bool bCreatePartySuccess = false;
-	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
+	bool bIsCreatePartySuccess = false;
+	lobbyA->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&ACreatePartyResult, &bIsCreatePartySuccess](const FAccelByteModelsCreatePartyResponse& Result)
 	{
 		ACreatePartyResult = Result;
-		bCreatePartySuccess = true;
+		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bCreatePartySuccess, "Lobby A creating party");
+	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
-	bool bStartMatchmakingSuccess = false;
-	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
+	bool bIsStartMatchmakingSuccess = false;
+	lobbyA->SetStartMatchmakingResponseDelegate(THandler<FAccelByteModelsMatchmakingResponse>::CreateLambda([&AMatchmakingResult, &bIsStartMatchmakingSuccess](const FAccelByteModelsMatchmakingResponse& Result)
 	{
 		AMatchmakingResult = Result;
-		bStartMatchmakingSuccess = true;
+		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bStartMatchmakingSuccess);
+	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	check(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
