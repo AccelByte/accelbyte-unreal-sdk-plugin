@@ -14,6 +14,9 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUser, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteUser);
+
 using AccelByte::Api::Oauth2;
 
 namespace AccelByte
@@ -88,32 +91,35 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 	}
-	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Session>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, 
+		THandler<FOauth2Session>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Session& Result)
 	{
 		const FOauth2Session session = Result;
 		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FAccountUserData& Result)
+		GetData(THandler<FAccountUserData>::CreateLambda([this, PlatformType, OnSuccess](const FAccountUserData& Result)
 		{
 			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FPagedPlatformLinks& Result)
+			if (!Result.UserId.IsEmpty())
 			{
-				if (Result.Data.Num() > 0)
+				GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda([this, PlatformType](const FPagedPlatformLinks& Result)
 				{
-					for (auto& data : Result.Data)
+					if (Result.Data.Num() > 0)
 					{
-						if (data.PlatformId == GetPlatformString(PlatformType))
+						for (auto& data : Result.Data)
 						{
-							AccelByte::Api::User::Credentials.SetPlatformInfo(data.PlatformUserId);
-							OnSuccess.ExecuteIfBound();
-							return;
+							if (data.PlatformId == GetPlatformString(PlatformType))
+							{
+								AccelByte::Api::User::Credentials.SetPlatformInfo(data.PlatformUserId);
+								return;
+							}
 						}
 					}
-				}
-				OnError.ExecuteIfBound((int32)ErrorCodes::InvalidResponse, ErrorMessages::Default.at((int32)ErrorCodes::InvalidResponse));
-			}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-			{
-				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-			}));
+				}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					UE_LOG(LogAccelByteUser, Log, TEXT("[AccelByte] Get Platform Links failed with error code: %d and messages: %s"), ErrorCode, *ErrorMessage);
+				}));
+			}
+			OnSuccess.ExecuteIfBound();
 		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
