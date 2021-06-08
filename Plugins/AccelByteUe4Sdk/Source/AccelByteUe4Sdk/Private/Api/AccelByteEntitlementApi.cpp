@@ -407,7 +407,7 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, cons
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
 			return;
 		}
-		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": %s}"), *Credentials.GetPlatformBoundUserId(), *Settings.AppId);
+		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": \"%s\"}"), *Credentials.GetPlatformBoundUserId(), *Settings.AppId);
 		break;
 	case EAccelBytePlatformSync::XBOX_LIVE:
 		PlatformText = TEXT("xbl");
