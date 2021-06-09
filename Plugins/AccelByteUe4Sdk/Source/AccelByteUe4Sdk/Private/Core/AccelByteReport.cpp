@@ -9,13 +9,6 @@ DEFINE_LOG_CATEGORY(AccelByteReportLog);
 
 namespace AccelByte
 {
-	/*static*/ void Report::SetLogVerbosity(ELogVerbosity::Type Verbosity)
-	{
-#ifndef NO_LOGGING
-		AccelByteReportLog.SetVerbosity(Verbosity);
-#endif // NO_LOGGING
-	}
-
 	void Report::GetHttpRequest(const FHttpRequestPtr & Request)
 	{
 		if (!UObjectInitialized()) return;
@@ -38,35 +31,10 @@ namespace AccelByte
 			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
 
 			LogMessage += "\n\n";
-
-			FString Content;
 			for (auto a : Request->GetContent())
 			{
-				Content += static_cast<char>(a);
+				LogMessage += static_cast<char>(a);
 			}
-
-			const FRegexPattern PasswordPattern(R"x(password=([^&]*)|"password"\s*:\s*"((\\"|[^"])*)")x");
-			FRegexMatcher PasswordMatcher(PasswordPattern, Content);
-			while (PasswordMatcher.FindNext())
-			{
-				// form data param value
-				int Start = PasswordMatcher.GetCaptureGroupBeginning(1);
-				int End = PasswordMatcher.GetCaptureGroupEnding(1);
-				if (Start == INDEX_NONE)
-				{
-					// json value
-					Start = PasswordMatcher.GetCaptureGroupBeginning(2);
-					End = PasswordMatcher.GetCaptureGroupEnding(2);
-				}
-				// minimal 4 characters masked, maximal 3 characters unmasked
-				const int MaskStart = FMath::Min(FMath::Max(Start, End - 4), Start + 3);
-				for (int i = MaskStart; i < End; i++)
-				{
-					Content[i] = '*';
-				}
-			}
-
-			LogMessage += Content;
 			LogMessage += "\n---";
 			LogMessage += "\n";
 #endif
@@ -97,7 +65,30 @@ namespace AccelByte
 			LogMessage += "\n---\n";
 		}
 
-		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
+		if (Response.IsValid())
+		{
+			const int32 ResponseCode = Response->GetResponseCode();
+			if (ResponseCode >= 400)
+			{
+				// Error
+				UE_LOG(AccelByteReportLog, Error, TEXT("%s"), *LogMessage);
+			}
+			else if (ResponseCode >= 300)
+			{
+				// Warning
+				UE_LOG(AccelByteReportLog, Warning, TEXT("%s"), *LogMessage);
+			}
+			else
+			{
+				// Log
+				UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
+			}
+		}
+		else
+		{
+			// Error
+			UE_LOG(AccelByteReportLog, Error, TEXT("%s"), *LogMessage);
+		}
 	}
 
 	void Report::GetFunctionLog(FString FunctionMacroName) 

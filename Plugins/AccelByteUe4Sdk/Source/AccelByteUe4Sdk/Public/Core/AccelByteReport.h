@@ -21,7 +21,6 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API Report
 {
 public:
-	static void SetLogVerbosity(ELogVerbosity::Type Verbosity);
 	void GetHttpRequest(const FHttpRequestPtr& Request);
 	void GetHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response);
 	void GetFunctionLog(FString FunctionMacroName);
