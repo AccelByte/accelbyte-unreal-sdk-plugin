@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.1](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.0.1%0D3.0.0) (2021-06-09)
+
+
+### Features
+
+* **ecommerce:** add some entitlement endpoint to server sdk ([e284472](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/e28447288bd8a96816e3a63c69c140679cd210e8))
+875da0fe172fc5120ed60ca9fc276d80302fd2cd))
+* **lobby:** unfriend, cancel friend, and reject friend notification ([099489a](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/099489a0316f84be9caddf45198469e3f77782e9))
+
+### Bug Fixes
+
+* **user:** Fix login with other platform function ([f6624fa](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/f6624fa749d924f739891dc1f53b068ec67e421e))
+* **entitlement:** change appid to string ([78592c5](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/78592c5da61355a2534bdcb9fd24a91f797c3705)
+
 ## [3.0.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.0.0%0D2.35.0) (2021-06-09)
 
 
