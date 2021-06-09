@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.0.0%0D2.35.0) (2021-06-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **AUser.Tests:** Fix breaking change caused by removal sensitive info
+* **tests.AUser:** Fix breaking change caused by removal sensitive info
+
+### Features
+
+* **ecommerce:** redeem code feature from VE repo ([875da0f](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/875da0fe172fc5120ed60ca9fc276d80302fd2cd))
+* **lobby:** add lobbySessionId to be able to reconnect using same token ([1bf75c8](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/1bf75c8e25f3538c90383b260540099378b1e932))
+
+
+### Bug Fixes
+
+* **AUser.Tests:** Fix breaking change caused by removal sensitive info ([4cecd53](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/4cecd53d8e310262e3eac360b84dc27197ecfe60))
+* **log:** github sync, removed nonfunctional verbosity set functions. ([9528e97](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/9528e970be64ddd405af5c2f41ba7ab5323c7d54))
+* **tests.AUser:** Fix breaking change caused by removal sensitive info ([f0a4d79](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/f0a4d7929948dcd2ced4ba0bc7580ad27b8fbfff))
+* error compile need to include AccelByteError.h on file AccelByteUtilities.h ([3d18b10](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/3d18b10d66286147839fdb6abfb2d9361f24a268)), closes [#312](https://accelbyte.atlassian.net/browse/312)
+
 ## [2.35.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/2.35.0%0D2.34.0) (2021-05-25)
 
 
