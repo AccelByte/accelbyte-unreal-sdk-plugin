@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -41,6 +41,17 @@ FHttpRetryScheduler::FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Reque
 
 bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
 {
+	if (State == EHttpRetrySchedulerState::SHUTTING_DOWN)
+	{
+		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is SHUTTING DOWN"));
+		return false;
+	}
+	if (State == EHttpRetrySchedulerState::UNINITIALIZED)
+	{
+		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is UNINITIALIZED"));
+		return false;
+	}
+
 	Report report;
 	report.GetHttpRequest(Request);
 
@@ -160,10 +171,15 @@ void FHttpRetryScheduler::Startup()
             return true;
         }),
         0.2f);
+
+	State = EHttpRetrySchedulerState::INITIALIZED;
+	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler has been INITIALIZED"));
 }
 
 void FHttpRetryScheduler::Shutdown()
 {
+	State = EHttpRetrySchedulerState::SHUTTING_DOWN;
+
 	if (PollRetryHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(PollRetryHandle);
@@ -184,7 +200,7 @@ void FHttpRetryScheduler::Shutdown()
 		// try flush once
 		FHttpModule::Get().GetHttpManager().Flush(true);
 		FHttpModule::Get().GetHttpManager().Tick(0);
-		PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+
 		// cancel unfinished http requests, so don't hinder the shutdown
 		for (auto& Task : RetryList)
 		{
