@@ -40,6 +40,15 @@ using namespace std;
 static Settings OriginalSettings;
 void ResetSettings();
 
+class FHttpRetrySchedulerTestingMode: public FHttpRetryScheduler{
+public:
+	FHttpRetrySchedulerTestingMode()
+	{
+		// Set this state to initialized without Startup() function that make the ticker duplication
+		State = EHttpRetrySchedulerState::INITIALIZED;
+	};
+};
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpRetryBackupSettings, "AccelByte.Tests.Core.HttpRetry.A.BackupSettings", AutomationFlagMaskHttpRetry);
 bool HttpRetryBackupSettings::RunTest(const FString& Parameter)
 {
@@ -50,7 +59,7 @@ bool HttpRetryBackupSettings::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError500Twice_RetryTwice, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError500Twice_RetryTwice", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -126,7 +135,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NetworkError_Retry, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NetworkError_Retry", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -222,7 +231,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 //	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
 //	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
 //	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-//	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+//	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 //	auto Ticker = FTicker::GetCoreTicker();
 //	double CurrentTime;
 //
@@ -309,7 +318,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 //	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
 //	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 20.0, TEXT("user_refresh_id"));
 //	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-//	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+//	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 //	auto Ticker = FTicker::GetCoreTicker();
 //	double CurrentTime;
 //
@@ -346,7 +355,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Disabled.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -403,7 +412,7 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoResponseFor60s_RequestCancelled, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NoResponseFor60s_RequestCancelled", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -463,7 +472,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithValidURL_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithValidURL_AllCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -516,7 +525,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllComp
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 
@@ -643,7 +652,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequestsChain_WithValidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessRequestsChain_WithValidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
-	auto Scheduler = MakeShared<FHttpRetryScheduler>();
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto& Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
 

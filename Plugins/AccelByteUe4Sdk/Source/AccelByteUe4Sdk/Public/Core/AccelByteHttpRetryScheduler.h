@@ -53,14 +53,6 @@ public:
 	void Shutdown();
 
 private:
-	enum class EHttpRetrySchedulerState
-	{
-		UNINITIALIZED,
-		INITIALIZED,
-		SHUTTING_DOWN
-	};
-	EHttpRetrySchedulerState State = EHttpRetrySchedulerState::UNINITIALIZED;
-
 	class FHttpRetryTask
 	{
 	public:
@@ -78,6 +70,15 @@ private:
 private:
 	TArray<TSharedRef<FHttpRetryTask>> RetryList;
 	FDelegateHandle PollRetryHandle;
+
+protected:
+	enum class EHttpRetrySchedulerState
+	{
+		UNINITIALIZED,
+		INITIALIZED,
+		SHUTTING_DOWN
+	};
+	EHttpRetrySchedulerState State = EHttpRetrySchedulerState::UNINITIALIZED;
 };
 
 }
