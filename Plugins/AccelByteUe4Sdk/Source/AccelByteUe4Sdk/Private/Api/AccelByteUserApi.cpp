@@ -24,7 +24,7 @@ namespace AccelByte
 namespace Api
 {
 
-User::User(AccelByte::Credentials& Credentials, AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
+User::User(AccelByte::Credentials& Credentials, AccelByte::Settings& Setting) : Creds(Credentials), Settings(Setting)
 {}
 
 User::~User()
@@ -83,47 +83,14 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
+	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
-		Oauth2::Logout(Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([](){}), 
-			FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.ForgetAll();
 	}
-	Oauth2::GetSessionIdWithPlatformGrant(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, 
-		THandler<FOauth2Session>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetTokenWithOtherPlatformToken(Settings.ClientId, Settings.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Token>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
 	{
-		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, PlatformType, OnSuccess](const FAccountUserData& Result)
-		{
-			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			if (!Result.UserId.IsEmpty())
-			{
-				GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda([this, PlatformType](const FPagedPlatformLinks& Result)
-				{
-					if (Result.Data.Num() > 0)
-					{
-						for (auto& data : Result.Data)
-						{
-							if (data.PlatformId == GetPlatformString(PlatformType))
-							{
-								AccelByte::Api::User::Credentials.SetPlatformInfo(data.PlatformUserId);
-								return;
-							}
-						}
-					}
-				}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					UE_LOG(LogAccelByteUser, Log, TEXT("[AccelByte] Get Platform Links failed with error code: %d and messages: %s"), ErrorCode, *ErrorMessage);
-				}));
-			}
-			OnSuccess.ExecuteIfBound();
-		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.SetAuthToken(Result, FPlatformTime::Seconds());
+		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
@@ -135,28 +102,16 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	User::TempUsername = Username;
-	Credentials.SetUserEmailAddress(Username);
-	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
+	TempUsername = Username;
+	Creds.SetUserEmailAddress(Username);
+	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
-		Oauth2::Logout(Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([](){}), 
-			FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.ForgetAll();
 	}
-	Oauth2::GetSessionIdWithPasswordGrant(Settings.ClientId, Settings.ClientSecret, Username, Password, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetTokenWithPasswordCredentials(Settings.ClientId, Settings.ClientSecret, Username, Password, THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
 	{
-		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
-		{
-			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			OnSuccess.ExecuteIfBound();
-		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.SetAuthToken(Result, FPlatformTime::Seconds());
+		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
@@ -168,26 +123,14 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
+	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
-		Oauth2::Logout(Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([](){}), 
-			FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.ForgetAll();
 	}
-	Oauth2::GetSessionIdWithDeviceGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result)
+	Oauth2::GetTokenWithDeviceId(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
 	{
-		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
-		{
-			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			OnSuccess.ExecuteIfBound();
-		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.SetAuthToken(Result, FPlatformTime::Seconds());
+		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
@@ -201,26 +144,14 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 
 	FString AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
 
-	if (Credentials.GetSessionState() == Credentials::ESessionState::Valid)
+	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
-		Oauth2::Logout(Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([](){}), 
-			FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+		Creds.ForgetAll();
 	}
 
-	Oauth2::GetSessionIdWithAuthorizationCodeGrant(Settings.ClientId, Settings.ClientSecret, AuthorizationCode, Settings.RedirectURI, THandler<FOauth2Session>::CreateLambda([this, OnSuccess, OnError](const FOauth2Session& Result) {
-		const FOauth2Session session = Result;
-		AccelByte::Api::User::Credentials.SetUserSession(session.Session_id, FPlatformTime::Seconds() + (session.Expires_in*FMath::FRandRange(0.7, 0.9)), session.Refresh_id);
-		GetData(THandler<FAccountUserData>::CreateLambda([this, OnSuccess, session](const FAccountUserData& Result)
-		{
-			AccelByte::Api::User::Credentials.SetUserLogin(Result.UserId, Result.DisplayName, Result.Namespace);
-			OnSuccess.ExecuteIfBound();
-		}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		}));
+	Oauth2::GetTokenWithAuthorizationCode(Settings.ClientId, Settings.ClientSecret, AuthorizationCode, Settings.RedirectURI, THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result) {
+		Creds.SetAuthToken(Result, FPlatformTime::Seconds());
+		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
@@ -232,7 +163,7 @@ void User::ForgetAllCredentials()
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	Credentials.ForgetAll();
+	Creds.ForgetAll();
 }
 
 void User::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
@@ -296,12 +227,44 @@ void User::Registerv2(const FString& EmailAddress, const FString& Username, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::Registerv3(const FRegisterRequestv3& RegisterRequest, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FRegisterRequestv3 NewUserRequest;
+	NewUserRequest.AcceptedPolicies = RegisterRequest.AcceptedPolicies;
+	NewUserRequest.DisplayName = RegisterRequest.DisplayName;
+	NewUserRequest.Password = RegisterRequest.Password;
+	NewUserRequest.EmailAddress = RegisterRequest.EmailAddress;
+	NewUserRequest.Username = RegisterRequest.Username;
+	NewUserRequest.AuthType = TEXT("EMAILPASSWD");
+	NewUserRequest.Country = RegisterRequest.Country;
+	NewUserRequest.DateOfBirth = RegisterRequest.DateOfBirth;
+
+	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users"), *Settings.IamServerUrl, *Settings.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(NewUserRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void User::GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/users/me"), *Settings.IamServerUrl);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
@@ -330,7 +293,7 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountU
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
@@ -354,7 +317,7 @@ void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, const FVoidHandle
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
@@ -381,7 +344,7 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 	const FString PlatformString = GetPlatformString(PlatformType);
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users"), *Settings.IamServerUrl, *Settings.Namespace, *PlatformString);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -405,7 +368,7 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandl
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (Credentials.GetUserEmailAddress().IsEmpty())
+	if (Creds.GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("User email address cannot be empty"));
 	}
@@ -414,7 +377,7 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandl
 	{
 		EVerificationContext::UserAccountRegistration,
 		TEXT(""),
-		Credentials.GetUserEmailAddress()
+		Creds.GetUserEmailAddress()
 	};
 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
@@ -425,7 +388,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const 
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	if (Credentials.GetUserEmailAddress().IsEmpty())
+	if (Creds.GetUserEmailAddress().IsEmpty())
 	{
 		OnError.ExecuteIfBound(400, TEXT("User email address cannot be empty"));
 	}
@@ -434,7 +397,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const 
 	{
 		EVerificationContext::UpdateEmailAddress,
 		TEXT(""),
-		Credentials.GetUserEmailAddress()
+		Creds.GetUserEmailAddress()
 	};
 
 	SendVerificationCode(SendVerificationCodeRequest, OnSuccess, OnError);
@@ -460,8 +423,8 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetUserNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetNamespace(), *FRegistry::Credentials.GetUserId());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -492,8 +455,8 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Creds.GetNamespace());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -524,8 +487,8 @@ void User::Upgradev2(const FString& EmailAddress, const FString& Username, const
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Creds.GetNamespace());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -551,65 +514,13 @@ void User::Upgradev2(const FString& EmailAddress, const FString& Username, const
 		FPlatformTime::Seconds());
 }
 
-void User::UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-{
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
-	const auto HttpNotifDelegate = HttpListenerExtension::FHttpNotif::CreateLambda([this]()
-	{
-		UpgradeNotif.ExecuteIfBound();
-	});
-
-	ListenerExtension = HttpListenerExtension();
-	ListenerExtension.SetHttpNotifDelegate(HttpNotifDelegate);
-	ListenerExtension.GetAvailableLocalUrl();
-	FString LocalUrl = ListenerExtension.AvailableLocalUrl;
-
-	User::UpgradeWithPlayerPortalAsync(LocalUrl, THandler<FUpgradeUserRequest>::CreateLambda([this, OnSuccess](const FUpgradeUserRequest& Result)
-	{
-		FString Url = FString::Printf(TEXT("%s/upgrade-account-from-sdk?temporary_session_id=%s"), *Settings.NonApiBaseUrl, *Result.Temporary_session_id);
-		FPlatformProcess::LaunchURL(*Url, NULL, NULL);
-
-		ListenerExtension.StartHttpListener();
-
-		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
-}
-
-void User::UpgradeWithPlayerPortalAsync(const FString& ReturnUrl, const THandler<FUpgradeUserRequest>& OnSuccess, const FErrorHandler& OnError)
-{
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v1/public/temporarysessions"), *Settings.BaseUrl);
-	FString Verb            = TEXT("POST");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content         = FString::Printf(TEXT("{ \"return_url\": \"%s\", \"ttl\": %i}"), *ReturnUrl, ListenerExtension.TTL);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
 void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString ContactType     = TEXT("email");
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/verify"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
@@ -679,8 +590,8 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, cons
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms"), *Settings.IamServerUrl, *Credentials.GetUserNamespace());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms"), *Settings.IamServerUrl, *Creds.GetNamespace(), *Creds.GetUserId());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -704,8 +615,8 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString&
 
 	auto PlatformId = GetPlatformString(PlatformType);
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Creds.GetNamespace(), *PlatformId);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
@@ -733,8 +644,8 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FS
 	linkRequest.PlatformId = PlatformId;
 	linkRequest.PlatformUserId = PlatformUserId;
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms/link"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms/link"), *Settings.IamServerUrl, *Creds.GetNamespace(), *Creds.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -759,8 +670,8 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidH
 
 	auto PlatformId = GetPlatformString(PlatformType);
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *PlatformId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *Settings.IamServerUrl, *Creds.GetNamespace(), *PlatformId);
 	FString Verb            = TEXT("DELETE");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -785,8 +696,8 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	FString Authorization   = TEXT("");
 	FString Namespace       = TEXT("");
 	
-	Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	Namespace = Credentials.GetUserNamespace();
+	Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	Namespace = Creds.GetNamespace();
 	
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/code/request"), *Settings.IamServerUrl, *Namespace);
 	FString Verb            = TEXT("POST");
@@ -811,8 +722,8 @@ void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THan
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Creds.GetNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -840,12 +751,12 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
-void User::GetUserByUserId(const FString& UserID, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
+void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *UserID);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
@@ -867,7 +778,7 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, con
 	report.GetFunctionLog(FString(__FUNCTION__));
 	FString PlatformId      = GetPlatformString(PlatformType);
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *PlatformId, *OtherPlatformUserId);
 	FString Verb            = TEXT("GET");
 	FString Accept          = TEXT("application/json");
@@ -886,8 +797,8 @@ void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErro
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/location/country"), *Settings.BaseUrl);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/location/country"), *Settings.IamServerUrl);
 	FString Verb            = TEXT("GET");
 	FString Accept          = TEXT("application/json");
 
@@ -928,31 +839,6 @@ void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHa
 	}));
 }
 
-void User::GetJsonWebToken(const THandler<FJsonWebTokenResponse>& OnSuccess, const FErrorHandler& OnError)
-{
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
-	FString url;
-	url = Settings.IamServerUrl;
-	if (Settings.IamServerUrl.Contains("/iam"))
-	{
-		url.RemoveFromEnd("/iam");
-	}
-
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/users/%s/sessions/%s"), *url, *Settings.Namespace, *Credentials.GetUserId(), *Credentials.GetUserSessionId());
-	FString Verb = TEXT("GET");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
 
 } // Namespace Api
 } // Namespace AccelByte

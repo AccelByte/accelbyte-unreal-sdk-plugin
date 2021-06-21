@@ -36,7 +36,6 @@ DECLARE_DELEGATE(FEcommerceUserInitializationFail);
 
 DECLARE_DELEGATE(FDeleteUserByIdSuccess);
 static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
-void FlushHttpRequests();//defined in TestUtilities.cpp
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
@@ -131,7 +130,6 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetCategorySuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetCategorySuccess,"Waiting for get category...");
 
 #pragma endregion GetCategory
@@ -164,7 +162,6 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 		bGetRootCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
 	
-	FlushHttpRequests();
 	Waiting(bGetRootCategoriesSuccess,"Waiting for get root category...");
 
 #pragma endregion GetRootCategories
@@ -198,7 +195,6 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 		bGetChildCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetChildCategoriesSuccess,"Waiting for get child category...");
 
 #pragma endregion GetChildCategories
@@ -236,7 +232,6 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 		bGetDescendantCategoriesSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetDescendantCategoriesSuccess,"Waiting for get descendant category...");
 
 #pragma endregion GetDescendantCategories
@@ -275,7 +270,6 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 		bGetItemByCriteriaSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess,"Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
@@ -317,7 +311,6 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		bGetItemByCriteriaSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess,"Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
@@ -332,7 +325,6 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 		bGetItemByIdSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByIdSuccess,"Waiting for get items...");
 
 #pragma endregion GetItem
@@ -377,7 +369,6 @@ bool EcommerceGetDiscountedItemSuccess::RunTest(const FString& Parameters)
 		bGetItemByCriteriaSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
@@ -410,7 +401,6 @@ bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 		bSearchItemSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bSearchItemSuccess,"Waiting for search item...");
 
 #pragma endregion SearchItem
@@ -440,14 +430,13 @@ bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bCreateDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateDistributionSuccess,"Waiting for create distribution receiver...");
 
 #pragma endregion CreateDistributionReceiver
 #pragma region GetDistributionReceiver
 	bool bGetDistributionSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
-	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
 	{
 		for (auto Data : Result)
 		{
@@ -463,7 +452,6 @@ bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bGetDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region DeleteDistributionReceiver
@@ -475,7 +463,6 @@ bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bDeleteDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
@@ -506,14 +493,13 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bCreateDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateDistributionSuccess,"Waiting for create distribution receiver...");
 
 #pragma endregion CreateDistributionReceiver
 #pragma region GetDistributionReceiver
 	bool bGetDistributionSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
-	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
 	{
 		for (auto Data : Result)
 		{
@@ -529,7 +515,6 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bGetDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region UpdateDistributionReceiver
@@ -546,14 +531,13 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bUpdateDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bUpdateDistributionSuccess,"Waiting for update distribution receiver...");
 
 #pragma endregion UpdateDistributionReceiver
 #pragma region GetDistributionReceiver
 	bGetDistributionSuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Distribution Receiver"));
-	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
+	FRegistry::Entitlement.GetDistributionReceiver(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), THandler<TArray<FAccelByteModelsDistributionReceiver>>::CreateLambda([&bGetDistributionSuccess](const TArray<FAccelByteModelsDistributionReceiver>& Result)
 	{
 		for (auto Data : Result)
 		{
@@ -569,7 +553,6 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bGetDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetDistributionSuccess,"Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region DeleteDistributionReceiver
@@ -581,7 +564,6 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 		bDeleteDistributionSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
@@ -624,7 +606,6 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		}
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess,"Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
@@ -650,7 +631,6 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateNewOrderSuccess,"Waiting for new order created...");
 
 #pragma endregion CreateOrder
@@ -678,7 +658,6 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		}
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess2,"Waiting for get item...");
 
 #pragma endregion GetItemByCriteria_InGameItem
@@ -702,7 +681,6 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 		bCreateNewOrderSuccess2 = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateNewOrderSuccess2,"Waiting for new order created...");
 
 #pragma endregion CreateOrder_InGameItem
@@ -749,7 +727,6 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		}
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess,"Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
@@ -776,7 +753,6 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateNewOrderSuccess,"Waiting for new order created...");
 
 #pragma endregion CreateOrder
@@ -791,7 +767,6 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 		bGetUserOrderSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetUserOrderSuccess,"Waiting for get user order...");
 
 #pragma endregion GetUserOrder
@@ -836,7 +811,6 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		}
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess,"Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
@@ -863,7 +837,6 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		bCreateNewOrderSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateNewOrderSuccess,"Waiting for new order created...");
 
 #pragma endregion CreateOrder
@@ -878,7 +851,6 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 		bGetUserOrderHistorySuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetUserOrderHistorySuccess,"Waiting for get user order history...");
 
 #pragma endregion GetUserOrderHistory
@@ -905,7 +877,6 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 		bGetUserOrdersSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetUserOrdersSuccess,"Waiting for get user order...");
 
 #pragma endregion GetUserOrders
@@ -925,7 +896,6 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 		bGetWalletSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetWalletSuccess,"Waiting for get wallet...");
 
 	check(bGetWalletSuccess);
@@ -947,7 +917,6 @@ bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
 		bGetWalletSuccess = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
 
 #pragma endregion GetWalletInfo
@@ -960,7 +929,6 @@ bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
 	{
 		bServerLoginWithClientCredentialsDone = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 #pragma endregion ClientLogin
@@ -980,7 +948,6 @@ bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
 		bBalanceIncrease = ((WalletInfo.Balance + request.Amount) == Result.Balance);
 		bCreditWalletSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
 
 #pragma endregion CreditUserWallet
@@ -1006,7 +973,6 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
         bGetWalletSuccess = true;
     }), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
 	check(bGetWalletSuccess)
 #pragma endregion GetWalletInfo
@@ -1019,7 +985,6 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
     {
         bServerLoginWithClientCredentialsDone = true;
     }), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	check(bServerLoginWithClientCredentialsDone)
@@ -1041,7 +1006,6 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
         bCreditWalletSuccess = true;
 		WalletInfo = Result;
     }), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
 	check(bCreditWalletSuccess)
 #pragma endregion CreditUserWallet
@@ -1059,7 +1023,6 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
 		bWalletDecreased = ((WalletInfo.Balance - DebitRequest.Amount) == Result.Balance);
 		bDebitWalletSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDebitWalletSuccess, "Waiting for debiting the user wallet");
 
 	check(bWalletDecreased)
@@ -1088,7 +1051,6 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 		Items = Result;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	check(bGetItemByCriteriaSuccess);
 #pragma endregion GetItemByCriteria
@@ -1100,7 +1062,6 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 		bClientLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsEntitlementGrant GrantedEntitlement;
@@ -1126,7 +1087,6 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 		}
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	check(bGrantEntitlementSuccess);
@@ -1141,7 +1101,6 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 		UserEntitlement = Result;
 		bQueryEntitlementSuccess = true;
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	FlushHttpRequests();
 	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = false;
@@ -1170,7 +1129,6 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 		bClientLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsEntitlementGrant GrantedEntitlement;
@@ -1207,7 +1165,6 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 			bGrantEntitlementDone = true;
 		}
 	}));
-	FlushHttpRequests();
 	Waiting(bGrantEntitlementDone, "Waiting for entitlement granted...");
 
 	check(bGrantEntitlementDone);
@@ -1223,7 +1180,6 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 		UserEntitlement = Result;
 		bQueryEntitlementSuccess = true;
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	FlushHttpRequests();
 	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = false;
@@ -1256,7 +1212,6 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 		ExpectedEntitlementId = Result.Data[0].Id;
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 
-	FlushHttpRequests();
 	Waiting(bQueryEntitlementSuccess, "Waiting for get user entitlement...");
 
 	check(bQueryEntitlementSuccess);
@@ -1279,7 +1234,6 @@ bool EcommerceConsumeUserEntitlement::RunTest(const FString& Parameters)
 		bConsumeEntitlement1Success = true;
 		bConsumeResult1True = (Result.Status == EAccelByteEntitlementStatus::CONSUMED);
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
 
 #pragma endregion FirstConsumption
@@ -1298,8 +1252,7 @@ bool EcommerceConsumeUserEntitlement::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 		bConsumeEntitlement2Success = true;
 	}));
-	FlushHttpRequests();
-	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+	Waiting(bConsumeEntitlement2Success, "Waiting for consume user entitlement...");
 
 #pragma endregion SecondConsumption
 
@@ -1325,7 +1278,6 @@ bool EcommerceGetUserEntitlementByEntitlementId::RunTest(const FString& Paramete
 		GetResult = Result;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	check(bGetEntitlementSuccess);
@@ -1354,7 +1306,6 @@ bool EcommerceGetUserEntitlementByEntitlementIdInvalid::RunTest(const FString& P
 		}
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
 
 	check(bGetEntitlementError);
@@ -1370,7 +1321,6 @@ bool EcommerceServerGetEntitlementByEntitlementId::RunTest(const FString& Parame
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 		bLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementSuccess = false;
@@ -1385,7 +1335,6 @@ bool EcommerceServerGetEntitlementByEntitlementId::RunTest(const FString& Parame
 		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
 		GetResult = Result;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	check(bGetEntitlementSuccess);
@@ -1465,7 +1414,6 @@ bool EcommerceServerGetEntitlementByEntitlementIdInvalid::RunTest(const FString&
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 		bLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementDone = false;
@@ -1480,13 +1428,12 @@ bool EcommerceServerGetEntitlementByEntitlementIdInvalid::RunTest(const FString&
 	{
 		bGetEntitlementDone = true;
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-		if ((ErrorCodes)ErrorCode == ErrorCodes::EntitlementIdNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::EntitlementIdNotFoundException)
 		{
 			bGetEntitlementError = true;
 		}
 	}));
 
-	FlushHttpRequests();
 	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
 
 	check(bGetEntitlementError);
@@ -1502,7 +1449,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 	{ 
 		bUserLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
 	check(bUserLoginSuccess);
 	
@@ -1522,7 +1468,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 		Items = Result;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	check(bGetItemByCriteriaSuccess);
 	
@@ -1540,7 +1485,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
         Items2 = Result;
     }), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
 	check(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
@@ -1552,7 +1496,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 		bClientLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
 	TArray<FAccelByteModelsEntitlementGrant> GrantedEntitlements;
@@ -1597,7 +1540,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 		}
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	check(bGrantEntitlementSuccess);
@@ -1612,7 +1554,6 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 		UserEntitlement = Result;
 		bQueryEntitlementSuccess = true;
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	FlushHttpRequests();
 	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = true;
@@ -2350,7 +2291,6 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 
 	bool bSetupSuccess = false;
 	SetupEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bSetupSuccess = true; }), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSetupSuccess,"Waiting for setup ecommerce...");
 	check(bSetupSuccess);
 
@@ -2359,7 +2299,6 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 	{ 
 		bUserLoginSuccess = true;
 	}), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
 	check(bUserLoginSuccess);
 	return true;
@@ -2370,7 +2309,6 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 {
 	bool bTearDownSuccess = false;
 	TearDownEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bTearDownSuccess = true; }), EcommerceErrorHandler);
-	FlushHttpRequests();
 	Waiting(bTearDownSuccess,"Waiting for teardown...");
 	check(bTearDownSuccess)
 
@@ -2388,7 +2326,6 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 		bDeleteDone = true;
 	}), EcommerceErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone,"Waiting for user deletion...");
 
 #pragma endregion DeleteUser

@@ -586,8 +586,8 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -609,8 +609,8 @@ void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteMo
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -630,8 +630,8 @@ void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelBy
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -651,8 +651,8 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *Settings.BaseUrl, *Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -673,8 +673,8 @@ void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteMo
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -694,8 +694,8 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *Settings.BaseUrl, *Credentials.GetUserNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -731,7 +731,7 @@ void Lobby::BlockPlayer(const FString& UserId)
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::BlockPlayer, Prefix::Block,
-		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetUserNamespace()));
+		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
 }
 
 void Lobby::UnblockPlayer(const FString& UserId)
@@ -740,7 +740,7 @@ void Lobby::UnblockPlayer(const FString& UserId)
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::UnblockPlayer, Prefix::Friends,
-		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetUserNamespace()));
+		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -764,7 +764,7 @@ FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::SetSessionAttribute, Prefix::Attribute,
-		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetClientNamespace(), *Key, *Value));
+		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetNamespace(), *Key, *Value));
 }
 
 void Lobby::UnbindEvent()
@@ -963,7 +963,7 @@ void Lobby::CreateWebSocket()
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("Authorization", "Bearer " + Credentials.GetUserSessionId());
+	Headers.Add("Authorization", "Bearer " + Credentials.GetAccessToken());
 	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
@@ -1237,8 +1237,8 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteMod
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetUserNamespace(), *PartyId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

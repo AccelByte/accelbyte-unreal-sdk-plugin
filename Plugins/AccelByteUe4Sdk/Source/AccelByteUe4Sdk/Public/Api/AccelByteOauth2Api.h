@@ -37,7 +37,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetSessionIdWithAuthorizationCodeGrant(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithAuthorizationCode(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Log user in with their email account.
@@ -49,7 +49,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetSessionIdWithPasswordGrant(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Get client token.
@@ -60,7 +60,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithClientCredentials(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 	//
 	// Custom grant types
@@ -77,7 +77,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	static void GetSessionIdWithDeviceGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithDeviceId(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief Log user in with their other platform account, e.g., Steam, Google, Facebook, Twitter, Twitch, etc.
@@ -88,7 +88,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetSessionIdWithPlatformGrant(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 
 	/**
@@ -101,7 +101,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void GetSessionIdWithRefreshId(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Session>& OnSuccess, const FErrorHandler& OnError);
+	static void GetTokenWithRefreshToken(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	* @brief Log user out.
@@ -111,7 +111,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void Logout(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	static void RevokeToken(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	Oauth2() = delete; // static class can't have instance

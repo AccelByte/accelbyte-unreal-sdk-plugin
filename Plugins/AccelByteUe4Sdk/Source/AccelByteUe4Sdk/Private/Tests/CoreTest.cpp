@@ -21,7 +21,6 @@ bool CoreConfigTest::RunTest(const FString& Parameters)
 {
     const FString EmptyString = "";
     TestNotEqual("BaseUrl", FRegistry::Settings.BaseUrl, EmptyString);
-    TestNotEqual("NonApiBaseUrl", FRegistry::Settings.NonApiBaseUrl, EmptyString);
     TestNotEqual("IamServerUrl", FRegistry::Settings.IamServerUrl, EmptyString);
     TestNotEqual("PlatformServerUrl", FRegistry::Settings.PlatformServerUrl, EmptyString);
     TestNotEqual("LobbyServerUrl", FRegistry::Settings.LobbyServerUrl, EmptyString);

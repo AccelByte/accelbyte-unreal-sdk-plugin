@@ -148,7 +148,7 @@ void LobbyDisconnect(int userCount)
 	}
 }
 
-void resetResponses()
+void ResetResponses()
 {
 	bUsersConnected = false;
 	bUsersConnectionSuccess = false;
@@ -731,7 +731,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 				}
 			}));
 		
-		FlushHttpRequests();
 		Waiting(UsersCreationSuccess[i],"Waiting for user created...");
 
 		LobbyUsers[i]->LoginWithUsername(
@@ -744,7 +743,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 			}), 
 			LobbyTestErrorHandler);
 		
-		FlushHttpRequests();
 		Waiting(UsersLoginSuccess[i],"Waiting for Login...");
 
 		Lobbies.Add(MakeShared<Api::Lobby>(UserCreds[i], FRegistry::Settings));
@@ -766,7 +764,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 			bGetServerLatenciesSuccess = true;
 			PreferedLatencies = Result;
 		}), LobbyTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 		check(bGetServerLatenciesSuccess);
 
@@ -814,7 +811,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		}
 		bGetDsmConfigComplete = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetDsmConfigComplete, "Waiting get dsm config");
 
 	if (isUpdateDsmConfig)
@@ -823,7 +819,6 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		DSM_Set_Config(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
 			bSetDsmConfigComplete = true;
 		}), LobbyTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bSetDsmConfigComplete, "Waiting set dsm config");
 	}
 	
@@ -831,28 +826,35 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.Tests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
+
 bool LobbyTestTeardown::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
-	bool bDeleteUsersSuccessful[TestUserCount];
-	Lobbies.Reset(0);
+	TArray<bool> SuccessfulDeletions;
+	SuccessfulDeletions.Init(false, TestUserCount);
 
 	for (int i = 0; i < TestUserCount; i++)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, TestUserCount);
-		DeleteUserById(UserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Success"));
-			bDeleteUsersSuccessful[i] = true;
-		}), LobbyTestErrorHandler);
-		FlushHttpRequests();
-		Waiting(bDeleteUsersSuccessful[i],"Waiting for user deletion...");
+		DeleteUserById(
+			UserCreds[i].GetUserId(),
+			FSimpleDelegate::CreateLambda([&SuccessfulDeletions, i]()
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Success"));
+				SuccessfulDeletions[i] = true;
+			}),
+			FErrorHandler::CreateLambda([&SuccessfulDeletions, i](int32 ErrorCode, FString ErrorMessage)
+			{
+				//Not found means we don't need to delete it
+				if (ErrorCode == static_cast<int32>(ErrorCodes::StatusNotFound))
+				{
+					SuccessfulDeletions[i] = true;
+				}
+			}));
+		WaitUntil([&]() { return SuccessfulDeletions[i]; }, 60.0, "Waiting for user deletion...");
 	}
 
-	for (int i = 0; i < TestUserCount; i++)
-	{
-		check(bDeleteUsersSuccessful[i]);
-	}
+	check(!SuccessfulDeletions.ContainsByPredicate([](const bool SuccessfulDeletion){ return !SuccessfulDeletion; }));
 	return true;
 }
 
@@ -938,7 +940,7 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 		check(userResponded[i]);
 	}
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -961,7 +963,7 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 	check(bUsersConnectionSuccess);
 
 	LobbyDisconnect(1);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -994,7 +996,7 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	check(receivedChatCount >= (TestUserCount - 1));
 
 	LobbyDisconnect(TestUserCount);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1045,7 +1047,7 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	check(receivedChatCount == (TestUserCount * TestUserCount * chatMultiplier));
 
 	LobbyDisconnect(TestUserCount);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1098,7 +1100,7 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 	check(receivedChatCount == (playerCount * playerCount) - 1);
 
 	LobbyDisconnect(playerCount);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1149,7 +1151,7 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 	check(onlineUserResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	check(onlineUserResponse.friendsId.Contains(UserCreds[2].GetUserId()));
 	check(onlineUserResponse.friendsId.Contains(UserCreds[3].GetUserId()));
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1171,7 +1173,7 @@ bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameter
 
 	LobbyDisconnect(2);
 	check(bGetInfoPartyError);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1207,7 +1209,7 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	check(infoPartyResponse.Members.Num() > 0);
 	check(infoPartyResponse.Members[0] == UserCreds[0].GetUserId());
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1242,7 +1244,7 @@ bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString
 	LobbyDisconnect(1);
 	check(bCreatePartyError);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1349,7 +1351,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 
 	LobbyDisconnect(2);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1494,7 +1496,7 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	check(joinParty[2].Members.Num() == 3 || joinParty[1].Members.Num() == 3);
 	check(infoPartyResponse.Members.Num() == 2);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1512,7 +1514,7 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 	check(Lobbies[0]->IsConnected());
 
 	LobbyDisconnect(1);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1528,7 +1530,6 @@ bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Paramete
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bSendNotifSucccess, "Sending Notification...");
 
 	LobbyConnect(1);
@@ -1544,7 +1545,7 @@ bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Paramete
 	check(bGetNotifSuccess);
 	check(getNotifResponse.Payload == notification);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1572,7 +1573,6 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
 		}), LobbyTestErrorHandler);
 
-		FlushHttpRequests();
 		Waiting(bSendNotifSucccess[i], "Sending Notification...");
 
 		Waiting(bGetNotifSuccess, "Getting All Notifications...");
@@ -1587,7 +1587,7 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 		check(bGetNotifCheck[i]);
 		check(getNotifCheck[i].Payload == payloads[i]);
 	}
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1645,7 +1645,7 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 	check(!bUserPresenceNotifError);
 	check(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability) == 0);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1710,7 +1710,7 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 	check(!bUserPresenceNotifError);
 	check(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability) == 0);
 
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1803,7 +1803,7 @@ bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 	check(!bUnfriendError);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1865,7 +1865,7 @@ bool LobbyTestFriends_Notification_Request_Accept::RunTest(const FString& Parame
 	check(!bUnfriendError);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -1986,7 +1986,7 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 	}
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2091,7 +2091,7 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 	check(!listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2196,7 +2196,7 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 	}
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2372,7 +2372,7 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2392,7 +2392,6 @@ bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Bulk Add Friend Success!"));
 		bBulkAddFriendSuccess = true;
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bBulkAddFriendSuccess, "Waiting Bulk Add Friend...");
 	
 	LobbyConnect(1);
@@ -2537,7 +2536,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	check(!bUnblockPlayerError);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2597,6 +2596,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	BlockerUserData.UserId = UserCreds[0].GetUserId();
 	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
+
 	check(bListBlockerListSuccess);
 	for (auto ResponseData : listBlockerResponse.Data)
 	{
@@ -2607,7 +2607,6 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 		}
 	}
 	check(bFound);
-	bFound = false;
 
 	// reblock should result in success
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
@@ -2619,7 +2618,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	check(!bUnblockPlayerError);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2698,7 +2697,6 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 		
-	FlushHttpRequests();
     Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -2778,7 +2776,6 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
     Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
     check(bCreateMatchmakingChannelSuccess);
@@ -2793,7 +2790,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -2876,7 +2873,6 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -2956,7 +2952,6 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -2983,7 +2978,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	check(customPortFoundCount == customPortNames.Num());
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -3021,6 +3016,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
+	
 	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
@@ -3046,11 +3042,11 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		}));
 
 	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-
 	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
+	bGetInfoPartyError = false;
+	bGetInfoPartySuccess = false;
 	Lobbies[0]->SendInfoPartyRequest();
-
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
 
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -3062,17 +3058,17 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 		}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
 	{
+		bLeavePartySuccess = false;
 		Lobbies[0]->SendLeavePartyRequest();
-
 		Waiting(bLeavePartySuccess, "Leaving Party...");
 	}
+	
+	bCreatePartySuccess = false;
 	Lobbies[0]->SendCreatePartyRequest();
-
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
 	check(!bCreatePartyError);
@@ -3080,7 +3076,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
 	Lobbies[1]->SendInfoPartyRequest();
-
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
@@ -3088,13 +3083,12 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
 		Lobbies[1]->SendLeavePartyRequest();
-
 		Waiting(bLeavePartySuccess, "Leaving Party...");
 	}
+	
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
 	Lobbies[1]->SendCreatePartyRequest();
-
 	Waiting(bCreatePartySuccess, "Creating Party...");
 	check(!bCreatePartyError);
 
@@ -3103,12 +3097,10 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bool bServerLoginWithClientCredentialsDone = false;
 	FRegistry::ServerOauth2.LoginWithClientCredentials(
 		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
-			{
-				bServerLoginWithClientCredentialsDone = true;
-			}),
+		{
+			bServerLoginWithClientCredentialsDone = true;
+		}),
 		LobbyTestErrorHandler);
-
-	FlushHttpRequests();
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	TMap<FString, FString> PartyAttributes;
@@ -3126,45 +3118,41 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		7777,
 		ServerName,
 		FVoidHandler::CreateLambda([&bRegisterLocalServerToDSMDone]()
-			{
-				bRegisterLocalServerToDSMDone = true;
-			}),
+		{
+			bRegisterLocalServerToDSMDone = true;
+		}),
 		LobbyTestErrorHandler);
-
-	FlushHttpRequests();
 	Waiting(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
 	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
-
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
-
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
-	while (matchMakingNotifNum < 2)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&](){ return matchMakingNotifNum >= 2; }, 60, "Waiting for Matchmaking Notification...");
+
+	bDsNotifSuccess = false;
+	bDsNotifError = false;
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
-
-	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification 0");
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
-
-	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
+	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification 1");
 	check(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
@@ -3178,7 +3166,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		sessionId = result.Session_id;
 		bSessionIdDone = true;
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSessionIdDone, "Waiting GetSessionId");
 	
 	
@@ -3189,7 +3176,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 		matchResult = result;
 		bSessionStatusDone = true;
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSessionStatusDone, "Waiting query session status");
 
 	bool bDeregisterLocalServerFromDSMDone = false;
@@ -3201,7 +3187,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			}),
 		LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeregisterLocalServerFromDSMDone, "Waiting Deregister Local DS From DSM");
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -3211,7 +3196,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 		}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -3248,7 +3232,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	}
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -3458,7 +3442,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	check(setSessionAttributeSuccessCounter.GetValue() == 2);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -3552,7 +3536,6 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -3643,7 +3626,6 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -3657,7 +3639,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -3774,7 +3756,6 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -3818,7 +3799,6 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		Latencies = Result;
 		Latencies.Sort(LatenciesPredicate);
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 	check(bGetServerLatenciesSuccess);
 	check(Latencies.Num() > 0);
@@ -3876,7 +3856,6 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bIsTheRightRegion[0]);
@@ -3893,15 +3872,16 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingTempParty_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartTempParty", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(2);
-
+	bDsNotifSuccess = false;
 	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
 	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
@@ -3954,12 +3934,12 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
 	{UserCreds[0].GetUserId()});
-
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
@@ -3967,17 +3947,13 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, TArray<FString>
 	{UserCreds[1].GetUserId()});
-
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	check(!bStartMatchmakingError);
 
-	while (matchMakingNotifNum < 2)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&matchMakingNotifNum](){ return matchMakingNotifNum == 2; }, 60, "Wait matchmaking notifs all arrived");
 
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
@@ -4002,7 +3978,6 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -4017,13 +3992,14 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartTempPartyOfTwo", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	const int UserNum = 4;
 	LobbyConnect(UserNum);
 
@@ -4070,7 +4046,6 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
@@ -4116,7 +4091,6 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -4130,7 +4104,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	}
 
 	LobbyDisconnect(UserNum);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -4195,13 +4169,14 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
 
 	LobbyDisconnect(1);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCancelMatchmakingTempParty_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingCancelTempParty", AutomationFlagMaskLobby);
 bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	LobbyConnect(1);
 
 	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
@@ -4235,7 +4210,6 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>{UserCreds[0].GetUserId()});
@@ -4258,11 +4232,10 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	LobbyDisconnect(1);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -4387,7 +4360,6 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
     Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	Lobbies[0]->SendInfoPartyRequest();
@@ -4520,7 +4492,6 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
     }), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
     Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
     check(bCreateMatchmakingChannelSuccess);
@@ -4531,7 +4502,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	check(!matchmakingNotifResponse[2].MatchId.IsEmpty());
 
 	LobbyDisconnect(3);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -4610,7 +4581,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
@@ -4656,7 +4626,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		}),
 		LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	bool canBind = false;
@@ -4674,7 +4643,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		}),
 		LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName);
@@ -4723,7 +4691,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		}),
 		LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeregisterLocalServerFromDSMDone, "Waiting Deregister Local DS From DSM");
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -4733,7 +4700,6 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
 	check(bCreateMatchmakingChannelSuccess);
@@ -4748,7 +4714,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }
 
@@ -4807,7 +4773,6 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 	for (int i = 0; i < 6; i++)
 	{
@@ -4867,7 +4832,6 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	check(bCreateMatchmakingChannelSuccess);
 	check(bDeleteMatchmakingChannelSuccess);
@@ -4880,7 +4844,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
 	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
 	LobbyDisconnect(6);
-	resetResponses();
+	ResetResponses();
 
 	return true;
 }
@@ -4895,208 +4859,6 @@ enum class WebSocketState
 	Closed = 5,
 	Aborted = 6
 };
-
-class WebSocketMock : public IWebSocket
-{
-public:
-	void Connect() override
-	{
-		OnConnectingEvent.ExecuteIfBound();
-	}
-
-	void Close(int32 Code = 1000, const FString& Reason = FString()) override
-	{
-		OnCloseSentEvent.ExecuteIfBound();
-	}
-
-	bool IsConnected() override
-	{
-		return State == WebSocketState::Open;
-	}
-
-	void Send(const FString& Data) override
-	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Message=%s"), *Data);
-		OnMessageReceivedEvent.Broadcast(Data);
-	}
-
-	void Send(const void* Data, SIZE_T Size, bool bIsBinary = false) override
-	{
-	}
-
-	IWebSocket::FWebSocketConnectedEvent& OnConnected() override
-	{
-		return OnConnectedEvent;
-	}
-
-	IWebSocket::FWebSocketConnectionErrorEvent& OnConnectionError() override
-	{
-		return OnConnectionErrorEvent;
-	}
-
-	IWebSocket::FWebSocketClosedEvent& OnClosed() override
-	{
-		return OnClosedEvent;
-	}
-
-	IWebSocket::FWebSocketMessageEvent& OnMessage() override
-	{
-		return OnMessageEvent;
-	}
-
-	IWebSocket::FWebSocketRawMessageEvent& OnRawMessage() override
-	{
-		return OnRawMessageEvent;
-	}
-
-	FVoidHandler& OnConnecting()
-	{
-		return OnConnectingEvent;
-	}
-
-	FVoidHandler& OnCloseSent()
-	{
-		return OnCloseSentEvent;
-	}
-
-	void Receive(FString Message)
-	{
-		OnMessageEvent.Broadcast(Message);
-	}
-
-	void ReceiveClose(int32 CloseCode, FString Reason)
-	{
-		this->State = WebSocketState::Closed;
-		OnClosedEvent.Broadcast(CloseCode, Reason, true);
-	}
-
-	IWebSocket::FWebSocketMessageEvent& OnMessageReceived()
-	{
-		return OnMessageReceivedEvent;
-	}
-
-#if ENGINE_MINOR_VERSION > 24
-	IWebSocket::FWebSocketMessageSentEvent& OnMessageSent()
-	{
-		return OnMessageSentEvent;
-	}
-#endif
-
-	void ReceiveOpen()
-	{
-		this->State = WebSocketState::Open;
-		OnConnectedEvent.Broadcast();
-	}
-
-private:
-	WebSocketState State;
-	IWebSocket::FWebSocketConnectedEvent OnConnectedEvent;
-	IWebSocket::FWebSocketConnectionErrorEvent OnConnectionErrorEvent;
-	IWebSocket::FWebSocketClosedEvent OnClosedEvent;
-	IWebSocket::FWebSocketMessageEvent OnMessageEvent;
-	IWebSocket::FWebSocketRawMessageEvent OnRawMessageEvent;
-	IWebSocket::FWebSocketMessageEvent OnMessageReceivedEvent;
-#if ENGINE_MINOR_VERSION > 24
-	IWebSocket::FWebSocketMessageSentEvent OnMessageSentEvent;
-#endif
-	FVoidHandler OnConnectingEvent;
-	FVoidHandler OnCloseSentEvent;
-};
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_GotConnectionClosed_Reconnected, "AccelByte.Tests.Lobby.C.Connected_GotConnectionClosed_Reconnected", AutomationFlagMaskLobby);
-bool LobbyTestConnected_GotConnectionClosed_Reconnected::RunTest(const FString& Parameters)
-{
-	AB_TEST_SKIP_WHEN_DISABLED();
-	//Arrange
-	AccelByte::Credentials DummyCredentials;
-	AccelByte::Settings DummySettings;
-	TSharedPtr<WebSocketMock> WebSocket = MakeShared<WebSocketMock>();
-	Lobby ALobby(DummyCredentials, DummySettings, 5.f, 1.f, 30.f, 60.f, WebSocket);
-	int NumConnect = 0;
-	WebSocket->OnConnecting().BindLambda([&NumConnect]()
-	{
-		NumConnect++;
-	});
-	ALobby.Connect();
-	WaitUntil([]() { return false; }, 0.5);
-	WebSocket->ReceiveOpen();
-	WaitUntil([]() { return false; }, 0.5);
-
-	//Act
-	WebSocket->ReceiveClose(1000, "abnormal close");
-	WaitUntil([&NumConnect]() { return NumConnect > 1; }, 1.5);
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
-
-	WaitUntil([&NumConnect]() { return NumConnect > 2; }, 2.75);
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
-
-	WaitUntil([&NumConnect]() { return NumConnect > 3; }, 5.25);
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
-
-	WaitUntil([&NumConnect]() { return NumConnect > 4; }, 10.25);
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumConnect=%d"), NumConnect);
-
-	WebSocket->ReceiveOpen();
-
-	int NumPing = 0;
-	FDelegateHandle PingHandle = WebSocket->OnMessageReceived().AddLambda([&NumPing](const FString& Message) {
-		if (Message.IsEmpty())
-		{
-			NumPing++;
-		}
-	});
-	WaitUntil([&NumPing]() { return NumPing > 0; }, 10);
-	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("NumPing=%d"), NumPing);
-
-	//Assert
-	check(NumConnect >= 5);
-	check(NumPing > 0);
-
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout, "AccelByte.Tests.Lobby.C.Reconnected_GotConnectionCLosed_ReconnectTimeout", AutomationFlagMaskLobby);
-bool LobbyTestReconnected_GotConnectionCLosed_ReconnectTimeout::RunTest(const FString& Parameters)
-{
-	AB_TEST_SKIP_WHEN_DISABLED();
-	//Arrange
-	AccelByte::Credentials DummyCredentials;
-	AccelByte::Settings DummySettings;
-	TSharedPtr<WebSocketMock> WebSocket = MakeShared<WebSocketMock>();
-	Lobby ALobby(DummyCredentials, DummySettings, 5.f, 0.5f, 15.f, 30.f, WebSocket);
-	int NumConnect = 0;
-	WebSocket->OnConnecting().BindLambda([&NumConnect]()
-	{
-		NumConnect++;
-	});
-	ALobby.Connect();
-	WaitUntil([]()
-	{
-		return false;
-	}, 0.5);
-	WebSocket->ReceiveOpen();
-	WaitUntil([]()
-	{
-		return false;
-	}, 0.5);
-
-	//Act
-	WebSocket->ReceiveClose(1000, "abnormal close");
-	WaitUntil([](){return false;}, 15);
-	const int firstNumConnect = NumConnect;
-	NumConnect = 0;
-	WebSocket->ReceiveOpen();
-	WebSocket->ReceiveClose(1000, "abnormal close");
-	WaitUntil([](){return false;}, 50);
-	const int secondNumConnect = NumConnect;
-
-	//Assert
-	check(firstNumConnect >= 5);
-	check(secondNumConnect > 4);
-	check(secondNumConnect <= 7);
-
-	return true;
-}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTokenRevoked_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestTokenRevoked_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
@@ -5141,7 +4903,7 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 
 	bool LogoutDone = false;
 	FString UserId = FRegistry::Credentials.GetUserId();
-	Oauth2::Logout(FRegistry::Credentials.GetUserSessionId(), FVoidHandler::CreateLambda([&]() { LogoutDone = true; }), LobbyTestErrorHandler);
+	Oauth2::RevokeToken(FRegistry::Credentials.GetAccessToken(), FVoidHandler::CreateLambda([&]() { LogoutDone = true; }), LobbyTestErrorHandler);
 
 	WaitUntil([&]() { return LogoutDone; }, 10);
 
@@ -5164,7 +4926,6 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 		}), 
 		LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	return true;
@@ -5244,7 +5005,6 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 		bDeleteDone = true;
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	return true;
@@ -5254,6 +5014,11 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserSameToken_Disconnected, "Accel
 bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	// Temporary disable, will be removed
+	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
+	{
+		return true;
+	}
 	AccelByte::Api::User& User = FRegistry::User;
 	bool bLoginDone = false;
 
@@ -5301,7 +5066,6 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 		bDeleteDone = true;
 	}), LobbyTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 	return true;
@@ -5439,6 +5203,6 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 	check(P2PDestinationId == UserCreds[1].GetUserId());
 	
 	LobbyDisconnect(2);
-	resetResponses();
+	ResetResponses();
 	return true;
 }

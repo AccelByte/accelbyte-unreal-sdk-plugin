@@ -67,7 +67,7 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),
@@ -143,7 +143,7 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 	{
 		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-		Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+		Scheduler->PollRetry(CurrentTime);
 
 		return true;
 	}),
@@ -363,7 +363,7 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),
@@ -420,7 +420,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),
@@ -480,7 +480,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),
@@ -533,7 +533,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),
@@ -671,7 +671,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
 		{
 			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
+			Scheduler->PollRetry(CurrentTime);
 
 			return true;
 		}),

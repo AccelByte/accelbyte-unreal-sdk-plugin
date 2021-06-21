@@ -41,7 +41,6 @@ bool QosGetServerLatencies::RunTest(const FString& Parameters)
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
 	}), QosTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 	check(bGetServerLatenciesSuccess);
 	check(Latencies.Num() > 0);
@@ -63,7 +62,6 @@ bool ServerQosGetServerLatencies::RunTest(const FString& Parameters)
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
 	}), QosTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
 	check(bGetServerLatenciesSuccess);
 	check(Latencies.Num() > 0);

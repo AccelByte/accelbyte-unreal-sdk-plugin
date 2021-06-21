@@ -16,31 +16,19 @@ namespace AccelByte
 {
 
 Credentials::Credentials()
-	: ClientAccessToken(TEXT(""))
-	, ClientNamespace(TEXT(""))
-	, UserSessionId(TEXT(""))
+	: AuthToken()
 	, UserSessionExpire(0)
-	, UserNamespace(TEXT(""))
-	, UserId(TEXT(""))
-	, UserDisplayName(TEXT(""))
 	, UserSessionState(ESessionState::Invalid)
-	, UserRefreshId(TEXT(""))
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
 	, UserRefreshBackoff(0.0)
-	, PlatformBoundUserId(TEXT(""))
 {
 }
 
 void Credentials::ForgetAll()
 {
-	UserSessionId = FString();
+	AuthToken = {};
 	UserSessionExpire = 0;
-	UserNamespace = FString();
-	UserId = FString();
-	UserDisplayName = FString();
-	PlatformBoundUserId = FString();
-
 	UserRefreshBackoff = 0.0;
 	UserRefreshTime = 0.0;
 	UserExpiredTime = 0.0;
@@ -53,32 +41,12 @@ void Credentials::SetClientCredentials(const FString& Id, const FString& Secret)
 	ClientSecret = Secret;
 }
 
-void Credentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)
+void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
 {
-	ClientAccessToken = AccessToken;
-	ClientNamespace = Namespace;
-}
-
-void Credentials::SetUserSession(const FString& SessionId, double ExpiredTime, const FString& RefreshId)
-{
-	UserSessionId = SessionId;
-	UserSessionExpire = ExpiredTime;
-	UserRefreshId = RefreshId;
-	UserRefreshTime = ExpiredTime;
-
+	UserSessionExpire = CurrentTime + (NewAuthToken.Expires_in*FMath::FRandRange(0.7, 0.9));
+	UserRefreshTime = UserSessionExpire;
+	AuthToken = NewAuthToken;
 	UserSessionState = ESessionState::Valid;
-}
-
-void Credentials::SetUserLogin(const FString& Id, const FString& DisplayName, const FString& Namespace)
-{
-	UserId = Id;
-	UserDisplayName = DisplayName;
-	UserNamespace = Namespace;
-}
-
-void Credentials::SetPlatformInfo(const FString& PlatformUserId)
-{
-	PlatformBoundUserId = PlatformUserId;
 }
 
 void Credentials::SetUserEmailAddress(const FString& EmailAddress)
@@ -86,24 +54,24 @@ void Credentials::SetUserEmailAddress(const FString& EmailAddress)
 	UserEmailAddress = EmailAddress;
 }
 
-const FString& Credentials::GetUserSessionId() const
+const FString& Credentials::GetAccessToken() const
 {
-	return UserSessionId;
+	return AuthToken.Access_token;
 }
 
-const FString& Credentials::GetUserRefreshId() const
+const FString& Credentials::GetRefreshToken() const
 {
-	return UserRefreshId;
+	return AuthToken.Refresh_token;
 }
 
-const FString& Credentials::GetUserNamespace() const
+const FString& Credentials::GetNamespace() const
 {
-	return UserNamespace;
+	return AuthToken.Namespace;
 }
 
-const FString& Credentials::GetPlatformBoundUserId() const
+const FString& Credentials::GetPlatformUserId() const
 {
-	return PlatformBoundUserId;
+	return AuthToken.Platform_user_id;
 }
 
 Credentials::ESessionState Credentials::GetSessionState() const
@@ -134,27 +102,17 @@ void Credentials::Shutdown()
 
 const FString& Credentials::GetUserId() const
 {
-	return UserId;
+	return AuthToken.User_id;
 }
 
 const FString& Credentials::GetUserDisplayName() const
 {
-	return UserDisplayName;
+	return AuthToken.Display_name;
 }
 
 const FString& Credentials::GetUserEmailAddress() const
 {
 	return UserEmailAddress;
-}
-
-const FString& Credentials::GetClientAccessToken() const
-{
-	return ClientAccessToken;
-}
-
-const FString& Credentials::GetClientNamespace() const
-{
-	return ClientNamespace;
 }
 
 void Credentials::PollRefreshToken(double CurrentTime)
@@ -165,12 +123,12 @@ void Credentials::PollRefreshToken(double CurrentTime)
 	case ESessionState::Valid:
 		if (UserRefreshTime <= CurrentTime)
 		{
-			Oauth2::GetSessionIdWithRefreshId(
+			Oauth2::GetTokenWithRefreshToken(
 				ClientId, ClientSecret,
-				UserRefreshId,
-				THandler<FOauth2Session>::CreateLambda([this, CurrentTime](const FOauth2Session& Result)
+				AuthToken.Refresh_token,
+				THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
 			{
-				SetUserSession(Result.Session_id, CurrentTime + (Result.Expires_in * FMath::FRandRange(0.7, 0.9)), Result.Refresh_id);
+				SetAuthToken(Result, CurrentTime);
 			}),
 				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
 			{
@@ -201,13 +159,17 @@ void Credentials::ScheduleRefreshToken(double RefreshTime)
 	UserRefreshTime = RefreshTime;
 }
 
+const FOauth2Token& Credentials::GetAuthToken() const
+{
+	return AuthToken;
+}
 } // Namespace AccelByte
 
 #include "Core/AccelByteRegistry.h"
 
 FString UAccelByteBlueprintsCredentials::GetUserSessionId()
 {
-	return FRegistry::Credentials.GetUserSessionId();
+	return FRegistry::Credentials.GetAccessToken();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserId()
@@ -222,7 +184,7 @@ FString UAccelByteBlueprintsCredentials::GetUserDisplayName()
 
 FString UAccelByteBlueprintsCredentials::GetUserNamespace()
 {
-	return FRegistry::Credentials.GetUserNamespace();
+	return FRegistry::Credentials.GetNamespace();
 }
 
 FString UAccelByteBlueprintsCredentials::GetUserEmailAddress()

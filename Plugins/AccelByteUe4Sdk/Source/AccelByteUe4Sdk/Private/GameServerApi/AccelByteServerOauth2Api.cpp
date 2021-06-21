@@ -19,7 +19,7 @@ void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& Clien
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url             = FString::Printf(TEXT("%s/oauth/token"), *FRegistry::ServerSettings.IamServerUrl);
+	FString Url             = FString::Printf(TEXT("%s/v3/oauth/token"), *FRegistry::ServerSettings.IamServerUrl);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
@@ -43,7 +43,7 @@ void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, con
 
 	GetAccessTokenWithClientCredentialsGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([OnSuccess](const FOauth2Token& Result)
 	{
-		FRegistry::ServerCredentials.SetClientToken(Result.Access_token, FPlatformTime::Seconds() + (Result.Expires_in*FMath::FRandRange(0.7, 0.9)), Result.Namespace);
+		FRegistry::ServerCredentials.SetClientToken(Result.Access_token, FPlatformTime::Seconds() + (Result.Expires_in*FMath::FRandRange(0.7, 0.9)), Result.Namespace);	
 		OnSuccess.ExecuteIfBound();
 	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
 	{

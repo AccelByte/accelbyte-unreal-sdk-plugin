@@ -111,7 +111,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 					}
 					bGetStatDone = true;
 				}));
-		FlushHttpRequests();
 		Waiting(bGetStatDone, "Waiting for get stat...");
 
 		if (!bStatIsExist)
@@ -136,7 +135,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 					CreateStatResult = Result;
 					bCreateStatDone = true;
 				}), LeaderboardTestErrorHandler);
-			FlushHttpRequests();
 			Waiting(bCreateStatDone, "Waiting for stat created...");
 		}
 	}
@@ -175,7 +173,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 						UE_LOG(LogAccelByteLeaderboardTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 					}
 				}));
-		FlushHttpRequests();
 		Waiting(bCreateLeaderboardConfigDone, "Waiting for config leaderboard...");
 	}
 
@@ -185,7 +182,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			bServerClientLoginSuccess = true;
 			UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), LeaderboardTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
 
 	TArray<FString> LoginUserIDs;
@@ -219,7 +215,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			}
 			bUsersCreationDone = true;
 		}));
-		FlushHttpRequests();
 		Waiting(bUsersCreationDone, "Waiting for user created...");
 
 		// USER LOG IN
@@ -234,7 +229,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			UsersLoginSuccess[i] = true;
 			UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("\t\tSuccessfully Login."));
 		}), LeaderboardTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(UsersLoginSuccess[i], "Waiting for login with user name...");
 		UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
@@ -247,7 +241,6 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("User stat items are created."));
 				UserStatCodeInitSuccess[i] = true;
 			}), LeaderboardTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(UserStatCodeInitSuccess[i], "Waiting for create user stat items...");
 	}
 	TestUsersID = LoginUserIDs;
@@ -282,7 +275,6 @@ bool LeaderboardTearDown::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Success"));
 				bDeleteLeaderboard = true;
 			}), LeaderboardTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bDeleteLeaderboard, "Waiting for leaderboard code deletion...");
 	}
 
@@ -325,7 +317,6 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 				bIncrementManyUsersStatItemsSuccess = true;
 			}),
 		LeaderboardTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
 
 
@@ -364,7 +355,6 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 			{
 				FRegistry::Leaderboard.GetRankings(leaderboardCode, timeFrame, 0, 9999, leaderboardGetRankingsHandler, GetLeaderboardErrorHandler);
 
-				FlushHttpRequests();
 				Waiting(bGetRankingDone, FString::Printf(TEXT("Waiting for get rankings [%d]..."), i));
 
 				if (bFound)
@@ -459,7 +449,6 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 				bIncrementManyUsersStatItemsSuccess = true;
 			}),
 		LeaderboardTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
 
 	//ACT
@@ -499,7 +488,6 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 			{
 				FRegistry::Leaderboard.GetUserRanking(userId, leaderboardCode, leaderboardGetRankingsHandler, GetLeaderboardErrorHandler);
 
-				FlushHttpRequests();
 				Waiting(bGetUserRankingDone, FString::Printf(TEXT("Waiting for GetUserRanking [%d]..."), i));
 
 				if (bFound)

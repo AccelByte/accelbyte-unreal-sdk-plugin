@@ -24,7 +24,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudStorageTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCloudStorageTest);
 
 const int32 AutomationFlagMaskCloudStorage = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 FString Payloads[2] = { TEXT("PayloadOne"), TEXT("PayloadTwo") };
 FString OriginalNames[2] = { TEXT("File1.txt"), TEXT("File2.txt") };
@@ -48,7 +47,6 @@ bool CloudStorageSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("User Login Success"));
 		bUserLoginResult = true;
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUserLoginResult, "Waiting for Login...");
 
 	check(bUserLoginResult);
@@ -68,7 +66,6 @@ bool CloudStorageTearDown::RunTest(const FString& Parameters)
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for deletion...");
 	
 	check(bDeleteSuccessful);
@@ -85,7 +82,6 @@ bool CloudStorageCreateSlot::RunTest(const FString& Parameters)
 		CreatedSlot = Result;
 		bSlotCreatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSlotCreatedResult, "Waiting for slot created...");
 	
 	check(bSlotCreatedResult);
@@ -101,7 +97,6 @@ bool CloudStorageUpdateSlot::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
 		bSlotUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSlotUpdatedResult, "Waiting for slot updated...");
 	
 	check(bSlotUpdatedResult);
@@ -122,7 +117,6 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 		bMetadataUpdatedResult = true;
 	}), nullptr, CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bMetadataUpdatedResult, "Waiting for meta updated...");
 	check(bMetadataUpdatedResult);
 
@@ -141,7 +135,6 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 			}
 		}
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetSlotAfterUpdateResult, "Waiting for get slot...");
 	check(bGetSlotAfterUpdateResult);
 
@@ -159,7 +152,6 @@ bool CloudStorageGetAllSlots::RunTest(const FString& Parameter)
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 
 	bool bUpdatedSlotFound = false;
@@ -187,7 +179,6 @@ bool CloudStorageGetSlot::RunTest(const FString& Parameters)
 		bGetSlotResult = true;
 		bSlotContentUpdated = (UAccelByteBlueprintsTest::BytesToFString(Data) == Payloads[1]);
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetSlotResult, "Waiting for get slot...");
 
 	check(bGetSlotResult);
@@ -206,22 +197,21 @@ bool CloudStorageDeleteSlot::RunTest(const FString& Parameters)
 		Results = Slots;
 		bGetAllSlotsResult = true;
 	}), CloudStorageErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetAllSlotsResult, "Waiting for get all slot...");
 	check(bGetAllSlotsResult);
 
 	TArray<bool> bDeleteSlotResults;
 	for (int i = 0; i < Results.Num(); i++)
 	{
+		bDeleteSlotResults.Add(false);
 		FRegistry::CloudStorage.DeleteSlot(Results[i].SlotId, FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Delete Slot %d / %d Success"), i+1, Results.Num());
-			bDeleteSlotResults.Add(true);
+			bDeleteSlotResults[i] = true;
 		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 		{
-			bDeleteSlotResults.Add(false);
+			bDeleteSlotResults[i] = false;
 		}));
-		FlushHttpRequests();
 		Waiting(bDeleteSlotResults[i], "Waiting for slot deletion...");
 	}
 	check(!bDeleteSlotResults.Contains(false));

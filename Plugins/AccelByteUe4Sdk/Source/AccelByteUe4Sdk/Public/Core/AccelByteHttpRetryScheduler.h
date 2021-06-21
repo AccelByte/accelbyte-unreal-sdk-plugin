@@ -47,7 +47,7 @@ public:
 	static const int TotalTimeout;
 
 	bool ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
-	bool PollRetry(double CurrentTime, Credentials& UserCredentials);
+	bool PollRetry(double CurrentTime);
 
 	void Startup();
 	void Shutdown();

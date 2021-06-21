@@ -50,6 +50,14 @@ class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 
 void FAccelByteUe4SdkModule::StartupModule()
 {
+#if WITH_EDITOR
+	FModuleManager::Get().LoadModuleChecked("Settings");
+#endif
+	FModuleManager::Get().LoadModuleChecked("Http");
+	FModuleManager::Get().LoadModuleChecked("Websockets");
+	FModuleManager::Get().LoadModuleChecked("Json");
+	FModuleManager::Get().LoadModuleChecked("JsonUtilities");
+
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
 	LoadServerSettingsFromConfigUobject();
@@ -117,25 +125,23 @@ bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
 	FRegistry::Settings.PublisherNamespace = GetDefault<UAccelByteSettings>()->PublisherNamespace;
 	FRegistry::Settings.RedirectURI = GetDefault<UAccelByteSettings>()->RedirectURI;
 	FRegistry::Settings.BaseUrl = GetDefault<UAccelByteSettings>()->BaseUrl;
-	FRegistry::Settings.NonApiBaseUrl = GetDefault<UAccelByteSettings>()->NonApiBaseUrl;
 
 	NullCheckConfig(*FRegistry::Settings.ClientId, "Client ID");
 	NullCheckConfig(*FRegistry::Settings.Namespace, "Namespace");
 	NullCheckConfig(*FRegistry::Settings.BaseUrl, "Base URL");
-	NullCheckConfig(*FRegistry::Settings.NonApiBaseUrl, "Non-API Base URL");
 
 	FRegistry::Settings.IamServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->IamServerUrl, TEXT("iam"));
 	FRegistry::Settings.PlatformServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->PlatformServerUrl, TEXT("platform"));
 	FRegistry::Settings.LobbyServerUrl = GetDefault<UAccelByteSettings>()->LobbyServerUrl;
 	if (FRegistry::Settings.LobbyServerUrl.IsEmpty())
 	{
-		const FString BaseUrl = FRegistry::Settings.NonApiBaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+		const FString BaseUrl = FRegistry::Settings.BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
 		FRegistry::Settings.LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *BaseUrl, TEXT("lobby/"));
 	}
 	FRegistry::Settings.BasicServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->BasicServerUrl, TEXT("basic"));
-	FRegistry::Settings.CloudStorageServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->CloudStorageServerUrl, TEXT("binary-store"));
-	FRegistry::Settings.GameProfileServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->GameProfileServerUrl, TEXT("soc-profile"));
-	FRegistry::Settings.StatisticServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->StatisticServerUrl, TEXT("statistic"));
+	FRegistry::Settings.CloudStorageServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->CloudStorageServerUrl, TEXT("social"));
+	FRegistry::Settings.GameProfileServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->GameProfileServerUrl, TEXT("social"));
+	FRegistry::Settings.StatisticServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->StatisticServerUrl, TEXT("social"));
 	FRegistry::Settings.QosManagerServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->QosManagerServerUrl, TEXT("qosm"));
 	FRegistry::Settings.LeaderboardServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->LeaderboardServerUrl, TEXT("leaderboard"));
 	FRegistry::Settings.GameTelemetryServerUrl = GetDefaultAPIUrl(GetDefault<UAccelByteSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));

@@ -29,7 +29,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteAchievementTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteAchievementTest);
 
 const int32 AutomationFlagMaskAchievement = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 FAchievementRequest achievement1;
 FAchievementRequest achievement2;
@@ -149,7 +148,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
 		bUserLoginSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUserLoginSuccess, "Waiting for Login ...");
 	
 	bool bDeleteUserSuccess = false;
@@ -158,7 +156,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 		bDeleteUserSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserSuccess, "Waiting for user deletion ...");
 
 	// Login again
@@ -168,7 +165,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
 		bNewUserLoginSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bNewUserLoginSuccess, "Waiting for Login new user ...");
 
 	// Client Login
@@ -178,7 +174,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Client login Success"));
 			bClientLoginSuccess = true;
 		}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 	check(bClientLoginSuccess);
 
@@ -191,7 +186,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 		{
 			bCreateStatDone = true;
 		}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
-		FlushHttpRequests();
 		Waiting(bCreateStatDone, "Waiting for Create statistic code...");
 
 		bool bCreateUserStatItemDone = false;
@@ -199,7 +193,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 			{
 				bCreateUserStatItemDone = true;
 			}), AchievementErrorHandler);
-		FlushHttpRequests();
 		Waiting(bCreateUserStatItemDone, "Waiting for create user stat item...");
 	}
 
@@ -215,7 +208,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not eelete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 				bDeleteAchievementDone = true;
 			}));
-		FlushHttpRequests();
 		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
@@ -224,7 +216,6 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
 				bCreateAchievementSuccess = true;
 			}), AchievementErrorHandler);
-		FlushHttpRequests();
 		Waiting(bCreateAchievementSuccess, "Waiting for creating achievement ...");
 		check(bCreateAchievementSuccess);
 	}
@@ -244,7 +235,6 @@ bool QueryNamespaceAchievementsDefaultLanguageCreatedAsc::RunTest(const FString&
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 100);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	bool isEnAchievement1Found = false;
@@ -284,7 +274,6 @@ bool QueryNamespaceAchievementsSpecificLanguage::RunTest(const FString& Paramete
 		paginatedEnAchievements = achievements;
 		bQueryEnAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 100);
-	FlushHttpRequests();
 	Waiting(bQueryEnAchievementsSuccess, "Waiting for querying en achievements ...");
 
 	bool isEnAchievement1Found = false;
@@ -316,7 +305,6 @@ bool QueryNamespaceAchievementsSpecificLanguage::RunTest(const FString& Paramete
 		paginatedIdAchievements = achievements;
 		bQueryIdAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 100);
-	FlushHttpRequests();
 	Waiting(bQueryIdAchievementsSuccess, "Waiting for querying id achievements ...");
 
 	bool isIdAchievement1Found = false;
@@ -360,7 +348,6 @@ bool QueryNamespaceAchievementsCreatedAsc::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 100);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	int achievement1Order = 0;
@@ -407,7 +394,6 @@ bool QueryNamespaceAchievementsCreatedDesc::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 100);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	int achievement1Order = 0;
@@ -454,7 +440,6 @@ bool QueryNamespaceAchievementsLimit1::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 1);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	check(bQueryAchievementsSuccess);
@@ -474,7 +459,6 @@ bool QueryNamespaceAchievementsOffset1::RunTest(const FString& Parameters)
 		paginatedAchievementsNoOffset = achievements;
 		bQueryAchievementsNoOffsetSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsNoOffsetSuccess, "Waiting for querying achievements no offset ...");
 
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
@@ -486,7 +470,6 @@ bool QueryNamespaceAchievementsOffset1::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 1);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	bool isAchievementSame = false;
@@ -513,7 +496,6 @@ bool GetAchievement::RunTest(const FString& Parameters)
 		getAchievement1 = achievement;
 		bGetAchievement1Success = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetAchievement1Success, "Waiting for getting achievement 1 ...");
 
 	FAccelByteModelsMultiLanguageAchievement getAchievement2;
@@ -525,7 +507,6 @@ bool GetAchievement::RunTest(const FString& Parameters)
 		getAchievement2 = achievement;
 		bGetAchievement2Success = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetAchievement2Success, "Waiting for getting achievement 2 ...");
 
 	check(bGetAchievement1Success);
@@ -553,7 +534,6 @@ bool GetInvalidAchievementId::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bGetAchievementDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetAchievementDone, "Waiting for getting invalid achievement ...");
 
 	check(!bGetAchievementSuccess);
@@ -576,7 +556,6 @@ bool GetEmptyAchievementId::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bGetAchievementDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetAchievementDone, "Waiting for getting empty achievement id ...");
 
 	check(!bGetAchievementSuccess);
@@ -595,7 +574,6 @@ bool QueryUserAchievementsEmptyData::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	check(bQueryAchievementsSuccess);
@@ -613,7 +591,6 @@ bool UnlockAchievement::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
 		bUnlockAchievementSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
 	
 	check(bUnlockAchievementSuccess);
@@ -632,7 +609,6 @@ bool QueryUserAchievements::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	bool isAchievement1Found = false;
@@ -769,7 +745,6 @@ bool QueryUserAchievementsUnlockedAll::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	bool isAchievement1Found = false;
@@ -811,7 +786,6 @@ bool QueryUserAchievementsOffset1::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 1);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	check(bQueryAchievementsSuccess);
@@ -832,7 +806,6 @@ bool QueryUserAchievementsLimit1::RunTest(const FString& Parameters)
 		paginatedAchievements = achievements;
 		bQueryAchievementsSuccess = true;
 	}), AchievementErrorHandler, 0, 1);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	check(bQueryAchievementsSuccess);
@@ -854,7 +827,6 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 			bGetUserStatItemSuccess = true;
 			getUserStatItemResult = Result;
 		}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
 	for (auto entry : getUserStatItemResult.Data)
 	{
@@ -875,7 +847,6 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 			bIncrementUserStatDone = true;
 			bulkAddUserStatItemResult = Result;
 		}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bIncrementUserStatDone, "Waiting for increment user stat item ...");
 
 	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
@@ -889,7 +860,6 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 				paginatedAchievements = achievements;
 				bQueryAchievementsSuccess = true;
 			}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	// Assert
@@ -914,7 +884,6 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 		{
 			bClientLoginSuccess = true;
 		}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
 	// Arrange
@@ -927,7 +896,6 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 			bGetUserStatItemSuccess = true;
 			getUserStatItemResult = Result;
 		}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
 	for (auto entry : getUserStatItemResult.Data)
 	{
@@ -948,7 +916,6 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 				bIncrementStatDone = true;
 			}),
 		AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bIncrementStatDone, "Waiting for increment user stat items...");
 
 	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
@@ -962,7 +929,6 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 				paginatedAchievements = achievements;
 				bQueryAchievementsSuccess = true;
 			}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
 	// Assert
@@ -992,7 +958,6 @@ bool AchievementTearDown::RunTest(const FString& Parameters)
 				bDeleteAchievementSuccess = true;
 				deleteAchievementResults.Add(true);
 			}), AchievementErrorHandler);
-		FlushHttpRequests();
 		Waiting(bDeleteAchievementSuccess, "Waiting for deleting achievement ...");
 	}
 
@@ -1002,7 +967,6 @@ bool AchievementTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 		bDeleteSuccess = true;
 	}), AchievementErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
 	for(auto bDeleteAchievementSuccess : deleteAchievementResults)

@@ -17,7 +17,6 @@ DEFINE_LOG_CATEGORY(LogAccelByteServerCloudSaveTest);
 const int32 AutomationFlagMaskServerCloudSave = (EAutomationTestFlags::EditorContext |
 	EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext
 );
-void FlushHttpRequests();
 
 const auto ServerCloudSaveErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
@@ -131,7 +130,6 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 		}
 	}));
 
-	FlushHttpRequests();
 	Waiting(bUserCreationSuccess, "Waiting for ServerCloudUser created...");
 
 	bool bUserLoginSuccess = false;
@@ -144,7 +142,6 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	}),
 		ServerCloudSaveErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bUserLoginSuccess, "Waiting for Login...");
 
 	bool bClientTokenObtained = false;
@@ -156,7 +153,6 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
         bClientTokenObtained = true;
     }), ServerCloudSaveErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	
@@ -167,7 +163,6 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
         bDeleteGameRecordSuccess = true;
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecordUnExistSuccess = false;
@@ -176,7 +171,6 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
         bDeleteGameRecordUnExistSuccess = true;
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordUnExistSuccess, "Waiting for deleting game record ...");
 	*/
 
@@ -195,7 +189,6 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecordUnExistSuccess = false;
@@ -204,7 +197,6 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
         bDeleteGameRecordUnExistSuccess = true;
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordUnExistSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteSuccess = false;
@@ -214,7 +206,6 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user by id success"));
 		bDeleteSuccess = true;
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
 	check(bDeleteGameRecordSuccess);
@@ -233,7 +224,6 @@ bool ServerCloudSaveTestAdminGameRecord::RunTest(const FString& Parameters)
 		SaveGameRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Save Game ServerCloudRecord success"));
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(SaveGameRecord, "Waiting for saving game record UnExist key ...");
 
 	check(SaveGameRecord)
@@ -260,7 +250,6 @@ bool ServerCloudTestGetAdminGameRecord::RunTest(const FString& Parameters)
 	}
 	));
 
-	FlushHttpRequests();
 	Waiting(bGetGameRecordDone, "Waiting for Get Game ServerCloudRecord ...");
 
 	check(bGetGameRecordSuccess)
@@ -286,7 +275,6 @@ bool ServerCloudTestGetAdminGameRecordUnExistKey::RunTest(const FString& Paramet
     }
     ));
 
-	FlushHttpRequests();
 	Waiting(bGetGameRecordDone, "Waiting for Get Game ServerCloudRecord with UnExist Key ...");
 
 	check(!bGetGameRecordSuccess)
@@ -303,7 +291,6 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 		bUpdateGameRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Update Game ServerCloudRecord"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUpdateGameRecord, "Waiting for Updating ServerCloudRecord value ... ");
 
 	check(bUpdateGameRecord)
@@ -316,7 +303,6 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 		bGetGameRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success GetGameRecord to compare with ServerCloudRecord2"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecord, "Waiting for GetGameRecord ...");
 
 	check(bGetGameRecord)
@@ -335,7 +321,6 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 		bReplaceGameRecordUnexistKey = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success replacing unexist key Game ServerCloudRecord"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceGameRecordUnexistKey, "Waiting replace game record on unexist key ...");
 
 	check(bReplaceGameRecordUnexistKey)
@@ -348,7 +333,6 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 		Compare = Result;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success getting Game ServerCloudRecord using unexist key (submited using replace game record)"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecordUnexistKey, "Waiting get game record on unexist key ...");
 
 	check(bGetGameRecordUnexistKey)
@@ -362,7 +346,6 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 		bDeleteGameRecordUnexistKey = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success deleting game record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordUnexistKey, "Waiting to delete game record on unexist key ...");
 
 	check(bDeleteGameRecordUnexistKey)
@@ -379,7 +362,6 @@ bool ServerCloudTestDeleteAdminGameRecord::RunTest(const FString& Parameters)
 		bDeleteGameRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Delete Game ServerCloudRecord"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecord, "Waiting for Deleting ServerCloudRecord Value ... ");
 
 	check(bDeleteGameRecord)
@@ -394,7 +376,6 @@ bool ServerCloudTestDeleteGameRecordUnExistKey::RunTest(const FString& Parameter
 	{
 		bDeleteGameRecord = true;
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecord, "Waiting Delete game record ...");
 
 	check(bDeleteGameRecord)
@@ -410,7 +391,6 @@ bool ServerCloudTestSavePlayerRecord::RunTest(const FString& Parameters)
 		bSavePlayerRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Saving new user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSavePlayerRecord, "Waiting saving user record ...");
 
 	check(bSavePlayerRecord)
@@ -427,7 +407,6 @@ bool ServerCloudTestSavePlayerRecordPublic::RunTest(const FString& Parameters)
         bSavePlayerRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Saving new user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSavePlayerRecord, "Waiting saving user record ...");
 
 	check(bSavePlayerRecord)
@@ -446,7 +425,6 @@ bool ServerCloudTestGetPlayerRecord::RunTest(const FString& Parameters)
 		Compare = Result;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success get user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPlayerRecord, "Waiting getting the user record ...");
 
 	check(bGetPlayerRecord)
@@ -465,7 +443,6 @@ bool ServerCloudTestGetPlayerRecordPublic::RunTest(const FString& Parameters)
         Compare = Result;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success get user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPlayerRecord, "Waiting getting the user record ...");
 
 	check(bGetPlayerRecord)
@@ -488,7 +465,6 @@ bool ServerCloudTestGetPlayerRecordUnexistKey::RunTest(const FString& Parameters
 		
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Failed get user record (expected behaviour)"))
 	}));
-	FlushHttpRequests();
 	Waiting(bGetRecordDone, "Waiting getting user record unexist key ...");
 
 	check(!bGetRecordUnexistKey)
@@ -505,7 +481,6 @@ bool ServerCloudTestReplaceExistingPlayerRecord::RunTest(const FString& Paramete
 		bReplaceUserRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
 	check(bReplaceUserRecord)
@@ -518,8 +493,7 @@ bool ServerCloudTestReplaceExistingPlayerRecord::RunTest(const FString& Paramete
 		Compare = Result;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to get user record");
+	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
 	check(bGetReplacedUserRecord)
 	check(Compare.Key == ServerCloudPlayerRecordKey)
@@ -536,7 +510,6 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
         bReplaceUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
 	check(bReplaceUserRecord)
@@ -549,8 +522,7 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
         Compare = Result;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to get user record");
+	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
 	check(bGetReplacedUserRecord)
     check(Compare.Key == ServerCloudPlayerRecordKeyPublic)
@@ -568,7 +540,6 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
         bReplaceUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
 	check(bReplaceUserRecord)
@@ -581,8 +552,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
         Compare = Result;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to get user record");
+	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
 	check(bGetReplacedUserRecord)
     check(Compare.Key == UnexistKey)
@@ -595,8 +565,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
 		bDeleteUserRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Succefully delete user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to delete user record");
+	Waiting(bDeleteUserRecord, "Waiting to delete user record");
 
 	check(bDeleteUserRecord)
 
@@ -613,7 +582,6 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
         bReplaceUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
 	check(bReplaceUserRecord)
@@ -626,8 +594,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
         Compare = Result;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to get user record");
+	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
 	check(bGetReplacedUserRecord)
     check(Compare.Key == UnexistKey)
@@ -640,8 +607,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
         bDeleteUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Succefully delete user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
-	Waiting(bReplaceUserRecord, "Waiting to delete user record");
+	Waiting(bDeleteUserRecord, "Waiting to delete user record");
 
 	check(bDeleteUserRecord)
 
@@ -657,7 +623,6 @@ bool ServerCloudTestDeletePlayerRecord::RunTest(const FString& Parameters)
 		bDeleteUserRecord = true;
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
 	}), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
 	check(bDeleteUserRecord)
@@ -674,7 +639,6 @@ bool ServerCloudTestDeletePlayerRecordPublic::RunTest(const FString& Parameters)
         bDeleteUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
 	check(bDeleteUserRecord)
@@ -691,7 +655,6 @@ bool ServerCloudTestDeletePlayerRecordUnExist::RunTest(const FString& Parameters
         bDeleteUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
     }),ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
 	check(bDeleteUserRecord)
@@ -708,7 +671,6 @@ bool ServerCloudTestDeletePlayerRecordUnExistPublic::RunTest(const FString& Para
         bDeleteUserRecord = true;
         UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
     }), ServerCloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
 	check(bDeleteUserRecord)

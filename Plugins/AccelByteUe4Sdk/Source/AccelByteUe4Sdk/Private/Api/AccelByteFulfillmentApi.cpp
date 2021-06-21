@@ -23,8 +23,8 @@ void Fulfillment::RedeemCode(const FString& Code, const FString& Region, const F
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");

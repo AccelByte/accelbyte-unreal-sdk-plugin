@@ -49,8 +49,8 @@ void Achievement::QueryAchievements(const FString& Language, const EAccelByteAch
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetUserNamespace());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -99,8 +99,8 @@ void Achievement::GetAchievement(const FString& AchievementCode, const THandler<
 		return;
 	}
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s"), *Settings.AchievementServerUrl, *Credentials.GetUserNamespace(), *AchievementCode);
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *AchievementCode);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -121,8 +121,8 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -170,8 +170,8 @@ void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidH
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock"), *Settings.AchievementServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *AchievementCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *AchievementCode);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

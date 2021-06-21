@@ -59,7 +59,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		clientLoginSuccess = true;
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Client Successfully Login."));
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(clientLoginSuccess, "Waiting for client login.");
 	check(clientLoginSuccess);
 
@@ -70,7 +69,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		PublishedStoreInfo = Result;
 		hasPublishedStore = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(hasPublishedStore, "Waiting for get published store");
 	check(hasPublishedStore);
 	FString publishedStoreId = PublishedStoreInfo.storeId;
@@ -90,7 +88,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU"));
 		doneGetItemBySKU = true;
 	}));
-	FlushHttpRequests();
 	Waiting(doneGetItemBySKU, "Waiting to get item by sku");
 	check(doneGetItemBySKU);
 	if (hasAppTypeItem) 
@@ -114,7 +111,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU"));
 		doneGetItemBySKU = true;
 	}));
-	FlushHttpRequests();
 	Waiting(doneGetItemBySKU, "Waiting to get item by sku");
 	check(doneGetItemBySKU);
 	if (hasSubsTypeItem)
@@ -145,7 +141,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			doneCreateTempStore = true;
 			tempStoreInfo = Result;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(doneCreateTempStore, "Waiting to create temp store");
 		tempStoreId = tempStoreInfo.storeId;
 		check(doneCreateTempStore);
@@ -156,7 +151,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Clone published store"));
 			clonePublishedStore = true;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(clonePublishedStore, "Waiting for clone published store...");
 		check(clonePublishedStore);
 
@@ -209,7 +203,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				createAppItemSuccess = true;
 				appItemInfo = Result;
 			}), SubscriptionErrorHandler);
-			FlushHttpRequests();
 			Waiting(createAppItemSuccess, "Waiting for app item created...");
 			check(createAppItemSuccess);
 			appTypeItemId = appItemInfo.itemId;
@@ -247,7 +240,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				createSubsItemSuccess = true;
 				appItemInfo = Result;
 			}), SubscriptionErrorHandler);
-			FlushHttpRequests();
 			Waiting(createSubsItemSuccess, "Waiting for subs item created...");
 			check(createSubsItemSuccess);
 			subsTypeItemId = appItemInfo.itemId;
@@ -260,7 +252,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Published temp store success"));
 			publishTempStore = true;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(publishTempStore, "Waiting for publish temp store...");
 		check(publishTempStore);
 	}
@@ -274,7 +265,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		loginWithDeviceSuccess = true;
 	}), SubscriptionErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(loginWithDeviceSuccess, "Waiting for Login...");
 	check(loginWithDeviceSuccess);
 
@@ -292,7 +282,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Search User"));
 			
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(doneSearchUser, "Waiting for search user");
 		check(doneSearchUser);
 
@@ -318,7 +307,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				doneRegisterUser = true;
 			}), SubscriptionErrorHandler);
 
-			FlushHttpRequests();
 			Waiting(doneRegisterUser, "Waiting for register user");
 			check(doneRegisterUser);
 			check(registerSuccess);
@@ -337,7 +325,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 			loginSuccess = true;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(loginSuccess, "Waiting for login");
 		check(loginSuccess);
 
@@ -349,7 +336,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			doneGetUserMap = true;
 			userMap = Result;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(doneGetUserMap, "Waiting for get user map");
 		check(doneGetUserMap);
 
@@ -379,7 +365,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 		loginSuccess = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(loginSuccess, "Waiting for login");
 
 	bool doneGetAppEntitlement = false;
@@ -395,7 +380,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have APP."));
 		doneGetAppEntitlement = true;
 	}));
-	FlushHttpRequests();
 	Waiting(doneGetAppEntitlement, "Waiting for get subs entitlement");
 	check(doneGetAppEntitlement);
 
@@ -413,7 +397,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			grantAppTypeSuccess = true;
 			grantResultInfo = Result;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(grantAppTypeSuccess, "Waiting for grant app type");
 		check(grantAppTypeSuccess);
 	}
@@ -427,7 +410,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 		loginSuccess = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(loginSuccess, "Waiting for login");
 
 	bool doneGetUserEntitlement = false;
@@ -443,7 +425,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
 			doneGetUserEntitlement = true;
 		}));
-	FlushHttpRequests();
 	Waiting(doneGetUserEntitlement, "Waiting for get subs entitlement");
 	check(doneGetUserEntitlement);
 
@@ -465,7 +446,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			doneGrantSubs = true;
 			subsItemInfo = Result;
 		}), SubscriptionErrorHandler);
-		FlushHttpRequests();
 		Waiting(doneGrantSubs, "Waiting for grant free subs");
 		check(doneGrantSubs);
 	}
@@ -494,7 +474,6 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginFinish, "Waiting user login...");
 
 	bool bCheckEligibleFinish = false;
@@ -505,7 +484,6 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 		bCheckEligibleFinish = true;
 		bCheckEligibleResult = result;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	check(bCheckEligibleResult);
@@ -532,7 +510,6 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginFinish, "Waiting user login...");
 
 	bool doneGetSubsOwnership = false;
@@ -548,7 +525,6 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
 		doneGetSubsOwnership = true;
 	}));
-	FlushHttpRequests();
 	Waiting(doneGetSubsOwnership, "Waiting for get subs entitlement");
 	check(doneGetSubsOwnership);
 	check(ownership.Owned);
@@ -576,7 +552,6 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginFinish, "Waiting user login...");
 
 	bool bCheckEligibleFinish = false;
@@ -587,7 +562,6 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 		bCheckEligibleFinish = true;
 		bCheckEligibleResult = result;
 	}), SubscriptionErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	check(!bCheckEligibleResult);

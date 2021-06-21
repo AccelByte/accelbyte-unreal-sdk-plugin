@@ -62,7 +62,7 @@ bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const F
 	return bIsStarted;
 }
 
-bool FHttpRetryScheduler::PollRetry(double CurrentTime, Credentials& UserCredentials)
+bool FHttpRetryScheduler::PollRetry(double CurrentTime)
 {
 	if (RetryList.Num() == 0)
 	{
@@ -166,7 +166,7 @@ void FHttpRetryScheduler::Startup()
 	PollRetryHandle = FTicker::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float DeltaTime)
         {
-            PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials);
+            PollRetry(FPlatformTime::Seconds());
 
             return true;
         }),

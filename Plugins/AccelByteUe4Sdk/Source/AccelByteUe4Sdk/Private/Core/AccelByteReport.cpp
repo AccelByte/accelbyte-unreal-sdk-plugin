@@ -71,7 +71,7 @@ namespace AccelByte
 			if (ResponseCode >= 400)
 			{
 				// Error
-				UE_LOG(AccelByteReportLog, Error, TEXT("%s"), *LogMessage);
+				UE_LOG(AccelByteReportLog, Warning, TEXT("%s"), *LogMessage);
 			}
 			else if (ResponseCode >= 300)
 			{

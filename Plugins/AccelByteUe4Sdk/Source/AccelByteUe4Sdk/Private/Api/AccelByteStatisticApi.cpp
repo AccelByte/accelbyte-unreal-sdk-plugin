@@ -24,7 +24,7 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/bulk"), *Settings.StatisticServerUrl, *Settings.Namespace, *Credentials.GetUserId());
 		FString Verb = TEXT("POST");
 		FString ContentType = TEXT("application/json");
@@ -71,8 +71,8 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -103,8 +103,8 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

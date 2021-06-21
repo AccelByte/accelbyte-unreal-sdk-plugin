@@ -39,7 +39,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "Icmp"
         });
 
-        if (Target.bBuildEditor == true)
+        if (Target.bBuildEditor)
         {
             PrivateDependencyModuleNames.AddRange(new string[]
             {

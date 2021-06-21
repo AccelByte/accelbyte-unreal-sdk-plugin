@@ -46,7 +46,7 @@ namespace Api
 			break;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *Settings.LeaderboardServerUrl, *Settings.Namespace, *LeaderboardCode, *TimeFrameString);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
@@ -80,7 +80,7 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s"), *Settings.LeaderboardServerUrl, *Settings.Namespace, *LeaderboardCode, *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");

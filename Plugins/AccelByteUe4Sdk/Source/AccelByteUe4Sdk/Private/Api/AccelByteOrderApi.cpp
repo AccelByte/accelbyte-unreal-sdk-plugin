@@ -23,8 +23,8 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(),  *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(),  *Credentials.GetUserId());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -47,8 +47,8 @@ void Order::GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModels
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *OrderNo);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -70,8 +70,8 @@ void Order::GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModel
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -95,8 +95,8 @@ void Order::GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FA
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *OrderNo);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/orders/%s/history"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *OrderNo);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");

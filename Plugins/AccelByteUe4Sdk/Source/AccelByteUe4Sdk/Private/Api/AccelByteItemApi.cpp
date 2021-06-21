@@ -44,8 +44,8 @@ void Item::GetItemById(const FString& ItemId, const FString& Language, const FSt
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *ItemId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/%s/locale"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *ItemId);
 	if (!Region.IsEmpty() || !Language.IsEmpty())
 	{
 		Url.Append(FString::Printf(TEXT("?")));
@@ -84,7 +84,7 @@ void Item::GetItemByAppId(const FString& AppId, const FString& Language, const F
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byAppId?appId=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *AppId);
 	if (!Region.IsEmpty() || !Language.IsEmpty())
 	{
@@ -123,7 +123,7 @@ void Item::GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, 
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
     FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/byCriteria"), *Settings.PlatformServerUrl, *Settings.Namespace);
     bool bIsNotFirst = false;
     if (!ItemCriteria.CategoryPath.IsEmpty())
@@ -254,7 +254,7 @@ void Item::SearchItem(const FString& Language, const FString& Keyword, const int
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/items/search?language=%s&keyword=%s"), *Settings.PlatformServerUrl, *Settings.Namespace, *Language, *FGenericPlatformHttp::UrlEncode(Keyword));
 	if (!Region.IsEmpty())
 	{

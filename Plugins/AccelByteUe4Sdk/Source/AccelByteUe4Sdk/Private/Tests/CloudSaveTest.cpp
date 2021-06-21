@@ -24,7 +24,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudSaveTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCloudSaveTest);
 
 const int32 AutomationFlagMaskCloudSave = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 Credentials user2Creds;
 TSharedPtr<Api::User> user2;
@@ -105,7 +104,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
 		bUserLoginSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUserLoginSuccess, "Waiting for Login...");
 
 	bool bDeleteUserRecordSuccess = false;
@@ -114,7 +112,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteUserRecord1Success = false;
@@ -123,7 +120,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecord1Success, "Waiting for deleting user record ...");
 
 	bool bDeleteGameRecordSuccess = false;
@@ -132,7 +128,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecord1Success = false;
@@ -141,7 +136,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecord1Success, "Waiting for deleting game record ...");
 
 	bool bDeleteUserPublicRecordSuccess = false;
@@ -150,7 +144,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserPublicRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserPublicRecordSuccess, "Waiting for deleting user record ...");
 
 	// user2 preps
@@ -190,7 +183,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 		}
 	}));
 
-	FlushHttpRequests();
 	Waiting(bUserCreationSuccess, "Waiting for user created...");
 
 	bool bUser2LoginSuccess = false;
@@ -203,7 +195,6 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 	}),
 		CloudSaveErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bUser2LoginSuccess, "Waiting for Login...");
 
 	cloudSave2 = MakeShared<Api::CloudSave>(user2Creds, FRegistry::Settings);
@@ -227,7 +218,6 @@ bool CloudSaveSaveUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 		bSaveUserRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
 	
 	bool bSaveUserRecord2Success = false;
@@ -236,7 +226,6 @@ bool CloudSaveSaveUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
 		bSaveUserRecord2Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveUserRecord2Success, "Waiting for saving user record2 ...");
 
 	check(bSaveUserRecord1Success);
@@ -253,7 +242,6 @@ bool CloudSaveSavePublicUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 		bSaveUserRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
 
 	bool bSaveUserRecord2Success = false;
@@ -262,7 +250,6 @@ bool CloudSaveSavePublicUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
 		bSaveUserRecord2Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveUserRecord2Success, "Waiting for saving user record2 ...");
 
 	check(bSaveUserRecord1Success);
@@ -281,7 +268,6 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 	
 	check(bGetUserRecordSuccess);
@@ -339,7 +325,6 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	check(bGetUserRecordSuccess);
@@ -397,7 +382,6 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	check(bGetUserRecordSuccess);
@@ -460,7 +444,6 @@ bool CloudSaveGetUserRecordInvalidKey::RunTest(const FString& Parameters)
 		bGetUserRecordSuccess = false;
 		bGetUserRecordDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetUserRecordDone, "Waiting for saving user record invalid key ...");
 
 	check(!bGetUserRecordSuccess);
@@ -476,7 +459,6 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace user record success"));
 		bReplaceUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecordSuccess, "Waiting for replacing user record ...");
 
 	bool bGetUserRecordSuccess = false;
@@ -487,7 +469,6 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	check(bGetUserRecordSuccess);
@@ -524,7 +505,6 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace user record success"));
 		bReplaceUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecordSuccess, "Waiting for replacing user record ...");
 
 	bool bGetUserRecordSuccess = false;
@@ -535,7 +515,6 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	check(bGetUserRecordSuccess);
@@ -572,7 +551,6 @@ bool CloudSaveDeleteUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bDeleteUserRecordSuccess);
@@ -588,7 +566,6 @@ bool CloudSaveDeleteUserRecordInvalidKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record invalid key success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bDeleteUserRecordSuccess);
@@ -604,7 +581,6 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace user record success"));
 		bReplaceUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceUserRecordSuccess, "Waiting for replacing user record ...");
 
 	bool bGetUserRecordSuccess = false;
@@ -615,7 +591,6 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
@@ -624,7 +599,6 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bReplaceUserRecordSuccess);
@@ -664,7 +638,6 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 		bSaveUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveUserRecordSuccess, "Waiting for saving user record ...");
 
 	bool bGetUserRecordSuccess = false;
@@ -675,7 +648,6 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 		getUserRecordResult = userRecord;
 		bGetUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
@@ -684,7 +656,6 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bSaveUserRecordSuccess);
@@ -737,7 +708,6 @@ bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Par
 		ErrorMessage = Message;
 		bReplaceRecordDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bReplaceRecordDone, "Waiting for replace user record...");
 
 	bool bReplaceRecord2Success = false;
@@ -758,7 +728,6 @@ bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Par
 		ErrorMessage2 = Message;
 		bReplaceRecord2Done = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bReplaceRecord2Done, "Waiting for replace user record...");
 
 	bool bDeleteUserRecordSuccess = false;
@@ -767,7 +736,6 @@ bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Par
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bReplaceRecordSuccess || bReplaceRecordDone);
@@ -782,6 +750,7 @@ bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Par
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordRacingConditionAuto, "AccelByte.Tests.CloudSave.F.ReplaceUserRecordRacingConditionAuto", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -801,7 +770,6 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 			}
 			float delay = FMath::RandRange(1.2f, 2.f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 			return LatestRecord;
 		}), FVoidHandler::CreateLambda([DictIndex, &UpdateDone, &UpdateSuccessCount]()
 		{
@@ -817,17 +785,9 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 		{
 			float delay = FMath::RandRange(1.5f, 2.5f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 		}
 	}
-	FlushHttpRequests();
-
-	while (UpdateDone < ConcurrentWriteCount)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Waiting for Update Record done..."));
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&UpdateDone, &ConcurrentWriteCount]() {return UpdateDone >= ConcurrentWriteCount;}, 60.0, "Waiting for Update Record done...");
 
 	// get the latest record
 	FAccelByteModelsUserRecord GetRecordResult;
@@ -837,7 +797,6 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 		GetRecordResult = Result;
 		bGetRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetRecordSuccess, "Waiting for get user record...");
 
 	bool bAssertValueCount = GetRecordResult.Value.Values.Num() == UpdateSuccessCount;
@@ -848,7 +807,6 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bAssertValueCount);
@@ -859,6 +817,8 @@ bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordAutoExhaustAllRetries, "AccelByte.Tests.CloudSave.F.ReplaceUserRecordAutoExhaustAllRetries", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
+
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -879,7 +839,6 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 			}
 			float delay = FMath::RandRange(1.2f, 2.f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 			return LatestRecord;
 		}), FVoidHandler::CreateLambda([DictIndex, &UpdateDone, &UpdateSuccessCount]()
 		{
@@ -899,17 +858,9 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		{
 			float delay = FMath::RandRange(1.5f, 2.5f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 		}
 	}
-	FlushHttpRequests();
-
-	while (UpdateDone < ConcurrentWriteCount)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Waiting for Update Record done... %d"), UpdateDone);FlushHttpRequests();
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&UpdateDone, &ConcurrentWriteCount]() {return UpdateDone >= ConcurrentWriteCount;}, 60.0, "Waiting for Update Record done...");
 
 	// get the latest record
 	FAccelByteModelsUserRecord GetRecordResult;
@@ -919,7 +870,6 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		GetRecordResult = Result;
 		bGetRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetRecordSuccess, "Waiting for get user record...");
 
 	bool bAssertValueCount = GetRecordResult.Value.Values.Num() == UpdateSuccessCount;
@@ -930,7 +880,6 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	check(bAssertValueCount);
@@ -948,7 +897,6 @@ bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save Game record1 success"));
 		bSaveGameRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveGameRecord1Success, "Waiting for saving game record1 ...");
 
 	bool bSaveGameRecord2Success = false;
@@ -957,7 +905,6 @@ bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save game record2 success"));
 		bSaveGameRecord2Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveGameRecord2Success, "Waiting for saving game record2 ...");
 
 	check(bSaveGameRecord1Success);
@@ -976,7 +923,6 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 		getGameRecordResult = gameRecord;
 		bGetGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	check(bGetGameRecordSuccess);
@@ -1037,7 +983,6 @@ bool CloudSaveGetGameRecordInvalidKey::RunTest(const FString& Parameters)
 		bGetGameRecordSuccess = false;
 		bGetGameRecordDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetGameRecordDone, "Waiting for saving game record invalid key ...");
 
 	check(!bGetGameRecordSuccess);
@@ -1053,7 +998,6 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace game record success"));
 		bReplaceGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceGameRecordSuccess, "Waiting for replacing game record ...");
 
 	bool bGetGameRecordSuccess = false;
@@ -1064,7 +1008,6 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 		getGameRecordResult = gameRecord;
 		bGetGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	check(bGetGameRecordSuccess);
@@ -1114,7 +1057,6 @@ bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Par
 		ErrorMessage = Message;
 		bReplaceRecordDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bReplaceRecordDone, "Waiting for replace game record...");
 
 	bool bReplaceRecord2Success = false;
@@ -1135,7 +1077,6 @@ bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Par
 		ErrorMessage2 = Message;
 		bReplaceRecord2Done = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bReplaceRecord2Done, "Waiting for replace game record...");
 
 	bool bDeleteGameRecordSuccess = false;
@@ -1144,7 +1085,6 @@ bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Par
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bReplaceRecordSuccess || bReplaceRecordDone);
@@ -1159,6 +1099,7 @@ bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Par
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordRacingConditionAuto, "AccelByte.Tests.CloudSave.J.ReplaceGameRecordRacingConditionAuto", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1178,7 +1119,6 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 			}
 			float delay = FMath::RandRange(1.2f, 2.f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 			return LatestRecord;
 		}), FVoidHandler::CreateLambda([DictIndex, &UpdateDone, &UpdateSuccessCount]()
 		{
@@ -1194,17 +1134,9 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 		{
 			float delay = FMath::RandRange(1.5f, 2.5f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 		}
 	}
-	FlushHttpRequests();
-
-	while (UpdateDone < ConcurrentWriteCount)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Waiting for Update Record done..."));
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&UpdateDone, &ConcurrentWriteCount]() {return UpdateDone >= ConcurrentWriteCount;}, 60.0, "Waiting for Update Record done...");
 
 	// get the latest record
 	FAccelByteModelsGameRecord GetRecordResult;
@@ -1214,7 +1146,6 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 		GetRecordResult = Result;
 		bGetRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetRecordSuccess, "Waiting for get game record...");
 
 	bool bAssertValueCount = GetRecordResult.Value.Values.Num() == UpdateSuccessCount;
@@ -1225,7 +1156,6 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bAssertValueCount);
@@ -1236,6 +1166,7 @@ bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordAutoExhaustAllRetries, "AccelByte.Tests.CloudSave.J.ReplaceGameRecordAutoExhaustAllRetries", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Parameters)
 {
+	AB_TEST_SKIP_WHEN_DISABLED();
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1256,7 +1187,6 @@ bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Par
 			}
 			float delay = FMath::RandRange(1.2f, 2.f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 			return LatestRecord;
 		}), FVoidHandler::CreateLambda([DictIndex, &UpdateDone, &UpdateSuccessCount]()
 		{
@@ -1276,17 +1206,9 @@ bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		{
 			float delay = FMath::RandRange(1.5f, 2.5f);
 			FPlatformProcess::Sleep(delay);
-			FTicker::GetCoreTicker().Tick(delay);
 		}
 	}
-	FlushHttpRequests();
-
-	while (UpdateDone < ConcurrentWriteCount)
-	{
-		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Waiting for Update Record done... %d"), UpdateDone); FlushHttpRequests();
-		FTicker::GetCoreTicker().Tick(.5f);
-	}
+	WaitUntil([&UpdateDone, &ConcurrentWriteCount]() {return UpdateDone >= ConcurrentWriteCount;}, 60.0, "Waiting for Update Record done...");
 
 	// get the latest record
 	FAccelByteModelsGameRecord GetRecordResult;
@@ -1296,7 +1218,6 @@ bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		GetRecordResult = Result;
 		bGetRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetRecordSuccess, "Waiting for get game record...");
 
 	bool bAssertValueCount = GetRecordResult.Value.Values.Num() == UpdateSuccessCount;
@@ -1307,7 +1228,6 @@ bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Par
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bAssertValueCount);
@@ -1325,7 +1245,6 @@ bool CloudSaveDeleteGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bDeleteGameRecordSuccess);
@@ -1341,7 +1260,6 @@ bool CloudSaveDeleteGameRecordInvalidKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record invalid key success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bDeleteGameRecordSuccess);
@@ -1357,7 +1275,6 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace game record success"));
 		bReplaceGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bReplaceGameRecordSuccess, "Waiting for replacing game record ...");
 
 	bool bGetGameRecordSuccess = false;
@@ -1368,7 +1285,6 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 		getGameRecordResult = gameRecord;
 		bGetGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	bool bDeleteGameRecordSuccess = false;
@@ -1377,7 +1293,6 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bReplaceGameRecordSuccess);
@@ -1416,7 +1331,6 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save game record1 success"));
 		bSaveGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bSaveGameRecordSuccess, "Waiting for saving game record ...");
 
 	bool bGetGameRecordSuccess = false;
@@ -1427,7 +1341,6 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 		getGameRecordResult = gameRecord;
 		bGetGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	bool bDeleteGameRecordSuccess = false;
@@ -1436,7 +1349,6 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	check(bSaveGameRecordSuccess);
@@ -1468,13 +1380,20 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveTearDown, "AccelByte.Tests.CloudSave.Z.TearDown", AutomationFlagMaskCloudSave);
 bool CloudSaveTearDown::RunTest(const FString& Parameters)
 {
+	bool bUserLoginSuccess= false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
+    {
+        UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
+        bUserLoginSuccess = true;
+    }), CloudSaveErrorHandler);
+	Waiting(bUserLoginSuccess, "Waiting for Login...");
+
 	bool bDeleteUserRecordSuccess = false;
 	FRegistry::CloudSave.DeleteUserRecord(keyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteUserRecord1Success = false;
@@ -1483,7 +1402,6 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
 		bDeleteUserRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteGameRecordSuccess = false;
@@ -1492,7 +1410,6 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecord1Success = false;
@@ -1501,7 +1418,6 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecord1Success = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteSuccess = false;
@@ -1511,13 +1427,7 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user by id success"));
 		bDeleteSuccess = true;
 	}), CloudSaveErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
-	check(bDeleteUserRecordSuccess);
-	check(bDeleteUserRecord1Success);
-	check(bDeleteGameRecordSuccess);
-	check(bDeleteGameRecord1Success);
-	check(bDeleteSuccess);
 	return true;
 }

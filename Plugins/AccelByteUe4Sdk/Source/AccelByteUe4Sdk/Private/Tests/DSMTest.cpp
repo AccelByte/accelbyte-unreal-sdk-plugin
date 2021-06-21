@@ -41,7 +41,6 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
 	check(bClientLoginSuccess);
 
@@ -51,7 +50,6 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		bServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
 	check(bServerRegisterSuccess);
 	WaitUntil([](){ return false;}, 5);
@@ -61,7 +59,6 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		bServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Shutdown Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerShutdownSuccess, "Waiting for shutdown server Url...");
 	check(bServerShutdownSuccess);
 	return true;
@@ -78,7 +75,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
 	check(bClientLoginSuccess);
 
@@ -88,7 +84,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bLocalServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLocalServerRegisterSuccess, "Waiting for register local server Url...");
 	check(bLocalServerRegisterSuccess);
 
@@ -101,7 +96,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bServerRegisterFailed = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Cloud Failed..! Code: %d | Message: %s"), ErrorCode, *ErrorMessage);
 	}));
-	FlushHttpRequests();
 	Waiting(bServerRegisterFailed, "Waiting for register server Url...");
 	check(bServerRegisterFailed);
 
@@ -116,7 +110,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bLocalServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLocalServerShutdownSuccess, "Waiting for deregister server Url...");
 	check(bLocalServerShutdownSuccess);
 
@@ -126,7 +119,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bCloudServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Cloud Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCloudServerRegisterSuccess, "Waiting for register server Url...");
 	check(bCloudServerRegisterSuccess);
 
@@ -141,7 +133,6 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		bCloudServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Shutdown Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCloudServerShutdownSuccess, "Waiting for shutdown server Url...");
 	check(bCloudServerShutdownSuccess);
 	return true;
@@ -158,7 +149,6 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
 	check(bClientLoginSuccess);
 
@@ -168,7 +158,6 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerRegisterSuccess, "Waiting for register local server Url...");
 	check(bServerRegisterSuccess);
 	WaitUntil([]()
@@ -181,7 +170,6 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
 	check(bServerShutdownSuccess);
 	return true;

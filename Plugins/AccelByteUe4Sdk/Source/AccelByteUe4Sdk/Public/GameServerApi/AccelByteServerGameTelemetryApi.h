@@ -54,6 +54,20 @@ public:
 	void Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 private:
+	struct FJob
+	{
+		FAccelByteModelsTelemetryBody TelemetryBody;
+		FVoidHandler OnSuccess;
+		FErrorHandler OnError;
+
+		FJob(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler OnSuccess, FErrorHandler OnError)
+			: TelemetryBody{TelemetryBody}
+			, OnSuccess{OnSuccess}
+			, OnError{OnError}
+		{
+		}
+	};
+
 	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 	bool PeriodicTelemetry(float DeltaTime);
 
@@ -66,7 +80,7 @@ private:
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;
-	TQueue<TTuple<FAccelByteModelsTelemetryBody, FVoidHandler, FErrorHandler>> JobQueue;
+	TQueue<TSharedPtr<FJob>> JobQueue;
 	bool bTelemetryJobStarted = false;
 	const FTimespan MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;

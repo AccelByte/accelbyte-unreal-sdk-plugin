@@ -68,7 +68,6 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
             bServerClientLoginSuccess = true;
             UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("\t\tClient Successfully Login."));
         }), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
 	TArray<FString> LoginUserIDs;
 	for (int i = 0; i < SessionBrowserUserCount; i++)
@@ -103,7 +102,6 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			}
 			bUsersCreationDone = true;
 		}));
-		FlushHttpRequests();
 		Waiting(bUsersCreationDone, "Waiting for user created...");
 
 		// USER LOG IN
@@ -118,7 +116,6 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			UsersLoginSuccess[i] = true;
 			UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("\t\tSuccessfully Login."));
 		}), SessionBrowserTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(UsersLoginSuccess[i], "Waiting for login with user name...");
 		UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
@@ -150,7 +147,6 @@ bool SessionBrowserTearDown::RunTest(const FString& Parameters)
 		{
 			bDeleteSessionBrowser = true;
 		}), SessionBrowserTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bDeleteSessionBrowser, "Waiting for session browser deletion...");
 	}
 	for (auto &Lobby : SessionBrowserLobbies)
@@ -183,7 +179,6 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 		bCreated = true;
 		Result = Data;
 	}), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreated, "Waiting for session browser created...");
 	check(bCreated);
 
@@ -196,7 +191,6 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bUpdated = true;
         ResultUpdated = Data;
     }), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUpdated, "Waiting for session browser updated...");
 	check(bUpdated);
 	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
@@ -213,7 +207,6 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUpdated, "Waiting for session browser queried...");
 	check(bQueried);
 	check(QueryResult.Sessions.Num() > 0);
@@ -238,7 +231,6 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
     {
         bRemoved = true;
     }), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bRemoved, "Waiting for session browser removed...");
 	check(bUpdated);
 	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
@@ -251,7 +243,6 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bUpdated, "Waiting for session browser queried...");
 	check(bQueried);
 

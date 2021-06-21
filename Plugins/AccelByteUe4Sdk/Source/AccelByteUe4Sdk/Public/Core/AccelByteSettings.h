@@ -20,7 +20,6 @@ public:
 	FString PublisherNamespace;
 	FString RedirectURI;
 	FString BaseUrl;
-	FString NonApiBaseUrl;
 	FString IamServerUrl;
 	FString PlatformServerUrl;
 	FString LobbyServerUrl;
@@ -67,9 +66,6 @@ public:
 
     UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
     FString BaseUrl;
-
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
-	FString NonApiBaseUrl;
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString IamServerUrl;

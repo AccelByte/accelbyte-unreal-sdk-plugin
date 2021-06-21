@@ -27,7 +27,7 @@ namespace AccelByte
 			User(Credentials& Credentials, Settings& Settings);
 			~User();
 		private:
-			Credentials& Credentials;
+			Credentials& Creds;
 			Settings& Settings;
 		public:
 			/**
@@ -48,7 +48,7 @@ namespace AccelByte
 			/**
 			 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
 			 *
-			 * @param PlatformId Specify platform type that chosen by user to log in.
+			 * @param PlatformType Specify platform type that chosen by user to log in.
 			 * @param PlatformToken Authentication code that provided by another platform.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
@@ -104,6 +104,15 @@ namespace AccelByte
 			void Registerv2(const FString& EmailAddress, const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
+			 * @brief This function will register a new user with email-based account and complete agreement.
+			 *
+			 * @param RegisterRequest invoke Accepted Policies, EmailAddress, Username, Password, Display Name, Country and Date of Birth
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void Registerv3(const FRegisterRequestv3& RegisterRequest, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError);
+			
+			/**
 			 * @brief This function will get data of currently logged in user.
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
@@ -139,19 +148,8 @@ namespace AccelByte
 			void Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief This function will upgrade user's headless account. You may call SendUserAccountVerificationCode afterwards.
-			 * Headless account is an account that doesn't have an email and password.
-			 * If user logs in with a device/platform and they cannot login with email-and-password, their account is considered as a headless account.
-			 *
-			 * @param OnSuccess This will be called when the operation succeeded. Player Profile will be opened from default browser.
-			 * @param OnError This will be called when the operation failed.
-			 */
-			void UpgradeWithPlayerPortal(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-			/**
 			 * @brief Verify user's email. User should login with email and password first to get access token.
 			 *
-			 * @param Username User email address or phone number.
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
@@ -284,7 +282,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccountUserData.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetUserByUserId(const FString& UserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+			void GetUserByUserId(const FString& UserId, const THandler<FSimpleUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function will get user by other platform user id it linked to.
@@ -341,27 +339,12 @@ namespace AccelByte
 			 */
 			void GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
 
-			/**
-			* @brief Get JWT from specified Session Id.
-			* he result is FAccelByteModelsOauth2Token.
-			*
-			* @param OnSuccess This will be called when the operation succeeded. The result is FJsonWebTokeResponse.
-			* @param OnError This will be called when the operation failed.
-			*/
-			void GetJsonWebToken(const THandler<FJsonWebTokenResponse>& OnSuccess, const FErrorHandler& OnError);
-
 		private:
 			User() = delete;
 			User(User const&) = delete;
 			User(User&&) = delete;
 
 			void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-			void UpgradeWithPlayerPortalAsync(const FString& ReturnUrl, const THandler<FUpgradeUserRequest>& OnSuccess, const FErrorHandler& OnError);	
-			
-			void CheckUserSubEntitlement(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
-
-			void CheckSubEntitlementFromItemInfo(const THandler<bool>& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsItemInfo& itemInfo);
 
 			static FString TempUsername;
 			FUpgradeNotif UpgradeNotif;

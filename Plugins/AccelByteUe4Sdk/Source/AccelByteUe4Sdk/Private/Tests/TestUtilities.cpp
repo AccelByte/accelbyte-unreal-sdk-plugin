@@ -65,9 +65,9 @@ bool AccelByteSkipTest(const FString& TestName)
 	return false;
 }
 
-void Waiting(bool& bcondition, FString Message)
+void Waiting(bool& bCondition, FString Message)
 {
-	while (!bcondition)
+	while (!bCondition)
 	{
 		FPlatformProcess::Sleep(.2f);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
@@ -76,9 +76,9 @@ void Waiting(bool& bcondition, FString Message)
 	}
 }
 
-void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, FString Message)
+void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString Message)
 {
-	double StartTime = FPlatformTime::Seconds();
+	const double StartTime = FPlatformTime::Seconds();
 	TimeoutSeconds = StartTime + TimeoutSeconds;
 	double LastTickTime = StartTime;
 	
@@ -128,7 +128,7 @@ FString GetAdminAccessToken()
 
 	FOauth2Token ClientLogin;
 	bool ClientLoginSuccess = false;
-	Api::Oauth2::GetAccessTokenWithClientCredentialsGrant(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
+	Api::Oauth2::GetTokenWithClientCredentials(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
 	{
 		ClientLogin = Result;
 		ClientLoginSuccess = true;
@@ -137,7 +137,6 @@ FString GetAdminAccessToken()
 	{
 		UE_LOG(LogTemp, Log, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
 	}));
-	FlushHttpRequests();
 	Waiting(ClientLoginSuccess, "Login with Client...");
 
 	AdminAccessTokenCache = ClientLogin.Access_token;
@@ -165,6 +164,7 @@ FString GetSuperUserTokenCache()
 	}
 
 	FString BaseUrl = GetBaseUrl();
+
 	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *BaseUrl);
 	FString Verb = TEXT("POST");
@@ -194,7 +194,6 @@ FString GetSuperUserTokenCache()
 		UE_LOG(LogTemp, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
 	});
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	FlushHttpRequests();
 	Waiting(bGetTokenSuccess, "Waiting for get token...");
 
 	SuperUserTokenCache = TokenResult.Access_token;
@@ -314,7 +313,7 @@ void FlushHttpRequests()
 {
 	double LastTickTime = FPlatformTime::Seconds();
 
-	while (FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds(), FRegistry::Credentials))
+	while (FRegistry::HttpRetryScheduler.PollRetry(FPlatformTime::Seconds()))
 	{
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
@@ -345,7 +344,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		bCurrencyAlreadyExist = false;
 		bCurrencyCheckDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bCurrencyCheckDone, "Waiting for currency check...");
 
 	if (!bCurrencyAlreadyExist)
@@ -360,7 +358,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			bCurrencyCreated = false;
 			OnError.ExecuteIfBound(Code, Message);
 		}));
-		FlushHttpRequests();
 		Waiting(bCurrencyCreated, "Waiting for currency created...");
 	}
 
@@ -389,7 +386,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is not found: %d | %s"), Code, *Message);
 		bPublishedStoreCheck = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bPublishedStoreCheck, "Waiting for ");
 
 	if (bTheresPublishedStore)
@@ -402,7 +398,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			CreatedArchiveStoreInfo = Result;
 			bArchiveStoreCreated = true;
 		}), OnError);
-		FlushHttpRequests();
 		Waiting(bArchiveStoreCreated, "Waiting for archive store created...");
 		bool bArchiveCloned = false;
 		Ecommerce_Store_Clone(PublishedStoreInfo.storeId, CreatedArchiveStoreInfo.storeId, FSimpleDelegate::CreateLambda([&bArchiveCloned]()
@@ -410,7 +405,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"));
 			bArchiveCloned = true;
 		}), OnError);
-		FlushHttpRequests();
 		Waiting(bArchiveCloned, "Waiting for archive store cloned...");
 		check(bArchiveStoreCreated);
 		check(bArchiveCloned);
@@ -418,11 +412,17 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		/*
 		 Try to delete the published store, if failed no problem.
 		*/
-		Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([]()
+		bool bDeleteStoreDone = false;
+		Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bDeleteStoreDone]()
 		{
+			bDeleteStoreDone = true;
 			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"));
-		}), nullptr);
-		FlushHttpRequests();
+		}), FErrorHandler::CreateLambda([&bDeleteStoreDone](int32, FString)
+		{
+			bDeleteStoreDone = true;
+		}));
+
+		WaitUntil([&bDeleteStoreDone]() { return bDeleteStoreDone; }, 5.0, "Waiting for archive store cloned...");
 	}
 
 
@@ -437,7 +437,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		CreatedTemporaryStoreInfo = Result;
 		bTemporaryStoreCreated = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bTemporaryStoreCreated, "Waiting for store created...");
 	check(bTemporaryStoreCreated);
 
@@ -453,7 +452,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY root is created"));
 		bCreateRootCategorySuccess = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bCreateRootCategorySuccess, "Waiting for root category created...");
 	check(bCreateRootCategorySuccess);
 
@@ -469,7 +467,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY child is created"));
 		bCreateChildCategorySuccess = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bCreateChildCategorySuccess, "Waiting for child category created...");
 	check(bCreateChildCategorySuccess);
 
@@ -485,7 +482,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"));
 		bCreateGrandChildCategorySuccess = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bCreateGrandChildCategorySuccess, "Waiting for grand child category created...");
 	check(bCreateGrandChildCategorySuccess);
 
@@ -549,7 +545,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM root is created "));
 		bRootItemCreated = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bRootItemCreated, "Waiting for root item created...");
 	check(bRootItemCreated);
 
@@ -612,7 +607,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM child is created"));
 		bChildItemCreated = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bChildItemCreated, "Waiting for child item created...");
 	check(bChildItemCreated);
 
@@ -675,7 +669,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM grandchild is created"));
 		bGrandchildItemCreated = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bGrandchildItemCreated, "Waiting for grand child item created...");
 	check(bGrandchildItemCreated);
 
@@ -752,7 +745,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is published"));
 		bPublishTemporaryStoreSuccess = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bPublishTemporaryStoreSuccess, "Waiting for publish temp store...");
 	check(bPublishTemporaryStoreSuccess);
 
@@ -1098,7 +1090,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"));
 		bCurrencyDeleted = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bCurrencyDeleted, "Waiting for currency deletion...");
 	check(bCurrencyDeleted);
 
@@ -1109,7 +1100,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"));
 		bPublishedStoreDeleted = true;
 	}), nullptr);
-	FlushHttpRequests();
 	Waiting(bPublishedStoreDeleted, "Waiting for published store deletion...");
 	check(bPublishedStoreDeleted);
 
@@ -1121,7 +1111,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 		GetAllResult = Result;
 		bGetAllStoreSuccess = true;
 	}), OnError);
-	FlushHttpRequests();
 	Waiting(bGetAllStoreSuccess, "Waiting for get all store...");
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
@@ -1135,7 +1124,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
 				bRestorePublishedStore = true;
 			}), nullptr);
-			FlushHttpRequests();
 			Waiting(bRestorePublishedStore, "Waiting for published store restored...");
 			bool bArchiveStoreDeleteSuccess = false;
 			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bArchiveStoreDeleteSuccess]()
@@ -1143,7 +1131,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
 				bArchiveStoreDeleteSuccess = true;
 			}), nullptr);
-			FlushHttpRequests();
 			Waiting(bArchiveStoreDeleteSuccess, "Waiting for archive store deletion...");
 		}
 		else // DELETE all testing store
@@ -1156,7 +1143,6 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 					UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
 					bDeleteTestingStoreSuccess = true;
 				}), nullptr);
-				FlushHttpRequests();
 				Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
 			}
 	}
@@ -1838,8 +1824,7 @@ void User_Get_Verification_Code(const FString & userId, const THandler<FVerifica
 		bGetUserMapSuccess = true;
 	}), OnError);
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
-	FlushHttpRequests();
-
+	
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *userMap.Namespace, *userMap.userId);
@@ -1900,8 +1885,7 @@ void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDele
 		OnError.Execute(ErrorCode, Message);
 	}));
 	Waiting(bGetUserDone, "Wait for getting user map data...");
-	FlushHttpRequests();
-
+	
 	if (bGetUserSuccess)
 	{
 		DeleteUserById(userData.UserId, OnSuccess, OnError);
@@ -1911,7 +1895,7 @@ void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDele
 void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *JsonWebToken);
-	FString Url = FString::Printf(TEXT("%s/iam/v3/public/users/me"), *FRegistry::Settings.NonApiBaseUrl);
+	FString Url = FString::Printf(TEXT("%s/iam/v3/public/users/me"), *FRegistry::Settings.BaseUrl);
 	FString Verb = TEXT("GET");
 	FString Accept = TEXT("application/json");
 

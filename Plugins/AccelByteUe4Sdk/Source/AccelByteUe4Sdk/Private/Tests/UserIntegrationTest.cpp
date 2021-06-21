@@ -33,8 +33,8 @@ DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
 const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-
-void Waiting(bool& condition, FString text);
+void FlushHttpRequests();//defined in TestUtilities.cpp
+void Waiting(bool& bCondition, FString text);
 
 UENUM(BlueprintType)
 enum class EVerificationCode : uint8
@@ -213,11 +213,6 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 
 	Waiting(bRegisterDone, "Waiting for Registered...");
 
-	if (!bRegisterSuccessful)
-	{
-		return false;
-	}
-
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
@@ -229,27 +224,22 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
 	// set session expired time to 0
-	FString SessionId = FRegistry::Credentials.GetUserSessionId();
-	FString RefreshId = FRegistry::Credentials.GetUserRefreshId();
-	FRegistry::Credentials.SetUserSession(SessionId, 0, RefreshId);
+	const FString AccessToken = FRegistry::Credentials.GetAccessToken();
+	const FString RefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FString NewAccessToken = FRegistry::Credentials.GetAccessToken();
+	FString NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FRegistry::Credentials.ScheduleRefreshToken(FPlatformTime::Seconds() + 2.0);
 
-	FString NewSessionId = FRegistry::Credentials.GetUserSessionId();
-	FString NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
-
-	// wait session to refresh
-	for (int i = 0; i < 20; i++)
-	{
-		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
-        
-		NewSessionId = FRegistry::Credentials.GetUserSessionId();
-		NewRefreshId = FRegistry::Credentials.GetUserRefreshId();
-
-		if (SessionId != NewSessionId && RefreshId != NewRefreshId)
+	WaitUntil(
+		[&]()
 		{
-			break;
-		}
-	}
+			NewAccessToken = FRegistry::Credentials.GetAccessToken();
+			NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+
+			return AccessToken != NewAccessToken && RefreshToken != NewRefreshToken;
+		},
+		10,
+		"Wait refresh token");
 
 #pragma region DeleteUserById
 
@@ -269,8 +259,8 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
 	check(bLoginSuccessful);
-	check(SessionId != NewSessionId);
-	check(RefreshId != NewRefreshId);
+	check(AccessToken != NewAccessToken);
+	check(RefreshToken != NewRefreshToken);
 	return true;
 }
 
@@ -910,15 +900,12 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.A
 bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString Email = TEXT("testSDKsteam@game.test");
-	FString Password = TEXT("123SDKTest123");
-	double LastTime = 0;
-	FString FirstUserId = TEXT("");
-	FString OldAccessToken = "", RefreshedAccessToken = "";
+	const FString Email = TEXT("testSDKsteam@game.test");
+	const FString Password = TEXT("123SDKTest123");
 
+	//Setup: with deleting any user associated with this steam account
 	bool bLoginPlatformSuccessful = false;
 	bool bSteamLoginDone = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
 	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
@@ -932,13 +919,40 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 	Waiting(bSteamLoginDone, "Waiting for Login...");
 
-	if (!bLoginPlatformSuccessful)
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
-		return false;
-	}
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful1 = true;
+		bDeleteDone1 = true;
+	}), UserTestErrorHandler);
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
-	OldAccessToken = FRegistry::Credentials.GetUserSessionId();
+	Waiting(bDeleteDone1, "Waiting for Deletion...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginPlatformSuccessful = false;
+	bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	Waiting(bSteamLoginDone, "Waiting for Login...");
+	FString FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
+
+	check(bLoginPlatformSuccessful);
+
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
@@ -962,12 +976,12 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 	Waiting(bLoginEmailSuccessful, "Waiting for Login...");
 
-	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
+	const FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
 
 #pragma region DeleteUser1
 
-	bool bDeleteDone1 = false;
-	bool bDeleteSuccessful1 = false;
+	bDeleteDone1 = false;
+	bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
@@ -985,7 +999,6 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	check(bUpgradeSuccessful);
 	check(bLoginEmailSuccessful);
 	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-	check(!OldAccessToken.Equals(RefreshedAccessToken));
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -994,15 +1007,42 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountv2Success, "AccelByte.Tests
 bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString Email = TEXT("testSDKsteam@game.test");
-	FString Username = TEXT("testSDKsteam");
-	FString Password = TEXT("123SDKTest123");
-	double LastTime = 0;
-	FString FirstUserId = TEXT("");
-	FString OldAccessToken = "", RefreshedAccessToken = "";
+	const FString Email = TEXT("testSDKsteam@game.test");
+	const FString Username = TEXT("testSDKsteam");
+	const FString Password = TEXT("123SDKTest123");
 
+	//Setup: with deleting any user associated with this steam account
 	bool bLoginPlatformSuccessful = false;
 	bool bSteamLoginDone = false;
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	Waiting(bSteamLoginDone, "Waiting for Login...");
+
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful1 = true;
+		bDeleteDone1 = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeleteDone1, "Waiting for Deletion...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginPlatformSuccessful = false;
+	bSteamLoginDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
 	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
 	{
@@ -1022,8 +1062,8 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
-	OldAccessToken = FRegistry::Credentials.GetUserSessionId();
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
 
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
@@ -1047,12 +1087,12 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 
 	Waiting(bLoginUsernameSuccessful, "Waiting for Login...");
 
-	RefreshedAccessToken = FRegistry::Credentials.GetUserSessionId();
+	FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
 
 #pragma region DeleteUser1
 
-	bool bDeleteDone1 = false;
-	bool bDeleteSuccessful1 = false;
+	bDeleteDone1 = false;
+	bDeleteSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
 	{
@@ -1070,7 +1110,6 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 	check(bUpgradeSuccessful);
 	check(bLoginUsernameSuccessful);
 	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-	check(!OldAccessToken.Equals(RefreshedAccessToken));
 	check(bDeleteSuccessful1);
 	return true;
 }
@@ -1732,7 +1771,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	bool bDeleteProfileDone = false;
 	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeleteProfileSuccessful = true;
@@ -1860,7 +1899,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	bool bDeleteProfileDone = false;
 	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteProfileSuccessful = true;
@@ -1917,7 +1956,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	bool bDeleteProfileDone = false;
 	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), 
+	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), 
 		FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("Unexpected condition: User profile should not exist before the test"));
@@ -2026,7 +2065,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	bDeleteProfileDone = false;
 	bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	DeleteUserProfile(FRegistry::Credentials.GetUserNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bDeleteProfileSuccessful = true;
@@ -2872,48 +2911,4 @@ FString GetSteamTicket()
 	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);
 
 	return SteamTicket;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginThenRetrieveJWTToGetAccountData, "AccelByte.Tests.AUser.RetrieveJWT", AutomationFlagMaskUser);
-bool FLoginThenRetrieveJWTToGetAccountData::RunTest(const FString & Parameter)
-{
-	FRegistry::User.ForgetAllCredentials();
-
-	bool bLoginSuccessful = false;
-	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginSuccessful]()
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login User"));
-		bLoginSuccessful = true;
-	}), UserTestErrorHandler);
-
-	Waiting(bLoginSuccessful, "Waiting for Login...");
-	check(bLoginSuccessful);
-	
-	bool bJwtRetrieved = false;
-	FJsonWebTokenResponse jsonWebToken;
-	FRegistry::User.GetJsonWebToken(THandler<FJsonWebTokenResponse>::CreateLambda([&bJwtRetrieved, &jsonWebToken](const FJsonWebTokenResponse& result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Get JsonWebToken"));
-		jsonWebToken = result;
-		bJwtRetrieved = true;
-	}), UserTestErrorHandler);
-
-	Waiting(bJwtRetrieved, "Waiting for getting JsonWebToken...");
-	check(bJwtRetrieved);
-
-	bool bSameUserId = false;
-	FString userId = FRegistry::Credentials.GetUserId();
-	User_Get_MyData_Direct(jsonWebToken.Jwt_token, THandler<FAccountUserData>::CreateLambda([&bSameUserId, &userId](const FAccountUserData& result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Get My Data using JWT"));
-		if (userId == result.UserId)
-		{
-			bSameUserId = true;
-		}
-	}), UserTestErrorHandler);
-
-	Waiting(bSameUserId, "Waiting to retrieve my data using JsonWebToken...");
-	check(bSameUserId);
-
-	return true;
 }

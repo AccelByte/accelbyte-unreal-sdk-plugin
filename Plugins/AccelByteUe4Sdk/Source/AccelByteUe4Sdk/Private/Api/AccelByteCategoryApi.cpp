@@ -22,8 +22,8 @@ void Category::GetRootCategories(const FString& Language, const THandler<TArray<
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Language);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Language);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -45,8 +45,8 @@ void Category::GetCategory(const FString& CategoryPath, const FString& Language,
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -68,8 +68,8 @@ void Category::GetChildCategories(const FString& Language, const FString& Catego
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/children?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -91,8 +91,8 @@ void Category::GetDescendantCategories(const FString& Language, const FString& C
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/categories/%s/descendants?language=%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *FGenericPlatformHttp::UrlEncode(CategoryPath), *Language);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");

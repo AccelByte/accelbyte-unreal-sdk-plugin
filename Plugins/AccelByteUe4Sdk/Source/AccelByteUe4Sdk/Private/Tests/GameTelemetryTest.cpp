@@ -24,7 +24,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteGameTelemetryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteGameTelemetryTest);
 
 const int32 AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 const auto GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
@@ -36,7 +35,6 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccessful = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]() { bLoginSuccessful = true; }), GameTelemetryErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "LoginWithDeviceId");
 	
 	FRegistry::GameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
@@ -67,14 +65,12 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 						allEventDone = true;
 					}
 				}), GameTelemetryErrorHandler);
-		FlushHttpRequests();
 	}
 
 	WaitUntil([&allEventDone]()
 	{
 		if (!allEventDone)
 		{
-			FlushHttpRequests();
 		}
 		return allEventDone;
 	}, 100, "Sending batch telemetry event");
@@ -91,7 +87,6 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 {
 	bool bLoginSuccessful = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]() { bLoginSuccessful = true; }), GameTelemetryErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "LoginWithDeviceId");
 
 	FString CurrentImmediateEventName = "SDK_UE4_Immediate_Event";
@@ -123,7 +118,6 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 						allEventDone = true;
 					}
 				}), GameTelemetryErrorHandler);
-		FlushHttpRequests();
 	}
 
 	Waiting(allEventDone, "Sending multiple immediate telemetry events");

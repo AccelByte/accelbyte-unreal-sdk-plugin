@@ -84,7 +84,6 @@ bool TestCleanUp()
 			bDequeueSuccess = true;
 		}), JoinableSessionTestErrorHandler);
 
-		FlushHttpRequests();
 		Waiting(bDequeueSuccess, "Dequeueing Joinable Session...");
 
 		isSessionQueued = false;
@@ -94,14 +93,13 @@ bool TestCleanUp()
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Cleaning Registered Local DS"));
 
-		bool bDderegisterLocalServerSuccess = false;
-		FRegistry::ServerDSM.DeregisterLocalServerFromDSM(LocalDSPodName, FVoidHandler::CreateLambda([&bDderegisterLocalServerSuccess]()
+		bool bUnregisterLocalServerSuccess = false;
+		FRegistry::ServerDSM.DeregisterLocalServerFromDSM(LocalDSPodName, FVoidHandler::CreateLambda([&bUnregisterLocalServerSuccess]()
 		{
-			bDderegisterLocalServerSuccess = true;
+			bUnregisterLocalServerSuccess = true;
 		}), JoinableSessionTestErrorHandler);
 
-		FlushHttpRequests();
-		Waiting(bDderegisterLocalServerSuccess, "Deregistering Local Server...");
+		Waiting(bUnregisterLocalServerSuccess, "Deregistering Local Server...");
 
 		isDSRegistered = false;
 		DSGetMatchData = FAccelByteModelsMatchmakingResult();
@@ -122,7 +120,6 @@ bool RegisterDS()
 	}),
 		JoinableSessionTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	bool canBind = false;
@@ -140,7 +137,6 @@ bool RegisterDS()
 	}),
 		JoinableSessionTestErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 	return bRegisterLocalServerToDSMDone;
 }
@@ -156,7 +152,6 @@ bool RegisterSessionAsync(const FAccelByteModelsMatchmakingResult matchmakingRes
 		{
 			bEnqueueResultSuccess = true;
 		}), JoinableSessionTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bEnqueueResultSuccess, "Wait enqueue joinable session");
 
 		check(bEnqueueResultSuccess);
@@ -181,7 +176,6 @@ bool GetMatchData()
 			bGetSessionId = true;
 			sessionId = result.Session_id;
 		}), JoinableSessionTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetSessionId, "Waiting GetSessionId");
 		return !sessionId.IsEmpty();
 	});
@@ -192,7 +186,6 @@ bool GetMatchData()
 		DSGetMatchData = result;
 		bQuerySessionStatusDone = true;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionStatusDone, "Waiting QuerySessionStatus");
 
 	return true;
@@ -249,7 +242,6 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 				}
 			}));
 		
-		FlushHttpRequests();
 		Waiting(UsersCreationSuccess[i],"Waiting for user created...");
 
 		ActiveUsers[i]->LoginWithUsername(
@@ -262,7 +254,6 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 			}), 
 			JoinableSessionTestErrorHandler);
 		
-		FlushHttpRequests();
 		Waiting(UsersLoginSuccess[i],"Waiting for Login...");
 	}
 	
@@ -286,7 +277,6 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler, true);
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create Joinable Matchmaking channel...");
 	check(bCreateMatchmakingChannelSuccess);
 
@@ -298,7 +288,6 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bCreateMatchmakingChannelSuccess, "Create NonJoinable Matchmaking channel...");
 	check(bCreateMatchmakingChannelSuccess);
 
@@ -321,7 +310,6 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;
 		}), JoinableSessionTestErrorHandler);
-		FlushHttpRequests();
 		Waiting(bDeleteUsersSuccessful[i],"Waiting for user deletion...");
 	}
 
@@ -337,7 +325,6 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	check(bDeleteMatchmakingChannelSuccess);
 
@@ -347,7 +334,6 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	check(bDeleteMatchmakingChannelSuccess);
 
@@ -570,7 +556,6 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bAddUserSuccess, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
@@ -580,7 +565,6 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
@@ -588,7 +572,6 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
@@ -599,7 +582,6 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 	
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
@@ -780,7 +762,6 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler, BCreatePartyResult.PartyId);
-	FlushHttpRequests();
 	Waiting(bAddUserSuccess, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
@@ -790,7 +771,6 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
@@ -798,7 +778,6 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
@@ -809,7 +788,6 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
@@ -1135,7 +1113,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bAddUserDone = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Add User Error: %d | %s"), Code, *Message);
 	}));
-	FlushHttpRequests();
 	Waiting(bAddUserDone, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
@@ -1145,7 +1122,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
@@ -1153,7 +1129,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
@@ -1164,7 +1139,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	FlushHttpRequests();
 	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)

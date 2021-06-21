@@ -46,7 +46,7 @@ void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgree
 		break;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&defaultOnEmpty=%s"),
 		*Settings.AgreementServerUrl,
 		*Namespace,
@@ -93,7 +93,7 @@ void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementP
 		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
 		*Settings.AgreementServerUrl, 
 		*Settings.Namespace, 
@@ -135,7 +135,7 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 		break;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&defaultOnEmpty=%s"), 
 		*Settings.AgreementServerUrl, 
 		*CountryCode,
@@ -182,7 +182,7 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
 		*Settings.AgreementServerUrl, 
 		*CountryCode,
@@ -208,33 +208,8 @@ void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgre
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/agreements/policies"), *Settings.AgreementServerUrl);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-
-	FAccelByteUtilities::TArrayUStructToJsonString(AgreementRequests, Content);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void Agreement::BulkAcceptPolicyVersionsIndirect(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError)
-{
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/agreements/policies/users/me"), *Settings.AgreementServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -258,7 +233,7 @@ void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, con
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/agreements/localized-policy-versions/%s"), *Settings.AgreementServerUrl, *LocalizedPolicyVersionId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -279,7 +254,7 @@ void Agreement::QueryLegalEligibilities(const FString& Namespace, const THandler
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/eligibilities/namespaces/%s"), *Settings.AgreementServerUrl, *Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");

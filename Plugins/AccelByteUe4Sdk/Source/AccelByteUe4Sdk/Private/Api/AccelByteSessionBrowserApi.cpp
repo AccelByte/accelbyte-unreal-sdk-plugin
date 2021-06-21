@@ -31,16 +31,16 @@ namespace Api
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession"), *SessionBrowserServerUrl, *Credentials.GetUserNamespace());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession"), *SessionBrowserServerUrl, *Credentials.GetNamespace());
 		FString Verb = TEXT("POST");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 
 		FAccelByteModelsSessionBrowserCreateRequest NewGameSession;
 		NewGameSession.Username = Credentials.GetUserDisplayName();
-		NewGameSession.Namespace = Credentials.GetUserNamespace();
+		NewGameSession.Namespace = Credentials.GetNamespace();
 		NewGameSession.Game_session_setting.Mode = GameMode;
 		NewGameSession.Game_session_setting.Map_name = GameMapName;
 		NewGameSession.Game_session_setting.Num_bot = BotCount;
@@ -76,9 +76,9 @@ namespace Api
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetUserNamespace(), *SessionId);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -103,9 +103,9 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetUserNamespace(), *SessionId);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionId);
 		FString Verb = TEXT("DELETE");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -124,9 +124,9 @@ namespace Api
 		Report report;
 		report.GetFunctionLog(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&limit=%d&offset=%d"), *SessionBrowserServerUrl, *Credentials.GetUserNamespace(), *SessionType, *GameMode, Limit, Offset);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&limit=%d&offset=%d"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionType, *GameMode, Limit, Offset);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

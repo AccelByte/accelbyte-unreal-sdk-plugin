@@ -28,8 +28,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteServerOauth2Test);
 
 const int32 AutomationFlagMaskServerOauth = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-void FlushHttpRequests();//defined in TestUtilities.cpp
-void Waiting(bool& condition, FString text);
+void Waiting(bool& bCondition, FString text);
 
 const auto ServerOauthErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
@@ -50,7 +49,6 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		bClientTokenObtained = true;
 	}), ServerOauthErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	check(bClientTokenObtained);
@@ -61,7 +59,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ClientAutomatedRefreshTokenTest, "AccelByte.Tes
 bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 {
 	FRegistry::ServerOauth2.ForgetAllCredentials();
-
+	
 	bool bClientTokenObtained = false;
 	double LastTime = 0;
 
@@ -72,34 +70,23 @@ bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 			bClientTokenObtained = true;
 		}), ServerOauthErrorHandler);
 
-	FlushHttpRequests();
 	Waiting(bClientTokenObtained, "Waiting for Login...");
 
 	// set session expired time to 0
-	FString ClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
-	FString ClientNamespace = FRegistry::ServerCredentials.GetClientNamespace();
-	FRegistry::ServerCredentials.SetClientToken(ClientAccessToken, 0, ClientNamespace);
+	const FString ClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
+	const FString ClientNamespace = FRegistry::ServerCredentials.GetClientNamespace();
+	FRegistry::ServerCredentials.SetClientToken(ClientAccessToken, FPlatformTime::Seconds() + 2, ClientNamespace);
+	FString NewClientAccessToken;
 
-	FString NewAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
-
-	bool bNewClientTokenObtained = false;
-
-	// wait session to refresh
-	for (int i = 0; i < 20; i++)
-	{
-		FPlatformProcess::Sleep(0.5f);
-		FTicker::GetCoreTicker().Tick(0.5f);
-
-		NewAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
-
-		if (ClientAccessToken != NewAccessToken)
+	WaitUntil(
+		[&]()
 		{
-			UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("Refresh token Success"));
-			bNewClientTokenObtained = true;
-			break;
-		}
-	}
+			NewClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
+			return ClientAccessToken != NewClientAccessToken;
+		},
+		10,
+		"Wait refresh token success");
 
-	check(bNewClientTokenObtained);
+	check(ClientAccessToken != NewClientAccessToken);
 	return true;
 }

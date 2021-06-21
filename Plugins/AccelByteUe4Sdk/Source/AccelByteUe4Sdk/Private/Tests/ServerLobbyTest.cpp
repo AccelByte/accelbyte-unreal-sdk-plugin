@@ -21,7 +21,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerLobbyTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteServerLobbyTest);
 
 const int32 AutomationFlagMaskServerLobby = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 const int STestUserCount = 4;
 FString SUserIds[STestUserCount];
@@ -89,7 +88,7 @@ void SLobbyDisconnect(int userCount)
 	}
 }
 
-void ResetResponses()
+void ResetServerResponses()
 {
 	bSUsersConnected = false;
 	bSUsersConnectionSuccess = false;
@@ -228,7 +227,7 @@ void CleanPartyBeforeTest(const FSimpleDelegate& OnSuccess)
 	}
 }
 
-void FormParty(const FSimpleDelegate& OnSuccess)
+void FormParty(const FSimpleDelegate OnSuccess)
 {
 	FAccelByteModelsPartyGetInvitedNotice invitedToParty[3];
 
@@ -279,7 +278,7 @@ void FormParty(const FSimpleDelegate& OnSuccess)
 	check(!SinfoPartyResponse.PartyId.IsEmpty());
 	check(SinfoPartyResponse.Members.Num() == STestUserCount);
 
-	OnSuccess.Execute();
+	bool _ = OnSuccess.ExecuteIfBound();
 }
 
 bool ComparePartyData(const FJsonObjectWrapper& PartyData)
@@ -379,7 +378,6 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 			}
 		}));
 
-		FlushHttpRequests();
 		Waiting(UsersCreationSuccess[i], "Waiting for user created...");
 
 		SLobbyUsers[i]->LoginWithUsername(
@@ -392,7 +390,6 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		}),
 			ServerLobbyErrorHandler);
 
-		FlushHttpRequests();
 		Waiting(UsersLoginSuccess[i], "Waiting for Login...");
 
 		SLobbies.Add(MakeShared<Api::Lobby>(SUserCreds[i], FRegistry::Settings));
@@ -409,7 +406,6 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		bLoginServerSuccess = true;
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("\t\tClient Successfully Login."));
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginServerSuccess, "Waiting for Client Login...");
 
 	SLobbyConnect(4);
@@ -423,7 +419,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 	}
 
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	// setup custom party storage data
 	SPartyStorageData.JsonObject = MakeShared<FJsonObject>();
@@ -453,12 +449,12 @@ bool ServerLobbyTestTeardown::RunTest(const FString& Parameters)
 	for (int i = 0; i < STestUserCount; i++)
 	{
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, STestUserCount);
+		bDeleteUsersSuccessful[i] = false;
 		DeleteUserById(SUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bDeleteUsersSuccessful[i], "Waiting for user deletion...");
 	}
 
@@ -491,7 +487,6 @@ bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Param
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	check(bWritePartyStorageSuccess);
@@ -500,7 +495,7 @@ bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Param
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -529,7 +524,6 @@ bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& 
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	check(bWritePartyStorageSuccess);
@@ -538,7 +532,7 @@ bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& 
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -562,7 +556,6 @@ bool PartyStorageTest_WritePartyStorage_NonExistParty::RunTest(const FString& Pa
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bWritePartyStorageDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageDone, "Waiting for write result");
 
 	check(!bWritePartyStorageSuccess);
@@ -587,7 +580,6 @@ bool PartyStorageTest_GetPartyStorage_NonExistParty::RunTest(const FString& Para
 	{
 		bGetPartyStorageDone = true;
 	}));
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageDone, "Waiting for get result");
 
 	check(!bGetPartyStorageSuccess);
@@ -617,7 +609,6 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 	
 	check(bGetPartyStorageSuccess);
@@ -627,7 +618,7 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -654,7 +645,6 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	check(bWritePartyStorageSuccess);
@@ -667,7 +657,6 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 		bGetPartyStorageSuccess = true;
 		PartyData = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 	check(bGetPartyStorageSuccess);
@@ -676,7 +665,7 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -716,7 +705,6 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	WaitUntil([&UpdateCount]() { return UpdateCount  == 4; }, 5);
@@ -735,7 +723,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -781,12 +769,10 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_T
 		{
 			bServerUpdateDone++;
 		})));
-		FlushHttpRequests();
 		Waiting(bWritePartyStorageSuccess, "Waiting for write result");
-		FPlatformProcess::Sleep(1.0f);
 	}
 
-	WaitUntil([&bServerUpdateDone, &bSpamUpdateCount]() { return bServerUpdateDone < bSpamUpdateCount; }, 5);
+	WaitUntil([&bServerUpdateDone, &bSpamUpdateCount]() { return bServerUpdateDone == bSpamUpdateCount; }, 5);
 
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
@@ -801,7 +787,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_T
 	}
 
 	SLobbyDisconnect(1);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -870,7 +856,7 @@ bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FS
 	check(!bSLeavePartyError);
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -906,7 +892,6 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 		bGetPartyStorageSuccess = true;
 		ClientPartyData = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 	check(ClientPartyData.Members.Contains(SUserIds[0]));
 	check(bGetPartyStorageSuccess);
@@ -918,7 +903,6 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 		bGetPartyStorageSuccess = true;
 		ServerPartyData = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 	check(ClientPartyData.Members.Contains(SUserIds[0]));
 	check(bGetPartyStorageSuccess);
@@ -931,7 +915,7 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 	check(PartyDataNotifResults.Invitees.Num() == 0);
 
 	SLobbyDisconnect(1);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -961,7 +945,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
@@ -988,7 +971,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
@@ -998,7 +980,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		check(ClientPartyData.Invitees.Num() == (PartySize - 1));
@@ -1020,7 +1001,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
@@ -1030,7 +1010,6 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		check(ClientPartyData.Invitees.Num() == 0);
@@ -1039,7 +1018,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		check(ServerPartyData.Members.Num() == PartySize);
 	}
 
-	WaitUntil([&PartyDataNotifResults]() { return (PartyDataNotifResults.Num() == 2); }, 2.0);
+	WaitUntil([&PartyDataNotifResults]() { return (PartyDataNotifResults.Num() == 2); }, 10.0);
 
 	for (auto& PartyDataNotif : PartyDataNotifResults)
 	{
@@ -1057,7 +1036,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 	}
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1090,7 +1069,6 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
@@ -1131,7 +1109,6 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
@@ -1141,7 +1118,6 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		check(ClientPartyData.Members.Num() == (PartySize - 1));
@@ -1171,7 +1147,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 	}
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1207,7 +1183,6 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
@@ -1250,7 +1225,6 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
@@ -1260,7 +1234,6 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		FlushHttpRequests();
 		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 		check(ClientPartyData.Members.Num() == (PartySize - 1));
@@ -1269,7 +1242,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		check(!ServerPartyData.Members.Contains(SUserIds[KickedMemberIndex]));
 	}
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == PartySize); }, 2.0);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == PartySize); }, 10.0);
 
 	for (int i = 0; i < PartyDataNotifResults.Num(); i++)
 	{
@@ -1290,7 +1263,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	}
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1311,7 +1284,6 @@ bool PartyStorageTest_ClientGetPartyStorage_NonExistParty::RunTest(const FString
 			{
 				bGetPartyStorageDone = true;
 			}));
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageDone, "Waiting for get result");
 
 	check(!bGetPartyStorageSuccess);
@@ -1341,7 +1313,6 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success::R
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 	check(bGetPartyStorageSuccess);
@@ -1351,7 +1322,7 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success::R
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1378,7 +1349,6 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	check(bWritePartyStorageSuccess);
@@ -1391,7 +1361,6 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
 
 	check(bGetPartyStorageSuccess);
@@ -1400,7 +1369,7 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1411,23 +1380,22 @@ bool PartyStorageTest_ClientWritePartyStorage_NonExistParty::RunTest(const FStri
 	AB_TEST_SKIP_WHEN_DISABLED();
 	FString PartyId = "InvalidParty2434ID";
 	FAccelByteModelsPartyDataNotif WriteNotif;
-	bool bWritePartyStorageSuccess = false;
+	bool bWritePartyStorageFailed = false;
 	bool bWritePartyStorageDone = false;
-	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageDone, &bWritePartyStorageSuccess, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
+	GameClientOverwritePartyStorage(SLobbies[0].Get(), PartyId, SPartyStorageData, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageDone, &WriteNotif](FAccelByteModelsPartyDataNotif notifResult)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
 			WriteNotif = notifResult;
-			bWritePartyStorageSuccess = true;
 			bWritePartyStorageDone = true;;
-		}), FErrorHandler::CreateLambda([&bWritePartyStorageDone](int32 ErrorCode, FString ErrorMessage)
+		}), FErrorHandler::CreateLambda([&bWritePartyStorageDone, &bWritePartyStorageFailed](int32 ErrorCode, FString ErrorMessage)
 			{
 				UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+				bWritePartyStorageFailed = true;
 				bWritePartyStorageDone = true;
 			}));
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageDone, "Waiting for write result");
 
-	check(!bWritePartyStorageSuccess);
+	check(bWritePartyStorageFailed);
 
 	return true;
 }
@@ -1456,7 +1424,6 @@ bool PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty::RunTest(const FSt
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	check(bWritePartyStorageSuccess);
@@ -1465,7 +1432,7 @@ bool PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty::RunTest(const FSt
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1501,7 +1468,6 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 	Waiting(bGetPartyDataNotif, "Waiting get party data notif");
 
@@ -1513,7 +1479,7 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 	Waiting(bSLeavePartySuccess, "Waiting for leave party");
 
 	SLobbyDisconnect(1);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1559,7 +1525,6 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 			ResultCount++;
 			WriteFailCount++;
 		}));
-		FlushHttpRequests();
 	}
 
 	WaitUntil([&ResultCount] {return ResultCount == 2; }, 2.5, "Waiting for write result");
@@ -1567,6 +1532,7 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 	// rarely happen
 	check(WriteSuccessCount == 1 || WriteSuccessCount == 2);
 	check(WriteFailCount == 1 || WriteFailCount == 0);
+	ResetServerResponses();
 	return true;
 }
 
@@ -1605,7 +1571,6 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	WaitUntil([&UpdateCount]() { return UpdateCount == 4; }, 5);
@@ -1624,7 +1589,7 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1651,7 +1616,6 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
 
 	bool bGetActivePartiesSuccess = false;
@@ -1663,7 +1627,6 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 		bGetActivePartiesSuccess = true;
 		PartiesData = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 
 	FAccelByteModelsPartyDataNotif PartyDataNotif;
@@ -1686,7 +1649,7 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
 	Waiting(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }
@@ -1723,7 +1686,6 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 		bGetActivePartiesSuccess = true;
 		PartiesData1 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1736,7 +1698,6 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 		bGetActivePartiesSuccess = true;
 		PartiesData2 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1758,7 +1719,7 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 	check(!bHasRepetitivePartyId);
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1795,7 +1756,6 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData1 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1809,7 +1769,6 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData2 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1823,7 +1782,6 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData3 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1837,7 +1795,6 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData4 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1851,7 +1808,6 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData5 = result;
 	}), ServerLobbyErrorHandler);
-	FlushHttpRequests();
 	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
 	check(bGetActivePartiesSuccess);
 
@@ -1882,7 +1838,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 	check(!bHasRepetitivePartyId);
 
 	SLobbyDisconnect(PartySize);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1911,7 +1867,7 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 	});
 	SLobbies[0]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 
-	int ConcurrentServerWriteCount = 6;
+	const int ConcurrentServerWriteCount = 6;
 	int ServerUpdateSuccessCount = 0;
 	int ServerUpdateDone = 0;
 
@@ -1922,22 +1878,24 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 	{
 		FString Key = FString::Printf(TEXT("key_%d"), i);
 		PartyStorageData.JsonObject->SetNumberField(Key, i);
-		FRegistry::ServerLobby.WritePartyStorage(PartyId, [PartyStorageData](FJsonObjectWrapper) { return PartyStorageData; }, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&ServerUpdateSuccessCount, &ServerUpdateDone](FAccelByteModelsPartyDataNotif notifResult)
+		bool bWritePartyStorageSuccess = false;
+		FRegistry::ServerLobby.WritePartyStorage(PartyId, [PartyStorageData](FJsonObjectWrapper) { return PartyStorageData; }, THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([&bWritePartyStorageSuccess, &ServerUpdateSuccessCount, &ServerUpdateDone](FAccelByteModelsPartyDataNotif notifResult)
 		{
-			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Write Party Storage Success"));
 			ServerUpdateSuccessCount++;
 			ServerUpdateDone++;
+			bWritePartyStorageSuccess = true;
 		}), FErrorHandler::CreateLambda([&ServerUpdateDone](int32 ErrorCode, FString ErrorMessage)
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			ServerUpdateDone++;
 		}));
-		FlushHttpRequests();
+		Waiting(bWritePartyStorageSuccess, "write party storage successful");
 	}
 
+	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
 	Waiting(bSLeavePartySuccess, "Waiting for leave party");
-	WaitUntil([ConcurrentServerWriteCount, PartyDataNotifResults]() { return ConcurrentServerWriteCount == PartyDataNotifResults.Num(); }, 2, "Wait until write done");
+	WaitUntil([&ConcurrentServerWriteCount, &PartyDataNotifResults]() { return ConcurrentServerWriteCount == PartyDataNotifResults.Num(); }, 2, "Wait until write done");
 
 	check(PartyDataNotifResults.Num() == ConcurrentServerWriteCount);
 	bool bLatestNotifFound = false;
@@ -1951,7 +1909,7 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 	check(bLatestNotifFound);
 
 	SLobbyDisconnect(1);
-	ResetResponses();
+	ResetServerResponses();
 	return true;
 }
 
@@ -1992,7 +1950,6 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	Waiting(bSJoinPartySuccess, "Waiting join party");
 	check(!bSJoinPartyError);
 
-	FlushHttpRequests();
 	FAccelByteModelsDataPartyResponse queryAfterInviteToParty0;
 	bool queryAfterInviteToParty0Success = false;
 	FRegistry::ServerLobby.GetPartyDataByUserId(
@@ -2004,7 +1961,6 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	}),
 		ServerLobbyErrorHandler);
 
-	FlushHttpRequests();
 	FAccelByteModelsDataPartyResponse queryAfterInviteToParty1;
 	bool queryAfterInviteToParty1Success = false;
 	FRegistry::ServerLobby.GetPartyDataByUserId(
@@ -2024,7 +1980,6 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	Waiting(bSLeavePartySuccess, "Waiting 1 leave party");
 	check(bSLeavePartySuccess);
 
-	FlushHttpRequests();
 	FAccelByteModelsDataPartyResponse queryAfterLeaveParty0;
 	bool queryAfterLeaveParty0Success = false;
 	FRegistry::ServerLobby.GetPartyDataByUserId(
@@ -2036,7 +1991,6 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	}),
 		ServerLobbyErrorHandler);
 
-	FlushHttpRequests();
 	FAccelByteModelsDataPartyResponse queryAfterLeaveParty1;
 	bool queryAfterLeaveNotFound1 = false;
 	bool queryAfterLeaveComplete1 = false;
@@ -2062,7 +2016,6 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	Waiting(bSLeavePartySuccess, "Waiting 0 leave party");
 	check(bSLeavePartySuccess);
 
-	FlushHttpRequests();
 	FAccelByteModelsDataPartyResponse queryAfterDisbandParty;
 	bool queryAfterDisbandPartyNotFound0 = false;
 	bool queryAfterDisbandComplete = false;
@@ -2108,8 +2061,7 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	check(queryAfterDisbandPartyNotFound0);
 
 	SLobbyDisconnect(2);
-
-	ResetResponses();
+	ResetServerResponses();
 
 	return true;
 }

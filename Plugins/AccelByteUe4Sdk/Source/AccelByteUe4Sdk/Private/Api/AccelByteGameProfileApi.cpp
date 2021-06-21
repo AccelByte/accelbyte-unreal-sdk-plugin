@@ -32,8 +32,8 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 	}
 	else
 	{
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace());
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace());
 		FString Verb            = TEXT("GET");
 		FString ContentType     = TEXT("application/json");
 		FString Accept          = TEXT("application/json");
@@ -60,8 +60,8 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -82,8 +82,8 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -105,8 +105,8 @@ void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAcce
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -127,8 +127,8 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteM
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("PUT");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -150,8 +150,8 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandle
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("DELETE");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -172,8 +172,8 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FStri
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -194,8 +194,8 @@ void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FA
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
 	FString Verb            = TEXT("PUT");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");

@@ -8,11 +8,7 @@ $CONFIG_FIELD =
 "ClientSecret=$Env:CLIENT_SECRET`r`n" +
 "Namespace=$Env:CLIENT_NAMESPACE`r`n" +
 "PublisherNamespace=$Env:PUBLISHER_NAMESPACE`r`n" +
-"BaseUrl=`"$Env:BASE_URL`"`r`n" +
-"NonApiBaseUrl=`"$Env:ADMIN_BASE_URL`"`r`n" +
-"CloudStorageServerUrl=`"$Env:BASE_URL$Env:CLOUD_STORAGE_PREFIX`"`r`n" +
-"GameProfileServerUrl=`"$Env:BASE_URL$Env:GAME_PROFILE_PREFIX`"`r`n" +
-"StatisticServerUrl=`"$Env:BASE_URL$Env:STATISTIC_PREFIX`"`r`n"
+"BaseUrl=`"$Env:BASE_URL`"`r`n"
 
 $SERVER_CONFIG_FIELD =
 "[/Script/AccelByteUe4Sdk.AccelByteServerSettings]`r`n" +

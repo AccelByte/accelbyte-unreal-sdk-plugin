@@ -23,8 +23,8 @@ void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const FS
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	
 	FString Query = TEXT("");
 	if (!EntitlementName.IsEmpty())
@@ -83,8 +83,8 @@ void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const TA
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
 	
 	FString Query = TEXT("");
 	if (!EntitlementName.IsEmpty())
@@ -144,8 +144,8 @@ void Entitlement::GetUserEntitlementById(const FString& Entitlementid, const THa
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *Entitlementid);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Entitlementid);
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -166,7 +166,7 @@ void Entitlement::GetUserEntitlementOwnershipByAppId(const FString& AppId, const
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byAppId?appId=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *AppId);
 
 	FString Verb = TEXT("GET");
@@ -188,7 +188,7 @@ void Entitlement::GetUserEntitlementOwnershipBySku(const FString& Sku, const THa
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/bySku?sku=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *Sku);
 
 	FString Verb = TEXT("GET");
@@ -219,7 +219,7 @@ void Entitlement::GetUserEntitlementOwnershipAny(const TArray<FString> ItemIds, 
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/any"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace);
 
 		int paramCount = 0;
@@ -262,8 +262,8 @@ void Entitlement::ConsumeUserEntitlement(const FString& EntitlementId, const int
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *EntitlementId);
 
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
@@ -287,8 +287,8 @@ void Entitlement::CreateDistributionReceiver(const FString& ExtUserId, const FAc
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ExtUserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ExtUserId);
 
 	FAccelByteModelsDistributionAttributes DistributionAttributes;
 	DistributionAttributes.Attributes = Attributes;
@@ -315,8 +315,8 @@ void Entitlement::DeleteDistributionReceiver(const FString& ExtUserId, const FSt
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *UserId, *ExtUserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *UserId, *ExtUserId);
 
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
@@ -337,14 +337,14 @@ void Entitlement::GetDistributionReceiver(const FString& PublisherNamespace, con
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers"), *Settings.PlatformServerUrl, *PublisherNamespace, *PublisherUserId);
 	
 	FString Query = TEXT("");
-	if (!Credentials.GetUserNamespace().IsEmpty())
+	if (!Credentials.GetNamespace().IsEmpty())
 	{
 		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("targetNamespace=%s"), *Credentials.GetUserNamespace()));
+		Query.Append(FString::Printf(TEXT("targetNamespace=%s"), *Credentials.GetNamespace()));
 	}
 	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
 
@@ -367,8 +367,8 @@ void Entitlement::UpdateDistributionReceiver(const FString& ExtUserId, const FAc
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *ExtUserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ExtUserId);
 
 	FAccelByteModelsDistributionAttributes DistributionAttributes;
 	DistributionAttributes.Attributes = Attributes;
@@ -397,7 +397,7 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, cons
 
 	FString PlatformText = TEXT("");
 	FString Content = TEXT("{}");
-	FString platformUserId = Credentials.GetPlatformBoundUserId();
+	FString platformUserId = Credentials.GetPlatformUserId();
 
 	switch (PlatformType)
 	{
@@ -407,7 +407,7 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, cons
 			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
 			return;
 		}
-		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": \"%s\"}"), *Credentials.GetPlatformBoundUserId(), *Settings.AppId);
+		Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": %s}"), *Credentials.GetPlatformUserId(), *Settings.AppId);
 		break;
 	case EAccelBytePlatformSync::XBOX_LIVE:
 		PlatformText = TEXT("xbl");
@@ -420,8 +420,8 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, cons
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync"), *Settings.PlatformServerUrl, *Credentials.GetUserNamespace(), *Credentials.GetUserId(), *PlatformText);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *PlatformText);
 
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");

@@ -22,7 +22,7 @@ void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
@@ -43,7 +43,7 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccel
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public"), *Settings.BasicServerUrl, *Settings.Namespace, *UserID);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
@@ -64,7 +64,7 @@ void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, co
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *Credentials.GetUserId());
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
@@ -85,7 +85,7 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
 	FString Verb			= TEXT("PUT");
 	FString ContentType		= TEXT("application/json");
@@ -109,7 +109,7 @@ void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpda
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *Credentials.GetUserId());
 	FString Verb			= TEXT("PUT");
 	FString ContentType		= TEXT("application/json");
@@ -135,7 +135,7 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");

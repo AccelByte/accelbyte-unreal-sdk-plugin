@@ -17,12 +17,13 @@ UENUM(BlueprintType)
 	enum class EAccelByteMatchmakingSessionStatus : uint8
 {
 	None = 0		UMETA(DisplayName = "none"),
+	Matched	        UMETA(DisplayName = "matched"),
 	Done			UMETA(DisplayName = "done"), // when matchmaking request is done successfully
 	Cancel			UMETA(DisplayName = "cancel"), // when matchmaking request is cancelled
 	Timeout			UMETA(DisplayName = "timeout"), // when matchmaking request is timed out
 	SessionInQueue	UMETA(DisplayName = "sessionInQueue"), // when joinable session is in queue and players from other party can join
 	SessionFull		UMETA(DisplayName = "sessionFull"), // when joinable session is full, and removed from queue
-	SessionTimeout	UMETA(DisplayName = "sessionTimeout") // when joinable session is timed out, and removed from queue
+	SessionTimeout	UMETA(DisplayName = "sessionTimeout"), // when joinable session is timed out, and removed from queue
 };
 
 USTRUCT(BlueprintType)

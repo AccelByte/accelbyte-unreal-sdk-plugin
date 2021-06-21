@@ -25,7 +25,6 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerGameTelemetryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteServerGameTelemetryTest);
 
 const int32 AutomationFlagMaskServerGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-void FlushHttpRequests();
 
 const auto ServerTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
@@ -41,14 +40,13 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 			bLoginSuccessful = true;
 			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), ServerTelemetryErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Client Login...");
 	
 	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
 	FRegistry::ServerGameTelemetry.SetImmediateEventList({});
-	const int EVENT_COUNT = 999;
+	const int EVENT_COUNT = 10;
 	int SuccessResultCount = 0;
-	bool allEventDone = false;
+	
 	for (int i = 0; i < EVENT_COUNT; i++)
 	{
 		FJsonObject Payload;
@@ -64,17 +62,15 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 	
 		FRegistry::ServerGameTelemetry.Send(
 			TelemetryBody,
-			FVoidHandler::CreateLambda([&]()
+			FVoidHandler::CreateLambda([&SuccessResultCount]()
 			{
 				SuccessResultCount++;
-				if (SuccessResultCount == EVENT_COUNT)
-				{
-					allEventDone = true;
-				}
+				UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("Received %d result count"), SuccessResultCount);
 			}), ServerTelemetryErrorHandler);
 	}
 
-	Waiting(allEventDone, "Sending batch telemetry event");
+	
+	WaitUntil([&SuccessResultCount, EVENT_COUNT]() {return SuccessResultCount == EVENT_COUNT; }, 60, "batch telemetry event sent successfully");
 
 	FRegistry::ServerCredentials.ForgetAll();
 	
@@ -92,7 +88,6 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 			bLoginSuccessful = true;
 			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), ServerTelemetryErrorHandler);
-	FlushHttpRequests();
 	Waiting(bLoginSuccessful, "Waiting for Client Login...");
 
 	FString CurrentImmediateEventName = "SDK_UE4_Immediate_Event";
@@ -111,8 +106,6 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 		TelemetryBody.EventName = CurrentImmediateEventName;
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
-
-		bool bTelemetryEventSent = false;
 
 		FRegistry::ServerGameTelemetry.Send(
 			TelemetryBody,

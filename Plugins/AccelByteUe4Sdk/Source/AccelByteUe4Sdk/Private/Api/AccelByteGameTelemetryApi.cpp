@@ -138,7 +138,7 @@ void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Ev
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *Settings.GameTelemetryServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");

@@ -57,51 +57,46 @@ void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, cons
 	}
 	else
 	{
-		JobQueue.Enqueue(TTuple<FAccelByteModelsTelemetryBody, FVoidHandler, FErrorHandler>{ TelemetryBody, OnSuccess, OnError });
-		if (bTelemetryJobStarted == false)
+		JobQueue.Enqueue(MakeShared<FJob>(TelemetryBody, OnSuccess, OnError ));
+		if (!bTelemetryJobStarted)
 		{
 			bTelemetryJobStarted = true;
 			GameTelemetryTickDelegate = FTickerDelegate::CreateRaw(this, &ServerGameTelemetry::PeriodicTelemetry);
-			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, (float)TelemetryInterval.GetSeconds());
+			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetSeconds()));
 		}
 	}
 }
 
 bool ServerGameTelemetry::PeriodicTelemetry(float DeltaTime)
 {
-	if (!JobQueue.IsEmpty())
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	if (JobQueue.IsEmpty()) { return true; }
+
+	TArray<FAccelByteModelsTelemetryBody> TelemetryBodies;
+	TSharedRef<TArray<TSharedPtr<FJob>>> Jobs = MakeShared<TArray<TSharedPtr<FJob>>>();
+	TSharedPtr<FJob> DequeueResult;
+	while (JobQueue.Dequeue(DequeueResult))
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
-
-		TArray<FAccelByteModelsTelemetryBody> TelemetryBodies;
-		TArray<FVoidHandler> OnSuccessCallbacks;
-		TArray<FErrorHandler> OnErrorCallbacks;
-		while (!JobQueue.IsEmpty())
-		{
-			TTuple<FAccelByteModelsTelemetryBody, FVoidHandler, FErrorHandler> DequeueResult;
-			if (JobQueue.Dequeue(DequeueResult))
-			{
-				TelemetryBodies.Add(DequeueResult.Get<0>());
-				OnSuccessCallbacks.Add(DequeueResult.Get<1>());
-				OnErrorCallbacks.Add(DequeueResult.Get<2>());
-			}
-		}
-
-		SendProtectedEvents(TelemetryBodies, FVoidHandler::CreateLambda([OnSuccessCallbacks]()
-		{
-			for (auto& OnSuccessCallback : OnSuccessCallbacks)
-			{
-				OnSuccessCallback.ExecuteIfBound();
-			}
-		}), FErrorHandler::CreateLambda([OnErrorCallbacks](int32 Code, FString Message)
-		{
-			for (auto& OnErrorCallback : OnErrorCallbacks)
-			{
-				OnErrorCallback.ExecuteIfBound(Code, Message);
-			}
-		}));
+		TelemetryBodies.Add(DequeueResult->TelemetryBody);
+		Jobs->Add(DequeueResult);
 	}
+
+	SendProtectedEvents(TelemetryBodies, FVoidHandler::CreateLambda([Jobs]()
+	{
+		for (auto& Job : *Jobs)
+		{
+			auto _ = Job->OnSuccess.ExecuteIfBound();
+		}
+	}), FErrorHandler::CreateLambda([Jobs](int32 Code, FString Message)
+	{
+		for (auto& Job : *Jobs)
+		{
+			auto _ = Job->OnError.ExecuteIfBound(Code, Message);
+		}
+	}));
+
 	return true;
 }
 

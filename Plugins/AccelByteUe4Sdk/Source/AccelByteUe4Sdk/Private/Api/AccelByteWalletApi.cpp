@@ -22,8 +22,8 @@ void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const THan
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetUserSessionId());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings.PlatformServerUrl, *FRegistry::Credentials.GetUserNamespace(), *Credentials.GetUserId(), *CurrencyCode);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings.PlatformServerUrl, *FRegistry::Credentials.GetNamespace(), *Credentials.GetUserId(), *CurrencyCode);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
