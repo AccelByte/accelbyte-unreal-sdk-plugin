@@ -26,6 +26,7 @@ namespace Api
 		const FString LeaveParty = TEXT("partyLeaveRequest");
 		const FString InviteParty = TEXT("partyInviteRequest");
 		const FString JoinParty = TEXT("partyJoinRequest");
+		const FString RejectParty = TEXT("partyRejectRequest");
 		const FString KickParty = TEXT("partyKickRequest");
 
 		// Chat
@@ -84,6 +85,8 @@ namespace Api
 		const FString PartyGetInvitedNotif = TEXT("partyGetInvitedNotif");
 		const FString PartyJoin = TEXT("partyJoinResponse");
 		const FString PartyJoinNotif = TEXT("partyJoinNotif");
+		const FString PartyReject = TEXT("partyRejectResponse");
+		const FString PartyRejectNotif = TEXT("partyRejectNotif");
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
 		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
@@ -331,6 +334,15 @@ FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString
 	report.GetFunctionLog(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::JoinParty, Prefix::Party,
+		FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
+}
+
+FString Api::Lobby::SendRejectInvitationRequest(const FString& PartyId, const FString& InvitationToken)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::RejectParty, Prefix::Party,
 		FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
 }
 
@@ -1157,6 +1169,8 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice, PartyGetInvitedNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoinNotif, FAccelByteModelsPartyJoinNotice, PartyJoinNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoin, FAccelByteModelsPartyJoinReponse, PartyJoinResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyRejectNotif, FAccelByteModelsPartyRejectNotice, PartyRejectNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyReject, FAccelByteModelsPartyRejectResponse, PartyRejectResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, PartyDataUpdateNotif);

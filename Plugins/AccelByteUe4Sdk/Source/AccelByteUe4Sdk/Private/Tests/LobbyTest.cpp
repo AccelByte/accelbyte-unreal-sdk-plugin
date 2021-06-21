@@ -55,7 +55,7 @@ bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendE
 bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSuccess, bOnIncomingRequestNotifError, bOnRequestAcceptedNotifSuccess, bOnRequestAcceptedNotifError;
 bool bUnfriendNotifSuccess, bCancelFriendNotifSuccess, bRejectFriendNotifSuccess;
 //Party
-bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySuccess, bRejectPartyError, bGetInvitedNotifSuccess, bGetInvitedNotifError, bGetInvitationRejectedNotifSuccess, bGetInvitationRejectedNotifError;
+bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySuccess, bRejectPartyError, bRejectedPartyNotifSuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError, bGetInvitationRejectedNotifSuccess, bGetInvitationRejectedNotifError;
 bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
 bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
 //Matchmaking
@@ -73,6 +73,7 @@ bool bBlockPlayerNotifSuccess, bUnblockPlayerNotifSuccess, bBlockPlayerNotifErro
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
 FAccelByteModelsPartyJoinReponse joinPartyResponse;
+FAccelByteModelsPartyRejectResponse rejectPartyResponse;
 
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
 FAccelByteModelsNotificationMessage getNotifResponse;
@@ -181,6 +182,9 @@ void ResetResponses()
 	bGetInvitedNotifError = false;
 	bJoinPartySuccess = false;
 	bJoinPartyError = false;
+	bRejectPartySuccess = false;
+	bRejectPartyError = false;
+	bRejectedPartyNotifSuccess = false;
 	bLeavePartySuccess = false;
 	bLeavePartyError = false;
 	bGetInfoPartySuccess = false;
@@ -495,6 +499,17 @@ const auto KickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLambda([
 	{
 		bKickedFromPartySuccess = true;
 	}
+});
+const auto RejectPartyNotifDelegate = Api::Lobby::FPartyRejectNotif::CreateLambda([](FAccelByteModelsPartyRejectNotice result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Reject Party Success! Reject UserId : %s, PartyLeader : %s, PartyId : %s"), *result.UserId, *result.LeaderId, *result.PartyId);
+	bRejectedPartyNotifSuccess = true;
+});
+const auto RejectPartyDelegate = Api::Lobby::FPartyRejectResponse::CreateLambda([](FAccelByteModelsPartyRejectResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Reject Party Success!"));
+	rejectPartyResponse = result;
+	bRejectPartySuccess = true;
 });
 #pragma endregion
 
@@ -1403,6 +1418,78 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	Lobbies[1]->SendLeavePartyRequest();
 	Waiting(bLeavePartySuccess, "Leaving Party...");
 	check(!bLeavePartyError);
+
+	LobbyDisconnect(2);
+
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestInviteToParty_InvitationRejected, "AccelByte.Tests.Lobby.B.RejectPartyInvitation", AutomationFlagMaskLobby);
+bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(2);
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	Lobbies[1]->SetInvitePartyRejectResponseDelegate(RejectPartyDelegate);
+	Lobbies[0]->SetPartyInvitationRejectedNotifDelegate(RejectPartyNotifDelegate);
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+	
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+
+	bGetInfoPartyError = false;
+	bGetInfoPartySuccess = false;
+	bRejectPartySuccess = false;
+	bRejectPartyError = false; 
+	bRejectedPartyNotifSuccess = false;
+	Lobbies[1]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[1]->SendLeavePartyRequest();
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+
+	Lobbies[0]->SendCreatePartyRequest();
+	Waiting(bCreatePartySuccess, "Creating Party...");
+
+	check(!bCreatePartyError);
+
+	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+	Waiting(bInvitePartySuccess, "Inviting to Party...");
+
+	check(bInvitePartySuccess);
+
+	Waiting(bGetInvitedNotifSuccess, "Waiting for Party Invitation...");
+
+	check(!bGetInvitedNotifError);
+
+	Lobbies[1]->SendRejectInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
+	while (!bRejectPartySuccess && !bGetInvitedNotifError)
+	{
+		FPlatformProcess::Sleep(.5f);
+		UE_LOG(LogTemp, Log, TEXT("Rejecting a Party..."));
+		FTicker::GetCoreTicker().Tick(.5f);
+	}
+	check(!bRejectPartyError);
+
+	Waiting(bRejectedPartyNotifSuccess, "Waiting for Reject Party Notification...");
+
+	check(bRejectedPartyNotifSuccess)
 
 	LobbyDisconnect(2);
 

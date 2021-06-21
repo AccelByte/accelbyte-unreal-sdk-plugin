@@ -104,6 +104,16 @@ public:
      */
     DECLARE_DELEGATE_OneParam(FPartyJoinNotif, const FAccelByteModelsPartyJoinNotice&);              // Passive
 
+	/**
+	* @brief delegate for handling reject party response
+	*/
+	DECLARE_DELEGATE_OneParam(FPartyRejectResponse, const FAccelByteModelsPartyRejectResponse&); 
+
+	/**
+	* @brief delegate for handling reject party notification
+	*/
+	DECLARE_DELEGATE_OneParam(FPartyRejectNotif, const FAccelByteModelsPartyRejectNotice&);;              // Passive
+	
     /**
      * @brief delegate for handling member kicked from party event
      */
@@ -420,6 +430,14 @@ public:
 	FString SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken);
 	
 	/**
+	* @brief Reject a party invitation.
+	* 
+	* @param PartyId Party ID from the invitation notice.
+	* @param InvitationToken Random string from the invitation notice.
+	*/
+	FString SendRejectInvitationRequest(const FString& PartyId, const FString& InvitationToken);
+	
+	/**
 	 * @brief Kick a party member.
 	 * 
 	 * @param UserId The target user ID to be kicked.
@@ -652,6 +670,10 @@ public:
 	{
 		PartyJoinNotif = OnInvitePartyJoinNotice;
 	}
+	void SetPartyInvitationRejectedNotifDelegate(const FPartyRejectNotif& OnInvitePartyRejectNotice)
+	{
+		PartyRejectNotif = OnInvitePartyRejectNotice;
+	}
 	void SetPartyKickNotifDelegate(const FPartyKickNotif& OnInvitePartyKickedNotice)
 	{
 		PartyKickNotif = OnInvitePartyKickedNotice;
@@ -746,6 +768,16 @@ public:
 	void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse)
 	{
 		PartyJoinResponse = OnInvitePartyJoinResponse;
+	};
+	
+	/**
+	* @brief set invite party reject response
+	*
+	* @param OnInvitePartyRejectResponse set delegate .
+	*/
+	void SetInvitePartyRejectResponseDelegate(FPartyRejectResponse OnInvitePartyRejectResponse)
+	{
+		PartyRejectResponse = OnInvitePartyRejectResponse;
 	};
 
 	/**
@@ -1189,6 +1221,8 @@ private:
     FPartyGetInvitedNotif PartyGetInvitedNotif;
     FPartyJoinResponse PartyJoinResponse;
     FPartyJoinNotif PartyJoinNotif;
+    FPartyRejectResponse PartyRejectResponse;
+    FPartyRejectNotif PartyRejectNotif;
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
