@@ -129,6 +129,20 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
 
+	/**
+	 * @brief delegate for handling get party code event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyGetCodeResponse, const FAccelByteModelsPartyGetCodeResponse&);
+
+	/**
+	 * @brief delegate for handling delete party code event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyDeleteCodeResponse, const FAccelByteModelsPartyDeleteCodeResponse&);
+
+	/**
+	 * @brief delegate for handling join party via party code event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinReponse&);
 
     // Chat
     /**
@@ -443,6 +457,26 @@ public:
 	 * @param UserId The target user ID to be kicked.
 	 */
 	FString SendKickPartyMemberRequest(const FString& UserId);
+
+	/**
+	 * @brief Generate and Get Party code.
+	 * 
+	 */
+	FString SendPartyGetCodeRequest();
+
+	/**
+	 * @brief Remove Party invite code.
+	 * 
+	 */
+	FString SendPartyDeleteCodeRequest();
+
+	/**
+	 * @brief Join Party via party code.
+	 * 
+	 * @param partyCode The target party Code to be joined.
+	 */
+	FString SendPartyJoinViaCodeRequest(const FString& partyCode);
+
 	/**
 	 * @brief Get a list of online users in the Lobby server.
 	 */
@@ -790,10 +824,40 @@ public:
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
 	};
 
-	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
+	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse)
 	{
 		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
-	}
+	};
+
+	/**
+	* @brief get party code reponse
+	*
+	* @param OnPartyGetCodeResponse set delegate .
+	*/
+	void SetPartyGetCodeResponseDelegate(FPartyGetCodeResponse OnPartyGetCodeResponse)
+	{
+		PartyGetCodeResponse = OnPartyGetCodeResponse;
+	};
+
+	/**
+	* @brief delete party code reponse
+	*
+	* @param OnPartyDeleteCodeResponse set delegate .
+	*/
+	void SetPartyDeleteCodeResponseDelegate(FPartyDeleteCodeResponse OnPartyDeleteCodeResponse)
+	{
+		PartyDeleteCodeResponse = OnPartyDeleteCodeResponse;
+	};
+
+	/**
+	* @brief join party via party code reponse
+	*
+	* @param OnPartyJoinViaCodeResponse set delegate .
+	*/
+	void SetPartyJoinViaCodeResponseDelegate(FPartyJoinViaCodeResponse OnPartyJoinViaCodeResponse)
+	{
+		PartyJoinViaCodeResponse = OnPartyJoinViaCodeResponse;
+	};
 
 	// Chat
 	/**
@@ -1226,6 +1290,9 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
+	FPartyGetCodeResponse PartyGetCodeResponse;
+	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
+	FPartyJoinViaCodeResponse PartyJoinViaCodeResponse;
 
     // Chat
     FPersonalChatResponse PersonalChatResponse;

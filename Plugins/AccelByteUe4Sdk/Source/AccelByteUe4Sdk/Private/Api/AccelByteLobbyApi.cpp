@@ -28,6 +28,9 @@ namespace Api
 		const FString JoinParty = TEXT("partyJoinRequest");
 		const FString RejectParty = TEXT("partyRejectRequest");
 		const FString KickParty = TEXT("partyKickRequest");
+		const FString PartyGetCodeRequest = TEXT("partyGetCodeRequest");
+		const FString PartyDeleteCodeRequest = TEXT("partyDeleteCodeRequest");
+		const FString PartyJoinViaCodeRequest = TEXT("partyJoinViaCodeRequest");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatRequest");
@@ -90,6 +93,9 @@ namespace Api
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
 		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
+		const FString PartyGetCode = TEXT("partyGetCodeResponse");
+		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
+		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeResponse");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatResponse");
@@ -353,6 +359,31 @@ FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 
 	return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
 		FString::Printf(TEXT("memberID: %s\n"), *UserId));
+}
+
+FString Lobby::SendPartyGetCodeRequest()
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::PartyGetCodeRequest, Prefix::Party);
+}
+
+FString Lobby::SendPartyDeleteCodeRequest()
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::PartyDeleteCodeRequest, Prefix::Party);
+}
+
+FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::PartyJoinViaCodeRequest, Prefix::Party,
+		FString::Printf(TEXT("partyCode: %s\n"), *partyCode));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1174,6 +1205,9 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, PartyKickNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, PartyDataUpdateNotif);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyGetCode, FAccelByteModelsPartyGetCodeResponse, PartyGetCodeResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyDeleteCode, FAccelByteModelsPartyDeleteCodeResponse, PartyDeleteCodeResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoinViaCode, FAccelByteModelsPartyJoinReponse, PartyJoinViaCodeResponse);
 
 	// Chat
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);

@@ -218,6 +218,25 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickPartyMemberResponse
     FString Code;
 };
 
+// Get party Code
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyGetCodeResponse
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString PartyCode;
+};
+
+// Delete party Code
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyDeleteCodeResponse
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString Code;
+};
+
+
 //Being kicked
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGotKickedFromPartyNotice
