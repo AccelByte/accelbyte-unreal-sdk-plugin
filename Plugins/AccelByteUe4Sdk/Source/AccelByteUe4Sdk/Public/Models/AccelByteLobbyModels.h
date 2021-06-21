@@ -22,6 +22,26 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
 // ------------------------------------------------------------------------------------------------
 // Party 
 // ------------------------------------------------------------------------------------------------
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyData
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FJsonObjectWrapper Custom_Attribute;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FString> Invitees;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Leader;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FString> Members;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString PartyId;
+	int64 UpdatedAt;
+};
+
 // Get current party info
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsInfoPartyResponse

@@ -1061,6 +1061,15 @@ public:
 	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError);
 
 	/**
+	* @brief  Get party data by party ID.
+	*
+	* @param PartyId Targeted party Id.
+	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsPartyData model.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetPartyData(const FString& PartyId, const THandler<FAccelByteModelsPartyData>& OnSuccess, const FErrorHandler& OnError) const;
+
+	/**
 	* @brief  Get party storage (attributes) by party ID.
 	*
 	* @param PartyId Targeted party Id.

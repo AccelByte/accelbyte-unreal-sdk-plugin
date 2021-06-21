@@ -1213,6 +1213,61 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestGetPartyData_PartyCreated_ReturnOk, "AccelByte.Tests.Lobby.B.GetPartyData", AutomationFlagMaskLobby);
+bool LobbyTestGetPartyData_PartyCreated_ReturnOk::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(1);
+	FString PartyId;
+
+	const Lobby::FPartyInfoResponse OnInfoPartyResponse = Lobby::FPartyInfoResponse::CreateLambda(
+		[&PartyId](FAccelByteModelsInfoPartyResponse Response)
+		{
+			PartyId = Response.PartyId;	
+		});
+	Lobbies[0]->SetInfoPartyResponseDelegate(OnInfoPartyResponse);
+	
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SendCreatePartyRequest();
+	Waiting(bCreatePartySuccess, "Creating party..");
+
+	Lobbies[0]->SendInfoPartyRequest();
+	WaitUntil([&]() { return !PartyId.IsEmpty(); });
+
+	bool bGetPartyDataDone = false;
+	bool bGetPartyDataError = false;
+	bool bGetPartyDataSuccess = false;
+	FAccelByteModelsPartyData PartyData;
+	const THandler<FAccelByteModelsPartyData> OnPartyDataSuccess = THandler<FAccelByteModelsPartyData>::CreateLambda(
+		[&bGetPartyDataSuccess, &bGetPartyDataDone, &PartyData](const FAccelByteModelsPartyData& Response)
+		{
+			bGetPartyDataDone = true;
+			bGetPartyDataSuccess = true;
+			PartyData = Response;
+		});	
+	const FErrorHandler OnPartyDataError = FErrorHandler::CreateLambda(
+		[&bGetPartyDataError, &bGetPartyDataDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			bGetPartyDataDone = true;
+			bGetPartyDataError = true;
+		});
+	
+	Lobbies[0]->GetPartyData(PartyId, OnPartyDataSuccess, OnPartyDataError);
+	Waiting(bGetPartyDataDone, "Getting party data...");
+	
+	Lobbies[0]->SendLeavePartyRequest();
+	Waiting(bLeavePartySuccess, "Leaving Party...");
+
+	LobbyDisconnect(1);
+	ResetResponses();
+
+	check(bGetPartyDataSuccess);
+	check(PartyId == PartyData.PartyId);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestCreateParty_PartyAlreadyCreated_ReturnError, "AccelByte.Tests.Lobby.B.CreatePartyError", AutomationFlagMaskLobby);
 bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString& Parameters)
 {

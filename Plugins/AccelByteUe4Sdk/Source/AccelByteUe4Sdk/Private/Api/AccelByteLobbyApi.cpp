@@ -604,6 +604,25 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModelsPartyData>& OnSuccess, const FErrorHandler& OnError) const
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
+	const FString Verb = TEXT("GET");
+	const FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
 {
 	Report report;
