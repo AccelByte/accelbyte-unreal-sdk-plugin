@@ -144,6 +144,11 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinReponse&);
 
+	/**
+	 * @brief delegate for handling promote party leader response
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyPromoteLeaderResponse, const FAccelByteModelsPartyPromoteLeaderResponse&);
+
     // Chat
     /**
      * @brief delegate for handling private message response
@@ -481,6 +486,13 @@ public:
 	 * @brief Get a list of online users in the Lobby server.
 	 */
     FString SendGetOnlineUsersRequest();
+
+	/**
+	 * @brief Promote party member to party leader.
+	 * 
+	 * @param UserId The target user ID to be promoted.
+	 */
+	FString SendPartyPromoteLeaderRequest(const FString& UserId);
 
 	//------------------------
 	// Notification
@@ -824,7 +836,7 @@ public:
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
 	};
 
-	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse)
+	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
 	{
 		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
 	};
@@ -857,6 +869,16 @@ public:
 	void SetPartyJoinViaCodeResponseDelegate(FPartyJoinViaCodeResponse OnPartyJoinViaCodeResponse)
 	{
 		PartyJoinViaCodeResponse = OnPartyJoinViaCodeResponse;
+	};
+
+	/**
+	* @brief set promote party leader reponse
+	*
+	* @param OnPromotePartyLeaderResponse set delegate .
+	*/
+	void SetPartyPromoteLeaderResponseDelegate(FPartyPromoteLeaderResponse OnPartyPromoteLeaderResponse)
+	{
+		PartyPromoteLeaderResponse = OnPartyPromoteLeaderResponse;
 	};
 
 	// Chat
@@ -1293,6 +1315,7 @@ private:
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
 	FPartyJoinViaCodeResponse PartyJoinViaCodeResponse;
+	FPartyPromoteLeaderResponse PartyPromoteLeaderResponse;
 
     // Chat
     FPersonalChatResponse PersonalChatResponse;

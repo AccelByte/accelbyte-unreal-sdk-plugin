@@ -31,6 +31,7 @@ namespace Api
 		const FString PartyGetCodeRequest = TEXT("partyGetCodeRequest");
 		const FString PartyDeleteCodeRequest = TEXT("partyDeleteCodeRequest");
 		const FString PartyJoinViaCodeRequest = TEXT("partyJoinViaCodeRequest");
+		const FString PartyPromoteLeaderRequest = TEXT("partyPromoteLeaderRequest");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatRequest");
@@ -96,6 +97,7 @@ namespace Api
 		const FString PartyGetCode = TEXT("partyGetCodeResponse");
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
 		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeResponse");
+		const FString PartyPromoteLeader = TEXT("partyPromoteLeaderResponse");
 
 		// Chat
 		const FString PersonalChat = TEXT("personalChatResponse");
@@ -384,6 +386,15 @@ FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
 
 	return SendRawRequest(LobbyRequest::PartyJoinViaCodeRequest, Prefix::Party,
 		FString::Printf(TEXT("partyCode: %s\n"), *partyCode));
+}
+
+FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::PartyPromoteLeaderRequest, Prefix::Party,
+		FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1208,7 +1219,7 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyGetCode, FAccelByteModelsPartyGetCodeResponse, PartyGetCodeResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyDeleteCode, FAccelByteModelsPartyDeleteCodeResponse, PartyDeleteCodeResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyJoinViaCode, FAccelByteModelsPartyJoinReponse, PartyJoinViaCodeResponse);
-
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::PartyPromoteLeader, FAccelByteModelsPartyPromoteLeaderResponse, PartyPromoteLeaderResponse);
 	// Chat
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::PersonalChatNotif, FAccelByteModelsPersonalMessageNotice, PersonalChatNotif);

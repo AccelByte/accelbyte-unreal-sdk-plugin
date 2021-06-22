@@ -59,6 +59,7 @@ bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySu
 bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
 bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
 bool bGetPartyCodeSuccess, bGetPartyCodeError, bDeletePartyCodeSuccess, bDeletePartyCodeError, bJoinPartyViaCodeSuccess, bJoinPartyViaCodeError;
+bool bPromotePartyLeaderSuccess, bPromotePartyLeaderError;
 //Matchmaking
 bool bStartMatchmakingSuccess, bStartMatchmakingError, bCancelMatchmakingSuccess, bCancelMatchmakingError;
 bool bReadyConsentResponseSuccess, bReadyConsentResponseError, bReadyConsentNotifSuccess, bReadyConsentNotifError;
@@ -193,6 +194,8 @@ void ResetResponses()
 	bGetInfoPartyError = false;
 	bKickPartyMemberSuccess = false;
 	bKickPartyMemberError = false;
+	bPromotePartyLeaderSuccess = false;
+	bPromotePartyLeaderError = false;
 	bKickedFromPartySuccess = false;
 	bReceivedPartyChatSuccess = false;
 	bGetPartyCodeSuccess = false;
@@ -551,6 +554,17 @@ const auto RejectPartyDelegate = Api::Lobby::FPartyRejectResponse::CreateLambda(
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Reject Party Success!"));
 	rejectPartyResponse = result;
 	bRejectPartySuccess = true;
+});
+
+
+const auto PromotePartyLeaderDelegate = Api::Lobby::FPartyPromoteLeaderResponse::CreateLambda([](FAccelByteModelsPartyPromoteLeaderResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Promote Party Leader Success!"));
+	bPromotePartyLeaderSuccess = true;
+	if (result.Code != "0")
+	{
+		bPromotePartyLeaderError = true;
+	}
 });
 #pragma endregion
 
@@ -1756,6 +1770,109 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	check(bKickedFromPartySuccess);
 	check(joinParty[2].Members.Num() == 3 || joinParty[1].Members.Num() == 3);
 	check(infoPartyResponse.Members.Num() == 2);
+
+	ResetResponses();
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestPartyMember_PromoteLeader, "AccelByte.Tests.Lobby.B.PromotePartyLeader", AutomationFlagMaskLobby);
+bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(2);
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
+
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SetPartyPromoteLeaderResponseDelegate(PromotePartyLeaderDelegate);
+
+	Lobbies[1]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+
+	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+
+	bGetInfoPartyError = false;
+	bGetInfoPartySuccess = false;
+	bLeavePartySuccess = false;
+	Lobbies[1]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[1]->SendLeavePartyRequest();
+		Waiting(bLeavePartySuccess, "Leaving Party...");
+	}
+
+	bGetInfoPartyError = false;
+	bGetInfoPartySuccess = false;
+	bLeavePartySuccess = false;
+
+	Lobbies[0]->SendCreatePartyRequest();
+	Waiting(bCreatePartySuccess, "Creating Party...");
+
+	check(!bCreatePartyError);
+
+	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+
+	Waiting(bInvitePartySuccess, "Inviting to Party...");
+
+	bInvitePartySuccess = false;
+
+	Waiting(bGetInvitedNotifSuccess, "Waiting for Party Invitation");
+
+	bGetInvitedNotifSuccess = false;
+
+	Lobbies[1]->SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
+
+	Waiting(bJoinPartySuccess, "Joining a Party...");
+
+	check(bJoinPartySuccess);
+
+	bJoinPartySuccess = false;
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	bGetInfoPartySuccess = false;
+
+	Lobbies[0]->SendPartyPromoteLeaderRequest(UserCreds[1].GetUserId());
+
+	Waiting(bPromotePartyLeaderSuccess, "Promoting Party leader...");
+
+	check(bPromotePartyLeaderSuccess);
+
+	bPromotePartyLeaderSuccess = false;
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+
+	bGetInfoPartySuccess = false;
+
+	check(infoPartyResponse.LeaderId == UserCreds[1].GetUserId());
+
+	LobbyDisconnect(2);
 
 	ResetResponses();
 	return true;
