@@ -1225,6 +1225,147 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestBulk_User_Get_Presence_Success, "AccelByte.Tests.Lobby.B.Bulk_User_Get_Presence_Success", AutomationFlagMaskLobby);
+bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
+{
+	// Arrange (connect some lobby user)
+	const int ExpectedOffline = 2;
+	LobbyConnect(TestUserCount);
+	TArray<FString> LobbyUserIds;
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		LobbyUserIds.Add(UserIds[i]);
+		if(i >= (TestUserCount - ExpectedOffline))
+		{
+			Lobbies[i]->Disconnect();
+		}
+	}
+
+	// Act (call bulk get user presence)
+	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
+	bool bGetPresenceSuccess = false;
+	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+	{
+		GetPresenceResult = Result;
+		bGetPresenceSuccess = true;
+	}), LobbyTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bGetPresenceSuccess, "Waiting for get presence...");
+
+	// Act (count the result)
+	bool ExpectedOnline = true;
+	int OnlineCount = 0;
+	int OfflineCount = 0;
+	for(auto Online : GetPresenceResult.Data)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("User: %s | Status: %d | %d"), *Online.UserID, Online.Availability, GetPresenceResult.Data.Num());
+		bool bIsOnline = false;
+		bool bIsExpectedOnline = false;
+		for (int i = 1; i < (Lobbies.Num() - ExpectedOffline); i++) {
+			if (Online.UserID == UserIds[i])
+			{
+				bIsExpectedOnline = true;
+				if (Online.Availability == EAccelByteGeneralUserStatus::Online)
+				{
+					bIsOnline = true;
+					OnlineCount++;
+				}
+				break;
+			}
+		}
+		if (!bIsOnline && bIsExpectedOnline)
+		{
+			ExpectedOnline = false;
+			break;
+		}
+		else if (!bIsExpectedOnline)
+		{
+			OfflineCount++;
+		}
+	}
+
+	// Cleanup
+	LobbyDisconnect(TestUserCount - ExpectedOffline);
+
+	// Assert
+	check(bGetPresenceSuccess);
+	check(OnlineCount == TestUserCount - ExpectedOffline - 1/*exclude the lobby 0*/);
+	check(OnlineCount == GetPresenceResult.Online);
+	check(OfflineCount == ExpectedOffline);
+	check(OfflineCount == GetPresenceResult.Offline);
+	check(ExpectedOnline);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestBulk_User_Get_Presence_CountOnly, "AccelByte.Tests.Lobby.B.Bulk_User_Get_Presence_CountOnly", AutomationFlagMaskLobby);
+bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameters)
+{
+	// Arrange (connect some lobby user)
+	const int ExpectedOffline = 2;
+	LobbyConnect(TestUserCount);
+	TArray<FString> LobbyUserIds;
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		LobbyUserIds.Add(UserIds[i]);
+		if (i >= (TestUserCount - ExpectedOffline))
+		{
+			Lobbies[i]->Disconnect();
+		}
+	}
+
+	// Act (call bulk get user presence)
+	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
+	bool bGetPresenceSuccess = false;
+	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+		{
+			GetPresenceResult = Result;
+			bGetPresenceSuccess = true;
+		}), LobbyTestErrorHandler, true);
+	FlushHttpRequests();
+	Waiting(bGetPresenceSuccess, "Waiting for get presence...");
+
+	// Cleanup
+	LobbyDisconnect(TestUserCount - ExpectedOffline);
+
+	check(bGetPresenceSuccess);
+	check(GetPresenceResult.Data.Num() == 0);
+	check(GetPresenceResult.Online == TestUserCount - ExpectedOffline - 1);
+	check(GetPresenceResult.Offline == ExpectedOffline);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestBulk_User_Get_Presence_EmptyUserId, "AccelByte.Tests.Lobby.B.Bulk_User_Get_Presence_EmptyUserId", AutomationFlagMaskLobby);
+bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Parameters)
+{
+	// Arrange (connect a lobby user)
+	LobbyConnect(1);
+	
+	TArray<FString> LobbyUserIds;
+
+	// Act (call bulk get user presence)
+	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
+	bool bGetPresenceSuccess = false;
+	bool bGetPresenceDone = false;
+	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &bGetPresenceDone, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+		{
+			GetPresenceResult = Result;
+			bGetPresenceSuccess = true;
+			bGetPresenceDone = true;
+		}), FErrorHandler::CreateLambda([&bGetPresenceDone](int32 Code, const FString& Message) 
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get User's Presence Error. Code: %d | Message: %s"), Code, *Message);
+			bGetPresenceDone = true;
+		}));
+	FlushHttpRequests();
+	Waiting(bGetPresenceDone, "Waiting for get presence...");
+
+	// Cleanup
+	LobbyDisconnect(1);
+
+	check(!bGetPresenceSuccess);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestGetPartyInfo_NoParty_ReturnError, "AccelByte.Tests.Lobby.B.GetPartyInfoError", AutomationFlagMaskLobby);
 bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameters)
 {

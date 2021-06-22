@@ -677,6 +677,38 @@ void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModels
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess, const FErrorHandler& OnError, bool CountOnly)
+{
+	Report report;
+	report.GetFunctionLog(FString(__FUNCTION__));
+
+	FString Query = TEXT("?userIds=");
+	for (int i = 0; i < UserIds.Num(); i++)
+	{
+		Query.Append(FString::Printf(TEXT("%s"), *FGenericPlatformHttp::UrlEncode(UserIds[i])));
+		if (i < UserIds.Num() - 1)
+		{
+			Query.Append(TEXT(","));
+		}
+	}
+
+	Query.Append(FString::Printf(TEXT("&countOnly=%s"), CountOnly ? TEXT("true") : TEXT("false")));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *Query);
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
 {
 	Report report;

@@ -1187,6 +1187,17 @@ public:
 	*/
 	void GetPartyData(const FString& PartyId, const THandler<FAccelByteModelsPartyData>& OnSuccess, const FErrorHandler& OnError) const;
 
+	/*
+	* @brief Bulk Get User(s) Presence, can get specific user's presence status not limited to friend.
+	*
+	* @param UserIds the list of UserId you want to request.
+	* @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsBulkUserStatusNotif.
+	* @param OnError This will be called when the operation failed.
+	* @param CountOnly Will only return the status count, without the user's data when set to true.
+	*/
+	void BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess, const FErrorHandler& OnError, bool CountOnly = false);
+
+
 	/**
 	* @brief  Get party storage (attributes) by party ID.
 	*

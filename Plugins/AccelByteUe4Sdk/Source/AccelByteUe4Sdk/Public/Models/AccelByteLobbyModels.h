@@ -693,6 +693,18 @@ enum class Availability : uint8
 	Invisible = 3
 };
 
+UENUM(BlueprintType)
+/**
+ * @brief general presence enumeration.
+ */
+	enum class EAccelByteGeneralUserStatus : uint8
+{
+	Offline UMETA(DisplayName = "offline"),
+	Online UMETA(DisplayName = "online"),
+	Busy UMETA(DisplayName = "busy"),
+	Invisible UMETA(DisplayName = "invisible")
+};
+
 USTRUCT(BlueprintType)
 struct FAccelByteModelsAcceptFriendsNotif
 {
@@ -741,6 +753,37 @@ struct FAccelByteModelsRejectFriendsNotif
 		FString userId;
 };
 		
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserStatusNotif
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+		FString UserID;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+		EAccelByteGeneralUserStatus Availability;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+		FString Activity;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | UserStatusNotif")
+		FString LastSeenAt;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkUserStatusNotif
+{
+	GENERATED_BODY()
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+		TArray<FAccelByteModelsUserStatusNotif> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+		int32 Online;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+		int32 Busy;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+		int32 Invisible;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Lobby | BulkUserStatusNotif")
+		int32 Offline;
+};
 // ------------------------------------------------------------------------------------------------
 // Party Storage
 // ------------------------------------------------------------------------------------------------
