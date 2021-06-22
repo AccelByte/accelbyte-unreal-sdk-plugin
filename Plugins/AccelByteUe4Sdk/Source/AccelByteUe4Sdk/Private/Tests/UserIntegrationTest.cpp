@@ -1738,7 +1738,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 		}),
 		UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful, "Waiting for Create Profile...");
+	Waiting(bDeviceLoginSuccessful, "Waiting for login...");
 
 	bool bGetProfileSuccessful = false;
 	FAccelByteModelsPublicUserProfileInfo OtherUserProfile;
@@ -1951,28 +1951,6 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 
 	Waiting(bDeviceLoginSuccessful, "Waiting for Login...");
 
-	//Delete profile regardless if it's exist or not (test cleanup double check)
-#pragma region DeleteUserProfile
-	bool bDeleteProfileDone = false;
-	bool bDeleteProfileSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), 
-		FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Unexpected condition: User profile should not exist before the test"));
-			bDeleteProfileSuccessful = true;
-			bDeleteProfileDone = true;
-		}), 
-		FErrorHandler::CreateLambda([&bDeleteProfileDone](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Expected condition: User profile not found"))
-			bDeleteProfileDone = true;
-		}));
-
-	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
-#pragma endregion DeleteUserProfile
-
-
 	bool bCreateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
 
@@ -2034,7 +2012,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
 
 	bool bGetCustomAttributeSuccessful = false;
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateCustomAttributeProfile"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetCustomAttributeProfile"));
 
 	int32 updatedNumberAttribute;
 	updatedCustomAttribute.TryGetNumberField("Two", updatedNumberAttribute);
@@ -2062,8 +2040,8 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	getCustomAttribute.TryGetBoolField("True", getBooleanAttribute);
 
 #pragma region DeleteUserProfile
-	bDeleteProfileDone = false;
-	bDeleteProfileSuccessful = false;
+	bool bDeleteProfileDone = false;
+	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
 	DeleteUserProfile(FRegistry::Credentials.GetNamespace(), FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 	{
