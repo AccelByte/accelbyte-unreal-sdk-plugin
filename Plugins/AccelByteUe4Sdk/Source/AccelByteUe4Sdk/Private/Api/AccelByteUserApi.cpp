@@ -423,8 +423,8 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 	Report report;
 	report.GetFunctionLog(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *FRegistry::Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *FRegistry::Settings.IamServerUrl, *FRegistry::Credentials.GetNamespace(), *FRegistry::Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *Settings.IamServerUrl, *Creds.GetNamespace(), *Creds.GetUserId());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
