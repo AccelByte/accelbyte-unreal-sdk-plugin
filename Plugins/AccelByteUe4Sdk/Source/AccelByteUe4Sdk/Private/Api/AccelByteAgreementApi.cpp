@@ -5,6 +5,7 @@
 #include "Api/AccelByteAgreementApi.h"
 #include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 #include "Core/AccelByteUtilities.h"
@@ -27,8 +28,7 @@ void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementP
 
 void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString AgreementPolicyTypeString = "";
 	switch (AgreementPolicyType)
@@ -68,8 +68,7 @@ void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgree
 
 void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString AgreementPolicyTypeString = "";
 	switch (AgreementPolicyType)
@@ -116,8 +115,7 @@ void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementP
 
 void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString AgreementPolicyTypeString = "";
 	switch (AgreementPolicyType)
@@ -157,8 +155,7 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 
 void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString AgreementPolicyTypeString = "";
 	switch (AgreementPolicyType)
@@ -205,8 +202,7 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 
 void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/agreements/policies"), *Settings.AgreementServerUrl);
@@ -230,8 +226,7 @@ void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgre
 
 void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/agreements/localized-policy-versions/%s"), *Settings.AgreementServerUrl, *LocalizedPolicyVersionId);
@@ -251,8 +246,7 @@ void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, con
 
 void Agreement::QueryLegalEligibilities(const FString& Namespace, const THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/eligibilities/namespaces/%s"), *Settings.AgreementServerUrl, *Namespace);
@@ -272,8 +266,7 @@ void Agreement::QueryLegalEligibilities(const FString& Namespace, const THandler
 
 void Agreement::GetLegalDocument(const FString & Url, const THandler<FString>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);

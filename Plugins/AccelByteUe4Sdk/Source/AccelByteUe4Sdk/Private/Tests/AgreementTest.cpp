@@ -4,14 +4,11 @@
 
 #include "Misc/AutomationTest.h"
 #include "Runtime/Launch/Resources/Version.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -45,8 +42,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementSetup, "AccelByte.Tests.Agreement.A.Se
 bool AgreementSetup::RunTest(const FString& Parameters)
 {
 	bool UsersDeletionDone = false;
-	bool UsersCreationSuccess = false;
-	bool UsersLoginSuccess = false;
+	bool bUserCreated = false;
+	bool bUserLoggedIn = false;
 
 	// CLEAN UP PREVIOUS USER
 	User_Delete_By_Email_Address(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&UsersDeletionDone]() {
@@ -63,16 +60,16 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	const FString DoB_String = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
 	bool bUsersCreationDone = false;
-	FRegistry::User.Register(AgreementTestUserInfo_.EmailAddress, AgreementTestUserInfo_.Password, AgreementTestUserInfo_.DisplayName, AgreementTestUserInfo_.CountryCode, DoB_String, THandler<FRegisterResponse>::CreateLambda([&UsersCreationSuccess, &bUsersCreationDone](const FRegisterResponse& Response)
+	FRegistry::User.Register(AgreementTestUserInfo_.EmailAddress, AgreementTestUserInfo_.Password, AgreementTestUserInfo_.DisplayName, AgreementTestUserInfo_.CountryCode, DoB_String, THandler<FRegisterResponse>::CreateLambda([&bUserCreated, &bUsersCreationDone](const FRegisterResponse& Response)
 	{
-		UsersCreationSuccess = true;
+		bUserCreated = true;
 		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is successfuly created."));
 		bUsersCreationDone = true;
 	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
-		if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
+		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 		{
-			UsersCreationSuccess = true;
+			bUserCreated = true;
 			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is already created."));
 		}
 		else
@@ -86,21 +83,21 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	// USER LOG IN
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login..."));
 
-	UsersLoginSuccess = false;
+	bUserLoggedIn = false;
 	FRegistry::User.LoginWithUsername(
 		AgreementTestUserInfo_.EmailAddress,
 		AgreementTestUserInfo_.Password,
-		FVoidHandler::CreateLambda([&UsersLoginSuccess]()
+		FVoidHandler::CreateLambda([&bUserLoggedIn]()
 	{
 		AgreementTestUserInfo_.UserId = FRegistry::Credentials.GetUserId();
-		UsersLoginSuccess = true;
+		bUserLoggedIn = true;
 		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
 	}), AgreementTestErrorHandler);
-	Waiting(UsersLoginSuccess, "Waiting for login with user name...");
+	Waiting(bUserLoggedIn, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
-	check(UsersCreationSuccess);
-	check(UsersLoginSuccess);
+	AB_TEST_TRUE(bUserCreated);
+	AB_TEST_TRUE(bUserLoggedIn);
 
 	bool bGetBasePoliciesSuccess = false;
 	TArray<FAgreementBasePolicy> basePolicies;
@@ -158,7 +155,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		Waiting(bCreatePoliciesDone, "Waiting for creating policy...");
 	}
 
-	check(!basePolicy.Id.IsEmpty());
+	AB_TEST_FALSE(basePolicy.Id.IsEmpty());
 
 	for (const auto& policy : basePolicy.Policies)
 	{
@@ -169,7 +166,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		}
 	}
 
-	check(!PolicyId.IsEmpty());
+	AB_TEST_FALSE(PolicyId.IsEmpty());
 
 	bool bGetCountryPolicySuccess = false;
 	FAgreementCountryPolicy countryPolicy;
@@ -181,10 +178,10 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	Waiting(bGetCountryPolicySuccess, "Waiting for get country policy...");
 
-	check(!countryPolicy.Id.IsEmpty())
+	AB_TEST_FALSE(countryPolicy.Id.IsEmpty())
 
 	FAgreementPolicyVersion policyVersion;
-	bool bPolicyPublised = false;
+	bool bPolicyPublished = false;
 	if (countryPolicy.PolicyVersions.Num() == 0)
 	{
 		bool bCreatePolicyVersionSuccess = false;
@@ -205,19 +202,19 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		{
 			if (policy.IsInEffect)
 			{
-				bPolicyPublised = true;
+				bPolicyPublished = true;
 				policyVersion = policy;
 				break;
 			}
 		}
 		// no active policy
-		if (!bPolicyPublised)
+		if (!bPolicyPublished)
 		{
 			policyVersion = countryPolicy.PolicyVersions[0];
 		}
 	}
 
-	check(!policyVersion.Id.IsEmpty());
+	AB_TEST_FALSE(policyVersion.Id.IsEmpty());
 
 	TArray<FAgreementLocalizedPolicy> localizedPolicies;
 	bool bGetLocalizedPolicySuccess = false;
@@ -244,7 +241,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		Waiting(bCreateLocalizedPolicySuccess, "Waiting for create localized policy...");
 	}
 
-	if (!bPolicyPublised)
+	if (!bPolicyPublished)
 	{
 #if ENGINE_MINOR_VERSION >= 23
 		bool bPublishPolicyVersionSuccess = false;
@@ -275,7 +272,7 @@ bool AgreementTearDown::RunTest(const FString& Parameters)
 	}), AgreementTestErrorHandler);
 	Waiting(bDeleteDone, "Waiting for deletion...");
 
-	check(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 
 	return true;
 }
@@ -285,7 +282,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTag::RunTest(const FString& Parame
 {
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
@@ -294,8 +291,8 @@ bool AgreementGetLegalPoliciesByCountryWithoutTag::RunTest(const FString& Parame
 	}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
 
-	check(policies.Num() > 0);
-	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+	AB_TEST_TRUE(policies.Num() > 0);
+	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
 
 	return true;
 }
@@ -305,7 +302,7 @@ bool AgreementGetLegalPoliciesByCountryWithSomeTags::RunTest(const FString& Para
 {
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, PolicyTags, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
@@ -314,8 +311,8 @@ bool AgreementGetLegalPoliciesByCountryWithSomeTags::RunTest(const FString& Para
 	}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
 
-	check(policies.Num() > 0);
-	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+	AB_TEST_TRUE(policies.Num() > 0);
+	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
 
 	return true;
 }
@@ -325,8 +322,8 @@ bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parame
 {
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
-	TArray<FString> Tags = TArray<FString> { TEXT("%S"), PolicyTags[0] };
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const TArray<FString> Tags = TArray<FString> { TEXT("%S"), PolicyTags[0] };
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
@@ -335,8 +332,8 @@ bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parame
 	}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
 
-	check(policies.Num() > 0);
-	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+	AB_TEST_TRUE(policies.Num() > 0);
+	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
 
 	return true;
 }
@@ -346,8 +343,8 @@ bool AgreementGetLegalPoliciesByCountryWithUnmatchTag::RunTest(const FString& Pa
 {
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
-	TArray<FString> Tags = TArray<FString> {TEXT("tag3")};
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const TArray<FString> Tags = TArray<FString> {TEXT("tag3")};
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
@@ -356,7 +353,7 @@ bool AgreementGetLegalPoliciesByCountryWithUnmatchTag::RunTest(const FString& Pa
 	}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
 
-	check(policies.Num() == 0);
+	AB_TEST_EQUAL(policies.Num() , 0);
 
 	return true;
 }
@@ -368,7 +365,7 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 
 	bool bGetPoliciesSuccess = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
 
 	FRegistry::Agreement.GetLegalPolicies(AgreementPolicyType, false,
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesSuccess, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {
@@ -377,9 +374,9 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 	}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesSuccess, "Waiting for get policies...");
 
-	check(policies.Num() > 0);
-	check(policies[0].Namespace == FRegistry::Settings.Namespace);
-	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+	AB_TEST_TRUE(policies.Num() > 0);
+	AB_TEST_EQUAL(policies[0].Namespace , FRegistry::Settings.Namespace);
+	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
 
 	TArray<FAccelByteModelsAcceptAgreementRequest> AcceptAgreementRequests;
 	for (const auto& policy : policies)
@@ -398,7 +395,7 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 		}
 	}
 
-	check(AcceptAgreementRequests.Num() > 0);
+	AB_TEST_TRUE(AcceptAgreementRequests.Num() > 0);
 
 	bool bAcceptPoliciesSuccess = false;
 	bool bProceed = false;
@@ -409,7 +406,7 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 	}), AgreementTestErrorHandler);
 	Waiting(bAcceptPoliciesSuccess, "Waiting for accept policies...");
 
-	check(bProceed);
+	AB_TEST_TRUE(bProceed);
 
 	return true;
 }
@@ -421,7 +418,7 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 
 	bool bGetPoliciesSuccess = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
 
 	FRegistry::Agreement.GetLegalPolicies(AgreementPolicyType, 
 		false,
@@ -445,7 +442,7 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 		}
 	}
 
-	check(!LocalizedPolicyVersionId.IsEmpty());
+	AB_TEST_FALSE(LocalizedPolicyVersionId.IsEmpty());
 
 	bool bAcceptPolicySuccess = false;
 	FRegistry::Agreement.AcceptPolicyVersion(LocalizedPolicyVersionId,
@@ -455,7 +452,7 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 	}), AgreementTestErrorHandler);
 	Waiting(bAcceptPolicySuccess, "Waiting for accept policies...");
 
-	check(bAcceptPolicySuccess);
+	AB_TEST_TRUE(bAcceptPolicySuccess);
 
 	return true;
 }
@@ -466,7 +463,7 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 	bool bGetPoliciesSuccess = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
-	EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
+	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
 
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("namespaces: %s"), *GetPublisherNamespace());
 	FRegistry::Agreement.GetLegalPolicies(GetPublisherNamespace(), AgreementPolicyType, true,
@@ -477,7 +474,6 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 	}), AgreementTestErrorHandler);
 	
 	Waiting(bGetPoliciesSuccess, "Waiting for get policies...");
-	FString LocalizedPolicyVersionId;
 	FString LocalizedPolicyUrl;
 	for (const auto& policy : policies) 
 	{
@@ -485,7 +481,7 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 		{
 			if (policyVersion.IsInEffect) 
 			{
-				LocalizedPolicyVersionId = policyVersion.LocalizedPolicyVersions[0].Id;
+				FString LocalizedPolicyVersionId = policyVersion.LocalizedPolicyVersions[0].Id;
 				LocalizedPolicyUrl = policyVersion.LocalizedPolicyVersions[0].AttachmentLocation;
 				break;
 			}
@@ -501,8 +497,8 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 	}), AgreementTestErrorHandler);
 	Waiting(bGetLegalDocSuccess, "Waiting for get legal docs...");
 	
-	check(bGetLegalDocSuccess);
-	check(!result.IsEmpty());
+	AB_TEST_TRUE(bGetLegalDocSuccess);
+	AB_TEST_FALSE(result.IsEmpty());
 
 	return true;
 }
@@ -520,19 +516,19 @@ bool AgreementCheckUserEligibilitiesNotComply::RunTest(const FString& Parameters
 	}), AgreementTestErrorHandler);
 	Waiting(bUserLoginSuccess, "Waiting for login...");
 	
-	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> eligibilitiesResult;
+	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesResult;
 	bool bGetEligibilitiesSuccess = false;
 
 	FRegistry::Agreement.QueryLegalEligibilities(FRegistry::Settings.Namespace, 
-		THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda([&bGetEligibilitiesSuccess, &eligibilitiesResult](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>& Result) 
+		THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda([&bGetEligibilitiesSuccess, &EligibilitiesResult](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>& Result) 
 	{
 		bGetEligibilitiesSuccess = true;
-		eligibilitiesResult = Result;
+		EligibilitiesResult = Result;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilites...");
+	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
 	
 	bool bIsComply = false;
-	for (const auto& eligibility : eligibilitiesResult) 
+	for (const auto& eligibility : EligibilitiesResult) 
 	{
 		if (eligibility.PolicyId.Equals(PolicyId)) 
 		{
@@ -543,8 +539,8 @@ bool AgreementCheckUserEligibilitiesNotComply::RunTest(const FString& Parameters
 			break;
 		}
 	}
-	check(bGetEligibilitiesSuccess);
-	check(!bIsComply);
+	AB_TEST_TRUE(bGetEligibilitiesSuccess);
+	AB_TEST_FALSE(bIsComply);
 
 	return true;
 }
@@ -552,19 +548,19 @@ bool AgreementCheckUserEligibilitiesNotComply::RunTest(const FString& Parameters
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AgreementCheckUserEligibilitiesAlreadyComply, "AccelByte.Tests.Agreement.E.CheckUserEligibilitiesAlreadyComply", AutomationFlagMaskAgreement)
 bool AgreementCheckUserEligibilitiesAlreadyComply::RunTest(const FString& Parameters)
 {
-	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> eligibilitiesResult;
+	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesResult;
 	bool bGetEligibilitiesSuccess = false;
 
 	FRegistry::Agreement.QueryLegalEligibilities(FRegistry::Settings.Namespace,
-		THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda([&bGetEligibilitiesSuccess, &eligibilitiesResult](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>& Result) 
+		THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda([&bGetEligibilitiesSuccess, &EligibilitiesResult](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>& Result) 
 	{
 		bGetEligibilitiesSuccess = true;
-		eligibilitiesResult = Result;
+		EligibilitiesResult = Result;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilites...");
+	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
 
 	bool bIsComply = false;
-	for (const auto& eligibility : eligibilitiesResult)
+	for (const auto& eligibility : EligibilitiesResult)
 	{
 		if (eligibility.PolicyId.Equals(PolicyId))
 		{
@@ -575,8 +571,8 @@ bool AgreementCheckUserEligibilitiesAlreadyComply::RunTest(const FString& Parame
 			break;
 		}
 	}
-	check(bGetEligibilitiesSuccess);
-	check(bIsComply);
+	AB_TEST_TRUE(bGetEligibilitiesSuccess);
+	AB_TEST_TRUE(bIsComply);
 
 	return true;
 }
@@ -595,8 +591,8 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 			}), AgreementTestErrorHandler);
 	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
 
-	check(policies.Num() > 0);
-	check(policies[0].CountryCode == AgreementTestUserInfo_.CountryCode);
+	AB_TEST_TRUE(policies.Num() > 0);
+	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
 
 	TArray<FAcceptedPolicies> AcceptAgreementRequests;
 	for (const auto& policy : policies)
@@ -615,7 +611,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 		}
 	}
 
-	check(AcceptAgreementRequests.Num() > 0);
+	AB_TEST_TRUE(AcceptAgreementRequests.Num() > 0);
 
 	// User Deletion
 	bool bDeleteDone = false;
@@ -630,7 +626,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 	}), AgreementTestErrorHandler);
 	Waiting(bDeleteDone, "Waiting for deletion...");
 
-	check(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 
 	// User Creation
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user creation ..."));
@@ -649,17 +645,17 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 	NewUserRequest.DateOfBirth = DoB_String;
 
 	bool bUsersCreationDone = false;
-	bool UsersCreationSuccess = false;
-	FRegistry::User.Registerv3(NewUserRequest, THandler<FRegisterResponse>::CreateLambda([&UsersCreationSuccess, &bUsersCreationDone](const FRegisterResponse& Response)
+	bool bUserCreated = false;
+	FRegistry::User.Registerv3(NewUserRequest, THandler<FRegisterResponse>::CreateLambda([&bUserCreated, &bUsersCreationDone](const FRegisterResponse& Response)
 		{
-			UsersCreationSuccess = true;
+			bUserCreated = true;
 			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is successfuly created."));
 			bUsersCreationDone = true;
 		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 			{
-				if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
+				if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 				{
-					UsersCreationSuccess = true;
+					bUserCreated = true;
 					UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Test User is already created."));
 				}
 				else
@@ -673,21 +669,21 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 	//User Loging in
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login..."));
 
-	bool UsersLoginSuccess = false;
+	bool bUserLoggedIn = false;
 	FRegistry::User.LoginWithUsername(
 		AgreementTestUserInfo_.EmailAddress,
 		AgreementTestUserInfo_.Password,
-		FVoidHandler::CreateLambda([&UsersLoginSuccess]()
+		FVoidHandler::CreateLambda([&bUserLoggedIn]()
 		{
 			AgreementTestUserInfo_.UserId = FRegistry::Credentials.GetUserId();
-			UsersLoginSuccess = true;
+			bUserLoggedIn = true;
 			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Successfully Login."));
 		}), AgreementTestErrorHandler);
-	Waiting(UsersLoginSuccess, "Waiting for login with user name...");
+	Waiting(bUserLoggedIn, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
-	check(UsersCreationSuccess);
-	check(UsersLoginSuccess);
+	AB_TEST_TRUE(bUserCreated);
+	AB_TEST_TRUE(bUserLoggedIn);
 
 	return true;
 }

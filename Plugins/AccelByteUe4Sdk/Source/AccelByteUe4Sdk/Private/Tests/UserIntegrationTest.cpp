@@ -5,9 +5,6 @@
 #pragma once
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
-#include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteUserApi.h"
 #include "Models/AccelByteUserProfileModels.h"
 #include "Core/AccelByteRegistry.h"
@@ -15,7 +12,6 @@
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
-#include "Runtime/Launch/Resources/Version.h"
 
 using namespace std;
 
@@ -50,21 +46,21 @@ static FString GetSteamTicket();
 
 const auto UserTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
-	UE_LOG(LogAccelByteUserTest, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+	UE_LOG(LogAccelByteUserTest, Error, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterTest, "AccelByte.Tests.AUser.RegisterEmail_ThenLogin", AutomationFlagMaskUser);
 bool FUserRegisterTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
+	
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -114,7 +110,7 @@ bool FUserRegisterTest::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
-	check(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginSuccessful);
 	return true;
 }
 
@@ -122,16 +118,15 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRegisterv2Test, "AccelByte.Tests.AUser.Reg
 bool FUserRegisterv2Test::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
-	FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -180,7 +175,7 @@ bool FUserRegisterv2Test::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
-	check(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginSuccessful);
 	return true;
 }
 
@@ -188,14 +183,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserAutomatedRefreshSessionTest, "AccelByte.Te
 bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -258,9 +252,9 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
-	check(bLoginSuccessful);
-	check(AccessToken != NewAccessToken);
-	check(RefreshToken != NewRefreshToken);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_NOT_EQUAL(AccessToken, NewAccessToken);
+	AB_TEST_NOT_EQUAL(RefreshToken, NewRefreshToken);
 	return true;
 }
 
@@ -268,15 +262,14 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginTest, "AccelByte.Tests.AUser.LoginEma
 bool FUserLoginTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	FRegisterResponse RegisterResult;
@@ -347,11 +340,11 @@ bool FUserLoginTest::RunTest(const FString & Parameter)
 
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
-	check(bGetDataSuccessful);
-	check(bLoginSuccessful);
-	check(bDeleteSuccessful);
-	check(RegisterResult.DisplayName.Equals(GetDataResult.DisplayName));
-	check(RegisterResult.UserId.Equals(GetDataResult.UserId));
+	AB_TEST_TRUE(bGetDataSuccessful);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_EQUAL(RegisterResult.DisplayName, GetDataResult.DisplayName);
+	AB_TEST_EQUAL(RegisterResult.UserId, GetDataResult.UserId);
 	return true;
 }
 
@@ -359,15 +352,14 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "AccelByte.Tests.AUser.
 bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
 	FString Password = "1Old_Password1";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -465,8 +457,8 @@ bool FUserResetPasswordTest::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserById
 
 #if 0
-	check(bForgotPaswordSuccessful);
-	check(bResetPasswordSuccessful);
+	AB_TEST_TRUE(bForgotPaswordSuccessful);
+	AB_TEST_TRUE(bResetPasswordSuccessful);
 #endif
 	return true;
 }
@@ -475,13 +467,10 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdSuccess, "AccelByte.Tests.AUs
 bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString FirstUserId = "";
-	FString SecondUserId = "";
-	double LastTime = 0;
 
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
-	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bDeviceLoginSuccessful1, &FirstUserId]()
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bDeviceLoginSuccessful1]()
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
@@ -490,8 +479,8 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
-	
-	FirstUserId = FRegistry::Credentials.GetUserId();
+
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 	bool bDeviceLoginSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId //Second attempt"));
@@ -503,7 +492,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
 
-	SecondUserId = FRegistry::Credentials.GetUserId();
+	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -522,10 +511,11 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bDeviceLoginSuccessful1);
-	check(bDeviceLoginSuccessful2);
-	check(bDeleteSuccessful);
-	check(FirstUserId == SecondUserId && FirstUserId != "" && SecondUserId != "");
+	AB_TEST_TRUE(bDeviceLoginSuccessful1);
+	AB_TEST_TRUE(bDeviceLoginSuccessful2);
+	AB_TEST_EQUAL(FirstUserId, SecondUserId);
+	AB_TEST_FALSE(FirstUserId.IsEmpty());
+	AB_TEST_FALSE(SecondUserId.IsEmpty());
 	return true;
 }
 
@@ -533,10 +523,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdUniqueIdCreated, "AccelByte.T
 bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString FirstUserId = "";
-	FString SecondUserId = "";
-	double LastTime = 0;
-
+	
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId // First attempt"));
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
@@ -547,7 +534,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 
 	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -577,7 +564,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 
 	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
 
-	SecondUserId = FRegistry::Credentials.GetUserId();
+	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -596,11 +583,11 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserById
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Asserting..."));
-	check(bDeviceLoginSuccessful1);
-	check(bDeviceLoginSuccessful2);
-	check(bDeleteSuccessful1);
-	check(bDeleteSuccessful2);
-	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
+	AB_TEST_TRUE(bDeviceLoginSuccessful1);
+	AB_TEST_TRUE(bDeviceLoginSuccessful2);
+	AB_TEST_NOT_EQUAL(FirstUserId, SecondUserId);
+	AB_TEST_FALSE(FirstUserId.IsEmpty());
+	AB_TEST_FALSE(SecondUserId.IsEmpty());
 	return true;
 }
 
@@ -709,16 +696,19 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString & Parameter)
 //
 //#pragma endregion DeleteUser2
 //
-//	check(bUpgradeSuccessful);
-//	check(bUpgradedHeadlessAccountUserIdRemain);
-//	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
-//	check(bEmailLoginSuccessful);
-//	check(bDeviceLoginSuccessful1);
-//	check(bDeviceLoginSuccessful2);
-//	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-//	check(!OldAccessToken.Equals(RefreshedAccessToken));
-//	check(bDeleteSuccessful1);
-//	check(bDeleteSuccessful2);
+//	AB_TEST_TRUE(bUpgradeSuccessful);
+//	AB_TEST_TRUE(bUpgradedHeadlessAccountUserIdRemain);
+//	AB_TEST_FALSE(FirstUserId.IsEmpty());
+//	AB_TEST_FALSE(SecondUserId.IsEmpty());
+//	AB_TEST_NOT_EQUAL(FirstUserId, SecondUserId);
+//	AB_TEST_TRUE(bEmailLoginSuccessful);
+//	AB_TEST_TRUE(bDeviceLoginSuccessful1);
+//	AB_TEST_TRUE(bDeviceLoginSuccessful2);
+//	AB_TEST_FALSE(OldAccessToken.IsEmpty());
+//	AB_TEST_FALSE(RefreshedAccessToken.IsEmpty());
+//	AB_TEST_EQUAL(OldAccessToken, RefreshedAccessToken);
+//	AB_TEST_TRUE(bDeleteSuccessful1);
+//	AB_TEST_TRUE(bDeleteSuccessful2);
 //	return true;
 //}
 
@@ -726,9 +716,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.AUser.
 bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString FirstUserId = "";
-	FString SecondUserId = "";
-	double LastTime = 0;
 
 	bool bSteamLoginSuccessful1 = false;
 	bool bSteamLoginDone1 = false;
@@ -751,7 +738,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful2 = false;
@@ -775,7 +762,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	SecondUserId = FRegistry::Credentials.GetUserId();
+	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -793,10 +780,12 @@ bool FLoginWithSteamSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bSteamLoginSuccessful1);
-	check(bSteamLoginSuccessful2);
-	check(bDeleteSuccessful);
-	check(FirstUserId == SecondUserId && FirstUserId != "" && SecondUserId != "");
+	AB_TEST_TRUE(bSteamLoginSuccessful1);
+	AB_TEST_TRUE(bSteamLoginSuccessful2);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_FALSE(FirstUserId.IsEmpty());
+	AB_TEST_FALSE(SecondUserId.IsEmpty());
+	AB_TEST_EQUAL(FirstUserId, SecondUserId);
 	return true;
 }
 
@@ -804,10 +793,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamUniqueIdCreated, "AccelByte.Test
 bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString FirstUserId = "";
-	FString SecondUserId = "";
-	double LastTime = 0;
-
+	
 	bool bSteamLoginSuccessful1 = false;
 	bool bSteamLoginDone1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
@@ -829,7 +815,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -870,7 +856,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	SecondUserId = FRegistry::Credentials.GetUserId();
+	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
 #pragma region DeleteUserById
 
@@ -888,11 +874,13 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bSteamLoginSuccessful1);
-	check(bSteamLoginSuccessful2);
-	check(bDeleteSuccessful);
-	check(bDeleteSuccessful2);
-	check(FirstUserId != SecondUserId && FirstUserId != "" && SecondUserId != "");
+	AB_TEST_TRUE(bSteamLoginSuccessful1);
+	AB_TEST_TRUE(bSteamLoginSuccessful2);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful2);
+	AB_TEST_FALSE(FirstUserId.IsEmpty());
+	AB_TEST_FALSE(SecondUserId.IsEmpty());
+	AB_TEST_NOT_EQUAL(FirstUserId, SecondUserId);
 	return true;
 }
 
@@ -948,10 +936,10 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 	}));
 
 	Waiting(bSteamLoginDone, "Waiting for Login...");
-	FString FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
 
-	check(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
 
 
 	bool bUpgradeSuccessful = false;
@@ -994,12 +982,13 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser1
 
-	check(FirstUserId == FRegistry::Credentials.GetUserId());
-	check(bLoginPlatformSuccessful);
-	check(bUpgradeSuccessful);
-	check(bLoginEmailSuccessful);
-	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-	check(bDeleteSuccessful1);
+	AB_TEST_EQUAL(FirstUserId, FRegistry::Credentials.GetUserId());
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bUpgradeSuccessful);
+	AB_TEST_TRUE(bLoginEmailSuccessful);
+	AB_TEST_FALSE(OldAccessToken.IsEmpty());
+	AB_TEST_FALSE(RefreshedAccessToken.IsEmpty());
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
 
@@ -1087,7 +1076,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 
 	Waiting(bLoginUsernameSuccessful, "Waiting for Login...");
 
-	FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
+	const FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
 
 #pragma region DeleteUser1
 
@@ -1105,12 +1094,13 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser1
 
-	check(FirstUserId == FRegistry::Credentials.GetUserId());
-	check(bLoginPlatformSuccessful);
-	check(bUpgradeSuccessful);
-	check(bLoginUsernameSuccessful);
-	check(!OldAccessToken.IsEmpty() && !RefreshedAccessToken.IsEmpty());
-	check(bDeleteSuccessful1);
+	AB_TEST_EQUAL(FirstUserId, FRegistry::Credentials.GetUserId());
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bUpgradeSuccessful);
+	AB_TEST_TRUE(bLoginUsernameSuccessful);
+	AB_TEST_FALSE(OldAccessToken.IsEmpty());
+	AB_TEST_FALSE(RefreshedAccessToken.IsEmpty());
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
 
@@ -1157,14 +1147,13 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 #pragma endregion DeleteUserSteam
 
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -1297,12 +1286,12 @@ bool FLinkSteamAccountSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser
 
-	check(bLoginPlatformSuccessful);
-	check(bLinkSteamSuccess);
-	check(bGetPlatformLinksSuccess);
-	check(bLoginSuccessful);
-	check(UserData.UserId == UserData2.UserId);
-	check(bDeleteSuccessful1);
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bLinkSteamSuccess);
+	AB_TEST_TRUE(bGetPlatformLinksSuccess);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_EQUAL(UserData.UserId, UserData2.UserId);
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
 
@@ -1333,14 +1322,13 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 	}
 
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -1461,11 +1449,11 @@ bool FLinkSteamAccountConflict::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser
 
-	check(bLoginPlatformSuccessful);
-	check(!bLinkSteamSuccess);
-	check(bLoginSuccessful);
-	check(UserData.UserId != UserData2.UserId);
-	check(bDeleteSuccessful1);
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_FALSE(bLinkSteamSuccess);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_NOT_EQUAL(UserData.UserId, UserData2.UserId);
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
 
@@ -1496,14 +1484,13 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 	}
 
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -1551,9 +1538,8 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
-	FString SteamUserID;
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
 
 	bool bLinkSteamAcc = false;
 	bool bLinkSteamSuccess = false;
@@ -1626,11 +1612,11 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUser
 
-	check(bLoginPlatformSuccessful);
-	check(bLinkSteamSuccess);
-	check(bLoginSuccessful);
-	check(UserData.UserId == UserData2.UserId);
-	check(bDeleteSuccessful1);
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bLinkSteamSuccess);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_EQUAL(UserData.UserId, UserData2.UserId);
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
 
@@ -1697,14 +1683,12 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	ProfileCreate.AvatarLargeUrl = "http://example.com/avatar/large.jpg";
 	FAccelByteModelsUserProfileInfo CreatedProfile;
 
-	bool bCreateProfileSuccessful = false;
 	bool bCreateProfileDone = false;
 	FRegistry::UserProfile.CreateUserProfile(
 		ProfileCreate,
 		THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bCreateProfileSuccessful = true;
 			bCreateProfileDone = true;
 			CreatedProfile = Result;
 		}),
@@ -1715,12 +1699,10 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 			if (Code != 2271)
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
-				bCreateProfileSuccessful = false;
 			}
 			else
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-				bCreateProfileSuccessful = true;
 			}
 		}));
 
@@ -1796,9 +1778,9 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
-	check(OtherUserProfile.AvatarSmallUrl == CreatedProfile.AvatarSmallUrl);
-	check(OtherUserProfile.AvatarUrl == CreatedProfile.AvatarUrl);
-	check(OtherUserProfile.AvatarLargeUrl == CreatedProfile.AvatarLargeUrl);
+	AB_TEST_EQUAL(OtherUserProfile.AvatarSmallUrl, CreatedProfile.AvatarSmallUrl);
+	AB_TEST_EQUAL(OtherUserProfile.AvatarUrl, CreatedProfile.AvatarUrl);
+	AB_TEST_EQUAL(OtherUserProfile.AvatarLargeUrl, CreatedProfile.AvatarLargeUrl);
 	return true;
 }
 
@@ -1816,7 +1798,6 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 	ProfileUpdate.AvatarUrl = "http://example.com";
 	ProfileUpdate.AvatarLargeUrl = "http://example.com";
 	FString UpdatedDateOfBirth = TEXT("");
-	double LastTime = 0;
 
 	bool bDeviceLoginSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
@@ -1925,13 +1906,13 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bDeviceLoginSuccessful1);
-	check(bGetProfileSuccessful1);
-	check(bUpdateProfileSuccessful);
-	check(UpdatedDateOfBirth == ProfileUpdate.DateOfBirth);
-	check(bGetProfileSuccessful2);
-	check(bDeleteProfileSuccessful);
-	check(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeviceLoginSuccessful1);
+	AB_TEST_TRUE(bGetProfileSuccessful1);
+	AB_TEST_TRUE(bUpdateProfileSuccessful);
+	AB_TEST_EQUAL(UpdatedDateOfBirth, ProfileUpdate.DateOfBirth);
+	AB_TEST_TRUE(bGetProfileSuccessful2);
+	AB_TEST_TRUE(bDeleteProfileSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 	return true;
 }
 
@@ -1939,7 +1920,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfileCustomAttributesTest, "AccelByte.Te
 bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	double LastTime = 0;
 
 	bool bDeviceLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
@@ -1963,14 +1943,12 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	ProfileCreate.AvatarSmallUrl = "http://example.com";
 	ProfileCreate.AvatarUrl = "http://example.com";
 	ProfileCreate.AvatarLargeUrl = "http://example.com";
-	FAccelByteModelsUserProfileInfo ProfileCreateResult;
 
 	FRegistry::UserProfile.CreateUserProfile(
 		ProfileCreate, 
 		THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			ProfileCreateResult = Result;
 			bCreateProfileSuccessful = true;
 		}), 
 		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
@@ -1994,11 +1972,11 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 
 	int32 numberAttribute = 2;
 	FString stringAttribute = "Five kuwi lima";
-	bool booleanAttribute = true;
+	bool bBooleanAttribute = true;
 	FJsonObject customAttribute;
 	customAttribute.SetNumberField("Two", numberAttribute);
 	customAttribute.SetStringField("Five", stringAttribute);
-	customAttribute.SetBoolField("True", booleanAttribute);
+	customAttribute.SetBoolField("True", bBooleanAttribute);
 	FJsonObject updatedCustomAttribute;
 	FRegistry::UserProfile.UpdateCustomAttributes(
 		customAttribute,
@@ -2069,15 +2047,15 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bDeviceLoginSuccessful);
-	check(bUpdateCustomAttributeSuccessful);
-	check(updatedNumberAttribute == numberAttribute);
-	check(updatedStringAttribute == stringAttribute);
-	check(updatedBooleanAttribute == booleanAttribute);
-	check(bGetCustomAttributeSuccessful);
-	check(getNumberAttribute == numberAttribute);
-	check(getStringAttribute == stringAttribute);
-	check(getBooleanAttribute == booleanAttribute);
+	AB_TEST_TRUE(bDeviceLoginSuccessful);
+	AB_TEST_TRUE(bUpdateCustomAttributeSuccessful);
+	AB_TEST_EQUAL(updatedNumberAttribute, numberAttribute);
+	AB_TEST_EQUAL(updatedStringAttribute, stringAttribute);
+	AB_TEST_EQUAL(updatedBooleanAttribute, bBooleanAttribute);
+	AB_TEST_TRUE(bGetCustomAttributeSuccessful);
+	AB_TEST_EQUAL(getNumberAttribute, numberAttribute);
+	AB_TEST_EQUAL(getStringAttribute, stringAttribute);
+	AB_TEST_EQUAL(getBooleanAttribute, bBooleanAttribute);
 	return true;
 }
 
@@ -2085,8 +2063,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserBySteamUserIDTest, "AccelByte.Tests.AUs
 bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString FirstUserId = "";
-	double LastTime = 0;
 
 	bool bSteamLoginSuccessful1 = false;
 	bool bSteamLoginDone1 = false;
@@ -2109,10 +2085,10 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	FirstUserId = FRegistry::Credentials.GetUserId();
+	FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
+	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
 
 	bool bGetUserDone = false;
 	FAccountUserData ReceivedUserData;
@@ -2145,9 +2121,9 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bSteamLoginSuccessful1);
-	check(bDeleteSuccessful);
-	check(ReceivedUserData.UserId.Compare("") != 0);
+	AB_TEST_TRUE(bSteamLoginSuccessful1);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_FALSE(ReceivedUserData.UserId.IsEmpty());
 	return true;
 }
 
@@ -2155,9 +2131,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkGetUserBySteamUserIDTest, "AccelByte.Tests
 bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString ABUserId = "";
-	double LastTime = 0;
-
+	
 	bool bSteamLoginSuccessful1 = false;
 	bool bSteamLoginDone1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount // First attempt"));
@@ -2179,11 +2153,10 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 		return false;
 	}
 
-	ABUserId = FRegistry::Credentials.GetUserId();
-	FString SteamUserID;
+	const FString ABUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
 
 	bool bGetUserDone = false;
 	FBulkPlatformUserIdResponse ReceivedUserData;
@@ -2216,10 +2189,10 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bSteamLoginSuccessful1);
-	check(bDeleteSuccessful);
-	check(ReceivedUserData.UserIdPlatforms.Num() != 0);
-	check(ReceivedUserData.UserIdPlatforms[0].UserId == ABUserId);
+	AB_TEST_TRUE(bSteamLoginSuccessful1);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_NOT_EQUAL(ReceivedUserData.UserIdPlatforms.Num(), 0);
+	AB_TEST_EQUAL(ReceivedUserData.UserIdPlatforms[0].UserId, ABUserId);
 	return true;
 }
 
@@ -2227,14 +2200,13 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserByEmailAddressTest, "AccelByte.Tests.AU
 bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
 
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
@@ -2299,11 +2271,11 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bLoginSuccessful);
-	check(bGetUserDone);
-	check(bDeleteSuccessful);
-	check(ReceivedUserData.Data.Num() != 0);
-	check(ReceivedUserData.Data[0].DisplayName == DisplayName);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(bGetUserDone);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
+	AB_TEST_EQUAL(ReceivedUserData.Data[0].DisplayName, DisplayName);
 	return true;
 }
 
@@ -2314,12 +2286,11 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -2383,20 +2354,15 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bLoginSuccessful);
-	check(bGetUserDone);
-	check(bDeleteSuccessful);
-	check(ReceivedUserData.Data.Num() != 0);
-	bool bIsDisplayNameFound = false;
-	for (int i = 0; i < ReceivedUserData.Data.Num(); i++)
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(bGetUserDone);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
+	const bool bDisplayNameFound = ReceivedUserData.Data.ContainsByPredicate([DisplayName](const FPublicUserInfo& Item)
 	{
-		if (ReceivedUserData.Data[i].DisplayName == DisplayName)
-		{
-			bIsDisplayNameFound = true;
-			break;
-		}
-	}
-	check(bIsDisplayNameFound);
+		return Item.DisplayName == DisplayName;
+	});
+	AB_TEST_TRUE(bDisplayNameFound);
 	return true;
 }
 
@@ -2407,12 +2373,11 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 	FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + Username + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -2476,20 +2441,15 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bLoginSuccessful);
-	check(bGetUserDone);
-	check(bDeleteSuccessful);
-	check(ReceivedUserData.Data.Num() != 0);
-	bool bIsUsernameFound = false;
-	for (int i = 0; i < ReceivedUserData.Data.Num(); i++)
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(bGetUserDone);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
+	const bool bUsernameFound = ReceivedUserData.Data.ContainsByPredicate([Username](const FPublicUserInfo& Item)
 	{
-		if (ReceivedUserData.Data[i].UserName == Username)
-		{
-			bIsUsernameFound = true;
-			break;
-		}
-	}
-	check(bIsUsernameFound);
+		return Item.UserName == Username;
+	});
+	AB_TEST_TRUE(bUsernameFound);
 	return true;
 }
 
@@ -2505,8 +2465,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	FString UserId1 = "";
@@ -2610,19 +2569,15 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString & Parameter)
 
 #pragma endregion DeleteUserById
 
-	check(bLoginSuccessful);
-	check(bGetUserDone);
-	check(bDeleteSuccessful);
-	bool bIsUsernameExpected = true;
-	for (int i = 0; i < ReceivedUserData.Data.Num(); i++)
-	{
-		if (!ReceivedUserData.Data[i].UserName.Contains(SearchQuery))
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(bGetUserDone);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	FPublicUserInfo* InvalidSearchUserInfoPtr = ReceivedUserData.Data.FindByPredicate(
+		[SearchQuery](const FPublicUserInfo& Item)
 		{
-			bIsUsernameExpected = false;
-			break;
-		}
-	}
-	check(bIsUsernameExpected);
+			return !Item.UserName.Contains(SearchQuery);
+		});
+	AB_TEST_NULL(InvalidSearchUserInfoPtr);
 	return true;
 }
 
@@ -2650,8 +2605,8 @@ bool FGetCountryFromIP::RunTest(const FString & Parameter)
 
 	Waiting(bGetCountryDone, "Waiting for CountryInfo...");
 
-	check(bGetCountryDone);
-	check(ReceivedCountryInfo.CountryCode != "");
+	AB_TEST_TRUE(bGetCountryDone);
+	AB_TEST_FALSE(ReceivedCountryInfo.CountryCode.IsEmpty());
 	return true;
 }
 
@@ -2659,15 +2614,14 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRegisterThenVerifyByRequestVerification, "Acce
 bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
+	const FString Password = "123SDKTest123";
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 22));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-	double LastTime = 0;
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	FRegisterResponse RegisterResult;
@@ -2685,7 +2639,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 	}));
 
 	Waiting(bRegisterDone, "Waiting for Registered...");
-	check(bRegisterSuccessful);
+	AB_TEST_TRUE(bRegisterSuccessful);
 
 	bool bLoginSuccessful = false;
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccessful]()
@@ -2695,7 +2649,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 	}), UserTestErrorHandler);
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
-	check(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginSuccessful);
 
 	bool bSuccessSendVerifCode = false;
 	FRegistry::User.SendVerificationCode(FVoidHandler::CreateLambda([&bSuccessSendVerifCode]()
@@ -2705,10 +2659,10 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 	}), UserTestErrorHandler);
 
 	Waiting(bSuccessSendVerifCode, "Waiting send verification code");
-	check(bSuccessSendVerifCode);
+	AB_TEST_TRUE(bSuccessSendVerifCode);
 
 	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::accountRegistration);
-	check(!VerificationCode.IsEmpty());
+	AB_TEST_FALSE(VerificationCode.IsEmpty());
 
 	bool bSuccessVerifyUser = false;
 	FRegistry::User.Verify(VerificationCode, FVoidHandler::CreateLambda([&bSuccessVerifyUser]()
@@ -2717,7 +2671,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 		bSuccessVerifyUser = true;
 	}), UserTestErrorHandler);
 	Waiting(bSuccessVerifyUser, "Waiting verify user");
-	check(bSuccessVerifyUser);
+	AB_TEST_TRUE(bSuccessVerifyUser);
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
@@ -2729,7 +2683,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString & Parameter
 	}), UserTestErrorHandler);
 
 	Waiting(bDeleteDone, "Waiting for Deletion...");
-	check(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 
 	return true;
 }
@@ -2768,7 +2722,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}));
 
 	Waiting(bRegisterDone, "Waiting for Registered...");
-	check(bRegisterSuccess);
+	AB_TEST_TRUE(bRegisterSuccess);
 
 	bool bLoginSuccess = false;
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
@@ -2778,7 +2732,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bLoginSuccess, "Waiting for Login...");
-	check(bLoginSuccess);
+	AB_TEST_TRUE(bLoginSuccess);
 
 	bool bSendChangeEmailSuccess = false;
 	FRegistry::User.SendUpdateEmailVerificationCode(FVoidHandler::CreateLambda([&bSendChangeEmailSuccess]()
@@ -2788,10 +2742,10 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bSendChangeEmailSuccess, "Waiting for Send Verification Request...");
-	check(bSendChangeEmailSuccess);
+	AB_TEST_TRUE(bSendChangeEmailSuccess);
 
 	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
-	check(!VerificationCode.IsEmpty());
+	AB_TEST_FALSE(VerificationCode.IsEmpty());
 
 	FUpdateEmailRequest updateEmailRequest;
 	updateEmailRequest.Code = VerificationCode;
@@ -2804,10 +2758,10 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bUpdateEmailSuccess, "Waiting for Update Email...");
-	check(bUpdateEmailSuccess);
+	AB_TEST_TRUE(bUpdateEmailSuccess);
 
 	const FString NewEmailVerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
-	check(!NewEmailVerificationCode.IsEmpty());
+	AB_TEST_FALSE(NewEmailVerificationCode.IsEmpty());
 
 	bool bVerifyNewEmailSuccess = false;
 	FRegistry::User.Verify(NewEmailVerificationCode, FVoidHandler::CreateLambda([&bVerifyNewEmailSuccess]()
@@ -2817,7 +2771,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bVerifyNewEmailSuccess, "Waiting for Verify on New Email...");
-	check(bVerifyNewEmailSuccess);
+	AB_TEST_TRUE(bVerifyNewEmailSuccess);
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -2829,7 +2783,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bLoginSuccess, "Waiting for Login New Email...");
-	check(bLoginSuccess);
+	AB_TEST_TRUE(bLoginSuccess);
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
@@ -2841,7 +2795,7 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bDeleteDone, "Waiting for Deletion...");
-	check(bDeleteSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -2851,9 +2805,9 @@ bool FUpdateUserEmail::RunTest(const FString & Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.AUser.SteamTicket", AutomationFlagMaskUser);
 bool FGetSteamTicket::RunTest(const FString & Parameter)
 {
-	FString Ticket = GetSteamTicket();
+	const FString Ticket = GetSteamTicket();
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
-	check(Ticket != TEXT(""));
+	AB_TEST_FALSE(Ticket.IsEmpty());
 	return true;
 }
 
@@ -2885,7 +2839,7 @@ FString GetSteamTicket()
 	FString SteamHelperOutput = TEXT("");
 	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
 	CurrentDirectory.Append(TEXT("SteamHelper/steamticket.txt"));
-	CurrentDirectory.Replace(TEXT("/"), TEXT("\\"));
+	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
 	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);
 
 	return SteamTicket;

@@ -4,6 +4,7 @@
 
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
@@ -27,8 +28,7 @@ namespace Api
 {
 void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId, const FString& ClientSecret, const FString& AuthorizationCode, const FString& RedirectUri, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -43,8 +43,7 @@ void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId, const FStrin
 
 void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -63,8 +62,7 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 
 void Oauth2::GetTokenWithClientCredentials(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -83,8 +81,7 @@ void Oauth2::GetTokenWithClientCredentials(const FString& ClientId, const FStrin
 
 void Oauth2::GetTokenWithDeviceId(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -100,8 +97,7 @@ void Oauth2::GetTokenWithDeviceId(const FString& ClientId, const FString& Client
 
 void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -116,8 +112,7 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 
 void Oauth2::GetTokenWithRefreshToken(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -132,8 +127,7 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId, const FString& Cl
 
 void Oauth2::RevokeToken(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));

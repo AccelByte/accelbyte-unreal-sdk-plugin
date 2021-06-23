@@ -5,8 +5,8 @@
 #include "Api/AccelByteWalletApi.h"
 
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -19,8 +19,7 @@ Wallet::~Wallet(){}
 
 void Wallet::GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/wallets/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *CurrencyCode);

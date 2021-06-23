@@ -5,9 +5,8 @@
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "JsonUtilities.h"
-#include "EngineMinimal.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -20,8 +19,7 @@ Fulfillment::~Fulfillment(){}
 
 void Fulfillment::RedeemCode(const FString& Code, const FString& Region, const FString& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());

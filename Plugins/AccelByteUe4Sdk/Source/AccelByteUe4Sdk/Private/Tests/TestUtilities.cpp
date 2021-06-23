@@ -3,16 +3,16 @@
 // and restrictions contact your company contract manager.
 
 #include "TestUtilities.h"
-#include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Api/AccelByteOauth2Api.h"
-#include "Json.h"
-#include "HAL/FileManager.h"
 #include "Misc/Base64.h"
+
+DEFINE_LOG_CATEGORY(LogAccelByteTest);
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -58,7 +58,7 @@ bool AccelByteSkipTest(const FString& TestName)
 {
 	if (!IsAccelByteTestEnabled(TestName))
 	{
-		UE_LOG(LogTemp, Log, TEXT("=== Skipping test `%s`"), *TestName);
+		UE_LOG(LogAccelByteTest, Log, TEXT("=== Skipping test `%s`"), *TestName);
 		return true;
 	}
 
@@ -67,10 +67,16 @@ bool AccelByteSkipTest(const FString& TestName)
 
 void Waiting(bool& bCondition, FString Message)
 {
-	while (!bCondition)
+	const double StartTime = FPlatformTime::Seconds();
+	//Timeout value is already too long to wait for automation tests
+	const double TimeoutSeconds = StartTime + 300;
+	double LastTickTime = StartTime;
+
+	while (!bCondition && (FPlatformTime::Seconds() < TimeoutSeconds))
 	{
 		FPlatformProcess::Sleep(.2f);
-		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s"), *Message);
+		LastTickTime = FPlatformTime::Seconds();
 		FHttpModule::Get().GetHttpManager().Tick(.2f);
 		FTicker::GetCoreTicker().Tick(.2f);
 	}
@@ -84,7 +90,7 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString
 	
 	while (Condition && !Condition() && (FPlatformTime::Seconds() < TimeoutSeconds))
 	{
-		UE_LOG(LogTemp, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
 		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
@@ -97,7 +103,7 @@ FString GetBaseUrl()
 	FString BaseUrl = Environment::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), 100);
 	if (BaseUrl.IsEmpty()) 
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Base URL is not found.\nPlease check your Environment variable."));
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Base URL is not found.\nPlease check your Environment variable."));
 	}
 	return FString::Printf(TEXT("%s"), *BaseUrl);
 }
@@ -107,7 +113,7 @@ FString GetPublisherNamespace()
 	FString Namespace = Environment::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), 100);
 	if (Namespace.IsEmpty())
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Namespace is not found.\nPlease check your Environment variable."));
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Namespace is not found.\nPlease check your Environment variable."));
 	}
 	return FString::Printf(TEXT("%s"), *Namespace);
 }
@@ -123,7 +129,7 @@ FString GetAdminAccessToken()
 	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
 	if (ClientId.IsEmpty() || ClientSecret.IsEmpty()) 
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
 	}
 
 	FOauth2Token ClientLogin;
@@ -132,10 +138,10 @@ FString GetAdminAccessToken()
 	{
 		ClientLogin = Result;
 		ClientLoginSuccess = true;
-		UE_LOG(LogTemp, Log, TEXT("Login with Client Success..!"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("Login with Client Success..!"));
 	}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		UE_LOG(LogTemp, Log, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
 	}));
 	Waiting(ClientLoginSuccess, "Login with Client...");
 
@@ -156,11 +162,11 @@ FString GetSuperUserTokenCache()
 	FString UserPass = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), 100);
 	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
 	}
 	if (UserName.IsEmpty() || UserPass.IsEmpty())
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environment variable."));
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environment variable."));
 	}
 
 	FString BaseUrl = GetBaseUrl();
@@ -191,7 +197,7 @@ FString GetSuperUserTokenCache()
 	FErrorHandler OnError;
 	OnError.BindLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		UE_LOG(LogTemp, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
 	});
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	Waiting(bGetTokenSuccess, "Waiting for get token...");
@@ -334,13 +340,13 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bCurrencyCheckDone = false;
 	Ecommerce_Currency_Get(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created already."));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY is created already."));
 		bCurrencyAlreadyExist = true;
 		bCurrencyCreated = true;
 		bCurrencyCheckDone = true;
 	}), FErrorHandler::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCheckDone](int32 Code, FString Message)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
 		bCurrencyAlreadyExist = false;
 		bCurrencyCheckDone = true;
 	}));
@@ -350,11 +356,11 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	{
 		Ecommerce_Currency_Create(Variables.ExpectedCurrency, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY is created"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY is created"));
 			bCurrencyCreated = true;
 		}), FErrorHandler::CreateLambda([&OnError, &bCurrencyCreated](int32 Code, FString Message)
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CURRENCY can not be created."));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY can not be created."));
 			bCurrencyCreated = false;
 			OnError.ExecuteIfBound(Code, Message);
 		}));
@@ -373,7 +379,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	FStoreInfo PublishedStoreInfo;
 	Ecommerce_PublishedStore_Get(THandler<FStoreInfo>::CreateLambda([&Variables, &bTheresPublishedStore, &PublishedStoreInfo, &bPublishedStoreCheck](const FStoreInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"));
 		Variables.ExpectedStoreArchive.defaultLanguage = Result.defaultLanguage;
 		Variables.ExpectedStoreArchive.defaultRegion = Result.defaultRegion;
 		Variables.ExpectedStoreArchive.supportedLanguages = Result.supportedLanguages;
@@ -383,7 +389,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		bPublishedStoreCheck = true;
 	}), FErrorHandler::CreateLambda([&OnError, &bPublishedStoreCheck](int32 Code, FString Message)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is not found: %d | %s"), Code, *Message);
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is not found: %d | %s"), Code, *Message);
 		bPublishedStoreCheck = true;
 	}));
 	Waiting(bPublishedStoreCheck, "Waiting for ");
@@ -394,7 +400,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		FStoreInfo CreatedArchiveStoreInfo;
 		Ecommerce_Store_Create(Variables.ExpectedStoreArchive, THandler<FStoreInfo>::CreateLambda([&bArchiveStoreCreated, &CreatedArchiveStoreInfo](const FStoreInfo& Result)
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     ARCHIVE_STORE for PUBLISHED_STORE is created"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     ARCHIVE_STORE for PUBLISHED_STORE is created"));
 			CreatedArchiveStoreInfo = Result;
 			bArchiveStoreCreated = true;
 		}), OnError);
@@ -402,7 +408,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		bool bArchiveCloned = false;
 		Ecommerce_Store_Clone(PublishedStoreInfo.storeId, CreatedArchiveStoreInfo.storeId, FSimpleDelegate::CreateLambda([&bArchiveCloned]()
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"));
 			bArchiveCloned = true;
 		}), OnError);
 		Waiting(bArchiveCloned, "Waiting for archive store cloned...");
@@ -416,7 +422,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bDeleteStoreDone]()
 		{
 			bDeleteStoreDone = true;
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"));
 		}), FErrorHandler::CreateLambda([&bDeleteStoreDone](int32, FString)
 		{
 			bDeleteStoreDone = true;
@@ -433,7 +439,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bTemporaryStoreCreated = false;
 	Ecommerce_Store_Create(Variables.ExpectedStoreTemporary, THandler<FStoreInfo>::CreateLambda([&CreatedTemporaryStoreInfo, &bTemporaryStoreCreated](const FStoreInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: TESTING_STORE is created"));
 		CreatedTemporaryStoreInfo = Result;
 		bTemporaryStoreCreated = true;
 	}), OnError);
@@ -449,7 +455,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bCreateRootCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateRootCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY root is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY root is created"));
 		bCreateRootCategorySuccess = true;
 	}), OnError);
 	Waiting(bCreateRootCategorySuccess, "Waiting for root category created...");
@@ -464,7 +470,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bCreateChildCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateChildCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY child is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY child is created"));
 		bCreateChildCategorySuccess = true;
 	}), OnError);
 	Waiting(bCreateChildCategorySuccess, "Waiting for child category created...");
@@ -479,7 +485,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bCreateGrandChildCategorySuccess = false;
 	Ecommerce_Category_Create(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateGrandChildCategorySuccess](const FCategoryInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"));
 		bCreateGrandChildCategorySuccess = true;
 	}), OnError);
 	Waiting(bCreateGrandChildCategorySuccess, "Waiting for grand child category created...");
@@ -542,7 +548,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bRootItemCreated = false;
 	Ecommerce_Item_Create(RootItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRootItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM root is created "));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM root is created "));
 		bRootItemCreated = true;
 	}), OnError);
 	Waiting(bRootItemCreated, "Waiting for root item created...");
@@ -604,7 +610,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bChildItemCreated = false;
 	Ecommerce_Item_Create(ChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bChildItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM child is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM child is created"));
 		bChildItemCreated = true;
 	}), OnError);
 	Waiting(bChildItemCreated, "Waiting for child item created...");
@@ -666,7 +672,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bGrandchildItemCreated = false;
 	Ecommerce_Item_Create(grandChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bGrandchildItemCreated](const FItemFullInfo& Result)
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM grandchild is created"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM grandchild is created"));
 		bGrandchildItemCreated = true;
 	}), OnError);
 	Waiting(bGrandchildItemCreated, "Waiting for grand child item created...");
@@ -727,7 +733,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bRedeemableItemCreated = false;
 	Ecommerce_Item_Create(redeemableItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRedeemableItemCreated, &Variables](const FItemFullInfo& Result)
 		{
-			UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: ITEM redeemable is created"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM redeemable is created"));
 			Variables.redeemableItem = Result;
 			bRedeemableItemCreated = true;
 		}), OnError);
@@ -742,7 +748,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	bool bPublishTemporaryStoreSuccess = false;
 	Ecommerce_Store_Clone(CreatedTemporaryStoreInfo.storeId, "", FSimpleDelegate::CreateLambda([&]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("SetupEcommerce: TESTING_STORE is published"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: TESTING_STORE is published"));
 		bPublishTemporaryStoreSuccess = true;
 	}), OnError);
 	Waiting(bPublishTemporaryStoreSuccess, "Waiting for publish temp store...");
@@ -1087,7 +1093,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 	bool bCurrencyDeleted = false;
 	Ecommerce_Currency_Delete(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"));
 		bCurrencyDeleted = true;
 	}), OnError);
 	Waiting(bCurrencyDeleted, "Waiting for currency deletion...");
@@ -1097,7 +1103,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 	bool bPublishedStoreDeleted = false;
 	Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted]()
 	{
-		UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"));
+		UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"));
 		bPublishedStoreDeleted = true;
 	}), nullptr);
 	Waiting(bPublishedStoreDeleted, "Waiting for published store deletion...");
@@ -1118,17 +1124,17 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 		if (GetAllResult[i].title == Variables.ExpectedStoreArchive.title)
 		{
 			bool bRestorePublishedStore = false;
-			UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"));
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"));
 			Ecommerce_Store_Clone(GetAllResult[i].storeId, "", FSimpleDelegate::CreateLambda([&bRestorePublishedStore]()
 			{
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
+				UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
 				bRestorePublishedStore = true;
 			}), nullptr);
 			Waiting(bRestorePublishedStore, "Waiting for published store restored...");
 			bool bArchiveStoreDeleteSuccess = false;
 			Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bArchiveStoreDeleteSuccess]()
 			{
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
+				UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
 				bArchiveStoreDeleteSuccess = true;
 			}), nullptr);
 			Waiting(bArchiveStoreDeleteSuccess, "Waiting for archive store deletion...");
@@ -1137,10 +1143,10 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 			if (GetAllResult[i].title == Variables.ExpectedStoreTemporary.title)
 			{
 				bool bDeleteTestingStoreSuccess = false;
-				UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"));
+				UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"));
 				Ecommerce_Store_Delete(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bDeleteTestingStoreSuccess]()
 				{
-					UE_LOG(LogTemp, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
+					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
 					bDeleteTestingStoreSuccess = true;
 				}), nullptr);
 				Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
@@ -1428,9 +1434,6 @@ void Ecommerce_GetItem_BySKU(const FString& Namespace, const FString& StoreId, c
 
 void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
-
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/entitlements"), *BaseUrl, *Namespace, *UserId);
@@ -1624,7 +1627,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
-	UE_LOG(LogTemp, Log, TEXT("JSON Content: %s"), *Content);
+	UE_LOG(LogAccelByteTest, Log, TEXT("JSON Content: %s"), *Content);
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *BaseUrl, *FRegistry::Settings.Namespace);
@@ -1796,7 +1799,8 @@ void Leaderboard_Delete_Leaderboard(const FString& leaderboardCode, const FSimpl
 
 void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	UE_LOG(LogTemp, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
+	check(!userId.IsEmpty());
+	UE_LOG(LogAccelByteTest, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
 	FString BaseUrl = GetBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());

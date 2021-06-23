@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerCloudSaveApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Models/AccelByteCloudSaveModels.h"
@@ -20,8 +21,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::RetrieveGameRecordsKey(const THandler<FAccelByteModelsPaginatedRecordsKey>& OnSuccess, const FErrorHandler& OnError, int32 Offset, int32 Limit)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace());
@@ -56,8 +56,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::SaveGameRecord(const FString& Key, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
@@ -82,8 +81,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::GetGameRecord(const FString& Key, const THandler<FAccelByteModelsGameRecord>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
@@ -123,8 +121,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::ReplaceGameRecord(const FString& Key, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
@@ -149,8 +146,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::DeleteGameRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
@@ -171,8 +167,7 @@ namespace GameServerApi
 	}
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
@@ -197,8 +192,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::GetUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
@@ -240,8 +234,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::GetPublicUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
@@ -283,8 +276,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
@@ -309,8 +301,7 @@ namespace GameServerApi
 
 	void ServerCloudSave::DeleteUserRecord(const FString& Key, const FString& UserId, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));

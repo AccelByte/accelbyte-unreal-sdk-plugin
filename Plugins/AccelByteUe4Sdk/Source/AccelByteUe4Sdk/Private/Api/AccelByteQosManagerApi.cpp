@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteQosManagerApi.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
@@ -21,8 +21,7 @@ namespace Api
 
 	void QosManager::GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::Settings.QosManagerServerUrl);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *Url);

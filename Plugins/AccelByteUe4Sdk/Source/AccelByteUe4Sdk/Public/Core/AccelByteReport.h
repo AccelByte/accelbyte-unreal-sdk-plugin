@@ -4,27 +4,19 @@
 
 #pragma once
 
-#include "HttpManager.h"
 #include "CoreMinimal.h"
-
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
 #include "Http.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(AccelByteReportLog, Log, All);
-
-using namespace AccelByte;
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByte, Log, All);
 
 namespace AccelByte 
 {
 
-class ACCELBYTEUE4SDK_API Report
+class ACCELBYTEUE4SDK_API FReport
 {
 public:
-	void GetHttpRequest(const FHttpRequestPtr& Request);
-	void GetHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response);
-	void GetFunctionLog(FString FunctionMacroName);
-private:
-	FString GetStandardTime();
+	static void LogHttpRequest(const FHttpRequestPtr& Request);
+	static void LogHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response);
+	static void Log(FString Message);
 };
 }

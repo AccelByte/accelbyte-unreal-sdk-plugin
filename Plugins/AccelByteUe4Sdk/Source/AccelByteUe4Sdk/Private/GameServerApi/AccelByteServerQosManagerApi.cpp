@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 
@@ -21,8 +21,7 @@ namespace GameServerApi
 
 	void ServerQosManager::GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::ServerSettings.QosManagerServerUrl);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *Url);

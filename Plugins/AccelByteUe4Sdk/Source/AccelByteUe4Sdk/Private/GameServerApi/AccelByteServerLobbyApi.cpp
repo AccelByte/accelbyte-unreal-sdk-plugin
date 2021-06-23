@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerLobby.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Models/AccelByteLobbyModels.h"
@@ -20,8 +21,7 @@ namespace GameServerApi
 
 	void ServerLobby::GetPartyDataByUserId(const FString & UserId, const THandler<FAccelByteModelsDataPartyResponse> OnSuccess, const FErrorHandler & OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		if (UserId.IsEmpty())
 		{
@@ -58,8 +58,7 @@ namespace GameServerApi
 
 	void ServerLobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);
@@ -79,8 +78,7 @@ namespace GameServerApi
 
 	void ServerLobby::GetActiveParties(const int32& Limit, const int32& Offset, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		if (Limit <= 0)
 		{
@@ -200,8 +198,7 @@ namespace GameServerApi
 
 	void ServerLobby::RequestWritePartyStorage(const FString &PartyId, const FAccelByteModelsPartyDataUpdateRequest& PartyDataRequest, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);

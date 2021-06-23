@@ -5,6 +5,7 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
@@ -46,8 +47,7 @@ FString Achievement::ConvertAchievementSortByToString(const EAccelByteAchievemen
 void Achievement::QueryAchievements(const FString& Language, const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedPublicAchievement>& OnSuccess, const FErrorHandler& OnError,
 	const int32& Offset, const int32& Limit)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace());
@@ -90,8 +90,7 @@ void Achievement::QueryAchievements(const FString& Language, const EAccelByteAch
 
 void Achievement::GetAchievement(const FString& AchievementCode, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (AchievementCode.IsEmpty())
 	{
@@ -118,8 +117,7 @@ void Achievement::GetAchievement(const FString& AchievementCode, const THandler<
 void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess, const FErrorHandler& OnError,
 	const int32& Offset, const int32& Limit, bool PreferUnlocked)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -161,8 +159,7 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 
 void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidHandler OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (AchievementCode.IsEmpty())
 	{

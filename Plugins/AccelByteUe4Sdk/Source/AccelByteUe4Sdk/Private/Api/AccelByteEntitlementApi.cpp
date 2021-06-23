@@ -5,6 +5,7 @@
 #include "Api/AccelByteEntitlementApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "EngineMinimal.h"
@@ -20,8 +21,7 @@ Entitlement::~Entitlement(){}
 
 void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const FString& ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass = EAccelByteEntitlementClass::NONE, EAccelByteAppType AppType = EAccelByteAppType::NONE )
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -80,8 +80,7 @@ void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const TA
 	const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess,
 	const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -141,8 +140,7 @@ void Entitlement::QueryUserEntitlements(const FString& EntitlementName, const TA
 
 void Entitlement::GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Entitlementid);
@@ -163,8 +161,7 @@ void Entitlement::GetUserEntitlementById(const FString& Entitlementid, const THa
 
 void Entitlement::GetUserEntitlementOwnershipByAppId(const FString& AppId, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byAppId?appId=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *AppId);
@@ -185,8 +182,7 @@ void Entitlement::GetUserEntitlementOwnershipByAppId(const FString& AppId, const
 
 void Entitlement::GetUserEntitlementOwnershipBySku(const FString& Sku, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/bySku?sku=%s"), *Settings.PlatformServerUrl, *Settings.PublisherNamespace, *Sku);
@@ -208,8 +204,7 @@ void Entitlement::GetUserEntitlementOwnershipBySku(const FString& Sku, const THa
 void Entitlement::GetUserEntitlementOwnershipAny(const TArray<FString> ItemIds, const TArray<FString> AppIds, const TArray<FString> Skus,
 	const THandler<FAccelByteModelsEntitlementOwnership> OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (ItemIds.Num() < 1
 		&& AppIds.Num() < 1
@@ -256,8 +251,7 @@ void Entitlement::GetUserEntitlementOwnershipAny(const TArray<FString> ItemIds, 
 
 void Entitlement::ConsumeUserEntitlement(const FString& EntitlementId, const int32& UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
@@ -284,8 +278,7 @@ void Entitlement::ConsumeUserEntitlement(const FString& EntitlementId, const int
 
 void Entitlement::CreateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ExtUserId);
@@ -312,8 +305,7 @@ void Entitlement::CreateDistributionReceiver(const FString& ExtUserId, const FAc
 
 void Entitlement::DeleteDistributionReceiver(const FString& ExtUserId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *UserId, *ExtUserId);
@@ -334,8 +326,7 @@ void Entitlement::DeleteDistributionReceiver(const FString& ExtUserId, const FSt
 
 void Entitlement::GetDistributionReceiver(const FString& PublisherNamespace, const FString& PublisherUserId, const THandler<TArray<FAccelByteModelsDistributionReceiver>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers"), *Settings.PlatformServerUrl, *PublisherNamespace, *PublisherUserId);
@@ -364,8 +355,7 @@ void Entitlement::GetDistributionReceiver(const FString& PublisherNamespace, con
 
 void Entitlement::UpdateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ExtUserId);
@@ -392,8 +382,7 @@ void Entitlement::UpdateDistributionReceiver(const FString& ExtUserId, const FAc
 
 void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString PlatformText = TEXT("");
 	FString Content = TEXT("{}");

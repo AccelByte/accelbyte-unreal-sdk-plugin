@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerAchievementApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 
@@ -20,8 +21,7 @@ ServerAchievement::~ServerAchievement()
 
 void ServerAchievement::UnlockAchievement(const FString& UserId, const FString& AchievementCode, const FVoidHandler OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	if (UserId.IsEmpty())
 	{

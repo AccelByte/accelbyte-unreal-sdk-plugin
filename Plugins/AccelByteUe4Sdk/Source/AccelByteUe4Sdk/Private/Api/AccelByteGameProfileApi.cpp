@@ -3,10 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteGameProfileApi.h"
-#include "Modules/ModuleManager.h"
-#include "IWebSocket.h"
-#include "WebSocketsModule.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
@@ -23,8 +21,7 @@ GameProfile::~GameProfile() { }
 
 void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THandler<TArray<FAccelByteModelsPublicGameProfile>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (UserIds.Num() < 1)
 	{
@@ -57,8 +54,7 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 
 void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameProfile>>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -79,8 +75,7 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 
 void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -102,8 +97,7 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 
 void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
@@ -124,8 +118,7 @@ void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAcce
 
 void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
@@ -147,8 +140,7 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteM
 
 void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
@@ -169,8 +161,7 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandle
 
 void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FString & AttributeName, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
@@ -191,8 +182,7 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FStri
 
 void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);

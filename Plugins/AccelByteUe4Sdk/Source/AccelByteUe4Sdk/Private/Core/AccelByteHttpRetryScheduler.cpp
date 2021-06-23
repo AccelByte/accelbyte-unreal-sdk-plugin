@@ -52,9 +52,8 @@ bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const F
 		return false;
 	}
 
-	Report report;
-	report.GetHttpRequest(Request);
 
+	FReport::LogHttpRequest(Request);
 	bool bIsStarted = Request->ProcessRequest();
 
 	RetryList.Add(MakeShared<FHttpRetryTask>(Request, CompleteDelegate, RequestTime, InitialDelay));
@@ -83,6 +82,7 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime)
 			if (CurrentTime >= CurrentTask->NextRetryTime)
 			{
 				CurrentTask->ScheduledRetry = false;
+				FReport::LogHttpRequest(CurrentTask->Request);
 				CurrentTask->Request->ProcessRequest();
 			}
 			else
@@ -155,6 +155,7 @@ bool FHttpRetryScheduler::PollRetry(double CurrentTime)
 	for (const auto& Task : CompletedTasks)
 	{
 		const FHttpRequestPtr& Request = Task->Request;
+		FReport::LogHttpResponse(Request, Request->GetResponse());
 		Task->CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), HttpRequest::IsFinished(Request));
 	}
 

@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "GameServerApi/AccelByteServerStatisticApi.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 
@@ -21,8 +21,7 @@ ServerStatistic::~ServerStatistic()
 
 void ServerStatistic::CreateUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/bulk"), *Settings.StatisticServerUrl, *Credentials.GetClientNamespace(), *UserId);
@@ -61,16 +60,14 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId, const TArray<FS
 
 void ServerStatistic::GetAllUserStatItems(const FString& UserId, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	ServerStatistic::GetUserStatItems(UserId, {}, {}, OnSuccess, OnError);
 }
 
 void ServerStatistic::GetUserStatItems(const FString& UserId, const TArray<FString>& StatCodes, const TArray<FString>& Tags, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetClientNamespace(), *UserId);
@@ -102,8 +99,7 @@ void ServerStatistic::GetUserStatItems(const FString& UserId, const TArray<FStri
 
 void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetClientNamespace());
@@ -137,8 +133,7 @@ void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsB
 
 void ServerStatistic::IncrementUserStatItems(const FString& UserId, const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetClientNamespace(), *UserId);

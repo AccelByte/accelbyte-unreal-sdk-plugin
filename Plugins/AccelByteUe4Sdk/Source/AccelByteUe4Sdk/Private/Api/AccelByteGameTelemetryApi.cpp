@@ -5,6 +5,7 @@
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
@@ -34,7 +35,7 @@ void GameTelemetry::SetBatchFrequency(FTimespan Interval)
 	}
 	else
 	{
-		UE_LOG(AccelByteReportLog, Warning, TEXT("Telemetry schedule interval is too small! Set to %f seconds."), MINIMUM_INTERVAL_TELEMETRY.GetTotalSeconds());
+		UE_LOG(LogAccelByte, Warning, TEXT("Telemetry schedule interval is too small! Set to %f seconds."), MINIMUM_INTERVAL_TELEMETRY.GetTotalSeconds());
 		TelemetryInterval = MINIMUM_INTERVAL_TELEMETRY;
 	}
 }
@@ -51,8 +52,7 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoi
 		return;
 	}
 
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
 	{
@@ -94,8 +94,7 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 {
 	if (!JobQueue.IsEmpty())
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		TArray<FAccelByteModelsTelemetryBody> TelemetryBodies;
 		TArray<FVoidHandler> OnSuccessCallbacks;
@@ -135,8 +134,7 @@ void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Ev
 		return;
 	}
 
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *Settings.GameTelemetryServerUrl);

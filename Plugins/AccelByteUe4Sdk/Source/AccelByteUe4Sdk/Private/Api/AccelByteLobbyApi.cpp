@@ -8,6 +8,7 @@
 #include "WebSocketsModule.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
@@ -172,8 +173,7 @@ namespace Api
 
 void Lobby::Connect()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (!WebSocket.IsValid())
 	{
@@ -206,8 +206,7 @@ void Lobby::Connect()
 
 void Lobby::Disconnect()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
 	if (LobbyTickDelegateHandle.IsValid())
@@ -232,16 +231,14 @@ void Lobby::Disconnect()
 
 bool Lobby::IsConnected() const
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return WebSocket.IsValid() && WebSocket->IsConnected();
 }
 
 void Lobby::SendPing()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -254,8 +251,7 @@ void Lobby::SendPing()
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PersonalChat, Prefix::Chat,
 		FString::Printf(TEXT("to: %s\npayload: %s\n"), *UserId, *Message));
@@ -263,8 +259,7 @@ FString Lobby::SendPrivateMessage(const FString& UserId, const FString& Message)
 
 FString Lobby::SendPartyMessage(const FString& Message)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyChat, Prefix::Chat,
 		FString::Printf(TEXT("payload: %s\n"), *Message));
@@ -272,16 +267,14 @@ FString Lobby::SendPartyMessage(const FString& Message)
 
 FString Lobby::SendJoinDefaultChannelChatRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::JoinChannelChat, Prefix::Chat);
 }
 
 FString Lobby::SendChannelMessage(const FString& Message)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (!ChannelSlug.IsEmpty())
 	{
@@ -305,32 +298,28 @@ FString Lobby::SendChannelMessage(const FString& Message)
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendInfoPartyRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyInfo, Prefix::Party);
 }
 
 FString Lobby::SendCreatePartyRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::CreateParty, Prefix::Party);
 }
 
 FString Lobby::SendLeavePartyRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::LeaveParty, Prefix::Party);
 }
 
 FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::InviteParty, Prefix::Party,
 		FString::Printf(TEXT("friendID: %s"), *UserId));
@@ -338,8 +327,7 @@ FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 
 FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::JoinParty, Prefix::Party,
 		FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
@@ -347,8 +335,7 @@ FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString
 
 FString Api::Lobby::SendRejectInvitationRequest(const FString& PartyId, const FString& InvitationToken)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::RejectParty, Prefix::Party,
 		FString::Printf(TEXT("partyID: %s\ninvitationToken: %s"), *PartyId, *InvitationToken));
@@ -356,8 +343,7 @@ FString Api::Lobby::SendRejectInvitationRequest(const FString& PartyId, const FS
 
 FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
 		FString::Printf(TEXT("memberID: %s\n"), *UserId));
@@ -365,24 +351,21 @@ FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 
 FString Lobby::SendPartyGetCodeRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyGetCodeRequest, Prefix::Party);
 }
 
 FString Lobby::SendPartyDeleteCodeRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyDeleteCodeRequest, Prefix::Party);
 }
 
 FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyJoinViaCodeRequest, Prefix::Party,
 		FString::Printf(TEXT("partyCode: %s\n"), *partyCode));
@@ -390,8 +373,7 @@ FString Lobby::SendPartyJoinViaCodeRequest(const FString& partyCode)
 
 FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::PartyPromoteLeaderRequest, Prefix::Party,
 		FString::Printf(TEXT("newLeaderUserId: %s\n"), *UserId));
@@ -402,8 +384,7 @@ FString Lobby::SendPartyPromoteLeaderRequest(const FString& UserId)
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendSetPresenceStatus(const Availability Availability, const FString& Activity)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::SetPresence, Prefix::Presence,
 		FString::Printf(TEXT("availability: %d\nactivity: %s\n"), (int)Availability, *Activity));
@@ -411,8 +392,7 @@ FString Lobby::SendSetPresenceStatus(const Availability Availability, const FStr
 
 FString Lobby::SendGetOnlineUsersRequest()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::FriendsPresence, Prefix::Presence);
 }
@@ -422,8 +402,7 @@ FString Lobby::SendGetOnlineUsersRequest()
 //-------------------------------------------------------------------------------------------------
 void Lobby::GetAllAsyncNotification()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -438,8 +417,7 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, TArray<FString> ExtraAttributes)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	FString Contents = FString::Printf(TEXT("gameMode: %s\n"), *GameMode);
 	if (!ServerName.IsEmpty())
 	{
@@ -538,8 +516,7 @@ FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> Par
 
 FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::CancelMatchmaking, Prefix::Matchmaking,
 		FString::Printf(TEXT("gameMode: %s\nisTempParty: %s"), *GameMode, (IsTempParty ? TEXT("true") : TEXT("false"))));
@@ -547,8 +524,7 @@ FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
 
 FString Lobby::SendReadyConsentRequest(FString MatchId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::ReadyConsent, Prefix::Matchmaking,
 		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
@@ -559,8 +535,7 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 //-------------------------------------------------------------------------------------------------
 void Lobby::RequestFriend(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::RequestFriend, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -568,8 +543,7 @@ void Lobby::RequestFriend(FString UserId)
 
 void Lobby::Unfriend(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::Unfriend, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -577,16 +551,14 @@ void Lobby::Unfriend(FString UserId)
 
 void Lobby::ListOutgoingFriends()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::ListOutgoingFriends, Prefix::Friends);
 }
 
 void Lobby::CancelFriendRequest(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::CancelFriends, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -594,16 +566,14 @@ void Lobby::CancelFriendRequest(FString UserId)
 
 void Lobby::ListIncomingFriends()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::ListIncomingFriends, Prefix::Friends);
 }
 
 void Lobby::AcceptFriend(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::AcceptFriends, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -611,8 +581,7 @@ void Lobby::AcceptFriend(FString UserId)
 
 void Lobby::RejectFriend(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::RejectFriends, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -620,16 +589,14 @@ void Lobby::RejectFriend(FString UserId)
 
 void Lobby::LoadFriendsList()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::LoadFriendList, Prefix::Friends);
 }
 
 void Lobby::GetFriendshipStatus(FString UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::GetFriendshipStatus, Prefix::Friends,
 		FString::Printf(TEXT("friendId: %s"), *UserId));
@@ -637,8 +604,7 @@ void Lobby::GetFriendshipStatus(FString UserId)
 
 void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidHandler OnSuccess, FErrorHandler OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -660,8 +626,7 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 
 void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModelsPartyData>& OnSuccess, const FErrorHandler& OnError) const
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
@@ -679,8 +644,7 @@ void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModels
 
 void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess, const FErrorHandler& OnError, bool CountOnly)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Query = TEXT("?userIds=");
 	for (int i = 0; i < UserIds.Num(); i++)
@@ -711,8 +675,7 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<F
 
 void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
@@ -732,8 +695,7 @@ void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteMo
 
 void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
@@ -753,8 +715,7 @@ void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelBy
 
 void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace());
@@ -775,8 +736,7 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 
 void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
@@ -796,8 +756,7 @@ void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteMo
 
 void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace());
@@ -832,8 +791,7 @@ void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrap
 
 void Lobby::BlockPlayer(const FString& UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::BlockPlayer, Prefix::Block,
 		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
@@ -841,8 +799,7 @@ void Lobby::BlockPlayer(const FString& UserId)
 
 void Lobby::UnblockPlayer(const FString& UserId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	SendRawRequest(LobbyRequest::UnblockPlayer, Prefix::Friends,
 		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
@@ -853,8 +810,7 @@ void Lobby::UnblockPlayer(const FString& UserId)
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendSignalingMessage(const FString& UserId, const FString& Message) 
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	
 	return SendRawRequest(LobbyRequest::SignalingP2PNotif, Prefix::Signaling,
 		FString::Printf(TEXT("destinationId: %s\nmessage: %s\n"), *UserId, *Message));
@@ -865,8 +821,7 @@ FString Lobby::SendSignalingMessage(const FString& UserId, const FString& Messag
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::SetSessionAttribute, Prefix::Attribute,
 		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetNamespace(), *Key, *Value));
@@ -874,8 +829,7 @@ FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
 
 void Lobby::UnbindEvent()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	PartyLeaveNotif.Unbind();
 	PartyInviteNotif.Unbind();
@@ -1344,8 +1298,7 @@ return; \
 
 void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
@@ -1413,8 +1366,7 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 
 void Lobby::SetRetryParameters(int32 NewTotalTimeout, int32 NewBackoffDelay, int32 NewMaxDelay)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (WebSocket.IsValid())
 	{
