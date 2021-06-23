@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.1.0%0D3.0.1) (2021-06-23)
+
+
+### Features
+
+* **apigw:** remove apigw and adjust endpoint, add Registerv3 accept legal policy when create new account ([db83fb6](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/db83fb6919fc3f082bb0b825d2caf6d59eacfd58))
+* **FMultiRegistry,FApiClient:** allow multiple users to be signed in at one ([503d2c9](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/503d2c994ee0b104011e129d8c9332a1bf4566e8))
+* **lobby:** Bulk get user presence ([e7fcfe4](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/e7fcfe432379b379be27e2e25172b7e9d75caadb))
+* **lobby:** Invite and Join Party via Code ([6c19a0e](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/6c19a0e52e539d43b65ac738d11307461a8a7330))
+* **lobby:** Promote party leader request ([f2348b8](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/f2348b8f33efa4bdf8a63f1b243e179103913a26))
+* **lobby:** Reject party invitation ([98c016c](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/98c016cc23d0d44e524223d9ceb74ed51f0b9ff2))
+* **Party:** Get party data by party id ([ac412e4](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/ac412e4f685cb47c1c50fca7a8e4a232b94318d6))
+
+
+### Bug Fixes
+
+* **Tests.AUserProfile:** remove redundant delete profile function ([b873b1c](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/b873b1c5af1c389cc75578e6ff81e65e2f2e5f46))
+* **Tests.AUserProfile:** remove redundant delete profile function ([5d97c87](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/5d97c874b2182159ef3fec6d0b8f2fda4b987bc2))
+
 ## [3.0.1](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.0.1%0D3.0.0) (2021-06-09)
 
 
