@@ -3,8 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
@@ -12,7 +10,6 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -26,7 +23,7 @@ const int32 AutomationFlagMaskServerStatistic = (EAutomationTestFlags::EditorCon
 
 const auto ServerStatisticTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteServerStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteServerStatisticTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const TArray<FString> StatisticStatCodes = { "sdktest3" , "sdktest4"};
@@ -35,26 +32,26 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerStatisticSetup, "AccelByte.Tests.ServerSt
 bool ServerStatisticSetup::RunTest(const FString& Parameters)
 {
 	bool bClientLoginSuccess = false;
-	bool UsersCreationSuccess = false;
-	bool UsersLoginSuccess = false;
+	bool bUserCreated = false;
+	bool bUserLoggedIn = false;
 
 	FString Email = FString::Printf(TEXT("Statistic_UE4Test@example.com"));
 	Email.ToLowerInline();
-	FString Password = FString::Printf(TEXT("123Password123"), 0);
-	FString DisplayName = FString::Printf(TEXT("StatisticUE4Test"), 0);
+	FString Password = TEXT("123Password123");
+	FString DisplayName = TEXT("StatisticUE4Test");
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
 	FRegistry::User.Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Response)
 	{
-		UsersCreationSuccess = true;
+		bUserCreated = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Test User is successfuly created."));
 	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
-		if ((ErrorCodes) Code == ErrorCodes::UserEmailAlreadyUsedException)
+		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 		{
-			UsersCreationSuccess = true;
+			bUserCreated = true;
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Test User is already created."));
 		}
 		else
@@ -62,17 +59,17 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Test User can't be created"));
 		}
 	}));
-	Waiting(UsersCreationSuccess, "Waiting for user created...");
+	Waiting(bUserCreated, "Waiting for user created...");
 
 	FRegistry::User.LoginWithUsername(
 		Email,
 		Password,
 		FVoidHandler::CreateLambda([&]()
 	{
-		UsersLoginSuccess = true;
+		bUserLoggedIn = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("\t\tSuccessfully Login."));
 	}), ServerStatisticTestErrorHandler);
-	Waiting(UsersLoginSuccess, "Waiting for Login...");
+	Waiting(bUserLoggedIn, "Waiting for Login...");
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
@@ -82,8 +79,8 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
-	check(bClientLoginSuccess);
-	check(UsersLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
+	AB_TEST_TRUE(bUserLoggedIn);
 
 	for (int i = 0; i < StatisticStatCodes.Num(); i++)
 	{
@@ -95,7 +92,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			GetStatResult = Result;
 			bStatIsExist = true;
 			bGetStatDone = true;
-		}), FErrorHandler::CreateLambda([&bStatIsExist, &bGetStatDone](int32 ErrorCode, FString ErrorMessage)
+		}), FErrorHandler::CreateLambda([&bGetStatDone](int32 ErrorCode, FString ErrorMessage)
 		{
 			if (ErrorCode != 70131 && ErrorCode != 12241)
 			{
@@ -132,10 +129,10 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 				bStatIsExist = true;
 			}), ServerStatisticTestErrorHandler);
 			Waiting(bCreateStatDone, "Waiting for stat created...");
-			check(bCreateStatDone);
+			AB_TEST_TRUE(bCreateStatDone);
 		}
-		check(bStatIsExist);
-		check(bGetStatDone);
+		AB_TEST_TRUE(bStatIsExist);
+		AB_TEST_TRUE(bGetStatDone);
 	}
 
 	return true;
@@ -153,7 +150,7 @@ bool ServerStatisticTearDown::RunTest(const FString& Parameters)
 		bDeleteUsersSuccessful = true;
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bDeleteUsersSuccessful, "Waiting for user deletion...");
-	check(bDeleteUsersSuccessful);
+	AB_TEST_TRUE(bDeleteUsersSuccessful);
 
 	return true;
 }
@@ -161,10 +158,9 @@ bool ServerStatisticTearDown::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerStatisticBulkCreateStatItem, "AccelByte.Tests.ServerStatistic.B.CreateUserStatItems_Success", AutomationFlagMaskServerStatistic);
 bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 {
-	bool bUserStatItemIsExist = false;
 	bool bGetUserStatItemDone = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult GetUserStatItemResult;
-	FRegistry::ServerStatistic.GetUserStatItems(FRegistry::Credentials.GetUserId(), { StatisticStatCodes[0], StatisticStatCodes[1] }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetUserStatItemDone, &bUserStatItemIsExist, &GetUserStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
+	FRegistry::ServerStatistic.GetUserStatItems(FRegistry::Credentials.GetUserId(), { StatisticStatCodes[0], StatisticStatCodes[1] }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&bGetUserStatItemDone, &GetUserStatItemResult](FAccelByteModelsUserStatItemPagingSlicedResult Result)
 	{
 		GetUserStatItemResult = Result;
 		bGetUserStatItemDone = true;
@@ -182,13 +178,13 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 		}), FErrorHandler::CreateLambda([&bDeleteUserStatSuccess](int32 ErrorCode, FString ErrorMessage)
 		{
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-			if ((ErrorCodes)ErrorCode == ErrorCodes::UserStatsNotFoundException)
+			if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::UserStatsNotFoundException)
 			{
 				bDeleteUserStatSuccess = true;
 			}
 		}));
 		Waiting(bDeleteUserStatSuccess, "Waiting for user statitem deletion...");
-		check(bDeleteUserStatSuccess);
+		AB_TEST_TRUE(bDeleteUserStatSuccess);
 	}
 
 	bool bCreateStatItemDone = false;
@@ -203,7 +199,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 		{
 			if (!result.Success)
 			{
-				if ((ErrorCodes)FCString::Atoi(*result.Details["errorCode"]) != ErrorCodes::UserStatAlreadyExistException)
+				if (static_cast<ErrorCodes>(FCString::Atoi(*result.Details["errorCode"])) != ErrorCodes::UserStatAlreadyExistException)
 				{
 					bCreateStatItemSuccess = false;
 					break;
@@ -212,8 +208,8 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 		}
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
-	check(bCreateStatItemDone);
-	check(bCreateStatItemSuccess);
+	AB_TEST_TRUE(bCreateStatItemDone);
+	AB_TEST_TRUE(bCreateStatItemSuccess);
 
 	for (int i = 0; i < StatisticStatCodes.Num(); i++)
 	{
@@ -226,13 +222,13 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 		}), FErrorHandler::CreateLambda([&bStatItemDeleteSuccess](int32 ErrorCode, FString ErrorMessage)
 		{
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-			if ((ErrorCodes)ErrorCode == ErrorCodes::UserStatsNotFoundException)
+			if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::UserStatsNotFoundException)
 			{
 				bStatItemDeleteSuccess = true;
 			}
 		}));
 		Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
-		check(bStatItemDeleteSuccess);
+		AB_TEST_TRUE(bStatItemDeleteSuccess);
 	}
 
 	return true;
@@ -253,7 +249,7 @@ bool ServerStatisticBulkCreateStatItemInvalid::RunTest(const FString& Parameters
 		{
 			if (!result.Success)
 			{
-				if ((ErrorCodes)FCString::Atoi(*result.Details["errorCode"]) == ErrorCodes::StatisticNotFoundException)
+				if (static_cast<ErrorCodes>(FCString::Atoi(*result.Details["errorCode"])) == ErrorCodes::StatisticNotFoundException)
 				{
 					bStatItemInvalid = true;
 					break;
@@ -262,8 +258,8 @@ bool ServerStatisticBulkCreateStatItemInvalid::RunTest(const FString& Parameters
 		}
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
-	check(bCreateStatItemDone);
-	check(bStatItemInvalid);
+	AB_TEST_TRUE(bCreateStatItemDone);
+	AB_TEST_TRUE(bStatItemInvalid);
 
 	return true;
 }
@@ -285,7 +281,7 @@ bool ServerStatisticGetAllUserStatItems::RunTest(const FString& Parameters)
 		}
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bGetAllUserStatItemsSuccess, "Waiting for get all stat items...");
-	check(bGetAllUserStatItemsSuccess);
+	AB_TEST_TRUE(bGetAllUserStatItemsSuccess);
 	return true;
 }
 
@@ -306,7 +302,7 @@ bool ServerStatisticGetUserStatItemsByStatCodes::RunTest(const FString& Paramete
 		}
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
-	check(bGetUserStatItemsByStatCodesSuccess);
+	AB_TEST_TRUE(bGetUserStatItemsByStatCodesSuccess);
 	return true;
 }
 
@@ -327,7 +323,7 @@ bool ServerStatisticGetUserStatItemsByTags::RunTest(const FString& Parameters)
 		}
 	}), ServerStatisticTestErrorHandler);
 	Waiting(bGetUserStatItemsByTagsSuccess, "Waiting for get stat items...");
-	check(bGetUserStatItemsByTagsSuccess);
+	AB_TEST_TRUE(bGetUserStatItemsByTagsSuccess);
 	return true;
 }
 
@@ -346,7 +342,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 		{
 			if (!result.Success)
 			{
-				if ((ErrorCodes)FCString::Atoi(*result.Details["errorCode"]) != ErrorCodes::UserStatAlreadyExistException)
+				if (static_cast<ErrorCodes>(FCString::Atoi(*result.Details["errorCode"])) != ErrorCodes::UserStatAlreadyExistException)
 				{
 					bCreateStatItemSuccess = false;
 					break;
@@ -399,17 +395,17 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 	}), FErrorHandler::CreateLambda([&bStatItemDeleteSuccess](int32 ErrorCode, FString ErrorMessage)
 	{
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		if ((ErrorCodes)ErrorCode == ErrorCodes::UserStatsNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::UserStatsNotFoundException)
 		{
 			bStatItemDeleteSuccess = true;
 		}
 	}));
 	Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
 
-	check(bIncrementManyUsersStatItemsSuccess);
-	check(bGetUserStatItemsByStatCodesSuccess);
-	check(IncrementResult[0].Success);
-	check(GetResult.Data[0].Value == 7);
+	AB_TEST_TRUE(bIncrementManyUsersStatItemsSuccess);
+	AB_TEST_TRUE(bGetUserStatItemsByStatCodesSuccess);
+	AB_TEST_TRUE(IncrementResult[0].Success);
+	AB_TEST_EQUAL(GetResult.Data[0].Value, 7.0f);
 	return true;
 }
 
@@ -428,7 +424,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 		{
 			if (!result.Success)
 			{
-				if ((ErrorCodes)FCString::Atoi(*result.Details["errorCode"]) != ErrorCodes::UserStatAlreadyExistException)
+				if (static_cast<ErrorCodes>(FCString::Atoi(*result.Details["errorCode"])) != ErrorCodes::UserStatAlreadyExistException)
 				{
 					bCreateStatItemSuccess = false;
 					break;
@@ -480,15 +476,15 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 	}), FErrorHandler::CreateLambda([&bStatItemDeleteSuccess](int32 ErrorCode, FString ErrorMessage)
 	{
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		if ((ErrorCodes)ErrorCode == ErrorCodes::UserStatsNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::UserStatsNotFoundException)
 		{
 			bStatItemDeleteSuccess = true;
 		}
 	}));
 	Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
 
-	check(bIncrementManyUsersStatItemsSuccess);
-	check(IncrementResult[0].Success);
-	check(GetResult.Data[0].Value == 7);
+	AB_TEST_TRUE(bIncrementManyUsersStatItemsSuccess);
+	AB_TEST_TRUE(IncrementResult[0].Success);
+	AB_TEST_EQUAL(GetResult.Data[0].Value, 7.0f);
 	return true;
 }

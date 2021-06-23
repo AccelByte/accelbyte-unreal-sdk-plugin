@@ -11,12 +11,9 @@
 #include "GameServerApi/AccelByteServerAchievementApi.h"
 #include "Api/AccelByteStatisticApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
-#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -41,7 +38,7 @@ TArray<FAchievementRequest> allAchievementRequests;
 
 const auto AchievementErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteAchievementTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteAchievementTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(AchievementSetup, "AccelByte.Tests.Achievement.A.Setup", AutomationFlagMaskAchievement);
@@ -175,7 +172,7 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 			bClientLoginSuccess = true;
 		}), AchievementErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
-	check(bClientLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
 
 	for (auto statisticRequest : allStatisticRequest)
 	{
@@ -217,7 +214,7 @@ bool AchievementSetup::RunTest(const FString& Parameters)
 				bCreateAchievementSuccess = true;
 			}), AchievementErrorHandler);
 		Waiting(bCreateAchievementSuccess, "Waiting for creating achievement ...");
-		check(bCreateAchievementSuccess);
+		AB_TEST_TRUE(bCreateAchievementSuccess);
 	}
 
 	return true;
@@ -237,28 +234,28 @@ bool QueryNamespaceAchievementsDefaultLanguageCreatedAsc::RunTest(const FString&
 	}), AchievementErrorHandler, 0, 100);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
-	bool isEnAchievement1Found = false;
+	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement1.AchievementCode && paginatedAchievements.Data[i].Name == achievement1.Name[achievement1.DefaultLanguage])
 		{
-			isEnAchievement1Found = true;
+			bEnAchievement1Found = true;
 			break;
 		}
 	}
-	bool isEnAchievement2Found = false;
+	bool bEnAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement2.AchievementCode && paginatedAchievements.Data[i].Name == achievement2.Name[achievement2.DefaultLanguage])
 		{
-			isEnAchievement2Found = true;
+			bEnAchievement2Found = true;
 			break;
 		}
 	}
 
-	check(bQueryAchievementsSuccess);
-	check(isEnAchievement1Found);
-	check(isEnAchievement2Found);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(bEnAchievement1Found);
+	AB_TEST_TRUE(bEnAchievement2Found);
 	return true;
 }
 
@@ -276,22 +273,22 @@ bool QueryNamespaceAchievementsSpecificLanguage::RunTest(const FString& Paramete
 	}), AchievementErrorHandler, 0, 100);
 	Waiting(bQueryEnAchievementsSuccess, "Waiting for querying en achievements ...");
 
-	bool isEnAchievement1Found = false;
+	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedEnAchievements.Data.Num(); i++)
 	{
 		if (paginatedEnAchievements.Data[i].AchievementCode == achievement1.AchievementCode && paginatedEnAchievements.Data[i].Name == achievement1.Name[TEXT("en")])
 		{
-			isEnAchievement1Found = true;
+			bEnAchievement1Found = true;
 			break;
 		}
 	}
 
-	bool isEnAchievement2Found = false;
+	bool bEnAchievement2Found = false;
 	for (int i = 0; i < paginatedEnAchievements.Data.Num(); i++)
 	{
 		if (paginatedEnAchievements.Data[i].AchievementCode == achievement2.AchievementCode && paginatedEnAchievements.Data[i].Name == achievement2.Name[TEXT("en")])
 		{
-			isEnAchievement2Found = true;
+			bEnAchievement2Found = true;
 			break;
 		}
 	}
@@ -307,32 +304,32 @@ bool QueryNamespaceAchievementsSpecificLanguage::RunTest(const FString& Paramete
 	}), AchievementErrorHandler, 0, 100);
 	Waiting(bQueryIdAchievementsSuccess, "Waiting for querying id achievements ...");
 
-	bool isIdAchievement1Found = false;
+	bool bIdAchievement1Found = false;
 	for (int i = 0; i < paginatedIdAchievements.Data.Num(); i++)
 	{
 		if (paginatedIdAchievements.Data[i].AchievementCode == achievement1.AchievementCode && paginatedIdAchievements.Data[i].Name == achievement1.Name[achievement1.DefaultLanguage])
 		{
-			isIdAchievement1Found = true;
+			bIdAchievement1Found = true;
 				break;
 		}
 	}
 
-	bool isIdAchievement2Found = false;
+	bool bIdAchievement2Found = false;
 	for (int i = 0; i < paginatedIdAchievements.Data.Num(); i++)
 	{
 		if (paginatedIdAchievements.Data[i].AchievementCode == achievement2.AchievementCode && paginatedIdAchievements.Data[i].Name == achievement2.Name[TEXT("id")])
 		{
-			isIdAchievement2Found = true;
+			bIdAchievement2Found = true;
 				break;
 		}
 	}
 
-	check(bQueryEnAchievementsSuccess);
-	check(isEnAchievement1Found);
-	check(isEnAchievement2Found);
-	check(bQueryIdAchievementsSuccess);
-	check(isIdAchievement1Found);
-	check(isIdAchievement2Found);
+	AB_TEST_TRUE(bQueryEnAchievementsSuccess);
+	AB_TEST_TRUE(bEnAchievement1Found);
+	AB_TEST_TRUE(bEnAchievement2Found);
+	AB_TEST_TRUE(bQueryIdAchievementsSuccess);
+	AB_TEST_TRUE(bIdAchievement1Found);
+	AB_TEST_TRUE(bIdAchievement2Found);
 	return true;
 }
 
@@ -351,34 +348,34 @@ bool QueryNamespaceAchievementsCreatedAsc::RunTest(const FString& Parameters)
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	int achievement1Order = 0;
-	bool isAchievement1Found = false;
+	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement1.AchievementCode)
 		{
 			achievement1Order = i;
-			isAchievement1Found = true;
+			bAchievement1Found = true;
 			break;
 		}
 	}
 
 	int achievement2Order = 0;
-	bool isAchievement2Found = false;
+	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement2.AchievementCode)
 		{
 			achievement2Order = i;
-			isAchievement2Found = true;
+			bAchievement2Found = true;
 			break;
 		}
 	}
 
-	check(bQueryAchievementsSuccess);
-	check(isAchievement1Found);
-	check(isAchievement1Found);
-	check(isAchievement2Found);
-	check(achievement1Order < achievement2Order);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(bAchievement2Found);
+	AB_TEST_TRUE(achievement1Order < achievement2Order);
 	return true;
 }
 
@@ -397,34 +394,34 @@ bool QueryNamespaceAchievementsCreatedDesc::RunTest(const FString& Parameters)
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
 	int achievement1Order = 0;
-	bool isAchievement1Found = false;
+	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement1.AchievementCode)
 		{
 			achievement1Order = i;
-			isAchievement1Found = true;
+			bAchievement1Found = true;
 			break;
 		}
 	}
 
 	int achievement2Order = 0;
-	bool isAchievement2Found = false;
+	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement2.AchievementCode)
 		{
 			achievement2Order = i;
-			isAchievement2Found = true;
+			bAchievement2Found = true;
 			break;
 		}
 	}
 
-	check(bQueryAchievementsSuccess);
-	check(isAchievement1Found);
-	check(isAchievement1Found);
-	check(isAchievement2Found);
-	check(achievement1Order > achievement2Order);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(bAchievement2Found);
+	AB_TEST_TRUE(achievement1Order > achievement2Order);
 	return true;
 }
 
@@ -442,8 +439,8 @@ bool QueryNamespaceAchievementsLimit1::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler, 0, 1);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 1);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
 	return true;
 }
 
@@ -472,15 +469,15 @@ bool QueryNamespaceAchievementsOffset1::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler, 1);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying achievements ...");
 
-	bool isAchievementSame = false;
+	bool bAchievementSame = false;
 	if (paginatedAchievements.Data[0].AchievementCode == paginatedAchievementsNoOffset.Data[1].AchievementCode)
 	{
-		isAchievementSame = true;
+		bAchievementSame = true;
 	}
 
-	check(bQueryAchievementsNoOffsetSuccess);
-	check(bQueryAchievementsSuccess);
-	check(isAchievementSame);
+	AB_TEST_TRUE(bQueryAchievementsNoOffsetSuccess);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(bAchievementSame);
 	return true;
 }
 
@@ -509,10 +506,10 @@ bool GetAchievement::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler);
 	Waiting(bGetAchievement2Success, "Waiting for getting achievement 2 ...");
 
-	check(bGetAchievement1Success);
-	check(getAchievement1.AchievementCode == achievement1.AchievementCode);
-	check(bGetAchievement2Success);
-	check(getAchievement2.AchievementCode == achievement2.AchievementCode);
+	AB_TEST_TRUE(bGetAchievement1Success);
+	AB_TEST_EQUAL(getAchievement1.AchievementCode, achievement1.AchievementCode);
+	AB_TEST_TRUE(bGetAchievement2Success);
+	AB_TEST_EQUAL(getAchievement2.AchievementCode, achievement2.AchievementCode);
 	return true;
 }
 
@@ -536,7 +533,7 @@ bool GetInvalidAchievementId::RunTest(const FString& Parameters)
 	}));
 	Waiting(bGetAchievementDone, "Waiting for getting invalid achievement ...");
 
-	check(!bGetAchievementSuccess);
+	AB_TEST_FALSE(bGetAchievementSuccess);
 	return true;
 }
 
@@ -558,7 +555,7 @@ bool GetEmptyAchievementId::RunTest(const FString& Parameters)
 	}));
 	Waiting(bGetAchievementDone, "Waiting for getting empty achievement id ...");
 
-	check(!bGetAchievementSuccess);
+	AB_TEST_FALSE(bGetAchievementSuccess);
 	return true;
 }
 
@@ -576,8 +573,8 @@ bool QueryUserAchievementsEmptyData::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 0);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 0);
 	return true;
 }
 
@@ -593,7 +590,7 @@ bool UnlockAchievement::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler);
 	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
 	
-	check(bUnlockAchievementSuccess);
+	AB_TEST_TRUE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -611,15 +608,15 @@ bool QueryUserAchievements::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	bool isAchievement1Found = false;
+	bool bAchievement1Found = false;
 	if (paginatedAchievements.Data[0].AchievementCode == achievement1.AchievementCode)
 	{
-		isAchievement1Found = true;
+		bAchievement1Found = true;
 	}
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 1);
-	check(isAchievement1Found);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
+	AB_TEST_TRUE(bAchievement1Found);
 	return true;
 }
 
@@ -636,7 +633,7 @@ bool ServerUnlockAchievement::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
 
-	check(bUnlockAchievementSuccess);
+	AB_TEST_TRUE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -660,7 +657,7 @@ bool ServerUnlockAchievementInvalidUserId::RunTest(const FString& Parameters)
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
 	// TODO: Uncomment below if the user id validation is fixed on the backend.
-	//check(!bUnlockAchievementSuccess);
+	//AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -683,7 +680,7 @@ bool ServerUnlockAchievementEmptyUserId::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for empty user id achievement ...");
 
-	check(!bUnlockAchievementSuccess);
+	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -706,7 +703,7 @@ bool ServerUnlockInvalidAchievementCode::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
-	check(!bUnlockAchievementSuccess);
+	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -729,7 +726,7 @@ bool ServerUnlockEmptyAchievementCode::RunTest(const FString& Parameters)
 	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
-	check(!bUnlockAchievementSuccess);
+	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -747,30 +744,30 @@ bool QueryUserAchievementsUnlockedAll::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	bool isAchievement1Found = false;
+	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement1.AchievementCode)
 		{
-			isAchievement1Found = true;
+			bAchievement1Found = true;
 			break;
 		}
 	}
 
-	bool isAchievement2Found = false;
+	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
 		if (paginatedAchievements.Data[i].AchievementCode == achievement2.AchievementCode)
 		{
-			isAchievement2Found = true;
+			bAchievement2Found = true;
 			break;
 		}
 	}
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 2);
-	check(isAchievement1Found);
-	check(isAchievement2Found);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 2);
+	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(bAchievement2Found);
 	return true;
 }
 
@@ -788,9 +785,9 @@ bool QueryUserAchievementsOffset1::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler, 1);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 1);
-	check(paginatedAchievements.Data[0].AchievementCode == achievement2.AchievementCode);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
+	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, achievement2.AchievementCode);
 	return true;
 }
 
@@ -808,9 +805,9 @@ bool QueryUserAchievementsLimit1::RunTest(const FString& Parameters)
 	}), AchievementErrorHandler, 0, 1);
 	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	check(bQueryAchievementsSuccess);
-	check(paginatedAchievements.Data.Num() == 1);
-	check(paginatedAchievements.Data[0].AchievementCode == achievement1.AchievementCode);
+	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
+	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, achievement1.AchievementCode);
 	return true;
 }
 
@@ -832,7 +829,7 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 	{
 		if (entry.StatCode == currentStatCode)
 		{
-			check(entry.Value == 0.0f);
+			AB_TEST_EQUAL(entry.Value, 0.0f);
 		}
 	}
 
@@ -841,11 +838,9 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 	UpdateStat.inc = currentAchievementRequest.GoalValue;
 	UpdateStat.statCode = currentStatCode;
 	bool bIncrementUserStatDone = false;
-	TArray<FAccelByteModelsBulkStatItemOperationResult> bulkAddUserStatItemResult;
 	FRegistry::Statistic.IncrementUserStatItems({ UpdateStat }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
 		{
 			bIncrementUserStatDone = true;
-			bulkAddUserStatItemResult = Result;
 		}), AchievementErrorHandler);
 	Waiting(bIncrementUserStatDone, "Waiting for increment user stat item ...");
 
@@ -872,7 +867,7 @@ bool UnlockIncrementalAchievement_ClientUpdateStat::RunTest(const FString& Param
 		}
 	}
 
-	check(bIncrementalAchievementUnlocked);
+	AB_TEST_TRUE(bIncrementalAchievementUnlocked);
 	return true;
 }
 
@@ -901,7 +896,7 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 	{
 		if (entry.StatCode == currentStatCode)
 		{
-			check(entry.Value == 0.0f);
+			AB_TEST_EQUAL(entry.Value, 0.0f);
 		}
 	}
 
@@ -910,7 +905,7 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 	TArray<FAccelByteModelsBulkStatItemOperationResult> IncrementResult;
 	FRegistry::ServerStatistic.IncrementUserStatItems(
 		FRegistry::Credentials.GetUserId(),
-		{ { (float) currentAchievementRequest.GoalValue, currentStatCode } },
+		{ { static_cast<float>(currentAchievementRequest.GoalValue), currentStatCode } },
 		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 			{
 				bIncrementStatDone = true;
@@ -941,7 +936,7 @@ bool UnlockIncrementalAchievement_ServerUpdateStat::RunTest(const FString& Param
 		}
 	}
 
-	check(bIncrementalAchievementUnlocked);
+	AB_TEST_TRUE(bIncrementalAchievementUnlocked);
 	return true;
 }
 
@@ -971,8 +966,8 @@ bool AchievementTearDown::RunTest(const FString& Parameters)
 
 	for(auto bDeleteAchievementSuccess : deleteAchievementResults)
 	{
-		check(bDeleteAchievementSuccess);
+		AB_TEST_TRUE(bDeleteAchievementSuccess);
 	}
-	check(bDeleteSuccess);
+	AB_TEST_TRUE(bDeleteSuccess);
 	return true;
 }
