@@ -486,7 +486,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 	}), SubscriptionErrorHandler);
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
-	check(bCheckEligibleResult);
+	AB_TEST_TRUE(bCheckEligibleResult);
 	FRegistry::Settings.AppId = oriAppId;
 
 	return true;
@@ -512,22 +512,22 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 	}), SubscriptionErrorHandler);
 	Waiting(bLoginFinish, "Waiting user login...");
 
-	bool doneGetSubsOwnership = false;
+	bool bGetSubsOwnership = false;
 	FAccelByteModelsEntitlementOwnership ownership;
 	FRegistry::Entitlement.GetUserEntitlementOwnershipBySku(
 		subsTypeItemSku,
-		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&doneGetSubsOwnership, &ownership](const FAccelByteModelsEntitlementOwnership& Result)
+		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&bGetSubsOwnership, &ownership](const FAccelByteModelsEntitlementOwnership& Result)
 	{
-		doneGetSubsOwnership = true;
+		bGetSubsOwnership = true;
 		ownership = Result;
-	}), FErrorHandler::CreateLambda([&doneGetSubsOwnership](int32 ErrorCode, FString ErrorMessage)
+	}), FErrorHandler::CreateLambda([&bGetSubsOwnership](int32 ErrorCode, FString ErrorMessage)
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
-		doneGetSubsOwnership = true;
+		bGetSubsOwnership = true;
 	}));
-	Waiting(doneGetSubsOwnership, "Waiting for get subs entitlement");
-	check(doneGetSubsOwnership);
-	check(ownership.Owned);
+	Waiting(bGetSubsOwnership, "Waiting for get subs entitlement");
+	AB_TEST_TRUE(bGetSubsOwnership);
+	AB_TEST_TRUE(ownership.Owned);
 
 	FRegistry::Settings.AppId = oriAppId;
 
@@ -564,15 +564,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 	}), SubscriptionErrorHandler);
 	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
 
-	check(!bCheckEligibleResult);
+	AB_TEST_FALSE(bCheckEligibleResult);
 	FRegistry::Settings.AppId = oriAppId;
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionTeardown, "AccelByte.Tests.Subscription.Z.SubscriptionTeardown", AutomationFlagMaskSubscription);
-bool SubscriptionTeardown::RunTest(const FString& Parameters)
-{
-	AB_TEST_SKIP_WHEN_DISABLED();
-
 	return true;
 }

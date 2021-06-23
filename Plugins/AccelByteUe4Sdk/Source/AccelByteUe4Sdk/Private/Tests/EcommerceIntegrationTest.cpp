@@ -134,7 +134,7 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetCategory
 
-	check(bGetCategorySuccess);
+	AB_TEST_TRUE(bGetCategorySuccess);
 	return true;
 }
 
@@ -166,8 +166,8 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetRootCategories
 
-	check(bGetRootCategoriesSuccess);
-	check(bExpectedRootCategoryFound);
+	AB_TEST_TRUE(bGetRootCategoriesSuccess);
+	AB_TEST_TRUE(bExpectedRootCategoryFound);
 	return true;
 }
 
@@ -199,8 +199,8 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetChildCategories
 
-	check(bGetChildCategoriesSuccess);
-	check(bExpectedChildCategoryFound);
+	AB_TEST_TRUE(bGetChildCategoriesSuccess);
+	AB_TEST_TRUE(bExpectedChildCategoryFound);
 	return true;
 }
 
@@ -236,9 +236,9 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetDescendantCategories
 
-	check(bGetDescendantCategoriesSuccess);
-	check(bExpectedDescendantCategoryFound1);
-	check(bExpectedDescendantCategoryFound2);
+	AB_TEST_TRUE(bGetDescendantCategoriesSuccess);
+	AB_TEST_TRUE(bExpectedDescendantCategoryFound1);
+	AB_TEST_TRUE(bExpectedDescendantCategoryFound2);
 	return true;
 }
 
@@ -274,8 +274,8 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetItemByCriteria
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedRootItemFound);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedRootItemFound);
 	return true;
 }
 
@@ -329,9 +329,9 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetItem
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedRootItemFound);
-	check(bGetItemByIdSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedRootItemFound);
+	AB_TEST_TRUE(bGetItemByIdSuccess);
 	return true;
 }
 
@@ -373,8 +373,8 @@ bool EcommerceGetDiscountedItemSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion GetItemByCriteria
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedRootItemFound);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedRootItemFound);
 	return true;
 }
 
@@ -405,8 +405,8 @@ bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion SearchItem
 
-	check(bSearchItemSuccess);
-	check(bSearchedItemFound);
+	AB_TEST_TRUE(bSearchItemSuccess);
+	AB_TEST_TRUE(bSearchedItemFound);
 	return true;
 }
 
@@ -466,9 +466,9 @@ bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Paramete
 	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
-	check(bCreateDistributionSuccess);
-	check(bGetDistributionSuccess);
-	check(bDeleteDistributionSuccess);
+	AB_TEST_TRUE(bCreateDistributionSuccess);
+	AB_TEST_TRUE(bGetDistributionSuccess);
+	AB_TEST_TRUE(bDeleteDistributionSuccess);
 
 	return true;
 }
@@ -567,10 +567,10 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 	Waiting(bDeleteDistributionSuccess,"Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
-	check(bCreateDistributionSuccess);
-	check(bGetDistributionSuccess);
-	check(bUpdateDistributionSuccess);
-	check(bDeleteDistributionSuccess);
+	AB_TEST_TRUE(bCreateDistributionSuccess);
+	AB_TEST_TRUE(bGetDistributionSuccess);
+	AB_TEST_TRUE(bUpdateDistributionSuccess);
+	AB_TEST_TRUE(bDeleteDistributionSuccess);
 
 	return true;
 }
@@ -685,12 +685,12 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 
 #pragma endregion CreateOrder_InGameItem
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedItemFound);
-	check(bCreateNewOrderSuccess);
-	check(bGetItemByCriteriaSuccess2);
-	check(bExpectedItemFound2);
-	check(bCreateNewOrderSuccess2);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedItemFound);
+	AB_TEST_TRUE(bCreateNewOrderSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
+	AB_TEST_TRUE(bExpectedItemFound2);
+	AB_TEST_TRUE(bCreateNewOrderSuccess2);
 	return true;
 }
 
@@ -771,10 +771,10 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 
 #pragma endregion GetUserOrder
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedItemFound);
-	check(bCreateNewOrderSuccess);
-	check(bGetUserOrderSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedItemFound);
+	AB_TEST_TRUE(bCreateNewOrderSuccess);
+	AB_TEST_TRUE(bGetUserOrderSuccess);
 	return true;
 }
 
@@ -855,10 +855,10 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 
 #pragma endregion GetUserOrderHistory
 
-	check(bGetItemByCriteriaSuccess);
-	check(bExpectedItemFound);
-	check(bCreateNewOrderSuccess);
-	check(bGetUserOrderHistorySuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bExpectedItemFound);
+	AB_TEST_TRUE(bCreateNewOrderSuccess);
+	AB_TEST_TRUE(bGetUserOrderHistorySuccess);
 	return true;
 }
 
@@ -881,7 +881,7 @@ bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 
 #pragma endregion GetUserOrders
 
-	check(bGetUserOrdersSuccess);
+	AB_TEST_TRUE(bGetUserOrdersSuccess);
 	return true;
 }
 
@@ -898,7 +898,7 @@ bool EcommerceGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 
 	Waiting(bGetWalletSuccess,"Waiting for get wallet...");
 
-	check(bGetWalletSuccess);
+	AB_TEST_TRUE(bGetWalletSuccess);
 	return true;
 }
 
@@ -952,9 +952,9 @@ bool EcommerceCreditUserWallet::RunTest(const FString& Parameters)
 
 #pragma endregion CreditUserWallet
 
-	check(bGetWalletSuccess);
-	check(bCreditWalletSuccess);
-	check(bBalanceIncrease);
+	AB_TEST_TRUE(bGetWalletSuccess);
+	AB_TEST_TRUE(bCreditWalletSuccess);
+	AB_TEST_TRUE(bBalanceIncrease);
 	return true;
 }
 
@@ -974,7 +974,7 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
     }), EcommerceErrorHandler);
 
 	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
-	check(bGetWalletSuccess)
+	AB_TEST_TRUE(bGetWalletSuccess)
 #pragma endregion GetWalletInfo
 
 #pragma region ServerLogin
@@ -987,7 +987,7 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
     }), EcommerceErrorHandler);
 	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
-	check(bServerLoginWithClientCredentialsDone)
+	AB_TEST_TRUE(bServerLoginWithClientCredentialsDone)
 #pragma endregion ServerLogin
 
 #pragma region CreditUserWallet
@@ -1007,7 +1007,7 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
 		WalletInfo = Result;
     }), EcommerceErrorHandler);
 	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
-	check(bCreditWalletSuccess)
+	AB_TEST_TRUE(bCreditWalletSuccess)
 #pragma endregion CreditUserWallet
 	
 #pragma region DebitUserWallet
@@ -1025,7 +1025,7 @@ bool EcommerceDebitUserWallet::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	Waiting(bDebitWalletSuccess, "Waiting for debiting the user wallet");
 
-	check(bWalletDecreased)
+	AB_TEST_TRUE(bWalletDecreased)
 #pragma endregion DebitUserWallet
 	
 	return true;
@@ -1052,7 +1052,7 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement
@@ -1089,7 +1089,7 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region CheckEntitlementGranted
@@ -1113,7 +1113,7 @@ bool EcommerceEntitlementGrant::RunTest(const FString& Parameters)
 			break;
 		}
 	}
-	check(bEntitlementGranted);
+	AB_TEST_TRUE(bEntitlementGranted);
 #pragma endregion CheckEntitlementGranted
 	return true;
 }
@@ -1167,8 +1167,8 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 	}));
 	Waiting(bGrantEntitlementDone, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementDone);
-	check(!bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementDone);
+	AB_TEST_FALSE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region CheckEntitlementGranted
@@ -1192,7 +1192,7 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 			break;
 		}
 	}
-	check(!bEntitlementGranted);
+	AB_TEST_FALSE(bEntitlementGranted);
 #pragma endregion CheckEntitlementGranted
 	return true;
 }
@@ -1214,8 +1214,8 @@ bool EcommerceQueryUserEntitlement::RunTest(const FString& Parameters)
 
 	Waiting(bQueryEntitlementSuccess, "Waiting for get user entitlement...");
 
-	check(bQueryEntitlementSuccess);
-	check(bQueryResultTrue);
+	AB_TEST_TRUE(bQueryEntitlementSuccess);
+	AB_TEST_TRUE(bQueryResultTrue);
 	return true;
 }
 
@@ -1256,9 +1256,9 @@ bool EcommerceConsumeUserEntitlement::RunTest(const FString& Parameters)
 
 #pragma endregion SecondConsumption
 
-	check(bConsumeEntitlement1Success);
-	check(bConsumeResult1True);
-	check(bConsumeEntitlement2Success);
+	AB_TEST_TRUE(bConsumeEntitlement1Success);
+	AB_TEST_TRUE(bConsumeResult1True);
+	AB_TEST_TRUE(bConsumeEntitlement2Success);
 	return true;
 }
 
@@ -1280,8 +1280,8 @@ bool EcommerceGetUserEntitlementByEntitlementId::RunTest(const FString& Paramete
 
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementSuccess);
-	check(bGetResultTrue);
+	AB_TEST_TRUE(bGetEntitlementSuccess);
+	AB_TEST_TRUE(bGetResultTrue);
 	return true;
 }
 
@@ -1308,7 +1308,7 @@ bool EcommerceGetUserEntitlementByEntitlementIdInvalid::RunTest(const FString& P
 
 	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementError);
+	AB_TEST_TRUE(bGetEntitlementError);
 	return true;
 }
 
@@ -1337,8 +1337,8 @@ bool EcommerceServerGetEntitlementByEntitlementId::RunTest(const FString& Parame
 	}), EcommerceErrorHandler);
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementSuccess);
-	check(bGetResultTrue);
+	AB_TEST_TRUE(bGetEntitlementSuccess);
+	AB_TEST_TRUE(bGetResultTrue);
 	return true;
 }
 
@@ -1369,8 +1369,8 @@ bool EcommerceServerGetEntitlementByUserIdAndEntitlementId::RunTest(const FStrin
 	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementSuccess);
-	check(bGetResultTrue);
+	AB_TEST_TRUE(bGetEntitlementSuccess);
+	AB_TEST_TRUE(bGetResultTrue);
 	return true;
 }
 
@@ -1400,8 +1400,8 @@ bool EcommerceServerQueryEntitlements::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementSuccess);
-	check(bGetResultTrue);
+	AB_TEST_TRUE(bGetEntitlementSuccess);
+	AB_TEST_TRUE(bGetResultTrue);
 	return true;
 }
 
@@ -1436,7 +1436,7 @@ bool EcommerceServerGetEntitlementByEntitlementIdInvalid::RunTest(const FString&
 
 	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
 
-	check(bGetEntitlementError);
+	AB_TEST_TRUE(bGetEntitlementError);
 	return true;
 }
 
@@ -1450,7 +1450,7 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 		bUserLoginSuccess = true;
 	}), EcommerceErrorHandler);
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 	
 #pragma region GetItemByCriteria
 
@@ -1469,7 +1469,7 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	
 	FAccelByteModelsItemCriteria ItemCriteria2;
 	ItemCriteria2.Language = TEXT("en");
@@ -1486,7 +1486,7 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
     }), EcommerceErrorHandler);
 
 	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess2);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement
@@ -1542,7 +1542,7 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region CheckEntitlementGranted
@@ -1575,7 +1575,7 @@ bool EcommerceEntitlementGrantMany::RunTest(const FString& Parameters)
 			break;
 		}
 	}
-	check(bEntitlementGranted);
+	AB_TEST_TRUE(bEntitlementGranted);
 #pragma endregion CheckEntitlementGranted
 	
 	return true;
@@ -1592,7 +1592,7 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 	
 #pragma region GetItemByCriteria
 
@@ -1612,7 +1612,7 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	
 	FAccelByteModelsItemCriteria ItemCriteria2;
 	ItemCriteria2.Language = TEXT("en");
@@ -1630,7 +1630,7 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess2);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement	
@@ -1660,7 +1660,7 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region ConsumeEntitlement
@@ -1674,7 +1674,7 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bIsConsumed, "Waiting to be consumed");
 
-	check(bIsConsumed);
+	AB_TEST_TRUE(bIsConsumed);
 #pragma endregion ConsumeEntitlement
 	return true;
 }
@@ -1690,7 +1690,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 	
 #pragma region GetItemByCriteria
 	FAccelByteModelsItemCriteria ItemCriteria;
@@ -1709,7 +1709,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	
 	FAccelByteModelsItemCriteria ItemCriteria2;
 	ItemCriteria2.Language = TEXT("en");
@@ -1727,7 +1727,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess2);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement
@@ -1766,7 +1766,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region EnableEntitlement
@@ -1779,7 +1779,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 		}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bIsEnable, "Waiting to enable the entitlement");
-	check(bIsEnable);
+	AB_TEST_TRUE(bIsEnable);
 #pragma endregion EnableEntitlement
 	
 #pragma region DisableEntitlement
@@ -1792,7 +1792,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 		}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bIsDisabled, "Waiting to disable the entitlement");
-	check(bIsDisabled);
+	AB_TEST_TRUE(bIsDisabled);
 #pragma endregion DisableEntitlement
 	
 #pragma region RevokeEntitlement
@@ -1805,7 +1805,7 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
 		}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bIsRevoked, "Waiting to revoke the entitlement");
-	check(bIsRevoked);
+	AB_TEST_TRUE(bIsRevoked);
 #pragma endregion RevokeEntitlement
 	
 	return true;
@@ -1821,7 +1821,7 @@ bool DisableEnableRevokeUserEntitlementInvalid::RunTest(const FString& Parameter
 	}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 
 	const FString InvalidId = TEXT("Invalid");
 #pragma region DisableEntitlement
@@ -1837,7 +1837,7 @@ bool DisableEnableRevokeUserEntitlementInvalid::RunTest(const FString& Parameter
 	);
 	FlushHttpRequests();
 	Waiting(bIsDisabledFailed, "Waiting to disable the entitlement");
-	check(bIsDisabledFailed);
+	AB_TEST_TRUE(bIsDisabledFailed);
 #pragma endregion DisableEntitlement
 
 #pragma region EnableEntitlement
@@ -1852,7 +1852,7 @@ bool DisableEnableRevokeUserEntitlementInvalid::RunTest(const FString& Parameter
 		}));
 	FlushHttpRequests();
 	Waiting(bIsEnableFailed, "Waiting to enable the entitlement");
-	check(bIsEnableFailed);
+	AB_TEST_TRUE(bIsEnableFailed);
 #pragma endregion EnableEntitlement
 	
 #pragma region RevokeEntitlement
@@ -1867,7 +1867,7 @@ bool DisableEnableRevokeUserEntitlementInvalid::RunTest(const FString& Parameter
 		}));
 	FlushHttpRequests();
 	Waiting(bIsRevokedFailed, "Waiting to revoke the entitlement");
-	check(bIsRevokedFailed);
+	AB_TEST_TRUE(bIsRevokedFailed);
 #pragma endregion RevokeEntitlement
 	
 	return true;
@@ -1883,7 +1883,7 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 	
 #pragma region GetItemByCriteria
 	FAccelByteModelsItemCriteria ItemCriteria;
@@ -1902,7 +1902,7 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	
 	FAccelByteModelsItemCriteria ItemCriteria2;
 	ItemCriteria2.Language = TEXT("en");
@@ -1920,7 +1920,7 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 
 	FlushHttpRequests();
 	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
-	check(bGetItemByCriteriaSuccess2);
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement
@@ -1970,7 +1970,7 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
-	check(bGrantEntitlementSuccess);
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
 
 #pragma region RevokeEntitlements
@@ -1983,7 +1983,7 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bIsRevokeSuccess, "Waiting for revoking the entitlements");
 
-	check(bIsRevokeSuccess);
+	AB_TEST_TRUE(bIsRevokeSuccess);
 
 #pragma endregion RevokeEntitlements
 	
@@ -2013,8 +2013,8 @@ bool EcommerceRevokeEntitlements::RunTest(const FString& Parameters)
 	}), EcommerceErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 	FlushHttpRequests();
 	Waiting(bServerQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
-	check(bServerQueryEntitlementSuccess);
-	check(bServerEntitlementRevoked);
+	AB_TEST_TRUE(bServerQueryEntitlementSuccess);
+	AB_TEST_TRUE(bServerEntitlementRevoked);
 #pragma endregion CheckEntitlementRevoked
 
 	return true;
@@ -2037,7 +2037,7 @@ bool ECommerceRedeemCode::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeSuccess, "Waiting for redeem code...");
 
-	check(fulfillmentResult.EntitlementSummaries[0].ItemId == ExpectedVariable.redeemableItem.itemId);
+	AB_TEST_EQUAL(fulfillmentResult.EntitlementSummaries[0].ItemId, ExpectedVariable.redeemableItem.itemId);
 
 	FAccelByteModelsEntitlementInfo getUserEntitlementByIdResult;
 	bool bGetEntitlementSuccess = false;
@@ -2049,9 +2049,9 @@ bool ECommerceRedeemCode::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get entitlement...");
 
-	check(getUserEntitlementByIdResult.Id == fulfillmentResult.EntitlementSummaries[0].Id);
-	check(getUserEntitlementByIdResult.ItemId == ExpectedVariable.redeemableItem.itemId);
-	check(getUserEntitlementByIdResult.Source == EAccelByteEntitlementSource::REDEEM_CODE);
+	AB_TEST_EQUAL(getUserEntitlementByIdResult.Id, fulfillmentResult.EntitlementSummaries[0].Id);
+	AB_TEST_EQUAL(getUserEntitlementByIdResult.ItemId, ExpectedVariable.redeemableItem.itemId);
+	AB_TEST_EQUAL(getUserEntitlementByIdResult.Source, EAccelByteEntitlementSource::REDEEM_CODE);
 	return true;
 }
 
@@ -2080,9 +2080,9 @@ bool ECommerceRedeemMaxCountExeceeded::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::ExceedMaxRedeemCountPerUserException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::ExceedMaxRedeemCountPerUserException);
 	return true;
 }
 
@@ -2117,7 +2117,7 @@ bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bUpdateCampaignSuccess, "Waiting for update campaign...");
 
-	check(bUpdateCampaignSuccess);
+	AB_TEST_TRUE(bUpdateCampaignSuccess);
 
 	FAccelByteModelsFulfillmentResult fulfillmentResult;
 	bool bRedeemCodeSuccess = false;
@@ -2141,9 +2141,9 @@ bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::CampaignIsInactiveException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CampaignIsInactiveException);
 	return true;
 }
 
@@ -2162,7 +2162,7 @@ bool ECommerceRedeemCampaignCodeInactive::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bDisableCodeSuccess, "Waiting for disabling code...");
 	
-	check(bDisableCodeSuccess);
+	AB_TEST_TRUE(bDisableCodeSuccess);
 
 	FAccelByteModelsFulfillmentResult fulfillmentResult;
 	bool bRedeemCodeSuccess = false;
@@ -2186,9 +2186,9 @@ bool ECommerceRedeemCampaignCodeInactive::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::CodeIsInactiveException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeIsInactiveException);
 	return true;
 }
 
@@ -2217,9 +2217,9 @@ bool ECommerceRedeemCodeDoesNotExistInNamespace::RunTest(const FString& Paramete
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::CodeNotFoundException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeNotFoundException);
 	return true;
 }
 
@@ -2248,9 +2248,9 @@ bool ECommerceRedeemRedeemptionNotStarted::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::CodeRedeemptionNotStartedException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeRedeemptionNotStartedException);
 	return true;
 }
 
@@ -2279,9 +2279,9 @@ bool ECommerceRedeemRedeemptionAlreadyEnded::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
 
-	check(!bRedeemCodeSuccess);
-	check(bRedeemCodeDone);
-	check(ErrorCode == (int32)ErrorCodes::CodeRedeemptionAlreadyEndedException);
+	AB_TEST_FALSE(bRedeemCodeSuccess);
+	AB_TEST_TRUE(bRedeemCodeDone);
+	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeRedeemptionAlreadyEndedException);
 	return true;
 }
 
@@ -2292,7 +2292,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 	bool bSetupSuccess = false;
 	SetupEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bSetupSuccess = true; }), EcommerceErrorHandler);
 	Waiting(bSetupSuccess,"Waiting for setup ecommerce...");
-	check(bSetupSuccess);
+	AB_TEST_TRUE(bSetupSuccess);
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
@@ -2300,7 +2300,7 @@ bool EcommerceSetup::RunTest(const FString& Parameters)
 		bUserLoginSuccess = true;
 	}), EcommerceErrorHandler);
 	Waiting(bUserLoginSuccess,"Waiting for Login...");
-	check(bUserLoginSuccess);
+	AB_TEST_TRUE(bUserLoginSuccess);
 	return true;
 }
 
@@ -2310,7 +2310,7 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	bool bTearDownSuccess = false;
 	TearDownEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bTearDownSuccess = true; }), EcommerceErrorHandler);
 	Waiting(bTearDownSuccess,"Waiting for teardown...");
-	check(bTearDownSuccess)
+	AB_TEST_TRUE(bTearDownSuccess)
 
 	float LastTime = 0.0f;
 
