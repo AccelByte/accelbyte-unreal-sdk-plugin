@@ -27,7 +27,7 @@ const int32 AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorConte
 
 const auto GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteGameTelemetryTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteGameTelemetryTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameTelemetryTestSendProtectedEvent, "AccelByte.Tests.GameTelemetry.Send_BatchTelemetryEvent_ReturnsOK", AutomationFlagMaskGameTelemetry);
@@ -77,7 +77,7 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 
 	FRegistry::User.ForgetAllCredentials();
 
-	check(SuccessResultCount == EVENT_COUNT);
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
 
 	return true;
 }
@@ -124,7 +124,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 
 	FRegistry::User.ForgetAllCredentials();
 
-	check(SuccessResultCount == EVENT_COUNT);
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
 
 	return true;
 }
