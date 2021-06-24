@@ -6,7 +6,29 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-	
+
+void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
+{
+	TArray<FString> KeysToRemove;
+	for (auto& Item: JsonPtr->Values)
+	{
+		if (Item.Value->Type == EJson::String && Item.Value->AsString() == "")
+		{
+			KeysToRemove.Add(Item.Key);
+		}
+		else if (Item.Value->Type == EJson::Object)
+		{
+			TSharedPtr<FJsonObject> const Child = Item.Value->AsObject();
+			RemoveEmptyStrings(Child);
+		}
+	}
+
+	for (FString const& Key : KeysToRemove)
+	{
+		JsonPtr->RemoveField(Key);
+	}
+}
+
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

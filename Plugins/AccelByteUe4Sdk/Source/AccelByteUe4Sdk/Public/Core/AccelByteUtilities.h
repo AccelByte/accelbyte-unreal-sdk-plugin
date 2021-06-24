@@ -12,7 +12,7 @@
 using AccelByte::THandler;
 using AccelByte::FErrorHandler;
 
-class JSONUTILITIES_API FAccelByteUtilities
+class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:
 	template<typename CharType = TCHAR, template<typename> class PrintPolicy = TPrettyJsonPrintPolicy, typename InStructType>
@@ -46,6 +46,8 @@ public:
 
 		return false;
 	}
+
+	static void RemoveEmptyStrings(TSharedPtr<FJsonObject> Json);
 };
 
 USTRUCT(BlueprintType)

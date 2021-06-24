@@ -1678,9 +1678,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	ProfileCreate.Language = "en";
 	ProfileCreate.Timezone = "Etc/UTC";
 	ProfileCreate.DateOfBirth = "1970-01-01";
-	ProfileCreate.AvatarSmallUrl = "http://example.com/avatar/small.jpg";
 	ProfileCreate.AvatarUrl = "http://example.com/avatar/normal.jpg";
-	ProfileCreate.AvatarLargeUrl = "http://example.com/avatar/large.jpg";
 	FAccelByteModelsUserProfileInfo CreatedProfile;
 
 	bool bCreateProfileDone = false;
