@@ -1258,7 +1258,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 	int OfflineCount = 0;
 	for(auto Online : GetPresenceResult.Data)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("User: %s | Status: %d | %d"), *Online.UserID, Online.Availability, GetPresenceResult.Data.Num());
+		UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("User: %s | Status: %d | %d"), *Online.UserID, static_cast<int32>(Online.Availability), GetPresenceResult.Data.Num());
 		bool bIsOnline = false;
 		bool bIsExpectedOnline = false;
 		for (int i = 1; i < (Lobbies.Num() - ExpectedOffline); i++) {

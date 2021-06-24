@@ -7,6 +7,7 @@
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -80,8 +81,7 @@ static FString GetPlatformString(EAccelBytePlatformType PlatformType)
 
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
@@ -99,8 +99,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 
 void User::LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	TempUsername = Username;
 	Creds.SetUserEmailAddress(Username);
@@ -120,8 +119,7 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (Creds.GetSessionState() == Credentials::ESessionState::Valid)
 	{
@@ -139,8 +137,7 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 
 void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString AuthorizationCode = Environment::GetEnvironmentVariable(TEXT("JUSTICE_AUTHORIZATION_CODE"), 1000);
 
@@ -160,16 +157,14 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 
 void User::ForgetAllCredentials()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	Creds.ForgetAll();
 }
 
 void User::Register(const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FRegisterRequest NewUserRequest;
 	NewUserRequest.DisplayName  = DisplayName;
@@ -198,8 +193,7 @@ void User::Register(const FString& Username, const FString& Password, const FStr
 
 void User::Registerv2(const FString& EmailAddress, const FString& Username, const FString& Password, const FString& DisplayName, const FString& Country, const FString& DateOfBirth, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FRegisterRequestv2 NewUserRequest;
 	NewUserRequest.DisplayName = DisplayName;
@@ -229,8 +223,7 @@ void User::Registerv2(const FString& EmailAddress, const FString& Username, cons
 
 void User::Registerv3(const FRegisterRequestv3& RegisterRequest, const THandler<FRegisterResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FRegisterRequestv3 NewUserRequest;
 	NewUserRequest.AcceptedPolicies = RegisterRequest.AcceptedPolicies;
@@ -261,8 +254,7 @@ void User::Registerv3(const FRegisterRequestv3& RegisterRequest, const THandler<
 
 void User::GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/users/me"), *Settings.IamServerUrl);
@@ -284,8 +276,7 @@ void User::GetData(const THandler<FAccountUserData>& OnSuccess, const FErrorHand
 
 void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (!UpdateRequest.EmailAddress.IsEmpty())
 	{
@@ -314,8 +305,7 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountU
 
 void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, const FVoidHandler & OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/email"), *Settings.IamServerUrl, *Settings.Namespace);
@@ -338,8 +328,7 @@ void User::UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, const FVoidHandle
 
 void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, const TArray<FString>& OtherPlatformUserId, const THandler<FBulkPlatformUserIdResponse>& OnSuccess, const FErrorHandler & OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	const FString PlatformString = GetPlatformString(PlatformType);
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
@@ -365,8 +354,7 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 
 void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (Creds.GetUserEmailAddress().IsEmpty())
 	{
@@ -385,8 +373,7 @@ void User::SendVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandl
 
 void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	if (Creds.GetUserEmailAddress().IsEmpty())
 	{
@@ -405,8 +392,7 @@ void User::SendUpdateEmailVerificationCode(const FVoidHandler& OnSuccess, const 
 
 void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FVerificationCodeRequest SendUpgradeVerificationCodeRequest
 	{
@@ -420,8 +406,7 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 
 void User::UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/code/verify"), *Settings.IamServerUrl, *Creds.GetNamespace(), *Creds.GetUserId());
@@ -452,8 +437,7 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 
 void User::Upgrade(const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Creds.GetNamespace());
@@ -484,8 +468,7 @@ void User::Upgrade(const FString& Username, const FString& Password, const THand
 
 void User::Upgradev2(const FString& EmailAddress, const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/verify"), *Settings.IamServerUrl, *Creds.GetNamespace());
@@ -516,8 +499,7 @@ void User::Upgradev2(const FString& EmailAddress, const FString& Username, const
 
 void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString ContactType     = TEXT("email");
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
@@ -540,8 +522,7 @@ void User::Verify(const FString& VerificationCode, const FVoidHandler& OnSuccess
 
 void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/forgot"), *Settings.IamServerUrl, *Settings.Namespace);
 	FString Verb            = TEXT("POST");
@@ -561,8 +542,7 @@ void User::SendResetPasswordCode(const FString& Username, const FVoidHandler& On
 
 void User::ResetPassword(const FString& VerificationCode, const FString& Username, const FString& NewPassword, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FResetPasswordRequest ResetPasswordRequest;
 	ResetPasswordRequest.Code           = VerificationCode;
@@ -587,8 +567,7 @@ void User::ResetPassword(const FString& VerificationCode, const FString& Usernam
 
 void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s/platforms"), *Settings.IamServerUrl, *Creds.GetNamespace(), *Creds.GetUserId());
@@ -610,8 +589,7 @@ void User::GetPlatformLinks(const THandler<FPagedPlatformLinks>& OnSuccess, cons
 
 void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Ticket, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	auto PlatformId = GetPlatformString(PlatformType);
 
@@ -635,8 +613,7 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString&
 
 void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformUserId, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	auto PlatformId = GetPlatformString(PlatformType);
 
@@ -665,8 +642,7 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FS
 
 void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	auto PlatformId = GetPlatformString(PlatformType);
 
@@ -690,8 +666,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidH
 
 void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCodeRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = TEXT("");
 	FString Namespace       = TEXT("");
@@ -719,8 +694,7 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 
 void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *Settings.IamServerUrl, *Creds.GetNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
@@ -753,8 +727,7 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 
 void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/%s"), *Settings.IamServerUrl, *Settings.Namespace, *UserID);
@@ -774,8 +747,7 @@ void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData
 
 void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	FString PlatformId      = GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
@@ -794,8 +766,7 @@ void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, con
 
 void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/location/country"), *Settings.IamServerUrl);
@@ -813,8 +784,7 @@ void User::GetCountryFromIP(const THandler<FCountryInfo>& OnSuccess, const FErro
 
 void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	auto onItemInfoGot = THandler<FAccelByteModelsItemInfo>::CreateLambda([this, OnSuccess, OnError](const FAccelByteModelsItemInfo& itemInfoResult)
 	{

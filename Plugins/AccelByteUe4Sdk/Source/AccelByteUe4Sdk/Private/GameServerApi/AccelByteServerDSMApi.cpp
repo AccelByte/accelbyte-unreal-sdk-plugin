@@ -4,20 +4,15 @@
 
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
-#include "Runtime/Launch/Resources/Version.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Core/AccelByteUtilities.h"
 #include "Http.h"
-#include "Modules/ModuleManager.h"
-#include "IWebSocket.h"
-#include "WebSocketsModule.h"
-#include "JsonUtilities.h"
 
 
 namespace AccelByte
@@ -27,8 +22,7 @@ namespace AccelByte
 
 		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 			ParseCommandParam();
 
 			if (ServerType != EServerType::NONE)
@@ -72,9 +66,6 @@ namespace AccelByte
 
 				OnRegisterResponse.BindLambda([this, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 				{
-					Report report;
-					report.GetHttpResponse(Request, Response);
-
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
 						FAccelByteModelsServerInfo Result;
@@ -100,8 +91,7 @@ namespace AccelByte
 
 		void ServerDSM::SendShutdownToDSM(const bool KillMe, const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 			if (ServerType == EServerType::LOCALSERVER)
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server not registered as Cloud Server."));
@@ -144,8 +134,7 @@ namespace AccelByte
 
 		void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 			if (ServerType != EServerType::NONE)
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server already registered."));
@@ -176,9 +165,6 @@ namespace AccelByte
 
 				OnRegisterResponse.BindLambda([this, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 				{
-					Report report;
-					report.GetHttpResponse(Request, Response);
-
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
 						SetServerType(EServerType::LOCALSERVER);
@@ -199,8 +185,7 @@ namespace AccelByte
 
 		void ServerDSM::RegisterLocalServerToDSM(const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 
 			GetPubIpDelegate.BindLambda([this, Port, ServerName_, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
 			{
@@ -211,8 +196,7 @@ namespace AccelByte
 
 		void ServerDSM::DeregisterLocalServerFromDSM(const FString& ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 			if (ServerType == EServerType::CLOUDSERVER)
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server not registered as Local Server."));
@@ -244,8 +228,7 @@ namespace AccelByte
 
 		void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionResponse>& OnSuccess, const FErrorHandler& OnError)
 		{
-			Report report;
-			report.GetFunctionLog(FString(__FUNCTION__));
+			FReport::Log(FString(__FUNCTION__));
 			FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
 			FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace(), *ServerName);
 			FString Verb = TEXT("GET");

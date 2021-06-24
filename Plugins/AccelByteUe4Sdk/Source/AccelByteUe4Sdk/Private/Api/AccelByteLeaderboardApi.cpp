@@ -3,8 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteLeaderboardApi.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 
@@ -21,8 +21,7 @@ namespace Api
 
 	void Leaderboard::GetRankings(const FString& LeaderboardCode, const EAccelByteLeaderboardTimeFrame& TimeFrame, uint32 Offset, uint32 Limit, const THandler<FAccelByteModelsLeaderboardRankingResult>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString TimeFrameString = "";
 		switch (TimeFrame)
@@ -77,8 +76,7 @@ namespace Api
 
 	void Leaderboard::GetUserRanking(const FString& UserId, const FString& LeaderboardCode, const THandler<FAccelByteModelsUserRankingData>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s"), *Settings.LeaderboardServerUrl, *Settings.Namespace, *LeaderboardCode, *UserId);

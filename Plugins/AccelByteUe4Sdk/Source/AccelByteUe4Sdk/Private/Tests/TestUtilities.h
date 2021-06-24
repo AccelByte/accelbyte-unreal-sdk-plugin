@@ -12,8 +12,22 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "TestUtilities.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
+
+#define AB_TEST_TRUE(Expr) UTEST_TRUE(TEXT(#Expr), Expr)
+#define AB_TEST_FALSE(Expr) UTEST_FALSE(TEXT(#Expr), Expr)
+#define AB_TEST_VALID(Ptr) UTEST_VALID(TEXT(#Ptr), Ptr)
+#define AB_TEST_INVALID(Ptr) UTEST_INVALID(TEXT(#Ptr), Ptr)
+#define AB_TEST_NOT_NULL(Ptr) UTEST_NOT_NULL(TEXT(#Ptr), Ptr)
+#define AB_TEST_NULL(Ptr) UTEST_NULL(TEXT(#Ptr), Ptr)
+#define AB_TEST_EQUAL(Actual, Expected) UTEST_EQUAL(TEXT(#Actual), Actual, Expected)
+#define AB_TEST_NOT_EQUAL(Actual, Expected) UTEST_NOT_EQUAL(TEXT(#Actual " and " #Expected), Actual, Expected)
+#define AB_TEST_SAME(Actual, Expected) UTEST_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)
+#define AB_TEST_NOT_SAME(Actual, Expected) UTEST_NOT_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)
+
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;
+using AccelByte::FVoidHandler;
 
 UCLASS(Blueprintable, BlueprintType)
 class UAccelByteBlueprintsTest : public UBlueprintFunctionLibrary

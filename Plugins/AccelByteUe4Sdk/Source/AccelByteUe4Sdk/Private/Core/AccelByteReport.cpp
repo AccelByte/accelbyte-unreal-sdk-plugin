@@ -3,31 +3,33 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteReport.h"
-#include "Runtime/Launch/Resources/Version.h" 
 
-DEFINE_LOG_CATEGORY(AccelByteReportLog);
+DEFINE_LOG_CATEGORY(LogAccelByte);
 
 namespace AccelByte
 {
-	void Report::GetHttpRequest(const FHttpRequestPtr & Request)
+	void FReport::LogHttpRequest(const FHttpRequestPtr & Request)
 	{
 		if (!UObjectInitialized()) return;
 
-		FString LogMessage = "";
-
-		if (Request.IsValid())
+		if (!Request.IsValid())
 		{
-			LogMessage += "\nHTTP Request:";
-			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
+			UE_LOG(LogAccelByte, Log, TEXT("INVALID REQ HTTP"));
+			return;
+		}
+
+		UE_LOG(LogAccelByte, Log, TEXT("HTTP REQ %s %s, %p"), *Request->GetVerb(), *Request->GetURL(), Request.Get());
+
+		if (UE_LOG_ACTIVE(LogAccelByte, Verbose))
+		{
+			FString LogMessage = "";
 			LogMessage += "\n---";
-			LogMessage += "\n" + Request->GetVerb() + " " + Request->GetURL();
-			LogMessage += "\n";
-			for (auto a : Request->GetAllHeaders())
+			for (const FString& Header : Request->GetAllHeaders())
 			{
-				LogMessage += a + "\n";
+				LogMessage += "\n" + Header;
 			}
-//INTENTIONAL: Request->GetContent() && Request->GetContentLength() could throw an error if it doesn't have content
-#if ENGINE_MINOR_VERSION != 22 
+			//INTENTIONAL: Request->GetContent() && Request->GetContentLength() could throw an error if it doesn't have content
+#if ENGINE_MINOR_VERSION != 22
 			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
 
 			LogMessage += "\n\n";
@@ -35,100 +37,57 @@ namespace AccelByte
 			{
 				LogMessage += static_cast<char>(a);
 			}
-			LogMessage += "\n---";
-			LogMessage += "\n";
+			LogMessage += "\n---\n";
 #endif
+			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
 		}
-		
-		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
 	}
 
-	void Report::GetHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response)
+	void FReport::LogHttpResponse(const FHttpRequestPtr Request, const FHttpResponsePtr Response)
 	{
 		if (!UObjectInitialized()) return;
-
-		FString LogMessage = "";
-
-		if (Response.IsValid())
+		
+		if (!Response.IsValid())
 		{
-			LogMessage += "\nHTTP Response:";
-			LogMessage += FString::Printf(TEXT("\nPtr: %p"), Request.Get());
-			if (Request.IsValid())
-			{
-				LogMessage += FString::Printf(TEXT("\nRequest: %s %s"), *Request->GetVerb(), *Request->GetURL());
-			}
-			LogMessage += "\n---";
-			LogMessage += "\nHTTP/1.1 " + FString::FromInt(Response->GetResponseCode());
-			LogMessage += "\nDate: " + GetStandardTime();
-			LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
-			LogMessage += "\n \n" + Response->GetContentAsString();
-			LogMessage += "\n---\n";
+			UE_LOG(LogAccelByte, Log, TEXT("INVALID RSP HTTP"));
+			return;
 		}
 
-		if (Response.IsValid())
+		const FString ShortLogMessage = FString::Printf(TEXT("HTTP %d %s %s, %p"), Response->GetResponseCode(), *Request->GetVerb(), *Response->GetURL(), Request.Get());
+		
+		if (Response->GetResponseCode() >= 400)
 		{
-			const int32 ResponseCode = Response->GetResponseCode();
-			if (ResponseCode >= 400)
-			{
-				// Error
-				UE_LOG(AccelByteReportLog, Warning, TEXT("%s"), *LogMessage);
-			}
-			else if (ResponseCode >= 300)
-			{
-				// Warning
-				UE_LOG(AccelByteReportLog, Warning, TEXT("%s"), *LogMessage);
-			}
-			else
-			{
-				// Log
-				UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
-			}
+			UE_LOG(LogAccelByte, Warning, TEXT("%s"), *ShortLogMessage);
+		}
+		else if (Response->GetResponseCode() >= 300)
+		{
+			UE_LOG(LogAccelByte, Warning, TEXT("%s"), *ShortLogMessage);
 		}
 		else
 		{
-			// Error
-			UE_LOG(AccelByteReportLog, Error, TEXT("%s"), *LogMessage);
+			UE_LOG(LogAccelByte, Log, TEXT("%s"), *ShortLogMessage);
+		}
+
+		if (UE_LOG_ACTIVE(LogAccelByte, Verbose))
+		{
+			FString LogMessage = "";
+			LogMessage += "\n---";
+			for (const FString& Header : Response->GetAllHeaders())
+			{
+				LogMessage += "\n" + Header;
+			}
+			LogMessage += "\nContent-Length: " + FString::FromInt(Response->GetContent().Num());
+			LogMessage += "\n\n" + Response->GetContentAsString();
+			LogMessage += "\n---\n";
+
+			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
 		}
 	}
 
-	void Report::GetFunctionLog(FString FunctionMacroName) 
+	void FReport::Log(const FString Message)
 	{
 		if (!UObjectInitialized()) return;
 
-		int count = 0;
-		
-		FString FunctionName = FunctionMacroName;
-		while (FunctionName.Find(TEXT("::")) > 0)
-		{
-			FunctionName = FunctionName.Right(FunctionName.Len() - FunctionName.Find(TEXT("::")) - 2 );
-			count ++;
-		};
-
-		FString ClassName = FunctionMacroName;
-		for (int i = 0; i < count-1; i++)
-		{
-			ClassName = ClassName.Right(ClassName.Len() - ClassName.Find(TEXT("::")) - 2 );
-			UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *ClassName);
-		}
-		ClassName = ClassName.Left(ClassName.Len() - FunctionName.Len() - 2 );
-
-		FString LogMessage = "";
-		LogMessage += "\nCurrent Function Called:";
-		LogMessage += "\n---";
-		LogMessage += "\nDate: " + GetStandardTime();
-		LogMessage += "\nClass: " + ClassName;
-		LogMessage += "\nFunction: " + FunctionName;
-		LogMessage += "\n---\n";
-
-		UE_LOG(AccelByteReportLog, Log, TEXT("%s"), *LogMessage);
+		UE_LOG(LogAccelByte, Log, TEXT("%s"), *Message);
 	}
-
-	FString Report::GetStandardTime()
-	{
-		FDateTime Now = FDateTime::Now();
-		FString StandardTime = FString::Printf(TEXT("%d-%d-%dT%d-%d-%dZ"), Now.GetYear(), Now.GetMonth(), Now.GetDay(), Now.GetHour(), Now.GetMinute(), Now.GetSecond());
-
-		return StandardTime;
-	}
-
 }

@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
 
@@ -21,8 +22,7 @@ ServerEcommerce::~ServerEcommerce()
 void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveOnly, const FString& EntitlementName, const TArray<FString>& ItemIds, const int32& Offset, const int32& Limit,
 	const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
@@ -76,8 +76,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *Entitlementid);
@@ -99,8 +98,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const
 void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FString& EntitlementId,
 	const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
@@ -120,8 +118,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FStrin
 
 void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
@@ -156,8 +153,7 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<
 
 void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *CurrencyCode);
@@ -180,8 +176,7 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& Cur
 void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray<FString>& EntitlementIds,
 	const THandler<FAccelByteModelsBulkRevokeEntitlements>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds?entitlementIds="), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
@@ -207,8 +202,7 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray
 void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString& EntitlementId,
 	const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
@@ -229,8 +223,7 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString
 void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FString& EntitlementId, int32 UseCount,
 	const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
@@ -252,8 +245,7 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FStrin
 void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FString& EntitlementId,
 	const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
@@ -273,8 +265,7 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FStrin
 void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString& EntitlementId,
 	const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
@@ -295,8 +286,7 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 	const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest,
 	const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *WalletId);

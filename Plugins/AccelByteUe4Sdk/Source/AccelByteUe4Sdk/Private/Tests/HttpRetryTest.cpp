@@ -5,12 +5,9 @@
 #pragma once
 
 #include <chrono>
-#include <ctime>
-#include <queue>
 #include <vector>
 
 #include "Misc/AutomationTest.h"
-#include "HAL/FileManager.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "TestUtilities.h"
@@ -21,7 +18,6 @@
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
-#include "Models/AccelByteUserProfileModels.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -122,8 +118,8 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
-	check(!RequestCompleted);
-	check(NumRequestRetry >= 2);
+	AB_TEST_FALSE(RequestCompleted);
+	AB_TEST_TRUE(NumRequestRetry >= 2);
 
 	FRegistry::Credentials.ForgetAll();
 	
@@ -191,8 +187,8 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
-	check(!RequestCompleted);
-	check(NumRequestRetry >= 2);
+	AB_TEST_FALSE(RequestCompleted);
+	AB_TEST_TRUE(NumRequestRetry >= 2);
 
 	FRegistry::Credentials.ForgetAll();
 
@@ -200,157 +196,6 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 	ResetSettings();
 	return true;
 }
-
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError403_RefreshToken, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError403_RefreshToken", AutomationFlagMaskHttpRetry);
-//bool ProcessRequest_GotError403_RefreshToken::RunTest(const FString& Parameter)
-//{
-//	//Mock IamServerUrl path prefix
-//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-//	//Sucess 200, with json for refresh token:
-//	//{
-//	//	"access_token": "some_access_token",
-//	//	"bans" : []
-//	//	"display_name": "some_display_name",
-//	//	"expires_in" : 10,
-//	//	"jflgs" : 0,
-//	//	"namespace" : "string",
-//	//	"permissions" : [],
-//	//	"platform_id": "string",
-//	//	"platform_user_id" : "string",
-//	//	"refresh_token" : "some_refresh_token",
-//	//	"roles" : [],
-//	//	"token_type" : "string",
-//	//	"user_id" : "string"
-//	//}
-//	
-//	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
-//	FRegistry::Settings.ClientId = "ClientID";
-//	FRegistry::Settings.ClientSecret = "ClientSecret";
-//	FRegistry::Settings.Namespace = "game01";
-//	FRegistry::Settings.PublisherNamespace = "publisher01";
-//	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 100.0, TEXT("user_refresh_id"));
-//	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-//	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-//	auto Ticker = FTicker::GetCoreTicker();
-//	double CurrentTime;
-//
-//	Ticker.AddTicker(
-//		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-//		{
-//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-//			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-//
-//			return true;
-//		}),
-//		0.2f);
-//
-//	auto Request = FHttpModule::Get().CreateRequest();
-//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-//	//Forbidden 403
-//	Request->SetURL("http://www.mocky.io/v2/5c38c0853100007800a99210");
-//	Request->SetVerb(TEXT("GET"));
-//	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-//	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-//	bool RequestCompleted = false;
-//	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-//	{
-//		if (Response.IsValid())
-//		{
-//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d"), CurrentTime, Response->GetResponseCode());
-//		}
-//		else
-//		{
-//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, NoResponse"), CurrentTime);
-//		}
-//
-//		RequestCompleted = true;
-//	});
-//
-//	CurrentTime = 10.0;
-//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
-//	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-//
-//	while (CurrentTime < 15)
-//	{
-//		CurrentTime += 0.2;
-//		Ticker.Tick(0.2);
-//		FPlatformProcess::Sleep(0.2);
-//	}
-//
-//	check(Request->GetResponse()->GetResponseCode() == 403);
-//	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("Session State %d"), static_cast<int32>(FRegistry::Credentials.GetSessionState()));
-//	check(FRegistry::Credentials.GetUserSessionId().Compare(TEXT("some_access_token")) == 0);
-//
-//	FRegistry::Credentials.ForgetAll();
-//
-//	ResetSettings();
-//	return true;
-//}
-
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(Credentials_OnExpired_Refreshed, "AccelByte.Tests.Core.HttpRetry.Credentials_OnExpired_Refreshed", AutomationFlagMaskHttpRetry);
-//bool Credentials_OnExpired_Refreshed::RunTest(const FString& Parameter)
-//{
-//	//Mock IamServerUrl path prefix
-//	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-//	//Sucess 200, with json for refresh token:
-//	//{
-//	//	"access_token": "some_access_token",
-//	//	"bans" : []
-//	//	"display_name": "some_display_name",
-//	//	"expires_in" : 10,
-//	//	"jflgs" : 0,
-//	//	"namespace" : "string",
-//	//	"permissions" : [],
-//	//	"platform_id": "string",
-//	//	"platform_user_id" : "string",
-//	//	"refresh_token" : "some_refresh_token",
-//	//	"roles" : [],
-//	//	"token_type" : "string",
-//	//	"user_id" : "string"
-//	//}
-//
-//	FRegistry::Settings.IamServerUrl = "http://www.mocky.io/v2/5c3b2f592e00000f00648857";
-//	FRegistry::Settings.ClientId = "ClientID";
-//	FRegistry::Settings.ClientSecret = "ClientSecret";
-//	FRegistry::Settings.Namespace = "game01";
-//	FRegistry::Settings.PublisherNamespace = "publisher01";
-//	FRegistry::Credentials.SetClientCredentials(TEXT("client_id"), TEXT("client_secret"));
-//	FRegistry::Credentials.SetUserSession(TEXT("user_access_token"), 20.0, TEXT("user_refresh_id"));
-//	FRegistry::Credentials.SetUserLogin(TEXT("Id"), "user_display_name", FRegistry::Settings.Namespace);
-//	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-//	auto Ticker = FTicker::GetCoreTicker();
-//	double CurrentTime;
-//
-//	Ticker.AddTicker(
-//		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-//		{
-//			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-//			Scheduler->PollRetry(CurrentTime, FRegistry::Credentials);
-//
-//			return true;
-//		}),
-//		0.2f);
-//
-//	CurrentTime = 10.0;
-//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
-//
-//	while (CurrentTime < 25.0)
-//	{
-//		CurrentTime += 0.2;
-//		Ticker.Tick(0.2);
-//		FPlatformProcess::Sleep(0.2);
-//	}
-//
-//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Valid);
-//	check(FRegistry::Credentials.GetUserSessionId().Compare(TEXT("some_access_token")) == 0);
-//
-//	FRegistry::Credentials.ForgetAll();
-//	check(FRegistry::Credentials.GetSessionState() == Credentials::ESessionState::Invalid);
-//
-//	ResetSettings();
-//	return true;
-//}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.Disabled.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
@@ -399,9 +244,9 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 		FPlatformProcess::Sleep(0.2);
 	}
 
-	check(RequestCompleted);
-	check(!Request->GetResponse().IsValid());
-	check(Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError);
+	AB_TEST_TRUE(RequestCompleted);
+	AB_TEST_FALSE(Request->GetResponse().IsValid());
+	AB_TEST_EQUAL(Request->GetStatus(), EHttpRequestStatus::Failed_ConnectionError);
 
 	Ticker.RemoveTicker(TickerDelegate);
 	FRegistry::Credentials.ForgetAll();
@@ -459,9 +304,9 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 		FPlatformProcess::Sleep(0.1); //lying to Scheduler, it's actually 30s instead of 60s. So mocky still hold the response, while Scheduler thinks that it's timeout.
 	}
 
-	check(RequestCompleted);
-	check(!Request->GetResponse().IsValid());
-	check(Request->GetStatus() == EHttpRequestStatus::Failed);
+	AB_TEST_TRUE(RequestCompleted);
+	AB_TEST_FALSE(Request->GetResponse().IsValid());
+	AB_TEST_EQUAL(Request->GetStatus(), EHttpRequestStatus::Failed);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate);
@@ -513,7 +358,7 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 		FPlatformProcess::Sleep(0.2);
 	}
 
-	check(RequestCompleted == 15);
+	AB_TEST_EQUAL(RequestCompleted, 15);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate);
@@ -609,8 +454,8 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	check(RequestFailed == 0);
-	check(RequestSucceeded == 3);
+	AB_TEST_EQUAL(RequestFailed, 0);
+	AB_TEST_EQUAL(RequestSucceeded, 3);
 
 	for (const auto& request : CancelledRequests)
 	{
@@ -627,8 +472,8 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	check(RequestFailed == 3);
-	check(RequestSucceeded == 6);
+	AB_TEST_EQUAL(RequestFailed, 3);
+	AB_TEST_EQUAL(RequestSucceeded, 6);
 
 	while (CurrentTime < 35.0)
 	{
@@ -640,8 +485,8 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	check(RequestFailed == 3);
-	check(RequestSucceeded == 9);
+	AB_TEST_EQUAL(RequestFailed, 3);
+	AB_TEST_EQUAL(RequestSucceeded, 9);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate);
@@ -753,7 +598,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 	}
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	check(RequestCompleted == 10)
+	AB_TEST_EQUAL(RequestCompleted, 10);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate1);

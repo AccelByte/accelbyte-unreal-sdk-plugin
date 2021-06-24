@@ -6,6 +6,7 @@
 #include "Core/AccelByteError.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -18,8 +19,7 @@ namespace Api
 
 	void CloudStorage::GetAllSlots(const THandler<TArray<FAccelByteModelsSlot>>& OnSuccess, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -41,8 +41,7 @@ namespace Api
 
 	void CloudStorage::CreateSlot(TArray<uint8> BinaryData, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 		
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
@@ -85,8 +84,7 @@ namespace Api
 
 	void CloudStorage::GetSlot(FString SlotID, const THandler<TArray<uint8>> & OnSuccess, const FErrorHandler & OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *SlotID);
@@ -108,8 +106,7 @@ namespace Api
 
 	void CloudStorage::UpdateSlot(FString SlotID, const TArray<uint8> BinaryData, const FString& FileName, const TArray<FString> & Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot> & OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler & OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());	
 		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *SlotID);
@@ -157,8 +154,7 @@ namespace Api
 
 	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url           = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s/metadata"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *SlotId);
@@ -186,8 +182,7 @@ namespace Api
 
 	void CloudStorage::DeleteSlot(FString SlotID, const FVoidHandler & OnSuccess, const FErrorHandler & OnError)
 	{
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/slots/%s"), *Settings.CloudStorageServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *SlotID);

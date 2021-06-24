@@ -28,11 +28,9 @@ DEFINE_LOG_CATEGORY(LogAccelByteServerOauth2Test);
 
 const int32 AutomationFlagMaskServerOauth = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-void Waiting(bool& bCondition, FString text);
-
 const auto ServerOauthErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
-	UE_LOG(LogAccelByteServerOauth2Test, Fatal, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+	UE_LOG(LogAccelByteServerOauth2Test, Error, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LoginGameClientSuccess, "AccelByte.Tests.ServerOauth2.LoginGameClient", AutomationFlagMaskServerOauth);
@@ -51,7 +49,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 
 	Waiting(bClientTokenObtained, "Waiting for Login...");
 
-	check(bClientTokenObtained);
+	AB_TEST_TRUE(bClientTokenObtained);
 	return true;
 }
 
@@ -87,6 +85,6 @@ bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 		10,
 		"Wait refresh token success");
 
-	check(ClientAccessToken != NewClientAccessToken);
+	AB_TEST_NOT_EQUAL(ClientAccessToken, NewClientAccessToken);
 	return true;
 }

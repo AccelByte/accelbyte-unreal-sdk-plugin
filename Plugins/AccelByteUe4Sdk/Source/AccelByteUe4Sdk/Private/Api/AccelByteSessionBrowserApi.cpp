@@ -4,6 +4,7 @@
 
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
@@ -22,8 +23,7 @@ namespace Api
 	}
 
 	void SessionBrowser::CreateGameSession(const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		if (MaxPlayer == 0)
 		{
@@ -62,8 +62,7 @@ namespace Api
 	}
 
 	void SessionBrowser::UpdateGameSession(const FString &SessionId, uint32 MaxPlayer, uint32 CurrentPlayerCount, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		if (MaxPlayer == 0)
 		{
@@ -100,8 +99,7 @@ namespace Api
 	}
 
 	void SessionBrowser::RemoveGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
@@ -121,8 +119,7 @@ namespace Api
 	}
 
 	void SessionBrowser::GetGameSessions(const FString& SessionType, const FString& GameMode, const THandler<FAccelByteModelsSessionBrowserGetResult>& OnSuccess, const FErrorHandler& OnError, uint32 Offset, uint32 Limit) {
-		Report report;
-		report.GetFunctionLog(FString(__FUNCTION__));
+		FReport::Log(FString(__FUNCTION__));
 
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();

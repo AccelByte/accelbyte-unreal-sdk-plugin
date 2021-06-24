@@ -9,6 +9,9 @@
 
 #include "AccelByteUtilities.generated.h"
 
+using AccelByte::THandler;
+using AccelByte::FErrorHandler;
+
 class JSONUTILITIES_API FAccelByteUtilities
 {
 public:

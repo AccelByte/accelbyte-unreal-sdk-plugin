@@ -7,12 +7,9 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "JsonUtilities.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
-#include "Runtime/Core/Public/Templates/UnrealTypeTraits.h"
 
 #include <unordered_map>
 
-#include "Core/AccelByteReport.h"
 #include "Models/AccelByteUserModels.h"
 #include "Models/AccelByteLobbyModels.h"
 #include "AccelByteError.generated.h"
@@ -529,9 +526,6 @@ namespace AccelByte
 			[OnSuccess, OnError]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
-			Report report;
-			report.GetHttpResponse(Request, Response);
-
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				HandleHttpResultOk(Response, OnSuccess);
@@ -558,9 +552,6 @@ namespace AccelByte
 			[OnSuccess, OnError]
 		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
 		{
-			Report report;
-			report.GetHttpResponse(Request, Response);
-
 			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 			{
 				HandleHttpResultOk(Response, OnSuccess);

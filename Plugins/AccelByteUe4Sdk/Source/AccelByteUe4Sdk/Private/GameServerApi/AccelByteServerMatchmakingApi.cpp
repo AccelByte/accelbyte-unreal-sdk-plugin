@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "Modules/ModuleManager.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h"
@@ -18,8 +19,7 @@ ServerMatchmaking::ServerMatchmaking(const AccelByte::ServerCredentials& Credent
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);
 	OnStatusPollingResponse.BindLambda([this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 	{
-		Report report;
-		report.GetHttpResponse(Request, Response);
+		FReport::LogHttpResponse(Request, Response);
 
 		if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 		{
@@ -35,8 +35,7 @@ ServerMatchmaking::ServerMatchmaking(const AccelByte::ServerCredentials& Credent
 
 void ServerMatchmaking::QuerySessionStatus(const FString MatchId, const  THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status"), *Settings.MatchmakingServerUrl,*Credentials.GetClientNamespace(), *MatchId);
@@ -58,8 +57,7 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId, const  THandle
 
 void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions"), *Settings.MatchmakingServerUrl,*Credentials.GetClientNamespace());
@@ -81,8 +79,7 @@ void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmaking
 
 void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue"), *Settings.MatchmakingServerUrl, *Credentials.GetClientNamespace());
@@ -103,8 +100,7 @@ void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVo
 
 void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& PartyId)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FAccelByteModelsAddUserIntoSessionRequest Body = FAccelByteModelsAddUserIntoSessionRequest
 	{
@@ -132,8 +128,7 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FStri
 
 void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsMatchmakingResult& Body)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s"), *Settings.MatchmakingServerUrl, *Credentials.GetClientNamespace(), *ChannelName, *MatchId, *UserId);
@@ -176,8 +171,7 @@ void ServerMatchmaking::DeactivateStatusPolling()
 
 bool ServerMatchmaking::StatusPollingTick(float DeltaTime)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	QuerySessionStatus(StatusPollingMatchId, OnStatusPollingResponseSuccess, OnStatusPollingResponseError);
 	return true;
 }

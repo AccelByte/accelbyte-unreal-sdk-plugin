@@ -4,12 +4,12 @@
 
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 	
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 	FString Url = FString::Printf(TEXT("https://api.ipify.org?format=json"));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");

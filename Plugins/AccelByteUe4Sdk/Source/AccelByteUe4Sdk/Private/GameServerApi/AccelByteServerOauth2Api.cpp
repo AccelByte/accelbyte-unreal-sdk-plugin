@@ -4,6 +4,7 @@
 
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
@@ -15,8 +16,7 @@ namespace GameServerApi
 
 void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
 	FString Url             = FString::Printf(TEXT("%s/v3/oauth/token"), *FRegistry::ServerSettings.IamServerUrl);
@@ -38,8 +38,7 @@ void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& Clien
 
 void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	GetAccessTokenWithClientCredentialsGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([OnSuccess](const FOauth2Token& Result)
 	{
@@ -53,8 +52,7 @@ void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, con
 
 void ServerOauth2::ForgetAllCredentials()
 {
-	Report report;
-	report.GetFunctionLog(FString(__FUNCTION__));
+	FReport::Log(FString(__FUNCTION__));
 
 	Credentials.ForgetAll();
 }
