@@ -452,8 +452,8 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 		{
 			FString key = keys[i];
 			FString value = PartyAttributes[keys[i]];
-			key.ReplaceCharWithEscapedChar();
-			value.ReplaceCharWithEscapedChar();
+			key = key.ReplaceCharWithEscapedChar();
+			value = value.ReplaceCharWithEscapedChar();
 			
 			//Convert to this format [ "key":"value" ]
 			partyAttributeSerialized.Append(FString::Printf(TEXT("\"%s\":\"%s\""), *key, *value));

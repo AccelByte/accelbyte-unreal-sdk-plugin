@@ -35,7 +35,7 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 
 namespace AccelByte
 {
-#if ENGINE_MINOR_VERSION > 25
+#if (ENGINE_MAJOR_VERSION == 5) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION > 25)
 	template <typename T> using THandler = TDelegate<void(const T&)>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TDelegate<T1(T2)>;
 	using FVoidHandler = TDelegate<void()>;

@@ -1258,6 +1258,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 	int OfflineCount = 0;
 	for(auto Online : GetPresenceResult.Data)
 	{
+		// static_cast<int> is used because older UE4 doesn't convert enum to int automatically, for fixing UE 4.22 compile error.
 		UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("User: %s | Status: %d | %d"), *Online.UserID, static_cast<int32>(Online.Availability), GetPresenceResult.Data.Num());
 		bool bIsOnline = false;
 		bool bIsExpectedOnline = false;

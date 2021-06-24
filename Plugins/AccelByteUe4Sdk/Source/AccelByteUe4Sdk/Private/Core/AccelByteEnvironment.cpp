@@ -9,7 +9,7 @@ namespace AccelByte
 	FString Environment::GetEnvironmentVariable(const FString EnvironmentVariableName, const int32 EnvironmentLenght) 
 	{
 		FString TempEnvironment;
-#if ENGINE_MINOR_VERSION < 21
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 21 
 		TCHAR* TempTCharEnvironment = new TCHAR[EnvironmentLenght];
 		#if PLATFORM_WINDOWS
 			FWindowsPlatformMisc::GetEnvironmentVariable((TEXT("%s"), *EnvironmentVariableName), TempTCharEnvironment, EnvironmentLenght);
