@@ -99,6 +99,26 @@ void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, co
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void UserProfile::GetPublicCustomAttributes(const FString& UserId, const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *UserId);
+	FString Verb			= TEXT("GET");
+	FString ContentType		= TEXT("application/json");
+	FString Accept			= TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateRequest& ProfileUpdateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

@@ -12,6 +12,7 @@
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
+#include "Core/AccelByteMultiRegistry.h"
 
 using namespace std;
 
@@ -2239,6 +2240,203 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString & Parameter)
 	}), UserTestErrorHandler);
 
 	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeviceLoginSuccessful);
+	AB_TEST_TRUE(bUpdateCustomAttributeSuccessful);
+	AB_TEST_EQUAL(updatedNumberAttribute, numberAttribute);
+	AB_TEST_EQUAL(updatedStringAttribute, stringAttribute);
+	AB_TEST_EQUAL(updatedBooleanAttribute, bBooleanAttribute);
+	AB_TEST_TRUE(bGetCustomAttributeSuccessful);
+	AB_TEST_EQUAL(getNumberAttribute, numberAttribute);
+	AB_TEST_EQUAL(getStringAttribute, stringAttribute);
+	AB_TEST_EQUAL(getBooleanAttribute, bBooleanAttribute);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfilePublicCustomAttributesTest, "AccelByte.Tests.AUserProfile.UserProfilePublicCustomAttributes", AutomationFlagMaskUser);
+bool FUserProfilePublicCustomAttributesTest::RunTest(const FString & Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bDeviceLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
+	TSharedPtr<FApiClient> User1Registry = FMultiRegistry::GetApiClient(TEXT("User1"));
+	User1Registry->User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeviceLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeviceLoginSuccessful, "Waiting for Login...");
+
+	bool bCreateProfileSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
+
+	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
+	ProfileCreate.FirstName = "first";
+	ProfileCreate.LastName = "last";
+	ProfileCreate.Language = "en";
+	ProfileCreate.Timezone = "Etc/UTC";
+	ProfileCreate.DateOfBirth = "1970-01-01";
+	ProfileCreate.AvatarSmallUrl = "http://example.com";
+	ProfileCreate.AvatarUrl = "http://example.com";
+	ProfileCreate.AvatarLargeUrl = "http://example.com";
+
+	User1Registry->UserProfile.CreateUserProfile(
+		ProfileCreate, 
+		THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bCreateProfileSuccessful = true;
+		}), 
+		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+		{
+			if (Code != 2271)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Fail: %d %s"), Code, *Message);
+				bCreateProfileSuccessful = false;
+			}
+			else
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bCreateProfileSuccessful = true;
+			}
+		}));
+
+	Waiting(bCreateProfileSuccessful, "Waiting for Create Profile...");
+
+	bool bUpdateCustomAttributeSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateCustomAttributeProfile"));
+
+	int32 numberAttribute = 2;
+	FString stringAttribute = "Five kuwi lima";
+	bool bBooleanAttribute = true;
+	FJsonObject customAttribute;
+	customAttribute.SetNumberField("Two", numberAttribute);
+	customAttribute.SetStringField("Five", stringAttribute);
+	customAttribute.SetBoolField("True", bBooleanAttribute);
+	FJsonObject updatedCustomAttribute;
+	User1Registry->UserProfile.UpdateCustomAttributes(
+		customAttribute,
+		THandler<FJsonObject>::CreateLambda([&updatedCustomAttribute, &bUpdateCustomAttributeSuccessful](const FJsonObject& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		updatedCustomAttribute = Result;
+		bUpdateCustomAttributeSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
+
+	bool bGetCustomAttributeSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetCustomAttributeProfile"));
+
+	int32 updatedNumberAttribute;
+	updatedCustomAttribute.TryGetNumberField("Two", updatedNumberAttribute);
+	FString updatedStringAttribute;
+	updatedCustomAttribute.TryGetStringField("Five", updatedStringAttribute);
+	bool updatedBooleanAttribute;
+	updatedCustomAttribute.TryGetBoolField("True", updatedBooleanAttribute);
+
+	// New User
+	TSharedPtr<FApiClient> User2Registry = FMultiRegistry::GetApiClient(TEXT("User2"));
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "1Old_Password1";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	User2Registry->User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	Waiting(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	User2Registry->User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bLoginSuccessful, "Waiting for Login...");
+	
+	FJsonObject getCustomAttribute;
+	User2Registry->UserProfile.GetPublicCustomAttributes(User1Registry->Credentials.GetUserId(),
+		THandler<FJsonObject>::CreateLambda([&getCustomAttribute, &bGetCustomAttributeSuccessful](const FJsonObject& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		getCustomAttribute = Result;
+		bGetCustomAttributeSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
+
+	int32 getNumberAttribute;
+	getCustomAttribute.TryGetNumberField("Two", getNumberAttribute);
+	FString getStringAttribute;
+	getCustomAttribute.TryGetStringField("Five", getStringAttribute);
+	bool getBooleanAttribute;
+	getCustomAttribute.TryGetBoolField("True", getBooleanAttribute);
+
+#pragma region DeleteUserProfile
+	bool bDeleteProfileDone = false;
+	bool bDeleteProfileSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
+	DeleteUserProfile(User1Registry->Credentials.GetNamespace(), User1Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteProfileSuccessful = true;
+		bDeleteProfileDone = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+#pragma endregion DeleteUserProfile
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(User1Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeleteDone, "Waiting for Deletion...");
+
+	bool bDeleteUser2Done = false;
+	bool bDeleteUser2Successful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(User2Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteUser2Done, &bDeleteUser2Successful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteUser2Successful = true;
+		bDeleteUser2Done = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeleteUser2Done, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 

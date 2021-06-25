@@ -65,6 +65,15 @@ public:
 	void GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	* @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.
+	*
+	* @param UserId The id of the user.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FJsonObject.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetPublicCustomAttributes(const FString& UserId, const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	 * @brief Update user's current profile information. If it doesn't exist, that will be an error.
 	 * 
 	 * @param ProfileUpdateRequest Request object.
