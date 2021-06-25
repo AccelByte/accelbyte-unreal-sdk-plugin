@@ -3,8 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
@@ -12,7 +10,6 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -26,7 +23,7 @@ const int32 AutomationFlagMaskStatistic = (EAutomationTestFlags::EditorContext |
 
 const auto StatisticTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteStatisticTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const FString StatisticStatCode = "sdktest";
@@ -36,13 +33,11 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("LOGIN WITH CLIENT CREDENTIALS..."));
 	bool bClientLoginSuccess = false;
-	bool UsersCreationSuccess = false;
-	bool UsersLoginSuccess = false;
-
+	
 	FString Email = FString::Printf(TEXT("Statistic_UE4Test@example.com"));
 	Email.ToLowerInline();
-	FString Password = FString::Printf(TEXT("123Password123"), 0);
-	FString DisplayName = FString::Printf(TEXT("StatisticUE4Test"), 0);
+	FString Password = TEXT("123Password123");
+	FString DisplayName = TEXT("StatisticUE4Test");
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21 + 7));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
@@ -56,7 +51,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		bUsersCreationDone = true;
 	}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
-		if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
+		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 		{
 			bUsersCreationSuccess = true;
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Test User is already created."));
@@ -89,8 +84,8 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	}), StatisticTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
-	check(bClientLoginSuccess);
-	check(bUsersLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
+	AB_TEST_TRUE(bUsersLoginSuccess);
 	bool bStatIsExist = false;
 	bool bGetStatDone = false;
 	FAccelByteModelsStatInfo GetStatResult;
@@ -101,7 +96,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		bGetStatDone = true;
 	}), FErrorHandler::CreateLambda([&bGetStatDone](int32 ErrorCode, FString ErrorMessage)
 	{
-		if ((ErrorCodes)ErrorCode != ErrorCodes::StatisticConfigNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) != ErrorCodes::StatisticConfigNotFoundException)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		}
@@ -129,7 +124,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		createStat.statCode = StatisticStatCode;
 		createStat.tags = { StatisticStatCode };
 
-		Statistic_Create_Stat(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&CreateStatResult, &bStatIsExist, &bCreateStatDone](FAccelByteModelsStatInfo Result)
+		Statistic_Create_Stat(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&CreateStatResult, &bCreateStatDone](FAccelByteModelsStatInfo Result)
 		{
 			CreateStatResult = Result;
 			bCreateStatDone = true;
@@ -147,7 +142,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		bCreateStatSuccess = true;
 	}), StatisticTestErrorHandler);
 	Waiting(bCreateStatSuccess, "Waiting for create stat codes...");
-	check(bCreateStatSuccess);
+	AB_TEST_TRUE(bCreateStatSuccess);
 
 	return true;
 }
@@ -163,7 +158,7 @@ bool StatisticTearDown::RunTest(const FString& Parameters)
 		bDeleteUsersSuccess = true;
 	}), StatisticTestErrorHandler);
 	Waiting(bDeleteUsersSuccess, "Waiting for user deletion...");
-	check(bDeleteUsersSuccess);
+	AB_TEST_TRUE(bDeleteUsersSuccess);
 	return true;
 }
 
@@ -184,8 +179,8 @@ bool StatisticGetAllUserStatItems::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	Waiting(bGetAllUserStatItemsSuccess, "Waiting for get all stat items...");
-	check(bGetAllUserStatItemsSuccess);
-	check(GetResult.Data.Num() > 0);
+	AB_TEST_TRUE(bGetAllUserStatItemsSuccess);
+	AB_TEST_TRUE(GetResult.Data.Num() > 0);
 	return true;
 }
 
@@ -206,9 +201,9 @@ bool StatisticGetUserStatItemsByStatCodes::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
-	check(bGetUserStatItemsByStatCodesSuccess);
-	check(GetResult.Data.Num() > 0);
-	check(GetResult.Data[0].StatCode == StatisticStatCode);
+	AB_TEST_TRUE(bGetUserStatItemsByStatCodesSuccess);
+	AB_TEST_TRUE(GetResult.Data.Num() > 0);
+	AB_TEST_EQUAL(GetResult.Data[0].StatCode, StatisticStatCode);
 	return true;
 }
 
@@ -229,9 +224,9 @@ bool StatisticGetUserStatItemsByTags::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	Waiting(bGetUserStatItemsByTagsSuccess, "Waiting for get stat items...");
-	check(bGetUserStatItemsByTagsSuccess);
-	check(GetResult.Data.Num() > 0);
-	check(GetResult.Data[0].Tags[0] == StatisticStatCode);
+	AB_TEST_TRUE(bGetUserStatItemsByTagsSuccess);
+	AB_TEST_TRUE(GetResult.Data.Num() > 0);
+	AB_TEST_EQUAL(GetResult.Data[0].Tags[0], StatisticStatCode);
 	return true;
 }
 
@@ -255,8 +250,8 @@ bool StatisticBulkAddUserStatItemValue::RunTest(const FString& Parameters)
 		}
 	}), StatisticTestErrorHandler);
 	Waiting(bBulkAddUserStatItemSuccess, "Waiting for bulk add User statitem...");
-	check(bBulkAddUserStatItemSuccess);
-	check(BulkAddUserStatItemResult[0].Success);
-	check(BulkAddUserStatItemResult[0].StatCode == MVP.statCode);
+	AB_TEST_TRUE(bBulkAddUserStatItemSuccess);
+	AB_TEST_TRUE(BulkAddUserStatItemResult[0].Success);
+	AB_TEST_EQUAL(BulkAddUserStatItemResult[0].StatCode, MVP.statCode);
 	return true;
 }

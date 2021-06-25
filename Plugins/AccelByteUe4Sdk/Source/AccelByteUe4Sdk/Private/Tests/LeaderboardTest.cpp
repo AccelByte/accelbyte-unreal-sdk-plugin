@@ -27,7 +27,7 @@ const int32 AutomationFlagMaskLeaderboard = (EAutomationTestFlags::EditorContext
 
 const auto LeaderboardTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteLeaderboardTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteLeaderboardTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const FString TestStatCodePrefix = "atestleaderboardstatcode";
@@ -248,15 +248,15 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 	// ASSERTION
 	for (int i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
 	{
-		check(UsersCreationSuccess[i]);
-		check(UsersLoginSuccess[i]);
-		check(UserStatCodeInitSuccess[i]);
+		AB_TEST_TRUE(UsersCreationSuccess[i]);
+		AB_TEST_TRUE(UsersLoginSuccess[i]);
+		AB_TEST_TRUE(UserStatCodeInitSuccess[i]);
 	}
-	check(bServerClientLoginSuccess);
+	AB_TEST_TRUE(bServerClientLoginSuccess);
 	for (size_t i = 0; i < TestStatCodeCount; i++)
 	{
-		check(StatCodeInitSuccess[i]);
-		check(LeaderboardConfigSuccess[i]);
+		AB_TEST_TRUE(StatCodeInitSuccess[i]);
+		AB_TEST_TRUE(LeaderboardConfigSuccess[i]);
 	}
 
 	return true;
@@ -372,13 +372,13 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 	//ASSERT
 	/// TestUsersID[USER_ID_WINNER_INDEX] should be in the first place for all time frame and for all leaderboard code
 
-	check(AllLeaderboardTestResults.Num() == AllLeaderboardTimeFrame.Num())
+	AB_TEST_EQUAL(AllLeaderboardTestResults.Num(), AllLeaderboardTimeFrame.Num());
 	for (auto& resultInATimeFrame : AllLeaderboardTestResults)
 	{
-		check(resultInATimeFrame.Num() == TestLeaderboardCodes.Num())
+		AB_TEST_EQUAL(resultInATimeFrame.Num(), TestLeaderboardCodes.Num());
 		for (auto& resultForEachLeaderboardCode : resultInATimeFrame)
 		{
-			check(TestUsersID.Num() <= resultForEachLeaderboardCode.Value.data.Num())
+			AB_TEST_TRUE(TestUsersID.Num() <= resultForEachLeaderboardCode.Value.data.Num())
 
 			TArray<FString> commonerUserIDs;
 			for (auto& testUser : TestUsersID)
@@ -403,10 +403,10 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 				}
 			}
 
-			check(bWinnerCorrect)
+			AB_TEST_TRUE(bWinnerCorrect)
 			for (auto& userId : commonerUserIDs)
 			{
-				check(commonerFoundResults.Contains(userId))
+				AB_TEST_TRUE(commonerFoundResults.Contains(userId))
 			}
 		}
 	}
@@ -508,11 +508,11 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 		{
 			if (userRankingResult.userId == TestUsersID[USER_ID_WINNER_INDEX])
 			{
-				check(userRankingResult.daily.rank == 1)
+				AB_TEST_EQUAL(userRankingResult.daily.rank, 1);
 			}
 			else
 			{
-				check(userRankingResult.daily.rank != 1)
+				AB_TEST_NOT_EQUAL(userRankingResult.daily.rank, 1);
 			}
 		}
 	}

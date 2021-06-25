@@ -3,14 +3,11 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -20,14 +17,14 @@ using AccelByte::Api::User;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteGameProfileTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteGameProfileTest);
 
-const int32 AutomationFlagMaskGameProfile = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+int32 const AutomationFlagMaskGameProfile = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-const auto GameProfileTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+auto const GameProfileTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteGameProfileTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteGameProfileTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-const int GameProfileTestUserCount = 3; //minimum is three
+int const GameProfileTestUserCount = 3; //minimum is three
 Credentials GameProfileCreds[GameProfileTestUserCount];
 TArray<TSharedPtr<Api::User>> GameProfileUsers;
 TArray<TSharedPtr<Api::GameProfile>> GameProfiles;
@@ -52,16 +49,14 @@ FAccelByteModelsGameProfileRequest GenerateGameProfileRequest(int32 AttributesLe
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameProfileSetup, "AccelByte.Tests.GameProfile.A.Setup", AutomationFlagMaskGameProfile);
 bool GameProfileSetup::RunTest(const FString& Parameters)
 {
-	bool bClientLoginSuccess = false;
-	bool UsersCreationSuccess[GameProfileTestUserCount];
-	bool UsersLoginSuccess[GameProfileTestUserCount];
+	bool SuccessfulUserLogins[GameProfileTestUserCount];
 
 	
 	int i = 0;
-	for (; i < GameProfileTestUserCount; i++)
+	for (bool SuccessfulUserCreations[GameProfileTestUserCount]; i < GameProfileTestUserCount; i++)
 	{
-		UsersCreationSuccess[i] = false;
-		UsersLoginSuccess[i] = false;
+		SuccessfulUserCreations[i] = false;
+		SuccessfulUserLogins[i] = false;
 		GameProfileUsers.Add(MakeShared<Api::User>(GameProfileCreds[i], FRegistry::Settings));
 
 		FString Email = FString::Printf(TEXT("GameProfileUE4Test+%d@example.com"), i);
@@ -75,13 +70,13 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 
 		GameProfileUsers[i]->Register(Email, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Response)
 		{
-			UsersCreationSuccess[i] = true;
+			SuccessfulUserCreations[i] = true;
 			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d is successfuly created."), i+1, GameProfileTestUserCount);
 		}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 		{
-			if (Code == (int32)AccelByte::ErrorCodes::UserEmailAlreadyUsedException)
+			if (Code == static_cast<int32>(AccelByte::ErrorCodes::UserEmailAlreadyUsedException))
 			{
-				UsersCreationSuccess[i] = true;
+				SuccessfulUserCreations[i] = true;
 				UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d is already created."), i+1, GameProfileTestUserCount);
 			}
 			else
@@ -89,7 +84,7 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Test GameProfile User %d/%d can't be created"), i, GameProfileTestUserCount);
 			}
 		}));
-		Waiting(UsersCreationSuccess[i],FString::Printf(TEXT("Waiting for game profile %d created..."), i));
+		Waiting(SuccessfulUserCreations[i],FString::Printf(TEXT("Waiting for game profile %d created..."), i));
 
 		GameProfileUsers[i]->LoginWithUsername(
 			Email,
@@ -97,9 +92,9 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 			FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("User %d Login with email Success"), i);
-			UsersLoginSuccess[i] = true;	
+			SuccessfulUserLogins[i] = true;	
 		}), GameProfileTestErrorHandler);
-		Waiting(UsersLoginSuccess[i],"Waiting for Login...");
+		Waiting(SuccessfulUserLogins[i],"Waiting for Login...");
 
 		GameProfiles.Add(MakeShared<Api::GameProfile>(GameProfileCreds[i], FRegistry::Settings));
 	}
@@ -107,7 +102,7 @@ bool GameProfileSetup::RunTest(const FString& Parameters)
 	i = 0;
 	for (; i < GameProfileTestUserCount; i++)
 	{
-		check(UsersLoginSuccess[i]);
+		AB_TEST_TRUE(SuccessfulUserLogins[i]);
 		UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("User Login %d checked."), i);
 	}
 	UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("Setup Done."));
@@ -131,7 +126,7 @@ bool GameProfileSetupTearDown::RunTest(const FString& Parameters)
 		}), GameProfileTestErrorHandler);
 		Waiting(bGetAllGameProfileSuccess,"Waiting for get all game profiles...");
 		UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\t%d game profile is found!"), GetAllGameProfileResult.Num());
-		check(bGetAllGameProfileSuccess);
+		AB_TEST_TRUE(bGetAllGameProfileSuccess);
 
 		for (int j = 0; j < GetAllGameProfileResult.Num(); j++)
 		{
@@ -143,7 +138,7 @@ bool GameProfileSetupTearDown::RunTest(const FString& Parameters)
 				bDeleteGameProfileSuccess = true;
 			}), GameProfileTestErrorHandler);
 			Waiting(bDeleteGameProfileSuccess,"Waiting for game profile deletion...");
-			check(bDeleteGameProfileSuccess);
+			AB_TEST_TRUE(bDeleteGameProfileSuccess);
 		}
 
 		UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\tDELETING USER ACCOUNT IS STARTED"));
@@ -154,7 +149,7 @@ bool GameProfileSetupTearDown::RunTest(const FString& Parameters)
 			bDeleteUsersSuccessful = true;
 		}), GameProfileTestErrorHandler);
 		Waiting(bDeleteUsersSuccessful,"Waiting for user deletion...");
-		check(bDeleteUsersSuccessful);
+		AB_TEST_TRUE(bDeleteUsersSuccessful);
 	}
 	return true;
 }
@@ -175,20 +170,20 @@ bool GameProfileCreate::RunTest(const FString& Parameters)
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
 
 	// ASSERTION
-	check(bCreateGameProfileSuccess)
-	check(ActualResult.attributes.Num() == Request.attributes.Num());
+	AB_TEST_TRUE(bCreateGameProfileSuccess)
+	AB_TEST_EQUAL(ActualResult.attributes.Num(), Request.attributes.Num());
 	TArray<FString> Keys;
 	Request.attributes.GetKeys(Keys);
 	for (int i = 0; i < Keys.Num(); i++)
 	{
-		check(ActualResult.attributes[Keys[i]] == Request.attributes[Keys[i]]);
+		AB_TEST_EQUAL(ActualResult.attributes[Keys[i]], Request.attributes[Keys[i]]);
 	}
-	check(ActualResult.avatarUrl == Request.avatarUrl);
-	check(ActualResult.label == Request.label);
-	check(ActualResult.profileName == Request.profileName);
+	AB_TEST_EQUAL(ActualResult.avatarUrl, Request.avatarUrl);
+	AB_TEST_EQUAL(ActualResult.label, Request.label);
+	AB_TEST_EQUAL(ActualResult.profileName, Request.profileName);
 	for (int i = 0; i < Request.tags.Num(); i++)
 	{
-		check(ActualResult.tags[i] == Request.tags[i]);
+		AB_TEST_EQUAL(ActualResult.tags[i], Request.tags[i]);
 	}
 	return true;
 }
@@ -205,7 +200,7 @@ bool GameProfileGet::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess);
+	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
 	FAccelByteModelsGameProfile GetResult;
@@ -217,20 +212,20 @@ bool GameProfileGet::RunTest(const FString& Parameters)
 	Waiting(bGetGameProfileSuccess,"Waiting for get game profile...");
 
 	// ASSERTION
-	check(bGetGameProfileSuccess);
-	check(GetResult.attributes.Num() == Request.attributes.Num());
+	AB_TEST_TRUE(bGetGameProfileSuccess);
+	AB_TEST_EQUAL(GetResult.attributes.Num(), Request.attributes.Num());
 	TArray<FString> Keys;
 	Request.attributes.GetKeys(Keys);
 	for (int i = 0; i < Keys.Num(); i++)
 	{
-		check(GetResult.attributes[Keys[i]] == Request.attributes[Keys[i]]);
+		AB_TEST_EQUAL(GetResult.attributes[Keys[i]], Request.attributes[Keys[i]]);
 	}
-	check(GetResult.avatarUrl == Request.avatarUrl);
-	check(GetResult.label == Request.label);
-	check(GetResult.profileName == Request.profileName);
+	AB_TEST_EQUAL(GetResult.avatarUrl, Request.avatarUrl);
+	AB_TEST_EQUAL(GetResult.label, Request.label);
+	AB_TEST_EQUAL(GetResult.profileName, Request.profileName);
 	for (int i = 0; i < Request.tags.Num(); i++)
 	{
-		check(GetResult.tags[i] == Request.tags[i]);
+		AB_TEST_EQUAL(GetResult.tags[i], Request.tags[i]);
 	}
 	return true;
 }
@@ -247,7 +242,7 @@ bool GameProfileUpdate::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess);
+	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ARRANGEMENT UPDATE
 	TArray<FString> OldAttributeKeys;
@@ -264,28 +259,28 @@ bool GameProfileUpdate::RunTest(const FString& Parameters)
 	Waiting(bUpdateGameProfileSuccess,"Waiting for game profile updated...");
 
 	// ASSERTION COMPARE UPDATE RESULT WITH CREATED PROFILE
-	check(bUpdateGameProfileSuccess);
+	AB_TEST_TRUE(bUpdateGameProfileSuccess);
 	TArray<FString> CreateResultAttributeKeys;
 	CreateResult.attributes.GetKeys(CreateResultAttributeKeys);
 	TArray<FString> UpdateResultAttributeKeys;
 	UpdateResult.attributes.GetKeys(UpdateResultAttributeKeys);
-	check(CreateResultAttributeKeys.Num() != UpdateResultAttributeKeys.Num());
-	check(CreateResult.tags.Num() != UpdateResult.tags.Num());
-	check(CreateResult.avatarUrl != UpdateResult.avatarUrl);
-	check(CreateResult.profileName != UpdateResult.profileName);
-	check(CreateResult.label != UpdateResult.label);
+	AB_TEST_NOT_EQUAL(CreateResultAttributeKeys.Num(), UpdateResultAttributeKeys.Num());
+	AB_TEST_NOT_EQUAL(CreateResult.tags.Num(), UpdateResult.tags.Num());
+	AB_TEST_NOT_EQUAL(CreateResult.avatarUrl, UpdateResult.avatarUrl);
+	AB_TEST_NOT_EQUAL(CreateResult.profileName, UpdateResult.profileName);
+	AB_TEST_NOT_EQUAL(CreateResult.label, UpdateResult.label);
 	// ASSERTION COMPARE UPDATE RESULT WITH UPDATE REQUEST
 	for (int i = 0; i < UpdateResultAttributeKeys.Num(); i++)
 	{
-		check(UpdateRequest.attributes[UpdateResultAttributeKeys[i]] == UpdateResult.attributes[UpdateResultAttributeKeys[i]]);
+		AB_TEST_EQUAL(UpdateResult.attributes[UpdateResultAttributeKeys[i]], UpdateRequest.attributes[UpdateResultAttributeKeys[i]]);
 	}
 	for (int i = 0; i < UpdateRequest.tags.Num(); i++)
 	{
-		check(UpdateRequest.tags[i] == UpdateResult.tags[i]);
+		AB_TEST_EQUAL(UpdateRequest.tags[i], UpdateResult.tags[i]);
 	}
-	check(UpdateRequest.avatarUrl == UpdateResult.avatarUrl);
-	check(UpdateRequest.profileName == UpdateResult.profileName);
-	check(UpdateRequest.label == UpdateResult.label);
+	AB_TEST_EQUAL(UpdateResult.avatarUrl, UpdateRequest.avatarUrl);
+	AB_TEST_EQUAL(UpdateResult.profileName, UpdateRequest.profileName);
+	AB_TEST_EQUAL(UpdateResult.label, UpdateRequest.label);
 	return true;
 }
 
@@ -301,7 +296,7 @@ bool GameProfileDelete::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess);
+	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
 	bool bDeleteGameProfileSuccess = false;
@@ -321,8 +316,8 @@ bool GameProfileDelete::RunTest(const FString& Parameters)
 	Waiting(bGameProfileDoesntExist,"Waiting for deleted game check...");
 
 	// ASSERTION
-	check(bDeleteGameProfileSuccess);
-	check(bGameProfileDoesntExist);
+	AB_TEST_TRUE(bDeleteGameProfileSuccess);
+	AB_TEST_TRUE(bGameProfileDoesntExist);
 	return true;
 }
 
@@ -332,7 +327,7 @@ bool GameProfileGetAll::RunTest(const FString& Parameters)
 	// ARRANGEMENT
 	TSharedPtr<Api::GameProfile> CurrentGameProfile = GameProfiles[0];
 
-	int GameProfileCreateAmount = 2;
+	const int GameProfileCreateAmount = 2;
 	TArray<FAccelByteModelsGameProfileRequest> Requests;
 	Requests.SetNum(GameProfileCreateAmount);
 	TArray<FAccelByteModelsGameProfile> CreateResults;
@@ -349,7 +344,7 @@ bool GameProfileGetAll::RunTest(const FString& Parameters)
 			bCreateGameProfileSuccesses[i] = true;
 		}), GameProfileTestErrorHandler);
 		Waiting(bCreateGameProfileSuccesses[i],"Waiting for game profile created...");
-		check(bCreateGameProfileSuccesses[i]);
+		AB_TEST_TRUE(bCreateGameProfileSuccesses[i]);
 	}
 
 	// ACT
@@ -362,8 +357,8 @@ bool GameProfileGetAll::RunTest(const FString& Parameters)
 	Waiting(bGetAllGameProfilesSuccess,"Waiting for get all game profile...");
 
 	// ASSERTION
-	check(bGetAllGameProfilesSuccess);
-	check(GetAllResult.Num() >= GameProfileCreateAmount);
+	AB_TEST_TRUE(bGetAllGameProfilesSuccess);
+	AB_TEST_TRUE(GetAllResult.Num() >= GameProfileCreateAmount);
 	TArray<bool> bGameProfilesFound;
 	bGameProfilesFound.Init(false, GameProfileCreateAmount);
 	
@@ -378,7 +373,7 @@ bool GameProfileGetAll::RunTest(const FString& Parameters)
 			}
 		}
 	}
-	check(!bGameProfilesFound.Contains(false));
+	AB_TEST_FALSE(bGameProfilesFound.Contains(false));
 	return true;
 }
 
@@ -397,7 +392,7 @@ bool GameProfileGetAttribute::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess);
+	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
 	FAccelByteModelsGameProfileAttribute GetResult;
@@ -409,8 +404,8 @@ bool GameProfileGetAttribute::RunTest(const FString& Parameters)
 	Waiting(bGetGameProfileAttributeSuccess,"Waiting for get game profile attribute...");
 
 	// ASSERTION
-	check(bGetGameProfileAttributeSuccess);
-	check(GetResult.value == Request.attributes[TestKey]);
+	AB_TEST_TRUE(bGetGameProfileAttributeSuccess);
+	AB_TEST_EQUAL(GetResult.value, Request.attributes[TestKey]);
 	return true;
 }
 
@@ -426,7 +421,7 @@ bool GameProfileUpdateAttribute::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess);
+	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
 	TArray<FString> AttributeKeys;
@@ -444,8 +439,8 @@ bool GameProfileUpdateAttribute::RunTest(const FString& Parameters)
 	Waiting(bUpdateGameProfileAttributeSuccess,"Waiting for game profile updated...");
 
 	// ASSERTION
-	check(bUpdateGameProfileAttributeSuccess);
-	check(UpdateResult.attributes[TestAttributeKey] == UpdateAttributeValue);
+	AB_TEST_TRUE(bUpdateGameProfileAttributeSuccess);
+	AB_TEST_EQUAL(UpdateResult.attributes[TestAttributeKey], UpdateAttributeValue);
 	return true;
 }
 
@@ -461,7 +456,7 @@ bool GameProfileGetBatchPublic::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess1 = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess1,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess1);
+	AB_TEST_TRUE(bCreateGameProfileSuccess1);
 
 	// ARRANGEMENT USER 2
 	FAccelByteModelsGameProfileRequest Request2 = GenerateGameProfileRequest(1, "2key", "2val", 1, "2tag");
@@ -472,7 +467,7 @@ bool GameProfileGetBatchPublic::RunTest(const FString& Parameters)
 		bCreateGameProfileSuccess2 = true;
 	}), GameProfileTestErrorHandler);
 	Waiting(bCreateGameProfileSuccess2,"Waiting for game profile created...");
-	check(bCreateGameProfileSuccess2);
+	AB_TEST_TRUE(bCreateGameProfileSuccess2);
 
 	// ACT
 	TArray<FAccelByteModelsPublicGameProfile> GetBatchPublicGameProfilesResult;
@@ -490,7 +485,7 @@ bool GameProfileGetBatchPublic::RunTest(const FString& Parameters)
 	// ASSERTION
 	TArray<bool> ArrayRequestedGameProfileFound;
 	ArrayRequestedGameProfileFound.Init(false, 2);
-	check(bBatchGetPublicGameProfiles);
+	AB_TEST_TRUE(bBatchGetPublicGameProfiles);
 	for (int i = 0; i < 2; i++)
 	{
 		ArrayRequestedGameProfileFound[i] = false;
@@ -509,6 +504,6 @@ bool GameProfileGetBatchPublic::RunTest(const FString& Parameters)
 			}
 		}
 	}
-	check(!ArrayRequestedGameProfileFound.Contains(false))
+	AB_TEST_FALSE(ArrayRequestedGameProfileFound.Contains(false))
 	return true;
 }

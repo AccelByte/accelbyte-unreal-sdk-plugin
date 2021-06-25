@@ -22,7 +22,7 @@ const int32 AccelByteMultiRegistryTestAutomationFlagMask = (
 
 const auto AccelByteMultiRegistryTestFatalErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 	{
-		UE_LOG(AccelByteMultiRegistryTestLog, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		UE_LOG(AccelByteMultiRegistryTestLog, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 	});
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(MultiRegistry, "AccelByte.Tests.MultiRegistry.Statistic", AccelByteMultiRegistryTestAutomationFlagMask);
@@ -231,8 +231,8 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		Register(User, bIsRegisterDone, bIsUserExists);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Register done", *User.Email), bIsRegisterDone);
-		TestTrue(FString::Printf(TEXT("%s - %s"), "User exists", *User.Email), bIsUserExists);
+		AB_TEST_TRUE(bIsRegisterDone);
+		AB_TEST_TRUE(bIsUserExists);
 	}
 
 	// Login user
@@ -243,7 +243,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		LoginUser(User, bIsUserLoginDone);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "User login done", *User.Email), bIsUserLoginDone);
+		AB_TEST_TRUE(bIsUserLoginDone);
 	}
 
 	// Check user credentials
@@ -252,7 +252,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 	{
 		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User.Email); // Using email as credentials key
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "User id is not empty", *User.Email), !ApiClient->Credentials.GetUserId().IsEmpty());
+		AB_TEST_FALSE(ApiClient->Credentials.GetUserId().IsEmpty());
 	}
 
 	// Login client
@@ -263,7 +263,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		LoginClient(bIsClientLoginDone);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Client login done", *User.Email), bIsClientLoginDone);
+		AB_TEST_TRUE(bIsClientLoginDone);
 	}
 
 	// Make sure stat for testing is available
@@ -278,7 +278,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		CheckExistingStat(StatisticStatCode, GetStatResult, bIsCheckingStatDone, bIsStatExist);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Checking stat done", *User.Email), bIsCheckingStatDone);
+		AB_TEST_TRUE(bIsCheckingStatDone);
 
 		// Create stat for testing if it does not exist
 
@@ -289,7 +289,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 			CreateStat(CreateStatRequest, CreateStatResult, IsCreateStatDone);
 
-			TestTrue(FString::Printf(TEXT("%s - %s"), "Create stat done", *User.Email), IsCreateStatDone);
+			AB_TEST_TRUE(IsCreateStatDone);
 		}
 	}
 
@@ -301,7 +301,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		CreateUserStatItems(User, StatCodes, bIsCreateUserStatItemsDone);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Create user stat items done", *User.Email), bIsCreateUserStatItemsDone);
+		AB_TEST_TRUE(bIsCreateUserStatItemsDone);
 	}
 
 	// Try get all user stat items
@@ -313,8 +313,8 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		TryGetAllUserStatItems(User, GetResult, bIsGetAllUserStatItemsDone);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Get all user stat items done", *User.Email), bIsGetAllUserStatItemsDone);
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Get all user stat items result num > 0", *User.Email), GetResult.Data.Num() > 0);
+		AB_TEST_TRUE(bIsGetAllUserStatItemsDone);
+		AB_TEST_TRUE(GetResult.Data.Num() > 0);
 	}
 
 	// Delete user
@@ -325,7 +325,7 @@ bool MultiRegistry::RunTest(const FString& Parameters)
 
 		DeleteUser(User, bIsDeleteUserDone);
 
-		TestTrue(FString::Printf(TEXT("%s - %s"), "Delete user done", *User.Email), bIsDeleteUserDone);
+		AB_TEST_TRUE(bIsDeleteUserDone);
 	}
 
 	return true;

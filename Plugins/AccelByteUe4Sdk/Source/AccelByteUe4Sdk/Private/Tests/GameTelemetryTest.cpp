@@ -3,15 +3,10 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteSettings.h"
-#include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -23,11 +18,11 @@ using AccelByte::Api::GameTelemetry;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteGameTelemetryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteGameTelemetryTest);
 
-const int32 AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+int32 const AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-const auto GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+auto const GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteGameTelemetryTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteGameTelemetryTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameTelemetryTestSendProtectedEvent, "AccelByte.Tests.GameTelemetry.Send_BatchTelemetryEvent_ReturnsOK", AutomationFlagMaskGameTelemetry);
@@ -53,8 +48,6 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
-		bool bTelemetryEventSent = false;
-
 		FRegistry::GameTelemetry.Send(
 			TelemetryBody,
 			FVoidHandler::CreateLambda([&]()
@@ -77,7 +70,7 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 
 	FRegistry::User.ForgetAllCredentials();
 
-	check(SuccessResultCount == EVENT_COUNT);
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
 
 	return true;
 }
@@ -106,8 +99,6 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
-		bool bTelemetryEventSent = false;
-
 		FRegistry::GameTelemetry.Send(
 			TelemetryBody,
 			FVoidHandler::CreateLambda([&]()
@@ -124,7 +115,7 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 
 	FRegistry::User.ForgetAllCredentials();
 
-	check(SuccessResultCount == EVENT_COUNT);
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
 
 	return true;
 }

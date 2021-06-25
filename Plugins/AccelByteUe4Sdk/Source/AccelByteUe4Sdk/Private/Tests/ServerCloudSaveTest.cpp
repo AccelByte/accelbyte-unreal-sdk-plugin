@@ -20,7 +20,7 @@ const int32 AutomationFlagMaskServerCloudSave = (EAutomationTestFlags::EditorCon
 
 const auto ServerCloudSaveErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
-	UE_LOG(LogAccelByteServerCloudSaveTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteServerCloudSaveTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 Credentials ServerCloudUserCreds;
@@ -35,14 +35,14 @@ FJsonObject ServerCloudRecord2;
 
 bool ServerCloudSaveCompareJsonObject(const FJsonObject& Compare1, const FJsonObject& Compare2)
 {
-    check(Compare1.GetStringField("map") == Compare2.GetStringField("map"))
-    check(Compare1.GetNumberField("maxTeamMember") == Compare2.GetNumberField("maxTeamMember"))
-    auto Eq1 = Compare2.GetArrayField("equipment");
+	if (Compare1.GetStringField("map") != Compare2.GetStringField("map")) { return false; }
+	if (Compare1.GetNumberField("maxTeamMember") != Compare2.GetNumberField("maxTeamMember")) { return false; }
+	auto Eq1 = Compare2.GetArrayField("equipment");
 	auto Eq2 = Compare2.GetArrayField("equipment");
-	for(int i = 0; i < Eq1.Num(); i++)
+	for (int i = 0; i < Eq1.Num(); i++)
 	{
 		bool bIsFound = false;
-		for(int j = 0; j < Eq2.Num(); j++)
+		for (int j = 0; j < Eq2.Num(); j++)
 		{
 			if (Eq1[i].Get()->AsString() == Eq2[j].Get()->AsString())
 			{
@@ -50,11 +50,13 @@ bool ServerCloudSaveCompareJsonObject(const FJsonObject& Compare1, const FJsonOb
 				break;
 			}
 		}
-		check(bIsFound)
-    }
-	check(Compare1.GetObjectField("consumable").Get()->GetNumberField("chocolate") == Compare2.GetObjectField("consumable").Get()->GetNumberField("chocolate"))
-    check(Compare1.GetObjectField("consumable").Get()->GetNumberField("water") == Compare2.GetObjectField("consumable").Get()->GetNumberField("water"))
-    check(Compare1.GetObjectField("consumable").Get()->GetNumberField("apple") == Compare2.GetObjectField("consumable").Get()->GetNumberField("apple"))
+
+		if (!bIsFound) { return false; }
+	}
+	
+	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("chocolate") != Compare2.GetObjectField("consumable").Get()->GetNumberField("chocolate")) { return false; }
+	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("water") != Compare2.GetObjectField("consumable").Get()->GetNumberField("water")) { return false; }
+	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("apple") != Compare2.GetObjectField("consumable").Get()->GetNumberField("apple")) { return false; }
 
 	return true;
 }
@@ -97,9 +99,9 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	ServerCloudUser = MakeShared<Api::User>(ServerCloudUserCreds, FRegistry::Settings);
 	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
 	Email.ToLowerInline();
-	FString Password = TEXT("123Password123");
-	FString DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
-	FString Country = "US";
+	FString const Password = TEXT("123Password123");
+	FString const DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
+	FString const Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
@@ -119,7 +121,7 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Code=%d"), Code);
-		if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException || (ErrorCodes)Code == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
+		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException || static_cast<ErrorCodes>(Code) == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
 		{
 			bUserCreationSuccess = true;
 			UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Test ServerCloudSave User2 is already"));
@@ -174,8 +176,8 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	Waiting(bDeleteGameRecordUnExistSuccess, "Waiting for deleting game record ...");
 	*/
 
-	check(bUserLoginSuccess)
-	check(bClientTokenObtained)
+	AB_TEST_TRUE(bUserLoginSuccess);
+	AB_TEST_TRUE(bClientTokenObtained);
 
 	return true;
 }
@@ -208,9 +210,9 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
-	check(bDeleteGameRecordSuccess);
-	check(bDeleteGameRecordUnExistSuccess);
-	check(bDeleteSuccess);
+	AB_TEST_TRUE(bDeleteGameRecordSuccess);
+	AB_TEST_TRUE(bDeleteGameRecordUnExistSuccess);
+	AB_TEST_TRUE(bDeleteSuccess);
 	
 	return true;
 }
@@ -252,7 +254,7 @@ bool ServerCloudTestGetAdminGameRecord::RunTest(const FString& Parameters)
 
 	Waiting(bGetGameRecordDone, "Waiting for Get Game ServerCloudRecord ...");
 
-	check(bGetGameRecordSuccess)
+	AB_TEST_TRUE(bGetGameRecordSuccess)
 
 	return true;
 }
@@ -277,7 +279,7 @@ bool ServerCloudTestGetAdminGameRecordUnExistKey::RunTest(const FString& Paramet
 
 	Waiting(bGetGameRecordDone, "Waiting for Get Game ServerCloudRecord with UnExist Key ...");
 
-	check(!bGetGameRecordSuccess)
+	AB_TEST_FALSE(bGetGameRecordSuccess)
 
     return true;
 }
@@ -293,7 +295,7 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bUpdateGameRecord, "Waiting for Updating ServerCloudRecord value ... ");
 
-	check(bUpdateGameRecord)
+	AB_TEST_TRUE(bUpdateGameRecord)
 	
 	bool bGetGameRecord = false;
 	FAccelByteModelsGameRecord Compare;
@@ -305,8 +307,8 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bGetGameRecord, "Waiting for GetGameRecord ...");
 
-	check(bGetGameRecord)
-	check(Compare.Key == ServerCloudGameRecordKey)
+	AB_TEST_TRUE(bGetGameRecord)
+	AB_TEST_EQUAL(Compare.Key, ServerCloudGameRecordKey);
 	
 	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 }
@@ -315,7 +317,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceGameRecordUnexistKey, "Ac
 bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 {
 	bool bReplaceGameRecordUnexistKey = false;
-	const FString UnexistKey = "UE4UnexistKeyGameRecordTest";
+	FString const UnexistKey = "UE4UnexistKeyGameRecordTest";
 	FRegistry::ServerCloudSave.ReplaceGameRecord(UnexistKey, ServerCloudRecord, FVoidHandler::CreateLambda([&bReplaceGameRecordUnexistKey]()
 	{
 		bReplaceGameRecordUnexistKey = true;
@@ -323,7 +325,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bReplaceGameRecordUnexistKey, "Waiting replace game record on unexist key ...");
 
-	check(bReplaceGameRecordUnexistKey)
+	AB_TEST_TRUE(bReplaceGameRecordUnexistKey)
 	
 	bool bGetGameRecordUnexistKey = false;
 	FAccelByteModelsGameRecord Compare;
@@ -335,9 +337,9 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bGetGameRecordUnexistKey, "Waiting get game record on unexist key ...");
 
-	check(bGetGameRecordUnexistKey)
+	AB_TEST_TRUE(bGetGameRecordUnexistKey)
 	
-	check(Compare.Key == UnexistKey)
+	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
 
 	bool bDeleteGameRecordUnexistKey = false;
@@ -348,7 +350,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteGameRecordUnexistKey, "Waiting to delete game record on unexist key ...");
 
-	check(bDeleteGameRecordUnexistKey)
+	AB_TEST_TRUE(bDeleteGameRecordUnexistKey)
 	
 	return true;
 }
@@ -364,7 +366,7 @@ bool ServerCloudTestDeleteAdminGameRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteGameRecord, "Waiting for Deleting ServerCloudRecord Value ... ");
 
-	check(bDeleteGameRecord)
+	AB_TEST_TRUE(bDeleteGameRecord)
 	return true;
 }
 
@@ -378,7 +380,7 @@ bool ServerCloudTestDeleteGameRecordUnExistKey::RunTest(const FString& Parameter
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteGameRecord, "Waiting Delete game record ...");
 
-	check(bDeleteGameRecord)
+	AB_TEST_TRUE(bDeleteGameRecord)
 	return true;
 }
 
@@ -393,7 +395,7 @@ bool ServerCloudTestSavePlayerRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bSavePlayerRecord, "Waiting saving user record ...");
 
-	check(bSavePlayerRecord)
+	AB_TEST_TRUE(bSavePlayerRecord)
 
 	return true;
 }
@@ -409,7 +411,7 @@ bool ServerCloudTestSavePlayerRecordPublic::RunTest(const FString& Parameters)
     }), ServerCloudSaveErrorHandler);
 	Waiting(bSavePlayerRecord, "Waiting saving user record ...");
 
-	check(bSavePlayerRecord)
+	AB_TEST_TRUE(bSavePlayerRecord)
 
     return true;
 }
@@ -427,8 +429,8 @@ bool ServerCloudTestGetPlayerRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bGetPlayerRecord, "Waiting getting the user record ...");
 
-	check(bGetPlayerRecord)
-	check(Compare.Key == ServerCloudPlayerRecordKey)
+	AB_TEST_TRUE(bGetPlayerRecord)
+	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKey);
 	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);	
 }
 
@@ -445,8 +447,8 @@ bool ServerCloudTestGetPlayerRecordPublic::RunTest(const FString& Parameters)
     }), ServerCloudSaveErrorHandler);
 	Waiting(bGetPlayerRecord, "Waiting getting the user record ...");
 
-	check(bGetPlayerRecord)
-    check(Compare.Key == ServerCloudPlayerRecordKeyPublic)
+	AB_TEST_TRUE(bGetPlayerRecord)
+    AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
     return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);	
 }
 
@@ -467,7 +469,7 @@ bool ServerCloudTestGetPlayerRecordUnexistKey::RunTest(const FString& Parameters
 	}));
 	Waiting(bGetRecordDone, "Waiting getting user record unexist key ...");
 
-	check(!bGetRecordUnexistKey)
+	AB_TEST_FALSE(bGetRecordUnexistKey)
 
 	return true;
 }
@@ -483,7 +485,7 @@ bool ServerCloudTestReplaceExistingPlayerRecord::RunTest(const FString& Paramete
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
-	check(bReplaceUserRecord)
+	AB_TEST_TRUE(bReplaceUserRecord)
 
 	bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
@@ -495,8 +497,8 @@ bool ServerCloudTestReplaceExistingPlayerRecord::RunTest(const FString& Paramete
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
-	check(bGetReplacedUserRecord)
-	check(Compare.Key == ServerCloudPlayerRecordKey)
+	AB_TEST_TRUE(bGetReplacedUserRecord)
+	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKey);
 
 	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 }
@@ -512,7 +514,7 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
     }), ServerCloudSaveErrorHandler);
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
-	check(bReplaceUserRecord)
+	AB_TEST_TRUE(bReplaceUserRecord)
 
     bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
@@ -524,8 +526,8 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
     }), ServerCloudSaveErrorHandler);
 	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
-	check(bGetReplacedUserRecord)
-    check(Compare.Key == ServerCloudPlayerRecordKeyPublic)
+	AB_TEST_TRUE(bGetReplacedUserRecord)
+    AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
 
     return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 }
@@ -542,7 +544,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
     }), ServerCloudSaveErrorHandler);
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
-	check(bReplaceUserRecord)
+	AB_TEST_TRUE(bReplaceUserRecord)
 
     bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
@@ -554,8 +556,8 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
     }), ServerCloudSaveErrorHandler);
 	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
-	check(bGetReplacedUserRecord)
-    check(Compare.Key == UnexistKey)
+	AB_TEST_TRUE(bGetReplacedUserRecord)
+    AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
     ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 
@@ -567,7 +569,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting to delete user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord)
 
 	return true;
 }
@@ -584,7 +586,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
     }), ServerCloudSaveErrorHandler);
 	Waiting(bReplaceUserRecord, "Waiting to replace user record");
 
-	check(bReplaceUserRecord)
+	AB_TEST_TRUE(bReplaceUserRecord)
 
     bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
@@ -596,8 +598,8 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
     }), ServerCloudSaveErrorHandler);
 	Waiting(bGetReplacedUserRecord, "Waiting to get user record");
 
-	check(bGetReplacedUserRecord)
-    check(Compare.Key == UnexistKey)
+	AB_TEST_TRUE(bGetReplacedUserRecord)
+    AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
     ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 
@@ -609,7 +611,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
     }), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting to delete user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord);
 
     return true;
 }
@@ -625,7 +627,7 @@ bool ServerCloudTestDeletePlayerRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord);
 
 	return true;
 }
@@ -641,7 +643,7 @@ bool ServerCloudTestDeletePlayerRecordPublic::RunTest(const FString& Parameters)
     }), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord);
 
     return true;
 }
@@ -657,7 +659,7 @@ bool ServerCloudTestDeletePlayerRecordUnExist::RunTest(const FString& Parameters
     }),ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord);
 
     return true;
 }
@@ -673,7 +675,7 @@ bool ServerCloudTestDeletePlayerRecordUnExistPublic::RunTest(const FString& Para
     }), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteUserRecord, "Waiting deleting user record");
 
-	check(bDeleteUserRecord)
+	AB_TEST_TRUE(bDeleteUserRecord);
 
     return true;
 }
