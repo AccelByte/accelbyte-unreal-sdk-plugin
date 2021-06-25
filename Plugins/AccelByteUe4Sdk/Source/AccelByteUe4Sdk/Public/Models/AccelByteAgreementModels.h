@@ -5,7 +5,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteGeneralModels.h"
 #include "AccelByteAgreementModels.generated.h"
 
 UENUM(BlueprintType)

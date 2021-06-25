@@ -9,6 +9,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
@@ -156,7 +157,10 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(ProfileCreateRequest, Content);
+	TSharedPtr<FJsonObject> Json = FJsonObjectConverter::UStructToJsonObject(ProfileCreateRequest);
+	FAccelByteUtilities::RemoveEmptyStrings(Json);
+	TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(Json.ToSharedRef(), Writer);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
