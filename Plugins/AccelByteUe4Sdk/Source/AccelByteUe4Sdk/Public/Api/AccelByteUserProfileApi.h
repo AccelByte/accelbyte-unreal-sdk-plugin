@@ -45,7 +45,16 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsPublicUserProfileInfo.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPublicUserProfileInfo(FString UserID, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetPublicUserProfileInfo(FString UserId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Batch get multiple user public profile informations.
+	 *
+	 * @param UserIds Multiple user ids, separated by comma.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BatchGetPublicUserProfileInfos(FString UserIds, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Get user's own custom attribute profile information. If it doesn't exist, that will be an error.

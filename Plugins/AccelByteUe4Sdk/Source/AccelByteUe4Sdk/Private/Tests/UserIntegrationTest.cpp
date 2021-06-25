@@ -1784,8 +1784,205 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString & Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBatchGetPublicUserProfileInfos, "AccelByte.Tests.AUserProfile.BatchGetPublicUserProfileInfos", AutomationFlagMaskUser);
+bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
+{
+	#pragma region Test definitions
+
+	struct TestUser
+	{
+		FString FirstName = TEXT("John");
+		FString LastName = TEXT("Appleseed");
+		FString DateOfBirth = TEXT("2000-01-01");
+		FString Country = TEXT("US");
+		FString Language = TEXT("en");
+		FString Timezone = TEXT("Etc/UTC");
+		FString DisplayName = FirstName + LastName;
+		FString Email;
+		FString Password = TEXT("Password123!");
+		FString AvatarSmallUrl = TEXT("http://example.com/avatar/small.jpg");
+		FString AvatarUrl = TEXT("http://example.com/avatar/normal.jpg");
+		FString AvatarLargeUrl = TEXT("http://example.com/avatar/large.jpg");
+		FString UserId;
+
+		TestUser(const FString& Project, const FString& TestUID, const int32 UserIndex = 0) :
+			Email((Project + TEXT("_test_") + TestUID + TEXT("_") + FString::Printf(TEXT("%02d"), UserIndex) + TEXT("@example.com")).ToLower())
+		{}
+	};
+
+	const auto RegisterUser = [this](const TestUser& InUser)
+	{
+		bool bIsDone = false;
+		bool bIsOk = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Registering user"), *InUser.Email);
+		FRegistry::User.Register(InUser.Email, InUser.Password, InUser.DisplayName, InUser.Country, InUser.DateOfBirth,
+			THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+				{
+					bIsOk = true;
+					bIsDone = true;
+				}),
+			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+				{
+					if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
+					{
+						bIsOk = true;
+					}
+					bIsDone = true;
+				}));
+		Waiting(bIsDone, TEXT("Waiting ..."));
+		return bIsOk;
+	};
+
+	const auto LoginUser = [this](const TestUser& InUser)
+	{
+		bool bIsDone = false;
+		bool bIsOk = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Logging in user"), *InUser.Email);
+		FRegistry::User.LoginWithUsername(InUser.Email, InUser.Password,
+			FVoidHandler::CreateLambda([&]()
+				{
+					bIsOk = true;
+					bIsDone = true;
+				}),
+			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					bIsDone = true;
+				}));
+		Waiting(bIsDone, TEXT("Waiting ..."));
+		return bIsOk;
+	};
+
+	const auto CreateUserProfile = [this](const TestUser& InUser)
+	{
+		bool bIsDone = false;
+		bool bIsOk = false;
+		FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
+		UserProfileCreateRequest.FirstName = InUser.FirstName;
+		UserProfileCreateRequest.LastName = InUser.LastName;
+		UserProfileCreateRequest.Language = InUser.Language;
+		UserProfileCreateRequest.Timezone = InUser.Timezone;
+		UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
+		UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
+		UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
+		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
+		FAccelByteModelsUserProfileInfo UserProfileInfo;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
+		FRegistry::UserProfile.CreateUserProfile(UserProfileCreateRequest,
+			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+				{
+					bIsOk = true;
+					bIsDone = true;
+					UserProfileInfo = Result;
+				}),
+			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+				{
+					if ((ErrorCodes)Code == ErrorCodes::UserProfileAlreadyExistsException)
+					{
+						bIsOk = true;
+					}
+					bIsDone = true;
+				}));
+
+		Waiting(bIsDone, TEXT("Waiting ..."));
+		return bIsOk;
+	};
+
+	const auto BatchGetPublicUserProfileInfos = [this](const FString& UserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
+		bool bIsDone = false;
+		bool bIsOk = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *UserIds);
+		FRegistry::UserProfile.BatchGetPublicUserProfileInfos(UserIds,
+			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
+				{
+					OutResult = Result;
+					bIsOk = true;
+					bIsDone = true;
+				}),
+			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					bIsDone = true;
+				}));
+		Waiting(bIsDone, TEXT("Waiting ..."));
+		return bIsOk;
+	};
+
+	const auto DeleteUser = [this](const TestUser& InUser)
+	{
+		bool bIsDone = false;
+		bool bIsOk = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Deleting user profile"), *InUser.Email);
+		DeleteUserById(InUser.UserId,
+			FSimpleDelegate::CreateLambda([&]()
+				{
+					bIsOk = true;
+					bIsDone = true;
+				}),
+			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					bIsDone = true;
+				}));
+		Waiting(bIsDone, TEXT("Waiting ..."));
+		return bIsOk;
+	};
+
+	#pragma endregion
+
+	const FString TestProject = TEXT("justice-ue4-sdk");
+	const FString TestUID = TEXT("29008abd"); // Arbitrary unique id to identify this specific automation test
+
+	TArray<TestUser> TestUsers;
+	
+	TestUsers.Add(TestUser(TestProject, TestUID, 1)); 
+	TestUsers.Add(TestUser(TestProject, TestUID, 2));
+
+	#pragma region Test setup
+
+	// Register user + login user + create profile
+
+	for (TestUser& User : TestUsers)
+	{
+		AB_TEST_TRUE(RegisterUser(User));
+		FRegistry::User.ForgetAllCredentials();
+		AB_TEST_TRUE(LoginUser(User));
+		User.UserId = FRegistry::Credentials.GetUserId();
+		AB_TEST_TRUE(!User.UserId.IsEmpty());
+		AB_TEST_TRUE(CreateUserProfile(User));
+	}
+
+	#pragma endregion
+
+	// Batch get public user profile infos
+
+	{
+		FString UserIdsCsv;
+
+		for (const TestUser& User : TestUsers)
+		{
+			UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *User.UserId));
+		}
+
+		TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
+
+		AB_TEST_TRUE(BatchGetPublicUserProfileInfos(UserIdsCsv, UserPublicProfiles));
+		AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
+	}
+
+	#pragma region Test tear down
+
+	// Delete user
+
+	for (TestUser& User : TestUsers)
+	{
+		AB_TEST_TRUE(DeleteUser(User));
+	}
+
+	#pragma endregion
+
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserProfileUtilitiesSuccess, "AccelByte.Tests.AUserProfile.GetAndUpdateProfile", AutomationFlagMaskUser);
-bool FUserProfileUtilitiesSuccess::RunTest(const FString & Parameter)
+bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
 	FAccelByteModelsUserProfileUpdateRequest ProfileUpdate;

@@ -58,6 +58,26 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccel
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void UserProfile::BatchGetPublicUserProfileInfos(const FString UserIds, const THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public"), *Settings.BasicServerUrl, *Credentials.GetNamespace());
+	const FString UrlEncodedUserIds = FGenericPlatformHttp::UrlEncode(UserIds);
+	const FString QueryString = FString::Printf(TEXT("userIds=%s"), *UrlEncodedUserIds);
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	const FString ContentType = TEXT("application/json");
+	const FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(FString::Printf(TEXT("%s?%s"), *Url, *QueryString));
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
