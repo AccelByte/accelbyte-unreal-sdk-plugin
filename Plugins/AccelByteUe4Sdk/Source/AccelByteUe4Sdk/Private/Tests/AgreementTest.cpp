@@ -22,7 +22,7 @@ const int32 AutomationFlagMaskAgreement = (EAutomationTestFlags::EditorContext |
 
 const auto AgreementTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteAgreementTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteAgreementTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 struct AgreementTestUserInfo

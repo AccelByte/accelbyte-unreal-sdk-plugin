@@ -20,7 +20,7 @@ const int32 AutomationFlagMaskServerCloudSave = (EAutomationTestFlags::EditorCon
 
 const auto ServerCloudSaveErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
-	UE_LOG(LogAccelByteServerCloudSaveTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteServerCloudSaveTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 Credentials ServerCloudUserCreds;
@@ -99,9 +99,9 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	ServerCloudUser = MakeShared<Api::User>(ServerCloudUserCreds, FRegistry::Settings);
 	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
 	Email.ToLowerInline();
-	FString Password = TEXT("123Password123");
-	FString DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
-	FString Country = "US";
+	FString const Password = TEXT("123Password123");
+	FString const DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
+	FString const Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
@@ -121,7 +121,7 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 	{
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Code=%d"), Code);
-		if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException || (ErrorCodes)Code == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
+		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException || static_cast<ErrorCodes>(Code) == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
 		{
 			bUserCreationSuccess = true;
 			UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Test ServerCloudSave User2 is already"));
@@ -317,7 +317,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceGameRecordUnexistKey, "Ac
 bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 {
 	bool bReplaceGameRecordUnexistKey = false;
-	const FString UnexistKey = "UE4UnexistKeyGameRecordTest";
+	FString const UnexistKey = "UE4UnexistKeyGameRecordTest";
 	FRegistry::ServerCloudSave.ReplaceGameRecord(UnexistKey, ServerCloudRecord, FVoidHandler::CreateLambda([&bReplaceGameRecordUnexistKey]()
 	{
 		bReplaceGameRecordUnexistKey = true;

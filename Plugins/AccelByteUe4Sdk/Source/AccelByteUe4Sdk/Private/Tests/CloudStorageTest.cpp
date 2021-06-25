@@ -123,10 +123,22 @@ bool CloudStorageUpdateMetadataSlot::RunTest(const FString& Parameters)
 		{
 			if (Result[i].SlotId == CreatedSlot.SlotId)
 			{
-				if (Result[i].Label != UpdateLabel) break;
-				if (!Result[i].Tags.Contains(UpdateTags[0])) break;
-				if (!Result[i].Tags.Contains(UpdateTags[1])) break;
-				if (Result[i].CustomAttribute != UpdateCustomAttribute) break;
+				if (Result[i].Label != UpdateLabel)
+				{
+					break;
+				}
+				if (!Result[i].Tags.Contains(UpdateTags[0]))
+				{
+					break;
+				}
+				if (!Result[i].Tags.Contains(UpdateTags[1]))
+				{
+					break;
+				}
+				if (Result[i].CustomAttribute != UpdateCustomAttribute)
+				{
+					break;
+				}
 				bGetSlotAfterUpdateResult = true;
 			}
 		}

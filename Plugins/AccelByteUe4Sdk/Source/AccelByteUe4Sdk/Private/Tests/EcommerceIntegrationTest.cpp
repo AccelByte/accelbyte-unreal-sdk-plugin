@@ -3,15 +3,11 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HAL/FileManager.h"
 #include "TestUtilities.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteItemApi.h"
-#include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteWalletApi.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteFulfillmentApi.h"
@@ -35,7 +31,6 @@ DECLARE_DELEGATE(FEcommerceUserInitializationSuccess);
 DECLARE_DELEGATE(FEcommerceUserInitializationFail);
 
 DECLARE_DELEGATE(FDeleteUserByIdSuccess);
-static void DeleteUserByIdLobby(const FString& UserID, const FDeleteUserByIdSuccess& OnSuccess, const FErrorHandler& OnError);
 
 const int32 AutomationFlagMaskEcommerce = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
@@ -111,18 +106,16 @@ FString ExpectedEntitlementId;
 
 const auto EcommerceErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 {
-	UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
+	UE_LOG(LogAccelByteEcommerceTest, Error, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetCategorySuccess, "AccelByte.Tests.Ecommerce.B.GetCategory", AutomationFlagMaskEcommerce);
 bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetCategory
 
-	FString CategoryPath = ExpectedChildCategoryPath;
-	FString Language = TEXT("en");
+	FString const CategoryPath = ExpectedChildCategoryPath;
+	FString const Language = TEXT("en");
 	bool bGetCategorySuccess = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetCategory"));
 	FRegistry::Category.GetCategory(CategoryPath, Language, THandler<FAccelByteModelsCategoryInfo>::CreateLambda([&](const FAccelByteModelsCategoryInfo& Result)
@@ -141,11 +134,9 @@ bool EcommerceGetCategorySuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetRootCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetRootCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetRootCategories
 
-	FString Language = TEXT("en");
+	FString const Language = TEXT("en");
 	bool bGetRootCategoriesSuccess = false;
 	bool bExpectedRootCategoryFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetRootCategories"));
@@ -174,11 +165,9 @@ bool EcommerceGetRootCategoriesSuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetChildCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetChildCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetChildCategories
 
-	FString Language = TEXT("en");
+	FString const Language = TEXT("en");
 	bool bGetChildCategoriesSuccess = false;
 	bool bExpectedChildCategoryFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetChildCategory"));
@@ -207,10 +196,8 @@ bool EcommerceGetChildCategoriesSuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetDescendantCategoriesSuccess, "AccelByte.Tests.Ecommerce.B.GetDescendantCategories", AutomationFlagMaskEcommerce);
 bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetDescendantCategories
-	FString Language = TEXT("en");
+	FString const Language = TEXT("en");
 	bool bGetDescendantCategoriesSuccess = false;
 	bool bExpectedDescendantCategoryFound1 = false;
 	bool bExpectedDescendantCategoryFound2 = false;
@@ -245,8 +232,6 @@ bool EcommerceGetDescendantCategoriesSuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemsByCriteriaSuccess, "AccelByte.Tests.Ecommerce.C.GetItemsByCriteria", AutomationFlagMaskEcommerce);
 bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetItemByCriteria
 
 	FAccelByteModelsItemCriteria ItemCriteria;
@@ -281,8 +266,7 @@ bool EcommerceGetItemsByCriteriaSuccess::RunTest(const FString& Parameters)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetItemSuccess, "AccelByte.Tests.Ecommerce.C.GetItem", AutomationFlagMaskEcommerce);
 bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
-{
-	float LastTime = FPlatformTime::Seconds();
+{	
 	FString ItemId = TEXT("");
 	const FString Language = TEXT("en");
 	const FString Region = TEXT("US");
@@ -338,8 +322,7 @@ bool EcommerceGetItemSuccess::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetDiscountedItemSuccess, "AccelByte.Tests.Ecommerce.C.GetDiscountedItem", AutomationFlagMaskEcommerce);
 bool EcommerceGetDiscountedItemSuccess::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-	FString ItemId = TEXT("");
+	FString ItemId{};
 	const FString Language = TEXT("en");
 	const FString Region = TEXT("US");
 
@@ -375,6 +358,7 @@ bool EcommerceGetDiscountedItemSuccess::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	AB_TEST_TRUE(bExpectedRootItemFound);
+	AB_TEST_NOT_EQUAL(ItemId, FString{});
 	return true;
 }
 
@@ -383,8 +367,8 @@ bool EcommerceSearchItemSuccess::RunTest(const FString& Parameters)
 {
 #pragma region SearchItem
 
-	FString Language = TEXT("en");
-	FString Region = TEXT("US");
+	FString const Language = TEXT("en");
+	FString const Region = TEXT("US");
 	bool bSearchItemSuccess = false;
 	bool bSearchedItemFound = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("SearchItem"));
@@ -414,7 +398,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateDistributionReceiverSuccess, "Ac
 bool EcommerceCreateDistributionReceiverSuccess::RunTest(const FString& Parameters)
 {
 #pragma region CreateDistributionReceiver
-	FString ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
+	FString const ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
 
 	FAccelByteModelsAttributes Attributes;
 	Attributes.ServerId = "70391cb5af52427e896e05290bc65832";
@@ -477,7 +461,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceUpdateDistributionReceiverSuccess, "Ac
 bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Parameters)
 {
 #pragma region CreateDistributionReceiver
-	FString ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
+	FString const ExtUserId = "55n8dj2jqgr5s3ryg9cpm4bm7k7vr33t";
 
 	FAccelByteModelsAttributes Attributes;
 	Attributes.ServerId = "70391cb5af52427e896e05290bc65832";
@@ -577,8 +561,7 @@ bool EcommerceUpdateDistributionReceiverSuccess::RunTest(const FString& Paramete
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceCreateOrderSuccess, "AccelByte.Tests.Ecommerce.D1.CreateOrder", AutomationFlagMaskEcommerce);
 bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
-{
-	float LastTime = FPlatformTime::Seconds();
+{	
 	FAccelByteModelsItemInfo Item;
 
 #pragma region GetItemByCriteria
@@ -696,8 +679,7 @@ bool EcommerceCreateOrderSuccess::RunTest(const FString& Parameters)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrder, "AccelByte.Tests.Ecommerce.D2.GetUserOrder", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
-{
-	float LastTime = FPlatformTime::Seconds();
+{	
 	FAccelByteModelsItemInfo Item;
 	FString OrderNo = TEXT("");
 
@@ -780,8 +762,7 @@ bool EcommerceGetUserOrder::RunTest(const FString& Parameters)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrderHistory, "AccelByte.Tests.Ecommerce.D3.GetUserOrderHistory", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
-{
-	float LastTime = FPlatformTime::Seconds();
+{	
 	FAccelByteModelsItemInfo Item;
 	FString OrderNo = TEXT("");
 
@@ -865,8 +846,6 @@ bool EcommerceGetUserOrderHistory::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(EcommerceGetUserOrders, "AccelByte.Tests.Ecommerce.D4.GetUserOrders", AutomationFlagMaskEcommerce);
 bool EcommerceGetUserOrders::RunTest(const FString& Parameters)
 {
-	float LastTime = FPlatformTime::Seconds();
-
 #pragma region GetUserOrders
 
 	bool bGetUserOrdersSuccess = false;
@@ -1155,7 +1134,7 @@ bool EcommerceEntitlementGrantInvalid::RunTest(const FString& Parameters)
 		}
 	}), FErrorHandler::CreateLambda([&bGrantEntitlementDone](int32 ErrorCode, const FString& ErrorMessage)
 	{
-		if ((ErrorCodes)ErrorCode != ErrorCodes::ItemNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) != ErrorCodes::ItemNotFoundException)
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 		}
@@ -1268,14 +1247,12 @@ bool EcommerceGetUserEntitlementByEntitlementId::RunTest(const FString& Paramete
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
-	FAccelByteModelsEntitlementInfo GetResult;
 	FRegistry::Entitlement.GetUserEntitlementById(ExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetEntitlementSuccess = true;
 		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
-		GetResult = Result;
 	}), EcommerceErrorHandler);
 
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
@@ -1300,7 +1277,7 @@ bool EcommerceGetUserEntitlementByEntitlementIdInvalid::RunTest(const FString& P
 	{
 		bGetEntitlementDone = true;
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-		if ((ErrorCodes)ErrorCode == ErrorCodes::EntitlementIdNotFoundException)
+		if (static_cast<ErrorCodes>(ErrorCode) == ErrorCodes::EntitlementIdNotFoundException)
 		{
 			bGetEntitlementError = true;
 		}
@@ -1326,14 +1303,12 @@ bool EcommerceServerGetEntitlementByEntitlementId::RunTest(const FString& Parame
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
-	FAccelByteModelsEntitlementInfo GetResult;
 	FRegistry::ServerEcommerce.GetUserEntitlementById(ExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetEntitlementSuccess = true;
 		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
-		GetResult = Result;
 	}), EcommerceErrorHandler);
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
@@ -1357,14 +1332,12 @@ bool EcommerceServerGetEntitlementByUserIdAndEntitlementId::RunTest(const FStrin
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
-	FAccelByteModelsEntitlementInfo GetResult;
 	FRegistry::ServerEcommerce.GetUserEntitlementById(FRegistry::Credentials.GetUserId(), ExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 	{
 		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 		bGetEntitlementSuccess = true;
 		bGetResultTrue = (Result.Id == ExpectedEntitlementId);
-		GetResult = Result;
 	}), EcommerceErrorHandler);
 	FlushHttpRequests();
 	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
@@ -1625,7 +1598,6 @@ bool EcommerceServerConsumeUserEntitlement::RunTest(const FString& Parameters)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
         bGetItemByCriteriaSuccess2 = true;
-        Items2 = Result;
     }), EcommerceErrorHandler);
 
 	FlushHttpRequests();
@@ -1722,7 +1694,6 @@ bool DisableEnableRevokeUserEntitlement::RunTest(const FString& Parameters)
     {
         UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
         bGetItemByCriteriaSuccess2 = true;
-        Items2 = Result;
     }), EcommerceErrorHandler);
 
 	FlushHttpRequests();
@@ -2082,14 +2053,14 @@ bool ECommerceRedeemMaxCountExeceeded::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::ExceedMaxRedeemCountPerUserException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::ExceedMaxRedeemCountPerUserException));
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ECommerceRedeemCampaignInactive, "AccelByte.Tests.Ecommerce.Fulfillment.3.RedeemCodeCampaignInactive_Failed", AutomationFlagMaskEcommerce);
 bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
 {
-	FCampaignUpdateModel campaignUpdate
+	FCampaignUpdateModel const CampaignUpdate
 	{
 		ExpectedVariable.campaignName,
 		"UE4 Campaign Test",
@@ -2108,7 +2079,7 @@ bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
 	bool bUpdateCampaignSuccess = false;
 	Ecommerce_Campaign_Update(
 		ExpectedVariable.campaignResult.id,
-		campaignUpdate,
+		CampaignUpdate,
 		THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &updateCampaignResult](const FCampaignInfo& Result) 
 			{
 				updateCampaignResult = Result;
@@ -2143,7 +2114,7 @@ bool ECommerceRedeemCampaignInactive::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CampaignIsInactiveException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CampaignIsInactiveException));
 	return true;
 }
 
@@ -2188,7 +2159,7 @@ bool ECommerceRedeemCampaignCodeInactive::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeIsInactiveException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CodeIsInactiveException));
 	return true;
 }
 
@@ -2219,7 +2190,7 @@ bool ECommerceRedeemCodeDoesNotExistInNamespace::RunTest(const FString& Paramete
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeNotFoundException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CodeNotFoundException));
 	return true;
 }
 
@@ -2250,7 +2221,7 @@ bool ECommerceRedeemRedeemptionNotStarted::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeRedeemptionNotStartedException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CodeRedeemptionNotStartedException));
 	return true;
 }
 
@@ -2281,7 +2252,7 @@ bool ECommerceRedeemRedeemptionAlreadyEnded::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
-	AB_TEST_EQUAL(ErrorCode, (int32)ErrorCodes::CodeRedeemptionAlreadyEndedException);
+	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CodeRedeemptionAlreadyEndedException));
 	return true;
 }
 
@@ -2311,8 +2282,6 @@ bool EcommerceTearDown::RunTest(const FString& Parameters)
 	TearDownEcommerce(ExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bTearDownSuccess = true; }), EcommerceErrorHandler);
 	Waiting(bTearDownSuccess,"Waiting for teardown...");
 	AB_TEST_TRUE(bTearDownSuccess)
-
-	float LastTime = 0.0f;
 
 #pragma region DeleteUser
 

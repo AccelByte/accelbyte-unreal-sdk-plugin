@@ -3,15 +3,10 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteSettings.h"
-#include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -23,9 +18,9 @@ using AccelByte::Api::GameTelemetry;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteGameTelemetryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteGameTelemetryTest);
 
-const int32 AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+int32 const AutomationFlagMaskGameTelemetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-const auto GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+auto const GameTelemetryErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
 	UE_LOG(LogAccelByteGameTelemetryTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
@@ -52,8 +47,6 @@ bool GameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameters)
 		TelemetryBody.EventName = "ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK";
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
-
-		bool bTelemetryEventSent = false;
 
 		FRegistry::GameTelemetry.Send(
 			TelemetryBody,
@@ -105,8 +98,6 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 		TelemetryBody.EventName = CurrentImmediateEventName;
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
-
-		bool bTelemetryEventSent = false;
 
 		FRegistry::GameTelemetry.Send(
 			TelemetryBody,

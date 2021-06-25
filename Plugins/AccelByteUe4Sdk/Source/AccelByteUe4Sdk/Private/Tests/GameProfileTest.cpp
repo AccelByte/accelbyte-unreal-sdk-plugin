@@ -17,14 +17,14 @@ using AccelByte::Api::User;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteGameProfileTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteGameProfileTest);
 
-const int32 AutomationFlagMaskGameProfile = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+int32 const AutomationFlagMaskGameProfile = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-const auto GameProfileTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+auto const GameProfileTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
 	UE_LOG(LogAccelByteGameProfileTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-const int GameProfileTestUserCount = 3; //minimum is three
+int const GameProfileTestUserCount = 3; //minimum is three
 Credentials GameProfileCreds[GameProfileTestUserCount];
 TArray<TSharedPtr<Api::User>> GameProfileUsers;
 TArray<TSharedPtr<Api::GameProfile>> GameProfiles;

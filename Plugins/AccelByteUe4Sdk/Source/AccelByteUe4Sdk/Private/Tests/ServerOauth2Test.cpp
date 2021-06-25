@@ -5,10 +5,7 @@
 #pragma once
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Core/AccelByteRegistry.h"
-#include "HAL/FileManager.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
 
@@ -38,8 +35,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 {
 	FRegistry::ServerOauth2.ForgetAllCredentials();
 	bool bClientTokenObtained = false;
-	double LastTime = 0;
-
+	
 	UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("LoginWithClientCredentials"));
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 	{
@@ -59,8 +55,7 @@ bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 	FRegistry::ServerOauth2.ForgetAllCredentials();
 	
 	bool bClientTokenObtained = false;
-	double LastTime = 0;
-
+	
 	UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("LoginWithClientCredentials"));
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
 		{

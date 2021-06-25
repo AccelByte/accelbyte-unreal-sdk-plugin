@@ -3,16 +3,11 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerGameTelemetryApi.h"
 #include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteSettings.h"
-#include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -58,8 +53,6 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 		TelemetryBody.EventNamespace = "SDKTestUE4";
 		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
 
-		bool bTelemetryEventSent = false;
-	
 		FRegistry::ServerGameTelemetry.Send(
 			TelemetryBody,
 			FVoidHandler::CreateLambda([&SuccessResultCount]()
