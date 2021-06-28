@@ -59,7 +59,7 @@ void SLobbyConnect(int userCount)
 		while (!SLobbies[i]->IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
-			UE_LOG(LogTemp, Log, TEXT("%s"), *text);
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("%s"), *text);
 			FTicker::GetCoreTicker().Tick(.5f);
 		}
 	}

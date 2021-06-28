@@ -123,7 +123,7 @@ void LobbyConnect(int userCount)
 		while (!Lobbies[i]->IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
-			UE_LOG(LogTemp, Log, TEXT("%s"), *text);
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s"), *text);
 			FTicker::GetCoreTicker().Tick(.5f);
 		}
 	}
@@ -962,7 +962,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 	for (const auto& Data : TestData)
 	{
 		FString MessageJSON = Lobby::LobbyMessageToJson(*Data.Message);
-		UE_LOG(LogTemp, Log, TEXT("%s -> %s"), *Data.Message, *MessageJSON);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s -> %s"), *Data.Message, *MessageJSON);
 		check(Data.ExpectedJSON.Equals(MessageJSON));
 	}
 
@@ -1658,7 +1658,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	while (!bJoinPartySuccess && !bGetInvitedNotifError)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Joining a Party..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Joining a Party..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	check(!bJoinPartyError);
@@ -1677,7 +1677,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	while (!bReceivedPartyChatSuccess && !bSendPartyChatError)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Fetching Party Chat..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Fetching Party Chat..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	check(bReceivedPartyChatSuccess);
@@ -1757,7 +1757,7 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 	while (!bRejectPartySuccess && !bGetInvitedNotifError)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Rejecting a Party..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Rejecting a Party..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	check(!bRejectPartyError);
@@ -3267,7 +3267,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	
@@ -3443,7 +3443,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -3918,7 +3918,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -4117,7 +4117,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -4344,7 +4344,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -4585,7 +4585,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	while (matchMakingNotifNum < UserNum)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -4954,7 +4954,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -4967,7 +4967,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	while (rematchmakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Rematchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Rematchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	check(rematchmakingNotifNum == 2);
@@ -4984,7 +4984,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
@@ -5180,7 +5180,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	while (matchMakingNotifNum < 2)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
@@ -5330,7 +5330,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	while (matchMakingNotifNum < 6)
 	{
 		FPlatformProcess::Sleep(.5f);
-		UE_LOG(LogTemp, Log, TEXT("Waiting for Matchmaking Notification..."));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[6];

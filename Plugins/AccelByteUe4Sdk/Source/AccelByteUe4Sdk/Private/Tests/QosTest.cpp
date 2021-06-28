@@ -36,7 +36,7 @@ bool QosGetServerLatencies::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteQosTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
 		for (auto Latency : Result)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Latency: Region %s | Ping: %.2f"), *Latency.Key, Latency.Value);
+			UE_LOG(LogAccelByteQosTest, Log, TEXT("Latency: Region %s | Ping: %.2f"), *Latency.Key, Latency.Value);
 		}
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
@@ -57,7 +57,7 @@ bool ServerQosGetServerLatencies::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteQosTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
 		for (auto Latency : Result)
 		{
-			UE_LOG(LogTemp, Log, TEXT("Latency: Region %s | Ping: %.2f"), *Latency.Key, Latency.Value);
+			UE_LOG(LogAccelByteQosTest, Log, TEXT("Latency: Region %s | Ping: %.2f"), *Latency.Key, Latency.Value);
 		}
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
