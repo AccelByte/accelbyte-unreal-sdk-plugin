@@ -2637,16 +2637,18 @@ bool FGetUserByEmailAddressTest::RunTest(const FString & Parameter)
 	FRegistry::User.SearchUsers(
 		EmailAddress,
 		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bGetUserDone = true;
-		ReceivedUserData = Result;
-		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
-		}
-	}),
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			ReceivedUserData = Result;
+			for (auto Data : ReceivedUserData.Data)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
+			}
+			bGetUserDone = true;
+		}),
 		UserTestErrorHandler);
+
+	Waiting(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2720,16 +2722,18 @@ bool FGetUserByDisplayNameTest::RunTest(const FString & Parameter)
 	FRegistry::User.SearchUsers(
 		DisplayName,
 		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bGetUserDone = true;
-		ReceivedUserData = Result;
-		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
-		}
-	}),
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			ReceivedUserData = Result;
+			for (auto Data : ReceivedUserData.Data)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
+			}
+			bGetUserDone = true;
+		}),
 		UserTestErrorHandler);
+
+	Waiting(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2807,16 +2811,18 @@ bool FGetUserByUsernameTest::RunTest(const FString & Parameter)
 	FRegistry::User.SearchUsers(
 		Username,
 		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserDone, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
-	{
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-		bGetUserDone = true;
-		ReceivedUserData = Result;
-		for (auto Data : ReceivedUserData.Data)
 		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
-		}
-	}),
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			ReceivedUserData = Result;
+			for (auto Data : ReceivedUserData.Data)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
+			}
+			bGetUserDone = true;
+		}),
 		UserTestErrorHandler);
+
+	Waiting(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
