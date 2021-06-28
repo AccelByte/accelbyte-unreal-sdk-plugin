@@ -62,7 +62,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Content-Type"), ContentType);
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
-				UE_LOG(LogTemp, Log, TEXT("Starting DSM Register Request..."));
+				FReport::Log(TEXT("Starting DSM Register Request..."));
 
 				OnRegisterResponse.BindLambda([this, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 				{
@@ -126,7 +126,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Content-Type"), ContentType);
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
-				UE_LOG(LogTemp, Log, TEXT("Starting DSM Shutdown Request..."));
+				FReport::Log(TEXT("Starting DSM Shutdown Request..."));
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 			}
@@ -161,7 +161,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Content-Type"), ContentType);
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
-				UE_LOG(LogTemp, Log, TEXT("Starting DSM Register Local Request..."));
+				FReport::Log(TEXT("Starting DSM Register Local Request..."));
 
 				OnRegisterResponse.BindLambda([this, OnSuccess, OnError](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
 				{
@@ -220,7 +220,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Content-Type"), ContentType);
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
-				UE_LOG(LogTemp, Log, TEXT("Starting DSM Deregister Request..."));
+				FReport::Log(TEXT("Starting DSM Deregister Request..."));
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 			}
@@ -251,7 +251,7 @@ namespace AccelByte
 			TArray<FString> Tokens;
 			TArray<FString> Switches;
 			FCommandLine::Parse(CommandParams, Tokens, Switches);
-			UE_LOG(LogTemp, Log, TEXT("Params: %s"), CommandParams);
+			FReport::Log(FString::Printf(TEXT("Params: %s"), CommandParams));
 			for (auto Param : Switches)
 			{
 				if (Param.Contains("provider"))

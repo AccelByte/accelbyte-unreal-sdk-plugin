@@ -24,7 +24,6 @@ namespace GameServerApi
 		FReport::Log(FString(__FUNCTION__));
 
 		FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::ServerSettings.QosManagerServerUrl);
-		UE_LOG(LogTemp, Log, TEXT("%s"), *Url);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

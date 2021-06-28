@@ -7,6 +7,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
 #include "Api/AccelByteGameTelemetryApi.h"
+#include "Core/AccelByteReport.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 
 #if WITH_EDITOR
@@ -188,7 +189,7 @@ void FAccelByteUe4SdkModule::NullCheckConfig(FString value, FString configField)
 {
 	if (value.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
+		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
 	}
 }
 

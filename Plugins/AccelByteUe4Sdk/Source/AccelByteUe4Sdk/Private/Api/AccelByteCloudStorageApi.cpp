@@ -79,7 +79,7 @@ namespace Api
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
-		UE_LOG(LogTemp, Log, TEXT("[AccelByte] Cloud Storage Start uploading..."));
+		FReport::Log(TEXT("[AccelByte] Cloud Storage Start uploading..."));
 	}
 
 	void CloudStorage::GetSlot(FString SlotID, const THandler<TArray<uint8>> & OnSuccess, const FErrorHandler & OnError)
@@ -144,7 +144,7 @@ namespace Api
 		Request->OnRequestProgress() = OnProgress;
 		Request->OnProcessRequestComplete() = CreateHttpResultHandler(OnSuccess, OnError);
 		Request->ProcessRequest();
-		UE_LOG(LogTemp, Log, TEXT("[AccelByte] Cloud Storage Start uploading..."));
+		FReport::Log(TEXT("[AccelByte] Cloud Storage Start uploading..."));
 	}
 
 	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
