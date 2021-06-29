@@ -28,9 +28,9 @@ DEFINE_LOG_CATEGORY(LogAccelByteAchievementTest);
 const int32 AutomationFlagMaskAchievement = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 const auto AchievementTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
-{
-	UE_LOG(LogAccelByteAchievementTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-});
+	{
+		UE_LOG(LogAccelByteAchievementTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	});
 
 FAchievementRequest AchievementTestAchievement1;
 FAchievementRequest AchievementTestAchievement2;
@@ -41,19 +41,89 @@ FStatCreateRequest AchievementTestAchievementStatisticServerRequest;
 TArray<FStatCreateRequest> AchievementTestAllStatisticRequests;
 TArray<FAchievementRequest> AchievementTestAllAchievementRequests;
 
-const auto AchievementTestQueryAchievements = [](const FString& InLanguage, const EAccelByteAchievementListSortBy& InSortBy, FAccelByteModelsPaginatedPublicAchievement& PaginatedPublicAchievement, const int32& InOffset = 0, const int32& InLimit = 20) // XXX InOffset and InLimit defaults must match with QueryAchievements defaults
+const auto AchievementTestQueryAchievements = [](const FString& InLanguage, const EAccelByteAchievementListSortBy& InSortBy, FAccelByteModelsPaginatedPublicAchievement& OutPaginatedPublicAchievement, const int32& InOffset = 0, const int32& InLimit = 20) // XXX InOffset and InLimit defaults must match with QueryAchievements defaults
 {
 	bool bIsOk = false;
+	bool bIsDone = false;
 	UE_LOG(LogAccelByteTest, Log, TEXT("%s"), TEXT("Querying achievements"));
 	FRegistry::Achievement.QueryAchievements(InLanguage, InSortBy,
 		THandler<FAccelByteModelsPaginatedPublicAchievement>::CreateLambda([&](FAccelByteModelsPaginatedPublicAchievement Result)
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("OK"));
-				PaginatedPublicAchievement = Result;
+				OutPaginatedPublicAchievement = Result;
 				bIsOk = true;
+				bIsDone = true;
 			}),
-		AchievementTestErrorHandler, InOffset, InLimit);
-	Waiting(bIsOk, "Waiting ...");
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+			{
+				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
+				bIsDone = true;
+			}), InOffset, InLimit);
+	Waiting(bIsDone, "Waiting ...");
+	return bIsOk;
+};
+
+const auto AchievementTestQueryUserAchievements = [](const EAccelByteAchievementListSortBy& InSortBy, FAccelByteModelsPaginatedUserAchievement& OutPaginatedUserAchievement,
+	const int32& InOffset = 0, const int32& InLimit = 20, const bool InPreferUnlocked = true) // XXX InOffset, InLimit, and InPreferUnlocked defaults must match with QueryUserAchievements defaults
+{
+	bool bIsOk = false;
+	bool bIsDone = false;
+	UE_LOG(LogAccelByteTest, Log, TEXT("%s"), TEXT("Querying user achievements"));
+	FRegistry::Achievement.QueryUserAchievements(InSortBy,
+		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&](FAccelByteModelsPaginatedUserAchievement Result)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("OK"));
+				OutPaginatedUserAchievement = Result;
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+			{
+				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
+				bIsDone = true;
+			}), InOffset, InLimit, InPreferUnlocked);
+	Waiting(bIsDone, "Waiting ...");
+	return bIsOk;
+};
+
+const auto AchievementTestGetAchievement = [](const FString& AchievementCode, FAccelByteModelsMultiLanguageAchievement& OutMultiLanguageAchievement)
+{
+	bool bIsOk = false;
+	bool bIsDone = false;
+	FRegistry::Achievement.GetAchievement(AchievementCode,
+		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&](FAccelByteModelsMultiLanguageAchievement Result)
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("OK"));
+				OutMultiLanguageAchievement = Result;
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+			{
+				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
+				bIsDone = true;
+			}));
+	Waiting(bIsDone, "Waiting ...");
+	return bIsOk;
+};
+
+const auto AchievementTestServerUnlockAchievement = [](const FString& UserId, const FString& AchievementCode)
+{
+	bool bIsOk = false;
+	bool bIsDone = false;
+	FRegistry::ServerAchievement.UnlockAchievement(UserId, AchievementCode,
+		FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("OK"));
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+			{
+				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
+				bIsDone = true;
+			}));
+	Waiting(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -95,14 +165,14 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		AchievementTestAchievement1.GoalValue = 7;
 		AchievementTestAchievement1.Hidden = true;
 		AchievementTestAchievement1.Incremental = false;
-		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug")});
-		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 2 url"), TEXT("This is locked icon 2 slug")});
+		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
+		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 2 url"), TEXT("This is locked icon 2 slug") });
 		AchievementTestAchievement1.Name.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
 		AchievementTestAchievement1.StatCode = TEXT("This is achievement 1 stat code");
 		AchievementTestAchievement1.Tags.Add(TEXT("Tags1"));
 		AchievementTestAchievement1.Tags.Add(TEXT("Tags2"));
-		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug")});
-		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug")});
+		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
+		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
 	}
 	// achievement2
 	{
@@ -157,27 +227,27 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
-		bUserLoginSuccess = true;
-	}), AchievementTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
+			bUserLoginSuccess = true;
+		}), AchievementTestErrorHandler);
 	Waiting(bUserLoginSuccess, "Waiting for Login ...");
-	
+
 	bool bDeleteUserSuccess = false;
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
-		bDeleteUserSuccess = true;
-	}), AchievementTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
+			bDeleteUserSuccess = true;
+		}), AchievementTestErrorHandler);
 	Waiting(bDeleteUserSuccess, "Waiting for user deletion ...");
 
 	// Login again
 	bool bNewUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bNewUserLoginSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
-		bNewUserLoginSuccess = true;
-	}), AchievementTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
+			bNewUserLoginSuccess = true;
+		}), AchievementTestErrorHandler);
 	Waiting(bNewUserLoginSuccess, "Waiting for Login new user ...");
 
 	// Client Login
@@ -196,9 +266,9 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 
 		// Even though it fails, as long as it exists in the namespace should not be a problem.
 		Statistic_Create_Stat(statisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
-		{
-			bCreateStatDone = true;
-		}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
+			{
+				bCreateStatDone = true;
+			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
 		Waiting(bCreateStatDone, "Waiting for Create statistic code...");
 
 		bool bCreateUserStatItemDone = false;
@@ -217,10 +287,10 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
 				bDeleteAchievementDone = true;
 			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
-			{
-				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not eelete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-				bDeleteAchievementDone = true;
-			}));
+				{
+					UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not eelete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+					bDeleteAchievementDone = true;
+				}));
 		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
@@ -241,7 +311,7 @@ bool FAchievementTestQueryAchievementsDefaultLanguage::RunTest(const FString& Pa
 {
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
 
-	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::NONE, paginatedAchievements, 0, 100))
+	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::NONE, paginatedAchievements, 0, 100));
 
 	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
@@ -273,7 +343,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 {
 	FAccelByteModelsPaginatedPublicAchievement paginatedEnAchievements;
 
-	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT("en"), EAccelByteAchievementListSortBy::NONE, paginatedEnAchievements, 0, 100))
+	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT("en"), EAccelByteAchievementListSortBy::NONE, paginatedEnAchievements, 0, 100));
 
 	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedEnAchievements.Data.Num(); i++)
@@ -299,13 +369,13 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 
 	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT("id"), EAccelByteAchievementListSortBy::NONE, paginatedIdAchievements, 0, 100))
 
-	bool bIdAchievement1Found = false;
+		bool bIdAchievement1Found = false;
 	for (int i = 0; i < paginatedIdAchievements.Data.Num(); i++)
 	{
 		if (paginatedIdAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode && paginatedIdAchievements.Data[i].Name == AchievementTestAchievement1.Name[AchievementTestAchievement1.DefaultLanguage])
 		{
 			bIdAchievement1Found = true;
-				break;
+			break;
 		}
 	}
 
@@ -315,7 +385,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 		if (paginatedIdAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode && paginatedIdAchievements.Data[i].Name == AchievementTestAchievement2.Name[TEXT("id")])
 		{
 			bIdAchievement2Found = true;
-				break;
+			break;
 		}
 	}
 
@@ -332,7 +402,7 @@ bool FAchievementTestQueryAchievementsCreatedAsc::RunTest(const FString& Paramet
 {
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
 
-	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 0, 100))
+	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 0, 100));
 
 	int achievement1Order = 0;
 	bool bAchievement1Found = false;
@@ -371,7 +441,7 @@ bool FAchievementTestQueryAchievementsCreatedDesc::RunTest(const FString& Parame
 {
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
 
-	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_DESC, paginatedAchievements, 0, 100))
+	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_DESC, paginatedAchievements, 0, 100));
 
 	int achievement1Order = 0;
 	bool bAchievement1Found = false;
@@ -410,7 +480,7 @@ bool FAchievementTestQueryAchievementsLimit1::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
 
-	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::NONE, paginatedAchievements, 0, 1))
+	AB_TEST_TRUE(AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::NONE, paginatedAchievements, 0, 1));
 
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
 
@@ -423,7 +493,7 @@ bool FAchievementTestQueryAchievementsOffset1::RunTest(const FString& Parameters
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievements;
 
 	AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 1);
-	
+
 	FAccelByteModelsPaginatedPublicAchievement paginatedAchievementsNoOffset;
 
 	AchievementTestQueryAchievements(TEXT(""), EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievementsNoOffset);
@@ -437,31 +507,16 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestGetAchievement, "AccelByte.Test
 bool FAchievementTestGetAchievement::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsMultiLanguageAchievement getAchievement1;
-	bool bGetAchievement1Success = false;
-	FRegistry::Achievement.GetAchievement(AchievementTestAchievement1.AchievementCode,
-		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&bGetAchievement1Success, &getAchievement1](FAccelByteModelsMultiLanguageAchievement achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Get achievement 1 success"));
-		getAchievement1 = achievement;
-		bGetAchievement1Success = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bGetAchievement1Success, "Waiting for getting achievement 1 ...");
+
+	AB_TEST_TRUE(AchievementTestGetAchievement(AchievementTestAchievement1.AchievementCode, getAchievement1));
 
 	FAccelByteModelsMultiLanguageAchievement getAchievement2;
-	bool bGetAchievement2Success = false;
-	FRegistry::Achievement.GetAchievement(AchievementTestAchievement2.AchievementCode,
-		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&bGetAchievement2Success, &getAchievement2](FAccelByteModelsMultiLanguageAchievement achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Get achievement 2 success"));
-		getAchievement2 = achievement;
-		bGetAchievement2Success = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bGetAchievement2Success, "Waiting for getting achievement 2 ...");
 
-	AB_TEST_TRUE(bGetAchievement1Success);
+	AB_TEST_TRUE(AchievementTestGetAchievement(AchievementTestAchievement2.AchievementCode, getAchievement2));
+
 	AB_TEST_EQUAL(getAchievement1.AchievementCode, AchievementTestAchievement1.AchievementCode);
-	AB_TEST_TRUE(bGetAchievement2Success);
 	AB_TEST_EQUAL(getAchievement2.AchievementCode, AchievementTestAchievement2.AchievementCode);
+
 	return true;
 }
 
@@ -469,45 +524,19 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestGetAchievementInvalidId, "Accel
 bool FAchievementTestGetAchievementInvalidId::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsMultiLanguageAchievement getAchievement;
-	bool bGetAchievementSuccess = false;
-	bool bGetAchievementDone = false;
-	FRegistry::Achievement.GetAchievement(TEXT("1fdcacd5-eb94-4e18-a3af-7d8c007a0d89"),
-		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&bGetAchievementSuccess, &bGetAchievementDone, &getAchievement](FAccelByteModelsMultiLanguageAchievement achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Get invalid achievement success"));
-		getAchievement = achievement;
-		bGetAchievementSuccess = true;
-		bGetAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bGetAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bGetAchievementDone = true;
-	}));
-	Waiting(bGetAchievementDone, "Waiting for getting invalid achievement ...");
 
-	AB_TEST_FALSE(bGetAchievementSuccess);
+	AB_TEST_FALSE(AchievementTestGetAchievement(TEXT("1fdcacd5-eb94-4e18-a3af-7d8c007a0d89"), getAchievement));
+
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestGetAchievementEmptyId, "AccelByte.Tests.Achievement.B.GetAchievementEmptyId", AutomationFlagMaskAchievement);
 bool FAchievementTestGetAchievementEmptyId::RunTest(const FString& Parameters)
 {
-	bool bGetAchievementSuccess = false;
-	bool bGetAchievementDone= false;
-	FRegistry::Achievement.GetAchievement(TEXT(""),
-		THandler<FAccelByteModelsMultiLanguageAchievement>::CreateLambda([&bGetAchievementSuccess, &bGetAchievementDone](FAccelByteModelsMultiLanguageAchievement achievement)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Get achievement success"));
-		bGetAchievementSuccess = true;
-		bGetAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bGetAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bGetAchievementDone = true;
-	}));
-	Waiting(bGetAchievementDone, "Waiting for getting empty achievement id ...");
+	FAccelByteModelsMultiLanguageAchievement getAchievement;
 
-	AB_TEST_FALSE(bGetAchievementSuccess);
+	AB_TEST_FALSE(AchievementTestGetAchievement(TEXT(""), getAchievement));
+
 	return true;
 }
 
@@ -515,18 +544,11 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestQueryUserAchievementsEmptyData,
 bool FAchievementTestQueryUserAchievementsEmptyData::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-		paginatedAchievements = achievements;
-		bQueryAchievementsSuccess = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
+
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 0);
+
 	return true;
 }
 
@@ -536,12 +558,12 @@ bool FAchievementTestUnlockAchievement::RunTest(const FString& Parameters)
 	bool bUnlockAchievementSuccess = false;
 	FRegistry::Achievement.UnlockAchievement(AchievementTestAchievement1.AchievementCode,
 		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
-		bUnlockAchievementSuccess = true;
-	}), AchievementTestErrorHandler);
+			{
+				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
+				bUnlockAchievementSuccess = true;
+			}), AchievementTestErrorHandler);
 	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
-	
+
 	AB_TEST_TRUE(bUnlockAchievementSuccess);
 	return true;
 }
@@ -550,130 +572,55 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestQueryUserAchievements, "AccelBy
 bool FAchievementTestQueryUserAchievements::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-		paginatedAchievements = achievements;
-		bQueryAchievementsSuccess = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	bool bAchievement1Found = false;
-	if (paginatedAchievements.Data[0].AchievementCode == AchievementTestAchievement1.AchievementCode)
-	{
-		bAchievement1Found = true;
-	}
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
 
-	AB_TEST_TRUE(bQueryAchievementsSuccess);
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
-	AB_TEST_TRUE(bAchievement1Found);
+	AB_TEST_TRUE(paginatedAchievements.Data[0].AchievementCode == AchievementTestAchievement1.AchievementCode);
+
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievement, "AccelByte.Tests.Achievement.E.ServerUnlockAchievement", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievement::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = false;
-	FRegistry::ServerAchievement.UnlockAchievement(FRegistry::Credentials.GetUserId(), AchievementTestAchievement2.AchievementCode,
-		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
-		bUnlockAchievementSuccess = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
+	AB_TEST_TRUE(AchievementTestServerUnlockAchievement(FRegistry::Credentials.GetUserId(), AchievementTestAchievement2.AchievementCode));
 
-	AB_TEST_TRUE(bUnlockAchievementSuccess);
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievementInvalidUserId, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementInvalidUserId", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievementInvalidUserId::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = false;
-	bool bUnlockAchievementDone = false;
-	FRegistry::ServerAchievement.UnlockAchievement(TEXT("Invalid"), AchievementTestAchievement2.AchievementCode,
-		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess, &bUnlockAchievementDone]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock invalid achievement success"));
-		bUnlockAchievementSuccess = true;
-		bUnlockAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bUnlockAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bUnlockAchievementDone = true;
-	}));
-	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
+	bool bUnlockAchievementSuccess = AchievementTestServerUnlockAchievement(TEXT("INVALID"), AchievementTestAchievement2.AchievementCode);
 
 	// TODO: Uncomment below if the user id validation is fixed on the backend.
 	//AB_TEST_FALSE(bUnlockAchievementSuccess);
+
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievementEmptyUserId, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementEmptyUserId", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievementEmptyUserId::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = false;
-	bool bUnlockAchievementDone = false;
-	FRegistry::ServerAchievement.UnlockAchievement(TEXT(""), AchievementTestAchievement2.AchievementCode,
-		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess, &bUnlockAchievementDone]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock empty user id achievement success"));
-		bUnlockAchievementSuccess = true;
-		bUnlockAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bUnlockAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bUnlockAchievementDone = true;
-	}));
-	Waiting(bUnlockAchievementDone, "Waiting for empty user id achievement ...");
+	AB_TEST_FALSE(AchievementTestServerUnlockAchievement(TEXT(""), AchievementTestAchievement2.AchievementCode));
 
-	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievementInvalidCode, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementInvalidCode", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievementInvalidCode::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = false;
-	bool bUnlockAchievementDone = false;
-	FRegistry::ServerAchievement.UnlockAchievement(FRegistry::Credentials.GetUserId(), TEXT("Invalid"),
-		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess, &bUnlockAchievementDone]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock invalid achievement success"));
-		bUnlockAchievementSuccess = true;
-		bUnlockAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bUnlockAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bUnlockAchievementDone = true;
-	}));
-	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
+	AB_TEST_FALSE(AchievementTestServerUnlockAchievement(FRegistry::Credentials.GetUserId(), TEXT("INVALID")));
 
-	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockEmptyAchievementCode, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementEmptyCode", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockEmptyAchievementCode::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = false;
-	bool bUnlockAchievementDone = false;
-	FRegistry::ServerAchievement.UnlockAchievement(FRegistry::Credentials.GetUserId(), TEXT(""),
-		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess, &bUnlockAchievementDone]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock invalid achievement success"));
-		bUnlockAchievementSuccess = true;
-		bUnlockAchievementDone = true;
-	}), FErrorHandler::CreateLambda([&bUnlockAchievementDone](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-		bUnlockAchievementDone = true;
-	}));
-	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
+	AB_TEST_FALSE(AchievementTestServerUnlockAchievement(FRegistry::Credentials.GetUserId(), TEXT("")));
 
-	AB_TEST_FALSE(bUnlockAchievementSuccess);
 	return true;
 }
 
@@ -681,15 +628,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestQueryUserAchievementsUnlockedAl
 bool FAchievementTestQueryUserAchievementsUnlockedAll::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-		paginatedAchievements = achievements;
-		bQueryAchievementsSuccess = true;
-	}), AchievementTestErrorHandler);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
+
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
 
 	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
@@ -711,10 +651,10 @@ bool FAchievementTestQueryUserAchievementsUnlockedAll::RunTest(const FString& Pa
 		}
 	}
 
-	AB_TEST_TRUE(bQueryAchievementsSuccess);
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 2);
 	AB_TEST_TRUE(bAchievement1Found);
 	AB_TEST_TRUE(bAchievement2Found);
+
 	return true;
 }
 
@@ -722,19 +662,12 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestQueryUserAchievementsOffset1, "
 bool FAchievementTestQueryUserAchievementsOffset1::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::CREATED_AT_ASC,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-		paginatedAchievements = achievements;
-		bQueryAchievementsSuccess = true;
-	}), AchievementTestErrorHandler, 1);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 1));
+
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
 	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, AchievementTestAchievement2.AchievementCode);
+
 	return true;
 }
 
@@ -742,19 +675,12 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestQueryUserAchievementsLimit1, "A
 bool FAchievementTestQueryUserAchievementsLimit1::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-		paginatedAchievements = achievements;
-		bQueryAchievementsSuccess = true;
-	}), AchievementTestErrorHandler, 0, 1);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
 
-	AB_TEST_TRUE(bQueryAchievementsSuccess);
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 0, 1));
+
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
 	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, AchievementTestAchievement1.AchievementCode);
+
 	return true;
 }
 
@@ -794,15 +720,8 @@ bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const
 	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
 
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-			{
-				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-				paginatedAchievements = achievements;
-				bQueryAchievementsSuccess = true;
-			}), AchievementTestErrorHandler);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
+
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
 
 	// Assert
 	bool bIncrementalAchievementUnlocked = false;
@@ -815,6 +734,7 @@ bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const
 	}
 
 	AB_TEST_TRUE(bIncrementalAchievementUnlocked);
+
 	return true;
 }
 
@@ -863,15 +783,8 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 	WaitUntil([]() { return false; }, 10.0f, "Waiting for KAFKA");
 
 	FAccelByteModelsPaginatedUserAchievement paginatedAchievements;
-	bool bQueryAchievementsSuccess = false;
-	FRegistry::Achievement.QueryUserAchievements(EAccelByteAchievementListSortBy::NONE,
-		THandler<FAccelByteModelsPaginatedUserAchievement>::CreateLambda([&bQueryAchievementsSuccess, &paginatedAchievements](FAccelByteModelsPaginatedUserAchievement achievements)
-			{
-				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Query user achievements success"));
-				paginatedAchievements = achievements;
-				bQueryAchievementsSuccess = true;
-			}), AchievementTestErrorHandler);
-	Waiting(bQueryAchievementsSuccess, "Waiting for querying user achievements ...");
+
+	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
 
 	// Assert
 	bool bIncrementalAchievementUnlocked = false;
@@ -884,6 +797,7 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 	}
 
 	AB_TEST_TRUE(bIncrementalAchievementUnlocked);
+
 	return true;
 }
 
@@ -905,16 +819,18 @@ bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 
 	bool bDeleteSuccess = false;
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
-	{
-		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
-		bDeleteSuccess = true;
-	}), AchievementTestErrorHandler);
+		{
+			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
+			bDeleteSuccess = true;
+		}), AchievementTestErrorHandler);
 	Waiting(bDeleteSuccess, "Waiting for user deletion...");
 
-	for(auto bDeleteAchievementSuccess : deleteAchievementResults)
+	for (auto bDeleteAchievementSuccess : deleteAchievementResults)
 	{
 		AB_TEST_TRUE(bDeleteAchievementSuccess);
 	}
+
 	AB_TEST_TRUE(bDeleteSuccess);
+
 	return true;
 }
