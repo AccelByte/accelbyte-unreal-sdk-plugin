@@ -267,7 +267,7 @@ TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
 	return Return;
 }
 
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials)
+bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers)
 {
 	const auto Register = [](const FTestUser& InUser)
 	{
@@ -292,6 +292,22 @@ bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<T
 		return bIsOk;
 	};
 
+	OutUsers.Empty();
+
+	for (int i = 0; i < InNumOfUsers; i++)
+	{
+		OutUsers.Add(MakeShared<FTestUser>(InTestUID, i));
+		if (!Register(*OutUsers[i]))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials)
+{
 	const auto Login = [](const FTestUser& InUser, Credentials& OutCredentials)
 	{
 		bool bIsDone = false;
@@ -312,17 +328,12 @@ bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<T
 		return bIsOk;
 	};
 
-	OutUsers.Empty();
-	OutCredentials.Empty();
-
-	for (int i = 0; i < InNumOfUsers; i++)
+	if (!SetupTestUsers(InTestUID, InNumOfUsers, OutUsers))
 	{
-		OutUsers.Add(MakeShared<FTestUser>(InTestUID, i));
-		if (!Register(*OutUsers[i]))
-		{
-			return false;
-		}
+		return false;
 	}
+
+	OutCredentials.Empty();
 
 	for (int i = 0; i < InNumOfUsers; i++)
 	{
