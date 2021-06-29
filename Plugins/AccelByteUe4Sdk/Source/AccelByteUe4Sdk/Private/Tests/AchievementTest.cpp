@@ -630,7 +630,6 @@ bool FAchievementTestServerUnlockAchievement::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
 		bUnlockAchievementSuccess = true;
 	}), AchievementTestErrorHandler);
-	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
 
 	AB_TEST_TRUE(bUnlockAchievementSuccess);
@@ -653,7 +652,6 @@ bool FAchievementTestServerUnlockAchievementInvalidUserId::RunTest(const FString
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bUnlockAchievementDone = true;
 	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
 	// TODO: Uncomment below if the user id validation is fixed on the backend.
@@ -677,7 +675,6 @@ bool FAchievementTestServerUnlockAchievementEmptyUserId::RunTest(const FString& 
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bUnlockAchievementDone = true;
 	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for empty user id achievement ...");
 
 	AB_TEST_FALSE(bUnlockAchievementSuccess);
@@ -700,7 +697,6 @@ bool FAchievementTestServerUnlockAchievementInvalidCode::RunTest(const FString& 
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bUnlockAchievementDone = true;
 	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
 	AB_TEST_FALSE(bUnlockAchievementSuccess);
@@ -723,7 +719,6 @@ bool FAchievementTestServerUnlockEmptyAchievementCode::RunTest(const FString& Pa
 		UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bUnlockAchievementDone = true;
 	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
 	Waiting(bUnlockAchievementDone, "Waiting for invalid achievement ...");
 
 	AB_TEST_FALSE(bUnlockAchievementSuccess);
