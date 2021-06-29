@@ -1540,7 +1540,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bLinkSteamAcc = false;
 	bool bLinkSteamSuccess = false;
@@ -2481,7 +2481,7 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 	FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bGetUserDone = false;
 	FAccountUserData ReceivedUserData;
@@ -2549,7 +2549,7 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 	const FString ABUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bGetUserDone = false;
 	FBulkPlatformUserIdResponse ReceivedUserData;

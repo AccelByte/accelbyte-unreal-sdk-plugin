@@ -97,6 +97,176 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString
 	}
 }
 
+FString GetRequiredEnvironmentVariable(const FString Name, const int32 ValueLength = 100)
+{
+	FString Value = Environment::GetEnvironmentVariable(Name, ValueLength + 1);
+	if (Value.IsEmpty())
+	{
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Missing required environment variable: %s"), *Name);
+	}
+	if (Value.Len() > ValueLength)
+	{
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Environment variable value is too long: %s"), *Name);
+	}
+	return FString::Printf(TEXT("%s"), *Value);
+}
+
+FString GetAdminBaseUrl()
+{
+	return GetRequiredEnvironmentVariable(TEXT("ADMIN_BASE_URL"));
+}
+
+FString GetPublisherNamespace()
+{
+	return GetRequiredEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"));
+}
+
+FString GetSteamUserId()
+{
+	return GetRequiredEnvironmentVariable(TEXT("STEAM_USER_ID"));
+}
+
+FString AdminAccessTokenCache;
+
+FString GetAdminAccessToken()
+{
+	if (!AdminAccessTokenCache.IsEmpty())
+	{
+		return AdminAccessTokenCache;
+	}
+
+	FString ClientId = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
+	FString ClientSecret = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
+
+	FOauth2Token ClientLogin;
+	bool ClientLoginSuccess = false;
+	Api::Oauth2::GetTokenWithClientCredentials(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
+		{
+			ClientLogin = Result;
+			ClientLoginSuccess = true;
+			UE_LOG(LogAccelByteTest, Log, TEXT("Login with Client Success..!"));
+		}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteTest, Fatal, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
+			}));
+	Waiting(ClientLoginSuccess, "Login with Client...");
+
+	AdminAccessTokenCache = ClientLogin.Access_token;
+
+	return ClientLogin.Access_token;
+}
+
+FString AdminUserTokenCache;
+
+FString GetAdminUserAccessToken()
+{
+	if (!AdminUserTokenCache.IsEmpty())
+	{
+		return AdminUserTokenCache;
+	}
+
+	FString ClientId = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
+	FString ClientSecret = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
+	FString UserName = GetRequiredEnvironmentVariable(TEXT("ADMIN_USER_NAME"));
+	FString UserPass = GetRequiredEnvironmentVariable(TEXT("ADMIN_USER_PASS"));
+
+	FString BaseUrl = GetAdminBaseUrl();
+
+	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
+	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *BaseUrl);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/x-www-form-urlencoded");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(UserName), *FGenericPlatformHttp::UrlEncode(UserPass));
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	bool bGetTokenSuccess = false;
+	FOauth2Token TokenResult;
+	THandler<FOauth2Token> OnSuccess;
+	OnSuccess.BindLambda([&TokenResult, &bGetTokenSuccess](const FOauth2Token& Result)
+		{
+			TokenResult = Result;
+			bGetTokenSuccess = true;
+		});
+	FErrorHandler OnError;
+	OnError.BindLambda([](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelByteTest, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
+		});
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	Waiting(bGetTokenSuccess, "Waiting for get token...");
+
+	AdminUserTokenCache = TokenResult.Access_token;
+
+	return TokenResult.Access_token;
+}
+
+void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
+{
+	UAccelByteBlueprintsTest::SendNotif(FRegistry::Credentials.GetUserId(), Message, bAsync, FVoidHandler::CreateLambda([OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
+		}), FErrorHandler::CreateLambda([OnError](int32 Code, const FString& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
+void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/notification/namespaces/%s/users/%s/freeform"), *BaseUrl, *FRegistry::Settings.Namespace, *UserId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = FString::Printf(TEXT("{\"message\":\"%s\"}"), *Message);
+	Url = Url.Replace(TEXT("wss"), TEXT("https")); //change protocol
+	Url = Url.Replace(TEXT("lobby/"), TEXT("")); //no /lobby
+	if (bAsync)
+	{
+		Url.Append(TEXT("?async=true"));
+	}
+	else
+	{
+		Url.Append(TEXT("?async=false"));
+	}
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+FString UAccelByteBlueprintsTest::BytesToFString(TArray<uint8> Input)
+{
+	uint32 size = Input.Num();
+	FString Data = TEXT("");
+	Data = BytesToString(Input.GetData(), Input.Num());
+	return Data;
+}
+
+TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
+{
+	uint8* Output = new uint8[Input.Len()];
+	TArray<uint8> Return;
+	Return.AddUninitialized(Input.Len());
+	StringToBytes(Input, Return.GetData(), Input.Len());
+	return Return;
+}
+
 bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials)
 {
 	const auto Register = [](const FTestUser& InUser)
@@ -229,173 +399,6 @@ bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials)
 	return true;
 }
 
-FString GetBaseUrl()
-{
-	FString BaseUrl = Environment::GetEnvironmentVariable(TEXT("ADMIN_BASE_URL"), 100);
-	if (BaseUrl.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Base URL is not found.\nPlease check your Environment variable."));
-	}
-	return FString::Printf(TEXT("%s"), *BaseUrl);
-}
-
-FString GetPublisherNamespace()
-{
-	FString Namespace = Environment::GetEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"), 100);
-	if (Namespace.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Namespace is not found.\nPlease check your Environment variable."));
-	}
-	return FString::Printf(TEXT("%s"), *Namespace);
-}
-
-FString AdminAccessTokenCache;
-FString GetAdminAccessToken()
-{
-	if (!AdminAccessTokenCache.IsEmpty())
-	{
-		return AdminAccessTokenCache;
-	}
-	FString ClientId = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), 100);
-	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
-	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
-	}
-
-	FOauth2Token ClientLogin;
-	bool ClientLoginSuccess = false;
-	Api::Oauth2::GetTokenWithClientCredentials(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret), THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
-		{
-			ClientLogin = Result;
-			ClientLoginSuccess = true;
-			UE_LOG(LogAccelByteTest, Log, TEXT("Login with Client Success..!"));
-		}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
-			{
-				UE_LOG(LogAccelByteTest, Fatal, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
-			}));
-	Waiting(ClientLoginSuccess, "Login with Client...");
-
-	AdminAccessTokenCache = ClientLogin.Access_token;
-	return ClientLogin.Access_token;
-}
-
-FString SuperUserTokenCache;
-FString GetSuperUserTokenCache()
-{
-	if (!SuperUserTokenCache.IsEmpty())
-	{
-		return SuperUserTokenCache;
-	}
-	FString ClientId = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"), 100);
-	FString ClientSecret = Environment::GetEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"), 100);
-	FString UserName = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_NAME"), 100);
-	FString UserPass = Environment::GetEnvironmentVariable(TEXT("ADMIN_USER_PASS"), 100);
-	if (ClientId.IsEmpty() || ClientSecret.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Client ID / Client Secret is not found.\nPlease check your Environment variable."));
-	}
-	if (UserName.IsEmpty() || UserPass.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Admin username / admin password is not found.\nPlease check your Environment variable."));
-	}
-
-	FString BaseUrl = GetBaseUrl();
-
-	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
-	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *BaseUrl);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/x-www-form-urlencoded");
-	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("grant_type=password&username=%s&password=%s"), *FGenericPlatformHttp::UrlEncode(UserName), *FGenericPlatformHttp::UrlEncode(UserPass));
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	bool bGetTokenSuccess = false;
-	FOauth2Token TokenResult;
-	THandler<FOauth2Token> OnSuccess;
-	OnSuccess.BindLambda([&TokenResult, &bGetTokenSuccess](const FOauth2Token& Result)
-		{
-			TokenResult = Result;
-			bGetTokenSuccess = true;
-		});
-	FErrorHandler OnError;
-	OnError.BindLambda([](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			UE_LOG(LogAccelByteTest, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
-		});
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	Waiting(bGetTokenSuccess, "Waiting for get token...");
-
-	SuperUserTokenCache = TokenResult.Access_token;
-	return TokenResult.Access_token;
-}
-
-void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
-{
-	UAccelByteBlueprintsTest::SendNotif(FRegistry::Credentials.GetUserId(), Message, bAsync, FVoidHandler::CreateLambda([OnSuccess]()
-		{
-			OnSuccess.ExecuteIfBound();
-		}), FErrorHandler::CreateLambda([OnError](int32 Code, const FString& Message)
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}));
-}
-
-void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-{
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/notification/namespaces/%s/users/%s/freeform"), *BaseUrl, *FRegistry::Settings.Namespace, *UserId);
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content = FString::Printf(TEXT("{\"message\":\"%s\"}"), *Message);
-	Url = Url.Replace(TEXT("wss"), TEXT("https")); //change protocol
-	Url = Url.Replace(TEXT("lobby/"), TEXT("")); //no /lobby
-	if (bAsync)
-	{
-		Url.Append(TEXT("?async=true"));
-	}
-	else
-	{
-		Url.Append(TEXT("?async=false"));
-	}
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-FString UAccelByteBlueprintsTest::BytesToFString(TArray<uint8> Input)
-{
-	uint32 size = Input.Num();
-	FString Data = TEXT("");
-	Data = BytesToString(Input.GetData(), Input.Num());
-	return Data;
-}
-
-TArray<uint8> UAccelByteBlueprintsTest::FStringToBytes(FString Input)
-{
-	uint8* Output = new uint8[Input.Len()];
-	TArray<uint8> Return;
-	Return.AddUninitialized(Input.Len());
-	StringToBytes(Input, Return.GetData(), Input.Len());
-	return Return;
-}
-
 void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	bool bGetUserMapSuccess = false;
@@ -408,7 +411,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *BaseUrl, *userMap.Namespace, *userMap.userId);
 	FString Verb = TEXT("DELETE");
@@ -427,7 +430,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 
 void DeleteUserProfile(const FString& Namespace, const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/basic/v1/admin/namespaces/%s/users/%s/profiles"), *BaseUrl, *Namespace, *UserId);
 	FString Verb = TEXT("DELETE");
@@ -1289,7 +1292,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 
 void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
@@ -1311,7 +1314,7 @@ void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDel
 
 void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s/summary"), *BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
 	FString Verb = TEXT("GET");
@@ -1332,7 +1335,7 @@ void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSucce
 
 void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *CurrencyCode);
 	FString Verb = TEXT("DELETE");
@@ -1353,7 +1356,7 @@ void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSu
 
 void Ecommerce_PublishedStore_Get(const FString& Namespace, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *Namespace);
 	FString Verb = TEXT("GET");
@@ -1380,7 +1383,7 @@ void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const F
 
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("DELETE");
@@ -1401,7 +1404,7 @@ void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FEr
 
 void Ecommerce_Store_Create(const FString& Namespace, FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *Namespace);
 	FString Verb = TEXT("POST");
@@ -1429,7 +1432,7 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("GET");
@@ -1450,7 +1453,7 @@ void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, cons
 
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
 	FString Verb = TEXT("DELETE");
@@ -1471,7 +1474,7 @@ void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, c
 
 void Ecommerce_Store_Clone(const FString& Namespace, FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *BaseUrl, *Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
 	FString Verb = TEXT("PUT");
@@ -1498,7 +1501,7 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/categories?storeId=%s"), *BaseUrl, *FRegistry::Settings.Namespace, *StoreId);
 	FString Verb = TEXT("POST");
@@ -1525,7 +1528,7 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 
 void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *BaseUrl, *Namespace, *StoreId);
 	FString Verb = TEXT("POST");
@@ -1547,8 +1550,8 @@ void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FS
 
 void Ecommerce_GetItem_BySKU(const FString& Namespace, const FString& StoreId, const FString& SKU, const bool& ActiveOnly, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items/bySku?storeId=%s&sku=%s&activeOnly=%s"), *BaseUrl, *Namespace, *StoreId, *SKU, ActiveOnly ? TEXT("true") : TEXT("false"));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -1565,8 +1568,8 @@ void Ecommerce_GetItem_BySKU(const FString& Namespace, const FString& StoreId, c
 
 void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/entitlements"), *BaseUrl, *Namespace, *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -1599,7 +1602,7 @@ void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& Us
 
 void Ecommerce_Campaign_Create(FCampaignCreateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
@@ -1621,7 +1624,7 @@ void Ecommerce_Campaign_Create(FCampaignCreateModel body, const THandler<FCampai
 
 void Ecommerce_Campaign_Update(FString campaignId, FCampaignUpdateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
 	FString Verb = TEXT("PUT");
@@ -1643,7 +1646,7 @@ void Ecommerce_Campaign_Update(FString campaignId, FCampaignUpdateModel body, co
 
 void Ecommerce_CampaignCodes_Create(FString campaignId, FCampaignCodeCreateModel body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
 	FString Verb = TEXT("POST");
@@ -1665,7 +1668,7 @@ void Ecommerce_CampaignCodes_Create(FString campaignId, FCampaignCodeCreateModel
 
 void Ecommerce_Campaign_Get_ByName(FString name, const THandler<FCampaignPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("GET");
@@ -1689,7 +1692,7 @@ void Ecommerce_Campaign_Get_ByName(FString name, const THandler<FCampaignPagingS
 
 void Ecommerce_CampaignCodes_Get(FString campaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *campaignId);
 	FString Verb = TEXT("GET");
@@ -1710,7 +1713,7 @@ void Ecommerce_CampaignCodes_Get(FString campaignId, const THandler<FCodeInfoPag
 
 void Ecommerce_CampaignCode_Disable(FString code, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *BaseUrl, *FRegistry::Settings.Namespace, *code);
 	FString Verb = TEXT("PUT");
@@ -1759,7 +1762,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
 	UE_LOG(LogAccelByteTest, Log, TEXT("JSON Content: %s"), *Content);
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
@@ -1778,7 +1781,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 
 void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *channel);
 	FString Verb = TEXT("DELETE");
@@ -1796,7 +1799,7 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
 	FString Verb = TEXT("GET");
@@ -1814,7 +1817,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
@@ -1836,7 +1839,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 
 void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *statCode);
 	FString Verb = TEXT("DELETE");
@@ -1854,7 +1857,7 @@ void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuc
 
 void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *statCode);
 	FString Verb = TEXT("DELETE");
@@ -1872,8 +1875,8 @@ void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, c
 
 void Leaderboard_Create_Leaderboard(const FLeaderboardConfigRequest& request, const THandler<FLeaderboardConfigRequest>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -1894,7 +1897,7 @@ void Leaderboard_Create_Leaderboard(const FLeaderboardConfigRequest& request, co
 
 void Leaderboard_GetAll_Leaderboard(const FString& leaderboardCode, const THandler<FLeaderboardConfigResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards"), *BaseUrl, *FRegistry::Settings.Namespace, *leaderboardCode);
 	FString Verb = TEXT("GET");
@@ -1912,8 +1915,8 @@ void Leaderboard_GetAll_Leaderboard(const FString& leaderboardCode, const THandl
 
 void Leaderboard_Delete_Leaderboard(const FString& leaderboardCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *leaderboardCode);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
@@ -1932,7 +1935,7 @@ void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapRespons
 {
 	check(!userId.IsEmpty());
 	UE_LOG(LogAccelByteTest, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());
 	FString Verb = TEXT("GET");
@@ -1960,7 +1963,7 @@ void User_Get_Verification_Code(const FString& userId, const THandler<FVerificat
 		}), OnError);
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *BaseUrl, *userMap.Namespace, *userMap.userId);
 	FString Verb = TEXT("GET");
@@ -1976,10 +1979,9 @@ void User_Get_Verification_Code(const FString& userId, const THandler<FVerificat
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-
 void User_Get_By_Email_Address(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/search?query=%s&limit=2"), *BaseUrl, *FRegistry::Settings.Namespace, *FGenericPlatformHttp::UrlEncode(EmailAddress));
 	FString Verb = TEXT("GET");
@@ -2045,8 +2047,8 @@ void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccount
 
 void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/servers/local/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *podName);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
@@ -2064,7 +2066,7 @@ void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, co
 
 void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies"), *BaseUrl);
 	FString Verb = TEXT("POST");
@@ -2087,7 +2089,7 @@ void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateReques
 
 void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPolicyVersionCreate& CreateRequest, const THandler<FAgreementPolicyVersion>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policies/%s/versions"), *BaseUrl, *PolicyId);
 	FString Verb = TEXT("POST");
@@ -2110,7 +2112,7 @@ void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPo
 
 void Agreement_Create_Localized_Policy(const FString& PolicyVersionId, const FAgreementLocalizedPolicyCreate& CreateRequest, const THandler<FAgreementLocalizedPolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/localized-policy-versions/versions/%s"), *BaseUrl, *PolicyVersionId);
 	FString Verb = TEXT("POST");
@@ -2133,7 +2135,7 @@ void Agreement_Create_Localized_Policy(const FString& PolicyVersionId, const FAg
 
 void Agreement_Publish_Policy_Version(const FString& PolicyVersionId, bool ShouldNotify, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policies/versions/%s/latest?shouldNotify=%s"), *BaseUrl, *PolicyVersionId, ShouldNotify ? TEXT("true") : TEXT("false"));
 	FString Verb = TEXT("PATCH");
@@ -2152,7 +2154,7 @@ void Agreement_Publish_Policy_Version(const FString& PolicyVersionId, bool Shoul
 
 void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies"), *BaseUrl);
 	FString Verb = TEXT("GET");
@@ -2171,7 +2173,7 @@ void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& O
 
 void Agreement_Get_Country_Base_Policy(const FString& BasePolicyId, const FString& CountryCode, const THandler<FAgreementCountryPolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies/%s/countries/%s"), *BaseUrl, *BasePolicyId, *CountryCode);
 	FString Verb = TEXT("GET");
@@ -2190,7 +2192,7 @@ void Agreement_Get_Country_Base_Policy(const FString& BasePolicyId, const FStrin
 
 void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policy-types?limit=100"), *BaseUrl);
 	FString Verb = TEXT("GET");
@@ -2209,7 +2211,7 @@ void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject
 
 void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THandler<TArray<FAgreementLocalizedPolicy>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/localized-policy-versions/versions/%s"), *BaseUrl, *PolicyVersionId);
 	FString Verb = TEXT("GET");
@@ -2228,7 +2230,7 @@ void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THan
 
 void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("POST");
@@ -2250,7 +2252,7 @@ void Achievement_Create(const FAchievementRequest& AchievementRequest, const THa
 
 void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements/%s"), *BaseUrl, *FRegistry::Settings.Namespace, *AchievementCode);
 	FString Verb = TEXT("DELETE");
@@ -2269,7 +2271,7 @@ void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& O
 
 void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
+	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/subscriptions/platformSubscribe"), *BaseUrl, *FRegistry::Settings.PublisherNamespace, *UserId);
 	FString Verb = TEXT("POST");
@@ -2291,8 +2293,8 @@ void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRe
 
 void DSM_Get_Config(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/configs"), *BaseUrl, *FRegistry::Settings.Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -2312,8 +2314,8 @@ void DSM_Get_Config(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& 
 
 void DSM_Set_Config(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	FString BaseUrl = GetBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetSuperUserTokenCache());
+	FString BaseUrl = GetAdminBaseUrl();
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/configs"), *BaseUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
