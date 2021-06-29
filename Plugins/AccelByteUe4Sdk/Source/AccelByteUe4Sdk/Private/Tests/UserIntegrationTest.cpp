@@ -1878,7 +1878,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	// Tear down
 
-	TearDownTestUsers(TestCredentials);
+	AB_TEST_TRUE(TearDownTestUsers(TestCredentials));
 
 	return true;
 }
