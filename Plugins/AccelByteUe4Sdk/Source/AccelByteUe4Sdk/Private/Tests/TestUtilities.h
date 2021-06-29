@@ -71,11 +71,6 @@ FString GetPublisherNamespace();
 
 FString GetSteamUserId();
 
-inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
-{
-	return left.Value < right.Value;
-}
-
 #pragma region ECOMMERCE_MODEL
 USTRUCT(BlueprintType)
 struct FCurrencyCreateRequest
