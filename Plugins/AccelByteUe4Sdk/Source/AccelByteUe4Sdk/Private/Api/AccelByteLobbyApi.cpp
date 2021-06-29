@@ -774,6 +774,30 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Lobby::SendNotificationToUser(const FString& SendToUserId, const FAccelByteModelsFreeFormNotificationRequest& Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/notification/namespaces/%s/users/%s/freeform?async=%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *SendToUserId, bAsync ? TEXT("true") : TEXT("false"));
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FJsonObjectConverter::UStructToJsonObjectString(Message, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError, uint32 RetryAttempt)
 {
 	TSharedPtr<PartyStorageWrapper> Wrapper = MakeShared<PartyStorageWrapper>();

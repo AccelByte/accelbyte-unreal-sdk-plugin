@@ -1244,6 +1244,8 @@ public:
 
 	void GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
 
+	void SendNotificationToUser(const FString& SendToUserId, const FAccelByteModelsFreeFormNotificationRequest& Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
 	/**
 	* @brief  Write party storage (attributes) data to the targeted party ID.
 	* Beware:

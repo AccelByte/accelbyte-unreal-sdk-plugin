@@ -2111,6 +2111,86 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_SendNotifUserToUserAsync, "AccelByte.Tests.Lobby.B.NotifAsyncUserToUser", AutomationFlagMaskLobby);
+bool LobbyTestNotification_SendNotifUserToUserAsync::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	LobbyConnect(1);
+	
+	bool bSendNotifSucccess = false;
+	FAccelByteModelsFreeFormNotificationRequest MessageRequest;
+	MessageRequest.Topic = TEXT("Message");
+	MessageRequest.Message = TEXT("Test from the integration test UE4");
+	Lobbies[0]->SendNotificationToUser(UserCreds[1].GetUserId(), MessageRequest, true, FVoidHandler::CreateLambda([&]()
+	{
+		bSendNotifSucccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
+	}), LobbyTestErrorHandler);
+
+	Waiting(bSendNotifSucccess, "Sending Notification...");
+
+	LobbyConnect(2);
+
+	Lobbies[1]->SetMessageNotifDelegate(GetNotifDelegate);
+
+	Lobbies[1]->GetAllAsyncNotification();
+
+	Waiting(bGetNotifSuccess, "Getting All Notifications...");
+
+	LobbyDisconnect(2);
+	AB_TEST_TRUE(bSendNotifSucccess);
+	AB_TEST_TRUE(bGetNotifSuccess);
+	AB_TEST_EQUAL(getNotifResponse.Payload, MessageRequest.Message);
+	AB_TEST_EQUAL(getNotifResponse.Topic, MessageRequest.Topic);
+
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_SendNotifUserToUserSync, "AccelByte.Tests.Lobby.B.NotifSyncUserToUser", AutomationFlagMaskLobby);
+bool LobbyTestNotification_SendNotifUserToUserSync::RunTest(const FString& Parameters)
+{
+	AB_TEST_SKIP_WHEN_DISABLED();
+	const int repetition = 2;
+	FAccelByteModelsFreeFormNotificationRequest MessageRequest[repetition];
+	bool bSendNotifSucccess[repetition] = { false };
+	bool bGetNotifCheck[repetition] = { false };
+	FAccelByteModelsNotificationMessage getNotifCheck[repetition];
+
+	LobbyConnect(2);
+
+	Lobbies[1]->SetMessageNotifDelegate(GetNotifDelegate);
+
+	for (int i = 0; i < repetition; i++)
+	{
+		MessageRequest[i].Topic = FString::Printf(TEXT("Message number %d"), i);
+		MessageRequest[i].Message = FString::Printf(TEXT("Test from the integration test UE4 number %d"), i);
+
+		Lobbies[0]->SendNotificationToUser(UserCreds[1].GetUserId(), MessageRequest[i], false, FVoidHandler::CreateLambda([&]()
+		{
+			bSendNotifSucccess[i] = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
+		}), LobbyTestErrorHandler);
+
+		Waiting(bSendNotifSucccess[i], "Sending Notification...");
+
+		Waiting(bGetNotifSuccess, "Getting All Notifications...");
+
+		bGetNotifCheck[i] = bGetNotifSuccess;
+		getNotifCheck[i] = getNotifResponse;
+		bGetNotifSuccess = false;
+	}
+	LobbyDisconnect(2);
+	for (int i = 0; i < repetition; i++)
+	{
+		AB_TEST_TRUE(bGetNotifCheck[i]);
+		AB_TEST_EQUAL(getNotifCheck[i].Payload, MessageRequest[i].Message);
+		AB_TEST_EQUAL(getNotifCheck[i].Topic, MessageRequest[i].Topic);
+	}
+	ResetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSetUserStatus_CheckedByAnotherUser, "AccelByte.Tests.Lobby.B.SetUserStatus", AutomationFlagMaskLobby);
 bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Parameters)
 {

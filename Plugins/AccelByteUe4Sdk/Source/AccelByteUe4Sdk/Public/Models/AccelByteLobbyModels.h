@@ -460,6 +460,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsNotificationMessage
 	FDateTime SentAt;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsFreeFormNotificationRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Topic;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Message;
+};
 
 // ------------------------------------------------------------------------------------------------
 // Matchmaking
