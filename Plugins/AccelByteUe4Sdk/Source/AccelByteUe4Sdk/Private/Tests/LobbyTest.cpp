@@ -103,6 +103,11 @@ FAccelByteModelsMatchmakingResponse matchmakingResponse;
 FAccelByteModelsReadyConsentNotice readyConsentNotice;
 FAccelByteModelsDsNotice dsNotice;
 
+inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
+{
+	return left.Value < right.Value;
+}
+
 void LobbyConnect(int userCount)
 {
 	if (userCount > TestUserCount)

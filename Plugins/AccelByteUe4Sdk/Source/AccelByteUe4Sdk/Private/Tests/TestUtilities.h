@@ -69,10 +69,7 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString
 
 FString GetPublisherNamespace();
 
-inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
-{
-	return left.Value < right.Value;
-}
+FString GetSteamUserId();
 
 #pragma region ECOMMERCE_MODEL
 USTRUCT(BlueprintType)
@@ -1146,6 +1143,7 @@ bool AccelByteSkipTest(const FString& TestName);
 
 #define AB_TEST_SKIP_WHEN_DISABLED() if (AccelByteSkipTest(GetBeautifiedTestName())) return true
 
+bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers);
 bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials);
 bool CheckTestUsers(const TArray<TSharedPtr<FTestUser>>& InUsers, const TArray<TSharedPtr<Credentials>>& InCredentials);
 bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials);

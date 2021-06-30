@@ -1540,7 +1540,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 	Waiting(bGetUserData, "Waiting for Get User Data...");
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bLinkSteamAcc = false;
 	bool bLinkSteamSuccess = false;
@@ -1788,70 +1788,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 {
 #pragma region Test definitions
 
-	struct TestUser
-	{
-		FString FirstName = TEXT("John");
-		FString LastName = TEXT("Appleseed");
-		FString DateOfBirth = TEXT("2000-01-01");
-		FString Country = TEXT("US");
-		FString Language = TEXT("en");
-		FString Timezone = TEXT("Etc/UTC");
-		FString DisplayName = FirstName + LastName;
-		FString Email;
-		FString Password = TEXT("Password123!");
-		FString AvatarSmallUrl = TEXT("http://example.com/avatar/small.jpg");
-		FString AvatarUrl = TEXT("http://example.com/avatar/normal.jpg");
-		FString AvatarLargeUrl = TEXT("http://example.com/avatar/large.jpg");
-		FString UserId;
-
-		TestUser(const FString& Project, const FString& TestUID, const int32 UserIndex = 0) :
-			Email((Project + TEXT("_test_") + TestUID + TEXT("_") + FString::Printf(TEXT("%02d"), UserIndex) + TEXT("@example.com")).ToLower())
-		{}
-	};
-
-	const auto RegisterUser = [this](const TestUser& InUser)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Registering user"), *InUser.Email);
-		FRegistry::User.Register(InUser.Email, InUser.Password, InUser.DisplayName, InUser.Country, InUser.DateOfBirth,
-			THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-				{
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-				{
-					if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
-					{
-						bIsOk = true;
-					}
-					bIsDone = true;
-				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	const auto LoginUser = [this](const TestUser& InUser)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Logging in user"), *InUser.Email);
-		FRegistry::User.LoginWithUsername(InUser.Email, InUser.Password,
-			FVoidHandler::CreateLambda([&]()
-				{
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	const auto CreateUserProfile = [this](const TestUser& InUser)
+	const auto CreateUserProfile = [this](const FTestUser& InUser, const Credentials& InCredentials)
 	{
 		bool bIsDone = false;
 		bool bIsOk = false;
@@ -1866,7 +1803,8 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
 		FAccelByteModelsUserProfileInfo UserProfileInfo;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		FRegistry::UserProfile.CreateUserProfile(UserProfileCreateRequest,
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
 			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 				{
 					bIsOk = true;
@@ -1875,7 +1813,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 				}),
 			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 				{
-					if ((ErrorCodes)Code == ErrorCodes::UserProfileAlreadyExistsException)
+					if (Code == 11441) // Unable to createUserProfile: User profile already exists
 					{
 						bIsOk = true;
 					}
@@ -1886,11 +1824,12 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		return bIsOk;
 	};
 
-	const auto BatchGetPublicUserProfileInfos = [this](const FString& UserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
+	const auto BatchGetPublicUserProfileInfos = [this](const Credentials& InCredentials, const FString& InUserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
 		bool bIsDone = false;
 		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *UserIds);
-		FRegistry::UserProfile.BatchGetPublicUserProfileInfos(UserIds,
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
 			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
 				{
 					OutResult = Result;
@@ -1905,77 +1844,41 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		return bIsOk;
 	};
 
-	const auto DeleteUser = [this](const TestUser& InUser)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Deleting user profile"), *InUser.Email);
-		DeleteUserById(InUser.UserId,
-			FSimpleDelegate::CreateLambda([&]()
-				{
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
 #pragma endregion
 
-	const FString TestProject = TEXT("justice-ue4-sdk");
 	const FString TestUID = TEXT("29008abd"); // Arbitrary unique id to identify this specific automation test
 
-	TArray<TestUser> TestUsers;
+	TArray<TSharedPtr<FTestUser>> TestUsers;
+	TArray<TSharedPtr<Credentials>> TestCredentials;
 
-	TestUsers.Add(TestUser(TestProject, TestUID, 1));
-	TestUsers.Add(TestUser(TestProject, TestUID, 2));
+	// Setup
 
-#pragma region Test setup
+	AB_TEST_TRUE(SetupTestUsers(TestUID, 2, TestUsers, TestCredentials));
 
-	// Register user + login user + create profile
+	// Create user profiles
 
-	for (TestUser& User : TestUsers)
+	for (int i = 0; i < TestUsers.Num(); i++)
 	{
-		AB_TEST_TRUE(RegisterUser(User));
-		FRegistry::User.ForgetAllCredentials();
-		AB_TEST_TRUE(LoginUser(User));
-		User.UserId = FRegistry::Credentials.GetUserId();
-		AB_TEST_TRUE(!User.UserId.IsEmpty());
-		AB_TEST_TRUE(CreateUserProfile(User));
+		AB_TEST_TRUE(CreateUserProfile(*TestUsers[i], *TestCredentials[i]));
 	}
-
-#pragma endregion
 
 	// Batch get public user profile infos
 
+	FString UserIdsCsv;
+
+	for (const TSharedPtr<Credentials> Credentials : TestCredentials)
 	{
-		FString UserIdsCsv;
-
-		for (const TestUser& User : TestUsers)
-		{
-			UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *User.UserId));
-		}
-
-		TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
-
-		AB_TEST_TRUE(BatchGetPublicUserProfileInfos(UserIdsCsv, UserPublicProfiles));
-		AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
+		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *Credentials->GetUserId()));
 	}
 
-#pragma region Test tear down
+	TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
 
-	// Delete user
+	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(*TestCredentials[0], UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
+	AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
 
-	for (TestUser& User : TestUsers)
-	{
-		AB_TEST_TRUE(DeleteUser(User));
-	}
+	// Tear down
 
-#pragma endregion
+	AB_TEST_TRUE(TearDownTestUsers(TestCredentials));
 
 	return true;
 }
@@ -2481,7 +2384,7 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 	FString FirstUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 100);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bGetUserDone = false;
 	FAccountUserData ReceivedUserData;
@@ -2549,7 +2452,7 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 	const FString ABUserId = FRegistry::Credentials.GetUserId();
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
-	const FString SteamUserID = Environment::GetEnvironmentVariable(TEXT("STEAM_USER_ID"), 1000);
+	const FString SteamUserID = GetSteamUserId();
 
 	bool bGetUserDone = false;
 	FBulkPlatformUserIdResponse ReceivedUserData;
