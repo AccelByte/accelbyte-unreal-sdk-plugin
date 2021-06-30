@@ -101,7 +101,7 @@ pipeline {
             stages {
                 stage('Cleanup') {
                     steps {
-                        powershell '& "$Env:WORKSPACE\Jenkins\Cleanup.ps1"'
+                        bat '%WORKSPACE%\\Jenkins\\Cleanup.bat'
                     }
                     post {
                         failure {
@@ -111,21 +111,21 @@ pipeline {
                         }
                     }
                 }
-                stage('Write Config') {
+                stage('Generate Project Solution') {
                     steps {
-                        powershell '& "$Env:WORKSPACE\Jenkins\WriteConfig.ps1"'
+                        bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
                     }
                     post {
                         failure {
                             script{
-                                FAILED_STAGE = "Write Config";
+                                FAILED_STAGE = "Generate Project Solution";
                             }
                         }
                     }
                 }
                 stage('Build Windows') {
                     steps {
-                        powershell '& "$Env:WORKSPACE\Jenkins\Build.ps1" -target Win64'
+                        bat '%WORKSPACE%\\Jenkins\\BuildWindows.bat'
                     }
                     post {
                         failure {
@@ -137,7 +137,7 @@ pipeline {
                 }
                 stage('Build Linux') {
                     steps {
-                        powershell '& "$Env:WORKSPACE\Jenkins\Build.ps1" -target Linux'
+                        bat '%WORKSPACE%\\Jenkins\\BuildLinux.bat'
                     }
                     post {
                         failure {
@@ -167,7 +167,8 @@ pipeline {
                 }
                 stage('Automation Test') {
                     steps {
-                        powershell '& "$Env:WORKSPACE\Jenkins\RunTests.ps1" -tests:"$UE4_TESTS" -logfile:$TEST_LOG'
+                        powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
+                        bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
                     }
                     post {
                         always {
