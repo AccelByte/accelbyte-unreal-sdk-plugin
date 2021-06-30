@@ -260,29 +260,29 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 	AB_TEST_TRUE(bClientLoginSuccess);
 
-	for (auto statisticRequest : AchievementTestAllStatisticRequests)
+	for (const auto& StatisticRequest : AchievementTestAllStatisticRequests)
 	{
 		bool bCreateStatDone = false;
 
 		// Even though it fails, as long as it exists in the namespace should not be a problem.
-		Statistic_Create_Stat(statisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
+		Statistic_Create_Stat(StatisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
 			{
 				bCreateStatDone = true;
 			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
 		Waiting(bCreateStatDone, "Waiting for Create statistic code...");
 
 		bool bCreateUserStatItemDone = false;
-		FRegistry::Statistic.CreateUserStatItems({ statisticRequest.statCode }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
+		FRegistry::Statistic.CreateUserStatItems({ StatisticRequest.statCode }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 			{
 				bCreateUserStatItemDone = true;
 			}), AchievementTestErrorHandler);
 		Waiting(bCreateUserStatItemDone, "Waiting for create user stat item...");
 	}
 
-	for (auto achievementRequest : AchievementTestAllAchievementRequests)
+	for (const auto& AchievementRequest : AchievementTestAllAchievementRequests)
 	{
 		bool bDeleteAchievementDone = false;
-		Achievement_Delete(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
+		Achievement_Delete(AchievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
 				bDeleteAchievementDone = true;
@@ -294,7 +294,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
-		Achievement_Create(achievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
+		Achievement_Create(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
 				bCreateAchievementSuccess = true;
