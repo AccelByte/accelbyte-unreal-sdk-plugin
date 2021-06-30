@@ -14,20 +14,20 @@ using AccelByte::Api::User;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteMultiRegistryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteMultiRegistryTest);
 
-static const int32 AutomationFlagMaskMultiRegistry = (
+const int32 AutomationFlagMaskMultiRegistry = (
 	EAutomationTestFlags::EditorContext |
 	EAutomationTestFlags::ProductFilter |
 	EAutomationTestFlags::CommandletContext |
 	EAutomationTestFlags::ClientContext);
 
-static const auto MultiRegistryTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+const auto MultiRegistryTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 	{
 		UE_LOG(LogAccelByteMultiRegistryTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 	});
 
-static TArray<TSharedPtr<FTestUser>> TestUsers;
-static TArray<TSharedPtr<Credentials>> TestCredentials;
-static const FString TestUID = TEXT("25479f26"); // Arbitrary UID for this test
+TArray<TSharedPtr<FTestUser>> MultiRegistryTestUsers;
+TArray<TSharedPtr<Credentials>> MultiRegistryTestCredentials;
+const FString MultiRegistryTestUID = TEXT("25479f26"); // Arbitrary UID for this test
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMultiRegistryTestLogin, "AccelByte.Tests.MultiRegistry.User", AutomationFlagMaskMultiRegistry);
 bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
@@ -38,11 +38,11 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	// Setup
 
-	AB_TEST_TRUE(SetupTestUsers(TestUID, 2, TestUsers)); // Register test users only (no login)
+	AB_TEST_TRUE(SetupTestUsers(MultiRegistryTestUID, 2, MultiRegistryTestUsers)); // Register test users only (no login)
 
 	// Multi user login using FMultiRegistry and FApiClient
 
-	for (const TSharedPtr<FTestUser> User : TestUsers)
+	for (const TSharedPtr<FTestUser> User : MultiRegistryTestUsers)
 	{
 		bool bIsDone = false;
 		bool bIsOk = false;
@@ -66,31 +66,31 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	// Check and load multi user credentials to an array (for testing purposes only)
 
-	TestCredentials.Empty();
+	MultiRegistryTestCredentials.Empty();
 
 	TSet<FString> UniqueUserIds;
 
-	for (const TSharedPtr<FTestUser> User : TestUsers)
+	for (const TSharedPtr<FTestUser> User : MultiRegistryTestUsers)
 	{
 		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User->Email);
 		FString UserId = ApiClient->Credentials.GetUserId();
 		AB_TEST_TRUE(!UserId.IsEmpty());
 		UniqueUserIds.Add(UserId);
-		TestCredentials.Add(MakeShared<Credentials>(ApiClient->Credentials)); 
+		MultiRegistryTestCredentials.Add(MakeShared<Credentials>(ApiClient->Credentials)); 
 	}
 
-	AB_TEST_EQUAL(TestUsers.Num(), UniqueUserIds.Num());
-	AB_TEST_EQUAL(TestUsers.Num(), TestCredentials.Num());
+	AB_TEST_EQUAL(MultiRegistryTestUsers.Num(), UniqueUserIds.Num());
+	AB_TEST_EQUAL(MultiRegistryTestUsers.Num(), MultiRegistryTestCredentials.Num());
 
 	// Multi user API GetData using FMultiRegistry and FApiClient
 
-	for (int i = 0; i < TestUsers.Num(); i++)
+	for (int i = 0; i < MultiRegistryTestUsers.Num(); i++)
 	{
 		FAccountUserData AccountUserData;
 		bool bIsDone = false;
 		bool bIsOk = false;
-		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Getting user data"), *TestUsers[i]->Email);
-		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(TestUsers[i]->Email);
+		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Getting user data"), *MultiRegistryTestUsers[i]->Email);
+		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(MultiRegistryTestUsers[i]->Email);
 		ApiClient->User.GetData(
 			THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
 				{
@@ -106,12 +106,12 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 				}));
 		Waiting(bIsDone, TEXT("Waiting ..."));
 		AB_TEST_TRUE(bIsOk);
-		AB_TEST_EQUAL(AccountUserData.UserId, TestCredentials[i]->GetUserId());
+		AB_TEST_EQUAL(AccountUserData.UserId, MultiRegistryTestCredentials[i]->GetUserId());
 	}
 
 	// Tear down
 
-	AB_TEST_TRUE(TearDownTestUsers(TestCredentials));
+	AB_TEST_TRUE(TearDownTestUsers(MultiRegistryTestCredentials));
 
 	return true;
 }
