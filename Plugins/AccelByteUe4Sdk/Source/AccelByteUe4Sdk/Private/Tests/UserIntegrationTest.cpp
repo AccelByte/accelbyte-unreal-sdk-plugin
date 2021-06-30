@@ -1846,9 +1846,10 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 #pragma endregion
 
+	const FString TestUID = TEXT("29008abd"); // Arbitrary unique id to identify this specific automation test
+
 	TArray<TSharedPtr<FTestUser>> TestUsers;
 	TArray<TSharedPtr<Credentials>> TestCredentials;
-	const FString TestUID = TEXT("29008abd"); // Arbitrary unique id to identify this specific automation test
 
 	// Setup
 
