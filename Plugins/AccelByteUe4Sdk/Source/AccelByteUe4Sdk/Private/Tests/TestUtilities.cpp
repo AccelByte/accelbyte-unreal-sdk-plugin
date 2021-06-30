@@ -66,11 +66,10 @@ bool AccelByteSkipTest(const FString& TestName)
 }
 #endif
 
-void Waiting(bool& bCondition, FString Message)
+void Waiting(bool& bCondition, FString Message, double TimeoutDelay)
 {
 	const double StartTime = FPlatformTime::Seconds();
-	//Timeout value is already too long to wait for automation tests
-	const double TimeoutSeconds = StartTime + 300;
+	const double TimeoutSeconds = StartTime + TimeoutDelay;
 	double LastTickTime = StartTime;
 
 	while (!bCondition && (FPlatformTime::Seconds() < TimeoutSeconds))
@@ -80,6 +79,11 @@ void Waiting(bool& bCondition, FString Message)
 		LastTickTime = FPlatformTime::Seconds();
 		FHttpModule::Get().GetHttpManager().Tick(.2f);
 		FTicker::GetCoreTicker().Tick(.2f);
+	}
+
+	if (FPlatformTime::Seconds() >= TimeoutSeconds)
+	{
+		UE_LOG(LogAccelByteTest, Error, TEXT("Waiting timed out."));
 	}
 }
 

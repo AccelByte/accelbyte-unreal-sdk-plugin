@@ -101,7 +101,7 @@ pipeline {
             stages {
                 stage('Cleanup') {
                     steps {
-                        bat '%WORKSPACE%\\Jenkins\\Cleanup.bat'
+                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Cleanup.ps1\""
                     }
                     post {
                         failure {
@@ -111,38 +111,40 @@ pipeline {
                         }
                     }
                 }
-                stage('Generate Project Solution') {
+                stage('Write Config') {
                     steps {
-                        bat '%WORKSPACE%\\Jenkins\\GenerateProjectSolution.bat'
+                        powershell "& \"${env.WORKSPACE}\\Jenkins\\WriteConfig.ps1\""
                     }
                     post {
                         failure {
                             script{
-                                FAILED_STAGE = "Generate Project Solution";
-                            }
-                        }
-                    }
-                }
-                stage('Build Windows') {
-                    steps {
-                        bat '%WORKSPACE%\\Jenkins\\BuildWindows.bat'
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Build Windows";
+                                FAILED_STAGE = "Write Config";
                             }
                         }
                     }
                 }
                 stage('Build Linux') {
                     steps {
-                        bat '%WORKSPACE%\\Jenkins\\BuildLinux.bat'
+                        echo "build linux"
+                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Linux"
                     }
                     post {
                         failure {
                             script{
                                 FAILED_STAGE = "Build Linux";
+                            }
+                        }
+                    }
+                }
+                stage('Build Windows') {
+                    steps {
+                        echo "build win64"
+                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Win64"
+                    }
+                    post {
+                        failure {
+                            script{
+                                FAILED_STAGE = "Build Windows";
                             }
                         }
                     }
@@ -167,39 +169,44 @@ pipeline {
                 }
                 stage('Automation Test') {
                     steps {
-                        powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\AutomationTest_Configure.ps1'
-                        bat '%WORKSPACE%\\Jenkins\\AutomationTest_Execute.bat'
+                        bat "powershell -Command \"${env.WORKSPACE}\\Jenkins\\LoginSteam.ps1\""
+                        script {
+                            def testsByGroup = [
+                                "Core" : "AccelByte.Tests.Core",  
+                                "IAM_Legal_ECommerce" : "AccelByte.Tests.Agreement+AccelByte.Tests.ServerOauth2+AccelByte.Tests.AUser+AccelByte.Tests.ECommerce+AccelByte.Tests.Subscription",  
+                                "Social": "AccelByte.Tests.Achievement+AccelByte.Tests.CloudSave+AccelByte.Tests.ServerCloudSave+AccelByte.Tests.CloudStorage+AccelByte.Tests.GameProfile+AccelByte.Tests.Statistic+AccelByte.Tests.ServerStatistic+AccelByte.Tests.Leaderboard+AccelByte.Tests.MultiRegistry",  
+                                "Analytics": "AccelByte.Tests.GameTelemetry+AccelByte.Tests.ServerGameTelemetry",
+                                "Play": "AccelByte.Tests.DSM+AccelByte.Tests.Qos+AccelByte.Tests.Lobby+AccelByte.Tests.ServerJoinableSession+AccelByte.Tests.ServerLobby+AccelByte.Tests.SessionBrowser"
+                            ]
+                            def failedTestGroups = []
+    
+                            echo "Run automation tests"
+    
+                            for (group in params.TEST_GROUPS.split(",")) {
+                                echo "Run tests for ${group}"
+                                def script = """
+                                    & \"${env.WORKSPACE}\\Jenkins\\RunTests.ps1\" `
+                                    -tests:${testsByGroup[group]} `
+                                    -log:${group}_Log.log `
+                                    -report:\"${env.WORKSPACE}\\Saved\\Logs\\${group}\""""
+                                
+                                    def status = powershell(returnStatus: true, script: script)
+                                    archiveArtifacts artifacts: "Saved/Logs/${group}_Log.log, Saved/Logs/${group}/*"
+
+                                    if (status != 0) {
+                                        failedTestGroups << group
+                                    }
+                            }
+                            
+                            if (failedTestGroups.size() > 0) {
+                                env.failedTestGroups = failedTestGroups
+                                error("Some test groups are failed: ${env.failedTestGroups}")
+                            }
+                        }
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: "Saved/Logs/${TEST_LOG}"
-                        }
-                        failure {
-                            script{
-                                FAILED_STAGE = "Automation Test";
-
-                                def file = readFile "${WORKSPACE}/Saved/Logs/${TEST_LOG}"
-                                def errorTests = ""
-                                def currentTest = ""
-                                def totalTests = "0"
-                                def testExecuted = 0
-                                file.readLines().each {
-                                    if (it.contains("Running Automation:")) {
-                                        testExecuted++
-                                        currentTest = it.substring(it.indexOf("Running Automation:") + 19)
-                                    } else if (it.contains("Error: ...Automation Test Failed")) {
-                                        errorTests += currentTest + "\n"
-                                    } else if (it.contains("Display: Timeout hit")) {
-                                        errorTests += "[TIMEOUT] " + currentTest + "\n"
-                                    } else if (it.contains("LogAutomationCommandLine: Display: Found ")) {
-                                        n = it.indexOf("LogAutomationCommandLine: Display: Found ") + 41
-                                        totalTests = it.substring(n, it.indexOf(" ", n))
-                                    }
-                                }
-                                print "Test executed: $testExecuted/$totalTests"
-                                print "===== FAILED TESTS ====="
-                                print errorTests
-                            }
+                            powershell "& \"${env.WORKSPACE}\\Jenkins\\LogoutSteam.ps1\""
                         }
                     }
                 }
@@ -246,16 +253,16 @@ pipeline {
                     }
 
                     environment {
-                    NEXUS_VERSION = "nexus3"
-                    NEXUS_PROTOCOL = "https"
-                    NEXUS_URL = "nexus.accelbyte.net"
-                    NEXUS_REPOSITORY = "justice-ue4-repository"
-                    NEXUS_CREDENTIAL_ID = "nexus-sdk"
-                    NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
-                    GIT_PATH = "${env.GIT_PATH}"
-                    GIT_SHA = "${env.GIT_COMMIT}"
-                    BUILD_NUMBER = "${env.BUILD_NUMBER}"
-                    WORKSPACE = "${env.WORKSPACE}"
+                        NEXUS_VERSION = "nexus3"
+                        NEXUS_PROTOCOL = "https"
+                        NEXUS_URL = "nexus.accelbyte.net"
+                        NEXUS_REPOSITORY = "justice-ue4-repository"
+                        NEXUS_CREDENTIAL_ID = "nexus-sdk"
+                        NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
+                        GIT_PATH = "${env.GIT_PATH}"
+                        GIT_SHA = "${env.GIT_COMMIT}"
+                        BUILD_NUMBER = "${env.BUILD_NUMBER}"
+                        WORKSPACE = "${env.WORKSPACE}"
                     }
 
                     steps {
@@ -293,42 +300,47 @@ pipeline {
         }
     }
     post {
-        always {
-          node('master') {
-            script{
-              if (buildByTimer) {
-                version = sh(returnStdout: true, script: 'cat version.json | grep "version" | tr -d \' "version": "\'').trim()
-
-                withAWS(
-                  credentials: "accelbyte_deployment",
-                  region: "us-west-2") {
-                    sh """
-                      ./jenkinsTestMetrics.sh \
-                        -s ${env.JOB_NAME} \
-                        -v ${version} \
-                        -j ${env.BUILD_URL}console \
-                        -r ${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log \
-                        -p ${currentBuild.currentResult}
-                    """
-                  }
-              }
-            }
-          }
-        }
+//         always {
+//           node('master') {
+//             script{
+//               if (buildByTimer) {
+//                 version = sh(returnStdout: true, script: 'cat version.json | grep "version" | tr -d \' "version": "\'').trim()
+// 
+//                 withAWS(
+//                   credentials: "accelbyte_deployment",
+//                   region: "us-west-2") {
+//                     sh """
+//                       ./jenkinsTestMetrics.sh \
+//                         -s ${env.JOB_NAME} \
+//                         -v ${version} \
+//                         -j ${env.BUILD_URL}console \
+//                         -r ${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log \
+//                         -p ${currentBuild.currentResult}
+//                     """
+//                   }
+//               }
+//             }
+//           }
+//         }
         success {
             node('master') {
-                script{
-                    def message = ""
-                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-                    gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
-
-                    if (grade == "production") {
-                        slackSend (channel: "#sdk-pipeline", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.GIT_BRANCH}` \n `${env.GIT_COMMIT}`: ${message} ")
-                    }
-                    if (buildByTimer) {
-                        slackSend (channel: "#product-justice-automation-monitoring", color: '#36B37E', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL* for `${env.JOB_NAME}` on branch `${env.BRANCH_NAME}` \n `${gitHash}`: ${message} ")
-                    }
+                script {
                     bitbucketBuildStatus("SUCCESS", "Bitbucket_Build_AccelByte", "accelbyte")
+
+                    def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+                    def gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
+                    def message = """
+                        |<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *SUCCESSFUL*
+                        |Project: `${env.JOB_NAME}` 
+                        |Branch: `${env.BRANCH_NAME}` 
+                        |
+                        |Commit: `${gitHash}`:
+                        |${commitMessage}
+                        |""".stripMargin()
+
+                    if (buildByTimer) {
+                        slackSend(channel: "#product-justice-automation-monitoring", color: '#36B37E', message: message)
+                    }
                 }
             }
         }
@@ -337,20 +349,27 @@ pipeline {
                 script{
                     bitbucketBuildStatus("FAILURE", "Bitbucket_Build_AccelByte", "accelbyte")
 
-                    def message = ""
-                    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-                    gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
+                    def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+                    def gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
+                    def message = """
+                        |<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` 
+                        |Project: `${env.JOB_NAME}` 
+                        |Branch: `${env.BRANCH_NAME}` 
+                        |
+                        |Commit: `${gitHash}`:
+                        |${commitMessage}
+                        |
+                        |Failed Tests: 
+                        |${env.failedTestGroups} 
+                        |""".stripMargin()
 
                     echo "jobName: ${JOB_NAME}"
                     echo "buildNumber: ${BUILD_NUMBER}"
                     echo "gitBranch: ${GIT_BRANCH}"
                     echo "buildURL: ${BUILD_URL}"
 
-                    if (grade == "production") {
-                        slackSend (channel: "#sdk-pipeline", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nProject: `${env.JOB_NAME}` \nBranch: `${env.GIT_BRANCH}` \nCommit: `${env.GIT_COMMIT}` \nMessage: `${message}` ")
-                    }
                     if (buildByTimer) {
-                        slackSend (channel: "#product-justice-automation-monitoring", color: '#FF0000', message: "<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` \nFail Log : <${env.BUILD_URL}artifact/Saved/Logs/AutomationTestLog.log|Jenkin's #${env.BUILD_NUMBER} Artifact> \nProject: `${env.JOB_NAME}` \nBranch: `${env.BRANCH_NAME}` \nCommit: `${gitHash}`: ${message}")
+                        slackSend(channel: "#product-justice-automation-monitoring", color: '#FF0000', message: message)
                     }
                 }
             }

@@ -28,9 +28,6 @@ DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
 const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-void FlushHttpRequests();//defined in TestUtilities.cpp
-void Waiting(bool& bCondition, FString text);
-
 UENUM(BlueprintType)
 enum class EVerificationCode : uint8
 {
