@@ -28,7 +28,7 @@ using AccelByte::Api::UserProfile;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUserTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
 
-const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+static const int32 AutomationFlagMaskUser = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
 void FlushHttpRequests();//defined in TestUtilities.cpp
 void Waiting(bool& bCondition, FString text);
