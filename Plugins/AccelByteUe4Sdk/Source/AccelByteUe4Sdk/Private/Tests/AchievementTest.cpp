@@ -25,21 +25,21 @@ using AccelByte::Api::Achievement;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteAchievementTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteAchievementTest);
 
-const int32 AutomationFlagMaskAchievement = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
+static const int32 AutomationFlagMaskAchievement = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-const auto AchievementTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
+static const auto AchievementTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 	{
 		UE_LOG(LogAccelByteAchievementTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 	});
 
-FAchievementRequest AchievementTestAchievement1;
-FAchievementRequest AchievementTestAchievement2;
-FAchievementRequest AchievementTestAchievementIncrementalClient;
-FAchievementRequest AchievementTestAchievementIncrementalServer;
-FStatCreateRequest AchievementTestAchievementStatisticClientRequest;
-FStatCreateRequest AchievementTestAchievementStatisticServerRequest;
-TArray<FStatCreateRequest> AchievementTestAllStatisticRequests;
-TArray<FAchievementRequest> AchievementTestAllAchievementRequests;
+static FAchievementRequest Achievement1;
+static FAchievementRequest Achievement2;
+static FAchievementRequest AchievementIncrementalClient;
+static FAchievementRequest AchievementIncrementalServer;
+static FStatCreateRequest AchievementStatisticClientRequest;
+static FStatCreateRequest AchievementStatisticServerRequest;
+static TArray<FStatCreateRequest> AllStatisticRequests;
+static TArray<FAchievementRequest> AllAchievementRequests;
 
 const auto AchievementTestQueryAchievements = [](const FString& InLanguage, const EAccelByteAchievementListSortBy& InSortBy, FAccelByteModelsPaginatedPublicAchievement& OutPaginatedPublicAchievement, const int32& InOffset = 0, const int32& InLimit = 20) // XXX InOffset and InLimit defaults must match with QueryAchievements defaults
 {
@@ -132,98 +132,98 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 {
 	// statistic client
 	{
-		AchievementTestAchievementStatisticClientRequest.defaultValue = 0;
-		AchievementTestAchievementStatisticClientRequest.description = "StatCode for SDK Test purpose";
-		AchievementTestAchievementStatisticClientRequest.incrementOnly = true;
-		AchievementTestAchievementStatisticClientRequest.maximum = 999999;
-		AchievementTestAchievementStatisticClientRequest.minimum = 0;
-		AchievementTestAchievementStatisticClientRequest.name = "Achievement Incremental Testing Client";
-		AchievementTestAchievementStatisticClientRequest.setAsGlobal = false;
-		AchievementTestAchievementStatisticClientRequest.setBy = EAccelByteStatisticSetBy::CLIENT;
-		AchievementTestAchievementStatisticClientRequest.statCode = "incremental-testing-client";
-		AchievementTestAchievementStatisticClientRequest.tags = { "nothing" };
+		AchievementStatisticClientRequest.defaultValue = 0;
+		AchievementStatisticClientRequest.description = "StatCode for SDK Test purpose";
+		AchievementStatisticClientRequest.incrementOnly = true;
+		AchievementStatisticClientRequest.maximum = 999999;
+		AchievementStatisticClientRequest.minimum = 0;
+		AchievementStatisticClientRequest.name = "Achievement Incremental Testing Client";
+		AchievementStatisticClientRequest.setAsGlobal = false;
+		AchievementStatisticClientRequest.setBy = EAccelByteStatisticSetBy::CLIENT;
+		AchievementStatisticClientRequest.statCode = "incremental-testing-client";
+		AchievementStatisticClientRequest.tags = { "nothing" };
 	}
 	// statistic server
 	{
-		AchievementTestAchievementStatisticServerRequest.defaultValue = 0;
-		AchievementTestAchievementStatisticServerRequest.description = "StatCode for SDK Test purpose";
-		AchievementTestAchievementStatisticServerRequest.incrementOnly = true;
-		AchievementTestAchievementStatisticServerRequest.maximum = 999999;
-		AchievementTestAchievementStatisticServerRequest.minimum = 0;
-		AchievementTestAchievementStatisticServerRequest.name = "Achievement Incremental Testing Server";
-		AchievementTestAchievementStatisticServerRequest.setAsGlobal = false;
-		AchievementTestAchievementStatisticServerRequest.setBy = EAccelByteStatisticSetBy::SERVER;
-		AchievementTestAchievementStatisticServerRequest.statCode = "incremental-testing-server";
-		AchievementTestAchievementStatisticServerRequest.tags = { "nothing" };
+		AchievementStatisticServerRequest.defaultValue = 0;
+		AchievementStatisticServerRequest.description = "StatCode for SDK Test purpose";
+		AchievementStatisticServerRequest.incrementOnly = true;
+		AchievementStatisticServerRequest.maximum = 999999;
+		AchievementStatisticServerRequest.minimum = 0;
+		AchievementStatisticServerRequest.name = "Achievement Incremental Testing Server";
+		AchievementStatisticServerRequest.setAsGlobal = false;
+		AchievementStatisticServerRequest.setBy = EAccelByteStatisticSetBy::SERVER;
+		AchievementStatisticServerRequest.statCode = "incremental-testing-server";
+		AchievementStatisticServerRequest.tags = { "nothing" };
 	}
 
 	// achievement1
 	{
-		AchievementTestAchievement1.AchievementCode = TEXT("UE4AchievementCode1");
-		AchievementTestAchievement1.DefaultLanguage = TEXT("en");
-		AchievementTestAchievement1.Description.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
-		AchievementTestAchievement1.GoalValue = 7;
-		AchievementTestAchievement1.Hidden = true;
-		AchievementTestAchievement1.Incremental = false;
-		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
-		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 2 url"), TEXT("This is locked icon 2 slug") });
-		AchievementTestAchievement1.Name.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
-		AchievementTestAchievement1.StatCode = TEXT("This is achievement 1 stat code");
-		AchievementTestAchievement1.Tags.Add(TEXT("Tags1"));
-		AchievementTestAchievement1.Tags.Add(TEXT("Tags2"));
-		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
-		AchievementTestAchievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
+		Achievement1.AchievementCode = TEXT("UE4AchievementCode1");
+		Achievement1.DefaultLanguage = TEXT("en");
+		Achievement1.Description.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
+		Achievement1.GoalValue = 7;
+		Achievement1.Hidden = true;
+		Achievement1.Incremental = false;
+		Achievement1.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
+		Achievement1.LockedIcons.Add({ TEXT("This is locked icon 2 url"), TEXT("This is locked icon 2 slug") });
+		Achievement1.Name.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
+		Achievement1.StatCode = TEXT("This is achievement 1 stat code");
+		Achievement1.Tags.Add(TEXT("Tags1"));
+		Achievement1.Tags.Add(TEXT("Tags2"));
+		Achievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
+		Achievement1.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
 	}
 	// achievement2
 	{
-		AchievementTestAchievement2.AchievementCode = TEXT("UE4AchievementCode2");
-		AchievementTestAchievement2.DefaultLanguage = TEXT("id");
-		AchievementTestAchievement2.Description.Add(TEXT("en"), TEXT("This is achievement 2 en description"));
-		AchievementTestAchievement2.Description.Add(TEXT("id"), TEXT("This is achievement 2 id description"));
-		AchievementTestAchievement2.GoalValue = 7;
-		AchievementTestAchievement2.Hidden = true;
-		AchievementTestAchievement2.Incremental = false;
-		AchievementTestAchievement2.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
-		AchievementTestAchievement2.LockedIcons.Add({ TEXT("This is locked icon 2 url") , TEXT("This is locked icon 2 slug") });
-		AchievementTestAchievement2.Name.Add(TEXT("en"), TEXT("This is achievement 2 en name"));
-		AchievementTestAchievement2.Name.Add(TEXT("id"), TEXT("This is achievement 2 id name"));
-		AchievementTestAchievement2.StatCode = TEXT("This is achievement 2 stat code");
-		AchievementTestAchievement2.Tags.Add(TEXT("Tags1"));
-		AchievementTestAchievement2.Tags.Add(TEXT("Tags2"));
-		AchievementTestAchievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
-		AchievementTestAchievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
+		Achievement2.AchievementCode = TEXT("UE4AchievementCode2");
+		Achievement2.DefaultLanguage = TEXT("id");
+		Achievement2.Description.Add(TEXT("en"), TEXT("This is achievement 2 en description"));
+		Achievement2.Description.Add(TEXT("id"), TEXT("This is achievement 2 id description"));
+		Achievement2.GoalValue = 7;
+		Achievement2.Hidden = true;
+		Achievement2.Incremental = false;
+		Achievement2.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
+		Achievement2.LockedIcons.Add({ TEXT("This is locked icon 2 url") , TEXT("This is locked icon 2 slug") });
+		Achievement2.Name.Add(TEXT("en"), TEXT("This is achievement 2 en name"));
+		Achievement2.Name.Add(TEXT("id"), TEXT("This is achievement 2 id name"));
+		Achievement2.StatCode = TEXT("This is achievement 2 stat code");
+		Achievement2.Tags.Add(TEXT("Tags1"));
+		Achievement2.Tags.Add(TEXT("Tags2"));
+		Achievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 1 url"), TEXT("This is unlocked icon 1 slug") });
+		Achievement2.UnlockedIcons.Add({ TEXT("This is unlocked icon 2 url"), TEXT("This is unlocked icon 2 slug") });
 	}
 	// achievementStatisticClientRequest
 	{
-		AchievementTestAchievementIncrementalClient.AchievementCode = TEXT("UE4AchievementCode4");
-		AchievementTestAchievementIncrementalClient.DefaultLanguage = TEXT("en");
-		AchievementTestAchievementIncrementalClient.Description.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
-		AchievementTestAchievementIncrementalClient.GoalValue = 100;
-		AchievementTestAchievementIncrementalClient.Hidden = true;
-		AchievementTestAchievementIncrementalClient.Incremental = true;
-		AchievementTestAchievementIncrementalClient.LockedIcons.Add({ TEXT("This is locked icon 4 url"), TEXT("This is locked icon 4 slug") });
-		AchievementTestAchievementIncrementalClient.Name.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
-		AchievementTestAchievementIncrementalClient.Tags.Add(TEXT("Tags4"));
-		AchievementTestAchievementIncrementalClient.UnlockedIcons.Add({ TEXT("This is unlocked icon 4 url"), TEXT("This is unlocked icon 4 slug") });
-		AchievementTestAchievementIncrementalClient.StatCode = AchievementTestAchievementStatisticClientRequest.statCode;
+		AchievementIncrementalClient.AchievementCode = TEXT("UE4AchievementCode4");
+		AchievementIncrementalClient.DefaultLanguage = TEXT("en");
+		AchievementIncrementalClient.Description.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
+		AchievementIncrementalClient.GoalValue = 100;
+		AchievementIncrementalClient.Hidden = true;
+		AchievementIncrementalClient.Incremental = true;
+		AchievementIncrementalClient.LockedIcons.Add({ TEXT("This is locked icon 4 url"), TEXT("This is locked icon 4 slug") });
+		AchievementIncrementalClient.Name.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
+		AchievementIncrementalClient.Tags.Add(TEXT("Tags4"));
+		AchievementIncrementalClient.UnlockedIcons.Add({ TEXT("This is unlocked icon 4 url"), TEXT("This is unlocked icon 4 slug") });
+		AchievementIncrementalClient.StatCode = AchievementStatisticClientRequest.statCode;
 	}
 	// achievementStatisticServerRequest
 	{
-		AchievementTestAchievementIncrementalServer.AchievementCode = TEXT("UE4AchievementCode3");
-		AchievementTestAchievementIncrementalServer.DefaultLanguage = TEXT("en");
-		AchievementTestAchievementIncrementalServer.Description.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
-		AchievementTestAchievementIncrementalServer.GoalValue = 100;
-		AchievementTestAchievementIncrementalServer.Hidden = true;
-		AchievementTestAchievementIncrementalServer.Incremental = true;
-		AchievementTestAchievementIncrementalServer.LockedIcons.Add({ TEXT("This is locked icon 3 url"), TEXT("This is locked icon 3 slug") });
-		AchievementTestAchievementIncrementalServer.Name.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
-		AchievementTestAchievementIncrementalServer.Tags.Add(TEXT("Tags3"));
-		AchievementTestAchievementIncrementalServer.UnlockedIcons.Add({ TEXT("This is unlocked icon 3 url"), TEXT("This is unlocked icon 3 slug") });
-		AchievementTestAchievementIncrementalServer.StatCode = AchievementTestAchievementStatisticServerRequest.statCode;
+		AchievementIncrementalServer.AchievementCode = TEXT("UE4AchievementCode3");
+		AchievementIncrementalServer.DefaultLanguage = TEXT("en");
+		AchievementIncrementalServer.Description.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
+		AchievementIncrementalServer.GoalValue = 100;
+		AchievementIncrementalServer.Hidden = true;
+		AchievementIncrementalServer.Incremental = true;
+		AchievementIncrementalServer.LockedIcons.Add({ TEXT("This is locked icon 3 url"), TEXT("This is locked icon 3 slug") });
+		AchievementIncrementalServer.Name.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
+		AchievementIncrementalServer.Tags.Add(TEXT("Tags3"));
+		AchievementIncrementalServer.UnlockedIcons.Add({ TEXT("This is unlocked icon 3 url"), TEXT("This is unlocked icon 3 slug") });
+		AchievementIncrementalServer.StatCode = AchievementStatisticServerRequest.statCode;
 	}
 
-	AchievementTestAllStatisticRequests = { AchievementTestAchievementStatisticClientRequest, AchievementTestAchievementStatisticServerRequest };
-	AchievementTestAllAchievementRequests = { AchievementTestAchievement1, AchievementTestAchievement2, AchievementTestAchievementIncrementalClient, AchievementTestAchievementIncrementalServer };
+	AllStatisticRequests = { AchievementStatisticClientRequest, AchievementStatisticServerRequest };
+	AllAchievementRequests = { Achievement1, Achievement2, AchievementIncrementalClient, AchievementIncrementalServer };
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
@@ -260,7 +260,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 	AB_TEST_TRUE(bClientLoginSuccess);
 
-	for (const auto& StatisticRequest : AchievementTestAllStatisticRequests)
+	for (const auto& StatisticRequest : AllStatisticRequests)
 	{
 		bool bCreateStatDone = false;
 
@@ -279,7 +279,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		Waiting(bCreateUserStatItemDone, "Waiting for create user stat item...");
 	}
 
-	for (const auto& AchievementRequest : AchievementTestAllAchievementRequests)
+	for (const auto& AchievementRequest : AllAchievementRequests)
 	{
 		bool bDeleteAchievementDone = false;
 		Achievement_Delete(AchievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
@@ -316,7 +316,7 @@ bool FAchievementTestQueryAchievementsDefaultLanguage::RunTest(const FString& Pa
 	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode && paginatedAchievements.Data[i].Name == AchievementTestAchievement1.Name[AchievementTestAchievement1.DefaultLanguage])
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement1.AchievementCode && paginatedAchievements.Data[i].Name == Achievement1.Name[Achievement1.DefaultLanguage])
 		{
 			bEnAchievement1Found = true;
 			break;
@@ -325,7 +325,7 @@ bool FAchievementTestQueryAchievementsDefaultLanguage::RunTest(const FString& Pa
 	bool bEnAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode && paginatedAchievements.Data[i].Name == AchievementTestAchievement2.Name[AchievementTestAchievement2.DefaultLanguage])
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement2.AchievementCode && paginatedAchievements.Data[i].Name == Achievement2.Name[Achievement2.DefaultLanguage])
 		{
 			bEnAchievement2Found = true;
 			break;
@@ -348,7 +348,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 	bool bEnAchievement1Found = false;
 	for (int i = 0; i < paginatedEnAchievements.Data.Num(); i++)
 	{
-		if (paginatedEnAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode && paginatedEnAchievements.Data[i].Name == AchievementTestAchievement1.Name[TEXT("en")])
+		if (paginatedEnAchievements.Data[i].AchievementCode == Achievement1.AchievementCode && paginatedEnAchievements.Data[i].Name == Achievement1.Name[TEXT("en")])
 		{
 			bEnAchievement1Found = true;
 			break;
@@ -358,7 +358,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 	bool bEnAchievement2Found = false;
 	for (int i = 0; i < paginatedEnAchievements.Data.Num(); i++)
 	{
-		if (paginatedEnAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode && paginatedEnAchievements.Data[i].Name == AchievementTestAchievement2.Name[TEXT("en")])
+		if (paginatedEnAchievements.Data[i].AchievementCode == Achievement2.AchievementCode && paginatedEnAchievements.Data[i].Name == Achievement2.Name[TEXT("en")])
 		{
 			bEnAchievement2Found = true;
 			break;
@@ -372,7 +372,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 		bool bIdAchievement1Found = false;
 	for (int i = 0; i < paginatedIdAchievements.Data.Num(); i++)
 	{
-		if (paginatedIdAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode && paginatedIdAchievements.Data[i].Name == AchievementTestAchievement1.Name[AchievementTestAchievement1.DefaultLanguage])
+		if (paginatedIdAchievements.Data[i].AchievementCode == Achievement1.AchievementCode && paginatedIdAchievements.Data[i].Name == Achievement1.Name[Achievement1.DefaultLanguage])
 		{
 			bIdAchievement1Found = true;
 			break;
@@ -382,7 +382,7 @@ bool FAchievementTestQueryAchievementsSpecificLanguage::RunTest(const FString& P
 	bool bIdAchievement2Found = false;
 	for (int i = 0; i < paginatedIdAchievements.Data.Num(); i++)
 	{
-		if (paginatedIdAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode && paginatedIdAchievements.Data[i].Name == AchievementTestAchievement2.Name[TEXT("id")])
+		if (paginatedIdAchievements.Data[i].AchievementCode == Achievement2.AchievementCode && paginatedIdAchievements.Data[i].Name == Achievement2.Name[TEXT("id")])
 		{
 			bIdAchievement2Found = true;
 			break;
@@ -408,7 +408,7 @@ bool FAchievementTestQueryAchievementsCreatedAsc::RunTest(const FString& Paramet
 	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement1.AchievementCode)
 		{
 			achievement1Order = i;
 			bAchievement1Found = true;
@@ -420,7 +420,7 @@ bool FAchievementTestQueryAchievementsCreatedAsc::RunTest(const FString& Paramet
 	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement2.AchievementCode)
 		{
 			achievement2Order = i;
 			bAchievement2Found = true;
@@ -447,7 +447,7 @@ bool FAchievementTestQueryAchievementsCreatedDesc::RunTest(const FString& Parame
 	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement1.AchievementCode)
 		{
 			achievement1Order = i;
 			bAchievement1Found = true;
@@ -459,7 +459,7 @@ bool FAchievementTestQueryAchievementsCreatedDesc::RunTest(const FString& Parame
 	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement2.AchievementCode)
 		{
 			achievement2Order = i;
 			bAchievement2Found = true;
@@ -508,14 +508,14 @@ bool FAchievementTestGetAchievement::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsMultiLanguageAchievement getAchievement1;
 
-	AB_TEST_TRUE(AchievementTestGetAchievement(AchievementTestAchievement1.AchievementCode, getAchievement1));
+	AB_TEST_TRUE(AchievementTestGetAchievement(Achievement1.AchievementCode, getAchievement1));
 
 	FAccelByteModelsMultiLanguageAchievement getAchievement2;
 
-	AB_TEST_TRUE(AchievementTestGetAchievement(AchievementTestAchievement2.AchievementCode, getAchievement2));
+	AB_TEST_TRUE(AchievementTestGetAchievement(Achievement2.AchievementCode, getAchievement2));
 
-	AB_TEST_EQUAL(getAchievement1.AchievementCode, AchievementTestAchievement1.AchievementCode);
-	AB_TEST_EQUAL(getAchievement2.AchievementCode, AchievementTestAchievement2.AchievementCode);
+	AB_TEST_EQUAL(getAchievement1.AchievementCode, Achievement1.AchievementCode);
+	AB_TEST_EQUAL(getAchievement2.AchievementCode, Achievement2.AchievementCode);
 
 	return true;
 }
@@ -556,7 +556,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestUnlockAchievement, "AccelByte.T
 bool FAchievementTestUnlockAchievement::RunTest(const FString& Parameters)
 {
 	bool bUnlockAchievementSuccess = false;
-	FRegistry::Achievement.UnlockAchievement(AchievementTestAchievement1.AchievementCode,
+	FRegistry::Achievement.UnlockAchievement(Achievement1.AchievementCode,
 		FVoidHandler::CreateLambda([&bUnlockAchievementSuccess]()
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
@@ -576,7 +576,7 @@ bool FAchievementTestQueryUserAchievements::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::NONE, paginatedAchievements));
 
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
-	AB_TEST_TRUE(paginatedAchievements.Data[0].AchievementCode == AchievementTestAchievement1.AchievementCode);
+	AB_TEST_TRUE(paginatedAchievements.Data[0].AchievementCode == Achievement1.AchievementCode);
 
 	return true;
 }
@@ -584,7 +584,7 @@ bool FAchievementTestQueryUserAchievements::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievement, "AccelByte.Tests.Achievement.E.ServerUnlockAchievement", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievement::RunTest(const FString& Parameters)
 {
-	AB_TEST_TRUE(AchievementTestServerUnlockAchievement(FRegistry::Credentials.GetUserId(), AchievementTestAchievement2.AchievementCode));
+	AB_TEST_TRUE(AchievementTestServerUnlockAchievement(FRegistry::Credentials.GetUserId(), Achievement2.AchievementCode));
 
 	return true;
 }
@@ -592,7 +592,7 @@ bool FAchievementTestServerUnlockAchievement::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievementInvalidUserId, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementInvalidUserId", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievementInvalidUserId::RunTest(const FString& Parameters)
 {
-	bool bUnlockAchievementSuccess = AchievementTestServerUnlockAchievement(TEXT("INVALID"), AchievementTestAchievement2.AchievementCode);
+	bool bUnlockAchievementSuccess = AchievementTestServerUnlockAchievement(TEXT("INVALID"), Achievement2.AchievementCode);
 
 	// TODO: Uncomment below if the user id validation is fixed on the backend.
 	//AB_TEST_FALSE(bUnlockAchievementSuccess);
@@ -603,7 +603,7 @@ bool FAchievementTestServerUnlockAchievementInvalidUserId::RunTest(const FString
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestServerUnlockAchievementEmptyUserId, "AccelByte.Tests.Achievement.E.ServerUnlockAchievementEmptyUserId", AutomationFlagMaskAchievement);
 bool FAchievementTestServerUnlockAchievementEmptyUserId::RunTest(const FString& Parameters)
 {
-	AB_TEST_FALSE(AchievementTestServerUnlockAchievement(TEXT(""), AchievementTestAchievement2.AchievementCode));
+	AB_TEST_FALSE(AchievementTestServerUnlockAchievement(TEXT(""), Achievement2.AchievementCode));
 
 	return true;
 }
@@ -634,7 +634,7 @@ bool FAchievementTestQueryUserAchievementsUnlockedAll::RunTest(const FString& Pa
 	bool bAchievement1Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement1.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement1.AchievementCode)
 		{
 			bAchievement1Found = true;
 			break;
@@ -644,7 +644,7 @@ bool FAchievementTestQueryUserAchievementsUnlockedAll::RunTest(const FString& Pa
 	bool bAchievement2Found = false;
 	for (int i = 0; i < paginatedAchievements.Data.Num(); i++)
 	{
-		if (paginatedAchievements.Data[i].AchievementCode == AchievementTestAchievement2.AchievementCode)
+		if (paginatedAchievements.Data[i].AchievementCode == Achievement2.AchievementCode)
 		{
 			bAchievement2Found = true;
 			break;
@@ -666,7 +666,7 @@ bool FAchievementTestQueryUserAchievementsOffset1::RunTest(const FString& Parame
 	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 1));
 
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
-	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, AchievementTestAchievement2.AchievementCode);
+	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, Achievement2.AchievementCode);
 
 	return true;
 }
@@ -679,7 +679,7 @@ bool FAchievementTestQueryUserAchievementsLimit1::RunTest(const FString& Paramet
 	AB_TEST_TRUE(AchievementTestQueryUserAchievements(EAccelByteAchievementListSortBy::CREATED_AT_ASC, paginatedAchievements, 0, 1));
 
 	AB_TEST_EQUAL(paginatedAchievements.Data.Num(), 1);
-	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, AchievementTestAchievement1.AchievementCode);
+	AB_TEST_EQUAL(paginatedAchievements.Data[0].AchievementCode, Achievement1.AchievementCode);
 
 	return true;
 }
@@ -688,8 +688,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestUnlockIncrementalAchievementCli
 bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const FString& Parameters)
 {
 	// Arrange
-	FString currentStatCode = AchievementTestAchievementIncrementalClient.StatCode;
-	FAchievementRequest currentAchievementRequest = AchievementTestAchievementIncrementalClient;
+	FString currentStatCode = AchievementIncrementalClient.StatCode;
+	FAchievementRequest currentAchievementRequest = AchievementIncrementalClient;
 	bool bGetUserStatItemSuccess = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult getUserStatItemResult;
 	FRegistry::Statistic.GetUserStatItems({ currentStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
@@ -749,8 +749,8 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
 
 	// Arrange
-	FString currentStatCode = AchievementTestAchievementIncrementalServer.StatCode;
-	FAchievementRequest currentAchievementRequest = AchievementTestAchievementIncrementalServer;
+	FString currentStatCode = AchievementIncrementalServer.StatCode;
+	FAchievementRequest currentAchievementRequest = AchievementIncrementalServer;
 	bool bGetUserStatItemSuccess = false;
 	FAccelByteModelsUserStatItemPagingSlicedResult getUserStatItemResult;
 	FRegistry::Statistic.GetUserStatItems({ currentStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
@@ -805,7 +805,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAchievementTestAchievementTearDown, "AccelByte
 bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 {
 	TArray<bool> deleteAchievementResults;
-	for (auto achievementRequest : AchievementTestAllAchievementRequests)
+	for (auto achievementRequest : AllAchievementRequests)
 	{
 		bool bDeleteAchievementSuccess = false;
 		Achievement_Delete(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&]()
