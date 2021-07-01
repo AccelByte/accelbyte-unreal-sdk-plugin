@@ -24,6 +24,7 @@
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
+#include "Api/AccelByteUGCApi.h"
 
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
@@ -65,6 +66,7 @@ public:
 	Api::Agreement Agreement{ Credentials, FRegistry::Settings };
 	Api::Achievement Achievement{ Credentials, FRegistry::Settings };
 	Api::SessionBrowser SessionBrowser{ Credentials, FRegistry::Settings };
+	Api::UGC UGC{ Credentials, FRegistry::Settings };
 };
 
 class ACCELBYTEUE4SDK_API FMultiRegistry

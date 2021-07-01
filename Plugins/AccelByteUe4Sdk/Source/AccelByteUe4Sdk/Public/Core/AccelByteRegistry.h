@@ -38,6 +38,7 @@ namespace Api
 	class Agreement;
 	class Achievement;
 	class SessionBrowser;
+	class UGC;
 }
 
 namespace GameServerApi
@@ -82,6 +83,7 @@ public:
 	static Api::Agreement Agreement;
 	static Api::Achievement Achievement;
 	static Api::SessionBrowser SessionBrowser;
+	static Api::UGC UGC;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

@@ -96,6 +96,11 @@ FString UAccelByteBlueprintsSettings::GetSessionBrowserServerUrl()
 	return FRegistry::Settings.SessionBrowserServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetUGCServerUrl()
+{
+	return FRegistry::Settings.UGCServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -184,6 +189,11 @@ void UAccelByteBlueprintsSettings::SetAchievementServerUrl(const FString& Achiev
 void UAccelByteBlueprintsSettings::SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl)
 {
 	FRegistry::Settings.SessionBrowserServerUrl = SessionBrowserServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetUGCServerUrl(const FString& UGCServerUrl)
+{
+	FRegistry::Settings.UGCServerUrl = UGCServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
