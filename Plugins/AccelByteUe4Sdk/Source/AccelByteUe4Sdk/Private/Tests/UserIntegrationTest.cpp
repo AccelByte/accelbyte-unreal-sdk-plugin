@@ -2,8 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#pragma once
-
 #include "Misc/AutomationTest.h"
 #include "Api/AccelByteUserApi.h"
 #include "Models/AccelByteUserProfileModels.h"
@@ -1866,7 +1864,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	FString UserIdsCsv;
 
-	for (const TSharedPtr<Credentials> Credentials : TestCredentials)
+	for (const auto& Credentials : TestCredentials)
 	{
 		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *Credentials->GetUserId()));
 	}

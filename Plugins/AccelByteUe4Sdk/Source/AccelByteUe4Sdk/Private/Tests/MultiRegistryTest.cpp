@@ -42,7 +42,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	// Multi user login using FMultiRegistry and FApiClient
 
-	for (const TSharedPtr<FTestUser> User : MultiRegistryTestUsers)
+	for (const auto& User : MultiRegistryTestUsers)
 	{
 		bool bIsDone = false;
 		bool bIsOk = false;
@@ -70,7 +70,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	TSet<FString> UniqueUserIds;
 
-	for (const TSharedPtr<FTestUser> User : MultiRegistryTestUsers)
+	for (const auto& User : MultiRegistryTestUsers)
 	{
 		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User->Email);
 		FString UserId = ApiClient->Credentials.GetUserId();

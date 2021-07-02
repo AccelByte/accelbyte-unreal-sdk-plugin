@@ -26,6 +26,28 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
 #define AB_TEST_SAME(Actual, Expected) UTEST_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)
 #define AB_TEST_NOT_SAME(Actual, Expected) UTEST_NOT_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)
 
+#define AB_HTTP_REQUEST(Name, URL, Verb, Authorization, ContentType, Content) \
+	FHttpRequestPtr Name = FHttpModule::Get().CreateRequest(); \
+	Name->SetURL(URL); \
+	Name->SetHeader(TEXT("Authorization"), Authorization); \
+	Name->SetVerb(Verb); \
+	Name->SetHeader(TEXT("Content-Type"), ContentType); \
+	Name->SetHeader(TEXT("Accept"), TEXT("application/json")); \
+	Name->SetContentAsString(Content);
+#define AB_HTTP_GET(Name, URL, Authorization) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("GET"), Authorization,  TEXT("application/json"), TEXT(""))
+#define AB_HTTP_DELETE(Name, URL, Authorization) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("DELETE"), Authorization, TEXT("application/json"), TEXT(""))
+#define AB_HTTP_POST(Name, URL, Authorization, Content) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("POST"), Authorization, TEXT("application/json"), Content)
+#define AB_HTTP_POST_FORM(Name, URL, Authorization, Content) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("POST"), Authorization, TEXT("application/x-www-form-urlencoded"), Content)
+#define AB_HTTP_PUT(Name, URL, Authorization, Content) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("PUT"), Authorization, TEXT("application/json"), Content)
+#define AB_HTTP_PATCH(Name, URL, Authorization, Content) \
+	AB_HTTP_REQUEST(Name, URL, TEXT("PATCH"), Authorization, TEXT("application/json"), Content)
+
+
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -1198,7 +1220,9 @@ void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapRespons
 void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
 void User_Get_By_Email_Address(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError);
 void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+#if 0
 void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+#endif
 
 void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 void DSM_Get_Config(const THandler<FDsmConfig> & OnSuccess, const FErrorHandler & OnError);
