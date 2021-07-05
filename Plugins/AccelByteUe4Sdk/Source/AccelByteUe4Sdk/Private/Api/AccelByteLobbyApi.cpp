@@ -155,6 +155,9 @@ namespace Api
 		//Signaling
 		const FString SignalingP2PNotif = TEXT("signalingP2PNotif");
 
+		// Error Notif
+		const FString ErrorNotif = TEXT("errorNotif");
+		
 		//Session Attribute
 		const FString SessionAttributeSet = TEXT("setSessionAttributeResponse");
 	}
@@ -1304,6 +1307,12 @@ return; \
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif, BlockPlayerNotif);
 	HANDLE_LOBBY_MESSAGE(LobbyResponse::UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif, UnblockPlayerNotif);
 
+	// Error
+	if(lobbyResponseType.Equals(LobbyResponse::ErrorNotif))
+	{
+		ErrorNotif.ExecuteIfBound(JsonParsed->GetIntegerField(TEXT("code")), JsonParsed->GetStringField(TEXT("message")));
+	}
+		
 	// Signaling
 	if (lobbyResponseType.Equals(LobbyResponse::SignalingP2PNotif))
 	{

@@ -1672,14 +1672,6 @@ void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccount
 }
 #endif
 
-void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/servers/local/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *podName);
-	AB_HTTP_DELETE(Request, Url, Authorization);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
 void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
@@ -1774,24 +1766,6 @@ void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRe
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/subscriptions/platformSubscribe"), *GetAdminBaseUrl(), *FRegistry::Settings.PublisherNamespace, *UserId);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(BodyRequest, Content);
-	AB_HTTP_POST(Request, Url, Authorization, Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void DSM_Get_Config(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/configs"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
-	AB_HTTP_GET(Request, Url, Authorization);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void DSM_Set_Config(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/configs"), *GetAdminBaseUrl());
-	FString Content = TEXT("");
-	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

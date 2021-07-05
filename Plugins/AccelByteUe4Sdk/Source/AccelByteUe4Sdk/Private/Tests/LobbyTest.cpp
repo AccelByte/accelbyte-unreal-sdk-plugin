@@ -14,6 +14,7 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
+#include "LobbyTestAdmin.h"
 #include "TestUtilities.h"
 #include "HAL/FileManager.h"
 #include "JsonObjectWrapper.h"
@@ -858,7 +859,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool bGetDsmConfigComplete = false;
 	
 	FDsmConfig dsmConfig;
-	DSM_Get_Config(THandler<FDsmConfig>::CreateLambda([&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
+	DSMGetConfig(THandler<FDsmConfig>::CreateLambda([&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
 	{
 		dsmConfig = result;
 
@@ -891,7 +892,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	if (isUpdateDsmConfig)
 	{
 		bool bSetDsmConfigComplete = false;
-		DSM_Set_Config(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
+		DSMSetConfig(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
 			bSetDsmConfigComplete = true;
 		}), LobbyTestErrorHandler);
 		Waiting(bSetDsmConfigComplete, "Waiting set dsm config");
@@ -5809,5 +5810,66 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 	
 	LobbyDisconnect(2);
 	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestRequestReachBurst, "AccelByte.Tests.Lobby.Y.LobbyTestRequestReachBurst", AutomationFlagMaskLobby);
+bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
+{
+	LobbyConnect(1);
+	const int32 ShortLimitBurst = 5;
+	const int32 HighLimitDuration = 1000000000;
+
+	bool bGetConfigSuccess = false;
+	FLobbyModelConfig DefaultConfig;
+	LobbyGetConfig(THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Getting config success"));
+		bGetConfigSuccess = true;
+		DefaultConfig = Response;
+	}), LobbyTestErrorHandler);
+	Waiting(bGetConfigSuccess, "Waiting Get Config...");
+	AB_TEST_TRUE(bGetConfigSuccess);
+
+	FLobbyModelConfig ShortBurstConfig = DefaultConfig;
+	ShortBurstConfig.GeneralRateLimitBurst = ShortLimitBurst;
+	ShortBurstConfig.GeneralRateLimitDuration = HighLimitDuration;
+
+	bool bSetConfigSuccess = false;
+	LobbySetConfig(ShortBurstConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Setting config success"));
+		bSetConfigSuccess = true;
+	}), LobbyTestErrorHandler);
+	Waiting(bSetConfigSuccess, "Waiting Set Config...");
+	AB_TEST_TRUE(bSetConfigSuccess);
+	
+	bool bReachedBurst = false;
+	Lobbies[0]->SetErrorNotifDelegate(Lobby::FErrorNotif::CreateLambda([&](int32 Code, const FString& Message)
+	{
+		// Too many request
+		if(Code == 429)
+		{
+			bReachedBurst = true;
+		}
+	}));
+	int SendRequestCounter = 0;
+	while(SendRequestCounter <= ShortLimitBurst)
+	{
+		Lobbies[0]->SendGetOnlineUsersRequest();
+		SendRequestCounter++;
+	}
+	Waiting(bReachedBurst, "Waiting to reach burst limit");
+	AB_TEST_TRUE(bReachedBurst);
+	
+	bSetConfigSuccess = false;
+	LobbySetConfig(DefaultConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Setting config to default success"));
+		bSetConfigSuccess = true;
+	}), LobbyTestErrorHandler);
+	Waiting(bSetConfigSuccess, "Waiting Set Back Default Configuration...");
+	AB_TEST_TRUE(bSetConfigSuccess);
+	
 	return true;
 }

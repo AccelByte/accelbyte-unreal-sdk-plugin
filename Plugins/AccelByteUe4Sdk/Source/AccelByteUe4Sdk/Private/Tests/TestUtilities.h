@@ -1034,110 +1034,6 @@ struct FFreeSubscriptionRequest
 		FString Language;
 };
 
-USTRUCT(BlueprintType)
-struct FPodConfig
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Cpu_limit;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Mem_limit;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Params;
-};
-
-USTRUCT(BlueprintType)
-struct FDeploymentConfig
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Configuration;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Game_version;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Regions;
-};
-
-USTRUCT(BlueprintType)
-struct FDeploymentWithOverride
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	bool Allow_version_override;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Configuration;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Game_version;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentConfig> Overrides;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Regions;
-};
-
-USTRUCT(BlueprintType)
-struct FDsmConfig
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	bool Allow_version_override;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Buffer_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Claim_timeout;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FPodConfig> Configurations;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Cpu_limit;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Mem_limit;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Params;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Creation_timeout;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Default_version;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentWithOverride> Deployments;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Heartbeat_timeout;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FString> Image_version_mapping;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Max_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Min_count;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, FDeploymentConfig> Overrides;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Port;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, int32> Ports;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	FString Protocol;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TArray<FString> Providers;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Session_timeout;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	int32 Unreachable_timeout;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | DSM | DSMConfig")
-	TMap<FString, int32> Version_image_size_mapping;
-};
-
 struct FTestUser
 {
 	FString FirstName = TEXT("John");
@@ -1223,10 +1119,6 @@ void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDele
 #if 0
 void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 #endif
-
-void DSM_Delete_Server(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-void DSM_Get_Config(const THandler<FDsmConfig> & OnSuccess, const FErrorHandler & OnError);
-void DSM_Set_Config(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError);
 void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPolicyVersionCreate& CreateRequest, const THandler<FAgreementPolicyVersion>& OnSuccess, const FErrorHandler& OnError);

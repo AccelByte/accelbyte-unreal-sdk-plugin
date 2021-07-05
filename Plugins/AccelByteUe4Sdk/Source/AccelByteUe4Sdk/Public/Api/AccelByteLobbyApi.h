@@ -349,6 +349,12 @@ public:
 	 */
 	DECLARE_DELEGATE_TwoParams(FSignalingP2P, const FString&, const FString&);
 
+	//Error
+	/**
+	* @brief delegate for handling signaling P2P message
+	*/
+	DECLARE_DELEGATE_TwoParams(FErrorNotif, int32, const FString&);				//passive
+	
 	/**
 	 * @brief delegate for handling response when setting session attribute
 	 */
@@ -1149,6 +1155,12 @@ public:
 		UnblockPlayerNotif = OnUnblockPlayerNotif;
 	};
 
+	// Error
+	void SetErrorNotifDelegate(FErrorNotif OnErrorNotif)
+	{
+		ErrorNotif = OnErrorNotif;
+	};
+
 	/**
 	* @brief Set SignalingP2P delegate.
 	*
@@ -1383,6 +1395,9 @@ private:
 	// Block + Notification
 	FBlockPlayerNotif BlockPlayerNotif;
 	FUnblockPlayerNotif UnblockPlayerNotif;
+
+	// Error
+	FErrorNotif ErrorNotif;
 
 	struct PartyStorageWrapper
 	{
