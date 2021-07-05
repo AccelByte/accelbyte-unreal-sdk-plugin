@@ -39,7 +39,7 @@ const int32 AutomationFlagMaskLobby = (EAutomationTestFlags::EditorContext | EAu
 
 const auto LobbyTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteLobbyTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteLobbyTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const int TestUserCount = 6;
@@ -155,6 +155,7 @@ void LobbyDisconnect(int userCount)
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("disconecting lobby %d"), i);
 			FTicker::GetCoreTicker().Tick(.5f);
 		}
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("lobby %d disconnected"), i);
 	}
 }
 
@@ -676,13 +677,10 @@ const auto DsNotifDelegate = Api::Lobby::FDsNotif::CreateLambda([](FAccelByteMod
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s"), *result.MatchId, *result.Message, *result.Status);
 	dsNotice = result;
-	if (dsNotice.Status == "READY" || dsNotice.Status == "BUSY")
+	bDsNotifError = !dsNotice.IsOK.ToBool();
+	if (dsNotice.Status == "READY" || dsNotice.Status == "BUSY" || bDsNotifError)
 	{
 		bDsNotifSuccess = true;
-	}
-	if (result.MatchId.IsEmpty())
-	{
-		bDsNotifError = true;
 	}
 });
 #pragma endregion
@@ -826,7 +824,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	
 	for (int i = 0; i < TestUserCount; i++)
 	{
-		check(UsersLoginSuccess[i]);
+		AB_TEST_TRUE(UsersLoginSuccess[i]);
 	}
 
 	FString PreferedDSRegion = Environment::GetEnvironmentVariable("PREFERED_DS_REGION", 1000);
@@ -841,7 +839,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 			PreferedLatencies = Result;
 		}), LobbyTestErrorHandler);
 		Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
-		check(bGetServerLatenciesSuccess);
+		AB_TEST_TRUE(bGetServerLatenciesSuccess);
 
 		for (int i = 0; i < PreferedLatencies.Num(); i++)
 		{
@@ -930,7 +928,7 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 		WaitUntil([&]() { return SuccessfulDeletions[i]; }, 60.0, "Waiting for user deletion...");
 	}
 
-	check(!SuccessfulDeletions.ContainsByPredicate([](const bool SuccessfulDeletion){ return !SuccessfulDeletion; }));
+	AB_TEST_TRUE(!SuccessfulDeletions.ContainsByPredicate([](const bool SuccessfulDeletion){ return !SuccessfulDeletion; }));
 	return true;
 }
 
@@ -969,7 +967,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 	{
 		FString MessageJSON = Lobby::LobbyMessageToJson(*Data.Message);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s -> %s"), *Data.Message, *MessageJSON);
-		check(Data.ExpectedJSON.Equals(MessageJSON));
+		AB_TEST_TRUE(Data.ExpectedJSON.Equals(MessageJSON));
 	}
 
 	return true;
@@ -1012,8 +1010,8 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 
 	for (int i = 0; i < 2; i++)
 	{
-		check(userConnected[i]);
-		check(userResponded[i]);
+		AB_TEST_TRUE(userConnected[i]);
+		AB_TEST_TRUE(userResponded[i]);
 	}
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -1035,8 +1033,8 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
 
-	check(bUsersConnected);
-	check(bUsersConnectionSuccess);
+	AB_TEST_TRUE(bUsersConnected);
+	AB_TEST_TRUE(bUsersConnectionSuccess);
 
 	LobbyDisconnect(1);
 	ResetResponses();
@@ -1069,7 +1067,7 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	}
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Received Message : %d"), receivedChatCount);
-	check(receivedChatCount >= (TestUserCount - 1));
+	AB_TEST_TRUE(receivedChatCount >= (TestUserCount - 1));
 
 	LobbyDisconnect(TestUserCount);
 	ResetResponses();
@@ -1120,7 +1118,7 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	Waiting(bChatAllReceived, text);
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Received Message : %d"), receivedChatCount);
-	check(receivedChatCount == (TestUserCount * TestUserCount * chatMultiplier));
+	AB_TEST_EQUAL(receivedChatCount, (TestUserCount * TestUserCount * chatMultiplier));
 
 	LobbyDisconnect(TestUserCount);
 	ResetResponses();
@@ -1173,7 +1171,7 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 	Waiting(bChatAllReceived, text);
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Received Message : %d"), receivedChatCount);
-	check(receivedChatCount == (playerCount * playerCount) - 1);
+	AB_TEST_EQUAL(receivedChatCount, (playerCount * playerCount) - 1);
 
 	LobbyDisconnect(playerCount);
 	ResetResponses();
@@ -1222,11 +1220,11 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 
 	LobbyDisconnect(TestUserCount);
 
-	check(bGetAllUserPresenceSuccess);
-	check(onlineUserResponse.friendsId.Num() >= 3);
-	check(onlineUserResponse.friendsId.Contains(UserCreds[1].GetUserId()));
-	check(onlineUserResponse.friendsId.Contains(UserCreds[2].GetUserId()));
-	check(onlineUserResponse.friendsId.Contains(UserCreds[3].GetUserId()));
+	AB_TEST_TRUE(bGetAllUserPresenceSuccess);
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Num() >= 3);
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[2].GetUserId()));
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[3].GetUserId()));
 	ResetResponses();
 	return true;
 }
@@ -1246,6 +1244,8 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 			Lobbies[i]->Disconnect();
 		}
 	}
+
+	WaitUntil([]() {return false;  }, 5, "Waiting backend to sync lobby disconnect");
 
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
@@ -1268,7 +1268,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("User: %s | Status: %d | %d"), *Online.UserID, static_cast<int32>(Online.Availability), GetPresenceResult.Data.Num());
 		bool bIsOnline = false;
 		bool bIsExpectedOnline = false;
-		for (int i = 1; i < (Lobbies.Num() - ExpectedOffline); i++) {
+		for (int i = 1; i < (TestUserCount - ExpectedOffline); i++) {
 			if (Online.UserID == UserIds[i])
 			{
 				bIsExpectedOnline = true;
@@ -1295,12 +1295,12 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 	LobbyDisconnect(TestUserCount - ExpectedOffline);
 
 	// Assert
-	check(bGetPresenceSuccess);
-	check(OnlineCount == TestUserCount - ExpectedOffline - 1/*exclude the lobby 0*/);
-	check(OnlineCount == GetPresenceResult.Online);
-	check(OfflineCount == ExpectedOffline);
-	check(OfflineCount == GetPresenceResult.Offline);
-	check(ExpectedOnline);
+	AB_TEST_TRUE(bGetPresenceSuccess);
+	AB_TEST_EQUAL(OnlineCount, TestUserCount - ExpectedOffline - 1/*exclude the lobby 0*/);
+	AB_TEST_EQUAL(OnlineCount, GetPresenceResult.Online);
+	AB_TEST_EQUAL(OfflineCount, ExpectedOffline);
+	AB_TEST_EQUAL(OfflineCount, GetPresenceResult.Offline);
+	AB_TEST_TRUE(ExpectedOnline);
 	return true;
 }
 
@@ -1320,6 +1320,8 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 		}
 	}
 
+	WaitUntil([]() {return false;  }, 5, "Waiting backend to sync lobby disconnect");
+
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
 	bool bGetPresenceSuccess = false;
@@ -1334,10 +1336,10 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 	// Cleanup
 	LobbyDisconnect(TestUserCount - ExpectedOffline);
 
-	check(bGetPresenceSuccess);
-	check(GetPresenceResult.Data.Num() == 0);
-	check(GetPresenceResult.Online == TestUserCount - ExpectedOffline - 1);
-	check(GetPresenceResult.Offline == ExpectedOffline);
+	AB_TEST_TRUE(bGetPresenceSuccess);
+	AB_TEST_EQUAL(GetPresenceResult.Data.Num(), 0);
+	AB_TEST_EQUAL(GetPresenceResult.Online, TestUserCount - ExpectedOffline - 1);
+	AB_TEST_EQUAL(GetPresenceResult.Offline, ExpectedOffline);
 	return true;
 }
 
@@ -1369,7 +1371,7 @@ bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Paramet
 	// Cleanup
 	LobbyDisconnect(1);
 
-	check(!bGetPresenceSuccess);
+	AB_TEST_TRUE(!bGetPresenceSuccess);
 	return true;
 }
 
@@ -1390,7 +1392,7 @@ bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameter
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
 
 	LobbyDisconnect(2);
-	check(bGetInfoPartyError);
+	AB_TEST_TRUE(bGetInfoPartyError);
 	ResetResponses();
 	return true;
 }
@@ -1421,11 +1423,11 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 
 	LobbyDisconnect(1);
 
-	check(bGetInfoPartySuccess);
-	check(!infoPartyResponse.PartyId.IsEmpty());
-	check(!infoPartyResponse.InvitationToken.IsEmpty());
-	check(infoPartyResponse.Members.Num() > 0);
-	check(infoPartyResponse.Members[0] == UserCreds[0].GetUserId());
+	AB_TEST_TRUE(bGetInfoPartySuccess);
+	AB_TEST_TRUE(!infoPartyResponse.PartyId.IsEmpty());
+	AB_TEST_TRUE(!infoPartyResponse.InvitationToken.IsEmpty());
+	AB_TEST_TRUE(infoPartyResponse.Members.Num() > 0);
+	AB_TEST_EQUAL(infoPartyResponse.Members[0], UserCreds[0].GetUserId());
 
 	ResetResponses();
 	return true;
@@ -1481,8 +1483,8 @@ bool LobbyTestGetPartyData_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	LobbyDisconnect(1);
 	ResetResponses();
 
-	check(bGetPartyDataSuccess);
-	check(PartyId == PartyData.PartyId);
+	AB_TEST_TRUE(bGetPartyDataSuccess);
+	AB_TEST_EQUAL(PartyId, PartyData.PartyId);
 	return true;
 }
 
@@ -1515,7 +1517,7 @@ bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString
 	Waiting(bLeavePartySuccess, "Leaving Party...");
 
 	LobbyDisconnect(1);
-	check(bCreatePartyError);
+	AB_TEST_TRUE(bCreatePartyError);
 
 	ResetResponses();
 	return true;
@@ -1571,13 +1573,13 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendPartyGetCodeRequest();
 
 	Waiting(bGetPartyCodeSuccess, "Getting Party Code...");
 
-	check(bGetPartyCodeSuccess);
+	AB_TEST_TRUE(bGetPartyCodeSuccess);
 
 	partyCode = partyCodeResponse.PartyCode;
 
@@ -1585,13 +1587,13 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	Waiting(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
 
-	check(bJoinPartyViaCodeSuccess);
+	AB_TEST_TRUE(bJoinPartyViaCodeSuccess);
 
 	Lobbies[0]->SendPartyDeleteCodeRequest();
 
 	Waiting(bDeletePartyCodeSuccess, "Deleting Party Code...");
 
-	check(bDeletePartyCodeSuccess);
+	AB_TEST_TRUE(bDeletePartyCodeSuccess);
 
 	LobbyDisconnect(2);
 
@@ -1649,16 +1651,16 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
 	Waiting(bInvitePartySuccess, "Inviting to Party...");
 
-	check(bInvitePartySuccess);
+	AB_TEST_TRUE(bInvitePartySuccess);
 
 	Waiting(bGetInvitedNotifSuccess, "Waiting for Party Invitation...");
 
-	check(!bGetInvitedNotifError);
+	AB_TEST_TRUE(!bGetInvitedNotifError);
 
 	Lobbies[1]->SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 	while (!bJoinPartySuccess && !bGetInvitedNotifError)
@@ -1667,18 +1669,18 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Joining a Party..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
-	check(!bJoinPartyError);
+	AB_TEST_TRUE(!bJoinPartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
 	Lobbies[1]->SendInfoPartyRequest();
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
 
-	check(!bGetInfoPartyError);
+	AB_TEST_TRUE(!bGetInfoPartyError);
 
 	Lobbies[1]->SendPartyMessage("This is a party chat");
 	Waiting(bSendPartyChatSuccess, "Sending a Party Chat...");
-	check(!bSendPartyChatError);
+	AB_TEST_TRUE(!bSendPartyChatError);
 
 	while (!bReceivedPartyChatSuccess && !bSendPartyChatError)
 	{
@@ -1686,19 +1688,19 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Fetching Party Chat..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
-	check(bReceivedPartyChatSuccess);
+	AB_TEST_TRUE(bReceivedPartyChatSuccess);
 
 	bLeavePartySuccess = false;
 	bLeavePartyError = false;
 	Lobbies[0]->SendLeavePartyRequest();
 	Waiting(bLeavePartySuccess, "Leaving Party...");
-	check(!bLeavePartyError);
+	AB_TEST_TRUE(!bLeavePartyError);
 
 	bLeavePartySuccess = false;
 	bLeavePartyError = false;
 	Lobbies[1]->SendLeavePartyRequest();
 	Waiting(bLeavePartySuccess, "Leaving Party...");
-	check(!bLeavePartyError);
+	AB_TEST_TRUE(!bLeavePartyError);
 
 	LobbyDisconnect(2);
 
@@ -1748,16 +1750,16 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
 	Waiting(bInvitePartySuccess, "Inviting to Party...");
 
-	check(bInvitePartySuccess);
+	AB_TEST_TRUE(bInvitePartySuccess);
 
 	Waiting(bGetInvitedNotifSuccess, "Waiting for Party Invitation...");
 
-	check(!bGetInvitedNotifError);
+	AB_TEST_TRUE(!bGetInvitedNotifError);
 
 	Lobbies[1]->SendRejectInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 	while (!bRejectPartySuccess && !bGetInvitedNotifError)
@@ -1766,11 +1768,11 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Rejecting a Party..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
-	check(!bRejectPartyError);
+	AB_TEST_TRUE(!bRejectPartyError);
 
 	Waiting(bRejectedPartyNotifSuccess, "Waiting for Reject Party Notification...");
 
-	check(bRejectedPartyNotifSuccess)
+	AB_TEST_TRUE(bRejectedPartyNotifSuccess)
 
 	LobbyDisconnect(2);
 
@@ -1914,10 +1916,10 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 
 	LobbyDisconnect(3);
 
-	check(bKickPartyMemberSuccess);
-	check(bKickedFromPartySuccess);
-	check(joinParty[2].Members.Num() == 3 || joinParty[1].Members.Num() == 3);
-	check(infoPartyResponse.Members.Num() == 2);
+	AB_TEST_TRUE(bKickPartyMemberSuccess);
+	AB_TEST_TRUE(bKickedFromPartySuccess);
+	AB_TEST_TRUE(joinParty[2].Members.Num() == 3 || joinParty[1].Members.Num() == 3);
+	AB_TEST_EQUAL(infoPartyResponse.Members.Num(), 2);
 
 	ResetResponses();
 	return true;
@@ -1978,7 +1980,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
 
@@ -1994,7 +1996,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	Waiting(bJoinPartySuccess, "Joining a Party...");
 
-	check(bJoinPartySuccess);
+	AB_TEST_TRUE(bJoinPartySuccess);
 
 	bJoinPartySuccess = false;
 
@@ -2008,7 +2010,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	Waiting(bPromotePartyLeaderSuccess, "Promoting Party leader...");
 
-	check(bPromotePartyLeaderSuccess);
+	AB_TEST_TRUE(bPromotePartyLeaderSuccess);
 
 	bPromotePartyLeaderSuccess = false;
 
@@ -2018,7 +2020,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	bGetInfoPartySuccess = false;
 
-	check(infoPartyResponse.LeaderId == UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(infoPartyResponse.LeaderId, UserCreds[1].GetUserId());
 
 	LobbyDisconnect(2);
 
@@ -2037,7 +2039,7 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 		FPlatformProcess::Sleep(5);
 		FTicker::GetCoreTicker().Tick(5);
 	}
-	check(Lobbies[0]->IsConnected());
+	AB_TEST_TRUE(Lobbies[0]->IsConnected());
 
 	LobbyDisconnect(1);
 	ResetResponses();
@@ -2067,9 +2069,9 @@ bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Paramete
 	Waiting(bGetNotifSuccess, "Getting All Notifications...");
 
 	LobbyDisconnect(1);
-	check(bSendNotifSucccess);
-	check(bGetNotifSuccess);
-	check(getNotifResponse.Payload == notification);
+	AB_TEST_TRUE(bSendNotifSucccess);
+	AB_TEST_TRUE(bGetNotifSuccess);
+	AB_TEST_EQUAL(getNotifResponse.Payload, notification);
 
 	ResetResponses();
 	return true;
@@ -2110,8 +2112,8 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 	LobbyDisconnect(1);
 	for (int i = 0; i < repetition; i++)
 	{
-		check(bGetNotifCheck[i]);
-		check(getNotifCheck[i].Payload == payloads[i]);
+		AB_TEST_TRUE(bGetNotifCheck[i]);
+		AB_TEST_EQUAL(getNotifCheck[i].Payload, payloads[i]);
 	}
 	ResetResponses();
 	return true;
@@ -2245,11 +2247,11 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 
 	FString FExpectedUserPresence = FString::FromInt((int)expectedUserStatus);
 
-	check(bUserPresenceSuccess);
-	check(bUserPresenceNotifSuccess);
-	check(!bUserPresenceError);
-	check(!bUserPresenceNotifError);
-	check(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability) == 0);
+	AB_TEST_TRUE(bUserPresenceSuccess);
+	AB_TEST_TRUE(bUserPresenceNotifSuccess);
+	AB_TEST_TRUE(!bUserPresenceError);
+	AB_TEST_TRUE(!bUserPresenceNotifError);
+	AB_TEST_EQUAL(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability), 0);
 
 	ResetResponses();
 	return true;
@@ -2310,11 +2312,11 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 
 	FString FExpectedUserPresence = FString::FromInt((int)expectedUserStatus);
 
-	check(bUserPresenceSuccess);
-	check(bUserPresenceNotifSuccess);
-	check(!bUserPresenceError);
-	check(!bUserPresenceNotifError);
-	check(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability) == 0);
+	AB_TEST_TRUE(bUserPresenceSuccess);
+	AB_TEST_TRUE(bUserPresenceNotifSuccess);
+	AB_TEST_TRUE(!bUserPresenceError);
+	AB_TEST_TRUE(!bUserPresenceNotifError);
+	AB_TEST_EQUAL(FExpectedUserPresence.Compare(userPresenceNotifResponse.Availability), 0);
 
 	ResetResponses();
 	return true;
@@ -2347,13 +2349,13 @@ bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
@@ -2361,52 +2363,52 @@ bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Outgoing);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Incoming);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
 
 	Waiting(bAcceptFriendSuccess, "Accepting Friend Request...");
-	check(!bAcceptFriendError);
+	AB_TEST_TRUE(!bAcceptFriendError);
 
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[1]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
 
 	Waiting(bUnfriendSuccess, "Waiting Unfriend...");
-	check(!bUnfriendError);
+	AB_TEST_TRUE(!bUnfriendError);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -2436,39 +2438,39 @@ bool LobbyTestFriends_Notification_Request_Accept::RunTest(const FString& Parame
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	Waiting(bOnIncomingRequestNotifSuccess, "Waiting for Incoming Friend Request...");
-	check(!bOnIncomingRequestNotifError);
-	check(requestFriendNotifResponse.friendId == UserCreds[0].GetUserId());
+	AB_TEST_TRUE(!bOnIncomingRequestNotifError);
+	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, UserCreds[0].GetUserId());
 
 	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
 
 	Waiting(bAcceptFriendSuccess, "Accepting Friend Request...");
-	check(!bAcceptFriendError);
+	AB_TEST_TRUE(!bAcceptFriendError);
 
 	Waiting(bOnRequestAcceptedNotifSuccess, "Waiting for Accepted Friend Request...");
-	check(!bOnRequestAcceptedNotifError);
-	check(acceptFriendNotifResponse.friendId == UserCreds[1].GetUserId());
+	AB_TEST_TRUE(!bOnRequestAcceptedNotifError);
+	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, UserCreds[1].GetUserId());
 
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[1]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
 
 	Waiting(bUnfriendSuccess, "Waiting Unfriend...");
-	check(!bUnfriendError);
+	AB_TEST_TRUE(!bUnfriendError);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -2504,80 +2506,80 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 	Lobbies[1]->SetOnUnfriendNotifDelegate(UnfriendNotifDelegate);
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Outgoing);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Incoming);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
 
 	Waiting(bAcceptFriendSuccess, "Accepting Friend Request...");
-	check(!bAcceptFriendError);
+	AB_TEST_TRUE(!bAcceptFriendError);
 
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[1]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
 
 	Waiting(bUnfriendSuccess, "Waiting Unfriend...");
-	check(!bUnfriendError);
+	AB_TEST_TRUE(!bUnfriendError);
 
 	Waiting(bUnfriendNotifSuccess, "Waiting Unfriend Notif...");
-	check(bUnfriendNotifSuccess);
+	AB_TEST_TRUE(bUnfriendNotifSuccess);
 
-	check(UnfriendNotifResponse.friendId == UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(UnfriendNotifResponse.friendId, UserCreds[0].GetUserId());
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
+	AB_TEST_TRUE(!bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		check(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_TRUE(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	}
 
 	bLoadFriendListSuccess = false;
@@ -2585,10 +2587,10 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 	Lobbies[1]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
+	AB_TEST_TRUE(!bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		check(!loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+		AB_TEST_TRUE(!loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 	}
 
 	LobbyDisconnect(2);
@@ -2619,82 +2621,82 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 	Lobbies[0]->SetOnRejectFriendsNotifDelegate(RejectFriendNotifDelegate);
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Outgoing);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Incoming);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[1]->RejectFriend(UserCreds[0].GetUserId());
 
 	Waiting(bRejectFriendSuccess, "Rejecting Friend Request...");
-	check(!bRejectFriendError);
+	AB_TEST_TRUE(!bRejectFriendError);
 
 	Waiting(bRejectFriendNotifSuccess, "Getting Reject Friend Notif...");
-	check(bRejectFriendNotifSuccess);
-	check(RejectFriendNotifResponse.userId == UserCreds[1].GetUserId());
+	AB_TEST_TRUE(bRejectFriendNotifSuccess);
+	AB_TEST_EQUAL(RejectFriendNotifResponse.userId, UserCreds[1].GetUserId());
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(!listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(!listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	bListOutgoingFriendSuccess = false;
 	bListOutgoingFriendError = false;
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(!listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(!listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -2728,66 +2730,66 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 	Lobbies[1]->SetOnCancelFriendsNotifDelegate(CancelFriendNotifDelegate);
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Outgoing);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Incoming);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[0]->CancelFriendRequest(UserCreds[1].GetUserId());
 
 	Waiting(bCancelFriendSuccess, "Cancelling Friend Request...");
-	check(!bCancelFriendError);
+	AB_TEST_TRUE(!bCancelFriendError);
 
 	Waiting(bCancelFriendNotifSuccess, "Getting Cancel Friend Notif...");
-	check(bCancelFriendNotifSuccess);
-	check(CancelFriendNotifResponse.userId == UserCreds[0].GetUserId());
+	AB_TEST_TRUE(bCancelFriendNotifSuccess);
+	AB_TEST_EQUAL(CancelFriendNotifResponse.userId, UserCreds[0].GetUserId());
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(!listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(!listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[1]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
+	AB_TEST_TRUE(!bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		check(!loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+		AB_TEST_TRUE(!loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 	}
 
 	bLoadFriendListSuccess = false;
@@ -2795,10 +2797,10 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
+	AB_TEST_TRUE(!bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		check(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_TRUE(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	}
 
 	LobbyDisconnect(2);
@@ -2839,42 +2841,42 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
-	check(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bListOutgoingFriendError);
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Outgoing);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
 	Lobbies[0]->CancelFriendRequest(UserCreds[1].GetUserId());
 
 	Waiting(bCancelFriendSuccess, "Cancelling Friend Request...");
-	check(!bCancelFriendError);
+	AB_TEST_TRUE(!bCancelFriendError);
 
 	bListOutgoingFriendSuccess = false;
 	bListOutgoingFriendError = false;
 	Lobbies[0]->ListOutgoingFriends();
 
 	Waiting(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
-	check(!bListOutgoingFriendError);
+	AB_TEST_TRUE(!bListOutgoingFriendError);
 	if (listOutgoingFriendResponse.friendsId.Num() != 0)
 	{
-		check(!listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_TRUE(!listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	}
 
 	bRequestFriendSuccess = false;
@@ -2882,91 +2884,91 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Incoming);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
 	Lobbies[1]->RejectFriend(UserCreds[0].GetUserId());
 
 	Waiting(bRejectFriendSuccess, "Rejecting Friend Request...");
-	check(!bRejectFriendError);
+	AB_TEST_TRUE(!bRejectFriendError);
 
 	bRequestFriendSuccess = false;
 	bRequestFriendError = false;
 	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
 
 	Waiting(bRequestFriendSuccess, "Requesting Friend...");
-	check(!bRequestFriendError);
+	AB_TEST_TRUE(!bRequestFriendError);
 
 	Waiting(bOnIncomingRequestNotifSuccess, "Waiting for Incoming Friend Request...");
-	check(!bOnIncomingRequestNotifError);
-	check(requestFriendNotifResponse.friendId == UserCreds[0].GetUserId());
+	AB_TEST_TRUE(!bOnIncomingRequestNotifError);
+	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, UserCreds[0].GetUserId());
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
 	Lobbies[1]->ListIncomingFriends();
 
 	Waiting(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
-	check(!bListIncomingFriendError);
-	check(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(!bListIncomingFriendError);
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
 
 	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
 
 	Waiting(bAcceptFriendSuccess, "Accepting Friend Request...");
-	check(!bAcceptFriendError);
+	AB_TEST_TRUE(!bAcceptFriendError);
 
 	Waiting(bOnRequestAcceptedNotifSuccess, "Waiting for Accepted Friend Request...");
-	check(!bOnRequestAcceptedNotifError);
-	check(acceptFriendNotifResponse.friendId == UserCreds[1].GetUserId());
+	AB_TEST_TRUE(!bOnRequestAcceptedNotifError);
+	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, UserCreds[1].GetUserId());
 
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
-	check(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(!bLoadFriendListError);
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Friend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Friend);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 	
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::Friend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Friend);
 
 	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
 
 	Waiting(bUnfriendSuccess, "Waiting Unfriend...");
-	check(!bUnfriendError);
+	AB_TEST_TRUE(!bUnfriendError);
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
 	Lobbies[0]->LoadFriendsList();
 
 	Waiting(bLoadFriendListSuccess, "Loading Friend List...");
-	check(!bLoadFriendListError);
+	AB_TEST_TRUE(!bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		check(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_TRUE(!loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	}
 
 	bGetFriendshipStatusSuccess = false;
@@ -2974,8 +2976,8 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
 
 	Waiting(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
-	check(!bGetFriendshipStatusError);
-	check(getFriendshipStatusResponse.friendshipStatus == ERelationshipStatusCode::NotFriend);
+	AB_TEST_TRUE(!bGetFriendshipStatusError);
+	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3010,10 +3012,10 @@ bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 
 	for (auto FriendId : FriendUserIds.FriendIds)
 	{
-		check(loadFriendListResponse.friendsId.Contains(FriendId));
+		AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(FriendId));
 		Lobbies[0]->Unfriend(FriendId);
 		Waiting(bUnfriendSuccess, "Waiting Unfriend...");
-		check(!bUnfriendError);
+		AB_TEST_TRUE(!bUnfriendError);
 		bUnfriendError = false;
 		bUnfriendSuccess = false;
 	}
@@ -3047,8 +3049,8 @@ bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FStr
 	FlushHttpRequests();
 	Waiting(bBulkAddFriendDone, "Waiting Bulk Add Friend...");
 
-	check(bBulkAddFriendError);
-	check(!bBulkAddFriendSuccess);
+	AB_TEST_TRUE(bBulkAddFriendError);
+	AB_TEST_TRUE(!bBulkAddFriendSuccess);
 
 	return true;
 }
@@ -3080,18 +3082,19 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 
 	Waiting(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
-	check(bListBlockedUserListSuccess);
+	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	auto CurrentListBlockedUser = listBlockedUserResponse;
 	
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
 	Waiting(bBlockPlayerSuccess, "Player 0 Blocks Player 1...");
-	check(!bBlockPlayerError);
+	AB_TEST_TRUE(!bBlockPlayerError);
 
+	bListBlockedUserListSuccess = false;
 	FBlockedData BlockedUserData;
 	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
-	check(bListBlockedUserListSuccess);
+	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	bool bFound = false;
 	for (auto ResponseData : listBlockedUserResponse.Data)
 	{
@@ -3101,14 +3104,14 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocked User Found in the List"));
 		}
 	}
-	check(bFound);
+	AB_TEST_TRUE(bFound);
 	bFound = false;
 
 	FBlockerData BlockerUserData;
 	BlockerUserData.UserId = UserCreds[0].GetUserId();
 	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
-	check(bListBlockerListSuccess);
+	AB_TEST_TRUE(bListBlockerListSuccess);
 	for (auto ResponseData : listBlockerResponse.Data)
 	{
 		if (ResponseData.UserId.Equals(BlockerUserData.UserId))
@@ -3117,7 +3120,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocker Found in the List"));
 		}
 	}
-	check(bFound);
+	AB_TEST_TRUE(bFound);
 	bFound = false;
 
 	bool bRequestFriendAttemptDone = false;
@@ -3133,13 +3136,13 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	}));
 	Lobbies[1]->RequestFriend(UserCreds[0].GetUserId());
 	Waiting(bRequestFriendAttemptDone, "Checking if Player 1 has been blocked from Requesting Friend Request properly.");
-	check(bBlockedFriendRequestPassed);
+	AB_TEST_TRUE(bBlockedFriendRequestPassed);
 	bRequestFriendAttemptDone = false;
 	bBlockedFriendRequestPassed = false;
 
 	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
 	Waiting(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
-	check(!bUnblockPlayerError);
+	AB_TEST_TRUE(!bUnblockPlayerError);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3174,18 +3177,19 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 
 	Waiting(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
-	check(bListBlockedUserListSuccess);
+	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	auto CurrentListBlockedUser = listBlockedUserResponse;
 
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
 	Waiting(bBlockPlayerSuccess, "Requesting Friend...");
-	check(!bBlockPlayerError);
+	AB_TEST_TRUE(!bBlockPlayerError);
 
+	bListBlockedUserListSuccess = false;
 	FBlockedData BlockedUserData;
 	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
-	check(bListBlockedUserListSuccess);
+	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	bool bFound = false;
 	for(auto ResponseData : listBlockedUserResponse.Data)
 	{
@@ -3195,7 +3199,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocked User Found in the List"));
 		}
 	}
-	check(bFound);
+	AB_TEST_TRUE(bFound);
 	bFound = false;
 
 	FBlockerData BlockerUserData;
@@ -3203,7 +3207,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
 	Waiting(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
 
-	check(bListBlockerListSuccess);
+	AB_TEST_TRUE(bListBlockerListSuccess);
 	for (auto ResponseData : listBlockerResponse.Data)
 	{
 		if (ResponseData.UserId.Equals(BlockerUserData.UserId))
@@ -3212,16 +3216,16 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Blocker User Found in the List"));
 		}
 	}
-	check(bFound);
+	AB_TEST_TRUE(bFound);
 
 	// reblock should result in success
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
 	Waiting(bBlockPlayerSuccess, "Player 0 Blocks Player 1 Again");
-	check(!bBlockPlayerError);
+	AB_TEST_TRUE(!bBlockPlayerError);
 
 	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
 	Waiting(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
-	check(!bUnblockPlayerError);
+	AB_TEST_TRUE(!bUnblockPlayerError);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3292,18 +3296,18 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	Lobbies[0]->SendInfoPartyRequest();
 
-    Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
 
-    FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
-    bool bCreateMatchmakingChannelSuccess = false;
-    Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-    {
-        bCreateMatchmakingChannelSuccess = true;
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-    }), LobbyTestErrorHandler);
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
 		
-    Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	if (!bGetInfoPartyError)
 	{
@@ -3315,7 +3319,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -3336,19 +3340,19 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -3361,7 +3365,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -3369,23 +3373,23 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
-    bool bDeleteMatchmakingChannelSuccess = false;
-    Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
-    {
-        bDeleteMatchmakingChannelSuccess = true;
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
-    }), LobbyTestErrorHandler);
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
 
-    Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-    check(bCreateMatchmakingChannelSuccess);
-    check(bDeleteMatchmakingChannelSuccess);
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[1]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
@@ -3491,7 +3495,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -3512,19 +3516,19 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -3537,7 +3541,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -3545,11 +3549,11 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -3560,19 +3564,19 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	// check custom ports names returned from 
-	check(!dsNotice.MatchId.IsEmpty());
+	AB_TEST_TRUE(!dsNotice.MatchId.IsEmpty());
 	int customPortFoundCount = 0;
 	for (auto portName : customPortNames)
 	{
@@ -3581,7 +3585,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 			customPortFoundCount++;
 		}
 	}
-	check(customPortFoundCount == customPortNames.Num());
+	AB_TEST_EQUAL(customPortFoundCount, customPortNames.Num());
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3677,7 +3681,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -3696,7 +3700,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bCreatePartyError = false;
 	Lobbies[1]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	//GameServer SDK / Local DS
 	FString ServerName = "ue4SdkTestServerName" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -3734,13 +3738,13 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bStartMatchmakingError = false;
 	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	WaitUntil([&](){ return matchMakingNotifNum >= 2; }, 60, "Waiting for Matchmaking Notification...");
 
@@ -3752,18 +3756,18 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	bReadyConsentNotifError = false;
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification 0");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification 1");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bSessionIdDone = false;
 	FString sessionId;
@@ -3804,16 +3808,16 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	for (auto Ally : matchResult.Matching_allies)
 	{
@@ -3823,10 +3827,10 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			{
 				FString Value;
 				bool bKeyFound = Party.Party_attributes.JsonObject->TryGetStringField(partyAttribute.Key, Value);
-				check(bKeyFound);
+				AB_TEST_TRUE(bKeyFound);
 				if (bKeyFound)
 				{
-					check(*Value == partyAttribute.Value);
+					AB_TEST_EQUAL(*Value, partyAttribute.Value);
 					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Party Attribute, Key: %s | Value: %s"), *partyAttribute.Key, *Value);
 				}
 				else
@@ -3961,7 +3965,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -3982,7 +3986,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SetSessionAttribute("mmr", "120");
 	Lobbies[1]->SetSessionAttribute("mmr", "110");
@@ -3992,14 +3996,14 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -4012,7 +4016,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -4020,11 +4024,11 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4035,17 +4039,17 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
-	check(setSessionAttributeSuccessCounter.GetValue() == 2);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
+	AB_TEST_EQUAL(setSessionAttributeSuccessCounter.GetValue(), 2);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -4154,7 +4158,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -4175,30 +4179,30 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	Waiting(bMatchmakingNotifTimeout[0], "Waiting for matchmaking timeout...");
 
-	check(bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(bMatchmakingNotifError[0]);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[0]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -4211,7 +4215,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -4219,11 +4223,11 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4234,15 +4238,15 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -4374,7 +4378,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -4395,7 +4399,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bool bGetServerLatenciesSuccess = false;
 	FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetServerLatenciesSuccess, &Latencies](const TArray<TPair<FString, float>>& Result)
@@ -4406,8 +4410,8 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		Latencies.Sort(LatenciesPredicate);
 	}), LobbyTestErrorHandler);
 	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
-	check(bGetServerLatenciesSuccess);
-	check(Latencies.Num() > 0);
+	AB_TEST_TRUE(bGetServerLatenciesSuccess);
+	AB_TEST_TRUE(Latencies.Num() > 0);
 
 	for (int i = 0; i < Latencies.Num(); i++)
 	{
@@ -4418,14 +4422,14 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0]});
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0] });
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -4438,7 +4442,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -4446,14 +4450,14 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bLatencyDsNotifSuccess[0], "Waiting for DS Notification...");
-	check(!bLatencyDsNotifError[0]);
+	AB_TEST_TRUE(!bLatencyDsNotifError[0]);
 
 	Waiting(bLatencyDsNotifSuccess[1], "Waiting for DS Notification...");
-	check(!bLatencyDsNotifError[1]);
+	AB_TEST_TRUE(!bLatencyDsNotifError[1]);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4464,18 +4468,18 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bIsTheRightRegion[0]);
-	check(bIsTheRightRegion[1]);
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bIsTheRightRegion[0]);
+	AB_TEST_TRUE(bIsTheRightRegion[1]);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -4547,14 +4551,14 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
 	{UserCreds[0].GetUserId()});
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, TArray<FString>
 	{UserCreds[1].GetUserId()});
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	WaitUntil([&matchMakingNotifNum](){ return matchMakingNotifNum == 2; }, 60, "Wait matchmaking notifs all arrived");
 
@@ -4564,7 +4568,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -4572,11 +4576,11 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4586,16 +4590,16 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	}), LobbyTestErrorHandler);
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -4658,7 +4662,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	{UserCreds[0].GetUserId(), UserCreds[1].GetUserId()});
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
@@ -4666,7 +4670,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	{UserCreds[2].GetUserId(), UserCreds[3].GetUserId()});
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < UserNum)
 	{
@@ -4681,7 +4685,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 		Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-		check(!bReadyConsentNotifError);
+		AB_TEST_TRUE(!bReadyConsentNotifError);
 		readyConsentNoticeResponse[i] = readyConsentNotice;
 
 		bReadyConsentNotifSuccess = false;
@@ -4689,7 +4693,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	}
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4699,14 +4703,14 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	}), LobbyTestErrorHandler);
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 	for (int i = 0; i < UserNum; i++)
 	{
-		check(!bMatchmakingNotifError[i]);
-		check(!matchmakingNotifResponse[i].MatchId.IsEmpty());
-		check(matchmakingNotifResponse[i].Status == EAccelByteMatchmakingStatus::Done);
-		check(readyConsentNoticeResponse[i].MatchId == matchmakingNotifResponse[i].MatchId);
+		AB_TEST_TRUE(!bMatchmakingNotifError[i]);
+		AB_TEST_TRUE(!matchmakingNotifResponse[i].MatchId.IsEmpty());
+		AB_TEST_EQUAL(matchmakingNotifResponse[i].Status, EAccelByteMatchmakingStatus::Done);
+		AB_TEST_EQUAL(readyConsentNoticeResponse[i].MatchId, matchmakingNotifResponse[i].MatchId);
 	}
 
 	LobbyDisconnect(UserNum);
@@ -4757,22 +4761,22 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[0]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendStartMatchmaking("test");
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	Lobbies[0]->SendCancelMatchmaking("test");
 
 	Waiting(bCancelMatchmakingSuccess, "Cancelling Matchmaking...");
-	check(!bCancelMatchmakingError);
+	AB_TEST_TRUE(!bCancelMatchmakingError);
 
 
 	/*Waiting(bMatchmakingNotifSuccess, "Waiting or Matchmaking Notification...");
-	check(!bMatchmakingNotifError);
-	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
+	AB_TEST_TRUE(!bMatchmakingNotifError);
+	AB_TEST_TRUE(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
 
 	LobbyDisconnect(1);
 	ResetResponses();
@@ -4821,16 +4825,16 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>{UserCreds[0].GetUserId()});
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	Lobbies[0]->SendCancelMatchmaking(ChannelName, true);
 
 	Waiting(bCancelMatchmakingSuccess, "Cancelling Matchmaking...");
-	check(!bCancelMatchmakingError);
+	AB_TEST_TRUE(!bCancelMatchmakingError);
 
 	/*Waiting(bMatchmakingNotifSuccess, "Waiting or Matchmaking Notification...");
-	check(!bMatchmakingNotifError);
-	check(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
+	AB_TEST_TRUE(!bMatchmakingNotifError);
+	AB_TEST_TRUE(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4957,16 +4961,16 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	Lobbies[2]->SetDsNotifDelegate(DsNotifDelegate);
 
-    FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
-    bool bCreateMatchmakingChannelSuccess = false;
-    Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-    {
-        bCreateMatchmakingChannelSuccess = true;
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-    }), LobbyTestErrorHandler);
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
 
-    Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
+	Waiting(bCreateMatchmakingChannelSuccess, "Create Matchmaking channel...");
 
 	Lobbies[0]->SendInfoPartyRequest();
 
@@ -4981,7 +4985,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[0]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -5002,7 +5006,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -5023,19 +5027,19 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[2]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -5047,7 +5051,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	while (rematchmakingNotifNum < 2)
@@ -5056,7 +5060,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Rematchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
-	check(rematchmakingNotifNum == 2);
+	AB_TEST_EQUAL(rematchmakingNotifNum, 2);
 
 	matchMakingNotifNum = 0;
 
@@ -5065,7 +5069,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	Lobbies[2]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 
 	Waiting(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -5073,8 +5077,8 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Waiting for Matchmaking Notification..."));
 		FTicker::GetCoreTicker().Tick(.5f);
 	}
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[2].Status == EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[2].Status, EAccelByteMatchmakingStatus::Done);
 
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
@@ -5089,19 +5093,19 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	readyConsentNoticeResponse[2] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
-    bool bDeleteMatchmakingChannelSuccess = false;
-    Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
-    {
-        bDeleteMatchmakingChannelSuccess = true;
-        UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
-    }), LobbyTestErrorHandler);
+	bool bDeleteMatchmakingChannelSuccess = false;
+	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
 
-    Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-    check(bCreateMatchmakingChannelSuccess);
-    check(bDeleteMatchmakingChannelSuccess);
+	check(bCreateMatchmakingChannelSuccess);
+	check(bDeleteMatchmakingChannelSuccess);
 	check(!bMatchmakingNotifError[0]);
 	check(!bMatchmakingNotifError[2]);
 	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
@@ -5199,7 +5203,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
 
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
@@ -5220,7 +5224,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Lobbies[1]->SendCreatePartyRequest();
 
 	Waiting(bCreatePartySuccess, "Creating Party...");
-	check(!bCreatePartyError);
+	AB_TEST_TRUE(!bCreatePartyError);
 
 	//GameServer SDK / Local DS
 	FString ServerName = "ue4SdkTestServerName" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -5254,14 +5258,14 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
 	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName);
 
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-	check(!bStartMatchmakingError);
+	AB_TEST_TRUE(!bStartMatchmakingError);
 
 	while (matchMakingNotifNum < 2)
 	{
@@ -5274,7 +5278,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
 
 	bReadyConsentNotifSuccess = false;
@@ -5282,11 +5286,11 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	Waiting(bReadyConsentNotifSuccess, "Waiting for Ready Consent Notification...");
-	check(!bReadyConsentNotifError);
+	AB_TEST_TRUE(!bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 
 	bool bDeregisterLocalServerFromDSMDone = false;
 	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(
@@ -5308,16 +5312,16 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -5390,7 +5394,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 			Waiting(bLeavePartySuccess, "Leaving Party...");
 			Lobbies[i]->SendCreatePartyRequest();
 			Waiting(bCreatePartySuccess, "Creating Party...");
-			check(!bCreatePartyError);
+			AB_TEST_TRUE(!bCreatePartyError);
 			bLeavePartySuccess = false;
 			bLeavePartyError = false;
 		}
@@ -5398,7 +5402,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		{
 			Lobbies[i]->SendCreatePartyRequest();
 			Waiting(bCreatePartySuccess, "Creating Party...");
-			check(!bCreatePartyError);
+			AB_TEST_TRUE(!bCreatePartyError);
 		}
 		bGetInfoPartySuccess = false;
 		bGetInfoPartyError = false;
@@ -5409,7 +5413,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	{
 		Lobbies[i]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
 		Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
-		check(!bStartMatchmakingError);
+		AB_TEST_TRUE(!bStartMatchmakingError);
 		bStartMatchmakingSuccess = false;
 		bStartMatchmakingError = false;
 	}
@@ -5424,13 +5428,13 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	{
 		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[i].MatchId);
 		Waiting(bReadyConsentNotifSuccess, FString::Printf(TEXT("Waiting for Ready Consent Notification... %d"), i));
-		check(!bReadyConsentNotifError);
+		AB_TEST_TRUE(!bReadyConsentNotifError);
 		readyConsentNoticeResponse[i] = readyConsentNotice;
 		bReadyConsentNotifSuccess = false;
 		bReadyConsentNotifError = false;
 	}
 	Waiting(bDsNotifSuccess, "Waiting for DS Notification...");
-	check(!bDsNotifError);
+	AB_TEST_TRUE(!bDsNotifError);
 	bool bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
@@ -5439,16 +5443,16 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	}), LobbyTestErrorHandler);
 
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
-	check(bCreateMatchmakingChannelSuccess);
-	check(bDeleteMatchmakingChannelSuccess);
-	check(!bMatchmakingNotifError[0]);
-	check(!bMatchmakingNotifError[1]);
-	check(!matchmakingNotifResponse[0].MatchId.IsEmpty());
-	check(!matchmakingNotifResponse[1].MatchId.IsEmpty());
-	check(matchmakingNotifResponse[0].Status == EAccelByteMatchmakingStatus::Done);
-	check(matchmakingNotifResponse[1].Status == EAccelByteMatchmakingStatus::Done);
-	check(readyConsentNoticeResponse[0].MatchId == matchmakingNotifResponse[0].MatchId);
-	check(readyConsentNoticeResponse[1].MatchId == matchmakingNotifResponse[1].MatchId);
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(!bMatchmakingNotifError[0]);
+	AB_TEST_TRUE(!bMatchmakingNotifError[1]);
+	AB_TEST_TRUE(!matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_TRUE(!matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 	LobbyDisconnect(6);
 	ResetResponses();
 
@@ -5515,11 +5519,11 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 
 	WaitUntil([&]() { return bLobbyDisconnected; }, 15);
 
-	check(!Lobby.IsConnected());
-	check(bLobbyDisconnected);
-	check(NumLobbyConnected == 1);
-	check(DisconnectNotifResponse.Message == "session deleted");
-	check(LogoutDone);
+	AB_TEST_TRUE(!Lobby.IsConnected());
+	AB_TEST_TRUE(bLobbyDisconnected);
+	AB_TEST_EQUAL(NumLobbyConnected, 1);
+	AB_TEST_EQUAL(DisconnectNotifResponse.Message, "session deleted");
+	AB_TEST_TRUE(LogoutDone);
 
 	Lobby.Disconnect();
 
@@ -5594,11 +5598,11 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 
 	WaitUntil([&]() { return bLobbyDisconnected; }, 15);
 
-	check(!Lobby.IsConnected());
-	check(bLobbyDisconnected);
-	check(OtherLobby.IsConnected());
-	check(NumLobbyConnected == 1);
-	check(DisconnectNotifResponse.Message == "multiple session login detected");
+	AB_TEST_TRUE(!Lobby.IsConnected());
+	AB_TEST_TRUE(bLobbyDisconnected);
+	AB_TEST_TRUE(OtherLobby.IsConnected());
+	AB_TEST_EQUAL(NumLobbyConnected, 1);
+	AB_TEST_EQUAL(DisconnectNotifResponse.Message, "multiple session login detected");
 
 	Lobby.Disconnect();
 	OtherLobby.Disconnect();
@@ -5656,10 +5660,10 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 
 	WaitUntil([&]() { return OtherLobby.IsConnected(); }, 10);
 
-	check(Lobby.IsConnected());
-	check(!bLobbyDisconnected);
-	check(!OtherLobby.IsConnected());
-	check(NumLobbyConnected == 1);
+	AB_TEST_TRUE(Lobby.IsConnected());
+	AB_TEST_TRUE(!bLobbyDisconnected);
+	AB_TEST_TRUE(!OtherLobby.IsConnected());
+	AB_TEST_EQUAL(NumLobbyConnected, 1);
 
 	Lobby.Disconnect();
 	OtherLobby.Disconnect();
@@ -5727,8 +5731,8 @@ bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Pa
 	FlushHttpRequests();
 	Waiting(bDeleteDone, "Waiting for Deletion...");
 	
-	check(bIsLobbyConnected);
-	check(NumLobbyConnected > 1);
+	AB_TEST_TRUE(bIsLobbyConnected);
+	AB_TEST_TRUE(NumLobbyConnected > 1);
 
 	return true;
 }
@@ -5780,8 +5784,8 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 
 	for (int i = 0; i < 2; i++)
 	{
-		check(userConnected[i]);
-		check(userResponded[i]);
+		AB_TEST_TRUE(userConnected[i]);
+		AB_TEST_TRUE(userResponded[i]);
 	}
 
 	Lobbies[0]->SetSignalingP2PDelegate(OnP2PDelegate);
@@ -5793,9 +5797,9 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 		return P2PMessageAvailable;
 	});
 
-	check(P2PMessageAvailable);
-	check(P2PMessage == Message);
-	check(P2PDestinationId == UserCreds[0].GetUserId());
+	AB_TEST_TRUE(P2PMessageAvailable);
+	AB_TEST_EQUAL(P2PMessage, Message);
+	AB_TEST_EQUAL(P2PDestinationId, UserCreds[0].GetUserId());
 
 	P2PMessageAvailable = false;
 	Lobbies[1]->SendSignalingMessage(UserCreds[0].GetUserId(), Message);
@@ -5804,9 +5808,9 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 		return P2PMessageAvailable;
 	});
 
-	check(P2PMessageAvailable);
-	check(P2PMessage == Message);
-	check(P2PDestinationId == UserCreds[1].GetUserId());
+	AB_TEST_TRUE(P2PMessageAvailable);
+	AB_TEST_EQUAL(P2PMessage, Message);
+	AB_TEST_EQUAL(P2PDestinationId, UserCreds[1].GetUserId());
 	
 	LobbyDisconnect(2);
 	ResetResponses();
