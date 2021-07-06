@@ -38,8 +38,6 @@ static FString GUserPassword = "Password+123";
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionSetup, "AccelByte.Tests.Subscription.A.SubscriptionSetup", AutomationFlagMaskSubscription);
 bool SubscriptionSetup::RunTest(const FString& Parameters) 
 {
-	AB_TEST_SKIP_WHEN_DISABLED();
-
 	FString GameNamespace = FRegistry::Settings.Namespace;
 	FString PublisherNamespace = FRegistry::Settings.PublisherNamespace;
 	FString Language = "en-US";
@@ -455,8 +453,6 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedAppId, "AccelByte.Tests.Subscription.B.CheckUserEligibleOwnedAppId", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 {
-	AB_TEST_SKIP_WHEN_DISABLED();
-
 	FString OriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 
@@ -491,8 +487,6 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSubs, "AccelByte.Tests.Subscription.C.CheckUserEligibleOwnedSubs", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 {
-	AB_TEST_SKIP_WHEN_DISABLED();
-
 	FString OriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 
@@ -533,8 +527,6 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.E.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
-	AB_TEST_SKIP_WHEN_DISABLED();
-
 	FString OriAppId = FRegistry::Settings.AppId;
 	FRegistry::Settings.AppId = APPID;
 

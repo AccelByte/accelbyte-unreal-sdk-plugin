@@ -20,6 +20,7 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
+#if 0 // AB_TEST_SKIP_WHEN_DISABLED is taken out, remove permanently in the future if no one is using
 TArray<FString> GetDisabledTestList()
 {
 	TArray<FString> DisabledTest;
@@ -63,6 +64,7 @@ bool AccelByteSkipTest(const FString& TestName)
 
 	return false;
 }
+#endif
 
 void Waiting(bool& bCondition, FString Message)
 {

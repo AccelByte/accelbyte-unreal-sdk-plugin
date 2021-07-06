@@ -369,7 +369,6 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
 bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
 {
-	AB_TEST_SKIP_WHEN_DISABLED();
 	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
 	auto Ticker = FTicker::GetCoreTicker();
 	double CurrentTime;
