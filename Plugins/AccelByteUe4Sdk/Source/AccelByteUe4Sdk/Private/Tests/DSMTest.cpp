@@ -4,15 +4,12 @@
 
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Models/AccelByteDSMModels.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -27,7 +24,7 @@ const int32 AutomationFlagMaskDSM = (EAutomationTestFlags::EditorContext | EAuto
 
 const auto DSMTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteDSMTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteDSMTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 #if ENABLE_RUN_COULD_SERVER_TESTS
@@ -42,7 +39,7 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
 	FRegistry::ServerDSM.RegisterServerToDSM(7777, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
@@ -51,8 +48,8 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerRegisterSuccess, "Waiting for register server Url...");
-	check(bServerRegisterSuccess);
-	WaitUntil([](){ return false;}, 5);
+	AB_TEST_TRUE(bServerRegisterSuccess);
+
 	bool bServerShutdownSuccess = false;
 	FRegistry::ServerDSM.SendShutdownToDSM(false, "", FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
 	{
@@ -60,7 +57,7 @@ bool DSMRegisterStaticServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Shutdown Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerShutdownSuccess, "Waiting for shutdown server Url...");
-	check(bServerShutdownSuccess);
+	AB_TEST_TRUE(bServerShutdownSuccess);
 	return true;
 }
 
@@ -76,7 +73,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bLocalServerRegisterSuccess = false;
 	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bLocalServerRegisterSuccess]()
@@ -85,7 +82,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bLocalServerRegisterSuccess, "Waiting for register local server Url...");
-	check(bLocalServerRegisterSuccess);
+	AB_TEST_TRUE(bLocalServerRegisterSuccess);
 
 	bool bServerRegisterFailed = false;
 	FRegistry::ServerDSM.RegisterServerToDSM(7777, FVoidHandler::CreateLambda([]()
@@ -97,12 +94,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Cloud Failed..! Code: %d | Message: %s"), ErrorCode, *ErrorMessage);
 	}));
 	Waiting(bServerRegisterFailed, "Waiting for register server Url...");
-	check(bServerRegisterFailed);
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 10);
+	AB_TEST_TRUE(bServerRegisterFailed);
 
 	bool bLocalServerShutdownSuccess = false;
 	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bLocalServerShutdownSuccess]()
@@ -111,7 +103,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bLocalServerShutdownSuccess, "Waiting for deregister server Url...");
-	check(bLocalServerShutdownSuccess);
+	AB_TEST_TRUE(bLocalServerShutdownSuccess);
 
 	bool bCloudServerRegisterSuccess = false;
 	FRegistry::ServerDSM.RegisterServerToDSM(7777, FVoidHandler::CreateLambda([&bCloudServerRegisterSuccess]()
@@ -120,12 +112,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Cloud Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bCloudServerRegisterSuccess, "Waiting for register server Url...");
-	check(bCloudServerRegisterSuccess);
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 10);
+	AB_TEST_TRUE(bCloudServerRegisterSuccess);
 
 	bool bCloudServerShutdownSuccess = false;
 	FRegistry::ServerDSM.SendShutdownToDSM(false, "", FVoidHandler::CreateLambda([&bCloudServerShutdownSuccess]()
@@ -134,7 +121,7 @@ bool DSMRegisterAsTwoDifferentServerFailed::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Shutdown Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bCloudServerShutdownSuccess, "Waiting for shutdown server Url...");
-	check(bCloudServerShutdownSuccess);
+	AB_TEST_TRUE(bCloudServerShutdownSuccess);
 	return true;
 }
 #endif
@@ -150,7 +137,7 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
 	FRegistry::ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
@@ -159,11 +146,8 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerRegisterSuccess, "Waiting for register local server Url...");
-	check(bServerRegisterSuccess);
-	WaitUntil([]()
-	{
-		return false;
-	}, 15);
+	AB_TEST_TRUE(bServerRegisterSuccess);
+
 	bool bServerShutdownSuccess = false;
 	FRegistry::ServerDSM.DeregisterLocalServerFromDSM( ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
 	{
@@ -171,7 +155,7 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
-	check(bServerShutdownSuccess);
+	AB_TEST_TRUE(bServerShutdownSuccess);
 	return true;
 }
 
@@ -186,7 +170,7 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bClientLoginSuccess, "Waiting for Login client...");
-	check(bClientLoginSuccess);
+	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
 	FRegistry::ServerDSM.RegisterLocalServerToDSM(7777, ServerName, FVoidHandler::CreateLambda([&bServerRegisterSuccess]()
@@ -195,11 +179,8 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local with public IP Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerRegisterSuccess, "Waiting for Register Local with public IP...");
-	check(bServerRegisterSuccess);
-	WaitUntil([]()
-	{
-		return false;
-	}, 15);
+	AB_TEST_TRUE(bServerRegisterSuccess);
+
 	bool bServerShutdownSuccess = false;
 	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(ServerName, FVoidHandler::CreateLambda([&bServerShutdownSuccess]()
 	{
@@ -207,6 +188,6 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
 	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
-	check(bServerShutdownSuccess);
+	AB_TEST_TRUE(bServerShutdownSuccess);
 	return true;
 }

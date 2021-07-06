@@ -14,7 +14,6 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
@@ -37,7 +36,7 @@ const int32 AutomationFlagMaskJoinable = (EAutomationTestFlags::EditorContext | 
 
 const auto JoinableSessionTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteJoinableSessionTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const int ActiveUserCount = 2;
@@ -154,7 +153,7 @@ bool RegisterSessionAsync(const FAccelByteModelsMatchmakingResult matchmakingRes
 		}), JoinableSessionTestErrorHandler);
 		Waiting(bEnqueueResultSuccess, "Wait enqueue joinable session");
 
-		check(bEnqueueResultSuccess);
+		if (!bEnqueueResultSuccess) { return false; }
 		isSessionQueued = true;
 		return bEnqueueResultSuccess;
 	}
@@ -259,7 +258,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	
 	for (int i = 0; i < ActiveUserCount; i++)
 	{
-		check(UsersLoginSuccess[i]);
+		AB_TEST_TRUE(UsersLoginSuccess[i]);
 	}
 
 	//Create Matchmaking Channel
@@ -277,8 +276,11 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler, true);
-	Waiting(bCreateMatchmakingChannelSuccess, "Create Joinable Matchmaking channel...");
-	check(bCreateMatchmakingChannelSuccess);
+	WaitUntil([&]()
+	{
+		return bCreateMatchmakingChannelSuccess;
+	}, 60, "Create Joinable Matchmaking channel...");
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 
 	NonJoinableChannelName = "ue4sdktestnonjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
@@ -288,8 +290,11 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bCreateMatchmakingChannelSuccess, "Create NonJoinable Matchmaking channel...");
-	check(bCreateMatchmakingChannelSuccess);
+	WaitUntil([&]()
+	{
+		return bCreateMatchmakingChannelSuccess;
+	}, 60, "Create NonJoinable Matchmaking channel...");
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 
 	return true;
 }
@@ -315,7 +320,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 
 	for (int i = 0; i < ActiveUserCount; i++)
 	{
-		check(bDeleteUsersSuccessful[i]);
+		AB_TEST_TRUE(bDeleteUsersSuccessful[i]);
 	}
 
 	//Delete Matchmaking Channel
@@ -326,7 +331,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
-	check(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 
 	bDeleteMatchmakingChannelSuccess = false;
 	Matchmaking_Delete_Matchmaking_Channel(NonJoinableChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -335,7 +340,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
 	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
-	check(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 
 	return true;
 }
@@ -413,12 +418,12 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 10);
+	}, 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -428,8 +433,6 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
-
-	WaitUntil([](){return false;}, 3);
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -451,7 +454,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	}));
 	lobbyB->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
@@ -466,9 +469,9 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		ActiveLobbies.RemoveAt(i);
 	}
 
-	check(!AMatchId.IsEmpty());
-	check(!BMatchId.IsEmpty());
-	check(AMatchId == BMatchId);
+	AB_TEST_FALSE(AMatchId.IsEmpty());
+	AB_TEST_FALSE(BMatchId.IsEmpty());
+	AB_TEST_EQUAL(AMatchId, BMatchId);
 
 	return TestCleanUp();
 }
@@ -530,12 +533,12 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 10);
+	}, 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -545,11 +548,6 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 3);
 
 	bool bAddUserSuccess = false;
 	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
@@ -593,7 +591,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 
 	// Assertions
 
-	check(!AMatchId.IsEmpty());
+	AB_TEST_FALSE(AMatchId.IsEmpty());
 
 	bool userIdExist = false;
 	for(auto ally : DSGetMatchData.Matching_allies)
@@ -613,8 +611,8 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		}
 		if (userIdExist) break;
 	}
-	check(!userIdExist);
-	check(bAddUserSuccess);
+	AB_TEST_FALSE(userIdExist);
+	AB_TEST_TRUE(bAddUserSuccess);
 
 	userIdExist = false;
 	for (auto ally : mmResultAfterAddUser.Matching_allies)
@@ -634,8 +632,8 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		}
 		if (userIdExist) break;
 	}
-	check(userIdExist);
-	check(bRemoveUserSuccess);
+	AB_TEST_TRUE(userIdExist);
+	AB_TEST_TRUE(bRemoveUserSuccess);
 
 	userIdExist = false;
 	for (auto ally : mmResultAfterRemoveUser.Matching_allies)
@@ -655,7 +653,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		}
 		if (userIdExist) break;
 	}
-	check(!userIdExist);
+	AB_TEST_FALSE(userIdExist);
 	return TestCleanUp();
 }
 
@@ -725,12 +723,12 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 10);
+	}, 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -740,11 +738,6 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 3);
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -798,7 +791,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	}
 
 	// Assertions
-	check(!AMatchId.IsEmpty());
+	AB_TEST_FALSE(AMatchId.IsEmpty());
 	bool userIdExist = false;
 	bool partyIdExist = false;
 	for(auto ally : DSGetMatchData.Matching_allies)
@@ -823,10 +816,10 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		}
 		if (userIdExist || partyIdExist) break;
 	}
-	check(!partyIdExist);
-	check(!userIdExist);
+	AB_TEST_FALSE(partyIdExist);
+	AB_TEST_FALSE(userIdExist);
 
-	check(bAddUserSuccess);
+	AB_TEST_TRUE(bAddUserSuccess);
 	userIdExist = false;
 	partyIdExist = false;
 	for(auto ally : mmResultAfterAddUser.Matching_allies)
@@ -849,10 +842,10 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		}
 		if (userIdExist && partyIdExist) break;
 	}
-	check(partyIdExist);
-	check(userIdExist);
+	AB_TEST_TRUE(partyIdExist);
+	AB_TEST_TRUE(userIdExist);
 
-	check(bRemoveUserSuccess);
+	AB_TEST_TRUE(bRemoveUserSuccess);
 	userIdExist = false;
 	partyIdExist = false;
 	for(auto ally : mmResultAfterRemoveUser.Matching_allies)
@@ -877,8 +870,8 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		}
 		if (userIdExist || partyIdExist) break;
 	}
-	check(!partyIdExist);
-	check(!userIdExist);
+	AB_TEST_FALSE(partyIdExist);
+	AB_TEST_FALSE(userIdExist);
 	return TestCleanUp();
 }
 
@@ -961,12 +954,12 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 10);
+	}, 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -976,11 +969,6 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 3);
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -1002,7 +990,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	}));
 	lobbyB->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
@@ -1017,9 +1005,9 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		ActiveLobbies.RemoveAt(i);
 	}
 
-	check(!AMatchId.IsEmpty());
-	check(!BMatchId.IsEmpty());
-	check(AMatchId != BMatchId);
+	AB_TEST_FALSE(AMatchId.IsEmpty());
+	AB_TEST_FALSE(BMatchId.IsEmpty());
+	AB_TEST_NOT_EQUAL(AMatchId, BMatchId);
 
 	return TestCleanUp();
 }
@@ -1081,12 +1069,12 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
 	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
-	check(bIsStartMatchmakingSuccess);
+	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 10);
+	}, 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -1096,11 +1084,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
-
-	WaitUntil([]()
-	{
-		return false;
-	}, 3);
 
 	bool bAddUserSuccess = false;
 	bool bAddUserDone = false;
@@ -1150,7 +1133,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 
 	// Assertions
 
-	check(!AMatchId.IsEmpty());
+	AB_TEST_FALSE(AMatchId.IsEmpty());
 
 	bool userIdExist = false;
 	for (auto ally : DSGetMatchData.Matching_allies)
@@ -1170,9 +1153,9 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		}
 		if (userIdExist) break;
 	}
-	check(!userIdExist);
-	check(!bAddUserSuccess);
-	check(bAddUserDone);
+	AB_TEST_FALSE(userIdExist);
+	AB_TEST_FALSE(bAddUserSuccess);
+	AB_TEST_TRUE(bAddUserDone);
 
 	userIdExist = false;
 	for (auto ally : mmResultAfterAddUser.Matching_allies)
@@ -1192,8 +1175,8 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		}
 		if (userIdExist) break;
 	}
-	check(!userIdExist);
-	check(bRemoveUserSuccess);
+	AB_TEST_FALSE(userIdExist);
+	AB_TEST_TRUE(bRemoveUserSuccess);
 
 	userIdExist = false;
 	for (auto ally : mmResultAfterRemoveUser.Matching_allies)
@@ -1213,6 +1196,6 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		}
 		if (userIdExist) break;
 	}
-	check(!userIdExist);
+	AB_TEST_FALSE(userIdExist);
 	return TestCleanUp();
 }

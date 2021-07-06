@@ -95,6 +95,11 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString
 		LastTickTime = FPlatformTime::Seconds();
 		FPlatformProcess::Sleep(.2f);
 	}
+
+	if (Condition && !Condition() && (FPlatformTime::Seconds() > TimeoutSeconds))
+	{
+		UE_LOG(LogAccelByteTest, Error, TEXT("%s Error"), *Message);
+	}
 }
 
 FString GetRequiredEnvironmentVariable(const FString Name, const int32 ValueLength = 100)

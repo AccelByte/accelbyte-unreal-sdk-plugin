@@ -3,14 +3,11 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -23,7 +20,7 @@ const int32 AutomationFlagMaskQos = (EAutomationTestFlags::EditorContext | EAuto
 
 const auto QosTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteQosTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteQosTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(QosGetServerLatencies, "AccelByte.Tests.Qos.A.GetServerLatencies", AutomationFlagMaskQos);
@@ -41,9 +38,12 @@ bool QosGetServerLatencies::RunTest(const FString& Parameters)
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
 	}), QosTestErrorHandler);
-	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
-	check(bGetServerLatenciesSuccess);
-	check(Latencies.Num() > 0);
+	WaitUntil([&]()
+	{
+		return bGetServerLatenciesSuccess;
+	}, 60, "Waiting for get server latencies...");
+	AB_TEST_TRUE(bGetServerLatenciesSuccess);
+	AB_TEST_TRUE(Latencies.Num() > 0);
 	return true;
 }
 
@@ -62,8 +62,11 @@ bool ServerQosGetServerLatencies::RunTest(const FString& Parameters)
 		bGetServerLatenciesSuccess = true;
 		Latencies = Result;
 	}), QosTestErrorHandler);
-	Waiting(bGetServerLatenciesSuccess, "Waiting for get server latencies...");
-	check(bGetServerLatenciesSuccess);
-	check(Latencies.Num() > 0);
+	WaitUntil([&]()
+	{
+		return bGetServerLatenciesSuccess;
+	}, 60, "Waiting for get server latencies...");
+	AB_TEST_TRUE(bGetServerLatenciesSuccess);
+	AB_TEST_TRUE(Latencies.Num() > 0);
 	return true;
 }
