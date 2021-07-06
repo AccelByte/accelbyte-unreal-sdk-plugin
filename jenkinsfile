@@ -178,9 +178,7 @@ pipeline {
                                 "Analytics": "AccelByte.Tests.GameTelemetry+AccelByte.Tests.ServerGameTelemetry",
                                 "Play": "AccelByte.Tests.DSM+AccelByte.Tests.Qos+AccelByte.Tests.Lobby+AccelByte.Tests.ServerJoinableSession+AccelByte.Tests.ServerLobby+AccelByte.Tests.SessionBrowser"
                             ]
-                            def failedTestGroups = []
-    
-                            echo "Run automation tests"
+                            failedTestGroups = []
     
                             for (group in params.TEST_GROUPS.split(",")) {
                                 echo "Run tests for ${group}"
@@ -194,12 +192,11 @@ pipeline {
                                     archiveArtifacts artifacts: "Saved/Logs/${group}_Log.log, Saved/Logs/${group}/*"
 
                                     if (status != 0) {
-                                        failedTestGroups << group
+                                        failedTestGroups.add(group)
                                     }
                             }
                             
                             if (failedTestGroups.size() > 0) {
-                                env.failedTestGroups = failedTestGroups
                                 error("Some test groups are failed: ${env.failedTestGroups}")
                             }
                         }
@@ -338,6 +335,8 @@ pipeline {
                         |${commitMessage}
                         |""".stripMargin()
 
+                    slackSend(channel: "#activity-justice-sdk", color: '#36B37E', message: message)
+
                     if (buildByTimer) {
                         slackSend(channel: "#product-justice-automation-monitoring", color: '#36B37E', message: message)
                     }
@@ -351,6 +350,15 @@ pipeline {
 
                     def commitMessage = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
                     def gitHash = sh(returnStdout: true, script: 'git rev-parse --short=10 HEAD').trim()
+                    
+                    def failedTestLinks = ""
+                    
+                    for (group in failedTestGroups) {
+                        failedTestLinks += "${group}: "
+                        failedTestLinks += "<${env.BUILD_URL}artifact/Saved/Logs/${group}/index.json|Report>, "
+                        failedTestLinks += "<${env.BUILD_URL}artifact/Saved/Logs/${group}_Log.log|Log>\n"
+                    }
+                                           
                     def message = """
                         |<${env.BUILD_URL}console|Jenkin's Job #${env.BUILD_NUMBER}> *FAILED* on Stage `${FAILED_STAGE}` 
                         |Project: `${env.JOB_NAME}` 
@@ -360,13 +368,15 @@ pipeline {
                         |${commitMessage}
                         |
                         |Failed Tests: 
-                        |${env.failedTestGroups} 
+                        |${failedTestLinks} 
                         |""".stripMargin()
 
                     echo "jobName: ${JOB_NAME}"
                     echo "buildNumber: ${BUILD_NUMBER}"
                     echo "gitBranch: ${GIT_BRANCH}"
                     echo "buildURL: ${BUILD_URL}"
+
+                    slackSend(channel: "#activity-justice-sdk", color: '#FF0000', message: message)
 
                     if (buildByTimer) {
                         slackSend(channel: "#product-justice-automation-monitoring", color: '#FF0000', message: message)
