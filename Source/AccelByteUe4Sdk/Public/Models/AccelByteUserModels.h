@@ -29,7 +29,8 @@ enum class EAccelBytePlatformType : uint8
 	Oculus,
 	Twitter,
 	EpicGames,
-	Stadia
+	Stadia,
+	AwsCognito
 };
 
 enum class EAccelByteSearchType : uint8
