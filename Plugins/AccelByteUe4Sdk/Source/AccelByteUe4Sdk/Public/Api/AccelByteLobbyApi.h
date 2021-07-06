@@ -360,6 +360,16 @@ public:
 	 */
 	DECLARE_DELEGATE_OneParam(FSetSessionAttributeResponse, const FAccelByteModelsSetSessionAttributesResponse&);
 
+	/**
+	 * @brief delegate for handling response when setting session attribute
+	 */
+	DECLARE_DELEGATE_OneParam(FGetSessionAttributeResponse, const FAccelByteModelsGetSessionAttributesResponse&);
+
+	/**
+	 * @brief delegate for handling response when setting session attribute
+	 */
+	DECLARE_DELEGATE_OneParam(FGetAllSessionAttributeResponse, const FAccelByteModelsGetAllSessionAttributesResponse&);
+
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
 	DECLARE_DELEGATE_ThreeParams(FConnectionClosed, int32 /* StatusCode */, const FString& /* Reason */, bool /* WasClean */);
@@ -684,6 +694,18 @@ public:
 	 * @param Value the attribute's value.
 	 */
 	FString SetSessionAttribute(const FString& Key, const FString& Value);
+
+	/**
+	 * @brief Get user attribute from lobby session.
+	 *
+	 * @param Key the attribute's key.
+	 */
+	FString GetSessionAttribute(const FString& Key);
+
+	/**
+	 * @brief Get all user attribute from lobby session.
+	 */
+	FString GetAllSessionAttribute();
 
 	/**
 	* @brief Unbind all delegates set previously.
@@ -1182,6 +1204,26 @@ public:
 	};
 
 	/**
+	* @brief Set GetSessionAttribute delegate.
+	*
+	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	*/
+	void SetGetSessionAttributeDelegate(FGetSessionAttributeResponse OnGetSessionAttributeResponse)
+	{
+		GetSessionAttributeResponse = OnGetSessionAttributeResponse;
+	};
+
+	/**
+	* @brief Set SetSessionAttribute delegate.
+	*
+	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	*/
+	void SetGetAllSessionAttributeDelegate(FGetAllSessionAttributeResponse OnGetAllSessionAttributeResponse)
+	{
+		GetAllSessionAttributeResponse = OnGetAllSessionAttributeResponse;
+	};
+
+	/**
 	* @brief Bulk add friend(s), don't need any confirmation from the player.
 	*
 	* @param UserIds the list of UserId you want to make friend with.
@@ -1417,6 +1459,8 @@ private:
 
 	//Session Attribute
 	FSetSessionAttributeResponse SetSessionAttributeResponse;
+	FGetSessionAttributeResponse GetSessionAttributeResponse;
+	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
 };
 
 } // Namespace Api

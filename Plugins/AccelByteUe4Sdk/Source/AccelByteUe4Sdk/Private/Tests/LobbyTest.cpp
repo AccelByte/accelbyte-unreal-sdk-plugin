@@ -5646,6 +5646,111 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	return true;
 }
 
+bool CompareSessionAttributes(const FJsonObjectWrapper& resultAttributes, TMap<FString, FString>& expected)
+{
+	for (auto attribute : expected)
+	{
+		if (!resultAttributes.JsonObject->HasField(attribute.Key))
+		{
+			UE_LOG(LogAccelByteLobbyTest, Error, TEXT("Session Attribute not found: key %s !"), *attribute.Key);
+			return false;
+		}
+
+		if (resultAttributes.JsonObject->GetStringField(attribute.Key) != attribute.Value)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Error, TEXT("Session Attribute Wrong Value: key %s, value %s, expected %s !"), *attribute.Key, *resultAttributes.JsonObject->GetStringField(attribute.Key), *attribute.Value);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSessionAttributesSetGet_Ok, "AccelByte.Tests.Lobby.E.SessionAttributes_Set_Get_Ok", AutomationFlagMaskLobby);
+bool LobbyTestSessionAttributesSetGet_Ok::RunTest(const FString& Parameters)
+{
+	// Temporary disable, will be removed
+	if (Environment::GetEnvironmentVariable("UE4_SDK_DISABLE_INTERMITTEN_TEST", 16) == "true")
+	{
+		return true;
+	}
+
+	TMap<FString, FString> sessionAttributes = { {"Difficulty", "Easy"}, {"Rank", "1"} };
+	TArray<FString> sessionAttributesKeys = {};
+	sessionAttributes.GenerateKeyArray(sessionAttributesKeys);
+
+	// Arrange setup user & lobby
+	User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+	FThreadSafeCounter setSessionAttributeSuccessCounter;
+	FAccelByteModelsGetSessionAttributesResponse getSessionAttributesResponse;
+	bool bGetSessionAttributeFinish = false;
+	FAccelByteModelsGetAllSessionAttributesResponse getAllSessionAttributesResponse;
+	bool bGetAllSessionAttributeFinish = false;
+
+	Lobby& Lobby = FRegistry::Lobby;
+
+	bool bSetSessionAttributeFailed = false;
+	Lobby.SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&setSessionAttributeSuccessCounter, &bSetSessionAttributeFailed](const FAccelByteModelsSetSessionAttributesResponse& result)
+	{
+		setSessionAttributeSuccessCounter.Add(1);
+		if (result.Code == "0")
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("SetSessionAttribute success!"));
+		}
+		else
+		{
+			bSetSessionAttributeFailed = true;
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("SetSessionAttribute failed error code %s !"), *result.Code);
+		}
+	}));
+
+	Lobby.SetGetSessionAttributeDelegate(THandler<FAccelByteModelsGetSessionAttributesResponse>::CreateLambda([&getSessionAttributesResponse, &bGetSessionAttributeFinish](const FAccelByteModelsGetSessionAttributesResponse& result)
+	{
+		bGetSessionAttributeFinish = true;
+		getSessionAttributesResponse = result;
+	}));
+
+	Lobby.SetGetAllSessionAttributeDelegate(THandler<FAccelByteModelsGetAllSessionAttributesResponse>::CreateLambda([&getAllSessionAttributesResponse, &bGetAllSessionAttributeFinish](const FAccelByteModelsGetAllSessionAttributesResponse& result)
+	{
+		bGetAllSessionAttributeFinish = true;
+		getAllSessionAttributesResponse = result;
+	}));
+
+	Lobby.Connect();
+	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+
+	// ACT setting session attribute
+
+	for (auto attribute : sessionAttributes)
+	{
+		Lobby.SetSessionAttribute(attribute.Key, attribute.Value);
+	}
+
+	WaitUntil([&setSessionAttributeSuccessCounter, &sessionAttributes]() {return setSessionAttributeSuccessCounter.GetValue() == sessionAttributes.Num(); }, 10, "Waiting set session Attribute");
+
+	Lobby.GetSessionAttribute(sessionAttributesKeys[0]);
+	Waiting(bGetSessionAttributeFinish, "Wait for get session attribute");
+
+	Lobby.GetAllSessionAttribute();
+	Waiting(bGetAllSessionAttributeFinish, "Wait for get all session attribute");
+	bool bCompareAllSessionAttributes = CompareSessionAttributes(getAllSessionAttributesResponse.attributes, sessionAttributes);
+
+	//Asserts
+	AB_TEST_FALSE(bSetSessionAttributeFailed);
+	AB_TEST_EQUAL(getSessionAttributesResponse.Value, sessionAttributes[sessionAttributesKeys[0]]);
+	AB_TEST_TRUE(bCompareAllSessionAttributes);
+
+	Lobby.Disconnect();
+
+	return true;
+}
+
 enum class WebSocketState
 {
 	None = 0,

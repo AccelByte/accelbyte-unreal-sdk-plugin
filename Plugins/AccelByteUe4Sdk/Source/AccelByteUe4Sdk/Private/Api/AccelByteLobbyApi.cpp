@@ -71,6 +71,8 @@ namespace Api
 
 		//Session Attribute
 		const FString SetSessionAttribute = TEXT("setSessionAttributeRequest");
+		const FString GetSessionAttribute = TEXT("getSessionAttributeRequest");
+		const FString GetAllSessionAttribute = TEXT("getAllSessionAttributeRequest");
 	}
 
 	namespace LobbyResponse
@@ -160,6 +162,8 @@ namespace Api
 		
 		//Session Attribute
 		const FString SessionAttributeSet = TEXT("setSessionAttributeResponse");
+		const FString SessionAttributeGet = TEXT("getSessionAttributeResponse");
+		const FString SessionAttributeGetAll = TEXT("getAllSessionAttributeResponse");
 	}
 
 	namespace Prefix
@@ -854,6 +858,22 @@ FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
 		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetNamespace(), *Key, *Value));
 }
 
+FString Lobby::GetSessionAttribute(const FString& Key)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::GetSessionAttribute, Prefix::Attribute,
+		FString::Printf(TEXT("namespace: %s\nkey: %s"), *Credentials.GetNamespace(), *Key));
+}
+
+FString Lobby::GetAllSessionAttribute()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::GetAllSessionAttribute, Prefix::Attribute,
+		FString::Printf(TEXT("namespace: %s"), *Credentials.GetNamespace()));
+}
+
 void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1321,7 +1341,9 @@ return; \
 	}
 
 	// Session Attribute
-	HANDLE_LOBBY_MESSAGE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse)
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::SessionAttributeGet, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse);
+	HANDLE_LOBBY_MESSAGE(LobbyResponse::SessionAttributeGetAll, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse);
 
 #undef HANDLE_LOBBY_MESSAGE
 #ifdef DEBUG_LOBBY_MESSAGE
