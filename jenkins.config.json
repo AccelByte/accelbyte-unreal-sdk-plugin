@@ -13,30 +13,6 @@
           }
         ]
       },
-      "4.20": {
-        "env_vars": [
-          {
-            "key": "ENGINE_PATH",
-            "value": "C:\\Program Files\\Epic Games\\UE_4.20"
-          },
-          {
-            "key": "LINUX_MULTIARCH_ROOT",
-            "value": "C:\\UnrealToolchains\\v11_clang-5.0.0-centos7\\"
-          }
-        ]
-      },
-      "4.21": {
-        "env_vars": [
-          {
-            "key": "ENGINE_PATH",
-            "value": "C:\\Program Files\\Epic Games\\UE_4.21"
-          },
-          {
-            "key": "LINUX_MULTIARCH_ROOT",
-            "value": "C:\\UnrealToolchains\\v12_clang-6.0.1-centos7\\"
-          }
-        ]
-      },
       "4.25": {
         "env_vars": [
           {
@@ -46,6 +22,18 @@
           {
             "key": "LINUX_MULTIARCH_ROOT",
             "value": "C:\\UnrealToolchains\\v16_clang-9.0.1-centos7\\"
+          }
+        ]
+      },
+	  "4.26": {
+        "env_vars": [
+          {
+            "key": "ENGINE_PATH",
+            "value": "C:\\Program Files\\Epic Games\\UE_4.26"
+          },
+          {
+            "key": "LINUX_MULTIARCH_ROOT",
+            "value": "C:\\UnrealToolchains\\v17_clang-10.0.1-centos7\\"
           }
         ]
       }
