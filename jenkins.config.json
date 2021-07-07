@@ -36,6 +36,18 @@
             "value": "C:\\UnrealToolchains\\v17_clang-10.0.1-centos7\\"
           }
         ]
+      },
+	  "5.0EA": {
+        "env_vars": [
+          {
+            "key": "ENGINE_PATH",
+            "value": "C:\\Program Files\\Epic Games\\UE_5.0EA"
+          },
+          {
+            "key": "LINUX_MULTIARCH_ROOT",
+            "value": "C:\\UnrealToolchains\\v17_clang-10.0.1-centos7\\"
+          }
+        ]
       }
     }
   }
