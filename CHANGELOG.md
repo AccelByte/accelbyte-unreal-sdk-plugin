@@ -2,6 +2,60 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.2.0%0D3.1.0) (2021-07-07)
+
+
+### Features
+
+* **Achievement:** remove redundant test code + fix identifier naming according to ue4 guideline ([4340c75](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/4340c759a78b5ac2b01408528078e91e47cea116))
+* **jenkins:** Convert scripts to powershell ([d8c6faf](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/d8c6faf794b1e64696f094e2ad69cb2e6af1aaef))
+* **jenkins:** Convert scripts to powershell ([973cd4a](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/973cd4a3006da5ddbced29a5bde52cb3976e4a78))
+* **Json:** Remove empty string fields from FJSonObject ([176e210](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/176e210fc41928491052afb0474d3591e8fccb33))
+* **lobby:** add errorNotif and move admin function into new file ([af5ddbc](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/af5ddbcc773d35810ca3db360ecc530dd7c0edcf))
+* **lobby:** Add Send Notification to User ([4f46c75](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/4f46c756d3c8f590ef4f23e067572005543b4142))
+* **ugc:** Add UGC into SDK ([8bb8e87](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/8bb8e87a55a85dce51675d25cdb2b629ae136e71))
+* **UserProfile:** add BatchGetPublicUserProfileInfos ([759f4d5](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/759f4d52e853b9a6d6de2e8bb01fc96964ed903a))
+* **UserProfile:** Get custom attribute other user id ([1dce0a5](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/1dce0a5659a63d128c9969b799e453b628813697))
+
+
+### Bug Fixes
+
+* **CloudSaveTest:** Disable concurrent record test ([02ed0a4](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/02ed0a4493c022f69b19995ab416b8bd71ff0aae))
+* **CloudSaveTest:** Disable concurrent record test ([1aa8263](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/1aa82637d0dc335d51c71127546edb1e275c1e30))
+* **Jenkins:** Revert unfinished work to convert scripts to powershell ([3cbcc1e](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/3cbcc1eb58c65a1d8c2924202e8c2999ae641b18))
+* **User test:** test failed due to missing waiting ([faf6818](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/faf6818563c985d492532be37a6775e6abdade2f))
+
+
+### Reverts
+
+* Revert "test(Achievement): make test variable declarations static to keep it local + make the names shorter" ([f1e8785](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/f1e8785b3ffffb3704709df4996e97779ffe0854))
+* Revert "test(MultiRegistry): make test variable declarations static to keep it local + make the names shorter" ([bd0f2ea](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/bd0f2ea376c1cd464f96721f3c323b0bcf2d3e20))
+* Revert "test(GameProfile): make test variable declarations static to keep it local + make the names shorter" ([e7c84bd](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/e7c84bd24c04657de05bb1c57c4ed2f1c685c199))
+* Revert "test(UserIntegration): make test variable declarations static to keep it local + make the names shorter" ([879f5ba](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/879f5bad209aaf0ab8a3561ed88a7fd45d6de92c))
+
+
+### Tests
+
+* **Achievement:** deduplicate QueryAchievement tests ([d5c8bf2](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/d5c8bf2b082d664689e37654c56c327e4c404f95))
+* **Achievement:** deduplicate QueryAchievement tests (more) ([63daee4](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/63daee4b9a2efdab1a182f0b2448f9afbebce583))
+* **Achievement:** remove unnecessary http flush ([b76e99a](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/b76e99afcf4bed5e559f6b9187b98b48717adc33))
+* **Achievement:** rename identifiers according to ue4 guideline ([651e5ad](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/651e5ad92c730f0d16de99becf71b3a930e9b082))
+* **Achievement:** setup - use reference on achievements loop ([9b070d9](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/9b070d9ec17e8ef608803feda03e91a70ed96153))
+* **CloudSave & GameTelemetry:** change check macro with AB_TEST_XXXX that doesn't crash if failed ([93dff77](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/93dff775262ce1a3bcd88d3f2d51d4543e11f18a))
+* **eCommerce:** Change check macro to AB_TEST_XXX to not crash test automation ([4c067a0](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/4c067a07e9081729900b3234dc630b566c0cd3ef))
+* **Ecommerce:** fix sdk tests (max draft 1 be changes, remove unnecessary http flush, remove code redundancy) ([6742f8f](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/6742f8f109ec7b2d8164370d8de4cfe4492b44e2))
+* **lobby:** fix lobby test stuck ([8744a3f](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/8744a3fde575fb7c4dea2182a6d6d021262c5a91)), closes [#364](https://accelbyte.atlassian.net/browse/364)
+* **MultiRegistry:** use setup/teardown test users from utilities ([f98b2a5](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/f98b2a5f8027acda604462a3b4e37239f15e9c10))
+* **serverlobby:** fix serverlobby test cases stuck ([c7ecf6d](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/c7ecf6d2fd4e1aa9ed25199eaea0a42fd2f87435)), closes [#366](https://accelbyte.atlassian.net/browse/366)
+* **Social:** change check macro into AB_TEST_XXX to not crash automated test ([469b04c](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/469b04c1fbc2e5fe33d87225154036f418915286))
+* **UserIntegration:** BatchGetPublicUserProfileInfos - use setup/teardown test users from utilities ([1efcbad](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/1efcbadc2be96af8236dbddedbdef0c2f73e77d6))
+* **UserIntegration:** BatchGetPublicUserProfileInfos - use setup/teardown test users from utilities (more) ([95667f3](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/95667f318d0c3d0a06ed5a2a40f30a91e222fb1d))
+* **UserIntegration:** clean up ([31b0d58](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/31b0d58c5c753e81674bb59f577785973c54c5f8))
+* **UserIntegration:** fix error due to missing waiting in GetUserByDisplayName, GetUserByEmailAddress, GetUserByUsername ([6f0bb58](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/6f0bb582c60ef7a020a8bf4d809fd4ead79d5236))
+* **User:** Replace check macro with more descriptive TestXXX-based AB_TEST_XXX macros ([8643f1e](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/8643f1efeba008abb11c83d8ad2beed12467132c))
+* **Utilities:** move LatenciesPredicate to its proper place ([57e8ad3](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/57e8ad3ceaa5c6a6b7ea0fef1828249543176768))
+* **Utilities:** remove redundant get required environment variable logic ([0f52026](https://bitbucket.org/accelbyte/justice-ue4-sdk/commits/0f520268e56cdfdf8fd912819c1aed71ec35482b))
+
 ## [3.1.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.1.0%0D3.0.1) (2021-06-23)
 
 
