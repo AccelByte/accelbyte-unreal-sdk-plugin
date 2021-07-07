@@ -96,7 +96,7 @@ pipeline {
         }
         stage('Build and Deploy') {
             agent {
-                label "windows-sdk"
+                label "justice-sdk-builder"
             }
             stages {
                 stage('Cleanup') {
