@@ -18,7 +18,7 @@ ue4_version="default"
 
 FAILED_STAGE = "";
 GIT_BRANCH = env.GIT_BRANCH;
-env.UE4_TESTS = params.UE4_TESTS == null ? "AccelByte.Tests" : params.UE4_TESTS;
+
 pipeline {
     agent none
     environment {
@@ -172,15 +172,56 @@ pipeline {
                         bat "powershell -Command \"${env.WORKSPACE}\\Jenkins\\LoginSteam.ps1\""
                         script {
                             def testsByGroup = [
-                                "Core" : "AccelByte.Tests.Core",  
-                                "IAM_Legal_ECommerce" : "AccelByte.Tests.Agreement+AccelByte.Tests.ServerOauth2+AccelByte.Tests.AUser+AccelByte.Tests.ECommerce+AccelByte.Tests.Subscription",  
-                                "Social": "AccelByte.Tests.Achievement+AccelByte.Tests.CloudSave+AccelByte.Tests.ServerCloudSave+AccelByte.Tests.CloudStorage+AccelByte.Tests.GameProfile+AccelByte.Tests.Statistic+AccelByte.Tests.ServerStatistic+AccelByte.Tests.Leaderboard+AccelByte.Tests.MultiRegistry",  
-                                "Analytics": "AccelByte.Tests.GameTelemetry+AccelByte.Tests.ServerGameTelemetry",
-                                "Play": "AccelByte.Tests.DSM+AccelByte.Tests.Qos+AccelByte.Tests.Lobby+AccelByte.Tests.ServerJoinableSession+AccelByte.Tests.ServerLobby+AccelByte.Tests.SessionBrowser"
+                                "Core": [
+                                        "AccelByte.Tests.Core"
+                                    ].join("+"),
+                                "Basic": [
+                                        "AccelByte.Tests.Agreement",
+                                        "AccelByte.Tests.ServerOauth2", 
+                                        "AccelByte.Tests.AUser", 
+                                        "AccelByte.Tests.CloudSave",
+                                        "AccelByte.Tests.ServerCloudSave"
+                                    ].join("+"),
+                                "Essentials": [
+                                        "AccelByte.Tests.ECommerce",
+                                        "AccelByte.Tests.Subscription"
+                                    ].join("+"),  
+                                "Social": [
+                                        "AccelByte.Tests.Achievement",
+                                        "AccelByte.Tests.CloudStorage",
+                                        "AccelByte.Tests.GameProfile",
+                                        "AccelByte.Tests.Statistic",
+                                        "AccelByte.Tests.ServerStatistic",
+                                        "AccelByte.Tests.Leaderboard",
+                                        "AccelByte.Tests.MultiRegistry"
+                                    ].join("+"),
+                                "Content": [
+                                        "AccelByte.Tests.UGC"
+                                    ].join("+"),
+                                "Play": [
+                                        "AccelByte.Tests.DSM",
+                                        "AccelByte.Tests.Qos",
+                                        "AccelByte.Tests.Lobby",
+                                        "AccelByte.Tests.ServerJoinableSession",
+                                        "AccelByte.Tests.ServerLobby",
+                                        "AccelByte.Tests.SessionBrowser"
+                                    ].join("+"),
+                                "Analytics": [
+                                        "AccelByte.Tests.GameTelemetry",
+                                        "AccelByte.Tests.ServerGameTelemetry"
+                                    ].join("+")
                             ]
+
+                            if (buildByTimer) {
+                                testGroups = testsByGroup.keySet()
+                            }
+                            else {
+                                testGroups = params.TEST_GROUPS.split(",")
+                            }
+                            
                             failedTestGroups = []
     
-                            for (group in params.TEST_GROUPS.split(",")) {
+                            for (group in testGroups) {
                                 echo "Run tests for ${group}"
                                 def script = """
                                     & \"${env.WORKSPACE}\\Jenkins\\RunTests.ps1\" `
@@ -197,13 +238,18 @@ pipeline {
                             }
                             
                             if (failedTestGroups.size() > 0) {
-                                error("Some test groups are failed: ${env.failedTestGroups}")
+                                error("Some test groups are failed: ${failedTestGroups}")
                             }
                         }
                     }
                     post {
                         always {
                             powershell "& \"${env.WORKSPACE}\\Jenkins\\LogoutSteam.ps1\""
+                        }
+                        failure {
+                            script{
+                                FAILED_STAGE = "Automation Test";
+                            }
                         }
                     }
                 }
