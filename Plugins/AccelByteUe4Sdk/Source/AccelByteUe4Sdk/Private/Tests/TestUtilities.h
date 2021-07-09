@@ -89,6 +89,8 @@ void Waiting(bool& bcondition, FString Message, double TimeoutDelay = 60.0);
 
 void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds = 5.0, FString Message = "");
 
+void WaitSecond(double WaitTime, FString Message = "");
+
 FString GetPublisherNamespace();
 
 FString GetSteamUserId();

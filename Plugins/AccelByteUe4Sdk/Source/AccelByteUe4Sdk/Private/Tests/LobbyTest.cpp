@@ -1157,12 +1157,12 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 
 	FString chatMessage = "Hello Chat, from " + UserCreds[0].GetUserDisplayName();
 	Lobbies[0]->SendChannelMessage(chatMessage);
-	WaitUntil([](){ return false; }, 3);
+	WaitSecond(3);
 
 	Lobbies[1]->Disconnect();
-	WaitUntil([](){ return false; }, 0.5);
+	WaitSecond(1);
 	Lobbies[1]->Connect();
-	WaitUntil([](){ return false; }, 0.5);
+	WaitSecond(1);
 
 	Lobbies[0]->SendChannelMessage(chatMessage);
 
@@ -1250,7 +1250,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 		}
 	}
 
-	WaitUntil([]() {return false;  }, 5, "Waiting backend to sync lobby disconnect");
+	WaitSecond(5, "Waiting backend to sync lobby disconnect");
 
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
@@ -1328,7 +1328,7 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 		}
 	}
 
-	WaitUntil([]() {return false;  }, 5, "Waiting backend to sync lobby disconnect");
+	WaitSecond(5, "Waiting backend to sync lobby disconnect");
 
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
@@ -1379,7 +1379,7 @@ bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Paramet
 	FlushHttpRequests();
 	WaitUntil([&]()
 	{
-		return bUserPresenceNotifSuccess;
+		return bGetPresenceDone;
 	}, 30, "Waiting for get presence...");
 
 	// Cleanup
@@ -3407,7 +3407,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 	
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
@@ -3592,7 +3592,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
@@ -4090,7 +4090,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
@@ -4279,7 +4279,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
-	Waiting(bMatchmakingNotifTimeout[0], "Waiting for matchmaking timeout...");
+	Waiting(bMatchmakingNotifTimeout[0], "Waiting for matchmaking timeout...", 300);
 
 	AB_TEST_TRUE(bMatchmakingNotifError[0]);
 
@@ -4299,7 +4299,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
@@ -4538,7 +4538,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
@@ -4806,7 +4806,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < UserNum;
+		return matchMakingNotifNum >= UserNum;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[UserNum];
@@ -5183,7 +5183,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
@@ -5198,7 +5198,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return rematchmakingNotifNum < 2;
+		return rematchmakingNotifNum >= 2;
 	}, 60, "Waiting for Rematchmaking Notification...");
 	AB_TEST_EQUAL(rematchmakingNotifNum, 2);
 
@@ -5213,7 +5213,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 2;
+		return matchMakingNotifNum >= 2;
 	}, 60, "Waiting for Matchmaking Notification...");
 	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
 	AB_TEST_EQUAL(matchmakingNotifResponse[2].Status, EAccelByteMatchmakingStatus::Done);
@@ -5493,6 +5493,21 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking3vs3_ReturnOk, "AccelB
 bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 {
 	LobbyConnect(6);
+
+	FThreadSafeCounter readyConsentNoticeCounter = 0;
+	auto ReadyConsentNotif = Lobby::FReadyConsentNotif::CreateLambda([&readyConsentNoticeCounter](FAccelByteModelsReadyConsentNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Ready Consent Notice!"));
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s is ready for match."), *result.UserId);
+		readyConsentNotice = result;
+		bReadyConsentNotifSuccess = true;
+		readyConsentNoticeCounter.Increment();
+		if (result.MatchId.IsEmpty())
+		{
+			bReadyConsentNotifError = true;
+		}
+	});
+
 	for (int i = 0; i < 6; i++)
 	{
 		auto CreateParty = CreatePartyDelegate;
@@ -5503,7 +5518,6 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		Lobbies[i]->SetLeavePartyResponseDelegate(LeaveParty);
 		auto ReadyConsentResponse = ReadyConsentResponseDelegate;
 		Lobbies[i]->SetReadyConsentResponseDelegate(ReadyConsentResponse);
-		auto ReadyConsentNotif = ReadyConsentNotifDelegate;
 		Lobbies[i]->SetReadyConsentNotifDelegate(ReadyConsentNotif);
 		auto DsNotif = DsNotifDelegate;
 		Lobbies[i]->SetDsNotifDelegate(DsNotif);
@@ -5584,7 +5598,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum < 6;
+		return matchMakingNotifNum >= 6;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[6];
@@ -5593,10 +5607,11 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[i].MatchId);
 		WaitUntil([&]()
 		{
-			return bReadyConsentNotifSuccess;
+			return readyConsentNoticeCounter.GetValue() >= 3;
 		}, 30, FString::Printf(TEXT("Waiting for Ready Consent Notification... %d"), i));
 		AB_TEST_FALSE(bReadyConsentNotifError);
 		readyConsentNoticeResponse[i] = readyConsentNotice;
+		readyConsentNoticeCounter.Set(0);
 		bReadyConsentNotifSuccess = false;
 		bReadyConsentNotifError = false;
 	}
@@ -5642,6 +5657,8 @@ enum class WebSocketState
 	Aborted = 6
 };
 
+/* commented this because the test flow is not suitable for non apigw release, but still may be useful in the future
+* 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTokenRevoked_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestTokenRevoked_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 {
@@ -5705,6 +5722,7 @@ bool LobbyTestTokenRevoked_Disconnected::RunTest(const FString& Parameters)
 
 	return true;
 }
+*/
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSameUserDifferentToken_Disconnected, "AccelByte.Tests.Lobby.C.LobbyTestSameUserDifferentToken_Disconnected", AutomationFlagMaskLobby);
 bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parameters)
@@ -5810,7 +5828,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 
 	OtherLobby.Connect();
 
-	WaitUntil([&]() { return OtherLobby.IsConnected(); }, 10);
+	WaitSecond(10, "waiting if lobby is connecting");
 
 	AB_TEST_TRUE(Lobby.IsConnected());
 	AB_TEST_FALSE(bLobbyDisconnected);
@@ -5860,7 +5878,7 @@ bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Pa
 
 	Lobby.Disconnect();
 
-	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, 5);
 	
 	//Act
 	Lobby.Connect();

@@ -18,15 +18,15 @@ struct FLobbyModelConfig
 	GENERATED_BODY();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	bool AutoKickOnDisconnect;
+	bool AutoKickOnDisconnect{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	int32 ChatRateLimitBurst;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	int32 ChatRateLimitDuration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	bool EnableChat;
+	bool EnableChat{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	bool EntitlementCheck;
+	bool EntitlementCheck{ false };
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	FString EntitlementItemID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
@@ -36,7 +36,7 @@ struct FLobbyModelConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
 	int32 MaxPartyMember;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Lobby | Config")
-	bool ProfanityFilter;
+	bool ProfanityFilter{ false };
 };
 
 USTRUCT(BlueprintType)

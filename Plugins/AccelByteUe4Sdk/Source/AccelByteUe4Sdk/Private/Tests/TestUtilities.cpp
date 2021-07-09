@@ -83,7 +83,7 @@ void Waiting(bool& bCondition, FString Message, double TimeoutDelay)
 
 	if (FPlatformTime::Seconds() >= TimeoutSeconds)
 	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("Waiting timed out."));
+		UE_LOG(LogAccelByteTest, Error, TEXT("Waiting timed out, message %s"), *Message);
 	}
 }
 
@@ -104,7 +104,23 @@ void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString
 
 	if (Condition && !Condition() && (FPlatformTime::Seconds() > TimeoutSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("%s Error"), *Message);
+		UE_LOG(LogAccelByteTest, Error, TEXT("WaitUntil timed out, message %s"), *Message);
+	}
+}
+
+void WaitSecond(double WaitTime, const FString Message)
+{
+	const double StartTime = FPlatformTime::Seconds();
+	WaitTime = StartTime + WaitTime;
+	double LastTickTime = StartTime;
+
+	while ((FPlatformTime::Seconds() < WaitTime))
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
+		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
+		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
+		LastTickTime = FPlatformTime::Seconds();
+		FPlatformProcess::Sleep(.2f);
 	}
 }
 

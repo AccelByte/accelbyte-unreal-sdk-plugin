@@ -94,10 +94,18 @@ void ResetServerResponses()
 	bSCreatePartySuccess = false;
 	bSCreatePartyError = false;
 	bSInvitePartySuccess = false;
+	bSGetInvitedNotifError = false;
+	bSGetInvitedNotifSuccess = false;
+	bSGetInfoPartySuccess = false;
+	bSGetInfoPartyError = false;
 	bSJoinPartySuccess = false;
 	bSJoinPartyError = false;
 	bSLeavePartySuccess = false;
 	bSLeavePartyError = false;
+	bSKickPartyMemberSuccess = false;
+	bSKickPartyMemberError = false; 
+	bSKickedFromPartySuccess = false;
+	bSCleanupLeaveParty = false;
 }
 
 const auto ServerLobbyErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
@@ -275,7 +283,7 @@ void FormParty(const FSimpleDelegate OnSuccess)
 	SLobbies[0]->SendInfoPartyRequest();
 	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
 
-	if (bSGetInfoPartySuccess && SinfoPartyResponse.PartyId.IsEmpty() && (SinfoPartyResponse.Members.Num() == STestUserCount))
+	if (bSGetInfoPartySuccess && !SinfoPartyResponse.PartyId.IsEmpty() && (SinfoPartyResponse.Members.Num() == STestUserCount))
 	{
 		bool _ = OnSuccess.ExecuteIfBound();
 	}
@@ -304,22 +312,22 @@ bool ComparePartyData(const FJsonObjectWrapper& PartyData)
 	}
 	if (!ComparedData->GetStringField("dungeon").Equals(ExpectedData->GetStringField("dungeon"), ESearchCase::CaseSensitive))
 	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("difficulty field content not match, got %s expected %s"), *ComparedData->GetStringField("dungeon"), *ExpectedData->GetStringField("dungeon"));
+		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("dungeon field content not match, got %s expected %s"), *ComparedData->GetStringField("dungeon"), *ExpectedData->GetStringField("dungeon"));
 		return false;
 	}
 	if (!ComparedData->GetStringField("server").Equals(ExpectedData->GetStringField("server"), ESearchCase::CaseSensitive))
 	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("difficulty field content not match, got %s expected %s"), *ComparedData->GetStringField("server"), *ExpectedData->GetStringField("server"));
+		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("server field content not match, got %s expected %s"), *ComparedData->GetStringField("server"), *ExpectedData->GetStringField("server"));
 		return false;
 	}
 	if (!(ComparedData->GetNumberField("port") == ExpectedData->GetNumberField("port")))
 	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("difficulty field content not match, got %f expected %f"), ComparedData->GetNumberField("port"), ExpectedData->GetNumberField("port"));
+		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("port field content not match, got %f expected %f"), ComparedData->GetNumberField("port"), ExpectedData->GetNumberField("port"));
 		return false;
 	}
 	if (!(ComparedData->GetNumberField("multiplier") == ExpectedData->GetNumberField("multiplier")))
 	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("difficulty field content not match, got %f expected %f"), ComparedData->GetNumberField("multiplier"), ExpectedData->GetNumberField("multiplier"));
+		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("multiplier field content not match, got %f expected %f"), ComparedData->GetNumberField("multiplier"), ExpectedData->GetNumberField("multiplier"));
 		return false;
 	}
 	if (!ComparedData->GetStringField("symbol1").Equals(ExpectedData->GetStringField("symbol1"), ESearchCase::CaseSensitive))
@@ -330,7 +338,7 @@ bool ComparePartyData(const FJsonObjectWrapper& PartyData)
 
 	if (!(ComparedData->GetArrayField("bosses").Num() == ExpectedData->GetArrayField("bosses").Num()))
 	{
-		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("boss field content not match, num got %d expected %d"), ComparedData->GetArrayField("bosses").Num(), ExpectedData->GetArrayField("bosses").Num());
+		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("bosses field content not match, num got %d expected %d"), ComparedData->GetArrayField("bosses").Num(), ExpectedData->GetArrayField("bosses").Num());
 		return false;
 	}
 
@@ -992,7 +1000,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		int index = i;
 		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
-			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("user %d Get Party Data Update Notif"), index);
 			PartyDataNotifResults.Add(result);
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
@@ -1123,6 +1131,8 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
 	Waiting(bSJoinPartySuccess, "Waiting join party");
 
+	WaitSecond(3, "delay wait for random partydatanotif");
+
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults = {};
 
 	for (int i = 0; i < PartySize; i++)
@@ -1130,7 +1140,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		int index = i;
 		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
-			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("user %d Get Party Data Update Notif"), index);
 			PartyDataNotifResults.Add(result);
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
@@ -1166,7 +1176,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		AB_TEST_FALSE(ServerPartyData.Members.Contains(SUserIds[LeaveMemberIndex]));
 	}
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == PartySize); }, 2.0);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, 2.0);
 
 	for (int i = 0; i < PartyDataNotifResults.Num(); i++)
 	{
@@ -1182,7 +1192,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		bSLeavePartyError = false;
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Waiting leave party");
+		Waiting(bSLeavePartySuccess, "Waiting leave party", 120);
 		AB_TEST_FALSE(bSLeavePartyError);
 	}
 
@@ -1242,6 +1252,8 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
 	Waiting(bSJoinPartySuccess, "Waiting join party");
 
+	WaitSecond(3, "delay wait for random partydatanotif");
+
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 
 	for (int i = 0; i < PartySize; i++)
@@ -1249,7 +1261,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		int index = i;
 		const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults, &index](FAccelByteModelsPartyDataNotif result)
 		{
-			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Get Party Data Update Notif"));
+			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("user %d Get Party Data Update Notif"), index);
 			PartyDataNotifResults.Add(result);
 		});
 		SLobbies[i]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
@@ -1287,7 +1299,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		AB_TEST_FALSE(ServerPartyData.Members.Contains(SUserIds[KickedMemberIndex]));
 	}
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == PartySize); }, 10.0);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, 10.0);
 
 	for (int i = 0; i < PartyDataNotifResults.Num(); i++)
 	{
@@ -1303,7 +1315,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		bSLeavePartyError = false;
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Waiting leave party");
+		Waiting(bSLeavePartySuccess, "Waiting leave party", 120);
 		AB_TEST_FALSE(bSLeavePartyError);
 	}
 
@@ -1580,8 +1592,10 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 	WaitUntil([&ResultCount] {return ResultCount == 2; }, 2.5, "Waiting for write result");
 
 	// rarely happen
-	AB_TEST_EQUAL(WriteSuccessCount, 1 || 2);
-	AB_TEST_EQUAL(WriteFailCount, 1 || 0);
+	bool bWriteSuccessPass = WriteSuccessCount == 1 || WriteSuccessCount == 2;
+	bool bWriteFailPass = WriteFailCount == 1 || WriteFailCount == 0;
+	AB_TEST_TRUE(bWriteSuccessPass);
+	AB_TEST_TRUE(bWriteFailPass);
 	ResetServerResponses();
 	return true;
 }
@@ -1975,6 +1989,15 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	SLobbies[1]->SetInvitePartyJoinResponseDelegate(SJoinPartyDelegate);
 	SLobbies[1]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
+	// Setup, make sure users have no party
+	bSLeavePartySuccess = false;
+	SLobbies[0]->SendLeavePartyRequest();
+	Waiting(bSLeavePartySuccess, "Lobby 0 waiting setup leave party");
+	bSLeavePartySuccess = false;
+	SLobbies[1]->SendLeavePartyRequest();
+	Waiting(bSLeavePartySuccess, "Lobby 1 waiting setup leave party");
+	bSLeavePartySuccess = false;
+
 	SLobbies[0]->SendCreatePartyRequest();
 	Waiting(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
@@ -1992,7 +2015,7 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 		ServerLobbyErrorHandler);
 	Waiting(queryAfterCreatePartySuccess, "Waiting query after creating party");
 
-
+	bSGetInvitedNotifSuccess = false;
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{

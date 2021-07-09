@@ -177,7 +177,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 		Result = Data;
 	}), SessionBrowserTestErrorHandler);
 	Waiting(bCreated, "Waiting for session browser created...");
-	check(bCreated);
+	AB_TEST_TRUE(bCreated);
 
 	//update game session
 	bool bUpdated = false;
@@ -189,9 +189,9 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         ResultUpdated = Data;
     }), SessionBrowserTestErrorHandler);
 	Waiting(bUpdated, "Waiting for session browser updated...");
-	check(bUpdated);
-	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
-	check(ResultUpdated.Game_session_setting.Current_player == UpdatedPlayerCount);
+	AB_TEST_TRUE(bUpdated);
+	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Max_player, UpdatedMaxPlayer);
+	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Current_player, UpdatedPlayerCount);
 
 	//Query game session
 	bool bQueried = false;
@@ -204,9 +204,9 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bUpdated, "Waiting for session browser queried...");
-	check(bQueried);
-	check(QueryResult.Sessions.Num() > 0);
+	Waiting(bQueried, "Waiting for session browser queried...");
+	AB_TEST_TRUE(bQueried);
+	AB_TEST_TRUE(QueryResult.Sessions.Num() > 0);
 
 	for(int i = 0; i < QueryResult.Sessions.Num(); i++)
 	{
@@ -216,10 +216,10 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 			Founded = QueryResult.Sessions[i];
 		}
 	}
-	check(Founded.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM1").Equals(TEXT("CUSTOM1")));
-	check(Founded.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2") == 20);
-	check(bFounded);
-	check(Founded.Game_session_setting.Current_player == ResultUpdated.Game_session_setting.Current_player);
+	AB_TEST_TRUE(Founded.Game_session_setting.Settings.JsonObject->GetStringField("CUSTOM1").Equals(TEXT("CUSTOM1")));
+	AB_TEST_EQUAL(Founded.Game_session_setting.Settings.JsonObject->GetIntegerField("CUSTOM2"), 20);
+	AB_TEST_TRUE(bFounded);
+	AB_TEST_EQUAL(Founded.Game_session_setting.Current_player, ResultUpdated.Game_session_setting.Current_player);
 
 	//Remove game session
 	bool bRemoved = false;
@@ -229,19 +229,20 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bRemoved = true;
     }), SessionBrowserTestErrorHandler);
 	Waiting(bRemoved, "Waiting for session browser removed...");
-	check(bUpdated);
-	check(ResultUpdated.Game_session_setting.Max_player == UpdatedMaxPlayer);
-	check(ResultUpdated.Game_session_setting.Current_player == UpdatedPlayerCount);
+	AB_TEST_TRUE(bUpdated);
+	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Max_player, UpdatedMaxPlayer);
+	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Current_player, UpdatedPlayerCount);
 
 	//Check again if game session really removed
+	bQueried = false;
 	SessionBrowsers[1]->GetGameSessions(SessionType, GameMode,
         THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda([&bQueried, &QueryResult](const FAccelByteModelsSessionBrowserGetResult &QueryData)
     {
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bUpdated, "Waiting for session browser queried...");
-	check(bQueried);
+	Waiting(bQueried, "Waiting for session browser queried...");
+	AB_TEST_TRUE(bQueried);
 
 	bFounded = false;
 	for(int i = 0; i < QueryResult.Sessions.Num(); i++)
@@ -251,7 +252,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 			bFounded = true;
 		}
 	}
-	check(!bFounded);
+	AB_TEST_FALSE(bFounded);
 	
 	return true;
 }

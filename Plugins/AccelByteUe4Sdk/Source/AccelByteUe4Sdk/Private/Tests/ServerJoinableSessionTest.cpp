@@ -206,7 +206,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 
 		ActiveUsers.Add(MakeShared<Api::User>(ActiveUserCreds[i], FRegistry::Settings));
 
-		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d@example.com"), i);
+		FString Email = FString::Printf(TEXT("joinableLobbyUE4Test+%d@example.com"), i);
 		Email.ToLowerInline();
 		FString Password = TEXT("123Password123");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
@@ -431,6 +431,8 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
 
+	WaitSecond(3, "Waiting backend session sync");
+
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
 	bIsCreatePartySuccess = false;
@@ -544,6 +546,8 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+
+	WaitSecond(3, "Waiting backend syncing session");
 
 	bool bAddUserSuccess = false;
 	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
@@ -733,6 +737,8 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+
+	WaitSecond(3, "Waiting backend to sync session");
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -964,6 +970,8 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
 
+	WaitSecond(3, "Waiting backend to sync session");
+
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
 	bIsCreatePartySuccess = false;
@@ -1077,6 +1085,8 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+
+	WaitSecond(3, "Waiting backend to sync session");
 
 	bool bAddUserSuccess = false;
 	bool bAddUserDone = false;
