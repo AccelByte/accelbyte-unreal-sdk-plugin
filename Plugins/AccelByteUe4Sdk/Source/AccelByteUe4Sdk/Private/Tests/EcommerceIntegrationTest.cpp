@@ -1285,7 +1285,7 @@ bool FEcommerceTestGetUserEntitlementById::RunTest(const FString& Parameters)
 {
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementById"));
 	FRegistry::Entitlement.GetUserEntitlementById(EcommerceTestExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 			{
@@ -1306,7 +1306,7 @@ bool FEcommerceTestGetUserEntitlementByIdInvalidId::RunTest(const FString& Param
 {
 	bool bGetEntitlementDone = false;
 	bool bGetEntitlementError = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementSuccess"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementByIdInvalidId"));
 	FRegistry::Entitlement.GetUserEntitlementById("440e447619a44658a95fd6607204c478",
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 			{
@@ -1341,7 +1341,7 @@ bool FEcommerceTestServerGetUserEntitlementById::RunTest(const FString& Paramete
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetUserEntitlementById"));
 	FRegistry::ServerEcommerce.GetUserEntitlementById(EcommerceTestExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 			{
@@ -1369,7 +1369,7 @@ bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Pa
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetUserEntitlementbyIdUserId"));
 	FRegistry::ServerEcommerce.GetUserEntitlementById(FRegistry::Credentials.GetUserId(), EcommerceTestExpectedEntitlementId,
 		THandler<FAccelByteModelsEntitlementInfo>::CreateLambda([&](const FAccelByteModelsEntitlementInfo& Result)
 			{
@@ -1397,7 +1397,7 @@ bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameter
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerGetEntitlementSuccess"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerQueryUserEntitlements"));
 	FRegistry::ServerEcommerce.QueryUserEntitlements(FRegistry::Credentials.GetUserId(), true, "",
 		{ EcommerceTestExpectedEntitlementId }, 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda(
 			[&bGetEntitlementSuccess, &bGetResultTrue](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
