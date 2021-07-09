@@ -29,7 +29,7 @@ namespace AccelByte
 				LogMessage += "\n" + Header;
 			}
 			//INTENTIONAL: Request->GetContent() && Request->GetContentLength() could throw an error if it doesn't have content
-#if ENGINE_MINOR_VERSION != 22
+
 			LogMessage += "Content-Length: " + FString::FromInt(Request->GetContentLength());
 
 			LogMessage += "\n\n";
@@ -38,7 +38,7 @@ namespace AccelByte
 				LogMessage += static_cast<char>(a);
 			}
 			LogMessage += "\n---\n";
-#endif
+
 			UE_LOG(LogAccelByte, Verbose, TEXT("%s"), *LogMessage);
 		}
 	}

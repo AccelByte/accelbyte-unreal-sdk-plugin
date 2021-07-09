@@ -243,15 +243,11 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	if (!bPolicyPublished)
 	{
-#if ENGINE_MINOR_VERSION >= 23
 		bool bPublishPolicyVersionSuccess = false;
 		Agreement_Publish_Policy_Version(policyVersion.Id, false, FSimpleDelegate::CreateLambda([&bPublishPolicyVersionSuccess]() {
 			bPublishPolicyVersionSuccess = true;
 		}), AgreementTestErrorHandler);
 		Waiting(bPublishPolicyVersionSuccess, "Publish policy version...");
-#else
-		UE_LOG(LogAccelByteAgreementTest, Fatal, TEXT("agreement setup failed: current ue4 version is not supported patch method, please publish policy %s manually"), *policyVersion.Id);
-#endif
 	}
 
 	return true;

@@ -30,7 +30,7 @@ AccelByte UE4 SDK features:
   - Ecommerce (get item categories, get items, create orders, etc.)
   - Lobby (chatting, party management)
 - Server API.
-- Supported UE4 versions: 4.20 - 4.25.3
+- Supported UE4 versions: 4.25 - 4.26
 
 ## Architecture
 
