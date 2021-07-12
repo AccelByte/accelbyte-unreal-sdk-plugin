@@ -264,5 +264,108 @@ namespace GameServerApi
 			})
 		);
 	}
+
+	void ServerLobby::GetSessionAttributeAll(const FString& UserId, const THandler<FAccelByteModelsGetSessionAttributeAllResponse>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		if (UserId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
+			return;
+		}
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerLobby::GetSessionAttribute(const FString& UserId, const FString& Key, const THandler<FAccelByteModelsGetSessionAttributeResponse>& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		if (UserId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
+			return;
+		}
+
+		if (Key.IsEmpty())
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. Key is empty."));
+			return;
+		}
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerLobby::SetSessionAttribute(const FString& UserId, const TMap<FString, FString>& Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		if (UserId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. User Id is empty."));
+			return;
+		}
+
+		if (Attributes.Num() == 0)
+		{
+			OnError.ExecuteIfBound(404, TEXT("Url is invalid. Attributes is empty."));
+			return;
+		}
+
+		FAccelByteModelsSetSessionAttributeRequest Body;
+		Body.Attributes = Attributes;
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Verb = TEXT("PUT");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content;
+		FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerLobby::SetSessionAttribute(const FString& UserId, const FString& Key, const FString& Value, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		TMap<FString, FString> Attributes = { { Key, Value } };
+		SetSessionAttribute(UserId, Attributes, OnSuccess, OnError);
+	}
+
 } // namespace GameServerApi
 } // namespace AccelByte

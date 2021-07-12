@@ -76,6 +76,46 @@ namespace GameServerApi
 		*/
 		void GetActiveParties(const FAccelByteModelsPaging& Paging, const EAccelBytePaginationType& PaginationType, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError);
 
+		/**
+		* @brief  Get all session attributes of the user.
+		*
+		* @param UserId The user's user ID.
+		* @param OnSuccess This will be called when the operation succeeded. Will return an FAccelByteModelsGetSessionAttributeAllRequest.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void GetSessionAttributeAll(const FString& UserId, const THandler<FAccelByteModelsGetSessionAttributeAllResponse>& OnSuccess, const FErrorHandler& OnError);
+
+		/**
+		* @brief  Get session attribute of the user accoding to the Key provided.
+		*
+		* @param UserId The user's user ID.
+		* @param Key The session attribute's key.
+		* @param OnSuccess This will be called when the operation succeeded. Will return an FAccelByteModelsGetSessionAttributeRequest.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void GetSessionAttribute(const FString& UserId, const FString& Key, const THandler<FAccelByteModelsGetSessionAttributeResponse>& OnSuccess, const FErrorHandler& OnError);
+
+		/**
+		* @brief  Set session attribute of the user.
+		*
+		* @param UserId The user's user ID.
+		* @param Attributes The session attributes you want to store.
+		* @param OnSuccess This will be called when the operation succeeded. Will return an FString value.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void SetSessionAttribute(const FString& UserId, const TMap<FString, FString>& Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+		/**
+		* @brief  Set session attribute of the user.
+		*
+		* @param UserId The user's user ID.
+		* @param Key The session attributes's Key.
+		* @param Value The session attributes's Value.
+		* @param OnSuccess This will be called when the operation succeeded. Will return an FString value.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void SetSessionAttribute(const FString& UserId, const FString& Key, const FString& Value, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+		
 	private:
 
 		struct PartyStorageWrapper

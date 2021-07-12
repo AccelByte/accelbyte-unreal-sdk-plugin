@@ -30,6 +30,7 @@ FJsonObjectWrapper SPartyStorageData;
 bool bSUsersConnected, bSUsersConnectionSuccess, bSUsersConnectionError;
 bool bSCreatePartySuccess, bSCreatePartyError, bSInvitePartySuccess, bSGetInvitedNotifSuccess, bSGetInvitedNotifError, bSGetInfoPartySuccess, bSGetInfoPartyError;
 bool bSJoinPartySuccess, bSJoinPartyError, bSLeavePartySuccess, bSLeavePartyError, bSKickPartyMemberSuccess, bSKickPartyMemberError, bSKickedFromPartySuccess;
+bool bSetSessionAttribute;
 bool bSCleanupLeaveParty;
 
 FAccelByteModelsInfoPartyResponse SinfoPartyResponse;
@@ -102,6 +103,7 @@ void ResetServerResponses()
 	bSJoinPartyError = false;
 	bSLeavePartySuccess = false;
 	bSLeavePartyError = false;
+	bSetSessionAttribute = false;
 	bSKickPartyMemberSuccess = false;
 	bSKickPartyMemberError = false; 
 	bSKickedFromPartySuccess = false;
@@ -206,6 +208,14 @@ const auto ServerKickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLa
 	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Kicked From Party!"));
 	{
 		bSKickedFromPartySuccess = true;
+	}
+});
+
+const auto ServerSetSessionAttributeDelagate = Api::Lobby::FSetSessionAttributeResponse::CreateLambda([](FAccelByteModelsSetSessionAttributesResponse result)
+{
+	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Set Session Attribute Success!"));
+	{
+		bSetSessionAttribute = true;
 	}
 });
 
@@ -2137,6 +2147,79 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(queryAfterDisbandPartyNotFound0);
 
 	SLobbyDisconnect(2);
+	ResetServerResponses();
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyGetSetSessionAttribute_Ok, "AccelByte.Tests.ServerLobby.C.SessionAttributeGetSet_Ok", AutomationFlagMaskServerLobby);
+bool ServerLobbyGetSetSessionAttribute_Ok::RunTest(const FString& Parameters)
+{
+	// Setup session attribute contents
+	const TMap<FString, FString> Attributes = { {"mmr", "50"}, {"sr", "50"} };
+	TArray<FString> AttributeKeys = {};
+	Attributes.GenerateKeyArray(AttributeKeys);
+
+	// Setup Lobby client
+	SLobbyConnect(1);
+
+	// ACT
+	// Setup User set Session Attribute
+	SLobbies[0]->SetSetSessionAttributeDelegate(ServerSetSessionAttributeDelagate);
+	SLobbies[0]->SetSessionAttribute(AttributeKeys[0], Attributes[AttributeKeys[0]]);
+
+	// Setup Server set session attribute
+	bool bServerSetSessionAttributeComplete = false;
+	FRegistry::ServerLobby.SetSessionAttribute(SUserIds[0], AttributeKeys[1], Attributes[AttributeKeys[1]], FVoidHandler::CreateLambda([&bServerSetSessionAttributeComplete]() {
+		bServerSetSessionAttributeComplete = true;
+	}), ServerLobbyErrorHandler);
+	Waiting(bServerSetSessionAttributeComplete, "Waiting server set session attribute 1");
+
+	// Setup Server get session attribute
+	bool bServerGetSessionAttribute = false;
+	FAccelByteModelsGetSessionAttributeResponse getSessionAttributeResult;
+	FRegistry::ServerLobby.GetSessionAttribute(SUserIds[0], AttributeKeys[0], THandler<FAccelByteModelsGetSessionAttributeResponse>::CreateLambda([&bServerGetSessionAttribute, &getSessionAttributeResult](const FAccelByteModelsGetSessionAttributeResponse& result)
+	{
+		bServerGetSessionAttribute = true;
+		getSessionAttributeResult = result;
+	}), ServerLobbyErrorHandler);
+
+	bool bServerGetSessionAttributeAll = false;
+	FAccelByteModelsGetSessionAttributeAllResponse getSessionAttributeAllResult;
+	FRegistry::ServerLobby.GetSessionAttributeAll(SUserIds[0], THandler<FAccelByteModelsGetSessionAttributeAllResponse>::CreateLambda([&bServerGetSessionAttributeAll, &getSessionAttributeAllResult](const FAccelByteModelsGetSessionAttributeAllResponse& result)
+	{
+		bServerGetSessionAttributeAll = true;
+		getSessionAttributeAllResult = result;
+	}), ServerLobbyErrorHandler);
+
+	Waiting(bServerGetSessionAttribute, "Waiting get session attribute response");
+	Waiting(bServerGetSessionAttributeAll, "Waiting get session attribute all response");
+
+	// ASSERT
+	AB_TEST_TRUE(bServerSetSessionAttributeComplete);
+	AB_TEST_TRUE(bServerGetSessionAttribute);
+	AB_TEST_EQUAL(getSessionAttributeResult.Key, AttributeKeys[0]);
+	AB_TEST_EQUAL(getSessionAttributeResult.Value, Attributes[AttributeKeys[0]]);
+	AB_TEST_TRUE(bServerGetSessionAttributeAll);
+	
+	bool attributesInconsistent = false;
+	for (auto attribute : Attributes)
+	{
+		if (!getSessionAttributeAllResult.Attributes.Contains(attribute.Key))
+		{
+			attributesInconsistent = true;
+			break;
+		}
+
+		if (attribute.Value != getSessionAttributeAllResult.Attributes[attribute.Key])
+		{
+			attributesInconsistent = true;
+			break;
+		}
+	}
+	AB_TEST_FALSE(attributesInconsistent);
+	
+	SLobbyDisconnect(1);
 	ResetServerResponses();
 
 	return true;
