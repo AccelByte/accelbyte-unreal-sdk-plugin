@@ -1,9 +1,10 @@
-﻿// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
 #include "TestUtilities.h"
+#include "UGCTestAdmin.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Core/AccelByteMultiRegistry.h"

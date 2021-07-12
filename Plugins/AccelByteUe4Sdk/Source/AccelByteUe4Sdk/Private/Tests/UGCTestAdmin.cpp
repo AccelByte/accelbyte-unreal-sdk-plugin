@@ -1,14 +1,9 @@
-﻿// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "CoreMinimal.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
-#include "Models/AccelByteUGCModels.h"
-
-FString GetAdminBaseUrl();
-FString GetAdminAccessToken();
+#include "UGCTestAdmin.h"
+#include "TestUtilities.h"
 
 void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError)
 {
