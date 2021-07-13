@@ -10,6 +10,7 @@
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "TestUtilities.h"
+#include "TestModels.h"
 #include "Core/AccelByteMultiRegistry.h"
 
 using namespace std;
@@ -3137,6 +3138,112 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bDeleteSuccessful);
 
 	FRegistry::User.ForgetAllCredentials();
+
+	return true;
+}
+
+void AwsCognitoAuthUserPassword(const FString& AwsRegion, const FString& AwsClientId, const FString& Username, const FString& Password, const THandler<FAwsCognitoAuthResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(FString::Printf(TEXT("https://cognito-idp.%s.amazonaws.com/"), *AwsRegion));
+	Request->SetVerb("POST");
+	Request->SetHeader(TEXT("Content-Type"), "application/x-amz-json-1.1");
+	Request->SetHeader(TEXT("Accept"), TEXT("*/*"));
+	Request->SetHeader(TEXT("X-Amz-Target"), TEXT("AWSCognitoIdentityProviderService.InitiateAuth"));
+	Request->SetContentAsString(
+		FString::Printf(TEXT(R"({"AuthFlow":"USER_PASSWORD_AUTH","AuthParameters": {"PASSWORD": "%s","USERNAME": "%s"},"ClientId": "%s"})"), *Password, *Username, *AwsClientId)
+	);
+
+	// handle error differently for AWS API
+	FRegistry::HttpRetryScheduler.ProcessRequest(
+		Request,
+		FHttpRequestCompleteDelegate::CreateLambda(
+		[OnSuccess, OnError]
+		(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bFinished)
+		{
+			if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+			{
+				HandleHttpResultOk(Response, OnSuccess);
+				return;
+			}
+
+			if (!bFinished)
+			{
+				OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.");
+				return;
+			}
+
+			FAwsErrorResult Result;
+			FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0);
+
+			OnError.ExecuteIfBound(Response->GetResponseCode(), Result.Message);
+		}),
+		FPlatformTime::Seconds());
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithAwscognito, "AccelByte.Tests.AUser.LoginWithAwscognito", AutomationFlagMaskUser);
+bool FLoginWithAwscognito::RunTest(const FString& Parameter)
+{
+	FString AwsRegion = FPlatformMisc::GetEnvironmentVariable(TEXT("AWS_COGNITO_REGION"));
+	FString AwsClientId = FPlatformMisc::GetEnvironmentVariable(TEXT("AWS_COGNITO_CLIENT_ID"));
+	FString Username = FPlatformMisc::GetEnvironmentVariable(TEXT("AWS_COGNITO_USERNAME"));
+	FString Password = FPlatformMisc::GetEnvironmentVariable(TEXT("AWS_COGNITO_PASSWORD"));
+
+	if (AwsRegion.IsEmpty() || AwsClientId.IsEmpty() || Username.IsEmpty() || Password.IsEmpty())
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("=== Skipping test `%s` because one of the environment variables AWS_COGNITO_REGION, AWS_COGNITO_CLIENT_ID, AWS_COGNITO_USERNAME, AWS_COGNITO_PASSWORD is undefined"), *TestName);
+		return true;
+	}
+
+	bool bAwsAuthComplete = false;
+	bool bAwsAuthSuccess = false;
+	FString AccessToken;
+	AwsCognitoAuthUserPassword(
+		AwsRegion, AwsClientId, Username, Password,
+		THandler<FAwsCognitoAuthResult>::CreateLambda(
+			[&bAwsAuthComplete, &bAwsAuthSuccess, &AccessToken](const FAwsCognitoAuthResult& Result)
+		{
+			bAwsAuthSuccess = true;
+			bAwsAuthComplete = true;
+			AccessToken = Result.AuthenticationResult.AccessToken;
+		}),
+		FErrorHandler::CreateLambda(
+			[&bAwsAuthComplete](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelByteUserTest, Error, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+			bAwsAuthComplete = true;
+		})
+	);
+
+	Waiting(bAwsAuthComplete, "AWS Cognito authenticate user password...");
+
+	AB_TEST_TRUE(bAwsAuthSuccess);
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginWithAwsCognitoComplete = false;
+	bool bLoginWithAwsCognitoSuccess = false;
+
+	FRegistry::User.LoginWithOtherPlatform(
+		EAccelBytePlatformType::AwsCognito,
+		AccessToken,
+		FVoidHandler::CreateLambda(
+			[&bLoginWithAwsCognitoComplete, &bLoginWithAwsCognitoSuccess]()
+		{
+			bLoginWithAwsCognitoSuccess = true;
+			bLoginWithAwsCognitoComplete = true;
+		}),
+		FErrorHandler::CreateLambda(
+			[&bLoginWithAwsCognitoComplete](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+			bLoginWithAwsCognitoComplete = true;
+		})
+	);
+
+	Waiting(bLoginWithAwsCognitoComplete, "Login with AWS Cognito...");
+
+	AB_TEST_TRUE(bLoginWithAwsCognitoSuccess);
 
 	return true;
 }

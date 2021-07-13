@@ -39,3 +39,41 @@ struct ACCELBYTEUE4SDK_API FGrandParent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FParent ParentB;
 };
+
+#pragma region AWS
+
+USTRUCT(BlueprintType)
+struct FAwsAuthenticationResult
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString AccessToken;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	int ExpiresIn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString IdToken;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString RefreshToken;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString TokenType;
+};
+
+USTRUCT(BlueprintType)
+struct FAwsCognitoAuthResult
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FAwsAuthenticationResult AuthenticationResult;
+};
+
+USTRUCT(BlueprintType)
+struct FAwsErrorResult
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString __type;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | AWS")
+	FString Message;
+};
+
+#pragma endregion AWS
