@@ -26,7 +26,7 @@ pipeline {
         POD_NAME = "ue4sdktest-${env.BUILD_NUMBER}"
     }
     stages {
-        stage('Preparation') {
+        stage('Prepare') {
             agent {
                 label 'master'
             }
@@ -94,253 +94,228 @@ pipeline {
                 }
             }
         }
-        stage('Build and Deploy') {
-            agent {
-                label "justice-sdk-builder"
-            }
-            stages {
-                stage('Cleanup') {
-                    steps {
-                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Cleanup.ps1\""
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Cleanup";
-                            }
-                        }
-                    }
-                }
-                stage('Write Config') {
-                    steps {
-                        powershell "& \"${env.WORKSPACE}\\Jenkins\\WriteConfig.ps1\""
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Write Config";
-                            }
-                        }
-                    }
-                }
-                stage('Build Linux') {
-                    steps {
-                        echo "build linux"
-                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Linux"
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Build Linux";
-                            }
-                        }
-                    }
-                }
-                stage('Build Windows') {
-                    steps {
-                        echo "build win64"
-                        powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Win64"
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Build Windows";
-                            }
-                        }
-                    }
-                }
-                stage('ProxySetup') {
-                    steps {
-                        script {
-                            if ("${env.USE_PROXY}" == "true") {
-                                powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\ProxySetup.ps1'
-                            } else {
-                                echo 'Proxy is not used'
-                            }
-                        }
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "ProxySetup";
-                            }
-                        }
-                    }
-                }
-                stage('Automation Test') {
-                    steps {
-                        bat "powershell -Command \"${env.WORKSPACE}\\Jenkins\\LoginSteam.ps1\""
-                        script {
-                            def testsByGroup = [
-                                "Core": [
-                                        "AccelByte.Tests.Core"
-                                    ].join("+"),
-                                "Basic": [
-                                        "AccelByte.Tests.Agreement",
-                                        "AccelByte.Tests.ServerOauth2", 
-                                        "AccelByte.Tests.AUser", 
-                                        "AccelByte.Tests.CloudSave",
-                                        "AccelByte.Tests.ServerCloudSave"
-                                    ].join("+"),
-                                "Essentials": [
-                                        "AccelByte.Tests.ECommerce",
-                                        "AccelByte.Tests.Subscription"
-                                    ].join("+"),  
-                                "Social": [
-                                        "AccelByte.Tests.Achievement",
-                                        "AccelByte.Tests.CloudStorage",
-                                        "AccelByte.Tests.GameProfile",
-                                        "AccelByte.Tests.Statistic",
-                                        "AccelByte.Tests.ServerStatistic",
-                                        "AccelByte.Tests.Leaderboard",
-                                        "AccelByte.Tests.MultiRegistry"
-                                    ].join("+"),
-                                "Content": [
-                                        "AccelByte.Tests.UGC"
-                                    ].join("+"),
-                                "Play": [
-                                        "AccelByte.Tests.DSM",
-                                        "AccelByte.Tests.Qos",
-                                        "AccelByte.Tests.Lobby",
-                                        "AccelByte.Tests.ServerJoinableSession",
-                                        "AccelByte.Tests.ServerLobby",
-                                        "AccelByte.Tests.SessionBrowser"
-                                    ].join("+"),
-                                "Analytics": [
-                                        "AccelByte.Tests.GameTelemetry",
-                                        "AccelByte.Tests.ServerGameTelemetry"
-                                    ].join("+")
-                            ]
+		stage('Multiplatform') {
+			parallel {
+				stage('Platform Win64') {
+					agent {
+						label "justice-unreal-sdk-build"
+					}
+					stages {
+						stage('Build Win64') {
+							steps {
+								powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Win64"
+							}
+							post {
+								failure {
+									script{
+										FAILED_STAGE = "Build Win64";
+									}
+								}
+							}
+						}
+						stage('Test') {
+							steps {
+								script {
+									if ("${env.USE_PROXY}" == "true") {
+										powershell 'powershell -File $Env:WORKSPACE\\Jenkins\\SetupProxy.ps1'
+									} else {
+										echo 'Proxy is not used'
+									}
+								}
+								powershell "& \"${env.WORKSPACE}\\Jenkins\\SetupConfig.ps1\""
+								bat "powershell -Command \"${env.WORKSPACE}\\Jenkins\\LoginSteam.ps1\""
+								script {
+									def testsByGroup = [
+										"Core": [
+												"AccelByte.Tests.Core"
+											].join("+"),
+										"Basic": [
+												"AccelByte.Tests.Agreement",
+												"AccelByte.Tests.ServerOauth2", 
+												"AccelByte.Tests.AUser", 
+												"AccelByte.Tests.CloudSave",
+												"AccelByte.Tests.ServerCloudSave"
+											].join("+"),
+										"Essentials": [
+												"AccelByte.Tests.ECommerce",
+												"AccelByte.Tests.Subscription"
+											].join("+"),  
+										"Social": [
+												"AccelByte.Tests.Achievement",
+												"AccelByte.Tests.CloudStorage",
+												"AccelByte.Tests.GameProfile",
+												"AccelByte.Tests.Statistic",
+												"AccelByte.Tests.ServerStatistic",
+												"AccelByte.Tests.Leaderboard",
+												"AccelByte.Tests.MultiRegistry"
+											].join("+"),
+										"Content": [
+												"AccelByte.Tests.UGC"
+											].join("+"),
+										"Play": [
+												"AccelByte.Tests.DSM",
+												"AccelByte.Tests.Qos",
+												"AccelByte.Tests.Lobby",
+												"AccelByte.Tests.ServerJoinableSession",
+												"AccelByte.Tests.ServerLobby",
+												"AccelByte.Tests.SessionBrowser"
+											].join("+"),
+										"Analytics": [
+												"AccelByte.Tests.GameTelemetry",
+												"AccelByte.Tests.ServerGameTelemetry"
+											].join("+")
+									]
 
-                            if (buildByTimer) {
-                                testGroups = testsByGroup.keySet()
-                            }
-                            else {
-                                testGroups = params.TEST_GROUPS.split(",")
-                            }
-                            
-                            failedTestGroups = []
-    
-                            for (group in testGroups) {
-                                echo "Run tests for ${group}"
-                                def script = """
-                                    & \"${env.WORKSPACE}\\Jenkins\\RunTests.ps1\" `
-                                    -tests:${testsByGroup[group]} `
-                                    -log:${group}_Log.log `
-                                    -report:\"${env.WORKSPACE}\\Saved\\Logs\\${group}\""""
-                                
-                                    def status = powershell(returnStatus: true, script: script)
-                                    archiveArtifacts artifacts: "Saved/Logs/${group}_Log.log, Saved/Logs/${group}/*"
+									if (buildByTimer) {
+										testGroups = testsByGroup.keySet()
+									}
+									else {
+										testGroups = params.TEST_GROUPS.split(",")
+									}
+									
+									failedTestGroups = []
+			
+									for (group in testGroups) {
+										echo "Run tests for ${group}"
+										def script = """
+											& \"${env.WORKSPACE}\\Jenkins\\RunTests.ps1\" `
+											-tests:${testsByGroup[group]} `
+											-log:${group}_Log.log `
+											-report:\"${env.WORKSPACE}\\Saved\\Logs\\${group}\""""
+										
+											def status = powershell(returnStatus: true, script: script)
+											archiveArtifacts artifacts: "Saved/Logs/${group}_Log.log, Saved/Logs/${group}/*"
 
-                                    if (status != 0) {
-                                        failedTestGroups.add(group)
-                                    }
-                            }
-                            
-                            if (failedTestGroups.size() > 0) {
-                                error("Some test groups are failed: ${failedTestGroups}")
-                            }
-                        }
-                    }
-                    post {
-                        always {
-                            powershell "& \"${env.WORKSPACE}\\Jenkins\\LogoutSteam.ps1\""
-                        }
-                        failure {
-                            script{
-                                FAILED_STAGE = "Automation Test";
-                            }
-                        }
-                    }
-                }
-                stage('Package') {
-                    when {
-                        expression { return doDeploy }
-                    }
-                    steps {
-                        bat '%WORKSPACE%\\Jenkins\\Package.bat'
-                        bat '%WORKSPACE%\\Jenkins\\Package_Plugin.bat'
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Package";
-                            }
-                        }
-                    }
-                }
-                stage('Archive'){
-                    when {
-                        expression { return doDeploy }
-                    }
-                    steps {
-                        script{
-                            def VERSION = version
-                        }
-                        bat '%WORKSPACE%\\Jenkins\\Archive.bat'
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Archive";
-                            }
-                        }
-                    }
-                }
-                stage('Upload Archive'){
-                    when {
-                        expression { return doDeploy }
-                    }
-                    tools {
-                        maven "Maven 3.6.1"
-                    }
+											if (status != 0) {
+												failedTestGroups.add(group)
+											}
+									}
+									
+									if (failedTestGroups.size() > 0) {
+										error("Some test groups are failed: ${failedTestGroups}")
+									}
+								}
+							}
+							post {
+								always {
+									powershell "& \"${env.WORKSPACE}\\Jenkins\\LogoutSteam.ps1\""
+								}
+								failure {
+									script{
+										FAILED_STAGE = "Test";
+									}
+								}
+							}
+						}
+						stage('Package') {
+							when {
+								expression { return doDeploy }
+							}
+							steps {
+								bat '%WORKSPACE%\\Jenkins\\Package.bat'
+								bat '%WORKSPACE%\\Jenkins\\Package_Plugin.bat'
+							}
+							post {
+								failure {
+									script{
+										FAILED_STAGE = "Package";
+									}
+								}
+							}
+						}
+						stage('Archive'){
+							when {
+								expression { return doDeploy }
+							}
+							steps {
+								script{
+									def VERSION = version
+								}
+								bat '%WORKSPACE%\\Jenkins\\Archive.bat'
+							}
+							post {
+								failure {
+									script{
+										FAILED_STAGE = "Archive";
+									}
+								}
+							}
+						}
+						stage('Upload'){
+							when {
+								expression { return doDeploy }
+							}
+							tools {
+								maven "Maven 3.6.1"
+							}
 
-                    environment {
-                        NEXUS_VERSION = "nexus3"
-                        NEXUS_PROTOCOL = "https"
-                        NEXUS_URL = "nexus.accelbyte.net"
-                        NEXUS_REPOSITORY = "justice-ue4-repository"
-                        NEXUS_CREDENTIAL_ID = "nexus-sdk"
-                        NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
-                        GIT_PATH = "${env.GIT_PATH}"
-                        GIT_SHA = "${env.GIT_COMMIT}"
-                        BUILD_NUMBER = "${env.BUILD_NUMBER}"
-                        WORKSPACE = "${env.WORKSPACE}"
-                    }
+							environment {
+								NEXUS_VERSION = "nexus3"
+								NEXUS_PROTOCOL = "https"
+								NEXUS_URL = "nexus.accelbyte.net"
+								NEXUS_REPOSITORY = "justice-ue4-repository"
+								NEXUS_CREDENTIAL_ID = "nexus-sdk"
+								NEXUS_GROUP_ID = "net.accelbyte.AccelByteSDK"
+								GIT_PATH = "${env.GIT_PATH}"
+								GIT_SHA = "${env.GIT_COMMIT}"
+								BUILD_NUMBER = "${env.BUILD_NUMBER}"
+								WORKSPACE = "${env.WORKSPACE}"
+							}
 
-                    steps {
-                        bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
-                        script{
-                            def PACKAGE = "${env.WORKSPACE}/artifacts/AccelByteUe4SdkPackage-${VERSION}.7z"
-                            nexusArtifactUploader(
-                                nexusVersion: NEXUS_VERSION,
-                                protocol: NEXUS_PROTOCOL,
-                                nexusUrl: NEXUS_URL,
-                                groupId: NEXUS_GROUP_ID,
-                                version: VERSION,
-                                repository: NEXUS_REPOSITORY,
-                                credentialsId: NEXUS_CREDENTIAL_ID,
-                                artifacts: [
-                                    [
-                                        artifactId: "sdk-ue4",
-                                        classifier: '',
-                                        file: PACKAGE,
-                                        type: "7z"
-                                    ]
-                                ]
-                            );
-                        }
-                    }
-                    post {
-                        failure {
-                            script{
-                                FAILED_STAGE = "Upload Archive";
-                            }
-                        }
-                    }
-                }
-            }
-        }
+							steps {
+								bat '%WORKSPACE%\\Jenkins\\UploadArchive.bat'
+								script{
+									def PACKAGE = "${env.WORKSPACE}/artifacts/AccelByteUe4SdkPackage-${VERSION}.7z"
+									nexusArtifactUploader(
+										nexusVersion: NEXUS_VERSION,
+										protocol: NEXUS_PROTOCOL,
+										nexusUrl: NEXUS_URL,
+										groupId: NEXUS_GROUP_ID,
+										version: VERSION,
+										repository: NEXUS_REPOSITORY,
+										credentialsId: NEXUS_CREDENTIAL_ID,
+										artifacts: [
+											[
+												artifactId: "sdk-ue4",
+												classifier: '',
+												file: PACKAGE,
+												type: "7z"
+											]
+										]
+									);
+								}
+							}
+							post {
+								failure {
+									script{
+										FAILED_STAGE = "Upload";
+									}
+								}
+							}
+						}
+					}
+				}
+				stage('Platform Linux') {
+					agent {
+						label "justice-unreal-sdk-build"
+					}
+					stages {
+						stage('Build Linux') {
+							steps {
+								powershell "& \"${env.WORKSPACE}\\Jenkins\\Build.ps1\" -platform Linux"
+							}
+							post {
+								failure {
+									script{
+										FAILED_STAGE = "Build Linux";
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
     }
     post {
 //         always {
