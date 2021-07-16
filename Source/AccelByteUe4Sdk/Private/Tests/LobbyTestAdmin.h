@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #pragma once
+
 #include "CoreMinimal.h"
 
 #include "Core/AccelByteError.h"

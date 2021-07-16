@@ -1610,6 +1610,30 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestJoinParty_Via_PartyCodeInvalid, "AccelByte.Tests.Lobby.B.JoinPartyCodeInvalid", AutomationFlagMaskLobby);
+bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
+{
+	LobbyConnect(1);
+
+	bool bJoinFailed = false;
+	Lobbies[0]->SetPartyJoinViaCodeResponseDelegate(Lobby::FPartyJoinViaCodeResponse::CreateLambda([&](const FAccelByteModelsPartyJoinReponse& Result)
+	{
+		if(Result.Code.Equals("11573") || !Result.Code.Equals("0"))
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("[EXPECTED] Join party code is invalid with code : %s"), *Result.Code);
+			bJoinFailed = true;
+		}
+	}));
+	Lobbies[0]->SendPartyJoinViaCodeRequest("INVALID");
+	Waiting(bJoinFailed, "Waiting to join party via code...");
+	
+	AB_TEST_TRUE(bJoinFailed);
+
+	LobbyDisconnect(1);
+	
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestInviteToParty_InvitationAccepted_CanChat, "AccelByte.Tests.Lobby.B.PartyChat", AutomationFlagMaskLobby);
 bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& Parameters)
 {

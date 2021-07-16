@@ -222,7 +222,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickPartyMemberResponse
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyGetCodeResponse
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString PartyCode;
 };
@@ -379,9 +381,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsChannelMessageResponse
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-		int32 Code;
+	FString Code;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-		FString Message;
+	FString Message;
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -417,7 +419,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUsersPresenceNotice
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGetOnlineUsersResponse
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString type;
@@ -503,9 +507,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-    FString Code;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString MatchId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
@@ -551,6 +552,8 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReadyConsentRequest
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	FString MatchId;
 };
