@@ -1065,14 +1065,6 @@ struct FTestUser
 	{}
 };
 
-#if 0 // AB_TEST_SKIP_WHEN_DISABLED is taken out, remove permanently in the future if no one is using
-TArray<FString> GetDisabledTestList();
-bool IsAccelByteTestEnabled(const FString& TestName);
-bool AccelByteSkipTest(const FString& TestName);
-
-#define AB_TEST_SKIP_WHEN_DISABLED() if (AccelByteSkipTest(GetBeautifiedTestName())) return true
-#endif
-
 FString GetAdminBaseUrl();
 FString GetAdminUserAccessToken();
 

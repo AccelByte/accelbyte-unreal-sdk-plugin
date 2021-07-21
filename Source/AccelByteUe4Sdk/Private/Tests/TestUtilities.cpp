@@ -20,52 +20,6 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-#if 0 // AB_TEST_SKIP_WHEN_DISABLED is taken out, remove permanently in the future if no one is using
-TArray<FString> GetDisabledTestList()
-{
-	TArray<FString> DisabledTest;
-	const FString DisabledTestString = Environment::GetEnvironmentVariable(TEXT("AB_UE4_SDK_DISABLED_TESTS"), 1000);
-	DisabledTestString.ParseIntoArray(DisabledTest, TEXT(";"), true);
-	DisabledTest.RemoveAll([](const FString& Test) -> bool
-		{
-			return Test.IsEmpty();
-		});
-	return DisabledTest;
-}
-
-bool IsAccelByteTestEnabled(const FString& TestName)
-{
-	static TArray<FString> DisabledTests = GetDisabledTestList();
-	for (const FString& DisabledTest : DisabledTests)
-	{
-		if (DisabledTest.StartsWith("\"") && DisabledTest.EndsWith("\""))
-		{
-			return !DisabledTest.Equals(TestName);
-		}
-		if (DisabledTest.StartsWith("*") && TestName.EndsWith(DisabledTest))
-		{
-			return false;
-		}
-		if (TestName.StartsWith(DisabledTest))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-bool AccelByteSkipTest(const FString& TestName)
-{
-	if (!IsAccelByteTestEnabled(TestName))
-	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("=== Skipping test `%s`"), *TestName);
-		return true;
-	}
-
-	return false;
-}
-#endif
-
 void Waiting(bool& bCondition, FString Message, double TimeoutDelay)
 {
 	const double StartTime = FPlatformTime::Seconds();
