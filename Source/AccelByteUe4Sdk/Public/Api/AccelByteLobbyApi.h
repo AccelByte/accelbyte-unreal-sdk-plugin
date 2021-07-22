@@ -499,9 +499,14 @@ public:
 	FString SendPartyJoinViaCodeRequest(const FString& partyCode);
 
 	/**
-	 * @brief Get a list of online users in the Lobby server.
+	 * @brief (Obsolete) the function name is misleading, please use SendGetOnlineFriendPresenceRequest().
 	 */
     FString SendGetOnlineUsersRequest();
+
+	/**
+	 * @brief Get list of online friends in the lobby server.
+	 */
+	FString SendGetOnlineFriendPresenceRequest();
 
 	/**
 	 * @brief Promote party member to party leader.
@@ -972,13 +977,23 @@ public:
 	};
 
 	/**
-	* @brief set info party response
+	* @brief (obsolete) misnamed, please use SetGetOnlineFriendsPresenceResponseDelegate
 	*
 	* @param OnGetAllUserPresenceResponse set delegate .
 	*/
 	void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse)
 	{
 		GetAllFriendsStatusResponse = OnGetAllUserPresenceResponse;
+	};
+
+	/**
+	* @brief Set GetFriendsPresenceResponse delegate. 
+	*
+	* @param OnGetFriendsPresenceResponse set delegate .
+	*/
+	void SetGetOnlineFriendsPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetFriendsPresenceResponse)
+	{
+		GetAllFriendsStatusResponse = OnGetFriendsPresenceResponse;
 	};
 
 	// Notification

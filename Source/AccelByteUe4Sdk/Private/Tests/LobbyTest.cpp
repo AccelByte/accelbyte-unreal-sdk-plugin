@@ -46,7 +46,7 @@ TArray<TSharedPtr<Api::User>> LobbyUsers;
 TArray<TSharedPtr<Api::Lobby>> Lobbies;
 TArray<TPair<FString, float>> PreferedLatencies;
 //General
-bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess;
+bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bGetFriendsPresenceSuccess;
 //Friends
 bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bRequestFriendSuccess, bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError;
 bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendError, bListIncomingFriendSuccess, bListIncomingFriendError;
@@ -77,6 +77,7 @@ FAccelByteModelsPartyGetCodeResponse partyCodeResponse;
 FAccelByteModelsPartyRejectResponse rejectPartyResponse;
 
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
+FAccelByteModelsGetOnlineUsersResponse onlineFriendResponse;
 FAccelByteModelsNotificationMessage getNotifResponse;
 FAccelByteModelsUsersPresenceNotice userPresenceNotifResponse;
 
@@ -162,6 +163,7 @@ void ResetResponses()
 	bUsersConnectionSuccess = false;
 	bGetMessage = false;
 	bGetAllUserPresenceSuccess = false;
+	bGetFriendsPresenceSuccess = false;
 	bRequestFriendSuccess = false;
 	bRequestFriendError = false;
 	bAcceptFriendSuccess = false;
@@ -690,6 +692,13 @@ const auto GetAllUsersPresenceDelegate = Api::Lobby::FGetAllFriendsStatusRespons
 	onlineUserResponse = result;
 });
 
+const auto GetFriendsPresenceDelegate = Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda([](FAccelByteModelsGetOnlineUsersResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("GetFriendsPresence Success!"));
+	bGetFriendsPresenceSuccess = true;
+	onlineFriendResponse = result;
+});
+
 const auto UserPresenceDelegate = Api::Lobby::FSetUserPresenceResponse::CreateLambda([](FAccelByteModelsSetOnlineUsersResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Presence Changed!"));
@@ -1210,7 +1219,6 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 		bAcceptFriendSuccess = false;
 	}
 
-
 	Lobbies[0]->SendGetOnlineUsersRequest();
 	WaitUntil([&]()
 	{
@@ -1230,6 +1238,58 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[1].GetUserId()));
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[2].GetUserId()));
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[3].GetUserId()));
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends, "AccelByte.Tests.Lobby.B.ListOnlineFriendsNew", AutomationFlagMaskLobby);
+bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends::RunTest(const FString& Parameters)
+{
+	LobbyConnect(TestUserCount);
+
+	Lobbies[0]->SetGetOnlineFriendsPresenceResponseDelegate(GetFriendsPresenceDelegate);
+
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		Lobbies[i]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	}
+
+	Lobbies[0]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		Lobbies[i]->RequestFriend(UserCreds[0].GetUserId());
+		FString text = FString::Printf(TEXT("Requesting Friend %d... "), i);
+		Waiting(bRequestFriendSuccess, text);
+
+		Lobbies[0]->AcceptFriend(UserCreds[i].GetUserId());
+		text = FString::Printf(TEXT("Accepting Friend %d... "), i);
+		Waiting(bAcceptFriendSuccess, text);
+
+		Lobbies[i]->SendSetPresenceStatus(Availability::Availabe, "random activity");
+		bRequestFriendSuccess = false;
+		bAcceptFriendSuccess = false;
+	}
+
+	Lobbies[0]->SendGetOnlineFriendPresenceRequest();
+	WaitUntil([&]()
+	{
+		return bGetFriendsPresenceSuccess;
+	}, 30, "Getting Friend Status...");
+
+	for (int i = 1; i < TestUserCount; i++)
+	{
+		Lobbies[i]->SendSetPresenceStatus(Availability::Offline, "disappearing");
+		Lobbies[i]->Unfriend(UserCreds[0].GetUserId());
+	}
+
+	LobbyDisconnect(TestUserCount);
+
+	AB_TEST_TRUE(bGetFriendsPresenceSuccess);
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Num() >= 3);
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[2].GetUserId()));
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[3].GetUserId()));
 	ResetResponses();
 	return true;
 }

@@ -399,6 +399,11 @@ FString Lobby::SendSetPresenceStatus(const Availability Availability, const FStr
 
 FString Lobby::SendGetOnlineUsersRequest()
 {
+	return Lobby::SendGetOnlineFriendPresenceRequest();
+}
+
+FString Lobby::SendGetOnlineFriendPresenceRequest()
+{
 	FReport::Log(FString(__FUNCTION__));
 
 	return SendRawRequest(LobbyRequest::FriendsPresence, Prefix::Presence);
