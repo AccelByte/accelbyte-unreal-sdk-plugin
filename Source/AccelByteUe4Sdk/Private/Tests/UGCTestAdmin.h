@@ -15,4 +15,4 @@ void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResp
 
 void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
-void UGCDeleteTags(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);

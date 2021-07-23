@@ -77,7 +77,7 @@ void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const F
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGCDeleteTags(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
