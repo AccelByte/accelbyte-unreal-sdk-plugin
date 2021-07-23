@@ -21,28 +21,24 @@ void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResp
 void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
-// Setup variables
+// Setup variables.
 FString UGCChannelName = TEXT("Integration Test Channel UE4");
 FString UGCChannelId;
-
-FString UGCType = TEXT("Vehicle");
-TArray<FString> UGCSubType = {TEXT("Body"), TEXT("Wheel"), TEXT("Vynil")};
-
-TArray<FString> UGCTags = {TEXT("Sedan"), TEXT("Minibus"), TEXT("Sport")};
-TArray<FString> UGCTagIds;
-
-
 FString UGCInvalidChannelId = TEXT("InvalidChannelId");
+TArray<FString> UGCTags = { TEXT("Sedan"), TEXT("Minibus"), TEXT("Sport") };
+TArray<FString> UGCTagIds;
+FString UGCType = TEXT("Vehicle");
+TArray<FString> UGCSubTypes = { TEXT("Body"), TEXT("Wheel"), TEXT("Vynil") };
+FString UGCTypeId;
+
 FString UGCInvalidContentId = TEXT("InvalidContentId");
 FAccelByteModelsUGCRequest UGCCreateContentRequest = {
-	"png", "Integration Test UE4", "", UGCType, UGCSubType[0], {UGCTags[0], UGCTags[1]}
+	"png", "Integration Test UE4", "", UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[1]}
 };
 FAccelByteModelsUGCRequest UGCModifyContentRequest = {
-	"txt", "MODIFIED Integration Test UE4", "", UGCType, UGCSubType[1], {UGCTags[1], UGCTags[2]}
+	"txt", "MODIFIED Integration Test UE4", "", UGCType, UGCSubTypes[1], {UGCTags[1], UGCTags[2]}
 };
 FString ModifiedUploadedContent = TEXT("Integration UE4 Upload Modified Test");
-FAccelByteModelsUGCTypeResponse UGCCreatedType;
-
 TArray<uint8> UGCPreviewBytes;
 FString UGCPreviewString;
 FString UGCDownloadString;
@@ -76,13 +72,27 @@ bool UGCCheckContainTag(const FString& ExpectedTagName, const FString& ExpectedT
 	return false;
 };
 
-bool UGCCheckFoundCreatedType(const FAccelByteModelsUGCTypesPagingResponse& Compare)
+bool UGCCheckContainSubType(const FString& ExpectedSubTypeName, const TArray<FString>& SubTypes)
 {
-	for(auto Type : Compare.Data)
+	for (auto SubType : SubTypes)
 	{
-		if(Type.Id.Equals(UGCCreatedType.Id))
+		if (SubType.Equals(ExpectedSubTypeName))
 		{
 			return true;
+		}
+	}
+	return false;
+};
+
+bool UGCCheckContainType(const FString& ExpectedTypeName, const FString& ExpectedTypeId, const TArray<FAccelByteModelsUGCTypeResponse>& Types)
+{
+	for(auto Type : Types)
+	{
+		if(Type.Type.Equals(ExpectedTypeName) && Type.Id.Equals(ExpectedTypeId))
+		{
+			return (UGCCheckContainSubType(UGCSubTypes[0], Type.Subtype))
+				&& (UGCCheckContainSubType(UGCSubTypes[1], Type.Subtype))
+				&& (UGCCheckContainSubType(UGCSubTypes[2], Type.Subtype));
 		}
 	}
 	return false;
@@ -159,35 +169,6 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bUGCLoginUserSuccess);
 	
 	// Setup UGC configuration.
-
-	// Clean up type test.
-	bool bGetTypesSuccess = false;
-	FAccelByteModelsUGCTypesPagingResponse GetTypesResponse;
-	FRegistry::UGC.GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse>::CreateLambda([&GetTypesResponse, &bGetTypesSuccess](const FAccelByteModelsUGCTypesPagingResponse& Response)
-	{
-		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get types Success"));
-		GetTypesResponse = Response;
-		bGetTypesSuccess = true;
-	}), UGCOnError);
-	FlushHttpRequests();
-	Waiting(bGetTypesSuccess, "Waiting for getting types...");
-
-	for(auto ResponseType : GetTypesResponse.Data)
-	{
-		if(ResponseType.Type.Equals(UGCType))
-		{
-			bool bDeleteTypeSuccess = false;
-			UGCDeleteType(ResponseType.Id, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
-			{
-				UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
-				bDeleteTypeSuccess = true;
-			}), UGCOnError);
-			Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
-
-			AB_TEST_TRUE(bDeleteTypeSuccess);
-		}
-	}
-	
 	// Clean up tag test.
 	FAccelByteModelsUGCTagsPagingResponse GetTagsResponse;
 	bool bGetTagsSuccess = false;
@@ -219,6 +200,34 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		}
 	}
 
+	// Clean up type test.
+	bool bGetTypesSuccess = false;
+	FAccelByteModelsUGCTypesPagingResponse GetTypesResponse;
+	FRegistry::UGC.GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse>::CreateLambda([&GetTypesResponse, &bGetTypesSuccess](const FAccelByteModelsUGCTypesPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get types Success"));
+		GetTypesResponse = Response;
+		bGetTypesSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetTypesSuccess, "Waiting for getting types...");
+
+	for (auto ResponseType : GetTypesResponse.Data)
+	{
+		if (ResponseType.Type.Equals(UGCType))
+		{
+			bool bDeleteTypeSuccess = false;
+			UGCDeleteType(ResponseType.Id, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
+			{
+				UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
+				bDeleteTypeSuccess = true;
+			}), UGCOnError);
+			Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
+
+			AB_TEST_TRUE(bDeleteTypeSuccess);
+		}
+	}
+
 	// Clean up channel.
 	bool bGetChannelsDone = false;
 	FString PreviousChannelId;
@@ -239,6 +248,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
 		bGetChannelsDone = true;
 	}));
+	FlushHttpRequests();
 	Waiting(bGetChannelsDone, "Waiting for getting channels...");
 
 	AB_TEST_TRUE(bGetChannelsDone);
@@ -255,6 +265,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
 			bDeleteChannelDone = true;
 		}));
+		FlushHttpRequests();
 		Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
 
 		AB_TEST_TRUE(bDeleteChannelDone);
@@ -262,10 +273,10 @@ bool UGCSetup::RunTest(const FString& Parameters)
 
 	// Create type.
 	bool bCreateTypeSuccess;
-	UGCCreateType(UGCType, UGCSubType, THandler<FAccelByteModelsUGCTypeResponse>::CreateLambda([&bCreateTypeSuccess](const FAccelByteModelsUGCTypeResponse& Response)
+	UGCCreateType(UGCType, UGCSubTypes, THandler<FAccelByteModelsUGCTypeResponse>::CreateLambda([&bCreateTypeSuccess](const FAccelByteModelsUGCTypeResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create type Success"));
-		UGCCreatedType = Response;
+		UGCTypeId = Response.Id;
 		bCreateTypeSuccess = true;
 	}), UGCOnError);
 	Waiting(bCreateTypeSuccess, "Waiting for creating type...");
@@ -304,7 +315,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCTeardown, "AccelByte.Tests.UGC.Z.Teardown", 
 bool UGCTeardown::RunTest(const FString& Parameters)
 {
 	bool bDeleteTypeSuccess;
-	UGCDeleteType(UGCCreatedType.Id, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
+	UGCDeleteType(UGCTypeId, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
 		bDeleteTypeSuccess = true;
@@ -326,15 +337,20 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		AB_TEST_TRUE(bDeleteTagSuccess);
 	}
 
-	//bool bDeleteChannelSuccess;
-	//FRegistry::UGC.DeleteChannel(UGCCreatedChannel.Id, FVoidHandler::CreateLambda([&]()
-	//{
-	//	UE_LOG(LogAccelByteUGCTest, Log, TEXT("Success Delete Channel"));
-	//	UGCCreatedChannel = {};
-	//	bDeleteChannelSuccess = true;
-	//}), UGCOnError);
-	//Waiting(bDeleteChannelSuccess, "Waiting to delete channel ...");
-	//AB_TEST_TRUE(bDeleteChannelSuccess);
+	bool bDeleteChannelDone = false;
+	FRegistry::UGC.DeleteChannel(UGCChannelId, FVoidHandler::CreateLambda([&bDeleteChannelDone]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
+		bDeleteChannelDone = true;
+	}), FErrorHandler::CreateLambda([&bDeleteChannelDone](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+		bDeleteChannelDone = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
+
+	AB_TEST_TRUE(bDeleteChannelDone);
 	
 	bool bDeleteUserSuccess;
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&]()
@@ -361,6 +377,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		UGCChannelId = Response.Id;
 		bCreateChannelSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
 
 	AB_TEST_TRUE(bCreateChannelSuccess);
@@ -374,6 +391,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		GetChannelsResponse = Response;
 		bGetChannelsSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bGetChannelsSuccess, "Waiting for getting channels...");
 
 	AB_TEST_TRUE(bGetChannelsSuccess);
@@ -385,6 +403,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
 		bDeleteChannelSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelSuccess);
@@ -414,25 +433,25 @@ bool UGCGetTags::RunTest(const FString& Parameters)
 	return true;
 }
 
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetTypes, "AccelByte.Tests.UGC.B.GetTypes", AutomationFlagMaskUGC);
-//bool UGCGetTypes::RunTest(const FString& Parameters)
-//{
-//	bool bGetTypesSuccess;
-//	FAccelByteModelsUGCTypesPagingResponse GetResponse;
-//	FRegistry::UGC.GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse>::CreateLambda([&](const FAccelByteModelsUGCTypesPagingResponse& Response)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Types Success"));
-//		bGetTypesSuccess = true;
-//		GetResponse = Response;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetTypesSuccess, "Getting types");
-//	AB_TEST_TRUE(bGetTypesSuccess);
-//	AB_TEST_TRUE(UGCCheckFoundCreatedType(GetResponse));
-//
-//	
-//	return true;
-//}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetTypes, "AccelByte.Tests.UGC.B.GetTypes", AutomationFlagMaskUGC);
+bool UGCGetTypes::RunTest(const FString& Parameters)
+{
+	bool bGetTypesSuccess;
+	FAccelByteModelsUGCTypesPagingResponse GetTypesResponse;
+	FRegistry::UGC.GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse>::CreateLambda([&bGetTypesSuccess, &GetTypesResponse](const FAccelByteModelsUGCTypesPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get types Success"));
+		GetTypesResponse = Response;
+		bGetTypesSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetTypesSuccess, "Waiting for getting types...");
+
+	AB_TEST_TRUE(bGetTypesSuccess);
+	AB_TEST_TRUE(UGCCheckContainType(UGCType, UGCTypeId, GetTypesResponse.Data));
+
+	return true;
+}
 
 //IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_DeleteContent, "AccelByte.Tests.UGC.C.Create_Get_DeleteContent", AutomationFlagMaskUGC)
 //bool UGCCreate_Get_DeleteContent::RunTest(const FString& Parameters)
