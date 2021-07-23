@@ -30,16 +30,20 @@ TArray<FString> UGCTagIds;
 FString UGCType = TEXT("Vehicle");
 TArray<FString> UGCSubTypes = { TEXT("Body"), TEXT("Wheel"), TEXT("Vynil") };
 FString UGCTypeId;
+TArray<uint8> UGCPreviewBytes = { 154, 221, 92, 161, 163, 42, 108, 18, 111, 191, 203, 239, 249, 43, 248, 255, 191, 132, 105, 26 };
+TArray<uint8> UGCContentBytes = { 106, 35, 188, 171, 106, 138, 197, 77, 94, 182, 18, 99, 9, 245, 110, 45, 197, 22, 35, 171 };
+FAccelByteModelsUGCRequest UGCCreateContentRequest = {
+	"png", "Integration Test UE4", FBase64::Encode(UGCPreviewBytes), UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[1]}
+};
 
 FString UGCInvalidContentId = TEXT("InvalidContentId");
-FAccelByteModelsUGCRequest UGCCreateContentRequest = {
-	"png", "Integration Test UE4", "", UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[1]}
+FAccelByteModelsUGCRequest UGCModifyContentRequest0 = {
+	"txt", "MODIFIED-0 Integration Test UE4", "", UGCType, UGCSubTypes[1], {UGCTags[1], UGCTags[2]}
 };
-FAccelByteModelsUGCRequest UGCModifyContentRequest = {
-	"txt", "MODIFIED Integration Test UE4", "", UGCType, UGCSubTypes[1], {UGCTags[1], UGCTags[2]}
+FAccelByteModelsUGCRequest UGCModifyContentRequest1 = {
+	"png", "MODIFIED-1 Integration Test UE4", "", UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[2]}
 };
 FString ModifiedUploadedContent = TEXT("Integration UE4 Upload Modified Test");
-TArray<uint8> UGCPreviewBytes;
 FString UGCPreviewString;
 FString UGCDownloadString;
 
@@ -65,6 +69,18 @@ bool UGCCheckContainTag(const FString& ExpectedTagName, const FString& ExpectedT
 	for(auto Tag : Tags)
 	{
 		if(Tag.Tag.Equals(ExpectedTagName) && Tag.Id.Equals(ExpectedTagId))
+		{
+			return true;
+		}
+	}
+	return false;
+};
+
+bool UGCCheckContainTag(const FString& ExpectedTagName,const TArray<FString>& Tags)
+{
+	for (auto Tag : Tags)
+	{
+		if (Tag.Equals(ExpectedTagName))
 		{
 			return true;
 		}
@@ -98,26 +114,26 @@ bool UGCCheckContainType(const FString& ExpectedTypeName, const FString& Expecte
 	return false;
 };
 
-bool UGCCheckContentEqual(const FAccelByteModelsUGCResponse& Compare1, const FAccelByteModelsUGCContentResponse& Compare2)
+bool UGCCheckContentEqual(const FAccelByteModelsUGCContentResponse& ContentResponse, const FAccelByteModelsUGCResponse& Response)
 {
-	if(!Compare1.Id.Equals(Compare2.Id)) { UE_LOG(LogAccelByteUGCTest, Log, TEXT("Id1 : %s != Id2 : %s"), *Compare1.Id, *Compare2.Id); return false; }
-	if(!Compare1.Name.Equals(Compare2.Name)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Name1 : %s != Name2 : %s"), *Compare1.Name, *Compare2.Name); return false; }
-	if(!Compare1.Namespace.Equals(Compare2.Namespace)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Namespace1 : %s != Namespace2 : %s"), *Compare1.Namespace, *Compare2.Namespace); return false; }
-	if(!Compare1.Type.Equals(Compare2.Type)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Type1 : %s != Type2 : %s"), *Compare1.Type, *Compare2.Type); return false; }
-	if(!Compare1.ChannelId.Equals(Compare2.ChannelId)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("ChannelId1 : %s != ChannelId2 : %s"), *Compare1.ChannelId, *Compare2.ChannelId); return false; }
-	if(!Compare1.CreatorName.Equals(Compare2.CreatorName)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("CreatorName1 : %s != CreatorName2 : %s"), *Compare1.CreatorName, *Compare2.CreatorName); return false; }
-	if(!Compare1.FileExtension.Equals(Compare2.FileExtension)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("FileExtension1 : %s != FileExtension2 : %s"), *Compare1.FileExtension, *Compare2.FileExtension); return false; }
-	if(!Compare1.ShareCode.Equals(Compare2.ShareCode)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("ShareCode1 : %s != ShareCode2 : %s"), *Compare1.ShareCode, *Compare2.ShareCode); return false; }
-	if(!Compare1.SubType.Equals(Compare2.SubType)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("SubType1 : %s != SubType2 : %s"), *Compare1.SubType, *Compare2.SubType); return false; };
-	if(!Compare1.UserId.Equals(Compare2.UserId)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("UserId1 : %s != UserId2 : %s"), *Compare1.UserId, *Compare2.UserId); return false; }
+	if(!Response.Id.Equals(ContentResponse.Id)) { UE_LOG(LogAccelByteUGCTest, Log, TEXT("Id1 : %s != Id2 : %s"), *Response.Id, *ContentResponse.Id); return false; }
+	if(!Response.Name.Equals(ContentResponse.Name)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Name1 : %s != Name2 : %s"), *Response.Name, *ContentResponse.Name); return false; }
+	if(!Response.Namespace.Equals(ContentResponse.Namespace)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Namespace1 : %s != Namespace2 : %s"), *Response.Namespace, *ContentResponse.Namespace); return false; }
+	if(!Response.Type.Equals(ContentResponse.Type)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("Type1 : %s != Type2 : %s"), *Response.Type, *ContentResponse.Type); return false; }
+	if(!Response.ChannelId.Equals(ContentResponse.ChannelId)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("ChannelId1 : %s != ChannelId2 : %s"), *Response.ChannelId, *ContentResponse.ChannelId); return false; }
+	if(!Response.CreatorName.Equals(ContentResponse.CreatorName)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("CreatorName1 : %s != CreatorName2 : %s"), *Response.CreatorName, *ContentResponse.CreatorName); return false; }
+	if(!Response.FileExtension.Equals(ContentResponse.FileExtension)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("FileExtension1 : %s != FileExtension2 : %s"), *Response.FileExtension, *ContentResponse.FileExtension); return false; }
+	if(!Response.ShareCode.Equals(ContentResponse.ShareCode)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("ShareCode1 : %s != ShareCode2 : %s"), *Response.ShareCode, *ContentResponse.ShareCode); return false; }
+	if(!Response.SubType.Equals(ContentResponse.SubType)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("SubType1 : %s != SubType2 : %s"), *Response.SubType, *ContentResponse.SubType); return false; };
+	if(!Response.UserId.Equals(ContentResponse.UserId)) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("UserId1 : %s != UserId2 : %s"), *Response.UserId, *ContentResponse.UserId); return false; }
 
-	if(Compare1.CreatedTime != Compare2.CreatedTime) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("CreatedTime1 : %s != CreatedTime2 : %s"), *Compare1.CreatedTime.ToString(), *Compare2.CreatedTime.ToString());return false; }
-	if(Compare1.IsOfficial != Compare2.IsOfficial) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("IsOfficial1 : %s != IsOfficial2 : %s"), Compare1.IsOfficial ? TEXT("true") : TEXT("false"), Compare2.IsOfficial ? TEXT("true") : TEXT("false")) ;return false; }
+	if(Response.CreatedTime != ContentResponse.CreatedTime) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("CreatedTime1 : %s != CreatedTime2 : %s"), *Response.CreatedTime.ToString(), *ContentResponse.CreatedTime.ToString());return false; }
+	if(Response.IsOfficial != ContentResponse.IsOfficial) { UE_LOG(LogAccelByteUGCTest, Warning, TEXT("IsOfficial1 : %s != IsOfficial2 : %s"), Response.IsOfficial ? TEXT("true") : TEXT("false"), ContentResponse.IsOfficial ? TEXT("true") : TEXT("false")) ;return false; }
 	
-	for(const FString& Tag : Compare1.Tags)
+	for(const FString& Tag : Response.Tags)
 	{
 		bool bIsFound = false;
-		for(const FString& Tag2 : Compare2.Tags)
+		for(const FString& Tag2 : ContentResponse.Tags)
 		{
 			if(Tag.Equals(Tag2))
 			{
@@ -298,16 +314,6 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		AB_TEST_TRUE(bCreateTagSuccess);
 	}
 	
-	//FString FilePath = FString::Printf(TEXT("%s/AccelByteUe4Sdk/Resources/Icon128.png"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectPluginsDir()));
-	//bool bLoadIconPreviewToBytes = FFileHelper::LoadFileToArray(UGCPreviewBytes, *FilePath, 0);
-	//UGCPreviewString = FBase64::Encode(UGCPreviewBytes);
-
-	//AB_TEST_TRUE(bLoadIconPreviewToBytes);
-	//AB_TEST_TRUE(!UGCPreviewString.IsEmpty());
-
-	//UGCCreateContentRequest.Preview = UGCPreviewString;
-	//UGCModifyContentRequest.Preview = UGCPreviewString;
-	
 	return true;
 }
 
@@ -381,7 +387,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
 
 	AB_TEST_TRUE(bCreateChannelSuccess);
-	AB_TEST_TRUE(CreatedChannelName.Equals(UGCChannelName));
+	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
 
 	bool bGetChannelsSuccess = false;
 	FAccelByteModelsUGCChannelsPagingResponse GetChannelsResponse;
@@ -407,6 +413,20 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelSuccess);
+
+	bool bGetChannelsNotFoundSuccess = false;
+	FAccelByteModelsUGCChannelsPagingResponse GetChannelsNotFoundResponse;
+	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&bGetChannelsNotFoundSuccess, &GetChannelsNotFoundResponse](const FAccelByteModelsUGCChannelsPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get channels Success"));
+		GetChannelsNotFoundResponse = Response;
+		bGetChannelsNotFoundSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetChannelsSuccess, "Waiting for getting channels...");
+
+	AB_TEST_TRUE(bGetChannelsNotFoundSuccess);
+	AB_TEST_FALSE(UGCCheckContainChannel(UGCChannelId, GetChannelsNotFoundResponse.Data));
 
 	return true;
 }
@@ -453,374 +473,336 @@ bool UGCGetTypes::RunTest(const FString& Parameters)
 	return true;
 }
 
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_DeleteContent, "AccelByte.Tests.UGC.C.Create_Get_DeleteContent", AutomationFlagMaskUGC)
-//bool UGCCreate_Get_DeleteContent::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(CreateContentResponse, GetContentResponse));
-//
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_GetPreview_DeleteContent, "AccelByte.Tests.UGC.C.Create_GetPreview_DeleteContent", AutomationFlagMaskUGC)
-//bool UGCCreate_GetPreview_DeleteContent::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCPreview GetPreviewResponse;
-//	bool bGetPreviewSuccess; 
-//	FRegistry::UGC.GetContentPreview(CreateContentResponse.Id, THandler<FAccelByteModelsUGCPreview>::CreateLambda([&](const FAccelByteModelsUGCPreview& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetPreviewResponse = GetResponse;
-//		bGetPreviewSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetPreviewSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetPreviewSuccess);
-//	AB_TEST_EQUAL(UGCPreviewString, GetPreviewResponse.Preview);
-//
-//	TArray<uint8> GetPreviewBytesResponse;
-//	bool bGetPreviewBytesSuccess; 
-//	FRegistry::UGC.GetContentPreview(CreateContentResponse.Id, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetPreviewBytesResponse = GetResponse;
-//		bGetPreviewBytesSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetPreviewBytesSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetPreviewBytesSuccess);
-//	AB_TEST_EQUAL(GetPreviewBytesResponse, UGCPreviewBytes);
-//	
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreatePreviewBytes_Get_DeleteContent, "AccelByte.Tests.UGC.C.CreatePreviewBytes_Get_DeleteContent", AutomationFlagMaskUGC)
-//bool UGCCreatePreviewBytes_Get_DeleteContent::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest.Name, UGCCreateContentRequest.Type, UGCCreateContentRequest.SubType,
-//		UGCCreateContentRequest.Tags, UGCPreviewBytes, UGCCreateContentRequest.FileExtension, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(CreateContentResponse, GetContentResponse));
-//
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_GetByShareCode_Delete_Content, "AccelByte.Tests.UGC.C.Create_GetByShareCode_Delete_Content", AutomationFlagMaskUGC)
-//bool UGCCreate_GetByShareCode_Delete_Content::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByShareCode(CreateContentResponse.ShareCode, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(CreateContentResponse, GetContentResponse));
-//
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Modify_Delete_Content, "AccelByte.Tests.UGC.C.Create_Modify_Delete_Content", AutomationFlagMaskUGC)
-//bool UGCCreate_Modify_Delete_Content::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCResponse ModifyContentResponse;
-//	bool bModifyContentSuccess;
-//	FRegistry::UGC.ModifyContent(UGCCreatedChannel.Id, CreateContentResponse.Id, UGCModifyContentRequest,
-//		THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		ModifyContentResponse = CreateResponse;
-//		bModifyContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bModifyContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bModifyContentSuccess);
-//
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(ModifyContentResponse, GetContentResponse));
-//
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_ModifyPreviewBytes_Delete_Content, "AccelByte.Tests.UGC.C.Create_ModifyPreviewBytes_Delete_Content", AutomationFlagMaskUGC)
-//bool UGCCreate_ModifyPreviewBytes_Delete_Content::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	FAccelByteModelsUGCResponse ModifyContentResponse;
-//	bool bModifyContentSuccess;
-//	FRegistry::UGC.ModifyContent(UGCCreatedChannel.Id, CreateContentResponse.Id, UGCModifyContentRequest.Name, UGCModifyContentRequest.Type,
-//		UGCModifyContentRequest.SubType, UGCModifyContentRequest.Tags, UGCPreviewBytes, UGCModifyContentRequest.FileExtension,
-//		THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](FAccelByteModelsUGCResponse CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		ModifyContentResponse = CreateResponse;
-//		bModifyContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bModifyContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bModifyContentSuccess);
-//
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(ModifyContentResponse, GetContentResponse));
-//
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Upload_Download_DeleteContent, "AccelByte.Tests.UGC.D.Create_Upload_Download_DeleteContent", AutomationFlagMaskUGC)
-//bool UGCCreate_Upload_Download_DeleteContent::RunTest(const FString& Parameters)
-//{
-//	FAccelByteModelsUGCResponse CreateContentResponse;
-//	bool bCreateContentSuccess;
-//	FRegistry::UGC.CreateContent(UGCCreatedChannel.Id, UGCCreateContentRequest, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& CreateResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create Content Success"));
-//		CreateContentResponse = CreateResponse;
-//		bCreateContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bCreateContentSuccess, "Waiting to Create Content...");
-//	AB_TEST_TRUE(bCreateContentSuccess);
-//	AB_TEST_TRUE(!CreateContentResponse.Id.IsEmpty());
-//
-//	bool bUploadSuccess;
-//	FAccelByteNetUtilities::UploadTo(CreateContentResponse.PayloadUrl[0].Url, UGCPreviewBytes,
-//		FHttpRequestProgressDelegate::CreateLambda([](const FHttpRequestPtr& Request, int32 BytesSent, int32 BytesReceived )
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Upload progress : %d / %d"), BytesSent, Request->GetContentLength());
-//	}),
-//	FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Upload Content Success"));
-//		bUploadSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bUploadSuccess, "Waiting to Upload Content...");
-//	AB_TEST_TRUE(bUploadSuccess);
-//	
-//	FAccelByteModelsUGCContentResponse GetContentResponse;
-//	bool bGetContentSuccess; 
-//	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&](const FAccelByteModelsUGCContentResponse& GetResponse)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
-//		GetContentResponse = GetResponse;
-//		bGetContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetContentSuccess, "Waiting to Get Content...");
-//	AB_TEST_TRUE(bGetContentSuccess);
-//	AB_TEST_TRUE(UGCCheckContentEqual(CreateContentResponse, GetContentResponse));
-//
-//	TArray<uint8> DownloadBytes;
-//	bool bDownloadSuccess;
-//	FAccelByteNetUtilities::DownloadFrom(GetContentResponse.PayloadUrl[0].Url, FHttpRequestProgressDelegate::CreateLambda([](const FHttpRequestPtr& Request, int32 BytesSent, int32 BytesReceived )
-//	{
-//		auto Response = Request->GetResponse();
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Download progress : %d / %d"), BytesReceived, Response->GetContentLength());
-//	}), THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& RawData)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Download Content Success"));
-//		DownloadBytes = RawData;
-//		bDownloadSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDownloadSuccess, "Waiting to Download Content...");
-//	AB_TEST_TRUE(bDownloadSuccess);
-//	AB_TEST_EQUAL(DownloadBytes, UGCPreviewBytes);
-//	
-//	bool bDeleteContentSuccess = false;
-//	FRegistry::UGC.DeleteContent(UGCCreatedChannel.Id, CreateContentResponse.Id, FVoidHandler::CreateLambda([&]()
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete Content Success"));
-//		bDeleteContentSuccess = true;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bDeleteContentSuccess, "Waiting to Delete Content...");
-//	AB_TEST_TRUE(bDeleteContentSuccess);
-//
-//	return true;
-//}
-//
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_Modify_Delete_Content_As_String, "AccelByte.Tests.UGC.C.Create_Get_Modify_Delete_Content_As_String", AutomationFlagMaskUGC)
+bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Parameters)
+{
+	// Create channel.
+	bool bCreateChannelSuccess = false;
+	FString CreatedChannelName;
+	FRegistry::UGC.CreateChannel(UGCChannelName, THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda([&bCreateChannelSuccess, &CreatedChannelName](const FAccelByteModelsUGCChannelResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create channel Succes"));
+		CreatedChannelName = Response.Name;
+		UGCChannelId = Response.Id;
+		bCreateChannelSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+
+	AB_TEST_TRUE(bCreateChannelSuccess);
+	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
+
+	// Create content.
+	bool bCreateContentSuccess = false;
+	FAccelByteModelsUGCResponse CreateContentResponse;
+	FRegistry::UGC.CreateContent(UGCChannelId, UGCCreateContentRequest,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda([&bCreateContentSuccess, &CreateContentResponse](const FAccelByteModelsUGCResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create content Success"));
+		CreateContentResponse = Response;
+		bCreateContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bCreateContentSuccess, "Waiting for creating content...");
+
+	AB_TEST_TRUE(bCreateContentSuccess);
+	AB_TEST_EQUAL(CreateContentResponse.ChannelId, UGCChannelId);
+	AB_TEST_EQUAL(CreateContentResponse.FileExtension, UGCCreateContentRequest.FileExtension);
+	AB_TEST_EQUAL(CreateContentResponse.Name, UGCCreateContentRequest.Name);
+	AB_TEST_EQUAL(CreateContentResponse.Preview, UGCCreateContentRequest.Preview);
+	AB_TEST_EQUAL(CreateContentResponse.Type, UGCCreateContentRequest.Type);
+	AB_TEST_TRUE(UGCCheckContainTag(CreateContentResponse.Tags[0], CreateContentResponse.Tags));
+	AB_TEST_TRUE(UGCCheckContainTag(CreateContentResponse.Tags[1], CreateContentResponse.Tags));
+
+	// Upload content payload based using the create content's payload url.
+	bool bUploadSuccess = false;
+	FAccelByteNetUtilities::UploadTo(CreateContentResponse.PayloadUrl[0].Url, UGCContentBytes,
+		FHttpRequestProgressDelegate::CreateLambda([](const FHttpRequestPtr& Request, int32 BytesSent, int32 BytesReceived )
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Upload progress : %d / %d"), BytesSent, Request->GetContentLength());
+	}),
+	FVoidHandler::CreateLambda([&bUploadSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Upload content Success"));
+		bUploadSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bUploadSuccess, "Waiting for uploading content...");
+
+	AB_TEST_TRUE(bUploadSuccess);
+
+	// Get content by content id.
+	bool bGetContentSuccess = false;
+	FAccelByteModelsUGCContentResponse GetContentResponse;
+	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id,
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by content id Success"));
+		GetContentResponse = Response;
+		bGetContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+
+	AB_TEST_TRUE(bGetContentSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
+
+	// Download content payload using get content's payload url.
+	bool bDownloadSuccess = false;
+	TArray<uint8> DownloadBytes;
+	FAccelByteNetUtilities::DownloadFrom(GetContentResponse.PayloadUrl[0].Url, FHttpRequestProgressDelegate::CreateLambda([](const FHttpRequestPtr& Request, int32 BytesSent, int32 BytesReceived)
+	{
+		auto Response = Request->GetResponse();
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Download progress : %d / %d"), BytesReceived, Response->GetContentLength());
+	}), THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& RawData)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Download content Success"));
+		DownloadBytes = RawData;
+		bDownloadSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bDownloadSuccess, "Waiting for downloading content...");
+
+	AB_TEST_TRUE(bDownloadSuccess);
+	AB_TEST_EQUAL(DownloadBytes, UGCContentBytes);
+
+	// Get content by share code.
+	bGetContentSuccess = false;
+	GetContentResponse = FAccelByteModelsUGCContentResponse();
+	FRegistry::UGC.GetContentByShareCode(CreateContentResponse.ShareCode, THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& GetResponse)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by share code Success"));
+		GetContentResponse = GetResponse;
+		bGetContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetContentSuccess, "Waiting for getting content by share code...");
+
+	AB_TEST_TRUE(bGetContentSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
+
+	// Get content preview as string.
+	bool bGetPreviewSuccess = false;
+	FAccelByteModelsUGCPreview GetPreviewResponse;
+	FRegistry::UGC.GetContentPreview(CreateContentResponse.Id, THandler<FAccelByteModelsUGCPreview>::CreateLambda([&bGetPreviewSuccess, &GetPreviewResponse](const FAccelByteModelsUGCPreview& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content preview as string Success"));
+		GetPreviewResponse = Response;
+		bGetPreviewSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetPreviewSuccess, "Waiting for getting content as string...");
+
+	AB_TEST_TRUE(bGetPreviewSuccess); 
+	AB_TEST_EQUAL(GetPreviewResponse.Preview, UGCCreateContentRequest.Preview);
+
+	// Get content preview as TArray<uint8>.
+	bool bGetPreviewBytesSuccess = false;
+	TArray<uint8> GetPreviewBytesResponse;
+	FRegistry::UGC.GetContentPreview(CreateContentResponse.Id, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& GetResponse)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content preview as TArray<uint8> Success"));
+		GetPreviewBytesResponse = GetResponse;
+		bGetPreviewBytesSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetPreviewBytesSuccess, "Waiting for getting content as TArray<uint8>...");
+
+	AB_TEST_TRUE(bGetPreviewBytesSuccess);
+	AB_TEST_EQUAL(GetPreviewBytesResponse, UGCPreviewBytes);
+	
+	// Modify content.
+	bool bModifyContentSuccess = false;
+	FAccelByteModelsUGCResponse ModifyContentResponse;
+	FRegistry::UGC.ModifyContent(UGCChannelId, CreateContentResponse.Id, UGCModifyContentRequest0,
+		THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](const FAccelByteModelsUGCResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Modify content Success"));
+		ModifyContentResponse = Response;
+		bModifyContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bModifyContentSuccess, "Waiting for modifying content...");
+
+	AB_TEST_TRUE(bModifyContentSuccess);
+
+	// Get content by content id for modifying confirmation.
+	bGetContentSuccess = false;
+	GetContentResponse = FAccelByteModelsUGCContentResponse();
+	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id,
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by content id Success"));
+		GetContentResponse = Response;
+		bGetContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+
+	AB_TEST_TRUE(bGetContentSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, ModifyContentResponse));
+
+	bModifyContentSuccess = false;
+	ModifyContentResponse = FAccelByteModelsUGCResponse();
+	FRegistry::UGC.ModifyContent(UGCChannelId, CreateContentResponse.Id, UGCModifyContentRequest1.Name, UGCModifyContentRequest1.Type, UGCModifyContentRequest1.SubType, UGCModifyContentRequest1.Tags,
+		UGCPreviewBytes, UGCModifyContentRequest1.FileExtension, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&](FAccelByteModelsUGCResponse CreateResponse)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Modify content Success"));
+		ModifyContentResponse = CreateResponse;
+		bModifyContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bModifyContentSuccess, "Waiting for modifying content...");
+
+	AB_TEST_TRUE(bModifyContentSuccess);
+
+	// Get content by content id for modifying confirmation.
+	bGetContentSuccess = false;
+	GetContentResponse = FAccelByteModelsUGCContentResponse();
+	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id,
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by content id Success"));
+		GetContentResponse = Response;
+		bGetContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+
+	AB_TEST_TRUE(bGetContentSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, ModifyContentResponse));
+
+	// Delete content.
+	bool bDeleteContentSuccess = false;
+	FRegistry::UGC.DeleteContent(UGCChannelId, CreateContentResponse.Id, FVoidHandler::CreateLambda([&bDeleteContentSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete content Success"));
+		bDeleteContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bDeleteContentSuccess, "Waiting for deleting Content...");
+
+	AB_TEST_TRUE(bDeleteContentSuccess);
+
+	// Check getting content again.
+	bool bGetContentNotFoundSuccess = false;
+	bool bGetContentNotFoundDone = false;
+	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id,
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentNotFoundDone](const FAccelByteModelsUGCContentResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content Success"));
+		bGetContentNotFoundDone = true;
+	}), FErrorHandler::CreateLambda([&bGetContentNotFoundSuccess, &bGetContentNotFoundDone](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+		bGetContentNotFoundSuccess = true;
+		bGetContentNotFoundDone = true;
+	}));
+	FlushHttpRequests();
+	Waiting(bGetContentNotFoundDone, "Waiting for getting content...");
+
+	AB_TEST_TRUE(bGetContentNotFoundSuccess);
+	AB_TEST_TRUE(bGetContentNotFoundDone);
+
+	// Delete Channel.
+	bool bDeleteChannelSuccess = false;
+	FRegistry::UGC.DeleteChannel(UGCChannelId, FVoidHandler::CreateLambda([&bDeleteChannelSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
+		bDeleteChannelSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+
+	AB_TEST_TRUE(bDeleteChannelSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_Delete_Content_As_Bytes, "AccelByte.Tests.UGC.C.Create_Get_Delete_Content_As_Bytes", AutomationFlagMaskUGC)
+bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
+{
+	// Create channel.
+	bool bCreateChannelSuccess = false;
+	FString CreatedChannelName;
+	FRegistry::UGC.CreateChannel(UGCChannelName, THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda([&bCreateChannelSuccess, &CreatedChannelName](const FAccelByteModelsUGCChannelResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create channel Succes"));
+		CreatedChannelName = Response.Name;
+		UGCChannelId = Response.Id;
+		bCreateChannelSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+
+	AB_TEST_TRUE(bCreateChannelSuccess);
+	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
+
+	// Create content.
+	bool bCreateContentSuccess = false;
+	FAccelByteModelsUGCResponse CreateContentResponse;
+	FRegistry::UGC.CreateContent(UGCChannelId, UGCCreateContentRequest.Name, UGCCreateContentRequest.Type, UGCCreateContentRequest.SubType, UGCCreateContentRequest.Tags, UGCPreviewBytes,
+		UGCCreateContentRequest.FileExtension, THandler<FAccelByteModelsUGCResponse>::CreateLambda([&bCreateContentSuccess, &CreateContentResponse](const FAccelByteModelsUGCResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create content Success"));
+		CreateContentResponse = Response;
+		bCreateContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bCreateContentSuccess, "Waiting for creating content...");
+
+	AB_TEST_TRUE(bCreateContentSuccess);
+	AB_TEST_EQUAL(CreateContentResponse.ChannelId, UGCChannelId);
+	AB_TEST_EQUAL(CreateContentResponse.FileExtension, UGCCreateContentRequest.FileExtension);
+	AB_TEST_EQUAL(CreateContentResponse.Name, UGCCreateContentRequest.Name);
+	AB_TEST_EQUAL(CreateContentResponse.Preview, UGCCreateContentRequest.Preview);
+	AB_TEST_EQUAL(CreateContentResponse.Type, UGCCreateContentRequest.Type);
+	AB_TEST_TRUE(UGCCheckContainTag(CreateContentResponse.Tags[0], CreateContentResponse.Tags));
+	AB_TEST_TRUE(UGCCheckContainTag(CreateContentResponse.Tags[1], CreateContentResponse.Tags));
+
+	// Get content.
+	bool bGetContentSuccess = false;
+	FAccelByteModelsUGCContentResponse GetContentResponse;
+	FRegistry::UGC.GetContentByContentId(CreateContentResponse.Id,
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content Success"));
+		GetContentResponse = Response;
+		bGetContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetContentSuccess, "Waiting for getting content...");
+
+	AB_TEST_TRUE(bGetContentSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
+
+	// Delete content.
+	bool bDeleteContentSuccess = false;
+	FRegistry::UGC.DeleteContent(UGCChannelId, CreateContentResponse.Id, FVoidHandler::CreateLambda([&bDeleteContentSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete content Success"));
+		bDeleteContentSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bDeleteContentSuccess, "Waiting for deleting Content...");
+
+	AB_TEST_TRUE(bDeleteContentSuccess);
+
+	// Delete Channel.
+	bool bDeleteChannelSuccess = false;
+	FRegistry::UGC.DeleteChannel(UGCChannelId, FVoidHandler::CreateLambda([&bDeleteChannelSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
+		bDeleteChannelSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+
+	AB_TEST_TRUE(bDeleteChannelSuccess);
+
+	return true;
+}
+
 //IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Upload_Share_Download_DeleteContent, "AccelByte.Tests.UGC.D.Create_Upload_Share_Download_DeleteContent", AutomationFlagMaskUGC)
 //bool UGCCreate_Upload_Share_Download_DeleteContent::RunTest(const FString& Parameters)
 //{
