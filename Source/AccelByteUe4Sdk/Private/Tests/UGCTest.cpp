@@ -209,6 +209,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete tag Success"));
 					bDeleteTagSuccess = true;
 				}), UGCOnError);
+				FlushHttpRequests();
 				Waiting(bDeleteTagSuccess, "Waiting for deleting tag...");
 
 				AB_TEST_TRUE(bDeleteTagSuccess);
@@ -238,6 +239,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
 				bDeleteTypeSuccess = true;
 			}), UGCOnError);
+			FlushHttpRequests();
 			Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
 
 			AB_TEST_TRUE(bDeleteTypeSuccess);
@@ -295,6 +297,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		UGCTypeId = Response.Id;
 		bCreateTypeSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bCreateTypeSuccess, "Waiting for creating type...");
 
 	AB_TEST_TRUE(bCreateTypeSuccess);
@@ -309,6 +312,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			UGCTagIds.Add(Response.Id);
 			bCreateTagSuccess = true;
 		}), UGCOnError);
+		FlushHttpRequests();
 		Waiting(bCreateTagSuccess, "Waiting for creating tag...");
 
 		AB_TEST_TRUE(bCreateTagSuccess);
@@ -326,6 +330,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
 		bDeleteTypeSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
 
 	AB_TEST_TRUE(bDeleteTypeSuccess);
@@ -338,6 +343,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete tag Success"));
 			bDeleteTagSuccess = true;
 		}), UGCOnError);
+		FlushHttpRequests();
 		Waiting(bDeleteTagSuccess, "Waiting for deleting tag...");
 
 		AB_TEST_TRUE(bDeleteTagSuccess);
@@ -364,6 +370,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete user Success"));
 		bDeleteUserSuccess = true;
 	}), UGCOnError);
+	FlushHttpRequests();
 	Waiting(bDeleteUserSuccess, "Waiting for deleting user...");
 
 	AB_TEST_TRUE(bDeleteUserSuccess);
@@ -920,6 +927,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 //	{
 //		bDeleteUserSuccess = true;
 //	}), UGCOnError);
+// 	FlushHttpRequests();
 //	Waiting(bDeleteUserSuccess, "Waiting Delete User2...");
 //
 //	User2Registry->User.ForgetAllCredentials();
