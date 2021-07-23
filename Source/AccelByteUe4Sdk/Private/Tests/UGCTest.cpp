@@ -23,9 +23,15 @@ void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FEr
 
 // Setup variables
 FString UGCChannelName = TEXT("Integration Test Channel UE4");
+FString UGCChannelId;
+
 FString UGCType = TEXT("Vehicle");
 TArray<FString> UGCSubType = {TEXT("Body"), TEXT("Wheel"), TEXT("Vynil")};
+
 TArray<FString> UGCTags = {TEXT("Sedan"), TEXT("Minibus"), TEXT("Sport")};
+TArray<FString> UGCTagIds;
+
+
 FString UGCInvalidChannelId = TEXT("InvalidChannelId");
 FString UGCInvalidContentId = TEXT("InvalidContentId");
 FAccelByteModelsUGCRequest UGCCreateContentRequest = {
@@ -35,9 +41,8 @@ FAccelByteModelsUGCRequest UGCModifyContentRequest = {
 	"txt", "MODIFIED Integration Test UE4", "", UGCType, UGCSubType[1], {UGCTags[1], UGCTags[2]}
 };
 FString ModifiedUploadedContent = TEXT("Integration UE4 Upload Modified Test");
-FAccelByteModelsUGCChannelResponse UGCCreatedChannel;
 FAccelByteModelsUGCTypeResponse UGCCreatedType;
-TArray<FAccelByteModelsUGCTagResponse> UGCCreatedTags;
+
 TArray<uint8> UGCPreviewBytes;
 FString UGCPreviewString;
 FString UGCDownloadString;
@@ -47,11 +52,11 @@ const auto UGCOnError = FErrorHandler::CreateLambda([](int32 Code, const FString
 	UE_LOG(LogAccelByteUGCTest, Error, TEXT("Error code: %d\nError message:%s"), Code, *Message);
 });
 
-bool UGCCheckContainsChannel(const FAccelByteModelsUGCChannelResponse& Compare1, const FAccelByteModelsUGCChannelsPagingResponse& Compare2)
+bool UGCCheckContainChannel(const FString& ExpectedChannelId, const TArray<FAccelByteModelsUGCChannelResponse>& Channels)
 {
-	for(auto Channel : Compare2.Data)
+	for (auto Channel : Channels)
 	{
-		if(Channel.Id.Equals(Compare1.Id))
+		if (Channel.Id.Equals(ExpectedChannelId))
 		{
 			return true;
 		}
@@ -59,25 +64,16 @@ bool UGCCheckContainsChannel(const FAccelByteModelsUGCChannelResponse& Compare1,
 	return false;
 };
 
-bool UGCCheckFoundCreatedTags(const FAccelByteModelsUGCTagsPagingResponse& Compare)
+bool UGCCheckContainTag(const FString& ExpectedTagName, const FString& ExpectedTagId, const TArray<FAccelByteModelsUGCTagResponse>& Tags)
 {
-	for(auto CreatedTag : UGCCreatedTags)
+	for(auto Tag : Tags)
 	{
-		bool bIsFound = false;
-		for(auto Tag : Compare.Data)
+		if(Tag.Tag.Equals(ExpectedTagName) && Tag.Id.Equals(ExpectedTagId))
 		{
-			if(CreatedTag.Id == Tag.Id)
-			{
-				bIsFound = true;
-				break;
-			}
-		}
-		if(!bIsFound)
-		{
-			return false;
+			return true;
 		}
 	}
-	return true;
+	return false;
 };
 
 bool UGCCheckFoundCreatedType(const FAccelByteModelsUGCTypesPagingResponse& Compare)
@@ -223,6 +219,47 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		}
 	}
 
+	// Clean up channel.
+	bool bGetChannelsDone = false;
+	FString PreviousChannelId;
+	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&bGetChannelsDone, &PreviousChannelId](const FAccelByteModelsUGCChannelsPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get channels Success"));
+		for (auto Channel : Response.Data)
+		{
+			if (Channel.Name.Equals(UGCChannelName))
+			{
+				PreviousChannelId = Channel.Id;
+				break;
+			}
+		}
+		bGetChannelsDone = true;
+	}), FErrorHandler::CreateLambda([&bGetChannelsDone](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+		bGetChannelsDone = true;
+	}));
+	Waiting(bGetChannelsDone, "Waiting for getting channels...");
+
+	AB_TEST_TRUE(bGetChannelsDone);
+
+	if (!PreviousChannelId.IsEmpty())
+	{
+		bool bDeleteChannelDone;
+		FRegistry::UGC.DeleteChannel(PreviousChannelId, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
+			bDeleteChannelDone = true;
+		}), FErrorHandler::CreateLambda([&bDeleteChannelDone](int32 Code, const FString& Message)
+		{
+			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+			bDeleteChannelDone = true;
+		}));
+		Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
+
+		AB_TEST_TRUE(bDeleteChannelDone);
+	}
+
 	// Create type.
 	bool bCreateTypeSuccess;
 	UGCCreateType(UGCType, UGCSubType, THandler<FAccelByteModelsUGCTypeResponse>::CreateLambda([&bCreateTypeSuccess](const FAccelByteModelsUGCTypeResponse& Response)
@@ -235,13 +272,14 @@ bool UGCSetup::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bCreateTypeSuccess);
 	
+	// Create tags.
 	for(const FString& UGCTag : UGCTags)
 	{
 		bool bCreateTagSuccess = false;
 		UGCCreateTags(UGCTag, THandler<FAccelByteModelsUGCTagResponse>::CreateLambda([&bCreateTagSuccess](const FAccelByteModelsUGCTagResponse& Response)
 		{
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create tag Success"));
-			UGCCreatedTags.Add(Response);
+			UGCTagIds.Add(Response.Id);
 			bCreateTagSuccess = true;
 		}), UGCOnError);
 		Waiting(bCreateTagSuccess, "Waiting for creating tag...");
@@ -249,30 +287,6 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		AB_TEST_TRUE(bCreateTagSuccess);
 	}
 	
-	bool bDeleteChannelDone;
-	FRegistry::UGC.DeleteChannel(UGCCreatedChannel.Id, FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
-		bDeleteChannelDone = true;
-	}), FErrorHandler::CreateLambda([&bDeleteChannelDone](int32 Code, const FString& Message)
-	{
-		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
-		bDeleteChannelDone = true;
-	}));
-	Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
-
-	AB_TEST_TRUE(bDeleteChannelDone);
-	
-	//bool bCreateChannelSuccess;
-	//FRegistry::UGC.CreateChannel(UGCChannelName, THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda([&](const FAccelByteModelsUGCChannelResponse& Response)
-	//{
-	//	UE_LOG(LogAccelByteUGCTest, Log, TEXT("Success Create channel"));
-	//	UGCCreatedChannel = Response;
-	//	bCreateChannelSuccess = true;
-	//}), UGCOnError);
-	//Waiting(bCreateChannelSuccess, "Waiting to create channel ...");
-	//AB_TEST_TRUE(bCreateChannelSuccess);
-
 	//FString FilePath = FString::Printf(TEXT("%s/AccelByteUe4Sdk/Resources/Icon128.png"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectPluginsDir()));
 	//bool bLoadIconPreviewToBytes = FFileHelper::LoadFileToArray(UGCPreviewBytes, *FilePath, 0);
 	//UGCPreviewString = FBase64::Encode(UGCPreviewBytes);
@@ -299,10 +313,10 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bDeleteTypeSuccess);
 	
-	for(auto UGCCreatedTag : UGCCreatedTags)
+	for(auto UGCTagId : UGCTagIds)
 	{
 		bool bDeleteTagSuccess = false;
-		UGCDeleteTag(UGCCreatedTag.Id, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
+		UGCDeleteTag(UGCTagId, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
 		{
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete tag Success"));
 			bDeleteTagSuccess = true;
@@ -335,79 +349,71 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 	return true;
 }
 
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_Delete_Channels, "AccelByte.Tests.UGC.B.Create_Get_Delete_Channels", AutomationFlagMaskUGC);
-//bool UGCCreate_Get_Delete_Channels::RunTest(const FString& Parameters)
-//{
-//	bool bCreateChannel2Succes = false;
-//	FAccelByteModelsUGCChannelResponse ChannelResponse2;
-//	FRegistry::UGC.CreateChannel(TEXT("Integration TEST Creation Channel 2"), THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda([&bCreateChannel2Succes, &ChannelResponse2](const FAccelByteModelsUGCChannelResponse& Response)
-//	{
-//		bCreateChannel2Succes = true;
-//		ChannelResponse2 = Response;
-//	}), UGCOnError);
-//	Waiting(bCreateChannel2Succes, "Waiting to create channel ...");
-//	AB_TEST_TRUE(bCreateChannel2Succes);
-//
-//	bool bGetChannel2Success = false;
-//	FAccelByteModelsUGCChannelsPagingResponse GetChannelResponse2;
-//	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&bGetChannel2Success, &GetChannelResponse2](const FAccelByteModelsUGCChannelsPagingResponse& Response)
-//	{
-//		bGetChannel2Success = true;
-//		GetChannelResponse2 = Response;
-//	}), UGCOnError);
-//	Waiting(bGetChannel2Success, "Waiting to get channel");
-//	AB_TEST_TRUE(bGetChannel2Success);
-//	AB_TEST_TRUE(UGCCheckContainsChannel(ChannelResponse2, GetChannelResponse2));
-//
-//	bool bDeleteChannel2Success = false;
-//	FRegistry::UGC.DeleteChannel(ChannelResponse2.Id, FVoidHandler::CreateLambda([&bDeleteChannel2Success]()
-//	{
-//		bDeleteChannel2Success = true;
-//	}), UGCOnError);
-//	Waiting(bDeleteChannel2Success, "Waiting to delete channel");
-//	AB_TEST_TRUE(bDeleteChannel2Success);
-//	
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetChannels, "AccelByte.Tests.UGC.B.GetChannels", AutomationFlagMaskUGC);
-//bool UGCGetChannels::RunTest(const FString& Parameters)
-//{
-//	bool bGetChannelSuccess;
-//	FAccelByteModelsUGCChannelsPagingResponse GetResponse;
-//	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&](const FAccelByteModelsUGCChannelsPagingResponse& Response)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Channel Success"));
-//		bGetChannelSuccess = true;
-//		GetResponse = Response;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetChannelSuccess, "Getting channels");
-//	AB_TEST_TRUE(bGetChannelSuccess);
-//	AB_TEST_TRUE(UGCCheckContainsChannel(UGCCreatedChannel, GetResponse));
-//
-//	return true;
-//}
-//
-//IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetTags, "AccelByte.Tests.UGC.B.GetTags", AutomationFlagMaskUGC);
-//bool UGCGetTags::RunTest(const FString& Parameters)
-//{
-//	bool bGetTagsSuccess;
-//	FAccelByteModelsUGCTagsPagingResponse GetResponse;
-//	FRegistry::UGC.GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse>::CreateLambda([&](const FAccelByteModelsUGCTagsPagingResponse& Response)
-//	{
-//		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Tags Success"));
-//		bGetTagsSuccess = true;
-//		GetResponse = Response;
-//	}), UGCOnError);
-//	FlushHttpRequests();
-//	Waiting(bGetTagsSuccess, "Getting Tags");
-//	AB_TEST_TRUE(bGetTagsSuccess);
-//	AB_TEST_TRUE(UGCCheckFoundCreatedTags(GetResponse));
-//	
-//	return true;
-//}
-//
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_Delete_Channel, "AccelByte.Tests.UGC.B.Create_Get_Delete_Channel", AutomationFlagMaskUGC);
+bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
+{
+	bool bCreateChannelSuccess = false;
+	FString CreatedChannelName;
+	FRegistry::UGC.CreateChannel(UGCChannelName, THandler<FAccelByteModelsUGCChannelResponse>::CreateLambda([&bCreateChannelSuccess, &CreatedChannelName](const FAccelByteModelsUGCChannelResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create channel Succes"));
+		CreatedChannelName = Response.Name;
+		UGCChannelId = Response.Id;
+		bCreateChannelSuccess = true;
+	}), UGCOnError);
+	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+
+	AB_TEST_TRUE(bCreateChannelSuccess);
+	AB_TEST_TRUE(CreatedChannelName.Equals(UGCChannelName));
+
+	bool bGetChannelsSuccess = false;
+	FAccelByteModelsUGCChannelsPagingResponse GetChannelsResponse;
+	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&bGetChannelsSuccess, &GetChannelsResponse](const FAccelByteModelsUGCChannelsPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get channels Success"));
+		GetChannelsResponse = Response;
+		bGetChannelsSuccess = true;
+	}), UGCOnError);
+	Waiting(bGetChannelsSuccess, "Waiting for getting channels...");
+
+	AB_TEST_TRUE(bGetChannelsSuccess);
+	AB_TEST_TRUE(UGCCheckContainChannel(UGCChannelId, GetChannelsResponse.Data));
+
+	bool bDeleteChannelSuccess = false;
+	FRegistry::UGC.DeleteChannel(UGCChannelId, FVoidHandler::CreateLambda([&bDeleteChannelSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete channel Success"));
+		bDeleteChannelSuccess = true;
+	}), UGCOnError);
+	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+
+	AB_TEST_TRUE(bDeleteChannelSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetTags, "AccelByte.Tests.UGC.B.GetTags", AutomationFlagMaskUGC);
+bool UGCGetTags::RunTest(const FString& Parameters)
+{
+	bool bGetTagsSuccess = false;
+	FAccelByteModelsUGCTagsPagingResponse GetTagsResponse;
+	FRegistry::UGC.GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse>::CreateLambda([&bGetTagsSuccess, &GetTagsResponse](const FAccelByteModelsUGCTagsPagingResponse& Response)
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get tags Success"));
+		GetTagsResponse = Response;
+		bGetTagsSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bGetTagsSuccess, "Waiting for getting tags...");
+
+	AB_TEST_TRUE(bGetTagsSuccess);
+	AB_TEST_TRUE(UGCCheckContainTag(UGCTags[0], UGCTagIds[0], GetTagsResponse.Data));
+	AB_TEST_TRUE(UGCCheckContainTag(UGCTags[1], UGCTagIds[1], GetTagsResponse.Data));
+	AB_TEST_TRUE(UGCCheckContainTag(UGCTags[2], UGCTagIds[2], GetTagsResponse.Data));
+	
+	return true;
+}
+
 //IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetTypes, "AccelByte.Tests.UGC.B.GetTypes", AutomationFlagMaskUGC);
 //bool UGCGetTypes::RunTest(const FString& Parameters)
 //{
@@ -427,7 +433,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 //	
 //	return true;
 //}
-//
+
 //IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreate_Get_DeleteContent, "AccelByte.Tests.UGC.C.Create_Get_DeleteContent", AutomationFlagMaskUGC)
 //bool UGCCreate_Get_DeleteContent::RunTest(const FString& Parameters)
 //{
