@@ -776,7 +776,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 
 		LobbyUsers.Add(MakeShared<Api::User>(UserCreds[i], FRegistry::Settings));
 
-		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d@example.com"), i);
+		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
 		Email.ToLowerInline();
 		FString Password = TEXT("123Password123");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
@@ -5948,6 +5948,8 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
 
 	User.ForgetAllCredentials();
+
+	WaitSecond(1, "Waiting 1 sec to make sure different token is generated.");
 
 	bLoginDone = false;
 

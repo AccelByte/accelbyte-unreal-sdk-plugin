@@ -206,7 +206,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 
 		ActiveUsers.Add(MakeShared<Api::User>(ActiveUserCreds[i], FRegistry::Settings));
 
-		FString Email = FString::Printf(TEXT("joinableLobbyUE4Test+%d@example.com"), i);
+		FString Email = FString::Printf(TEXT("joinablelobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
 		Email.ToLowerInline();
 		FString Password = TEXT("123Password123");
 		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
