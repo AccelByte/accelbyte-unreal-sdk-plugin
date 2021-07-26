@@ -948,8 +948,6 @@ bool UGCCreateContentInvalidChannelId::RunTest(const FString& Parameters)
 	return true;
 }
 
-// TODO: Confirm with the Backend team for similiar endpoint with the search content if the content id is empty.
-#if 0
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetContentEmptyContentId, "AccelByte.Tests.UGC.C.GetContent_EmptyContentId", AutomationFlagMaskUGC)
 bool UGCGetContentEmptyContentId::RunTest(const FString& Parameters)
 {
@@ -974,7 +972,7 @@ bool UGCGetContentEmptyContentId::RunTest(const FString& Parameters)
 
 	return true;
 }
-#endif
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetContentInvalidContentId, "AccelByte.Tests.UGC.C.GetContent_InvalidContentId", AutomationFlagMaskUGC)
 bool UGCGetContentInvalidContentId::RunTest(const FString& Parameters)
 {

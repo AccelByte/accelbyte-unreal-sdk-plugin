@@ -129,6 +129,12 @@ void UGC::GetContentByContentId(const FString& ContentId,
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Url is invalid. ContentId is empty."));
+		return;
+	}
+
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *ContentId);
 	FString Verb = TEXT("GET");
