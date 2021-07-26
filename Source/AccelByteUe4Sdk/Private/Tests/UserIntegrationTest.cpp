@@ -38,7 +38,6 @@ enum class EVerificationCode : uint8
 };
 
 FString GetVerificationCode(const FString& userId, EVerificationCode code);
-static FString GetSteamTicket();
 
 const auto UserTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
@@ -711,6 +710,11 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamSuccess, "AccelByte.Tests.AUser.LoginWithSteam.LoginTwiceGetSameUserId", AutomationFlagMaskUser);
 bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful1 = false;
@@ -788,6 +792,11 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithSteamUniqueIdCreated, "AccelByte.Tests.AUser.LoginWithSteam.UniqueUserIdCreatedForSteamAccount", AutomationFlagMaskUser);
 bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful1 = false;
@@ -883,6 +892,11 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountSuccess, "AccelByte.Tests.AUser.UpgradeHeadlessSteamAccount", AutomationFlagMaskUser);
 bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 	const FString Email = TEXT("testSDKsteam@game.test");
 	const FString Password = TEXT("123SDKTest123");
@@ -991,6 +1005,11 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountv2Success, "AccelByte.Tests.AUser.UpgradeHeadlessSteamAccountv2", AutomationFlagMaskUser);
 bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 	const FString Email = TEXT("testSDKsteam@game.test");
 	const FString Username = TEXT("testSDKsteam");
@@ -1103,6 +1122,11 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLinkSteamAccountSuccess, "AccelByte.Tests.AUser.LinktoSteamAccount", AutomationFlagMaskUser);
 bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bLoginPlatformSuccessful = false;
@@ -1294,6 +1318,11 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLinkSteamAccountConflict, "AccelByte.Tests.AUser.LinktoSteamAccountConflict", AutomationFlagMaskUser);
 bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bLoginPlatformSuccessful = false;
@@ -1456,6 +1485,11 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLinkSteamAccountForcedSuccess, "AccelByte.Tests.AUser.LinktoSteamAccountForced", AutomationFlagMaskUser);
 bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bLoginPlatformSuccessful = false;
@@ -2353,6 +2387,11 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserBySteamUserIDTest, "AccelByte.Tests.AUser.GetUserBySteamUserID", AutomationFlagMaskUser);
 bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful1 = false;
@@ -2421,6 +2460,11 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkGetUserBySteamUserIDTest, "AccelByte.Tests.AUser.BulkGetUserBySteamUserID", AutomationFlagMaskUser);
 bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 {
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
 	FRegistry::User.ForgetAllCredentials();
 
 	bool bSteamLoginSuccessful1 = false;
@@ -3097,15 +3141,6 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetSteamTicket, "AccelByte.Tests.AUser.SteamTicket", AutomationFlagMaskUser);
-bool FGetSteamTicket::RunTest(const FString& Parameter)
-{
-	const FString Ticket = GetSteamTicket();
-	UE_LOG(LogAccelByteUserTest, Log, TEXT("Print Steam Ticket :\r\n%s"), *Ticket);
-	AB_TEST_FALSE(Ticket.IsEmpty());
-	return true;
-}
-
 FString GetVerificationCode(const FString& userId, EVerificationCode code)
 {
 	bool bGetVerificationCodeSuccess = false;
@@ -3126,16 +3161,4 @@ FString GetVerificationCode(const FString& userId, EVerificationCode code)
 	case EVerificationCode::updateEmail: return verificationCode.updateEmail;
 	}
 	return FString("");
-}
-
-FString GetSteamTicket()
-{
-	FString SteamTicket = TEXT("");
-	FString SteamHelperOutput = TEXT("");
-	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
-	CurrentDirectory.Append(TEXT("SteamHelper/steamticket.txt"));
-	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
-	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);
-
-	return SteamTicket;
 }

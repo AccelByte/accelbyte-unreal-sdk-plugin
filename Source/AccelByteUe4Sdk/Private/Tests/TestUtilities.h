@@ -95,6 +95,12 @@ FString GetPublisherNamespace();
 
 FString GetSteamUserId();
 
+FString GetSteamAppId();
+
+FString GetSteamTicket();
+
+bool CheckSteamTicket();
+
 #pragma region ECOMMERCE_MODEL
 USTRUCT(BlueprintType)
 struct FCurrencyCreateRequest

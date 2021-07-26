@@ -148,11 +148,6 @@ FString GetPublisherNamespace()
 	return GetRequiredEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"));
 }
 
-FString GetSteamUserId()
-{
-	return GetRequiredEnvironmentVariable(TEXT("STEAM_USER_ID"));
-}
-
 FString AdminAccessTokenCache;
 
 FString GetAdminAccessToken()
@@ -225,6 +220,66 @@ FString GetAdminUserAccessToken()
 
 	return TokenResult.Access_token;
 }
+
+FString GetSteamUserId()
+{
+	return GetRequiredEnvironmentVariable(TEXT("STEAM_USER_ID"));
+}
+
+FString GetSteamKey()
+{
+	return GetRequiredEnvironmentVariable(TEXT("STEAM_KEY"));
+}
+
+FString GetSteamTicket()
+{
+	FString SteamTicket = TEXT("");
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("SteamHelper/steamticket.txt"));
+	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
+	FFileHelper::LoadFileToString(SteamTicket, *CurrentDirectory);
+
+	return SteamTicket;
+}
+
+FString GetSteamAppId()
+{
+	FString SteamAppId = TEXT("");
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("SteamHelper/steam_appid.txt"));
+	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
+	FFileHelper::LoadFileToString(SteamAppId, *CurrentDirectory);
+
+	return SteamAppId;
+}
+
+bool CheckSteamTicket() {
+	FString Url = FString::Printf(
+		TEXT("https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/?key=%s&appid=%s&ticket=%s&format=json"),
+		*GetSteamKey(),
+		*GetSteamAppId(),
+		*GetSteamTicket());
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(TEXT("GET"));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	bool bIsDone = false;
+	bool bIsOk = false;
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request,
+		CreateHttpResultHandler(
+			THandler<FString>::CreateLambda([&](const FString& Result)
+				{
+					UE_LOG(LogAccelByteTest, Log, TEXT("%s: %s"), TEXT("Check Steam ticket"), *Result);
+					bIsOk = Result.Contains(TEXT("OK"));
+					bIsDone = true;
+				}),
+			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage) {
+					bIsDone = true;
+				})),
+		FPlatformTime::Seconds());
+	Waiting(bIsDone, "Waiting ...");
+	return bIsOk;
+};
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
