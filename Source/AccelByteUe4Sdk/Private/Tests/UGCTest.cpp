@@ -337,19 +337,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 
 	UGCUser2Registry = FMultiRegistry::GetApiClient(TEXT("User2"));;
 	bool bLoginSuccess = false;
-	if (bIsUser2Exist)
-	{
-		UGCUser2Registry->User.LoginWithUsername(User2EmailAddress, User2Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
-		{
-			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Login user2 Success"));
-			bLoginSuccess = true;
-		}), UGCOnError);
-		FlushHttpRequests();
-		Waiting(bLoginSuccess, "Waiting for login user2...");
-
-		AB_TEST_TRUE(bLoginSuccess);
-	}
-	else
+	if (!bIsUser2Exist)
 	{
 		// Register new user2.
 		bool bRegisterSuccess = false;
@@ -365,6 +353,16 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		Waiting(bRegisterSuccess, "Waiting for registering user2...");
 		AB_TEST_TRUE(bRegisterSuccess);
 	}
+
+	UGCUser2Registry->User.LoginWithUsername(User2EmailAddress, User2Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
+	{
+		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Login user2 Success"));
+		bLoginSuccess = true;
+	}), UGCOnError);
+	FlushHttpRequests();
+	Waiting(bLoginSuccess, "Waiting for login user2...");
+
+	AB_TEST_TRUE(bLoginSuccess);
 
 	return true;
 }
@@ -633,39 +631,36 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 	AB_TEST_EQUAL(DownloadBytes, UGCContentBytes);
 
 	// Get content by share code by its content creator.
-	bGetContentSuccess = false;
-	GetContentResponse = FAccelByteModelsUGCContentResponse();
+	bool bGetContenttByShareCodeSuccess = false;
+	FAccelByteModelsUGCContentResponse GetContenttByShareCodeResponse;
 	FRegistry::UGC.GetContentByShareCode(CreateContentResponse.ShareCode,
-		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContenttByShareCodeSuccess, &GetContenttByShareCodeResponse](const FAccelByteModelsUGCContentResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by share code by its content creator Success"));
-		GetContentResponse = Response;
-		bGetContentSuccess = true;
+		GetContenttByShareCodeResponse = Response;
+		bGetContenttByShareCodeSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content by share code by its content creator...");
+	Waiting(bGetContenttByShareCodeSuccess, "Waiting for getting content by share code by its content creator...");
 
-	AB_TEST_TRUE(bGetContentSuccess);
-	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
-
-	AB_TEST_TRUE(bGetContentSuccess);
-	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
+	AB_TEST_TRUE(bGetContenttByShareCodeSuccess);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContenttByShareCodeResponse, CreateContentResponse));
 
 	// Get content by share code by User2.
-	bGetContentSuccess = false;
-	GetContentResponse = FAccelByteModelsUGCContentResponse();
+	bool bGetContenttByShareCodeUser2Success = false;
+	FAccelByteModelsUGCContentResponse GetContentByShareCodeUser2Response;
 	UGCUser2Registry->UGC.GetContentByShareCode(CreateContentResponse.ShareCode,
-		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentSuccess, &GetContentResponse](const FAccelByteModelsUGCContentResponse& Response)
+		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContenttByShareCodeUser2Success, &GetContentByShareCodeUser2Response](const FAccelByteModelsUGCContentResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get content by share code by User2 Success"));
-		GetContentResponse = Response;
-		bGetContentSuccess = true;
+		GetContentByShareCodeUser2Response = Response;
+		bGetContenttByShareCodeUser2Success = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content by share code by User2...");
+	Waiting(bGetContenttByShareCodeUser2Success, "Waiting for getting content by share code by User2...");
 
-	AB_TEST_TRUE(bGetContentSuccess);
-	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
+	AB_TEST_TRUE(bGetContenttByShareCodeUser2Success);
+	AB_TEST_TRUE(UGCCheckContentEqual(GetContentByShareCodeUser2Response, CreateContentResponse));
 
 	// Download content payload using get content by share coded's payload url.
 	bDownloadSuccess = false;
@@ -953,6 +948,8 @@ bool UGCCreateContentInvalidChannelId::RunTest(const FString& Parameters)
 	return true;
 }
 
+// TODO: Confirm with the Backend team for similiar endpoint with the search content if the content id is empty.
+#if 0
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetContentEmptyContentId, "AccelByte.Tests.UGC.C.GetContent_EmptyContentId", AutomationFlagMaskUGC)
 bool UGCGetContentEmptyContentId::RunTest(const FString& Parameters)
 {
@@ -977,7 +974,7 @@ bool UGCGetContentEmptyContentId::RunTest(const FString& Parameters)
 
 	return true;
 }
-
+#endif
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCGetContentInvalidContentId, "AccelByte.Tests.UGC.C.GetContent_InvalidContentId", AutomationFlagMaskUGC)
 bool UGCGetContentInvalidContentId::RunTest(const FString& Parameters)
 {
@@ -1008,7 +1005,7 @@ bool UGCGetContentEmptyShareCode::RunTest(const FString& Parameters)
 {
 	bool bGetContentDone = false;
 	bool bGetContentSuccess = false;
-	FRegistry::UGC.GetContentByContentId(TEXT(""),
+	FRegistry::UGC.GetContentByShareCode(TEXT(""),
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentDone, &bGetContentSuccess](const FAccelByteModelsUGCContentResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
@@ -1033,7 +1030,7 @@ bool UGCGetContentInvalidShareCode::RunTest(const FString& Parameters)
 {
 	bool bGetContentDone = false;
 	bool bGetContentSuccess = false;
-	FRegistry::UGC.GetContentByContentId(TEXT("InvalidContentId"),
+	FRegistry::UGC.GetContentByShareCode(TEXT("InvalidShareCode"),
 		THandler<FAccelByteModelsUGCContentResponse>::CreateLambda([&bGetContentDone, &bGetContentSuccess](const FAccelByteModelsUGCContentResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get Content Success"));
