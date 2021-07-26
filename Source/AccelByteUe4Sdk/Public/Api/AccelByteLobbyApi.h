@@ -130,6 +130,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
 
 	/**
+	 * @brief delegate for handling generate party code event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyGenerateCodeResponse, const FAccelByteModelsPartyGenerateCodeResponse&);
+
+	/**
 	 * @brief delegate for handling get party code event
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyGetCodeResponse, const FAccelByteModelsPartyGetCodeResponse&);
@@ -478,9 +483,15 @@ public:
 	 * @param UserId The target user ID to be kicked.
 	 */
 	FString SendKickPartyMemberRequest(const FString& UserId);
-
+	
 	/**
-	 * @brief Generate and Get Party code.
+	 * @brief Generate Party code.
+	 * 
+	 */
+	FString SendPartyGenerateCodeRequest();
+	
+	/**
+	 * @brief Get Party code.
 	 * 
 	 */
 	FString SendPartyGetCodeRequest();
@@ -872,6 +883,16 @@ public:
 	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
 	{
 		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
+	};
+
+	/**
+	* @brief generate party code reponse
+	*
+	* @param OnPartyGenerateCodeResponse set delegate .
+	*/
+	void SetPartyGenerateCodeResponseDelegate(FPartyGenerateCodeResponse OnPartyGenerateCodeResponse)
+	{
+		PartyGenerateCodeResponse = OnPartyGenerateCodeResponse;
 	};
 
 	/**
@@ -1394,6 +1415,7 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
+	FPartyGenerateCodeResponse PartyGenerateCodeResponse;
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
 	FPartyJoinViaCodeResponse PartyJoinViaCodeResponse;

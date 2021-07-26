@@ -56,7 +56,7 @@ bool bUnfriendNotifSuccess, bCancelFriendNotifSuccess, bRejectFriendNotifSuccess
 bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySuccess, bRejectPartyError, bRejectedPartyNotifSuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError, bGetInvitationRejectedNotifSuccess, bGetInvitationRejectedNotifError;
 bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
 bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
-bool bGetPartyCodeSuccess, bGetPartyCodeError, bDeletePartyCodeSuccess, bDeletePartyCodeError, bJoinPartyViaCodeSuccess, bJoinPartyViaCodeError;
+bool bGeneratePartyCodeSuccess, bGeneratePartyCodeError, bGetPartyCodeSuccess, bGetPartyCodeError, bDeletePartyCodeSuccess, bDeletePartyCodeError, bJoinPartyViaCodeSuccess, bJoinPartyViaCodeError;
 bool bPromotePartyLeaderSuccess, bPromotePartyLeaderError;
 //Matchmaking
 bool bStartMatchmakingSuccess, bStartMatchmakingError, bCancelMatchmakingSuccess, bCancelMatchmakingError;
@@ -73,6 +73,7 @@ bool bBlockPlayerNotifSuccess, bUnblockPlayerNotifSuccess, bBlockPlayerNotifErro
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
 FAccelByteModelsPartyJoinReponse joinPartyResponse;
+FAccelByteModelsPartyGenerateCodeResponse partyGenerateCodeResponse;
 FAccelByteModelsPartyGetCodeResponse partyCodeResponse;
 FAccelByteModelsPartyRejectResponse rejectPartyResponse;
 
@@ -455,6 +456,17 @@ const auto CreatePartyDelegate = Api::Lobby::FPartyCreateResponse::CreateLambda(
 	}
 });
 
+const auto GeneratePartyCodeDelegate = Api::Lobby::FPartyGenerateCodeResponse::CreateLambda([](FAccelByteModelsPartyGenerateCodeResponse result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Party Code Success!"));
+	bGeneratePartyCodeSuccess = true;
+	partyGenerateCodeResponse = result;
+	if (result.PartyCode.IsEmpty())
+	{
+		bGeneratePartyCodeError = true;
+	}
+});
+
 const auto GetPartyCodeDelegate = Api::Lobby::FPartyGetCodeResponse::CreateLambda([](FAccelByteModelsPartyGetCodeResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Party Code Success!"));
@@ -484,7 +496,7 @@ const auto JoinViaCodeDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([]
 	bJoinPartyViaCodeSuccess = true;
 	if (result.Code != "0")
 	{
-		bJoinPartyViaCodeError = false;
+		bJoinPartyViaCodeError = true;
 	}
 });
 
@@ -1606,6 +1618,8 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
+	Lobbies[0]->SetPartyGenerateCodeResponseDelegate(GeneratePartyCodeDelegate);
+
 	Lobbies[0]->SetPartyGetCodeResponseDelegate(GetPartyCodeDelegate);
 
 	Lobbies[0]->SetPartyDeleteCodeResponseDelegate(DeletePartyCodeDelegate);
@@ -1616,6 +1630,7 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	Lobbies[1]->SetPartyJoinViaCodeResponseDelegate(JoinViaCodeDelegate);
 
+	// Leave Previous parties
 	Lobbies[0]->SendInfoPartyRequest();
 
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
@@ -1639,29 +1654,60 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 		Waiting(bLeavePartySuccess, "Leaving Party...");
 	}
 
+	// Create Party
 	Lobbies[0]->SendCreatePartyRequest();
 	Waiting(bCreatePartySuccess, "Creating Party...");
-
 	AB_TEST_FALSE(bCreatePartyError);
 
+	// Get Party Code
 	Lobbies[0]->SendPartyGetCodeRequest();
-
 	Waiting(bGetPartyCodeSuccess, "Getting Party Code...");
-
 	AB_TEST_TRUE(bGetPartyCodeSuccess);
-
+	bGetPartyCodeSuccess = false;
 	partyCode = partyCodeResponse.PartyCode;
 
+	// Join via Party Code
 	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
-
 	Waiting(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
-
 	AB_TEST_TRUE(bJoinPartyViaCodeSuccess);
+	bJoinPartyViaCodeError = false;
+	bJoinPartyViaCodeSuccess = false;
 
+	// Leave Party
+	bLeavePartySuccess = false;
+	Lobbies[1]->SendLeavePartyRequest();
+	Waiting(bLeavePartySuccess, "Leaving Party...");
+
+	// Generate new Party Code
+	Lobbies[0]->SendPartyGenerateCodeRequest();
+	Waiting(bGeneratePartyCodeSuccess, "Generate Party Code...");
+	AB_TEST_TRUE(bGeneratePartyCodeSuccess);
+
+	// Join via Party Code using previous code
+	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
+	Waiting(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
+	AB_TEST_TRUE(bJoinPartyViaCodeError);
+	bJoinPartyViaCodeError = false;
+	bJoinPartyViaCodeSuccess = false;
+
+	// Get Party Code
+	Lobbies[0]->SendPartyGetCodeRequest();
+	Waiting(bGetPartyCodeSuccess, "Getting Party Code...");
+	AB_TEST_TRUE(bGetPartyCodeSuccess);
+	bGetPartyCodeSuccess = false;
+	partyCode = partyCodeResponse.PartyCode;
+	AB_TEST_TRUE(partyCode == partyGenerateCodeResponse.PartyCode);
+
+	// Join via Party Code using new code
+	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
+	Waiting(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
+	AB_TEST_TRUE(bJoinPartyViaCodeSuccess);
+	bJoinPartyViaCodeError = false;
+	bJoinPartyViaCodeSuccess = false;
+
+	// Delete Party Code
 	Lobbies[0]->SendPartyDeleteCodeRequest();
-
 	Waiting(bDeletePartyCodeSuccess, "Deleting Party Code...");
-
 	AB_TEST_TRUE(bDeletePartyCodeSuccess);
 
 	LobbyDisconnect(2);

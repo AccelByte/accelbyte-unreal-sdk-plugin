@@ -29,6 +29,7 @@ namespace Api
 		const FString JoinParty = TEXT("partyJoinRequest");
 		const FString RejectParty = TEXT("partyRejectRequest");
 		const FString KickParty = TEXT("partyKickRequest");
+		const FString PartyGenerateCodeRequest = TEXT("partyGenerateCodeRequest");
 		const FString PartyGetCodeRequest = TEXT("partyGetCodeRequest");
 		const FString PartyDeleteCodeRequest = TEXT("partyDeleteCodeRequest");
 		const FString PartyJoinViaCodeRequest = TEXT("partyJoinViaCodeRequest");
@@ -97,6 +98,7 @@ namespace Api
 		const FString PartyKick = TEXT("partyKickResponse");
 		const FString PartyKickNotif = TEXT("partyKickNotif");
 		const FString PartyDataUpdateNotif = TEXT("partyDataUpdateNotif");
+		const FString PartyGenerateCode = TEXT("partyGenerateCodeResponse");
 		const FString PartyGetCode = TEXT("partyGetCodeResponse");
 		const FString PartyDeleteCode = TEXT("partyDeleteCodeResponse");
 		const FString PartyJoinViaCode = TEXT("partyJoinViaCodeResponse");
@@ -354,6 +356,13 @@ FString Lobby::SendKickPartyMemberRequest(const FString& UserId)
 
 	return SendRawRequest(LobbyRequest::KickParty, Prefix::Party,
 		FString::Printf(TEXT("memberID: %s\n"), *UserId));
+}
+
+FString Lobby::SendPartyGenerateCodeRequest()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::PartyGenerateCodeRequest, Prefix::Party);
 }
 
 FString Lobby::SendPartyGetCodeRequest()
@@ -1228,7 +1237,6 @@ if (lobbyResponseType.Equals(MessageType)) \
 	} \
 	return; \
 } \
-
 	// NOTIF
 	// Party
 	HANDLE_LOBBY_MESSAGE_NOTIF(LobbyResponse::DisconnectNotif, FAccelByteModelsDisconnectNotif, DisconnectNotif);
@@ -1335,6 +1343,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyReject, FAccelByteModelsPartyRejectResponse, PartyRejectResponse);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGetCode, FAccelByteModelsPartyGetCodeResponse, PartyGetCodeResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGenerateCode, FAccelByteModelsPartyGenerateCodeResponse, PartyGenerateCodeResponse);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyDeleteCode, FAccelByteModelsPartyDeleteCodeResponse, PartyDeleteCodeResponse);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyJoinViaCode, FAccelByteModelsPartyJoinReponse, PartyJoinViaCodeResponse);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyPromoteLeader, FAccelByteModelsPartyPromoteLeaderResponse, PartyPromoteLeaderResponse);
