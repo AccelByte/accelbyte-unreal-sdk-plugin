@@ -34,6 +34,7 @@ public:
 	FString AgreementServerUrl;
 	FString AchievementServerUrl;
 	FString SessionBrowserServerUrl;
+	FString TurnManagerServerUrl;
 	FString UGCServerUrl;
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
@@ -128,6 +129,9 @@ public:
 	FString SessionBrowserServerUrl;
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString TurnManagerServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString UGCServerUrl;
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
@@ -219,6 +223,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetSessionBrowserServerUrl();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetTurnManagerServerUrl();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetUGCServerUrl();
@@ -279,6 +286,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetTurnManagerServerUrl(const FString& TurnManagerServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetUGCServerUrl(const FString& UGCServerUrl);

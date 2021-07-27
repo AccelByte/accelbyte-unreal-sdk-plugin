@@ -38,6 +38,7 @@ namespace Api
 	class Agreement;
 	class Achievement;
 	class SessionBrowser;
+	class TurnManager;
 	class UGC;
 	class SeasonPass;
 	class Reporting;
@@ -89,6 +90,7 @@ public:
 	static Api::Agreement Agreement;
 	static Api::Achievement Achievement;
 	static Api::SessionBrowser SessionBrowser;
+	static Api::TurnManager TurnManager;
 	static Api::UGC UGC;
 	static Api::SeasonPass SeasonPass;
 	static Api::Reporting Reporting;

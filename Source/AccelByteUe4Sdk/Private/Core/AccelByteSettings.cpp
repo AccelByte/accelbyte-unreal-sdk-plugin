@@ -172,6 +172,11 @@ FString UAccelByteBlueprintsSettings::GetSessionBrowserServerUrl()
 	return FRegistry::Settings.SessionBrowserServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetTurnManagerServerUrl()
+{
+	return FRegistry::Settings.TurnManagerServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetUGCServerUrl()
 {
 	return FRegistry::Settings.UGCServerUrl;
@@ -270,6 +275,11 @@ void UAccelByteBlueprintsSettings::SetAchievementServerUrl(const FString& Achiev
 void UAccelByteBlueprintsSettings::SetSessionBrowserServerUrl(const FString& SessionBrowserServerUrl)
 {
 	FRegistry::Settings.SessionBrowserServerUrl = SessionBrowserServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetTurnManagerServerUrl(const FString& TurnManagerServerUrl)
+{
+	FRegistry::Settings.TurnManagerServerUrl = TurnManagerServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetUGCServerUrl(const FString& UGCServerUrl)
