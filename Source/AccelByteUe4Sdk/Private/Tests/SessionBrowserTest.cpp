@@ -221,6 +221,18 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bFounded);
 	AB_TEST_EQUAL(Founded.Game_session_setting.Current_player, ResultUpdated.Game_session_setting.Current_player);
 
+	//Get game session by session id
+	bool bGameSessionGet = false;
+	FAccelByteModelsSessionBrowserData getByIdResult;
+	SessionBrowsers[1]->GetGameSession(QueryResult.Sessions[0].Session_id,
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bGameSessionGet, &getByIdResult](const FAccelByteModelsSessionBrowserData& result)
+		{
+			bGameSessionGet = true;
+			getByIdResult = result;
+		}), SessionBrowserTestErrorHandler);
+	Waiting(bGameSessionGet, "Waiting get session by session id");
+	AB_TEST_EQUAL(getByIdResult.Session_id, QueryResult.Sessions[0].Session_id);
+
 	//Remove game session
 	bool bRemoved = false;
 	SessionBrowsers[0]->RemoveGameSession(Result.Session_id,

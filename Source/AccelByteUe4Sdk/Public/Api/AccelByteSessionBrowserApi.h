@@ -68,14 +68,23 @@ public:
 	/**
 	* @brief Query game session.
 	*
-	* @param SessionType id of the session want to update.
-	* @param GameMode id of the session want to update.
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
+	* @param SessionType the session type, either "dedicated", or "p2p"
+	* @param GameMode The game mode of the session to query.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserGetResult.
 	* @param OnError This will be called when the operation failed.
 	* @param Offset offset of the query
 	* @param Limit number of data to return
 	*/
 	void GetGameSessions(const FString &SessionType, const FString &GameMode, const THandler<FAccelByteModelsSessionBrowserGetResult>& OnSuccess, const FErrorHandler& OnError, uint32 Offset = 0, uint32 Limit = 50);
+
+	/**
+	* @brief Get game session data by session ID.
+	*
+	* @param SessionId id of the session
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	SessionBrowser() = delete;
