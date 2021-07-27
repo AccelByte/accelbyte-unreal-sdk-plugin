@@ -49,7 +49,7 @@ const auto UGCOnError = FErrorHandler::CreateLambda([](int32 Code, const FString
 
 bool UGCCheckContainChannel(const FString& ExpectedChannelId, const TArray<FAccelByteModelsUGCChannelResponse>& Channels)
 {
-	for (auto Channel : Channels)
+	for (const FAccelByteModelsUGCChannelResponse& Channel : Channels)
 	{
 		if (Channel.Id.Equals(ExpectedChannelId))
 		{
@@ -61,7 +61,7 @@ bool UGCCheckContainChannel(const FString& ExpectedChannelId, const TArray<FAcce
 
 bool UGCCheckContainTag(const FString& ExpectedTagName, const FString& ExpectedTagId, const TArray<FAccelByteModelsUGCTagResponse>& Tags)
 {
-	for(auto Tag : Tags)
+	for(const FAccelByteModelsUGCTagResponse& Tag : Tags)
 	{
 		if(Tag.Tag.Equals(ExpectedTagName) && Tag.Id.Equals(ExpectedTagId))
 		{
@@ -73,7 +73,7 @@ bool UGCCheckContainTag(const FString& ExpectedTagName, const FString& ExpectedT
 
 bool UGCCheckContainTag(const FString& ExpectedTagName,const TArray<FString>& Tags)
 {
-	for (auto Tag : Tags)
+	for (const FString& Tag : Tags)
 	{
 		if (Tag.Equals(ExpectedTagName))
 		{
@@ -85,7 +85,7 @@ bool UGCCheckContainTag(const FString& ExpectedTagName,const TArray<FString>& Ta
 
 bool UGCCheckContainSubType(const FString& ExpectedSubTypeName, const TArray<FString>& SubTypes)
 {
-	for (auto SubType : SubTypes)
+	for (const FString& SubType : SubTypes)
 	{
 		if (SubType.Equals(ExpectedSubTypeName))
 		{
@@ -97,7 +97,7 @@ bool UGCCheckContainSubType(const FString& ExpectedSubTypeName, const TArray<FSt
 
 bool UGCCheckContainType(const FString& ExpectedTypeName, const FString& ExpectedTypeId, const TArray<FAccelByteModelsUGCTypeResponse>& Types)
 {
-	for(auto Type : Types)
+	for(const FAccelByteModelsUGCTypeResponse& Type : Types)
 	{
 		if(Type.Type.Equals(ExpectedTypeName) && Type.Id.Equals(ExpectedTypeId))
 		{
@@ -192,9 +192,9 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetTagsSuccess, "Waiting for getting tags...");
 
-	for(auto UGCTag : UGCTags)
+	for(const FString& UGCTag : UGCTags)
 	{
-		for(auto ResponseTag : GetTagsResponse.Data)
+		for(const FAccelByteModelsUGCTagResponse& ResponseTag : GetTagsResponse.Data)
 		{
 			if(ResponseTag.Tag.Equals(UGCTag))
 			{
@@ -224,7 +224,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	FlushHttpRequests();
 	Waiting(bGetTypesSuccess, "Waiting for getting types...");
 
-	for (auto ResponseType : GetTypesResponse.Data)
+	for (const FAccelByteModelsUGCTypeResponse& ResponseType : GetTypesResponse.Data)
 	{
 		if (ResponseType.Type.Equals(UGCType))
 		{
@@ -247,7 +247,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	FRegistry::UGC.GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse>::CreateLambda([&bGetChannelsDone, &PreviousChannelId](const FAccelByteModelsUGCChannelsPagingResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Get channels Success"));
-		for (auto Channel : Response.Data)
+		for (const FAccelByteModelsUGCChannelResponse& Channel : Response.Data)
 		{
 			if (Channel.Name.Equals(UGCChannelName))
 			{
@@ -327,7 +327,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bDoneSearchUser = true;
 	}), UGCOnError);
 	Waiting(bDoneSearchUser, "Waiting for searching user...");
-	check(bDoneSearchUser);
+	AB_TEST_TRUE(bDoneSearchUser);
 
 	if (ReceivedUserData.Data.Num() > 0)
 	{
@@ -381,7 +381,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bDeleteTypeSuccess);
 	
-	for(auto UGCTagId : UGCTagIds)
+	for(const FString& UGCTagId : UGCTagIds)
 	{
 		bool bDeleteTagSuccess = false;
 		UGCDeleteTag(UGCTagId, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
