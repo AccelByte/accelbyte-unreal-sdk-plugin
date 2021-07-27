@@ -124,28 +124,51 @@ void WaitSecond(double WaitTime, const FString Message)
 	}
 }
 
-FString GetRequiredEnvironmentVariable(const FString Name, const int32 ValueLength = 100)
+FString GetEnvironmentVariable(const FString Name, const int32 MaxValueLength = 100)
 {
-	FString Value = Environment::GetEnvironmentVariable(Name, ValueLength + 1);
-	if (Value.IsEmpty())
-	{
-		UE_LOG(LogAccelByteTest, Fatal, TEXT("Missing required environment variable: %s"), *Name);
-	}
-	if (Value.Len() > ValueLength)
+	FString Value = Environment::GetEnvironmentVariable(Name, MaxValueLength + 1);
+
+	if (Value.Len() > MaxValueLength)
 	{
 		UE_LOG(LogAccelByteTest, Fatal, TEXT("Environment variable value is too long: %s"), *Name);
 	}
+
 	return FString::Printf(TEXT("%s"), *Value);
+}
+
+FString GetMandatoryEnvironmentVariable(const FString Name, const int32 MaxValueLength = 100)
+{
+	FString Value = GetEnvironmentVariable(Name, MaxValueLength);
+
+	if (Value.IsEmpty())
+	{
+		UE_LOG(LogAccelByteTest, Fatal, TEXT("Missing mandatory environment variable: %s"), *Name);
+	}
+
+	return FString::Printf(TEXT("%s"), *Value);
+}
+
+TOptional<FString> GetOptionalEnvironmentVariable(const FString Name, const int32 MaxValueLength = 100)
+{
+	TOptional<FString> Value;
+	FString TempValue = GetEnvironmentVariable(Name, MaxValueLength);
+
+	if (!TempValue.IsEmpty())
+	{
+		Value = TempValue;
+	}
+
+	return Value;
 }
 
 FString GetAdminBaseUrl()
 {
-	return GetRequiredEnvironmentVariable(TEXT("ADMIN_BASE_URL"));
+	return GetMandatoryEnvironmentVariable(TEXT("ADMIN_BASE_URL"));
 }
 
 FString GetPublisherNamespace()
 {
-	return GetRequiredEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"));
+	return GetMandatoryEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"));
 }
 
 FString AdminAccessTokenCache;
@@ -157,8 +180,8 @@ FString GetAdminAccessToken()
 		return AdminAccessTokenCache;
 	}
 
-	FString ClientId = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
-	FString ClientSecret = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
+	FString ClientId = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
+	FString ClientSecret = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
 
 	FOauth2Token ClientLogin;
 	bool ClientLoginSuccess = false;
@@ -189,10 +212,10 @@ FString GetAdminUserAccessToken()
 		return AdminUserTokenCache;
 	}
 
-	FString ClientId = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
-	FString ClientSecret = GetRequiredEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
-	FString UserName = GetRequiredEnvironmentVariable(TEXT("ADMIN_USER_NAME"));
-	FString UserPass = GetRequiredEnvironmentVariable(TEXT("ADMIN_USER_PASS"));
+	FString ClientId = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
+	FString ClientSecret = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
+	FString UserName = GetMandatoryEnvironmentVariable(TEXT("ADMIN_USER_NAME"));
+	FString UserPass = GetMandatoryEnvironmentVariable(TEXT("ADMIN_USER_PASS"));
 
 	FString Authorization = TEXT("Basic " + FBase64::Encode(FString::Printf(TEXT("%s:%s"), *ClientId, *ClientSecret)));
 	FString Url = FString::Printf(TEXT("%s/iam/oauth/token"), *GetAdminBaseUrl());
@@ -223,12 +246,12 @@ FString GetAdminUserAccessToken()
 
 FString GetSteamUserId()
 {
-	return GetRequiredEnvironmentVariable(TEXT("STEAM_USER_ID"));
+	return GetMandatoryEnvironmentVariable(TEXT("STEAM_USER_ID"));
 }
 
-FString GetSteamKey()
+TOptional<FString> GetSteamKey()
 {
-	return GetRequiredEnvironmentVariable(TEXT("STEAM_KEY"));
+	return GetOptionalEnvironmentVariable(TEXT("STEAM_KEY"));
 }
 
 FString GetSteamTicket()
@@ -254,9 +277,15 @@ FString GetSteamAppId()
 }
 
 bool CheckSteamTicket() {
+	TOptional<FString> SteamKey = GetSteamKey();
+	if (!SteamKey.IsSet())
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("Environment variable STEAM_KEY is not set, not checking Steam ticket"));
+		return true;
+	}
 	FString Url = FString::Printf(
 		TEXT("https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/?key=%s&appid=%s&ticket=%s&format=json"),
-		*GetSteamKey(),
+		*SteamKey.GetValue(),
 		*GetSteamAppId(),
 		*GetSteamTicket());
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
