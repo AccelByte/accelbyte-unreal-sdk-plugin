@@ -900,7 +900,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreateContentEmptyChannelId, "AccelByte.Tests.UGC.C.CreateContent_Empty", AutomationFlagMaskUGC)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCCreateContentEmptyChannelId, "AccelByte.Tests.UGC.C.CreateContent_EmptyChannelId", AutomationFlagMaskUGC)
 bool UGCCreateContentEmptyChannelId::RunTest(const FString& Parameters)
 {
 	bool bCreateContentSuccess = false;
