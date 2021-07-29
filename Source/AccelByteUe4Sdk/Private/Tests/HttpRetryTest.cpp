@@ -45,6 +45,50 @@ public:
 	};
 };
 
+class FHttpTestWorker : public FRunnable
+{
+public:
+	FHttpTestWorker(const FString& ThreadName, const TSharedRef<FHttpRetryScheduler>& Scheduler, const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double Delay = 0.0f)
+		: Scheduler(Scheduler)
+		, Request(Request)
+		, RequestCompleteDelegate(CompleteDelegate)
+		, RequestTime(RequestTime)
+		, DelayTime(Delay)
+	{ 
+		Thread = FRunnableThread::Create(this, *ThreadName);
+	}
+
+	~FHttpTestWorker()
+	{
+		delete Thread;
+		Thread = nullptr;
+	}
+
+	virtual uint32 Run() override
+	{
+		FPlatformProcess::Sleep(DelayTime);
+		uint32 ThreadId = FPlatformTLS::GetCurrentThreadId();
+		FString ThreadName = FThreadManager::Get().GetThreadName(ThreadId);
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("[Async] Start Sending Request to URL=%s on Thread=%s"), *Request->GetURL(), *ThreadName);
+		Scheduler->ProcessRequest(Request, RequestCompleteDelegate, RequestTime + DelayTime);
+		return 0;
+	}
+
+	void EnsureCompletion()
+	{
+		Stop();
+		Thread->WaitForCompletion();
+	}
+
+private:
+	const TSharedRef<FHttpRetryScheduler> Scheduler;
+	const FHttpRequestPtr Request;
+	const FHttpRequestCompleteDelegate RequestCompleteDelegate;
+	const double RequestTime;
+	const double DelayTime;
+	FRunnableThread* Thread;
+};
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpRetryBackupSettings, "AccelByte.Tests.Core.HttpRetry.A.BackupSettings", AutomationFlagMaskHttpRetry);
 bool HttpRetryBackupSettings::RunTest(const FString& Parameter)
 {
@@ -91,8 +135,8 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 	[&NumRequestRetry, &CurrentTime]
 	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
-		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried"), CurrentTime);
 		NumRequestRetry++;
+		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried %d times"), CurrentTime, NumRequestRetry);
 	});
 	
 	//Official OnProcessRequestComplete
@@ -104,17 +148,16 @@ bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Paramete
 		RequestCompleted = true;
 	});
 
-
+	float SpecifiedDeltaTime = 0.5f;
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
 	while (CurrentTime < 16)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
-
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
@@ -160,8 +203,8 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 		[&NumRequestRetry, &CurrentTime]
 	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 	{
-		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried"), CurrentTime);
 		NumRequestRetry++;
+		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried %d times"), CurrentTime, NumRequestRetry);
 	});
 
 	//Official OnProcessRequestComplete
@@ -173,17 +216,16 @@ bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
 		RequestCompleted = true;
 	});
 
-
+	float SpecifiedDeltaTime = 0.5f;
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
 	while (CurrentTime < 30 && NumRequestRetry < 2)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
-
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
@@ -234,14 +276,15 @@ bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FStr
 		RequestCompleted = true;
 	});
 
+	float SpecifiedDeltaTime = 0.2f;
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
 	while (CurrentTime < 70.3 && !RequestCompleted)
 	{
-		CurrentTime += 0.2;
-		Ticker.Tick(0.2);
-		FPlatformProcess::Sleep(0.2);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
 	AB_TEST_TRUE(RequestCompleted);
@@ -294,14 +337,15 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 		RequestCompleted = true;
 	});
 
+	float SpecifiedDeltaTime = 0.2f;
 	CurrentTime = 10.0;
 	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
 	while (CurrentTime < 70.3 && !RequestCompleted)
 	{
-		CurrentTime += 0.2;
-		Ticker.Tick(0.2);
-		FPlatformProcess::Sleep(0.1); //lying to Scheduler, it's actually 30s instead of 60s. So mocky still hold the response, while Scheduler thinks that it's timeout.
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime / 2); //lying to Scheduler, it's actually 30s instead of 60s. So mocky still hold the response, while Scheduler thinks that it's timeout.
 	}
 
 	AB_TEST_TRUE(RequestCompleted);
@@ -332,8 +376,9 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 		0.2f);
 
 	int RequestCompleted = 0;
+	int RequestCount = 15;
 
-	for (int i = 0; i < 15; i++)
+	for (int i = 0; i < RequestCount; i++)
 	{
 		auto Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(FString::Printf(TEXT("http://www.example.com/?id=%d"), i));
@@ -349,16 +394,17 @@ bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Param
 		Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 	}
 
+	float SpecifiedDeltaTime = 0.2f;
 	CurrentTime = 10.0;
 
 	while (CurrentTime < 15.0)
 	{
-		CurrentTime += 0.2;
-		Ticker.Tick(0.2);
-		FPlatformProcess::Sleep(0.2);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
-	AB_TEST_EQUAL(RequestCompleted, 15);
+	AB_TEST_EQUAL(RequestCompleted, RequestCount);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate);
@@ -386,7 +432,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	int RequestCompleted = 0;
 	int RequestSucceeded = 0;
 	int RequestFailed = 0;
-	vector<FHttpRequestPtr> CancelledRequests;
+	TArray<FHttpRequestPtr> CancelledRequests;
 
 	for (int i = 0; i < 12; i++)
 	{
@@ -408,7 +454,7 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
 			//BadRequest 400, delayed by 10s
 			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), i));
-			CancelledRequests.push_back(Request);
+			CancelledRequests.Add(Request);
 
 			break;
 		case 3:
@@ -442,12 +488,13 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 	}
 
 	CurrentTime = 10.0;
+	float SpecifiedDeltaTime = 0.5f;
 
 	while (CurrentTime < 15.0)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
@@ -463,9 +510,9 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 
 	while (CurrentTime < 25.0)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
@@ -476,9 +523,9 @@ bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString
 
 	while (CurrentTime < 35.0)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
@@ -531,7 +578,7 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 		}),
 		0.2f);
 
-
+	float SpecifiedDeltaTime = 0.5f;
 	CurrentTime = 10.0;
 	int RequestCompleted = 0;
 	using Del = FHttpRequestCompleteDelegate;
@@ -591,9 +638,9 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 
 	while (CurrentTime < 50.0)
 	{
-		CurrentTime += 0.5;
-		Ticker.Tick(0.5);
-		FPlatformProcess::Sleep(0.5);
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
 	}
 
 	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
@@ -604,6 +651,137 @@ bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Par
 	Ticker.RemoveTicker(TickerDelegate2);
 
 	ResetSettings();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(Concurrency_ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.Concurrency.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
+bool Concurrency_ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
+{
+	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
+	auto Ticker = FTicker::GetCoreTicker();
+	double CurrentTime;
+	TArray<TSharedPtr<FHttpTestWorker>> Tasks;
+
+	auto TickerDelegate = Ticker.AddTicker(
+		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
+	{
+		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
+		Scheduler->PollRetry(CurrentTime);
+
+		return true;
+	}),
+		0.2f);
+
+	int TotalRequests = 24;
+	int RequestCompleted = 0;
+	int RequestSucceeded = 0;
+	int RequestFailed = 0;
+	int FirstPass = 0;
+
+	TArray<FHttpRequestPtr> CancelledRequests;
+
+	for (int count = 0; count < TotalRequests; count++)
+	{
+		FString URL = TEXT("");
+		auto Request = FHttpModule::Get().CreateRequest();
+		int modulo = count % 4;
+		double DelayTime = (double)modulo;
+
+		switch (modulo)
+		{
+		case 0:
+			Request->SetURL(FString::Printf(TEXT("http://www.example.com/?id=%d"), count));
+			FirstPass++;
+
+			break;
+		case 1:
+			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+			//BadRequest 400, delayed by 10s
+			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), count));
+
+			break;
+		case 2:
+			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+			//BadRequest 400, delayed by 10s
+			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), count));
+			CancelledRequests.Add(Request);
+
+			break;
+		case 3:
+			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+			//Sucess 200, delayed by 20s
+			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=20s&id=%d"), count));
+
+			break;
+		}
+
+		Request->SetVerb(TEXT("GET"));
+
+		auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &RequestSucceeded, &RequestFailed](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+		{
+			RequestCompleted++;
+
+			if (Request->GetStatus() == EHttpRequestStatus::Succeeded)
+			{
+				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus=%s, ResponseCode=%d, URL=%s"), ToString(Request->GetStatus()), Response->GetResponseCode(), *Request->GetURL());
+				RequestSucceeded++;
+			}
+			else
+			{
+				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus=%s, URL=%s"), ToString(Request->GetStatus()), *Request->GetURL());
+				RequestFailed++;
+			}
+
+		});
+
+		FString ThreadName = FString::Printf(TEXT("Concurrency_%03d"), count);
+		TSharedPtr<FHttpTestWorker> Task = MakeShared<FHttpTestWorker>(ThreadName, Scheduler, Request, RequestCompleteDelegate, 10.01, DelayTime);
+		Tasks.Add(Task);
+	}
+
+	CurrentTime = 10.0;
+	float SpecifiedDeltaTime = 0.5f; 
+	
+	while (CurrentTime < 15.0)
+	{
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
+	}
+
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
+	AB_TEST_EQUAL(RequestFailed, 0);
+	AB_TEST_EQUAL(RequestSucceeded, FirstPass);
+
+	for (const auto& Request : CancelledRequests)
+	{
+		Request->CancelRequest();
+	}
+
+	while (CurrentTime < 40.0)
+	{
+		CurrentTime += SpecifiedDeltaTime;
+		Ticker.Tick(SpecifiedDeltaTime);
+		FPlatformProcess::Sleep(SpecifiedDeltaTime);
+	}
+
+	int FailedNum = CancelledRequests.Num();
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
+	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
+	AB_TEST_EQUAL(RequestFailed, FailedNum);
+	AB_TEST_EQUAL(RequestSucceeded, TotalRequests - FailedNum);
+
+	FRegistry::Credentials.ForgetAll();
+	Ticker.RemoveTicker(TickerDelegate);
+
+	for (auto& Task : Tasks)
+	{
+		Task->EnsureCompletion();
+	}
+
 	return true;
 }
 
