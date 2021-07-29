@@ -171,43 +171,13 @@ FString GetPublisherNamespace()
 	return GetMandatoryEnvironmentVariable(TEXT("PUBLISHER_NAMESPACE"));
 }
 
-FString AdminAccessTokenCache;
-
-FString GetAdminAccessToken()
-{
-	if (!AdminAccessTokenCache.IsEmpty())
-	{
-		return AdminAccessTokenCache;
-	}
-
-	FString ClientId = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_ID"));
-	FString ClientSecret = GetMandatoryEnvironmentVariable(TEXT("ADMIN_CLIENT_SECRET"));
-
-	FOauth2Token ClientLogin;
-	bool ClientLoginSuccess = false;
-	Api::Oauth2::GetTokenWithClientCredentials(FString::Printf(TEXT("%s"), *ClientId), FString::Printf(TEXT("%s"), *ClientSecret),
-		THandler<FOauth2Token>::CreateLambda([&ClientLogin, &ClientLoginSuccess](const FOauth2Token& Result)
-			{
-				ClientLogin = Result;
-				ClientLoginSuccess = true;
-				UE_LOG(LogAccelByteTest, Log, TEXT("Login with Client Success..!"));
-			}),
-		FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
-			{
-				UE_LOG(LogAccelByteTest, Fatal, TEXT("ERROR: %i - %s"), ErrorCode, *ErrorMessage);
-			}));
-	Waiting(ClientLoginSuccess, "Login with Client...");
-
-	AdminAccessTokenCache = ClientLogin.Access_token;
-
-	return ClientLogin.Access_token;
-}
-
 FString AdminUserTokenCache;
+double AdminUserTokenExpiry;
 
 FString GetAdminUserAccessToken()
 {
-	if (!AdminUserTokenCache.IsEmpty())
+	double CurrentTime = FPlatformTime::Seconds();
+	if (!AdminUserTokenCache.IsEmpty() && CurrentTime < AdminUserTokenExpiry)
 	{
 		return AdminUserTokenCache;
 	}
@@ -236,10 +206,12 @@ FString GetAdminUserAccessToken()
 		{
 			UE_LOG(LogAccelByteTest, Fatal, TEXT("Error Code: %d, Message: %s"), ErrorCode, *ErrorMessage);
 		});
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	CurrentTime = FPlatformTime::Seconds();
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), CurrentTime);
 	Waiting(bGetTokenSuccess, "Waiting for get token...");
 
 	AdminUserTokenCache = TokenResult.Access_token;
+	AdminUserTokenExpiry = CurrentTime + TokenResult.Expires_in;
 
 	return TokenResult.Access_token;
 }
@@ -325,7 +297,7 @@ void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, co
 
 void UAccelByteBlueprintsTest::SendNotif(FString UserId, FString Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/notification/namespaces/%s/users/%s/freeform"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *UserId);
 	FString Content = FString::Printf(TEXT("{\"message\":\"%s\"}"), *Message);
 	Url = Url.Replace(TEXT("wss"), TEXT("https")); //change protocol
@@ -514,7 +486,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 			}), OnError);
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -522,7 +494,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 
 void DeleteUserProfile(const FString& Namespace, const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/basic/v1/admin/namespaces/%s/users/%s/profiles"), *GetAdminBaseUrl(), *Namespace, *UserId);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1393,7 +1365,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 
 void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Currency, Content);
@@ -1403,7 +1375,7 @@ void Ecommerce_Currency_Create(FCurrencyCreateRequest Currency, const FSimpleDel
 
 void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s/summary"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CurrencyCode);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1411,7 +1383,7 @@ void Ecommerce_Currency_Get(FString CurrencyCode, const FSimpleDelegate& OnSucce
 
 void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CurrencyCode);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1419,7 +1391,7 @@ void Ecommerce_Currency_Delete(FString CurrencyCode, const FSimpleDelegate& OnSu
 
 void Ecommerce_PublishedStore_Get(const FString& Namespace, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *GetAdminBaseUrl(), *Namespace);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1433,7 +1405,7 @@ void Ecommerce_PublishedStore_Get(const THandler<FStoreInfo>& OnSuccess, const F
 
 void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/published"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1441,7 +1413,7 @@ void Ecommerce_PublishedStore_Delete(const FSimpleDelegate& OnSuccess, const FEr
 
 void Ecommerce_Store_Create(const FString& Namespace, FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *GetAdminBaseUrl(), *Namespace);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Store, Content);
@@ -1457,7 +1429,7 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 
 void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1465,7 +1437,7 @@ void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, cons
 
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *StoreId);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1473,7 +1445,7 @@ void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, c
 
 void Ecommerce_Store_Clone(const FString& Namespace, FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *GetAdminBaseUrl(), *Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
 	FString Content;
 	AB_HTTP_PUT(Request, Url, Authorization, Content);
@@ -1488,7 +1460,7 @@ void Ecommerce_Store_Clone(FString Source, FString Target, const FSimpleDelegate
 
 void Ecommerce_Category_Create(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/categories?storeId=%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *StoreId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Category, Content);
@@ -1504,7 +1476,7 @@ void Ecommerce_Item_Create(FItemCreateRequest Item, FString StoreId, const THand
 
 void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *GetAdminBaseUrl(), *Namespace, *StoreId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Item, Content);
@@ -1546,7 +1518,7 @@ void Ecommerce_GrantUserEntitlements(const FString& Namespace, const FString& Us
 
 void Ecommerce_Campaign_Create(FCampaignCreateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
@@ -1556,7 +1528,7 @@ void Ecommerce_Campaign_Create(FCampaignCreateModel body, const THandler<FCampai
 
 void Ecommerce_Campaign_Update(FString campaignId, FCampaignUpdateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
@@ -1566,7 +1538,7 @@ void Ecommerce_Campaign_Update(FString campaignId, FCampaignUpdateModel body, co
 
 void Ecommerce_CampaignCodes_Create(FString campaignId, FCampaignCodeCreateModel body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
@@ -1576,7 +1548,7 @@ void Ecommerce_CampaignCodes_Create(FString campaignId, FCampaignCodeCreateModel
 
 void Ecommerce_Campaign_Get_ByName(FString name, const THandler<FCampaignPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Query = FString::Printf(TEXT("?name=%s"), *name);
 	Url.Append(name.IsEmpty() ? TEXT("") : FString::Printf(TEXT("%s"), *Query));
@@ -1586,7 +1558,7 @@ void Ecommerce_Campaign_Get_ByName(FString name, const THandler<FCampaignPagingS
 
 void Ecommerce_CampaignCodes_Get(FString campaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1594,7 +1566,7 @@ void Ecommerce_CampaignCodes_Get(FString campaignId, const THandler<FCodeInfoPag
 
 void Ecommerce_CampaignCode_Disable(FString code, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *code);
 	FString Content;
 	AB_HTTP_PUT(Request, Url, Authorization, Content);
@@ -1630,7 +1602,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
 	UE_LOG(LogAccelByteTest, Log, TEXT("JSON Content: %s"), *Content);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1638,7 +1610,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 
 void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *channel);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1646,7 +1618,7 @@ void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpl
 
 void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *statCode);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1654,7 +1626,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 
 void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
@@ -1664,7 +1636,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 
 void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *statCode);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1672,7 +1644,7 @@ void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuc
 
 void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *statCode);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1690,7 +1662,7 @@ void Leaderboard_Create_Leaderboard(const FLeaderboardConfigRequest& request, co
 
 void Leaderboard_GetAll_Leaderboard(const FString& leaderboardCode, const THandler<FLeaderboardConfigResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/leaderboard/v1/admin/namespaces/%s/leaderboards"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *leaderboardCode);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1708,7 +1680,7 @@ void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapRespons
 {
 	check(!userId.IsEmpty());
 	UE_LOG(LogAccelByteTest, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1726,7 +1698,7 @@ void User_Get_Verification_Code(const FString& userId, const THandler<FVerificat
 			}), OnError);
 	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1734,7 +1706,7 @@ void User_Get_Verification_Code(const FString& userId, const THandler<FVerificat
 
 void User_Get_By_Email_Address(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/search?query=%s&limit=2"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *FGenericPlatformHttp::UrlEncode(EmailAddress));
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(THandler<FUserSearchResponse>::CreateLambda([OnSuccess, OnError](FUserSearchResponse Users) {
@@ -1785,7 +1757,7 @@ void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccount
 
 void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies"), *GetAdminBaseUrl());
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
@@ -1795,7 +1767,7 @@ void Agreement_Create_Base_Policy(const FAgreementBasePolicyCreate& CreateReques
 
 void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPolicyVersionCreate& CreateRequest, const THandler<FAgreementPolicyVersion>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policies/%s/versions"), *GetAdminBaseUrl(), *PolicyId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
@@ -1805,7 +1777,7 @@ void Agreement_Create_Policy_Version(const FString& PolicyId, const FAgreementPo
 
 void Agreement_Create_Localized_Policy(const FString& PolicyVersionId, const FAgreementLocalizedPolicyCreate& CreateRequest, const THandler<FAgreementLocalizedPolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/localized-policy-versions/versions/%s"), *GetAdminBaseUrl(), *PolicyVersionId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
@@ -1815,7 +1787,7 @@ void Agreement_Create_Localized_Policy(const FString& PolicyVersionId, const FAg
 
 void Agreement_Publish_Policy_Version(const FString& PolicyVersionId, bool ShouldNotify, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policies/versions/%s/latest?shouldNotify=%s"), *GetAdminBaseUrl(), *PolicyVersionId, ShouldNotify ? TEXT("true") : TEXT("false"));
 	AB_HTTP_PATCH(Request, Url, Authorization, TEXT(""));
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1823,7 +1795,7 @@ void Agreement_Publish_Policy_Version(const FString& PolicyVersionId, bool Shoul
 
 void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies"), *GetAdminBaseUrl());
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1831,7 +1803,7 @@ void Agreement_Get_Base_Policies(const THandler<TArray<FAgreementBasePolicy>>& O
 
 void Agreement_Get_Country_Base_Policy(const FString& BasePolicyId, const FString& CountryCode, const THandler<FAgreementCountryPolicy>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/base-policies/%s/countries/%s"), *GetAdminBaseUrl(), *BasePolicyId, *CountryCode);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1839,7 +1811,7 @@ void Agreement_Get_Country_Base_Policy(const FString& BasePolicyId, const FStrin
 
 void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/policy-types?limit=100"), *GetAdminBaseUrl());
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1847,7 +1819,7 @@ void Agreement_Get_Policy_Types(const THandler<TArray<FAgreementPolicyTypeObject
 
 void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THandler<TArray<FAgreementLocalizedPolicy>>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/agreement/admin/localized-policy-versions/versions/%s"), *GetAdminBaseUrl(), *PolicyVersionId);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1855,7 +1827,7 @@ void Agreement_Get_Localized_Policies(const FString& PolicyVersionId, const THan
 
 void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(AchievementRequest, Content);
@@ -1865,7 +1837,7 @@ void Achievement_Create(const FAchievementRequest& AchievementRequest, const THa
 
 void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *AchievementCode);
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -1873,7 +1845,7 @@ void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& O
 
 void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/subscriptions/platformSubscribe"), *GetAdminBaseUrl(), *FRegistry::Settings.PublisherNamespace, *UserId);
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(BodyRequest, Content);

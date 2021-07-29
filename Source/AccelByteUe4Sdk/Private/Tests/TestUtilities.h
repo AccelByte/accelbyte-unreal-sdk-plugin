@@ -1072,7 +1072,7 @@ bool AccelByteSkipTest(const FString& TestName);
 #endif
 
 FString GetAdminBaseUrl();
-FString GetAdminAccessToken();
+FString GetAdminUserAccessToken();
 
 bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers);
 bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials);

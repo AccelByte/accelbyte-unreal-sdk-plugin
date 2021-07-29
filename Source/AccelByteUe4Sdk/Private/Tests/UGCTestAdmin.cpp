@@ -8,7 +8,7 @@
 void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/ugc/v1/admin/namespaces/%s/types"), *BaseUrl, *FRegistry::ServerSettings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -38,7 +38,7 @@ void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const TH
 void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/ugc/v1/admin/namespaces/%s/tags"), *BaseUrl, *FRegistry::ServerSettings.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -59,7 +59,7 @@ void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResp
 void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/ugc/v1/admin/namespaces/%s/types/%s"), *BaseUrl, *FRegistry::ServerSettings.Namespace, *TypeId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
@@ -80,7 +80,7 @@ void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const F
 void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/ugc/v1/admin/namespaces/%s/tags/%s"), *BaseUrl, *FRegistry::ServerSettings.Namespace, *TagId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");

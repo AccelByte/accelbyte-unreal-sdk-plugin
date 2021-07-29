@@ -330,14 +330,14 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 		for (auto& leaderboardCode : TestLeaderboardCodes)
 		{
 			bool bGetRankingDone = false;
-			bool bFound = false;
+			bool bGetRankingFound = false;
 			THandler<FAccelByteModelsLeaderboardRankingResult> leaderboardGetRankingsHandler = THandler<FAccelByteModelsLeaderboardRankingResult>::CreateLambda([&](const FAccelByteModelsLeaderboardRankingResult& result)
             {
                 bGetRankingDone = true;
                 if (result.data.Num() != 0)
                 {
                 	ThisTimeFrameResults.Add(TTuple<FString, FAccelByteModelsLeaderboardRankingResult>{leaderboardCode, result });
-                	bFound = true;
+					bGetRankingFound = true;
                 }
             });
 
@@ -350,6 +350,7 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteLeaderboardTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 				}
             });
+
 			// retry 60 times
 			for (int i = 0; i < 60; i++)
 			{
@@ -357,13 +358,15 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 
 				Waiting(bGetRankingDone, FString::Printf(TEXT("Waiting for get rankings [%d]..."), i));
 
-				if (bFound)
+				if (bGetRankingFound)
 				{
 					break;
 				}
 
 				FPlatformProcess::Sleep(1.0f);
+				bGetRankingDone = false;
 			}
+			AB_TEST_TRUE(bGetRankingFound);
 		}
 
 		AllLeaderboardTestResults.Add(ThisTimeFrameResults);
@@ -462,12 +465,12 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 		for (auto& leaderboardCode : TestLeaderboardCodes)
 		{
 			bool bGetUserRankingDone = false;
-			bool bFound = false;
+			bool bGetUserRankingFound = false;
 			THandler<FAccelByteModelsUserRankingData> leaderboardGetRankingsHandler = THandler<FAccelByteModelsUserRankingData>::CreateLambda([&](const FAccelByteModelsUserRankingData& Result)
             {
 				bGetUserRankingDone = true;
                 currentUserRanking.Add(Result);
-                bFound = true;
+				bGetUserRankingFound = true;
             });
 
 			const auto GetLeaderboardErrorHandler = FErrorHandler::CreateLambda([&bGetUserRankingDone](int32 ErrorCode, FString ErrorMessage)
@@ -490,13 +493,15 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 
 				Waiting(bGetUserRankingDone, FString::Printf(TEXT("Waiting for GetUserRanking [%d]..."), i));
 
-				if (bFound)
+				if (bGetUserRankingFound)
 				{
 					break;
 				}
 
 				FPlatformProcess::Sleep(1.0f);
+				bGetUserRankingDone = false;
 			}
+			AB_TEST_TRUE(bGetUserRankingFound);
 		}
 		allGetUserRankingResult.Add(currentUserRanking);
 	}

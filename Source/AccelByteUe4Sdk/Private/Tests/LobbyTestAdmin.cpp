@@ -8,9 +8,6 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteRegistry.h"
 
-FString GetAdminBaseUrl();
-FString GetAdminUserAccessToken();
-
 void LobbyGetConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
