@@ -2612,7 +2612,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
-	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
+	AB_TEST_EQUAL(ReceivedUserData.Data.Num(), 1);
 	AB_TEST_EQUAL(ReceivedUserData.Data[0].DisplayName, DisplayName);
 	return true;
 }
@@ -2660,6 +2660,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
+	// Complete DisplayName.
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
 	FRegistry::User.SearchUsers(
@@ -2677,6 +2678,22 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 		UserTestErrorHandler);
 
 	Waiting(bGetUserDone, "Waiting for Search Users...");
+
+	// Partial DisplayName.
+	bool bGetUserPartialQueryDone = false;
+	FPagedPublicUsersInfo ReceivedUserPartialQueryData;
+	FRegistry::User.SearchUsers(
+		TEXT("ab"),
+		EAccelByteSearchType::DISPLAYNAME,
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserPartialQueryDone, &ReceivedUserPartialQueryData](const FPagedPublicUsersInfo& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		ReceivedUserPartialQueryData = Result;
+		bGetUserPartialQueryDone = true;
+	}),
+		UserTestErrorHandler);
+
+	Waiting(bGetUserPartialQueryDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2696,6 +2713,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
+	AB_TEST_TRUE(bGetUserPartialQueryDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
 	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
 	const bool bDisplayNameFound = ReceivedUserData.Data.ContainsByPredicate([DisplayName](const FPublicUserInfo& Item)
@@ -2703,6 +2721,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 			return Item.DisplayName == DisplayName;
 		});
 	AB_TEST_TRUE(bDisplayNameFound);
+	AB_TEST_EQUAL(ReceivedUserPartialQueryData.Data.Num(), 0);
 	return true;
 }
 
@@ -2749,6 +2768,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
+	// Complete username.
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
 	FRegistry::User.SearchUsers(
@@ -2759,13 +2779,29 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 				ReceivedUserData = Result;
 				for (auto Data : ReceivedUserData.Data)
 				{
-					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, UserName: %s, UserId: %s"), *Data.UserName, *Data.UserId);
 				}
 				bGetUserDone = true;
 			}),
 		UserTestErrorHandler);
 
 	Waiting(bGetUserDone, "Waiting for Search Users...");
+
+	// Partial username.
+	bool bGetUserPartialUsernameDone = false;
+	FPagedPublicUsersInfo ReceivedUserPartialUsernameData;
+	FRegistry::User.SearchUsers(
+		TEXT("ab"),
+		EAccelByteSearchType::USERNAME,
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&bGetUserPartialUsernameDone, &ReceivedUserPartialUsernameData](const FPagedPublicUsersInfo& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		ReceivedUserPartialUsernameData = Result;
+		bGetUserPartialUsernameDone = true;
+	}),
+		UserTestErrorHandler);
+
+	Waiting(bGetUserPartialUsernameDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2792,6 +2828,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 			return Item.UserName == Username;
 		});
 	AB_TEST_TRUE(bUsernameFound);
+	AB_TEST_EQUAL(ReceivedUserPartialUsernameData.Data.Num(), 0);
 	return true;
 }
 
