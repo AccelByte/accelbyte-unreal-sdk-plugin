@@ -2876,12 +2876,10 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 				bGetUserDone = true;
 				ReceivedUserData = Result;
-				for (auto Data : ReceivedUserData.Data)
-				{
-					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
-				}
 			}),
 		UserTestErrorHandler);
+
+	Waiting(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2914,12 +2912,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
-	FPublicUserInfo* InvalidSearchUserInfoPtr = ReceivedUserData.Data.FindByPredicate(
-		[SearchQuery](const FPublicUserInfo& Item)
-		{
-			return !Item.UserName.Contains(SearchQuery);
-		});
-	AB_TEST_NULL(InvalidSearchUserInfoPtr);
+	AB_TEST_EQUAL(ReceivedUserData.Data.Num(), 0);
 	return true;
 }
 

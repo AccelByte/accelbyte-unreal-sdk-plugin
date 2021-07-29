@@ -257,18 +257,18 @@ namespace AccelByte
 			void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief This function will search user by their Email Address, Username, or Display Name.
+			 * @brief This function will search user by their Email Address, Username, or Display Name. The query must be exactly match with the targeted user's.
 			 *
-			 * @param Query Targeted user's Email Address, Username, or Display Name.
+			 * @param Query Targeted user's Email Address, Username, or Display Name. The query must be exactly match with the targeted user's.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief This function will search user by their Email Address, Username, or Display Name.
+			 * @brief This function will search user by their Email Address, Username, or Display Name. The query must be exactly match with the targeted user's.
 			 *
-			 * @param Query Targeted user's Email Address, Username, or Display Name.
+			 * @param Query Targeted user's Email Address, Username, or Display Name. The query must be exactly match with the targeted user's.
 			 * @param By Filter the responded PagedPublicUsersInfo by SearchType. Choose the SearchType.ALL if you want to be responded with all query type.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 			 * @param OnError This will be called when the operation failed.
