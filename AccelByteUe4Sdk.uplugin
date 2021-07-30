@@ -20,12 +20,5 @@
       "LoadingPhase": "PreDefault"
     }
   ],
-  "Plugins": [],
-  "PrebuildSteps": {
-    "Win64": [
-      "set /p ABSDKTRACKERUNREAL_KEY=<$(PluginDir)\\AbSdkTrackerPublicKey.txt",
-      "set /p ABSDKSIGNATURE=<$(PluginDir)\\AbSdkSignature.txt",
-      "$(PluginDir)\\AbSdkTrackerUnreal.exe verifyPlugin $(PluginDir) -signature %ABSDKSIGNATURE%"
-    ]
-  }
+  "Plugins": []
 }
