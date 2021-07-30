@@ -65,7 +65,7 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoi
 		{
 			bTelemetryJobStarted = true;
 			GameTelemetryTickDelegate = FTickerDelegate::CreateRaw(this, &GameTelemetry::PeriodicTelemetry);
-			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, (float)TelemetryInterval.GetSeconds());
+			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetTotalSeconds()));
 		}
 	}
 }

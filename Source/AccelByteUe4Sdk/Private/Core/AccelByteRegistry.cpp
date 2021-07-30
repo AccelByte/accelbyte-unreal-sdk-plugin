@@ -4,6 +4,7 @@
 
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteCredentials.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteCategoryApi.h"

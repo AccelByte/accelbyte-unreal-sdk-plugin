@@ -1,3 +1,6 @@
+# Rider user specific files
+.idea
+
 # Visual Studio 2015 user specific files
 .vs/
 
@@ -75,23 +78,5 @@ Intermediate/*
 DerivedDataCache/*
 Content/StarterContent/*
 
-*.bak
-Plugins/AccelByteUe4Sdk/Binaries/
-Plugins/AccelByteUe4Sdk/Intermediate/Build/
-Plugins/AccelByteCustomWebBrowserWidget/Binaries/
-Plugins/AccelByteCustomWebBrowserWidget/Content/WebTexture_M.uasset
-Plugins/AccelByteCustomWebBrowserWidget/Intermediate/Build/
-
 # Doxygen generated files
 Doxygen/*
-
-# Test
-SteamHelper/steamticket.txt
-SteamHelper/SteamTicketHelper.pid
-*.orig
-
-# pre commit hook
-node_modules
-yarn.lock
-package.json
-.idea
