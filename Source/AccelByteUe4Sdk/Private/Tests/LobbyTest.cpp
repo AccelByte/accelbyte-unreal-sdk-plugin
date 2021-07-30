@@ -56,7 +56,7 @@ bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSucces
 bool bUnfriendNotifSuccess, bCancelFriendNotifSuccess, bRejectFriendNotifSuccess;
 //Party
 bool bCreatePartySuccess, bCreatePartyError, bInvitePartySuccess, bRejectPartySuccess, bRejectPartyError, bRejectedPartyNotifSuccess, bGetInvitedNotifSuccess, bGetInvitedNotifError, bGetInvitationRejectedNotifSuccess, bGetInvitationRejectedNotifError;
-bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError;
+bool bJoinPartySuccess, bJoinPartyError, bLeavePartySuccess, bLeavePartyError, bGetInfoPartySuccess, bGetInfoPartyError, bGetPartyDataUpdateNotifSuccess;
 bool bKickPartyMemberSuccess, bKickPartyMemberError, bKickedFromPartySuccess, bReceivedPartyChatSuccess, bSendPartyChatSuccess, bSendPartyChatError;
 bool bGeneratePartyCodeSuccess, bGeneratePartyCodeError, bGetPartyCodeSuccess, bGetPartyCodeError, bDeletePartyCodeSuccess, bDeletePartyCodeError, bJoinPartyViaCodeSuccess, bJoinPartyViaCodeError;
 bool bPromotePartyLeaderSuccess, bPromotePartyLeaderError;
@@ -78,6 +78,7 @@ FAccelByteModelsPartyJoinReponse joinPartyResponse;
 FAccelByteModelsPartyGenerateCodeResponse partyGenerateCodeResponse;
 FAccelByteModelsPartyGetCodeResponse partyCodeResponse;
 FAccelByteModelsPartyRejectResponse rejectPartyResponse;
+FAccelByteModelsPartyDataNotif partyDataNotif;
 
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
 FAccelByteModelsGetOnlineUsersResponse onlineFriendResponse;
@@ -251,6 +252,7 @@ void ResetResponses()
 	bReadyConsentResponseError = false;
 	bDsNotifSuccess = false;
 	bDsNotifError = false;
+	bGetPartyDataUpdateNotifSuccess = false;
 }
 
 #pragma region GeneralDelegate
@@ -528,6 +530,13 @@ const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](F
 	{
 		bJoinPartyError = false;
 	}
+});
+
+const auto PartyDataUpdateDelegate = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([](FAccelByteModelsPartyDataNotif result)
+{
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get a Party data update notif!"));	
+	bGetPartyDataUpdateNotifSuccess = true;
+	partyDataNotif = result;
 });
 
 const auto PartyChatNotifDelegate = Api::Lobby::FPartyChatNotif::CreateLambda([](FAccelByteModelsPartyMessageNotice result)
@@ -1754,15 +1763,16 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 
 	Lobbies[1]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
-
+	
 	Lobbies[0]->SetPartyChatNotifDelegate(PartyChatNotifDelegate);
-
+	
 	Lobbies[1]->SetPartyMessageResponseDelegate(PartyChatSendDelegate);
 
 	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
 	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
 	Lobbies[0]->SendInfoPartyRequest();
@@ -1805,6 +1815,8 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 
 	AB_TEST_FALSE(bGetInvitedNotifError);
 
+	Lobbies[0]->SetPartyDataUpdateNotifDelegate(PartyDataUpdateDelegate);
+
 	Lobbies[1]->SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 	while (!bJoinPartySuccess && !bGetInvitedNotifError)
 	{
@@ -1814,12 +1826,21 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	}
 	AB_TEST_FALSE(bJoinPartyError);
 
+	Waiting(bGetPartyDataUpdateNotifSuccess, "Waiting receive party data update notif");
+	const FAccelByteModelsPartyDataNotif partyDataUpdate = partyDataNotif;
+
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
 	Lobbies[1]->SendInfoPartyRequest();
 	Waiting(bGetInfoPartySuccess, "Getting Info Party...");
+	const auto partyInfoResult = infoPartyResponse;
 
 	AB_TEST_FALSE(bGetInfoPartyError);
+
+	// Compare partydata notif with partyget info
+	AB_TEST_EQUAL(partyDataUpdate.PartyId, partyInfoResult.PartyId);
+	AB_TEST_EQUAL(partyDataUpdate.Leader, partyInfoResult.LeaderId);
+	AB_TEST_EQUAL(partyDataUpdate.Members.Num(), partyInfoResult.Members.Num());
 
 	Lobbies[1]->SendPartyMessage("This is a party chat");
 	Waiting(bSendPartyChatSuccess, "Sending a Party Chat...");
@@ -4861,10 +4882,6 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 			matchmakingNotifResponse[1] = result;
 			matchMakingNotifNum++;
 			bMatchmakingNotifSuccess[1] = true;
-			if (result.MatchId.IsEmpty())
-			{
-				bMatchmakingNotifError[1] = true;
-			}
 		}
 	}));
 
@@ -4979,14 +4996,10 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 			matchmakingNotifResponse[i] = result;
-			if (result.Status != EAccelByteMatchmakingStatus::Start)
+			if (result.Status == EAccelByteMatchmakingStatus::Done)
 			{
 				matchmakingNotifDone++;
 				bMatchmakingNotifSuccess[i] = true;
-				if (result.MatchId.IsEmpty())
-				{
-					bMatchmakingNotifError[i] = true;
-				}
 			}
 		}));
 
@@ -5010,6 +5023,8 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	{
 		return bCreateMatchmakingChannelSuccess;
 	}, 60, "Create Matchmaking channel...");
+
+	WaitSecond(5, "waiting for 5 sec");
 
 	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
 	{UserCreds[0].GetUserId(), UserCreds[1].GetUserId()});
