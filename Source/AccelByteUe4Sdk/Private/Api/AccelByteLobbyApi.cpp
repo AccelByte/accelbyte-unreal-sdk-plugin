@@ -895,6 +895,7 @@ void Lobby::UnbindEvent()
 	BlockPlayerNotif.Unbind();
 	UnblockPlayerNotif.Unbind();
 	MessageNotif.Unbind();
+	PartyDataUpdateNotif.Unbind();
 
 	UnbindFriendNotifEvents();
 	UnbindFriendResponseEvents();
