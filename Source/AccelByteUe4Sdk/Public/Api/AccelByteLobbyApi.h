@@ -741,42 +741,42 @@ public:
 	/**
 	* @brief Unbind all party notif delegates set previously.
 	*/
-	void UnbindPartyNotifEvent();
+	void UnbindPartyNotifEvents();
 
 	/**
 	* @brief Unbind all party response delegates set previously.
 	*/
-	void UnbindPartyResponseEvent();
+	void UnbindPartyResponseEvents();
 
 	/**
 	* @brief Unbind all friend notif delegates set previously.
 	*/
-	void UnbindFriendNotifEvent();
+	void UnbindFriendNotifEvents();
 
 	/**
 	* @brief Unbind all friend response delegates set previously.
 	*/
-	void UnbindFriendResponseEvent();
+	void UnbindFriendResponseEvents();
 
 	/**
 	* @brief Unbind all matchmaking notif delegates set previously.
 	*/
-	void UnbindMatchmakingNotifEvent();
+	void UnbindMatchmakingNotifEvents();
 
 	/**
 	* @brief Unbind all matchmaking response delegates set previously.
 	*/
-	void UnbindMatchmakingResponseEvent();
+	void UnbindMatchmakingResponseEvents();
 
 	/**
 	* @brief Unbind all chat notif delegates set previously.
 	*/
-	void UnbindChatNotifEvent();
+	void UnbindChatNotifEvents();
 
 	/**
 	* @brief Unbind all chat response delegates set previously.
 	*/
-	void UnbindChatResponseEvent();
+	void UnbindChatResponseEvents();
 
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
