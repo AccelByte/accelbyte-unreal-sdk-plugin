@@ -31,6 +31,8 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 		FString ErrorMessage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		FString Message;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
+		FString Error;
 };
 
 namespace AccelByte
@@ -398,16 +400,23 @@ namespace AccelByte
 			Code = (int32)ErrorCodes::NetworkError;
 		}
 
-		auto it = ErrorMessages::Default.find(Code);
-		if (it != ErrorMessages::Default.cend())
-		{
-			OutMessage += ErrorMessages::Default.at(Code);
-		}
-
 		if (!Error.ErrorMessage.IsEmpty())
 		{
 			OutMessage += " " + Error.ErrorMessage;
 		}
+		else if (!Error.Error.IsEmpty())
+		{
+			OutMessage += " " + Error.Error;
+		}
+		else
+		{
+			auto it = ErrorMessages::Default.find(Code);
+			if (it != ErrorMessages::Default.cend())
+			{
+				OutMessage += ErrorMessages::Default.at(Code);
+			}
+		}
+
 		if (Response.IsValid())
 		{
 			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
