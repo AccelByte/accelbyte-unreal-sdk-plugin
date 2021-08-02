@@ -28,6 +28,8 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
+#include "Api/AccelByteSeasonPassApi.h"
+
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -69,6 +71,7 @@ public:
 	Api::Achievement Achievement{ Credentials, FRegistry::Settings };
 	Api::SessionBrowser SessionBrowser{ Credentials, FRegistry::Settings };
 	Api::UGC UGC{ Credentials, FRegistry::Settings };
+	Api::SeasonPass SeasonPass{ Credentials, FRegistry::Settings };
 };
 
 class ACCELBYTEUE4SDK_API FMultiRegistry

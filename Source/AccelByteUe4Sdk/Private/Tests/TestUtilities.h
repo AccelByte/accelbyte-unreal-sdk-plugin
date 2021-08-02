@@ -279,6 +279,8 @@ struct FItemCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		EAccelByteItemType itemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
+		EAccelByteSeasonType SeasonType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		EAccelByteEntitlementType entitlementType; // "Language" : "Description"
