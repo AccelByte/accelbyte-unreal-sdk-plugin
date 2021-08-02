@@ -299,12 +299,6 @@ namespace AccelByte
 			Code = (int32)ErrorCodes::NetworkError;
 		}
 
-		auto it = ErrorMessages::Default.find(Code);
-		if (it != ErrorMessages::Default.cend())
-		{
-			OutMessage += ErrorMessages::Default.at(Code);
-		}
-
 		if (!Error.ErrorMessage.IsEmpty())
 		{
 			OutMessage += " " + Error.ErrorMessage;
@@ -312,6 +306,14 @@ namespace AccelByte
 		else if (!Error.Message.IsEmpty())
 		{
 			OutMessage += " " + Error.Message;
+		}
+		else
+		{
+			auto it = ErrorMessages::Default.find(Code);
+			if (it != ErrorMessages::Default.cend())
+			{
+				OutMessage += ErrorMessages::Default.at(Code);
+			}
 		}
 
 		// Debug message. Delete this code section for production
