@@ -112,7 +112,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	FAgreementBasePolicy basePolicy;
 	for (const auto& policy : basePolicies)
 	{
-		if (policy.Namespace == FRegistry::Settings.Namespace)
+		if (policy.BasePolicyName == "SDK Test Policy" &&  policy.Namespace == FRegistry::Settings.Namespace)
 		{
 			basePolicy = policy;
 		}
@@ -159,10 +159,10 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	for (const auto& policy : basePolicy.Policies)
 	{
-		if (policy.CountryCode == AgreementTestUserInfo_.CountryCode)
+		if (policy.PolicyName == "SDK Test Policy" && policy.CountryCode == AgreementTestUserInfo_.CountryCode)
 		{
 			PolicyId = policy.Id;
-			break;
+			//break;
 		}
 	}
 
