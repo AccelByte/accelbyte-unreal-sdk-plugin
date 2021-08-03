@@ -372,9 +372,9 @@ bool FUserLoginFailedTest::RunTest(const FString& Parameter)
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
-	check(!bLoginSuccessful);
-	check(bLoginDone);
-	check(ErrorMessage != DefaultMessage);
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_FALSE(ErrorMessage != DefaultMessage);
 	return true;
 }
 
@@ -406,9 +406,9 @@ bool FUserLoginSteamFailedTest::RunTest(const FString& Parameter)
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
-	check(!bLoginSuccessful);
-	check(bLoginDone);
-	check(ErrorMessage != DefaultMessage);
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_FALSE(ErrorMessage != DefaultMessage);
 	return true;
 }
 
@@ -440,9 +440,9 @@ bool FUserLoginEmailFailedNoContentTest::RunTest(const FString& Parameter)
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
-	check(!bLoginSuccessful);
-	check(bLoginDone);
-	check(ErrorMessage == DefaultMessage);
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_TRUE(ErrorMessage == DefaultMessage);
 	return true;
 }
 
