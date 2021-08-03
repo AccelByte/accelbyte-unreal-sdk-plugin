@@ -340,7 +340,7 @@ namespace AccelByte
 		//
 		//PartyStorage Error Code List
 		// 
-		PartyStorageOutdatedUpdateData = 11903,
+		PartyStorageOutdatedUpdateData = 119017,
 		PartyNotFound = 11901,
 	};
 
