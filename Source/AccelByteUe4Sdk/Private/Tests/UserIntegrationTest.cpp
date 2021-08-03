@@ -2575,6 +2575,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
+	// Complete email.
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
 	FRegistry::User.SearchUsers(
@@ -2612,7 +2613,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
-	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
+	AB_TEST_EQUAL(ReceivedUserData.Data.Num(), 1);
 	AB_TEST_EQUAL(ReceivedUserData.Data[0].DisplayName, DisplayName);
 	return true;
 }
@@ -2660,6 +2661,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
+	// Complete DisplayName.
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
 	FRegistry::User.SearchUsers(
@@ -2749,6 +2751,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 
 	Waiting(bLoginSuccessful, "Waiting for Login...");
 
+	// Complete username.
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
 	FRegistry::User.SearchUsers(
@@ -2759,7 +2762,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 				ReceivedUserData = Result;
 				for (auto Data : ReceivedUserData.Data)
 				{
-					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, UserName: %s, UserId: %s"), *Data.UserName, *Data.UserId);
 				}
 				bGetUserDone = true;
 			}),
@@ -2786,12 +2789,8 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
-	AB_TEST_NOT_EQUAL(ReceivedUserData.Data.Num(), 0);
-	const bool bUsernameFound = ReceivedUserData.Data.ContainsByPredicate([Username](const FPublicUserInfo& Item)
-		{
-			return Item.UserName == Username;
-		});
-	AB_TEST_TRUE(bUsernameFound);
+	AB_TEST_EQUAL(ReceivedUserData.Data.Num(), 1);
+	AB_TEST_EQUAL(ReceivedUserData.Data[0].UserName, Username);
 	return true;
 }
 
@@ -2799,8 +2798,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetUserFilterByUsernameTest, "AccelByte.Tests.
 bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 {
 	FRegistry::User.ForgetAllCredentials();
-	FString SearchQuery = "accelbyte";
-	FString Username = SearchQuery + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString SearchQuery = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString Username = SearchQuery;
 	FString EmailAddress = "test+u4esdk+" + Username + "@game.test";
 	EmailAddress.ToLowerInline();
 	FString Password = "123SDKTest123";
@@ -2832,12 +2831,13 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 	}
 
 	FString Username2 = FGuid::NewGuid().ToString(EGuidFormats::Digits);
-	FString EmailAddress2 = SearchQuery + "+" + Username + "@game.test";
+	FString EmailAddress2 = SearchQuery + "@game.test";
+	FString DisplayName = SearchQuery;
 	bRegisterSuccessful = false;
 	bRegisterDone = false;
 	FString UserId2 = "";
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount2"));
-	FRegistry::User.Registerv2(EmailAddress2, Username2, Password, "", Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &UserId2](const FRegisterResponse& Result)
+	FRegistry::User.Registerv2(EmailAddress2, Username2, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &UserId2](const FRegisterResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
 			bRegisterSuccessful = true;
@@ -2876,12 +2876,10 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 				bGetUserDone = true;
 				ReceivedUserData = Result;
-				for (auto Data : ReceivedUserData.Data)
-				{
-					UE_LOG(LogAccelByteUserTest, Log, TEXT("Get User, DisplayName: %s, UserId: %s"), *Data.DisplayName, *Data.UserId);
-				}
 			}),
 		UserTestErrorHandler);
+
+	Waiting(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2914,12 +2912,8 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_TRUE(bGetUserDone);
 	AB_TEST_TRUE(bDeleteSuccessful);
-	FPublicUserInfo* InvalidSearchUserInfoPtr = ReceivedUserData.Data.FindByPredicate(
-		[SearchQuery](const FPublicUserInfo& Item)
-		{
-			return !Item.UserName.Contains(SearchQuery);
-		});
-	AB_TEST_NULL(InvalidSearchUserInfoPtr);
+	AB_TEST_EQUAL(ReceivedUserData.Data.Num(), 1);
+	AB_TEST_EQUAL(ReceivedUserData.Data[0].UserId, UserId1);
 	return true;
 }
 

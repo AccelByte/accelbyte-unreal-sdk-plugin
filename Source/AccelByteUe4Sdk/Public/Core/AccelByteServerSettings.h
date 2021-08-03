@@ -30,6 +30,7 @@ public:
 	FString MatchmakingServerUrl;
 	FString LobbyServerUrl;
 	FString CloudSaveServerUrl;
+	FString SeasonPassServerUrl;
 };
 
 } // Namespace AccelByte
@@ -91,6 +92,9 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString CloudSaveServerUrl;
+	
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	FString SeasonPassServerUrl;
 };
 
 
@@ -143,6 +147,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static FString GetCloudSaveServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static FString GetSeasonPassServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetClientId(const FString& ClientId);
@@ -185,4 +192,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetCloudSaveServerUrl(const FString& CloudServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void SetSeasonPassServerUrl(const FString& CloudServerUrl);
 };

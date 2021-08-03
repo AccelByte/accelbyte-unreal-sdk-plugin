@@ -2,6 +2,59 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/4.0.0%0D3.2.0) (2021-08-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Achievement:** Change the type of LatestValue of FAccelByteModelsUserAchievement model from int32 into float.
+
+### Features
+
+* add awscognito platform type ([0610ef2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0610ef28ab6907069be6402d1d887b87a155a487))
+* Add digital signature check to plugin ([94e8843](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/94e8843875a10f41f6e976000198afef40e7e5d7))
+* **core:** add scope lock-free mechanism on HttpRetryScheduler for thread-safety ([c731dcb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c731dcbbec20e44cfd207c36a3e7abdb064c4418)), closes [#2](https://accelbyte.atlassian.net/browse/2)
+* **jenkins:** jenkinsfile - remove ue 4.20, 4.21 and add 4.26 ([a152ca6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a152ca62e85dbe4c9f04439f6b53e6d1defd8ee9))
+* **jenkins:** make build linux & windows parallel + separate build editor and game to make ci faster ([3a98e60](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3a98e60f5840eb3c28f4c595a234aa952c71176a))
+* **jenkins:** use the new justice-sdk-builder ([472995e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/472995ed380f6125a81b09d6412fed869dada6b3))
+* **lobby:** add get & getAll session Attributes ws commands ([4208e56](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4208e56fb3dc7510714a624c4ca584fa188e185a))
+* **lobby:** add GetOnlineFriendPresence, and marked OnGetAllUSerPresence obsolete. ([eaf18ef](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/eaf18ef389fd2ebd84f2ed3bb0a3753f0ff8968b))
+* **lobby:** Generate party code ([2e04734](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2e04734c03b06a91e40646533899f4c3cb5f5b2d))
+* **serverloby:** add Set, Get, GetAll user session attribute ([1d69966](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1d699664354896f936ddb1dc4fbaf04f50b3f486))
+* **session browser:** add get session data by session id ([6982214](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6982214c52344b03b415286c56f8bd11c0e38e63))
+* **ue5ea:** Jenkins - Build.ps1 - remove superficial option ue4exe ([d93e2d2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d93e2d28538a4f646f606568cd9ed042d6ce9f38))
+* **ue5ea:** Jenkins - RunTests.ps1 - add alternate unreal editor exe for UE5 and UE4 ([2c9deca](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2c9deca8fcb2a40490651ae7370dc9fa14d91126))
+* **ue5ea:** jenkins.config.json - add ue 5.0ea ([21bb301](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/21bb301287e4de1ffc059fd8091b9a8b1f1eda3e))
+* **unrealengine:** remove support for ue < 4.25 ([a5b7791](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a5b7791fa7799f0773c6556f09a70a0e092f963f))
+
+
+### Bug Fixes
+
+* **Achievement:** Fix the User Achievement model difference with the Backend response. ([1581d57](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1581d57a4f34d73a10de47f127280d85c3b1a0ec))
+* **files order:** Fix signature algorithm to ensure files and directories order consistent and update digital signature ([57f9688](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/57f968814d190d598b20a2b8f37734dcbb070790))
+* **lobby:** Response.Code always empty ([134429c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/134429cefcabfb6e0f72ae33dd7dd4f0ad321ec7))
+* **Oauth2:** Fix the GetTokenWithAuthorizationCode() using v1 endpoint ([1e642ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1e642ae06b83b08af9cb624bc3b94d1def4390d1))
+* **Telemetry:** Change GetSeconds() to GetTotalSeconds ([c8b57de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c8b57de210f1c91b5bc6979015d1eddb4f82d4f1))
+* **UGC:** Fix the integration test naming ([889e2f6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/889e2f64393448fc3fd3e44fad55a4cc6ca0bf68))
+* **UGC:** Rewrite the inline documentation: fixing from copy-paste mistake, and not standard writing. Fix the copyright. ([25b909a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/25b909a3281b5de4271e55c75d012655a4a84056))
+* **uplugin:** remove unicode literal in PrebuildSteps ([ac08206](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ac082067a8a69c636cb421a4456e022860c6dd9b))
+
+
+### Documentations
+
+* add version.json, changelog, and readme ([5aa4cf2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5aa4cf2b662917f0383f159d69f5138791979daf))
+
+
+### Tests
+
+* **AUser:** fix test regression due to invalid partial query result assertion ([37e7a98](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/37e7a986670b9120e2bfa30942ce9b226ac335a2))
+* **AUser:** make STEAM_KEY environment variable optional ([eb0d5c5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/eb0d5c526047600758fbb54471676053492789ef))
+* **basic:** check steam ticket before testing with steam in AUser tests ([e1d06ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e1d06ae4a93df953fc41d2cb7d615c94962e08b4))
+* **general:** fix incorrect token retrieval for the admin user in test utilities ([448d23c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/448d23c5b444c7a842976c984330b281313c3088)), closes [#19](https://accelbyte.atlassian.net/browse/19)
+* **play:** add random element in lobby user test emails ([ccf71a1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ccf71a1e287a7e7632a50f4aec51394c7daabacd))
+* **play:** fixed lobby, serverlobby, joinablesession & session browser tests ([c705f48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c705f48bfab962dfeb9a90bdde222457f2360e73)), closes [#375](https://accelbyte.atlassian.net/browse/375)
+* **subscription:** fix error categoryPath /game ([8ad19c8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8ad19c8a46d4034da4939418a4d0ab298305835c))
+
 ## [3.2.0](https://bitbucket.org/accelbyte/justice-ue4-sdk/branches/compare/3.2.0%0D3.1.0) (2021-07-07)
 
 

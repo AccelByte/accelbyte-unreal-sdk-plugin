@@ -26,6 +26,7 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
+#include "Api/AccelByteSeasonPassApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -36,6 +37,7 @@
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "GameServerApi/AccelByteServerLobby.h"
 #include "GameServerApi/AccelByteServerCloudSaveApi.h"
+#include "GameServerApi/AccelByteServerSeasonPassApi.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -66,6 +68,7 @@ Api::Agreement FRegistry::Agreement(FRegistry::Credentials, FRegistry::Settings)
 Api::Achievement FRegistry::Achievement(FRegistry::Credentials, FRegistry::Settings);
 Api::SessionBrowser FRegistry::SessionBrowser(FRegistry::Credentials, FRegistry::Settings);
 Api::UGC FRegistry::UGC(FRegistry::Credentials, FRegistry::Settings);
+Api::SeasonPass FRegistry::SeasonPass(FRegistry::Credentials, FRegistry::Settings);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);
@@ -76,3 +79,4 @@ GameServerApi::ServerAchievement FRegistry::ServerAchievement(FRegistry::ServerC
 GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerLobby FRegistry::ServerLobby(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass(FRegistry::ServerCredentials, FRegistry::ServerSettings);

@@ -181,7 +181,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			AppItemRequest.name = "SDK UE4 App Item";
 			AppItemRequest.appId = APPID;
 			AppItemRequest.appType = EAccelByteAppType::GAME;
-			AppItemRequest.categoryPath = "/game";
+			AppItemRequest.categoryPath = "/games";
 			AppItemRequest.entitlementType = EAccelByteEntitlementType::DURABLE;
 			AppItemRequest.sku = GAppTypeItemSku;
 			AppItemRequest.status = EAccelByteItemStatus::ACTIVE;

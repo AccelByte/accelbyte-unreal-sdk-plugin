@@ -743,6 +743,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	FItemCreateRequest RootItemRequest
 	{
 		EAccelByteItemType::INGAMEITEM,
+		EAccelByteSeasonType::PASS, // set as default
 		Variables.ExpectedRootItemTitle,
 		EAccelByteEntitlementType::CONSUMABLE,
 		1,
@@ -805,6 +806,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	FItemCreateRequest ChildItemRequest
 	{
 		EAccelByteItemType::COINS,
+		EAccelByteSeasonType::PASS, // set as default
 		Variables.ExpectedChildItemTitle,
 		EAccelByteEntitlementType::CONSUMABLE,
 		20,
@@ -867,6 +869,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	FItemCreateRequest grandChildItemRequest
 	{
 		EAccelByteItemType::COINS,
+		EAccelByteSeasonType::PASS, // set as default
 		Variables.ExpectedChildItemTitle,
 		EAccelByteEntitlementType::CONSUMABLE,
 		10,
@@ -929,6 +932,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 	FItemCreateRequest redeemableItemRequest
 	{
 		EAccelByteItemType::INGAMEITEM,
+		EAccelByteSeasonType::PASS, // set as default
 		Variables.redeemableItemTitle,
 		EAccelByteEntitlementType::CONSUMABLE,
 		1,
