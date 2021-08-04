@@ -165,14 +165,12 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v3/logout"), *SettingsRef.IamServerUrl);
 	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("text/plain");
 	FString Accept = TEXT("application/json");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
 	auto OnSuccess_ = FVoidHandler::CreateLambda([this, OnSuccess]()
