@@ -64,12 +64,20 @@ namespace AccelByte
 			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief login from Accelbyte Launcher
+			 * @brief Log in from Accelbyte Launcher.
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Remove access tokens, user ID, and other credentials from memory.

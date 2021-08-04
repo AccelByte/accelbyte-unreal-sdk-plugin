@@ -157,6 +157,32 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	}));
 }
 
+void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Creds.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v3/logout"), *Settings.IamServerUrl);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("text/plain");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	auto OnSuccess_ = FVoidHandler::CreateLambda([this, OnSuccess]()
+	{
+		ForgetAllCredentials();
+		OnSuccess.ExecuteIfBound();
+	});
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess_, OnError), FPlatformTime::Seconds());
+}
+
 void User::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));

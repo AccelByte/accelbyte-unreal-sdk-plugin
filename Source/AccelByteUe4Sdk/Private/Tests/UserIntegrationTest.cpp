@@ -515,6 +515,52 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString& Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLogoutSuccess, "AccelByte.Tests.AUser.Logout", AutomationFlagMaskUser);
+bool FLogoutSuccess::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bDeviceLoginSuccessful = false;
+
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bDeviceLoginSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeviceLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeviceLoginSuccessful, "Waiting for Login with device id...");
+
+	FString UserId = FRegistry::Credentials.GetUserId();
+	bool bLogoutSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
+	FRegistry::User.Logout(FVoidHandler::CreateLambda([&bLogoutSuccessful]()
+	{
+		bLogoutSuccessful = true;
+	}), UserTestErrorHandler);
+	Waiting(bLogoutSuccessful, "Waiting for Logout...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	DeleteUserById(UserId, FVoidHandler::CreateLambda([&bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+	}), UserTestErrorHandler);
+
+	Waiting(bDeleteSuccessful, "Waiting for Delete...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeviceLoginSuccessful);
+	AB_TEST_TRUE(bLogoutSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_TRUE(FRegistry::Credentials.GetUserId().IsEmpty());
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithDeviceIdUniqueIdCreated, "AccelByte.Tests.AUser.LoginWithDeviceId.UniqueUserIdCreatedForEachDevice", AutomationFlagMaskUser);
 bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 {
