@@ -10,6 +10,7 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
+#include "StatisticTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;

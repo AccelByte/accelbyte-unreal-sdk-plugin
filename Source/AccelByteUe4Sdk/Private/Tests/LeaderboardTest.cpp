@@ -5,6 +5,7 @@
 #include "Misc/AutomationTest.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
+#include "HAL/FileManager.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
@@ -13,7 +14,8 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
-#include "HAL/FileManager.h"
+#include "LeaderboardTestAdmin.h"
+#include "StatisticTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;

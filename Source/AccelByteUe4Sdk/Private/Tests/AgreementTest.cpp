@@ -9,6 +9,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "TestUtilities.h"
+#include "AgreementTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;

@@ -14,6 +14,7 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "TestUtilities.h"
+#include "MatchmakingTestAdmin.h"
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>

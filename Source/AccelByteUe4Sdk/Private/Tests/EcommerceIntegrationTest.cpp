@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "TestUtilities.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteCategoryApi.h"
@@ -14,6 +13,8 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "TestUtilities.h"
+#include "EcommerceTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
