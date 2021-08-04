@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
@@ -19,11 +20,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Fulfillment
 {
 public:
-	Fulfillment(const Credentials& Credentials, const Settings& Settings);
+	Fulfillment(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Fulfillment();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	* @brief Redeem Campaign Code to Receive In Game Item.
@@ -34,7 +36,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsFulfillmentResult.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void RedeemCode(const FString& Code, const FString& Region, const FString& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError);
+	void RedeemCode(FString const& Code, FString const& Region, FString const& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError);
 
 private:
 	Fulfillment() = delete;

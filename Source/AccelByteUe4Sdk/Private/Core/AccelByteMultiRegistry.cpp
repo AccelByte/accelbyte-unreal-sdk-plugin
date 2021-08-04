@@ -7,6 +7,20 @@
 using namespace AccelByte;
 using namespace AccelByte::Api;
 
+FApiClient::FApiClient()
+{
+	Http.Startup();
+	Credentials.Startup();
+	GameTelemetry.Startup();
+}
+
+FApiClient::~FApiClient()
+{
+	GameTelemetry.Shutdown();
+	Credentials.Shutdown();
+	Http.Shutdown();
+}
+
 TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(FString key)
 {
 	if (!ApiClientInstances.Contains(key))

@@ -14,7 +14,15 @@ namespace AccelByte
 {
 namespace Api
 {
-Achievement::Achievement(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting){}
+
+Achievement::Achievement(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
 
 Achievement::~Achievement(){}
 
@@ -49,8 +57,8 @@ void Achievement::QueryAchievements(const FString& Language, const EAccelByteAch
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -85,7 +93,7 @@ void Achievement::QueryAchievements(const FString& Language, const EAccelByteAch
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Achievement::GetAchievement(const FString& AchievementCode, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess, const FErrorHandler& OnError)
@@ -98,8 +106,8 @@ void Achievement::GetAchievement(const FString& AchievementCode, const THandler<
 		return;
 	}
 
-	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *AchievementCode);
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/achievements/%s"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *AchievementCode);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -111,7 +119,7 @@ void Achievement::GetAchievement(const FString& AchievementCode, const THandler<
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess, const FErrorHandler& OnError,
@@ -119,8 +127,8 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -154,7 +162,7 @@ void Achievement::QueryUserAchievements(const EAccelByteAchievementListSortBy& S
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidHandler OnSuccess, const FErrorHandler& OnError)
@@ -167,8 +175,8 @@ void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidH
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock"), *Settings.AchievementServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *AchievementCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/achievements/%s/unlock"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *AchievementCode);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -180,7 +188,7 @@ void Achievement::UnlockAchievement(const FString& AchievementCode, const FVoidH
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

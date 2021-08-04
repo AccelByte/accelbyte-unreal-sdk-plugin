@@ -319,7 +319,7 @@ bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parame
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
 	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
-	const TArray<FString> Tags = TArray<FString> { TEXT("%S"), PolicyTags[0] };
+	const TArray<FString> Tags = TArray<FString> { TEXT("%s"), PolicyTags[0] };
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {

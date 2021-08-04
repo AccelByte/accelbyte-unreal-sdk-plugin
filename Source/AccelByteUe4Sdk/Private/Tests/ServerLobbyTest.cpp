@@ -389,7 +389,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		UsersLoginSuccess[i] = false;
 		bClientLoginSuccess = false;
 
-		SLobbyUsers.Add(MakeShared<Api::User>(SUserCreds[i], FRegistry::Settings));
+		SLobbyUsers.Add(MakeShared<Api::User>(SUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 
 		FString Email = FString::Printf(TEXT("serverlobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
 		Email.ToLowerInline();
@@ -439,7 +439,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 
 		Waiting(UsersLoginSuccess[i], "Waiting for Login...");
 
-		SLobbies.Add(MakeShared<Api::Lobby>(SUserCreds[i], FRegistry::Settings));
+		SLobbies.Add(MakeShared<Api::Lobby>(SUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 	}
 
 	for (int i = 0; i < STestUserCount; i++)

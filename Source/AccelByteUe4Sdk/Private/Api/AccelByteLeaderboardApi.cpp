@@ -13,13 +13,19 @@ namespace AccelByte
 namespace Api
 {
 
-	Leaderboard::Leaderboard(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
-	{}
+Leaderboard::Leaderboard(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
 
 	Leaderboard::~Leaderboard()
 	{}
 
-	void Leaderboard::GetRankings(const FString& LeaderboardCode, const EAccelByteLeaderboardTimeFrame& TimeFrame, uint32 Offset, uint32 Limit, const THandler<FAccelByteModelsLeaderboardRankingResult>& OnSuccess, const FErrorHandler& OnError)
+	void Leaderboard::GetRankings(FString const& LeaderboardCode, EAccelByteLeaderboardTimeFrame const& TimeFrame, uint32 Offset, uint32 Limit, THandler<FAccelByteModelsLeaderboardRankingResult> const& OnSuccess, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -45,8 +51,8 @@ namespace Api
 			break;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *Settings.LeaderboardServerUrl, *Settings.Namespace, *LeaderboardCode, *TimeFrameString);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *TimeFrameString);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -71,15 +77,15 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void Leaderboard::GetUserRanking(const FString& UserId, const FString& LeaderboardCode, const THandler<FAccelByteModelsUserRankingData>& OnSuccess, const FErrorHandler& OnError)
+	void Leaderboard::GetUserRanking(FString const& UserId, FString const& LeaderboardCode, THandler<FAccelByteModelsUserRankingData> const& OnSuccess, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s"), *Settings.LeaderboardServerUrl, *Settings.Namespace, *LeaderboardCode, *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/users/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -91,7 +97,7 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // Namespace Api

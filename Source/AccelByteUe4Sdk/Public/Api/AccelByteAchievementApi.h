@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteAchievementModels.h"
 
 namespace AccelByte
@@ -20,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Achievement
 {
 public:
-	Achievement(const Credentials& Credentials, const Settings& Settings);
+	Achievement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Achievement();
 
 	/**
@@ -34,7 +35,7 @@ public:
 	 * @param Offset The offset of the achievements result. Default value is 0.
 	 * @param Limit The limit of the achievements result. Default value is 20.
 	*/
-	void QueryAchievements(const FString& Language, const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedPublicAchievement>& OnSuccess, const FErrorHandler& OnError, const int32& Offset = 0, const int32& Limit = 20);
+	void QueryAchievements(FString const& Language, EAccelByteAchievementListSortBy const& SortBy, THandler<FAccelByteModelsPaginatedPublicAchievement> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20);
 
 	/**
 	 * @brief Get an specific achievement information.
@@ -43,7 +44,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsMultiLanguageAchievement&.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void GetAchievement(const FString& AchievementCode, const THandler<FAccelByteModelsMultiLanguageAchievement>& OnSuccess, const FErrorHandler& OnError);
+	void GetAchievement(FString const& AchievementCode, THandler<FAccelByteModelsMultiLanguageAchievement> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Query user's achievements. Include achieved and in-progress.
@@ -55,7 +56,7 @@ public:
 	 * @param Limit The limit of the achievements result. Default value is 20.
 	 * @param PreferUnlocked True if the configuration to display unlocked achievements first active, the list order should display unlocked achievements first on top of locked achievements, and false otherwise. Default value is true.
 	*/
-	void QueryUserAchievements(const EAccelByteAchievementListSortBy& SortBy, const THandler<FAccelByteModelsPaginatedUserAchievement>& OnSuccess, const FErrorHandler& OnError, const int32& Offset = 0, const int32& Limit = 20, bool PreferUnlocked = true);
+	void QueryUserAchievements(EAccelByteAchievementListSortBy const& SortBy, THandler<FAccelByteModelsPaginatedUserAchievement> const& OnSuccess, FErrorHandler const& OnError, int32 const& Offset = 0, int32 const& Limit = 20, bool PreferUnlocked = true);
 
 	/**
 	 * @brief Unlock specific achievement.
@@ -64,17 +65,18 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void UnlockAchievement(const FString& AchievementCode, const FVoidHandler OnSuccess, const FErrorHandler& OnError);
+	void UnlockAchievement(FString const& AchievementCode, FVoidHandler const OnSuccess, FErrorHandler const& OnError);
 
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 	Achievement() = delete;
 	Achievement(Achievement const&) = delete;
 	Achievement(Achievement&&) = delete;
 
-	FString ConvertAchievementSortByToString(const EAccelByteAchievementListSortBy& SortBy);
+	FString ConvertAchievementSortByToString(EAccelByteAchievementListSortBy const& SortBy);
 };
 
 } // Namespace Api

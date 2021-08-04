@@ -61,10 +61,10 @@ class ACCELBYTEUE4SDK_API FRegistry
 {
 public:
 	static Settings Settings;
+	static FHttpRetryScheduler HttpRetryScheduler;
 	static Credentials Credentials;
 	static ServerSettings ServerSettings;
 	static ServerCredentials ServerCredentials;
-	static FHttpRetryScheduler HttpRetryScheduler;
 	static Api::User User;
 	static Api::UserProfile UserProfile;
 	static Api::Category Category;

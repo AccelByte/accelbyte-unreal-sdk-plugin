@@ -41,7 +41,7 @@ public:
 	FHttpRetrySchedulerTestingMode()
 	{
 		// Set this state to initialized without Startup() function that make the ticker duplication
-		State = EHttpRetrySchedulerState::INITIALIZED;
+		State = EState::Initialized;
 	};
 };
 

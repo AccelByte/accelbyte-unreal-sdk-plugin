@@ -71,10 +71,10 @@ void FAccelByteUe4SdkModule::StartupModule()
 
 void FAccelByteUe4SdkModule::ShutdownModule()
 {
+	FRegistry::ServerCredentials.Shutdown();
 	FRegistry::GameTelemetry.Shutdown();
 	FRegistry::Credentials.Shutdown();
 	FRegistry::HttpRetryScheduler.Shutdown();
-	FRegistry::ServerCredentials.Shutdown();
 
 	UnregisterSettings();
 }

@@ -7,26 +7,28 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteStatisticModels.h"
 
 namespace AccelByte
 {
-	class Credentials;
-	class Settings;
-	namespace Api
-	{
+class Credentials;
+class Settings;
 
-		/**
-		 * @brief Statistic API to manage user's in-game profiles's statistic.
-		 */
-		class ACCELBYTEUE4SDK_API Statistic
-		{
-		public:
-			Statistic(const Credentials& Credentials, const Settings& Settings);
-			~Statistic();
-		private:
-			const Credentials& Credentials;
-			const Settings& Settings;
+namespace Api
+{
+/**
+* @brief Statistic API to manage user's in-game profiles's statistic.
+*/
+class ACCELBYTEUE4SDK_API Statistic
+{
+public:
+	Statistic(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	~Statistic();
+private:
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 public:
 	/**
@@ -70,6 +72,5 @@ private:
 	Statistic(Statistic const&) = delete;
 	Statistic(Statistic&&) = delete;
 };
-
-	} // Namespace Api
+} // Namespace Api
 } // Namespace AccelByte

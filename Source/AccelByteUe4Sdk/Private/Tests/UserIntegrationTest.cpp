@@ -1879,7 +1879,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
 		FAccelByteModelsUserProfileInfo UserProfileInfo;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
 			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 				{
@@ -1904,7 +1904,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		bool bIsDone = false;
 		bool bIsOk = false;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
 			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
 				{

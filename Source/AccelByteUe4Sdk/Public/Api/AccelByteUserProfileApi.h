@@ -6,10 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Misc/ConfigCacheIni.h"
-#include "Http.h"
 #include "Models/AccelByteUserProfileModels.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteRegistry.h"
 
 namespace AccelByte
 {
@@ -24,11 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile
 {
 public:
-	UserProfile(const Credentials& Credentials, const Settings& Settings);
+	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& HttpRef);
 	~UserProfile();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& Settings;
 public:
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.

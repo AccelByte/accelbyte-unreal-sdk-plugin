@@ -5,8 +5,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteAgreementModels.h"
 
 namespace AccelByte
@@ -22,11 +22,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Agreement
 {
 public:
-	Agreement(const Credentials& Credentials, const Settings& Settings);
+	Agreement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Agreement();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
@@ -36,7 +37,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace can be filled with namespace or publisher namespace. The country will be read from user token.
@@ -47,7 +48,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPolicies(const FString& Namespace, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPolicies(FString const& Namespace, EAccelByteAgreementPolicyType const& AgreementPolicyType, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Retrieve all active latest policies based on a namespace and country. The namespace is current client namespace. The country will be read from user token.
@@ -58,7 +59,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType, TArray<FString> const& Tags, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Retrieve all active latest policies based on a country.
@@ -69,7 +70,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPoliciesByCountry(FString const& CountryCode, EAccelByteAgreementPolicyType const& AgreementPolicyType, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Retrieve all active latest policies based on a country.
@@ -81,7 +82,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<FAccelByteModelsPublicPolicy>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalPoliciesByCountry(FString const& CountryCode, EAccelByteAgreementPolicyType const& AgreementPolicyType, TArray<FString> const& Tags, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Accepts many legal policy versions all at once. Supply with localized version policy id to accept an agreement.
@@ -90,7 +91,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsAcceptAgreementResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError);
+	void BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests, THandler<FAccelByteModelsAcceptAgreementResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Accepts a legal policy version. Supply with localized version policy id to accept an agreement.
@@ -99,7 +100,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void AcceptPolicyVersion(FString const& LocalizedPolicyVersionId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Query all player's legal eligibilities on a namespace, use to check is player already commited to legal or not.
@@ -108,7 +109,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a TArray<RetrieveUserEligibilitiesResponse>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void QueryLegalEligibilities(const FString& Namespace, const THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>& OnSuccess, const FErrorHandler& OnError);
+	void QueryLegalEligibilities(FString const& Namespace, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>> const& OnSuccess, FErrorHandler const& OnError);
 
 	/*
 	* @brief Get the content of the legal document.
@@ -117,7 +118,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is a string.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetLegalDocument(const FString& Url, const THandler<FString>& OnSuccess, const FErrorHandler& OnError);
+	void GetLegalDocument(FString const& Url, THandler<FString> const& OnSuccess, FErrorHandler const& OnError);
 private:
 	Agreement() = delete;
 	Agreement(Agreement const&) = delete;

@@ -12,14 +12,20 @@ namespace AccelByte
 namespace Api
 {
 
-	SessionBrowser::SessionBrowser(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
-	{}
+	SessionBrowser::SessionBrowser(
+		Credentials const& CredentialsRef,
+		Settings const& SettingsRef,
+		FHttpRetryScheduler& HttpRef)
+		:
+		HttpRef{HttpRef},
+		CredentialsRef{CredentialsRef},
+		SettingsRef{SettingsRef} {}
 
 	SessionBrowser::~SessionBrowser()
 	{}
 
 	FString SessionBrowser::GetSessionBrowserUrl() {
-		return Settings.SessionBrowserServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/sessionbrowser"), *Settings.BaseUrl) : Settings.SessionBrowserServerUrl;
+		return SettingsRef.SessionBrowserServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/sessionbrowser"), *SettingsRef.BaseUrl) : SettingsRef.SessionBrowserServerUrl;
 	}
 
 	void SessionBrowser::CreateGameSession(const FString& GameMode, const FString& GameMapName, const FString& GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
@@ -31,16 +37,16 @@ namespace Api
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession"), *SessionBrowserServerUrl, *Credentials.GetNamespace());
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession"), *SessionBrowserServerUrl, *CredentialsRef.GetNamespace());
 		FString Verb = TEXT("POST");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 
 		FAccelByteModelsSessionBrowserCreateRequest NewGameSession;
-		NewGameSession.Username = Credentials.GetUserDisplayName();
-		NewGameSession.Namespace = Credentials.GetNamespace();
+		NewGameSession.Username = CredentialsRef.GetUserDisplayName();
+		NewGameSession.Namespace = CredentialsRef.GetNamespace();
 		NewGameSession.Game_session_setting.Mode = GameMode;
 		NewGameSession.Game_session_setting.Map_name = GameMapName;
 		NewGameSession.Game_session_setting.Num_bot = BotCount;
@@ -75,9 +81,9 @@ namespace Api
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionId);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -101,9 +107,9 @@ namespace Api
 	void SessionBrowser::RemoveGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError) {
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionId);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
 		FString Verb = TEXT("DELETE");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -121,9 +127,9 @@ namespace Api
 	void SessionBrowser::GetGameSessions(const FString& SessionType, const FString& GameMode, const THandler<FAccelByteModelsSessionBrowserGetResult>& OnSuccess, const FErrorHandler& OnError, uint32 Offset, uint32 Limit) {
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&limit=%d&offset=%d"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionType, *GameMode, Limit, Offset);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&limit=%d&offset=%d"), *SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionType, *GameMode, Limit, Offset);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -141,9 +147,9 @@ namespace Api
 	void SessionBrowser::GetGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError){
 		FReport::Log(FString(__FUNCTION__));
 		
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString SessionBrowserServerUrl = GetSessionBrowserUrl();
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *Credentials.GetNamespace(), *SessionId);
+		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

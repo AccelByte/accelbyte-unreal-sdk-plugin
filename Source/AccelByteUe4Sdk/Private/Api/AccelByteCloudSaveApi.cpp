@@ -14,11 +14,20 @@ namespace AccelByte
 {
 namespace Api
 {
-CloudSave::CloudSave(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting){}
+CloudSave::CloudSave(
+	AccelByte::Credentials const& Credentials,
+	AccelByte::Settings const& Setting,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	Credentials{Credentials},
+	Settings{Setting}
+{
+}
 
 CloudSave::~CloudSave(){}
 
-void CloudSave::SaveUserRecord(const FString& Key, FJsonObject RecordRequest, bool IsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::SaveUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -40,10 +49,10 @@ void CloudSave::SaveUserRecord(const FString& Key, FJsonObject RecordRequest, bo
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::GetUserRecord(const FString& Key, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -62,30 +71,33 @@ void CloudSave::GetUserRecord(const FString& Key, const THandler<FAccelByteModel
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(
+	HttpRef.ProcessRequest(
 		Request,
-		CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
-		{
-			FAccelByteModelsUserRecord userRecord;
-			jsonObject.TryGetStringField("key", userRecord.Key);
-			jsonObject.TryGetStringField("namespace", userRecord.Namespace);
-			jsonObject.TryGetStringField("user_id", userRecord.UserId);
-			jsonObject.TryGetBoolField("is_public", userRecord.IsPublic);
-			FString CreatedAt;
-			jsonObject.TryGetStringField("created_at", CreatedAt);
-			FDateTime::ParseIso8601(*CreatedAt, userRecord.CreatedAt);
-			FString UpdatedAt;
-			jsonObject.TryGetStringField("updated_at", UpdatedAt);
-			FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
-			const TSharedPtr<FJsonObject> *value;
-			jsonObject.TryGetObjectField("value", value);
-			userRecord.Value = *value->ToSharedRef();
-			OnSuccess.ExecuteIfBound(userRecord);
-		}), OnError),
+		CreateHttpResultHandler(
+			THandler<FJsonObject>::CreateLambda(
+				[OnSuccess](FJsonObject const& jsonObject)
+				{
+					FAccelByteModelsUserRecord userRecord;
+					jsonObject.TryGetStringField("key", userRecord.Key);
+					jsonObject.TryGetStringField("namespace", userRecord.Namespace);
+					jsonObject.TryGetStringField("user_id", userRecord.UserId);
+					jsonObject.TryGetBoolField("is_public", userRecord.IsPublic);
+					FString CreatedAt;
+					jsonObject.TryGetStringField("created_at", CreatedAt);
+					FDateTime::ParseIso8601(*CreatedAt, userRecord.CreatedAt);
+					FString UpdatedAt;
+					jsonObject.TryGetStringField("updated_at", UpdatedAt);
+					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					TSharedPtr<FJsonObject> const* value;
+					jsonObject.TryGetObjectField("value", value);
+					userRecord.Value = *value->ToSharedRef();
+					OnSuccess.ExecuteIfBound(userRecord);
+				}),
+			OnError),
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::GetPublicUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, THandler<FAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -104,30 +116,33 @@ void CloudSave::GetPublicUserRecord(const FString& Key, const FString& UserId, c
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(
+	HttpRef.ProcessRequest(
 		Request,
-		CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
-	{
-		FAccelByteModelsUserRecord userRecord;
-		jsonObject.TryGetStringField("key", userRecord.Key);
-		jsonObject.TryGetStringField("namespace", userRecord.Namespace);
-		jsonObject.TryGetStringField("user_id", userRecord.UserId);
-		jsonObject.TryGetBoolField("is_public", userRecord.IsPublic);
-		FString CreatedAt;
-		jsonObject.TryGetStringField("created_at", CreatedAt);
-		FDateTime::ParseIso8601(*CreatedAt, userRecord.CreatedAt);
-		FString UpdatedAt;
-		jsonObject.TryGetStringField("updated_at", UpdatedAt);
-		FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
-		const TSharedPtr<FJsonObject> *value;
-		jsonObject.TryGetObjectField("value", value);
-		userRecord.Value = *value->ToSharedRef();
-		OnSuccess.ExecuteIfBound(userRecord);
-	}), OnError),
+		CreateHttpResultHandler(
+			THandler<FJsonObject>::CreateLambda(
+				[OnSuccess](FJsonObject const& jsonObject)
+				{
+					FAccelByteModelsUserRecord userRecord;
+					jsonObject.TryGetStringField("key", userRecord.Key);
+					jsonObject.TryGetStringField("namespace", userRecord.Namespace);
+					jsonObject.TryGetStringField("user_id", userRecord.UserId);
+					jsonObject.TryGetBoolField("is_public", userRecord.IsPublic);
+					FString CreatedAt;
+					jsonObject.TryGetStringField("created_at", CreatedAt);
+					FDateTime::ParseIso8601(*CreatedAt, userRecord.CreatedAt);
+					FString UpdatedAt;
+					jsonObject.TryGetStringField("updated_at", UpdatedAt);
+					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					TSharedPtr<FJsonObject> const* value;
+					jsonObject.TryGetObjectField("value", value);
+					userRecord.Value = *value->ToSharedRef();
+					OnSuccess.ExecuteIfBound(userRecord);
+				}),
+			OnError),
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecord(const FString& Key, FJsonObject RecordRequest, bool IsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -149,10 +164,10 @@ void CloudSave::ReplaceUserRecord(const FString& Key, FJsonObject RecordRequest,
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -177,27 +192,39 @@ void CloudSave::ReplaceUserRecord(int TryAttempt, const FString& Key, const FAcc
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, FErrorHandler::CreateLambda([this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](int32 Code, const FString& Message)
-	{
-		if (Code == (int32)ErrorCodes::PlayerRecordPreconditionFailedException)
-		{
-			if (TryAttempt > 0)
-			{
-				CloudSave::ReplaceUserRecordCheckLatest(TryAttempt - 1, Key, Data.Value, PayloadModifier, OnSuccess, OnError);
-			}
-			else
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		}
-		else
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	})), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			OnSuccess,
+			FErrorHandler::CreateLambda(
+				[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](int32 Code, FString const& Message)
+				{
+					if (Code == (int32)ErrorCodes::PlayerRecordPreconditionFailedException)
+					{
+						if (TryAttempt > 0)
+						{
+							CloudSave::ReplaceUserRecordCheckLatest(
+								TryAttempt - 1,
+								Key,
+								Data.Value,
+								PayloadModifier,
+								OnSuccess,
+								OnError);
+						}
+						else
+						{
+							OnError.ExecuteIfBound(Code, Message);
+						}
+					}
+					else
+					{
+						OnError.ExecuteIfBound(Code, Message);
+					}
+				})),
+		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -208,56 +235,65 @@ void CloudSave::ReplaceUserRecordCheckLatest(const FString& Key, const FDateTime
 	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
-		OnError.ExecuteIfBound((int32)ErrorCodes::PlayerRecordPreconditionFailedException, "Exhaust all retry attempt to modify game record. Please try again.");
+		OnError.ExecuteIfBound(
+			(int32)ErrorCodes::PlayerRecordPreconditionFailedException,
+			"Exhaust all retry attempt to modify game record. Please try again.");
 		return;
 	}
 
-	GetUserRecord(Key, THandler<FAccelByteModelsUserRecord>::CreateLambda([this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](FAccelByteModelsUserRecord LatestData)
-	{
-		if (PayloadModifier.IsBound())
-		{
-			LatestData.Value = PayloadModifier.Execute(LatestData.Value);
-		}
+	GetUserRecord(
+		Key,
+		THandler<FAccelByteModelsUserRecord>::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError]
+			(FAccelByteModelsUserRecord LatestData)
+			{
+				if (PayloadModifier.IsBound())
+				{
+					LatestData.Value = PayloadModifier.Execute(LatestData.Value);
+				}
 
-		FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
-		UpdateRequest.Value = LatestData.Value;
-		UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
+				FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+				UpdateRequest.Value = LatestData.Value;
+				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
 
-		CloudSave::ReplaceUserRecord(
-			TryAttempt,
-			Key,
-			UpdateRequest,
-			PayloadModifier,
-			OnSuccess,
-			OnError);
-	}), FErrorHandler::CreateLambda([this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, const FString& Message)
-	{
-		if (Code == (int32)ErrorCodes::PlayerRecordNotFoundException)
-		{
-			FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
-			UpdateRequest.Value = RecordRequest;
-			UpdateRequest.UpdatedAt = FDateTime::Now();
+				CloudSave::ReplaceUserRecord(
+					TryAttempt,
+					Key,
+					UpdateRequest,
+					PayloadModifier,
+					OnSuccess,
+					OnError);
+			}),
+		FErrorHandler::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError]
+			(int32 Code, FString const& Message)
+			{
+				if (Code == (int32)ErrorCodes::PlayerRecordNotFoundException)
+				{
+					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+					UpdateRequest.Value = RecordRequest;
+					UpdateRequest.UpdatedAt = FDateTime::Now();
 
-			CloudSave::ReplaceUserRecord(
-				TryAttempt,
-				Key,
-				UpdateRequest,
-				PayloadModifier,
-				OnSuccess,
-				OnError);
-		}
-		else
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	}));
+					CloudSave::ReplaceUserRecord(
+						TryAttempt,
+						Key,
+						UpdateRequest,
+						PayloadModifier,
+						OnSuccess,
+						OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			}));
 }
 
-void CloudSave::DeleteUserRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::DeleteUserRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -276,10 +312,10 @@ void CloudSave::DeleteUserRecord(const FString& Key, const FVoidHandler& OnSucce
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::SaveGameRecord(const FString& Key, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::SaveGameRecord(FString const& Key, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -301,10 +337,10 @@ void CloudSave::SaveGameRecord(const FString& Key, FJsonObject RecordRequest, co
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::GetGameRecord(const FString& Key, const THandler<FAccelByteModelsGameRecord>& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameRecord> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -323,28 +359,31 @@ void CloudSave::GetGameRecord(const FString& Key, const THandler<FAccelByteModel
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(
+	HttpRef.ProcessRequest(
 		Request,
-		CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
-		{
-			FAccelByteModelsGameRecord gameRecord;
-			jsonObject.TryGetStringField("key", gameRecord.Key);
-			jsonObject.TryGetStringField("namespace", gameRecord.Namespace);
-			FString CreatedAt;
-			jsonObject.TryGetStringField("created_at", CreatedAt);
-			FDateTime::ParseIso8601(*CreatedAt, gameRecord.CreatedAt);
-			FString UpdatedAt;
-			jsonObject.TryGetStringField("updated_at", UpdatedAt);
-			FDateTime::ParseIso8601(*UpdatedAt, gameRecord.UpdatedAt);
-			const TSharedPtr<FJsonObject> *value;
-			jsonObject.TryGetObjectField("value", value);
-			gameRecord.Value = *value->ToSharedRef();
-			OnSuccess.ExecuteIfBound(gameRecord);
-		}), OnError),
+		CreateHttpResultHandler(
+			THandler<FJsonObject>::CreateLambda(
+				[OnSuccess](FJsonObject const& JSONObject)
+				{
+					FAccelByteModelsGameRecord GameRecord;
+					JSONObject.TryGetStringField("key", GameRecord.Key);
+					JSONObject.TryGetStringField("namespace", GameRecord.Namespace);
+					FString CreatedAt;
+					JSONObject.TryGetStringField("created_at", CreatedAt);
+					FDateTime::ParseIso8601(*CreatedAt, GameRecord.CreatedAt);
+					FString UpdatedAt;
+					JSONObject.TryGetStringField("updated_at", UpdatedAt);
+					FDateTime::ParseIso8601(*UpdatedAt, GameRecord.UpdatedAt);
+					TSharedPtr<FJsonObject> const* value;
+					JSONObject.TryGetObjectField("value", value);
+					GameRecord.Value = *value->ToSharedRef();
+					OnSuccess.ExecuteIfBound(GameRecord);
+				}),
+			OnError),
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecord(const FString& Key, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -366,10 +405,10 @@ void CloudSave::ReplaceGameRecord(const FString& Key, FJsonObject RecordRequest,
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -394,27 +433,40 @@ void CloudSave::ReplaceGameRecord(int TryAttempt, const FString& Key, const FAcc
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, FErrorHandler::CreateLambda([this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError](int32 Code, const FString& Message)
-	{
-		if (Code == (int32)ErrorCodes::GameRecordPreconditionFailedException)
-		{
-			if (TryAttempt > 0)
-			{
-				CloudSave::ReplaceGameRecordCheckLatest(TryAttempt - 1, Key, Data.Value, PayloadModifier, OnSuccess, OnError);
-			}
-			else
-			{
-				OnError.ExecuteIfBound(Code, Message);
-			}
-		}
-		else
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	})), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(
+		Request,
+		CreateHttpResultHandler(
+			OnSuccess,
+			FErrorHandler::CreateLambda(
+				[this, TryAttempt, Key, Data, PayloadModifier, OnSuccess, OnError]
+				(int32 Code, FString const& Message)
+				{
+					if (Code == (int32)ErrorCodes::GameRecordPreconditionFailedException)
+					{
+						if (TryAttempt > 0)
+						{
+							CloudSave::ReplaceGameRecordCheckLatest(
+								TryAttempt - 1,
+								Key,
+								Data.Value,
+								PayloadModifier,
+								OnSuccess,
+								OnError);
+						}
+						else
+						{
+							OnError.ExecuteIfBound(Code, Message);
+						}
+					}
+					else
+					{
+						OnError.ExecuteIfBound(Code, Message);
+					}
+				})),
+		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -425,7 +477,7 @@ void CloudSave::ReplaceGameRecordCheckLatest(const FString& Key, const FDateTime
 	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -433,48 +485,55 @@ void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key,
 		return;
 	}
 
-	GetGameRecord(Key, THandler<FAccelByteModelsGameRecord>::CreateLambda([this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](FAccelByteModelsGameRecord LatestData)
-	{
-		if (PayloadModifier.IsBound())
-		{
-			LatestData.Value = PayloadModifier.Execute(LatestData.Value);
-		}
+	GetGameRecord(
+		Key,
+		THandler<FAccelByteModelsGameRecord>::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError]
+			(FAccelByteModelsGameRecord LatestData)
+			{
+				if (PayloadModifier.IsBound())
+				{
+					LatestData.Value = PayloadModifier.Execute(LatestData.Value);
+				}
 
-		FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
-		UpdateRequest.Value = LatestData.Value;
-		UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
+				FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+				UpdateRequest.Value = LatestData.Value;
+				UpdateRequest.UpdatedAt = LatestData.UpdatedAt;
 
-		CloudSave::ReplaceGameRecord(
-			TryAttempt,
-			Key,
-			UpdateRequest,
-			PayloadModifier,
-			OnSuccess,
-			OnError);
-	}), FErrorHandler::CreateLambda([this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError](int32 Code, const FString& Message)
-	{
-		if (Code == (int32)ErrorCodes::GameRecordNotFoundException)
-		{
-			FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
-			UpdateRequest.Value = RecordRequest;
-			UpdateRequest.UpdatedAt = FDateTime::Now();
+				ReplaceGameRecord(
+					TryAttempt,
+					Key,
+					UpdateRequest,
+					PayloadModifier,
+					OnSuccess,
+					OnError);
+			}),
+		FErrorHandler::CreateLambda(
+			[this, TryAttempt, PayloadModifier, Key, RecordRequest, OnSuccess, OnError]
+			(int32 Code, FString const& Message)
+			{
+				if (Code == (int32)ErrorCodes::GameRecordNotFoundException)
+				{
+					FAccelByteModelsConcurrentReplaceRequest UpdateRequest;
+					UpdateRequest.Value = RecordRequest;
+					UpdateRequest.UpdatedAt = FDateTime::Now();
 
-			CloudSave::ReplaceGameRecord(
-				TryAttempt,
-				Key,
-				UpdateRequest,
-				PayloadModifier,
-				OnSuccess,
-				OnError);
-		}
-		else
-		{
-			OnError.ExecuteIfBound(Code, Message);
-		}
-	}));
+					ReplaceGameRecord(
+						TryAttempt,
+						Key,
+						UpdateRequest,
+						PayloadModifier,
+						OnSuccess,
+						OnError);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(Code, Message);
+				}
+			}));
 }
 
-void CloudSave::DeleteGameRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void CloudSave::DeleteGameRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -493,7 +552,7 @@ void CloudSave::DeleteGameRecord(const FString& Key, const FVoidHandler& OnSucce
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

@@ -13,8 +13,14 @@ namespace AccelByte
 namespace Api
 {
 
-	QosManager::QosManager(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings) : Credentials(Credentials), Settings(Settings)
-	{}
+QosManager::QosManager(
+	const Credentials& CredentialsRef,
+	const Settings& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
 
 	QosManager::~QosManager()
 	{}
@@ -33,7 +39,7 @@ namespace Api
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // Namespace Api

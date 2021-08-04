@@ -377,7 +377,7 @@ bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<T
 		bool bIsDone = false;
 		bool bIsOk = false;
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s: %s"), TEXT("Logging in"), *InUser.Email);
-		Api::User UserApi(OutCredentials, FRegistry::Settings);
+		Api::User UserApi(OutCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		UserApi.LoginWithUsername(InUser.Email, InUser.Password,
 			FVoidHandler::CreateLambda([&]()
 				{

@@ -96,7 +96,7 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 
 	FRegistry::ServerOauth2.ForgetAllCredentials();
 	
-	ServerCloudUser = MakeShared<Api::User>(ServerCloudUserCreds, FRegistry::Settings);
+	ServerCloudUser = MakeShared<Api::User>(ServerCloudUserCreds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
 	Email.ToLowerInline();
 	FString const Password = TEXT("123Password123");

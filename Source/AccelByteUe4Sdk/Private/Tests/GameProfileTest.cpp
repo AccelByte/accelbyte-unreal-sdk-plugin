@@ -64,7 +64,7 @@ bool FGameProfileTestTearDown::RunTest(const FString& Parameters)
 		// for each user, delete each game profile
 		TArray<FAccelByteModelsGameProfile> GetAllGameProfileResult;
 		bool bGetAllGameProfileSuccess = false;
-		Api::GameProfile GameProfileApi(*GameProfileTestCredentials[i], FRegistry::Settings);
+		Api::GameProfile GameProfileApi(*GameProfileTestCredentials[i], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		GameProfileApi.GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsGameProfile>& Result){
 			UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\t\tsuccess"));
 			GetAllGameProfileResult = Result;
@@ -104,7 +104,7 @@ bool FGameProfileTestCreateGameProfile::RunTest(const FString& Parameters)
 	// ACT
 	FAccelByteModelsGameProfile ActualResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result){
 		ActualResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -140,7 +140,7 @@ bool FGameProfileTestGetGameProfile::RunTest(const FString& Parameters)
 	FAccelByteModelsGameProfileRequest Request = GameProfileTestCreateGameProfileRequest(1, "key", "val", 1, "tag");
 	FAccelByteModelsGameProfile CreateResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&CreateResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result) {
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -186,7 +186,7 @@ bool FGameProfileTestUpdateGameProfile::RunTest(const FString& Parameters)
 	FAccelByteModelsGameProfileRequest CreateRequest = GameProfileTestCreateGameProfileRequest(2, "key", "val", 1, "T", "http://example.com/old", "oldLabel", "oldName");
 	FAccelByteModelsGameProfile CreateResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(CreateRequest, THandler<FAccelByteModelsGameProfile>::CreateLambda([&CreateResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result) {
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -244,7 +244,7 @@ bool FGameProfileTestDeleteGameProfile::RunTest(const FString& Parameters)
 	FAccelByteModelsGameProfileRequest Request = GameProfileTestCreateGameProfileRequest(1, "key", "val", 1, "tag");
 	FAccelByteModelsGameProfile ActualResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&ActualResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result) {
 		ActualResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -282,7 +282,7 @@ bool FGameProfileTestGetAllGameProfiles::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(CheckTestUsers(GameProfileTestUsers, GameProfileTestCredentials));
 
 	// ARRANGEMENT
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 
 	const int GameProfileCreateAmount = 2;
 	TArray<FAccelByteModelsGameProfileRequest> Requests;
@@ -347,7 +347,7 @@ bool FGameProfileTestGetGameProfileAttribute::RunTest(const FString& Parameters)
 	FString TestKey = AttributeKeys[0];
 	FAccelByteModelsGameProfile CreateResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&CreateResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result) {
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -380,7 +380,7 @@ bool FGameProfileTestUpdateGameProfileAttribute::RunTest(const FString& Paramete
 	FAccelByteModelsGameProfileRequest Request = GameProfileTestCreateGameProfileRequest(1, "key", "val", 1, "tag");
 	FAccelByteModelsGameProfile CreateResult;
 	bool bCreateGameProfileSuccess = false;
-	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi.CreateGameProfile(Request, THandler<FAccelByteModelsGameProfile>::CreateLambda([&CreateResult, &bCreateGameProfileSuccess](const FAccelByteModelsGameProfile& Result) {
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
@@ -419,7 +419,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 	FAccelByteModelsGameProfileRequest Request1 = GameProfileTestCreateGameProfileRequest(1, "1key", "1val", 1, "1tag");
 	FAccelByteModelsGameProfile CreateResult1;
 	bool bCreateGameProfileSuccess1 = false;
-	Api::GameProfile GameProfileApi1(*GameProfileTestCredentials[1], FRegistry::Settings);
+	Api::GameProfile GameProfileApi1(*GameProfileTestCredentials[1], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi1.CreateGameProfile(Request1, THandler<FAccelByteModelsGameProfile>::CreateLambda([&](const FAccelByteModelsGameProfile& Result) {
 		CreateResult1 = Result;
 		bCreateGameProfileSuccess1 = true;
@@ -431,7 +431,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 	FAccelByteModelsGameProfileRequest Request2 = GameProfileTestCreateGameProfileRequest(1, "2key", "2val", 1, "2tag");
 	FAccelByteModelsGameProfile CreateResult2;
 	bool bCreateGameProfileSuccess2 = false;
-	Api::GameProfile GameProfileApi2(*GameProfileTestCredentials[2], FRegistry::Settings);
+	Api::GameProfile GameProfileApi2(*GameProfileTestCredentials[2], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi2.CreateGameProfile(Request2, THandler<FAccelByteModelsGameProfile>::CreateLambda([&](const FAccelByteModelsGameProfile& Result) {
 		CreateResult2 = Result;
 		bCreateGameProfileSuccess2 = true;
@@ -445,7 +445,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 	TArray<FString> ArrayOfUserId;
 	ArrayOfUserId.Add(GameProfileTestCredentials[1]->GetUserId());
 	ArrayOfUserId.Add(GameProfileTestCredentials[2]->GetUserId());
-	Api::GameProfile GameProfileApi0(*GameProfileTestCredentials[0], FRegistry::Settings);
+	Api::GameProfile GameProfileApi0(*GameProfileTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	GameProfileApi0.BatchGetPublicGameProfiles(ArrayOfUserId, THandler<TArray<FAccelByteModelsPublicGameProfile>>::CreateLambda([&](const TArray<FAccelByteModelsPublicGameProfile>& Result)
 	{
 		bBatchGetPublicGameProfiles = true;
