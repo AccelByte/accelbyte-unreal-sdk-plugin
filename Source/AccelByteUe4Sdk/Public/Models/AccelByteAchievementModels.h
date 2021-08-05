@@ -128,11 +128,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserAchievement
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
+		FString Id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
+		TMap<FString, FString> Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
 		FString AchievementCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
 		FString AchievedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		int32 LatestValue;
+		float LatestValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
 		int32 Status; // 1: In-Progress, 2: Unlocked
 };

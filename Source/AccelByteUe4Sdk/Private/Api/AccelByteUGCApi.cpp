@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -128,6 +128,12 @@ void UGC::GetContentByContentId(const FString& ContentId,
 								const THandler<FAccelByteModelsUGCContentResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+
+	if (ContentId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("Url is invalid. ContentId is empty."));
+		return;
+	}
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *ContentId);

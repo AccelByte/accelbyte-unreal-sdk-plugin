@@ -130,6 +130,11 @@ public:
 	DECLARE_DELEGATE_OneParam(FPartyDataUpdateNotif, const FAccelByteModelsPartyDataNotif&);
 
 	/**
+	 * @brief delegate for handling generate party code event
+	 */
+	DECLARE_DELEGATE_OneParam(FPartyGenerateCodeResponse, const FAccelByteModelsPartyGenerateCodeResponse&);
+
+	/**
 	 * @brief delegate for handling get party code event
 	 */
 	DECLARE_DELEGATE_OneParam(FPartyGetCodeResponse, const FAccelByteModelsPartyGetCodeResponse&);
@@ -478,9 +483,15 @@ public:
 	 * @param UserId The target user ID to be kicked.
 	 */
 	FString SendKickPartyMemberRequest(const FString& UserId);
-
+	
 	/**
-	 * @brief Generate and Get Party code.
+	 * @brief Generate Party code.
+	 * 
+	 */
+	FString SendPartyGenerateCodeRequest();
+	
+	/**
+	 * @brief Get Party code.
 	 * 
 	 */
 	FString SendPartyGetCodeRequest();
@@ -499,9 +510,14 @@ public:
 	FString SendPartyJoinViaCodeRequest(const FString& partyCode);
 
 	/**
-	 * @brief Get a list of online users in the Lobby server.
+	 * @brief (Obsolete) the function name is misleading, please use SendGetOnlineFriendPresenceRequest().
 	 */
     FString SendGetOnlineUsersRequest();
+
+	/**
+	 * @brief Get list of online friends in the lobby server.
+	 */
+	FString SendGetOnlineFriendPresenceRequest();
 
 	/**
 	 * @brief Promote party member to party leader.
@@ -870,6 +886,16 @@ public:
 	};
 
 	/**
+	* @brief generate party code reponse
+	*
+	* @param OnPartyGenerateCodeResponse set delegate .
+	*/
+	void SetPartyGenerateCodeResponseDelegate(FPartyGenerateCodeResponse OnPartyGenerateCodeResponse)
+	{
+		PartyGenerateCodeResponse = OnPartyGenerateCodeResponse;
+	};
+
+	/**
 	* @brief get party code reponse
 	*
 	* @param OnPartyGetCodeResponse set delegate .
@@ -972,13 +998,23 @@ public:
 	};
 
 	/**
-	* @brief set info party response
+	* @brief (obsolete) misnamed, please use SetGetOnlineFriendsPresenceResponseDelegate
 	*
 	* @param OnGetAllUserPresenceResponse set delegate .
 	*/
 	void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse)
 	{
 		GetAllFriendsStatusResponse = OnGetAllUserPresenceResponse;
+	};
+
+	/**
+	* @brief Set GetFriendsPresenceResponse delegate. 
+	*
+	* @param OnGetFriendsPresenceResponse set delegate .
+	*/
+	void SetGetOnlineFriendsPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetFriendsPresenceResponse)
+	{
+		GetAllFriendsStatusResponse = OnGetFriendsPresenceResponse;
 	};
 
 	// Notification
@@ -1379,6 +1415,7 @@ private:
     FPartyKickResponse PartyKickResponse;
     FPartyKickNotif PartyKickNotif;
 	FPartyDataUpdateNotif PartyDataUpdateNotif;
+	FPartyGenerateCodeResponse PartyGenerateCodeResponse;
 	FPartyGetCodeResponse PartyGetCodeResponse;
 	FPartyDeleteCodeResponse PartyDeleteCodeResponse;
 	FPartyJoinViaCodeResponse PartyJoinViaCodeResponse;

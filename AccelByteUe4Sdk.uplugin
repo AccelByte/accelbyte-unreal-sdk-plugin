@@ -1,25 +1,24 @@
 {
-	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0",
-	"FriendlyName": "AccelByte Unreal Engine 4 SDK",
-	"Description": "Official AccelByte SDK for Unreal Engine 4",
-	"Category": "Online Platform",
-	"CreatedBy": "Accelbyte Inc",
-	"CreatedByUrl": "https://www.accelbyte.net/",
-	"DocsUrl": "https://docs.accelbyte.net/sdk/ue4/index.html",
-	"MarketplaceUrl": "",
-	"SupportUrl": "",
-	"CanContainContent": false,
-	"IsBetaVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "AccelByteUe4Sdk",
-			"Type": "Runtime",
-			"LoadingPhase": "PreDefault"
-		}
-	],
-	"Plugins": [
-	]
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "AccelByte Unreal Engine 4 SDK",
+  "Description": "Official AccelByte SDK for Unreal Engine 4",
+  "Category": "Online Platform",
+  "CreatedBy": "Accelbyte Inc",
+  "CreatedByUrl": "https://www.accelbyte.net/",
+  "DocsUrl": "https://docs.accelbyte.net/sdk/ue4/index.html",
+  "MarketplaceUrl": "",
+  "SupportUrl": "",
+  "CanContainContent": false,
+  "IsBetaVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "AccelByteUe4Sdk",
+      "Type": "Runtime",
+      "LoadingPhase": "PreDefault"
+    }
+  ],
+  "Plugins": []
 }

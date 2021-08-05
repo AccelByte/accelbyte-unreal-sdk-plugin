@@ -15,148 +15,283 @@ using namespace std;
 namespace AccelByte
 {
 
-namespace HttpRequest
-{
-	bool IsFinished(const FHttpRequestPtr& Request)
-	{
-		return Request->GetStatus() == EHttpRequestStatus::Failed ||
-			Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError ||
-			Request->GetStatus() == EHttpRequestStatus::Succeeded;
-	}
-}
-
 const int FHttpRetryScheduler::InitialDelay = 1;
 const int FHttpRetryScheduler::MaximumDelay = 30;
 const int FHttpRetryScheduler::TotalTimeout = 60;
 
-FHttpRetryScheduler::FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay)
-	: Request(Request)
+class FHttpRetryTask : public FAccelByteTask
+{
+public:
+	FHttpRetryTask(const FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay);
+	virtual ~FHttpRetryTask();
+
+	virtual bool Start() override;
+	virtual bool Cancel() override;
+	virtual void Tick(double CurrentTime) override;
+	virtual bool Finish() override;
+private:
+	const FHttpRequestPtr Request;
+	const FHttpRequestCompleteDelegate CompleteDelegate;
+	const double RequestTime;
+	double NextRetryTime;
+	float NextDelay;
+	bool ScheduledRetry;
+
+	EAccelByteTaskState Retry();
+	EAccelByteTaskState ScheduleNextRetry();
+	bool IsFinished();
+};
+
+FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay)
+	: FAccelByteTask()
+	, Request(Request)
 	, CompleteDelegate(CompleteDelegate)
 	, RequestTime(RequestTime)
+	, NextRetryTime(NextDelay)
 	, NextDelay(NextDelay)
-	, NextRetryTime(RequestTime + NextDelay)
 	, ScheduledRetry(false)
 {
+
 }
 
-bool FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
+FHttpRetryTask::~FHttpRetryTask()
 {
+
+}
+
+bool FHttpRetryTask::Start()
+{
+	if (!Request.IsValid()) 
+	{
+		TaskState = EAccelByteTaskState::Failed;
+		return false;
+	}
+
+	Request->ProcessRequest();
+	TaskState = EAccelByteTaskState::Running;
+	return FAccelByteTask::Start();
+}
+
+bool FHttpRetryTask::Cancel()
+{
+	if (!Request.IsValid())
+	{
+		TaskState = EAccelByteTaskState::Failed;
+		return false;
+	}
+
+	Request->CancelRequest();
+	TaskState = EAccelByteTaskState::Cancelled;
+	return FAccelByteTask::Cancel();
+}
+
+void FHttpRetryTask::Tick(double CurrentTime)
+{
+	if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
+	{
+		return;
+	}
+
+	EAccelByteTaskState NextState = TaskState;
+	
+	if (!Request.IsValid())
+	{
+		NextState = EAccelByteTaskState::Failed;
+		return;
+	}
+
+	TaskTime = CurrentTime;
+
+	if (ScheduledRetry)
+	{
+		if (TaskTime >= NextRetryTime)
+		{
+			NextState = Retry();
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	switch (Request->GetStatus())
+	{
+	case EHttpRequestStatus::Processing:
+		if (TaskTime >= RequestTime + FHttpRetryScheduler::TotalTimeout)
+		{
+			Cancel();
+		}
+		break;
+	case EHttpRequestStatus::Succeeded: //got response
+		switch (Request->GetResponse()->GetResponseCode())
+		{
+		case EHttpResponseCodes::ServerError:
+		case EHttpResponseCodes::BadGateway:
+		case EHttpResponseCodes::ServiceUnavail:
+		case EHttpResponseCodes::GatewayTimeout:
+			if (TaskTime < RequestTime + FHttpRetryScheduler::TotalTimeout)
+			{
+				NextState = ScheduleNextRetry();
+			}
+			else
+			{
+				NextState = EAccelByteTaskState::Completed;
+			}
+			break;
+		default:
+			NextState = EAccelByteTaskState::Completed;
+			break;
+		}
+		break;
+	case EHttpRequestStatus::Failed_ConnectionError: //network error
+		if (TaskTime < RequestTime + FHttpRetryScheduler::TotalTimeout)
+		{
+			NextState = ScheduleNextRetry();
+		}
+	case EHttpRequestStatus::NotStarted:
+		if (TaskTime >= RequestTime + FHttpRetryScheduler::TotalTimeout)
+		{
+			NextState = EAccelByteTaskState::Completed;
+		}
+		break;
+	case EHttpRequestStatus::Failed: //request cancelled
+		NextState = EAccelByteTaskState::Completed;
+	default:
+		break;
+	}
+
+	TaskState = NextState;
+}
+
+bool FHttpRetryTask::Finish()
+{
+	if (TaskState == EAccelByteTaskState::Running)
+	{
+		Cancel();
+	}
+
+	if (TaskState == EAccelByteTaskState::Completed)
+	{
+		FReport::LogHttpResponse(Request, Request->GetResponse());
+		CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), IsFinished());
+	}
+	return FAccelByteTask::Finish();
+}
+
+EAccelByteTaskState FHttpRetryTask::Retry()
+{
+	ScheduledRetry = false;
+	if (Start())
+	{
+		FReport::LogHttpRequest(Request);
+	}
+	return TaskState;
+}
+
+EAccelByteTaskState FHttpRetryTask::ScheduleNextRetry()
+{
+	NextDelay *= 2;
+	NextDelay += FMath::RandRange(-NextDelay, NextDelay) / 4;
+
+	if (NextDelay > FHttpRetryScheduler::MaximumDelay)
+	{
+		NextDelay = FHttpRetryScheduler::MaximumDelay;
+	}
+
+	NextRetryTime = TaskTime + NextDelay;
+
+	if (NextRetryTime > RequestTime + FHttpRetryScheduler::TotalTimeout)
+	{
+		NextRetryTime = RequestTime + FHttpRetryScheduler::TotalTimeout;
+	}
+
+	ScheduledRetry = true;
+	return EAccelByteTaskState::Pending;
+}
+
+bool FHttpRetryTask::IsFinished()
+{
+	return Request->GetStatus() == EHttpRequestStatus::Failed ||
+		Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError ||
+		Request->GetStatus() == EHttpRequestStatus::Succeeded;
+}
+
+FAccelByteTaskRef FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
+{
+	FAccelByteTaskPtr Task(nullptr);
 	if (State == EHttpRetrySchedulerState::SHUTTING_DOWN)
 	{
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is SHUTTING DOWN"));
-		return false;
+		return Task.ToSharedRef();
 	}
 	if (State == EHttpRetrySchedulerState::UNINITIALIZED)
 	{
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is UNINITIALIZED"));
-		return false;
+		return Task.ToSharedRef();
 	}
-
 
 	FReport::LogHttpRequest(Request);
-	bool bIsStarted = Request->ProcessRequest();
+	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>(Request, CompleteDelegate, RequestTime, InitialDelay);
+	Task->Start();
 
-	RetryList.Add(MakeShared<FHttpRetryTask>(Request, CompleteDelegate, RequestTime, InitialDelay));
+	TaskQueue.Enqueue(Task);
 
-	return bIsStarted;
+	return Task.ToSharedRef();
 }
 
-bool FHttpRetryScheduler::PollRetry(double CurrentTime)
+bool FHttpRetryScheduler::PollRetry(double Time)
 {
-	if (RetryList.Num() == 0)
+	if (TaskQueue.IsEmpty())
 	{
 		return false;
 	}
 
-	TArray<TSharedRef<FHttpRetryTask>> CompletedTasks;
-
-	RetryList.RemoveAll([CurrentTime, &CompletedTasks](const TSharedRef<FHttpRetryTask>& CurrentTask)
+	TArray<FAccelByteTaskPtr> CompletedTasks;
+	bool Loop = true;
+	do
 	{
-		if (!CurrentTask->Request.IsValid())
+		FAccelByteTaskPtr *TaskPtr = TaskQueue.Peek();
+		if (TaskPtr != nullptr)
 		{
-			return true;
-		}
-
-		if (CurrentTask->ScheduledRetry)
-		{
-			if (CurrentTime >= CurrentTask->NextRetryTime)
+			FAccelByteTaskPtr Task = *TaskPtr;
+			if (Task->Time() < Time)
 			{
-				CurrentTask->ScheduledRetry = false;
-				FReport::LogHttpRequest(CurrentTask->Request);
-				CurrentTask->Request->ProcessRequest();
+				TaskQueue.Pop();
+
+				bool WillBeRemoved = false;
+				Task->Tick(Time);
+
+				switch (Task->State())
+				{
+				case EAccelByteTaskState::Completed:
+				case EAccelByteTaskState::Cancelled:
+					CompletedTasks.Add(Task);
+				case EAccelByteTaskState::Failed:
+					WillBeRemoved = true;
+					break;
+				default:
+					break;
+				}
+
+				if (!WillBeRemoved)
+				{
+					TaskQueue.Enqueue(Task);
+				}
 			}
 			else
 			{
-				return false;
+				Loop = false;
 			}
 		}
-
-		switch (CurrentTask->Request->GetStatus())
+		else
 		{
-		case EHttpRequestStatus::Processing:
-			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
-			{
-				CurrentTask->Request->CancelRequest();
-			}
-
-			return false;
-		case EHttpRequestStatus::Succeeded: //got response
-			switch (CurrentTask->Request->GetResponse()->GetResponseCode())
-			{
-			case EHttpResponseCodes::ServerError:
-			case EHttpResponseCodes::BadGateway:
-			case EHttpResponseCodes::ServiceUnavail:
-			case EHttpResponseCodes::GatewayTimeout:
-				if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
-				{
-					CompletedTasks.Add(CurrentTask);
-					return true;
-				}
-
-				CurrentTask->ScheduleNextRetry(CurrentTime);
-
-				return false;
-			case EHttpResponseCodes::Forbidden:
-				CompletedTasks.Add(CurrentTask);
-
-				return true;
-			default:
-				CompletedTasks.Add(CurrentTask);
-
-				return true;
-			}
-		case EHttpRequestStatus::NotStarted:
-			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
-			{
-				CompletedTasks.Add(CurrentTask);
-				return true;
-			}
-
-			return false;
-		case EHttpRequestStatus::Failed_ConnectionError: //network error
-			if (CurrentTime >= CurrentTask->RequestTime + FHttpRetryScheduler::TotalTimeout)
-			{
-				CompletedTasks.Add(CurrentTask);
-				return true;
-			}
-
-			CurrentTask->ScheduleNextRetry(CurrentTime);
-
-			return false;
-		case EHttpRequestStatus::Failed: //request cancelled
-			CompletedTasks.Add(CurrentTask);
-
-			return true;
-		default:
-			return false;
+			Loop = false;
 		}
-	});
+	} while (Loop);
 
-	for (const auto& Task : CompletedTasks)
+	for (auto& Task : CompletedTasks)
 	{
-		const FHttpRequestPtr& Request = Task->Request;
-		FReport::LogHttpResponse(Request, Request->GetResponse());
-		Task->CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), HttpRequest::IsFinished(Request));
+		Task->Finish();
 	}
 
 	return true;
@@ -188,7 +323,7 @@ void FHttpRetryScheduler::Shutdown()
 	}
 
 	// flush http requests
-	if (RetryList.Num() != 0)
+	if (!TaskQueue.IsEmpty())
 	{
 		double MaxFlushTimeSeconds = -1.0;
 		GConfig->GetDouble(TEXT("HTTP"), TEXT("MaxFlushTimeSeconds"), MaxFlushTimeSeconds, GEngineIni);
@@ -203,36 +338,8 @@ void FHttpRetryScheduler::Shutdown()
 		FHttpModule::Get().GetHttpManager().Tick(0);
 
 		// cancel unfinished http requests, so don't hinder the shutdown
-		for (auto& Task : RetryList)
-		{
-			if (Task->Request.IsValid() && Task->Request->GetStatus() == EHttpRequestStatus::Processing)
-			{
-				Task->Request->CancelRequest();
-			}
-		}
-		RetryList.Empty();
+		TaskQueue.Empty();
 	};
-}
-
-void FHttpRetryScheduler::FHttpRetryTask::ScheduleNextRetry(double CurrentTime)
-{
-	NextDelay *= 2;
-	NextDelay += FMath::RandRange(-NextDelay, NextDelay) / 4;
-
-	if (NextDelay > FHttpRetryScheduler::MaximumDelay)
-	{
-		NextDelay = FHttpRetryScheduler::MaximumDelay;
-	}
-
-	NextRetryTime = CurrentTime + NextDelay;
-
-	if (NextRetryTime > RequestTime + FHttpRetryScheduler::TotalTimeout)
-	{
-		NextRetryTime = RequestTime + FHttpRetryScheduler::TotalTimeout;
-	}
-
-	ScheduledRetry = true;
-
 }
 
 }

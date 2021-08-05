@@ -32,7 +32,7 @@ void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId, const FStrin
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
-	Request->SetURL(FString::Printf(TEXT("%s/v3/oauth/token"), *FRegistry::Settings.IamServerUrl));
+	Request->SetURL(FString::Printf(TEXT("%s/oauth/token"), *FRegistry::Settings.IamServerUrl));
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));

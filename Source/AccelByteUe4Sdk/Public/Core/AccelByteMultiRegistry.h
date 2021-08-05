@@ -4,11 +4,14 @@
 
 #pragma once
 
-#include "AccelByteRegistry.h"
-#include "AccelByteHttpRetryScheduler.h"
-
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteCredentials.h"
+#include "Api/AccelByteUserApi.h"
+#include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteWalletApi.h"
 #include "Api/AccelByteFulfillmentApi.h"
@@ -25,7 +28,6 @@
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
-
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
