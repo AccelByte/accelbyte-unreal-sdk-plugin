@@ -29,6 +29,7 @@
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
+#include "Api/AccelByteReportingApi.h"
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 
@@ -67,6 +68,7 @@ public:
 	Api::SessionBrowser SessionBrowser{Credentials, FRegistry::Settings, Http};
 	Api::UGC UGC{Credentials, FRegistry::Settings, Http};
 	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
+	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
 };
 
 class ACCELBYTEUE4SDK_API FMultiRegistry
