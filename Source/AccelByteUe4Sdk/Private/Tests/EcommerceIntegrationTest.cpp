@@ -2256,3 +2256,172 @@ bool FECommerceTestFulfillmentRedeemCodeAlreadyEnded::RunTest(const FString& Par
 	AB_TEST_EQUAL(ErrorCode, static_cast<int32>(ErrorCodes::CodeRedeemptionAlreadyEndedException));
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FECommerceTestServerEntitlementFulfillItem, "AccelByte.Tests.Ecommerce.Fulfillment.5.ServerEntitlementFulfillItemSuccess", AutomationFlagMaskEcommerce);
+bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Parameters)
+{
+#pragma region GetItemByCriteria
+
+	FAccelByteModelsItemCriteria ItemCriteria;
+	ItemCriteria.Language = TEXT("en");
+	ItemCriteria.Region = TEXT("US");
+	ItemCriteria.ItemType = EAccelByteItemType::INGAMEITEM;
+	bool bGetItemByCriteriaSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
+	FAccelByteModelsItemPagingSlicedResult Items;
+	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bGetItemByCriteriaSuccess = true;
+			Items = Result;
+		}), EcommerceTestErrorHandler);
+
+	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+#pragma endregion GetItemByCriteria
+
+#pragma region FulfillEntitlement
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+			bClientLoginSuccess = true;
+		}), EcommerceTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
+	FAccelByteModelsFulfillmentRequest FulfillEntitlement;
+	FulfillEntitlement.ItemId = Items.Data[0].ItemId;
+	FulfillEntitlement.OrderNo = "123456789";
+	FulfillEntitlement.Quantity = 1;
+	FulfillEntitlement.Source = EAccelByteItemSource::ACHIEVEMENT;
+	FulfillEntitlement.Region = Items.Data[0].Region;
+	FulfillEntitlement.Language = Items.Data[0].Language;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GrantingUserEntitlement"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
+
+	bool bFulfillEntitlementSuccess = false;
+	FAccelByteModelsFulfillmentResult FulfillEntitlementResult;
+	FRegistry::ServerEcommerce.FulfillUserItem(FRegistry::Credentials.GetUserId(), FulfillEntitlement, THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bFulfillEntitlementSuccess, &FulfillEntitlementResult](const FAccelByteModelsFulfillmentResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			FulfillEntitlementResult = Result;
+			bFulfillEntitlementSuccess = true;
+			for (auto Entitlement : Result.EntitlementSummaries)
+			{
+				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Id);
+			}
+		}), EcommerceTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bFulfillEntitlementSuccess, "Waiting for entitlement granted...");
+
+	AB_TEST_TRUE(bFulfillEntitlementSuccess);
+#pragma endregion FulfillEntitlement
+
+#pragma region CheckEntitlementFulfilled
+	bool bQueryEntitlementSuccess = false;
+	FAccelByteModelsEntitlementPagingSlicedResult UserEntitlement;
+	FRegistry::Entitlement.QueryUserEntitlements("", EcommerceTestExpectedVariable.LootItem.itemId, 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&bQueryEntitlementSuccess, &UserEntitlement](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			UserEntitlement = Result;
+			bQueryEntitlementSuccess = true;
+		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
+	FlushHttpRequests();
+	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+
+	bool bEntitlementFulfilled = false;
+	for (auto Entitlement : UserEntitlement.Data)
+	{
+		if (Entitlement.Id == FulfillEntitlementResult.EntitlementSummaries[0].Id)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Granted Entitlement Found!"));
+			bEntitlementFulfilled = true;
+			break;
+		}
+	}
+	AB_TEST_TRUE(bEntitlementFulfilled);
+#pragma endregion CheckEntitlementFulfilled
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FECommerceTestServerEntitlementFulfillInvalid, "AccelByte.Tests.Ecommerce.Fulfillment.5.ServerEntitlementFulfillInvalidFailed", AutomationFlagMaskEcommerce);
+bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Parameters)
+{
+
+#pragma region FulfillEntitlement
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+			bClientLoginSuccess = true;
+		}), EcommerceTestErrorHandler);
+	FlushHttpRequests();
+	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+
+	FAccelByteModelsFulfillmentRequest FulfilledEntitlement;
+	FulfilledEntitlement.ItemId = "Invalid";
+	FulfilledEntitlement.OrderNo = "123456789";
+	FulfilledEntitlement.Quantity = 1;
+	FulfilledEntitlement.Source = EAccelByteItemSource::ACHIEVEMENT;
+	FulfilledEntitlement.Region = "US";
+	FulfilledEntitlement.Language = "en";
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("FulfillingUserEntitlement"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
+
+	bool bFulfillEntitlementSuccess = false;
+	bool bFulfillEntitlementDone = false;
+	FRegistry::ServerEcommerce.FulfillUserItem(FRegistry::Credentials.GetUserId(), FulfilledEntitlement, THandler<FAccelByteModelsFulfillmentResult>::CreateLambda([&bFulfillEntitlementSuccess, &bFulfillEntitlementDone](const FAccelByteModelsFulfillmentResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bFulfillEntitlementSuccess = true;
+			bFulfillEntitlementDone = true;
+			for (auto Entitlement : Result.EntitlementSummaries)
+			{
+				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Id);
+			}
+		}), FErrorHandler::CreateLambda([&bFulfillEntitlementDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				if ((ErrorCodes)ErrorCode != ErrorCodes::ItemNotFoundException)
+				{
+					UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				}
+				else
+				{
+					UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+					bFulfillEntitlementDone = true;
+				}
+			}));
+	FlushHttpRequests();
+	Waiting(bFulfillEntitlementDone, "Waiting for entitlement Fulfilled...");
+
+	AB_TEST_TRUE(bFulfillEntitlementDone);
+	AB_TEST_FALSE(bFulfillEntitlementSuccess);
+#pragma endregion FulfillEntitlement
+
+#pragma region CheckEntitlementFulfilled
+	bool bQueryEntitlementSuccess = false;
+	FAccelByteModelsEntitlementPagingSlicedResult UserEntitlement;
+	FRegistry::Entitlement.QueryUserEntitlements("", "Invalid", 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda([&bQueryEntitlementSuccess, &UserEntitlement](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			UserEntitlement = Result;
+			bQueryEntitlementSuccess = true;
+		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
+	FlushHttpRequests();
+	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+
+	bool bEntitlementFulfilled = false;
+	for (auto Entitlement : UserEntitlement.Data)
+	{
+		if (Entitlement.ItemId == "Invalid")
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Fulfilled Entitlement Found!"));
+			bEntitlementFulfilled = true;
+			break;
+		}
+	}
+	AB_TEST_FALSE(bEntitlementFulfilled);
+#pragma endregion CheckEntitlementFulfilled
+	return true;
+}
