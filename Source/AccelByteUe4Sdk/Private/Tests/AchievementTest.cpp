@@ -164,7 +164,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		AchievementTestAchievement1.AchievementCode = TEXT("UE4AchievementCode1");
 		AchievementTestAchievement1.DefaultLanguage = TEXT("en");
 		AchievementTestAchievement1.Description.Add(TEXT("en"), TEXT("This is achievement 1 en description"));
-		AchievementTestAchievement1.GoalValue = 7;
+		AchievementTestAchievement1.GoalValue = 7.7;
 		AchievementTestAchievement1.Hidden = true;
 		AchievementTestAchievement1.Incremental = false;
 		AchievementTestAchievement1.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
@@ -182,7 +182,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		AchievementTestAchievement2.DefaultLanguage = TEXT("id");
 		AchievementTestAchievement2.Description.Add(TEXT("en"), TEXT("This is achievement 2 en description"));
 		AchievementTestAchievement2.Description.Add(TEXT("id"), TEXT("This is achievement 2 id description"));
-		AchievementTestAchievement2.GoalValue = 7;
+		AchievementTestAchievement2.GoalValue = 77.77;
 		AchievementTestAchievement2.Hidden = true;
 		AchievementTestAchievement2.Incremental = false;
 		AchievementTestAchievement2.LockedIcons.Add({ TEXT("This is locked icon 1 url"), TEXT("This is locked icon 1 slug") });
@@ -200,7 +200,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		AchievementTestAchievementIncrementalClient.AchievementCode = TEXT("UE4AchievementCode4");
 		AchievementTestAchievementIncrementalClient.DefaultLanguage = TEXT("en");
 		AchievementTestAchievementIncrementalClient.Description.Add(TEXT("en"), TEXT("This is achievement 4 en description"));
-		AchievementTestAchievementIncrementalClient.GoalValue = 100;
+		AchievementTestAchievementIncrementalClient.GoalValue = 100.001;
 		AchievementTestAchievementIncrementalClient.Hidden = true;
 		AchievementTestAchievementIncrementalClient.Incremental = true;
 		AchievementTestAchievementIncrementalClient.LockedIcons.Add({ TEXT("This is locked icon 4 url"), TEXT("This is locked icon 4 slug") });
@@ -214,7 +214,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		AchievementTestAchievementIncrementalServer.AchievementCode = TEXT("UE4AchievementCode3");
 		AchievementTestAchievementIncrementalServer.DefaultLanguage = TEXT("en");
 		AchievementTestAchievementIncrementalServer.Description.Add(TEXT("en"), TEXT("This is achievement 3 en description"));
-		AchievementTestAchievementIncrementalServer.GoalValue = 100;
+		AchievementTestAchievementIncrementalServer.GoalValue = 500.005;
 		AchievementTestAchievementIncrementalServer.Hidden = true;
 		AchievementTestAchievementIncrementalServer.Incremental = true;
 		AchievementTestAchievementIncrementalServer.LockedIcons.Add({ TEXT("This is locked icon 3 url"), TEXT("This is locked icon 3 slug") });
@@ -290,13 +290,13 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 				bDeleteAchievementDone = true;
 			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
 				{
-					UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not eelete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+					UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not delete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 					bDeleteAchievementDone = true;
 				}));
 		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
-		Achievement_Create(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
+		Achievement_Create(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse Achievement)
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
 				bCreateAchievementSuccess = true;
@@ -729,7 +729,9 @@ bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const
 	bool bIncrementalAchievementUnlocked = false;
 	for (auto userAchievement : paginatedAchievements.Data)
 	{
-		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode)
+		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode
+			&& userAchievement.LatestValue == currentAchievementRequest.GoalValue
+			&& userAchievement.Name[TEXT("en")] == currentAchievementRequest.Name[TEXT("en")])
 		{
 			bIncrementalAchievementUnlocked = true;
 		}
@@ -774,7 +776,7 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 	TArray<FAccelByteModelsBulkStatItemOperationResult> IncrementResult;
 	FRegistry::ServerStatistic.IncrementUserStatItems(
 		FRegistry::Credentials.GetUserId(),
-		{ { static_cast<float>(currentAchievementRequest.GoalValue), currentStatCode } },
+		{ { currentAchievementRequest.GoalValue, currentStatCode } },
 		THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 			{
 				bIncrementStatDone = true;
@@ -792,7 +794,9 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 	bool bIncrementalAchievementUnlocked = false;
 	for (auto userAchievement : paginatedAchievements.Data)
 	{
-		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode)
+		if (userAchievement.AchievementCode == currentAchievementRequest.AchievementCode
+			&& userAchievement.LatestValue == currentAchievementRequest.GoalValue
+			&& userAchievement.Name[TEXT("en")] == currentAchievementRequest.Name[TEXT("en")])
 		{
 			bIncrementalAchievementUnlocked = true;
 		}
