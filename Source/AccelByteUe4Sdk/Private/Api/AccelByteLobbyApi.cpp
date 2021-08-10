@@ -485,7 +485,7 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 				partyAttributeSerialized.Append(", ");
 			}
 		}
-		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}"), *partyAttributeSerialized));
+		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
 	}
 
 	if (TempPartyUserIds.Num() > 0)

@@ -4279,6 +4279,87 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingAllParams_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartAllParameters", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmakingAllParams_ReturnOk::RunTest(const FString& Parameters)
+{
+	// Arrange, create matchmaking channels
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 2;
+	AllianceRule.max_number = 2;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 1;
+
+	FMatchingRule MmrRule;
+	MmrRule.attribute = "mmr";
+	MmrRule.criteria = "distance";
+	MmrRule.reference = 10;
+	TArray<FMatchingRule> MatchingRules;
+	MatchingRules.Add(MmrRule);
+
+	bool bCreateMatchmakingChannelSuccess = false;
+	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, MatchingRules,
+		FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	WaitUntil([&]()
+	{
+		return bCreateMatchmakingChannelSuccess;
+	}, 60, "Create Matchmaking channel...");
+
+	// Arrange, set party attribute to be passed to start matchmaking function
+	const TMap<FString, FString> partyAttribute ({{"map", "ffarena"}, {"difficulty", "hard"}});
+
+	// Arrange Lobby delegates
+	LobbyConnect(1);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	// Arrange, make sure lobby not in party.
+	Lobbies[0]->SendLeavePartyRequest();
+	Waiting(bLeavePartySuccess, "waiting 0 leave party");
+
+	// Arrange, lobby set session attribute
+	bool bSetSessionAttributeFinish = false;
+	bool bSetSessionAttributeError = false;
+	Lobbies[0]->SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&bSetSessionAttributeFinish, &bSetSessionAttributeError](const FAccelByteModelsSetSessionAttributesResponse& result)
+	{
+		if (result.Code == "0")
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("SetSessionAttribute success!"));
+			bSetSessionAttributeFinish = true;
+		}
+		else
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("SetSessionAttribute failed error code %s !"), *result.Code);
+			bSetSessionAttributeError = true;
+		}
+	}));
+
+	Lobbies[0]->SetSessionAttribute("mmr", "120");
+	Waiting(bSetSessionAttributeFinish, "Waiting set session attribute");
+
+	// Arrange, extra attribute to be passed to start matchmaking function
+	TArray<FString> ExtraAttributes = { "mmr" };
+
+	// ACT
+	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies, partyAttribute, TArray<FString>({UserIds[0]}), ExtraAttributes);
+	Waiting(bStartMatchmakingSuccess, "Starting Matchmaking...");
+
+	// Asserts
+	AB_TEST_FALSE(bStartMatchmakingError);
+
+	LobbyDisconnect(1);
+	ResetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_Timeout, "AccelByte.Tests.Lobby.B.MatchmakingStartTimeout", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 {
