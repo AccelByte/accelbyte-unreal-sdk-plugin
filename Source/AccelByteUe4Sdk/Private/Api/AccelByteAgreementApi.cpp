@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteAgreementApi.h"
-#include "Modules/ModuleManager.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -14,19 +13,25 @@ namespace AccelByte
 {
 namespace Api
 {
-
-Agreement::Agreement(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
+Agreement::Agreement(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef(CredentialsRef),
+	SettingsRef(SettingsRef)
 {}
 
 Agreement::~Agreement()
 {}
 
-void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError)
+void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError)
 {
-	GetLegalPolicies(*Settings.Namespace, AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
+	GetLegalPolicies(*SettingsRef.Namespace, AgreementPolicyType, DefaultOnEmpty, OnSuccess, OnError);
 }
 
-void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgreementPolicyType& AgreementPolicyType, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError)
+void Agreement::GetLegalPolicies(FString const& Namespace, EAccelByteAgreementPolicyType const& AgreementPolicyType, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -46,9 +51,9 @@ void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgree
 		break;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&defaultOnEmpty=%s"),
-		*Settings.AgreementServerUrl,
+		*SettingsRef.AgreementServerUrl,
 		*Namespace,
 		*AgreementPolicyTypeString,
 		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
@@ -63,10 +68,10 @@ void Agreement::GetLegalPolicies(const FString& Namespace, const EAccelByteAgree
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags, bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::GetLegalPolicies(EAccelByteAgreementPolicyType const& AgreementPolicyType, TArray<FString> const& Tags, bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -92,10 +97,10 @@ void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementP
 		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/namespaces/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
-		*Settings.AgreementServerUrl, 
-		*Settings.Namespace, 
+		*SettingsRef.AgreementServerUrl, 
+		*SettingsRef.Namespace, 
 		*AgreementPolicyTypeString,
 		*TagsString,
 		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
@@ -110,10 +115,10 @@ void Agreement::GetLegalPolicies(const EAccelByteAgreementPolicyType& AgreementP
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode, EAccelByteAgreementPolicyType const& AgreementPolicyType,  bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -133,9 +138,9 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 		break;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&defaultOnEmpty=%s"), 
-		*Settings.AgreementServerUrl, 
+		*SettingsRef.AgreementServerUrl, 
 		*CountryCode,
 		*AgreementPolicyTypeString,
 		DefaultOnEmpty ? TEXT("true") : TEXT("false"));
@@ -150,10 +155,10 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAccelByteAgreementPolicyType& AgreementPolicyType, const TArray<FString>& Tags,  bool DefaultOnEmpty, const THandler<TArray<FAccelByteModelsPublicPolicy>>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::GetLegalPoliciesByCountry(FString const& CountryCode, EAccelByteAgreementPolicyType const& AgreementPolicyType, TArray<FString> const& Tags,  bool DefaultOnEmpty, THandler<TArray<FAccelByteModelsPublicPolicy>> const& OnSuccess, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -179,9 +184,9 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 		TagsString.Append((i == 0) ? TEXT(""): TEXT(",")).Append(Tags[i]);
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/policies/countries/%s?policyType=%s&tags=%s&defaultOnEmpty=%s"), 
-		*Settings.AgreementServerUrl, 
+		*SettingsRef.AgreementServerUrl, 
 		*CountryCode,
 		*AgreementPolicyTypeString,
 		*TagsString,
@@ -197,15 +202,15 @@ void Agreement::GetLegalPoliciesByCountry(const FString& CountryCode, const EAcc
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgreementRequest>& AgreementRequests, const THandler<FAccelByteModelsAcceptAgreementResponse>& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::BulkAcceptPolicyVersions(TArray<FAccelByteModelsAcceptAgreementRequest> const& AgreementRequests, THandler<FAccelByteModelsAcceptAgreementResponse> const& OnSuccess, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/agreements/policies"), *Settings.AgreementServerUrl);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/agreements/policies"), *SettingsRef.AgreementServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -221,15 +226,15 @@ void Agreement::BulkAcceptPolicyVersions(const TArray<FAccelByteModelsAcceptAgre
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError) 
+void Agreement::AcceptPolicyVersion(FString const& LocalizedPolicyVersionId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError) 
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/agreements/localized-policy-versions/%s"), *Settings.AgreementServerUrl, *LocalizedPolicyVersionId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/agreements/localized-policy-versions/%s"), *SettingsRef.AgreementServerUrl, *LocalizedPolicyVersionId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -241,15 +246,15 @@ void Agreement::AcceptPolicyVersion(const FString& LocalizedPolicyVersionId, con
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::QueryLegalEligibilities(const FString& Namespace, const THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>& OnSuccess, const FErrorHandler& OnError)
+void Agreement::QueryLegalEligibilities(FString const& Namespace, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/eligibilities/namespaces/%s"), *Settings.AgreementServerUrl, *Namespace);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/eligibilities/namespaces/%s"), *SettingsRef.AgreementServerUrl, *Namespace);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -261,10 +266,10 @@ void Agreement::QueryLegalEligibilities(const FString& Namespace, const THandler
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Agreement::GetLegalDocument(const FString & Url, const THandler<FString>& OnSuccess, const FErrorHandler & OnError)
+void Agreement::GetLegalDocument(FString const& Url, THandler<FString> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -272,7 +277,7 @@ void Agreement::GetLegalDocument(const FString & Url, const THandler<FString>& O
 	Request->SetURL(Url);
 	Request->SetVerb("GET");
 	Request->SetHeader(TEXT("Accept"), "*/*");
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

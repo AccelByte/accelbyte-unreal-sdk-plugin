@@ -344,6 +344,108 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginFailedTest, "AccelByte.Tests.AUser.LoginEmail_Invalid", AutomationFlagMaskUser);
+bool FUserLoginFailedTest::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginSuccessful = false;
+	bool bLoginDone = false;
+	int32 ErrorCode;
+	FString ErrorMessage;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername("", "", FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bLoginSuccessful = true;
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+				ErrorCode = Code;
+				ErrorMessage = Message;
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	Waiting(bLoginDone, "Waiting for Login...");
+
+	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
+
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_FALSE(ErrorMessage != DefaultMessage);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginSteamFailedTest, "AccelByte.Tests.AUser.LoginSteam_Invalid", AutomationFlagMaskUser);
+bool FUserLoginSteamFailedTest::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginSuccessful = false;
+	bool bLoginDone = false;
+	int32 ErrorCode;
+	FString ErrorMessage;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, "Invalid", FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bLoginSuccessful = true;
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+				ErrorCode = Code;
+				ErrorMessage = Message;
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	Waiting(bLoginDone, "Waiting for Login...");
+
+	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
+
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_FALSE(ErrorMessage != DefaultMessage);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserLoginEmailFailedNoContentTest, "AccelByte.Tests.AUser.LoginEmail_InvalidNoContent", AutomationFlagMaskUser);
+bool FUserLoginEmailFailedNoContentTest::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginSuccessful = false;
+	bool bLoginDone = false;
+	int32 ErrorCode;
+	FString ErrorMessage;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername("Invalid", "Invalid", FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bLoginSuccessful = true;
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+				ErrorCode = Code;
+				ErrorMessage = Message;
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	Waiting(bLoginDone, "Waiting for Login...");
+
+	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
+
+	AB_TEST_FALSE(bLoginSuccessful);
+	AB_TEST_TRUE(bLoginDone);
+	AB_TEST_TRUE(ErrorMessage == DefaultMessage);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserResetPasswordTest, "AccelByte.Tests.AUser.RegisterEmail_ThenResetPassword", AutomationFlagMaskUser);
 bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 {
@@ -1879,7 +1981,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
 		FAccelByteModelsUserProfileInfo UserProfileInfo;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
 			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
 				{
@@ -1904,7 +2006,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 		bool bIsDone = false;
 		bool bIsOk = false;
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings);
+		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
 			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
 				{

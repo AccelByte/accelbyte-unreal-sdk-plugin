@@ -2,14 +2,15 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Misc/AutomationTest.h"
 #include "TestUtilities.h"
 #include "UGCTestAdmin.h"
-#include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUGCApi.h"
+#include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteUtilities.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "Misc/AutomationTest.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUGCTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUGCTest);

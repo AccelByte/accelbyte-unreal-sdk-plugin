@@ -8,6 +8,7 @@
 #include "CoreMinimal.h"
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSeasonPassModels.h"
 
 
@@ -25,11 +26,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API SeasonPass
 		{
 		public:
-			SeasonPass(const Credentials& Credentials, const Settings& Settings);
+			SeasonPass(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 			~SeasonPass();
 		private:
-			const Credentials& Credentials;
-			const Settings& Settings;
+			FHttpRetryScheduler& HttpRef;
+			Credentials const& CredentialsRef;
+			Settings const& SettingsRef;
 		public:
 			/** @brief Get current active season.
 			 *
@@ -37,7 +39,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonInfo.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void GetCurrentSeason(const FString& Language, const THandler<FAccelByteModelsSeasonInfo>& OnSuccess, const FErrorHandler& OnError);
+			void GetCurrentSeason(FString const& Language, THandler<FAccelByteModelsSeasonInfo> const& OnSuccess, FErrorHandler const& OnError);
 			
 			/** @brief Get user season data by SeasonId
 			*
@@ -45,14 +47,14 @@ namespace AccelByte
 			* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void GetUserSeason(const FString& SeasonId, const THandler<FAccelByteModelsUserSeasonInfo>& OnSuccess, const FErrorHandler& OnError);
+			void GetUserSeason(FString const& SeasonId, THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess, FErrorHandler const& OnError);
 			
 			/** @brief Get current active user season data.
 			*
 			* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUserSeasonInfo.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void GetCurrentUserSeason(const THandler<FAccelByteModelsUserSeasonInfo>& OnSuccess, const FErrorHandler& OnError);
+			void GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo> const& OnSuccess, FErrorHandler const& OnError);
 			
 			/** @brief Claim Season Rewards.
 			*
@@ -60,14 +62,14 @@ namespace AccelByte
 			* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonClaimRewardResponse.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void ClaimRewards(const FAccelByteModelsSeasonClaimRewardRequest& RewardRequest, const THandler<FAccelByteModelsSeasonClaimRewardResponse>& OnSuccess, const FErrorHandler& OnError);
+			void ClaimRewards(FAccelByteModelsSeasonClaimRewardRequest const& RewardRequest, THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess, FErrorHandler const& OnError);
 			
 			/** @brief Bulk claim season rewards.
 			*
 			* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSeasonClaimRewardResponse.
 			* @param OnError This will be called when the operation failed.
 			*/
-			void BulkClaimRewards(const THandler<FAccelByteModelsSeasonClaimRewardResponse>& OnSuccess, const FErrorHandler& OnError);
+			void BulkClaimRewards(THandler<FAccelByteModelsSeasonClaimRewardResponse> const& OnSuccess, FErrorHandler const& OnError);
 
 		private:
 			/** @brief Utility to convert Claim Reward Json Object to TMap<int32, TMap<FString, TArray<FString>>>
@@ -75,10 +77,10 @@ namespace AccelByte
 			 * @param JsonObject Input of JsonObject to be converted
 			 * @return TMap<FString, TArray<FString>> TMap as Passes Rewards (Key as Pass Code, Value as Array of Reward Codes)
 			 */
-			TMap<FString, TArray<FString>> FJsonObjectToPassRewards(TSharedPtr<FJsonObject> JsonObject);
+			static TMap<FString, TArray<FString>> FJsonObjectToPassRewards(TSharedPtr<FJsonObject> JsonObject);
 
 			SeasonPass() = delete;
-			SeasonPass(const SeasonPass&) = delete;
+			SeasonPass(SeasonPass const&) = delete;
 			SeasonPass(SeasonPass&&) = delete;
 		};
 	};

@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
+#include "JsonObjectWrapper.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
@@ -12,9 +13,10 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
-#include "LobbyTestAdmin.h"
 #include "TestUtilities.h"
-#include "JsonObjectWrapper.h"
+#include "LobbyTestAdmin.h"
+#include "MatchmakingTestAdmin.h"
+
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
@@ -786,7 +788,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		UsersLoginSuccess[i] = false;
 		bClientLoginSuccess = false;
 
-		LobbyUsers.Add(MakeShared<Api::User>(UserCreds[i], FRegistry::Settings));
+		LobbyUsers.Add(MakeShared<Api::User>(UserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 
 		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
 		Email.ToLowerInline();
@@ -836,7 +838,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		
 		Waiting(UsersLoginSuccess[i],"Waiting for Login...");
 
-		Lobbies.Add(MakeShared<Api::Lobby>(UserCreds[i], FRegistry::Settings));
+		Lobbies.Add(MakeShared<Api::Lobby>(UserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 	}
 	
 	for (int i = 0; i < TestUserCount; i++)
@@ -6003,7 +6005,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 
 	WaitUntil([&]() { return bLoginDone; });
 
-	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings };
+	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 
 	OtherLobby.Connect();
 
@@ -6061,7 +6063,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 
 	WaitUntil([&]() { return Lobby.IsConnected(); }, 5);
 
-	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings };
+	AccelByte::Api::Lobby OtherLobby{ FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler };
 
 	OtherLobby.Connect();
 

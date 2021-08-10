@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteLeaderboardModels.h"
 
 namespace AccelByte
@@ -22,11 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Leaderboard
 {
 public:
-	Leaderboard(const Credentials& Credentials, const Settings& Settings);
+	Leaderboard(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Leaderboard();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	* @brief Get leaderboard rankings in a specified timeframe.
@@ -38,7 +40,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsLeaderboardRankingResult.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetRankings(const FString& LeaderboardCode, const EAccelByteLeaderboardTimeFrame& TimeFrame, uint32 Offset, uint32 Limit, const THandler<FAccelByteModelsLeaderboardRankingResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetRankings(FString const& LeaderboardCode, EAccelByteLeaderboardTimeFrame const& TimeFrame, uint32 Offset, uint32 Limit, THandler<FAccelByteModelsLeaderboardRankingResult> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get user's ranking from leaderboard
@@ -48,7 +50,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is an FAccelByteModelsUserRankingData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserRanking(const FString& UserId, const FString& LeaderboardCode, const THandler<FAccelByteModelsUserRankingData>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserRanking(FString const& UserId, FString const& LeaderboardCode, THandler<FAccelByteModelsUserRankingData> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	Leaderboard() = delete;

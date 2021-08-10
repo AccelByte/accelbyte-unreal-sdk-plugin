@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
@@ -19,11 +20,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Item
 {
 public:
-	Item(const Credentials& Credentials, const Settings& Settings);
+	Item(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Item();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief Get one item information from an online store.
@@ -34,7 +36,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetItemById(const FString& ItemId, const FString& Language, const FString& Region, const THandler<FAccelByteModelsPopulatedItemInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetItemById(FString const& ItemId, FString const& Language, FString const& Region, THandler<FAccelByteModelsPopulatedItemInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get one item information from an online store.
@@ -45,7 +47,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsPopulatedItemInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	 void GetItemByAppId(const FString & AppId, const FString & Language, const FString & Region, const THandler<FAccelByteModelsItemInfo>& OnSuccess, const FErrorHandler & OnError);
+	 void GetItemByAppId(FString const& AppId, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get an array of items with specific criteria/filter from online store.
@@ -56,7 +58,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetItemsByCriteria(const FAccelByteModelsItemCriteria& ItemCriteria, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void GetItemsByCriteria(FAccelByteModelsItemCriteria const& ItemCriteria, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Search items by keyword in title, description and long description from published store. Language constrained. If item does not exist in the specified region, default region item will be returned.
@@ -69,7 +71,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemPagingSlicedResult&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SearchItem(const FString& Language, const FString& Keyword, const int32& Offset, const int32& Limit, const FString& Region, const THandler<FAccelByteModelsItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
+	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	Item() = delete;

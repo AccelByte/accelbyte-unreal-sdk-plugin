@@ -305,5 +305,27 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 	Request->SetContentAsString(Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(FulfillmentRequest, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 } // Namespace GameServerApi
 } // Namespace AccelByte

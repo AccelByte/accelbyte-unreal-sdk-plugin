@@ -143,6 +143,15 @@ public:
 	*/
 	void DebitUserWallet(const FString& UserId, const FString& WalletId, const FAccelByteModelsDebitUserWalletRequest& DebitUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief FulFill item to a user.
+	 *
+	 * @param UserId The user who will receive credit.
+	 * @param FulfillmentRequest The request to fulfill an item to user.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsFulfillmentResult&.
+	 * @param OnError This will be called when the operation fails.
+	 */
+	void FulfillUserItem(const FString& UserId, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess, const FErrorHandler& OnError);
 
 private:
 	const ServerCredentials& Credentials;

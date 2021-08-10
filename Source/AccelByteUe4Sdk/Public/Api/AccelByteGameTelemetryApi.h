@@ -9,6 +9,7 @@
 #include "Containers/Queue.h"
 #include "Containers/Set.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteGameTelemetryModels.h"
 
 namespace AccelByte
@@ -24,7 +25,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameTelemetry
 {
 public:
-	GameTelemetry(const Credentials& Credentials, const Settings& Settings);
+	GameTelemetry(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~GameTelemetry();
 
 	/**
@@ -41,7 +42,7 @@ public:
 	 *
 	 * @param EventNames FString Array of payload EventName.
 	 */
-	void SetImmediateEventList(const TArray<FString>& EventNames);
+	void SetImmediateEventList(TArray<FString> const& EventNames);
 
 	/**
 	 * @brief Send/enqueue a single authorized telemetry data.
@@ -51,7 +52,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Startup module
@@ -64,21 +65,22 @@ public:
 	void Shutdown();
 
 private:
-	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	bool PeriodicTelemetry(float DeltaTime);
 
 	GameTelemetry() = delete;
 	GameTelemetry(GameTelemetry const&) = delete;
 	GameTelemetry(GameTelemetry&&) = delete;
 
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& Credentials;
+	Settings const& Settings;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;
 	TQueue<TTuple<FAccelByteModelsTelemetryBody, FVoidHandler, FErrorHandler>> JobQueue;
 	bool bTelemetryJobStarted = false;
-	const FTimespan MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
+	FTimespan const MINIMUM_INTERVAL_TELEMETRY = FTimespan(0, 0, 5);
 	FTickerDelegate GameTelemetryTickDelegate;
 	FDelegateHandle GameTelemetryTickDelegateHandle;
 

@@ -8,6 +8,7 @@
 #include "Http.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,11 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Wallet
 {
 public:
-	Wallet(const Credentials& Credentials, const Settings& Settings);
+	Wallet(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Wallet();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief Get user's wallet information for a specific currency code.
@@ -35,7 +37,7 @@ public:
 	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletInfo&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetWalletInfoByCurrencyCode(const FString& CurrencyCode, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetWalletInfoByCurrencyCode(FString const& CurrencyCode, THandler<FAccelByteModelsWalletInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	Wallet() = delete;

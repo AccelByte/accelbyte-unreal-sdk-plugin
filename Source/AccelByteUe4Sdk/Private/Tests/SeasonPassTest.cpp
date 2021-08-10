@@ -3,8 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "TestUtilities.h"
-#include "SeasonPassTestAdmin.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteOrderApi.h"
@@ -14,6 +12,9 @@
 #include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerSeasonPassApi.h"
+#include "TestUtilities.h"
+#include "EcommerceTestAdmin.h"
+#include "SeasonPassTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteSeasonPassTest, Log, All);
 

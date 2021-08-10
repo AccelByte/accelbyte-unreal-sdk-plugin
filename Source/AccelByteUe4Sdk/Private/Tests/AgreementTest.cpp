@@ -9,6 +9,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "TestUtilities.h"
+#include "AgreementTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -112,7 +113,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	FAgreementBasePolicy basePolicy;
 	for (const auto& policy : basePolicies)
 	{
-		if (policy.Namespace == FRegistry::Settings.Namespace)
+		if (policy.BasePolicyName == "SDK Test Policy" &&  policy.Namespace == FRegistry::Settings.Namespace)
 		{
 			basePolicy = policy;
 		}
@@ -159,10 +160,10 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	for (const auto& policy : basePolicy.Policies)
 	{
-		if (policy.CountryCode == AgreementTestUserInfo_.CountryCode)
+		if (policy.PolicyName == "SDK Test Policy" && policy.CountryCode == AgreementTestUserInfo_.CountryCode)
 		{
 			PolicyId = policy.Id;
-			break;
+			//break;
 		}
 	}
 
@@ -319,7 +320,7 @@ bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parame
 	bool bGetPoliciesDone = false;
 	TArray<FAccelByteModelsPublicPolicy> policies;
 	const EAccelByteAgreementPolicyType AgreementPolicyType = EAccelByteAgreementPolicyType::EMPTY;
-	const TArray<FString> Tags = TArray<FString> { TEXT("%S"), PolicyTags[0] };
+	const TArray<FString> Tags = TArray<FString> { TEXT("%s"), PolicyTags[0] };
 
 	FRegistry::Agreement.GetLegalPoliciesByCountry(AgreementTestUserInfo_.CountryCode, AgreementPolicyType, Tags, false, 
 		THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&bGetPoliciesDone, &policies](const TArray<FAccelByteModelsPublicPolicy>& Policies) {

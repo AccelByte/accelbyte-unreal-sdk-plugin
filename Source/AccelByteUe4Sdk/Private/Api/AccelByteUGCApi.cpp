@@ -14,19 +14,24 @@ namespace AccelByte
 {
 namespace Api
 {
-UGC::UGC(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings) : Credentials(Credentials), Settings(Settings)
-{
-}
-	
+
+UGC::UGC(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef) :
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
+
 UGC::~UGC(){}
 
-void UGC::CreateContent(const FString& ChannelId, const FAccelByteModelsUGCRequest& CreateRequest,
-						const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::CreateContent(
+	FString const& ChannelId,
+	FAccelByteModelsUGCRequest const& CreateRequest,
+	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId(), *ChannelId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -44,9 +49,16 @@ void UGC::CreateContent(const FString& ChannelId, const FAccelByteModelsUGCReque
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::CreateContent(const FString& ChannelId, const FString& Name, const FString& Type,
-	const FString& SubType, const TArray<FString>& Tags, const TArray<uint8>& Preview, const FString& FileExtension,
-	const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::CreateContent(
+	FString const& ChannelId,
+	FString const& Name,
+	FString const& Type,
+	FString const& SubType,
+	TArray<FString> const& Tags,
+	TArray<uint8> const& Preview,
+	FString const& FileExtension,
+	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -61,13 +73,17 @@ void UGC::CreateContent(const FString& ChannelId, const FString& Name, const FSt
 	CreateContent(ChannelId, Req, OnSuccess, OnError);
 }
 
-void UGC::ModifyContent(const FString& ChannelId, const FString& ContentId, const FAccelByteModelsUGCRequest& ModifyRequest,
-	const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::ModifyContent(
+	FString const& ChannelId,
+	FString const& ContentId,
+	FAccelByteModelsUGCRequest const& ModifyRequest,
+	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId(), *ChannelId, *ContentId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/s3/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId, *ContentId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -85,9 +101,17 @@ void UGC::ModifyContent(const FString& ChannelId, const FString& ContentId, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::ModifyContent(const FString& ChannelId, const FString& ContentId, const FString& Name,
-	const FString& Type, const FString& SubType, const TArray<FString>& Tags, const TArray<uint8>& Preview,
-	const FString& FileExtension, const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::ModifyContent(
+	FString const& ChannelId,
+	FString const& ContentId,
+	FString const& Name,
+	FString const& Type,
+	FString const& SubType,
+	TArray<FString> const& Tags,
+	TArray<uint8> const& Preview,
+	FString const& FileExtension,
+	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -102,12 +126,12 @@ void UGC::ModifyContent(const FString& ChannelId, const FString& ContentId, cons
 	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
 }
 
-void UGC::DeleteContent(const FString& ChannelId, const FString& ContentId,	const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void UGC::DeleteContent(FString const& ChannelId, FString const& ContentId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId(), *ChannelId, *ContentId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s/contents/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId, *ContentId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -124,8 +148,10 @@ void UGC::DeleteContent(const FString& ChannelId, const FString& ContentId,	cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::GetContentByContentId(const FString& ContentId,
-								const THandler<FAccelByteModelsUGCContentResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::GetContentByContentId(
+	FString const& ContentId,
+	THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -135,8 +161,8 @@ void UGC::GetContentByContentId(const FString& ContentId,
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *ContentId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -153,13 +179,15 @@ void UGC::GetContentByContentId(const FString& ContentId,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::GetContentByShareCode(const FString& ShareCode,
-	const THandler<FAccelByteModelsUGCContentResponse>& OnSuccess, const FErrorHandler& OnError)
+void UGC::GetContentByShareCode(
+	FString const& ShareCode,
+	THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *ShareCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/sharecodes/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ShareCode);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -176,12 +204,12 @@ void UGC::GetContentByShareCode(const FString& ShareCode,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::GetContentPreview(const FString& ContentId, const THandler<FAccelByteModelsUGCPreview>& OnSuccess, const FErrorHandler& OnError)
+void UGC::GetContentPreview(FString const& ContentId, THandler<FAccelByteModelsUGCPreview> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview"), *Settings.UGCServerUrl, *Settings.Namespace, *ContentId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/contents/%s/preview"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *ContentId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -198,10 +226,12 @@ void UGC::GetContentPreview(const FString& ContentId, const THandler<FAccelByteM
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());	
 }
 
-void UGC::GetContentPreview(const FString& ContentId, const THandler<TArray<uint8>>& OnSuccess,
-	const FErrorHandler& OnError)
+void UGC::GetContentPreview(
+	FString const& ContentId,
+	THandler<TArray<uint8>> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
-	GetContentPreview(ContentId, THandler<FAccelByteModelsUGCPreview>::CreateLambda([OnSuccess](const FAccelByteModelsUGCPreview& Response)
+	GetContentPreview(ContentId, THandler<FAccelByteModelsUGCPreview>::CreateLambda([OnSuccess](FAccelByteModelsUGCPreview const& Response)
 	{
 		TArray<uint8> Bytes;
 		if(FBase64::Decode(Response.Preview, Bytes))
@@ -211,12 +241,12 @@ void UGC::GetContentPreview(const FString& ContentId, const THandler<TArray<uint
 	}), OnError);
 }
 
-void UGC::GetTags(const THandler<FAccelByteModelsUGCTagsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit, int32 Offset)
+void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags?limit=%d&offset=%d"), *Settings.UGCServerUrl, *Settings.Namespace, Limit, Offset);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/tags?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, Limit, Offset);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -233,12 +263,12 @@ void UGC::GetTags(const THandler<FAccelByteModelsUGCTagsPagingResponse>& OnSucce
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::GetTypes(const THandler<FAccelByteModelsUGCTypesPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit, int32 Offset)
+void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types?limit=%d&offset=%d"), *Settings.UGCServerUrl, *Settings.Namespace, Limit, Offset);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/types?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, Limit, Offset);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -255,13 +285,15 @@ void UGC::GetTypes(const THandler<FAccelByteModelsUGCTypesPagingResponse>& OnSuc
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::CreateChannel(const FString& ChannelName, const THandler<FAccelByteModelsUGCChannelResponse>& OnSuccess,
-	const FErrorHandler& OnError)
+void UGC::CreateChannel(
+	FString const& ChannelName,
+	THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess,
+	FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -278,12 +310,12 @@ void UGC::CreateChannel(const FString& ChannelName, const THandler<FAccelByteMod
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::GetChannels(const THandler<FAccelByteModelsUGCChannelsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit, int32 Offset)
+void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels?limit=%d&offset=%d"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId(), Limit, Offset);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels?limit=%d&offset=%d"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), Limit, Offset);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -300,12 +332,12 @@ void UGC::GetChannels(const THandler<FAccelByteModelsUGCChannelsPagingResponse>&
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGC::DeleteChannel(const FString& ChannelId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void UGC::DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s"), *Settings.UGCServerUrl, *Settings.Namespace, *Credentials.GetUserId(), *ChannelId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/channels/%s"), *SettingsRef.UGCServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId(), *ChannelId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

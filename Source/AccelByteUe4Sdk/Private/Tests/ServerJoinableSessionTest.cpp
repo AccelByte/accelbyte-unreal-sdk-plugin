@@ -14,6 +14,7 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "TestUtilities.h"
+#include "MatchmakingTestAdmin.h"
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
@@ -53,7 +54,7 @@ FAccelByteModelsMatchmakingResult DSGetMatchData;
 
 TSharedPtr<Api::Lobby> CreateLobby(Credentials Creds)
 {
-	TSharedPtr<Api::Lobby> lobby =  MakeShared<Api::Lobby>(Creds, FRegistry::Settings);
+	TSharedPtr<Api::Lobby> lobby =  MakeShared<Api::Lobby>(Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	lobby->Connect();
 	ActiveLobbies.Add(lobby);
 	return lobby;
@@ -204,7 +205,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 		UsersLoginSuccess[i] = false;
 		bClientLoginSuccess = false;
 
-		ActiveUsers.Add(MakeShared<Api::User>(ActiveUserCreds[i], FRegistry::Settings));
+		ActiveUsers.Add(MakeShared<Api::User>(ActiveUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 
 		FString Email = FString::Printf(TEXT("joinablelobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
 		Email.ToLowerInline();

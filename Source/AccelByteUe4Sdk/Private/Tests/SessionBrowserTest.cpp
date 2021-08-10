@@ -77,7 +77,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 		TestEmails[i] = FString::Printf(TEXT("%s+%d%s"), *SessionBrowserTestUserInfo_.EmailPrefix, i, *SessionBrowserTestUserInfo_.EmailSuffix);
 		TestEmails[i].ToLowerInline();
 
-		SessionBrowserUsers.Add(MakeShared<Api::User>(SessionBrowserUserCreds[i], FRegistry::Settings));
+		SessionBrowserUsers.Add(MakeShared<Api::User>(SessionBrowserUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21 + 7));
 		const FString DoB_String = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
@@ -119,7 +119,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 		//User connect to lobby
-		SessionBrowserLobbies.Add(MakeShared<Api::Lobby>(SessionBrowserUserCreds[i], FRegistry::Settings));
+		SessionBrowserLobbies.Add(MakeShared<Api::Lobby>(SessionBrowserUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 		SessionBrowserLobbies[i]->Connect();
 		while (!SessionBrowserLobbies[i]->IsConnected())
 		{
@@ -128,7 +128,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			FTicker::GetCoreTicker().Tick(.1f);
 		}
 
-		SessionBrowsers.Add(MakeShared<Api::SessionBrowser>(SessionBrowserUserCreds[i], FRegistry::Settings));
+		SessionBrowsers.Add(MakeShared<Api::SessionBrowser>(SessionBrowserUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 	}
 	TestSessionBrowserUsersID = LoginUserIDs;
 

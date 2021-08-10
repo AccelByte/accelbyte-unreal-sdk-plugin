@@ -10,6 +10,8 @@
 #include "Core/AccelByteCredentials.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
+#include "EcommerceTestAdmin.h"
+#include "SubscriptionTestAdmin.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;

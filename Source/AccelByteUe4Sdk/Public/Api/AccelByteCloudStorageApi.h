@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteCloudStorageModels.h"
 
 namespace AccelByte

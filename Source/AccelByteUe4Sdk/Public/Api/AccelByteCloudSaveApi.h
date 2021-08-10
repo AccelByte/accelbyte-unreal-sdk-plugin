@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteCloudSaveModels.h"
 
 namespace AccelByte
@@ -20,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API CloudSave
 {
 public:
-	CloudSave(const Credentials& Credentials, const Settings& Settings);
+	CloudSave(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~CloudSave();
 
 	/**
@@ -32,7 +33,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SaveUserRecord(const FString& Key, FJsonObject RecordRequest, bool IsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SaveUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a record (arbitrary JSON data) by its key in user-level.
@@ -41,7 +42,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserRecord(const FString& Key, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a public record (arbitrary JSON data) by its key and userId in user-level.
@@ -51,7 +52,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetPublicUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError);
+	void GetPublicUserRecord(FString const& Key, FString const& UserId, THandler<FAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -62,7 +63,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceUserRecord(const FString& Key, FJsonObject RecordRequest, bool IsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one, but will failed if lastUpdated is not up-to-date.
@@ -73,7 +74,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceUserRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. Beware: Function will try to get the latest value, put it in the custom modifier and request to replace the record. will retry it again when the record is updated by other user, until exhaust all the attempt.
@@ -85,7 +86,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceUserRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Delete a record under the given key in user-level.
@@ -94,7 +95,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void DeleteUserRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteUserRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Save a namespace-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
@@ -104,7 +105,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SaveGameRecord(const FString& Key, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SaveGameRecord(FString const& Key, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a record by its key in namespace-level.
@@ -113,7 +114,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGameRecord&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetGameRecord(const FString& Key, const THandler<FAccelByteModelsGameRecord>& OnSuccess, const FErrorHandler& OnError);
+	void GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameRecord> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -123,7 +124,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceGameRecord(const FString& Key, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	 /**
 	 * @brief Replace a record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one, but will failed if lastUpdated is not up-to-date.
@@ -134,7 +135,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceGameRecordCheckLatest(const FString& Key, const FDateTime LastUpdated, FJsonObject RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Replace a record in namespace-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one. Beware: Function will try to get the latest value, put it in the custom modifier and request to replace the record. will retry it again when the record is updated by other user, until exhaust all the attempt.
@@ -146,7 +147,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceGameRecordCheckLatest(int TryAttempt, const FString& Key, FJsonObject RecordRequest, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	 * @brief Delete a record under the given key in namespace-level.
@@ -155,18 +156,19 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void DeleteGameRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteGameRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& Credentials;
+	Settings const& Settings;
 
 	CloudSave() = delete;
 	CloudSave(CloudSave const&) = delete;
 	CloudSave(CloudSave&&) = delete;
 
-	void ReplaceUserRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-	void ReplaceGameRecord(int TryAttempt, const FString& Key, const FAccelByteModelsConcurrentReplaceRequest& Data, const THandlerPayloadModifier<FJsonObject, FJsonObject>& PayloadModifier, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	void ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 };
 
 } // Namespace Api

@@ -29,49 +29,46 @@
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
+#include "Api/AccelByteReportingApi.h"
 
-#include "GameServerApi/AccelByteServerOauth2Api.h"
-#include "GameServerApi/AccelByteServerDSMApi.h"
-#include "GameServerApi/AccelByteServerStatisticApi.h"
-#include "GameServerApi/AccelByteServerEcommerceApi.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
-#include "GameServerApi/AccelByteServerGameTelemetryApi.h"
-#include "GameServerApi/AccelByteServerAchievementApi.h"
-#include "GameServerApi/AccelByteServerMatchmakingApi.h"
-#include "GameServerApi/AccelByteServerLobby.h"
-#include "GameServerApi/AccelByteServerCloudSaveApi.h"
 
 using namespace AccelByte;
 
 namespace AccelByte
 {
 
-class ACCELBYTEUE4SDK_API FApiClient
+class ACCELBYTEUE4SDK_API FApiClient final
 {
 public:
-	Credentials Credentials;
-	Api::User User{ Credentials, FRegistry::Settings };
-	Api::UserProfile UserProfile{ Credentials, FRegistry::Settings };
-	Api::Category Category{ Credentials, FRegistry::Settings };
-	Api::Entitlement Entitlement{ Credentials, FRegistry::Settings };
-	Api::Order Order{ Credentials, FRegistry::Settings };
-	Api::Item Item{ Credentials, FRegistry::Settings };
-	Api::Wallet Wallet{ Credentials, FRegistry::Settings };
-	Api::Fulfillment Fulfillment{ Credentials, FRegistry::Settings };
-	Api::CloudStorage CloudStorage{ Credentials, FRegistry::Settings };
-	Api::Lobby Lobby{ Credentials, FRegistry::Settings };
-	Api::GameProfile GameProfile{ Credentials, FRegistry::Settings };
-	Api::Statistic Statistic{ Credentials, FRegistry::Settings };
-	Api::QosManager QosManager{ Credentials, FRegistry::Settings };
-	Api::Qos Qos;
-	Api::Leaderboard Leaderboard{ Credentials, FRegistry::Settings };
-	Api::CloudSave CloudSave{ Credentials, FRegistry::Settings };
-	Api::GameTelemetry GameTelemetry{ Credentials, FRegistry::Settings };
-	Api::Agreement Agreement{ Credentials, FRegistry::Settings };
-	Api::Achievement Achievement{ Credentials, FRegistry::Settings };
-	Api::SessionBrowser SessionBrowser{ Credentials, FRegistry::Settings };
-	Api::UGC UGC{ Credentials, FRegistry::Settings };
-	Api::SeasonPass SeasonPass{ Credentials, FRegistry::Settings };
+	FApiClient();
+	~FApiClient();
+
+	Credentials Credentials{};
+	FHttpRetryScheduler Http{};
+	Api::User User{Credentials, FRegistry::Settings, Http};
+	Api::UserProfile UserProfile{Credentials, FRegistry::Settings, Http};
+	Api::Category Category{Credentials, FRegistry::Settings, Http};
+	Api::Entitlement Entitlement{Credentials, FRegistry::Settings, Http};
+	Api::Order Order{Credentials, FRegistry::Settings, Http};
+	Api::Item Item{Credentials, FRegistry::Settings, Http};
+	Api::Wallet Wallet{Credentials, FRegistry::Settings, Http};
+	Api::Fulfillment Fulfillment{Credentials, FRegistry::Settings, Http};
+	Api::CloudStorage CloudStorage{Credentials, FRegistry::Settings};
+	Api::Lobby Lobby{Credentials, FRegistry::Settings, Http};
+	Api::GameProfile GameProfile{Credentials, FRegistry::Settings, Http};
+	Api::Statistic Statistic{Credentials, FRegistry::Settings, Http};
+	Api::QosManager QosManager{Credentials, FRegistry::Settings, Http};
+	Api::Qos Qos{};
+	Api::Leaderboard Leaderboard{Credentials, FRegistry::Settings, Http};
+	Api::CloudSave CloudSave{Credentials, FRegistry::Settings, Http};
+	Api::GameTelemetry GameTelemetry{Credentials, FRegistry::Settings, Http};
+	Api::Agreement Agreement{Credentials, FRegistry::Settings, Http};
+	Api::Achievement Achievement{Credentials, FRegistry::Settings, Http};
+	Api::SessionBrowser SessionBrowser{Credentials, FRegistry::Settings, Http};
+	Api::UGC UGC{Credentials, FRegistry::Settings, Http};
+	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
+	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
 };
 
 class ACCELBYTEUE4SDK_API FMultiRegistry
@@ -83,10 +80,10 @@ private:
 	static TMap<FString, TSharedPtr<FApiClient>> ApiClientInstances;
 
 	FMultiRegistry() = delete;
-	FMultiRegistry(const FMultiRegistry& other) = delete;
-	FMultiRegistry& operator=(const FMultiRegistry& other) = delete;
-	FMultiRegistry(FMultiRegistry&& other) = delete;
-	FMultiRegistry& operator=(FMultiRegistry&& other) = delete;
+	FMultiRegistry(FMultiRegistry const& Other) = delete;
+	FMultiRegistry& operator=(FMultiRegistry const& Other) = delete;
+	FMultiRegistry(FMultiRegistry&& Other) = delete;
+	FMultiRegistry& operator=(FMultiRegistry&& Other) = delete;
 	~FMultiRegistry() = delete;
 };
 

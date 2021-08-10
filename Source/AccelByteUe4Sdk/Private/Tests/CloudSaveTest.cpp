@@ -143,7 +143,7 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 	Waiting(bDeleteUserPublicRecordSuccess, "Waiting for deleting user record ...");
 
 	// user2 preps
-	User2 = MakeShared<Api::User>(User2Creds, FRegistry::Settings);
+	User2 = MakeShared<Api::User>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
 	Email.ToLowerInline();
 	FString const Password = TEXT("123Password123");
@@ -193,7 +193,7 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 
 	Waiting(bUser2LoginSuccess, "Waiting for Login...");
 
-	CloudSave2 = MakeShared<Api::CloudSave>(User2Creds, FRegistry::Settings);
+	CloudSave2 = MakeShared<Api::CloudSave>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 
 	AB_TEST_TRUE(bUserLoginSuccess);
 	AB_TEST_TRUE(bUserCreationSuccess);

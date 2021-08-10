@@ -14,6 +14,8 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
+#include "AchievementTestAdmin.h"
+#include "StatisticTestAdmin.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteQosModels.h"
 
 namespace AccelByte
@@ -22,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API QosManager
 {
 public:
-	QosManager(const Credentials& Credentials, const Settings& Settings);
+	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~QosManager();
 
 	/**
@@ -33,8 +34,9 @@ public:
 	*/
 	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 	QosManager() = delete;
 	QosManager(QosManager const&) = delete;
