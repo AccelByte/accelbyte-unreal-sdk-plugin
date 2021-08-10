@@ -4838,29 +4838,37 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
-		matchmakingNotifResponse[0] = result;
-		matchMakingNotifNum++;
-		bMatchmakingNotifSuccess[0] = true;
-		if (result.MatchId.IsEmpty())
+
+		if(result.Status == EAccelByteMatchmakingStatus::Done)
 		{
-			bMatchmakingNotifError[0] = true;
+			matchmakingNotifResponse[0] = result;
+			matchMakingNotifNum++;
+			bMatchmakingNotifSuccess[0] = true;
+
+			if (result.MatchId.IsEmpty())
+			{
+				bMatchmakingNotifError[0] = true;
+			}
 		}
 	}));
 
 	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
-		matchmakingNotifResponse[1] = result;
-		matchMakingNotifNum++;
-		bMatchmakingNotifSuccess[1] = true;
-		if (result.MatchId.IsEmpty())
+
+		if(result.Status == EAccelByteMatchmakingStatus::Done)
 		{
-			bMatchmakingNotifError[1] = true;
+			matchmakingNotifResponse[1] = result;
+			matchMakingNotifNum++;
+			bMatchmakingNotifSuccess[1] = true;
+			if (result.MatchId.IsEmpty())
+			{
+				bMatchmakingNotifError[1] = true;
+			}
 		}
 	}));
 
 	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-
 	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -4958,7 +4966,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[UserNum];
 	bool bMatchmakingNotifSuccess[UserNum] = { false };
 	bool bMatchmakingNotifError[UserNum] = { false };
-	int matchMakingNotifNum = 0;
+	int matchmakingNotifDone = 0;
 	for (int i = 0; i < UserNum; i++)
 	{
 		Lobbies[i]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
@@ -4971,9 +4979,9 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 			matchmakingNotifResponse[i] = result;
-			matchMakingNotifNum++;
 			if (result.Status != EAccelByteMatchmakingStatus::Start)
 			{
+				matchmakingNotifDone++;
 				bMatchmakingNotifSuccess[i] = true;
 				if (result.MatchId.IsEmpty())
 				{
@@ -5019,7 +5027,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 
 	WaitUntil([&]()
 	{
-		return matchMakingNotifNum >= UserNum;
+		return matchmakingNotifDone >= UserNum;
 	}, 60, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[UserNum];
