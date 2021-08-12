@@ -921,12 +921,17 @@ void Ecommerce_Store_Create(FStoreCreateRequest Store, const THandler<FStoreInfo
 	Ecommerce_Store_Create(Namespace, Store, OnSuccess, OnError);
 }
 
-void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
+void Ecommerce_Store_Get_All(const FString& Namespace, const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *GetAdminBaseUrl(), *Namespace);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Ecommerce_Store_Get_All(const THandler<TArray<FStoreInfo>>& OnSuccess, const FErrorHandler& OnError)
+{
+	Ecommerce_Store_Get_All(FRegistry::Settings.Namespace, OnSuccess, OnError);
 }
 
 void Ecommerce_Store_Delete(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
@@ -974,7 +979,8 @@ void Ecommerce_Item_Create(const FString& Namespace, FItemCreateRequest Item, FS
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *GetAdminBaseUrl(), *Namespace, *StoreId);
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(Item, Content);
-	Content = Content.Replace(TEXT("uS"), TEXT("US"), ESearchCase::CaseSensitive); // XXX
+	// Fix "US" property name because of the JsonObjectConverter's camelCase. 
+	Content = Content.Replace(TEXT("\"uS\""), TEXT("\"US\""), ESearchCase::CaseSensitive);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

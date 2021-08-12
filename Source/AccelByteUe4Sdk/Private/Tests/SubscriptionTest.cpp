@@ -27,7 +27,7 @@ void FlushHttpRequests();
 
 auto const SubscriptionErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString ErrorMessage)
 {
-	UE_LOG(LogAccelByteSubscriptionTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	UE_LOG(LogAccelByteSubscriptionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 static FString APPID = "sdkTest0001";
@@ -36,8 +36,10 @@ FString GSubsTypeItemSku;
 
 TArray<FString> GUsersMail;
 static FString GUserPassword = "Password+123";
+static FString TitleStoreId = TEXT("ACCELBYTE STORE");
+static FString SubscriptionTestStoreId;
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionSetup, "AccelByte.Tests.Subscription.A.SubscriptionSetup", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(SubscriptionSetup, "AccelByte.Tests.Subscription.A.Setup", AutomationFlagMaskSubscription);
 bool SubscriptionSetup::RunTest(const FString& Parameters) 
 {
 	FString GameNamespace = FRegistry::Settings.Namespace;
@@ -56,7 +58,8 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Client Successfully Login."));
 	}), SubscriptionErrorHandler);
 	Waiting(clientLoginSuccess, "Waiting for client login.");
-	check(clientLoginSuccess);
+
+	AB_TEST_TRUE(clientLoginSuccess);
 
 	bool bHasPublishedStore = false;
 	FStoreInfo PublishedStoreInfo;
@@ -66,89 +69,126 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		bHasPublishedStore = true;
 	}), SubscriptionErrorHandler);
 	Waiting(bHasPublishedStore, "Waiting for get published store");
-	check(bHasPublishedStore);
+
+	AB_TEST_TRUE(bHasPublishedStore);
 	FString PublishedStoreId = PublishedStoreInfo.storeId;
 	
-	GAppTypeItemSku = "sdktestSkuApp001";
+	GAppTypeItemSku = TEXT("sdktestSkuApp001");
 	FString appTypeItemId;
-	FItemFullInfo appTypeInfo;
-	bool bHasAppTypeItem = false;
 	bool bDoneGetItemBySku = false;
-	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GAppTypeItemSku, true, THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &bHasAppTypeItem, &appTypeInfo](const FItemFullInfo& Result)
+	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GAppTypeItemSku, true,
+		THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &appTypeItemId](const FItemFullInfo& Result)
 	{
-		bDoneGetItemBySku = true;
-		bHasAppTypeItem = true;
-		appTypeInfo = Result;
-	}), FErrorHandler::CreateLambda([&bDoneGetItemBySku](int32 ErrorCode, FString ErrorMessage)
-	{
-		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU"));
-		bDoneGetItemBySku = true;
-	}));
-	Waiting(bDoneGetItemBySku, "Waiting to get item by sku");
-	check(bDoneGetItemBySku);
-	if (bHasAppTypeItem) 
-	{
-		appTypeItemId = appTypeInfo.itemId;
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Has APP Item type on store"));
-	}
-
-	GSubsTypeItemSku = "sdktestSkuSubs001";
-	FString SubsTypeItemId;
-	FItemFullInfo SubsTypeInfo;
-	bool bHasSubsTypeItem = false;
-	bDoneGetItemBySku = false;
-	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GSubsTypeItemSku, true, THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &bHasSubsTypeItem, &SubsTypeInfo](const FItemFullInfo& Result)
-	{
+		appTypeItemId = Result.itemId;
 		bDoneGetItemBySku = true;
-		bHasSubsTypeItem = true;
-		SubsTypeInfo = Result;
 	}), FErrorHandler::CreateLambda([&bDoneGetItemBySku](int32 ErrorCode, FString ErrorMessage)
 	{
-		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU"));
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU. Does not have APP Item type on store"));
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bDoneGetItemBySku = true;
 	}));
 	Waiting(bDoneGetItemBySku, "Waiting to get item by sku");
-	check(bDoneGetItemBySku);
-	if (bHasSubsTypeItem)
-	{
-		SubsTypeItemId = SubsTypeInfo.itemId;
-		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Has Subscription Item type on store"));
-	}
+	
+	AB_TEST_TRUE(bDoneGetItemBySku);
 
-	bool bNeedToCreateItem = !bHasAppTypeItem || !bHasSubsTypeItem;
-	if (bNeedToCreateItem) 
+	GSubsTypeItemSku = TEXT("sdktestSkuSubs001");
+	FString SubsTypeItemId;
+	bDoneGetItemBySku = false;
+	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GSubsTypeItemSku, true,
+		THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &SubsTypeItemId](const FItemFullInfo& Result)
 	{
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Has Subscription Item type on store"));
+		SubsTypeItemId = Result.itemId;
+		bDoneGetItemBySku = true;
+	}), FErrorHandler::CreateLambda([&bDoneGetItemBySku](int32 ErrorCode, FString ErrorMessage)
+	{
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error Get Item By SKU. Does not have Subscription Item type on store"));
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		bDoneGetItemBySku = true;
+	}));
+	Waiting(bDoneGetItemBySku, "Waiting to get item by sku");
+
+	AB_TEST_TRUE(bDoneGetItemBySku);
+
+	if (appTypeItemId.IsEmpty() || SubsTypeItemId.IsEmpty())
+	{
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Creating item."));
+
 		FStoreCreateRequest TemporaryStore
 		{
-			"UE4 Store Test",
-			"for UE4 SDK testing purpose",
+			TitleStoreId,
+			"Create from UE4 SDK Subscription Test",
 			{"en"},
 			{"US"},
 			"en-US",
 			"US"
 		};
 
-		bool bDoneCreateTempStore = false;
-		FStoreInfo TempStoreInfo;
-		FString TempStoreId;
-		Ecommerce_Store_Create(PublisherNamespace, TemporaryStore, THandler<FStoreInfo>::CreateLambda([&bDoneCreateTempStore, &TempStoreInfo](const FStoreInfo& Result)
+		// Fetch all publisher stores.
+		bool bGetAllStoreSuccess = false;
+		TArray<FStoreInfo> GetAllResult;
+		Ecommerce_Store_Get_All(PublisherNamespace, THandler<TArray<FStoreInfo>>::CreateLambda([&PublisherNamespace, &bGetAllStoreSuccess, &GetAllResult](const TArray<FStoreInfo>& Result)
 		{
-			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create temp store success"));
-			bDoneCreateTempStore = true;
-			TempStoreInfo = Result;
+			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Get %s stores Success"), *PublisherNamespace);
+			GetAllResult = Result;
+			bGetAllStoreSuccess = true;
 		}), SubscriptionErrorHandler);
-		Waiting(bDoneCreateTempStore, "Waiting to create temp store");
-		TempStoreId = TempStoreInfo.storeId;
-		check(bDoneCreateTempStore);
+		Waiting(bGetAllStoreSuccess, "Waiting for get all stores...");
 
-		bool bClonePublishedStore = false;
-		Ecommerce_Store_Clone(PublisherNamespace, PublishedStoreId, TempStoreId, FSimpleDelegate::CreateLambda([&bClonePublishedStore]()
+		AB_TEST_TRUE(bGetAllStoreSuccess);
+
+		int32 DraftStoreNum = 0;
+		for (const FStoreInfo& Store : GetAllResult)
 		{
-			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Clone published store"));
-			bClonePublishedStore = true;
-		}), SubscriptionErrorHandler);
-		Waiting(bClonePublishedStore, "Waiting for clone published store...");
-		check(bClonePublishedStore);
+			DraftStoreNum += Store.published ? 0 : 1;
+		}
+
+		if (DraftStoreNum > 0)
+		{
+			FStoreInfo* ExistingStore = GetAllResult.FindByPredicate([](const FStoreInfo& Store)
+			{
+				return Store.published == false && Store.title == TitleStoreId;
+			});
+			if (ExistingStore)
+			{
+				SubscriptionTestStoreId = ExistingStore->storeId;
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Found %s draft store for Subscription testing"), *TitleStoreId);
+			}
+			else
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Not found %s draft store for Subscription testing"), *TitleStoreId);
+				FStoreInfo* TopDraftStore = GetAllResult.FindByPredicate([](const FStoreInfo& Store)
+				{
+					return Store.published == false;
+				});
+				SubscriptionTestStoreId = TopDraftStore->storeId;				
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Use %s (%s) as top draf store for testing"), *TopDraftStore->title, *TopDraftStore->storeId);
+			}
+		}
+		else
+		{
+			bool bDoneCreateTempStore = false;
+			FStoreInfo TempStoreInfo;
+			Ecommerce_Store_Create(PublisherNamespace, TemporaryStore, THandler<FStoreInfo>::CreateLambda([&bDoneCreateTempStore, &TempStoreInfo](const FStoreInfo& Result)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create temp store success"));
+				bDoneCreateTempStore = true;
+				TempStoreInfo = Result;
+			}), SubscriptionErrorHandler);
+			Waiting(bDoneCreateTempStore, "Waiting to create temp store");
+			SubscriptionTestStoreId = TempStoreInfo.storeId;
+			check(bDoneCreateTempStore);
+
+			bool bClonePublishedStore = false;
+			Ecommerce_Store_Clone(PublisherNamespace, PublishedStoreId, SubscriptionTestStoreId, FSimpleDelegate::CreateLambda([&bClonePublishedStore]()
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Clone published store"));
+				bClonePublishedStore = true;
+			}), SubscriptionErrorHandler);
+			Waiting(bClonePublishedStore, "Waiting for clone published store...");
+			check(bClonePublishedStore);
+		}
 
 		FCreateRegionDataItem regionData
 		{
@@ -176,7 +216,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 		FString AppId = "ue4SdkTest001";
 		// if doesn't have "APP" item on published store
-		if (!bHasAppTypeItem) 
+		if (appTypeItemId.IsEmpty())
 		{
 			FItemCreateRequest AppItemRequest;
 			AppItemRequest.itemType = EAccelByteItemType::APP;
@@ -193,7 +233,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool bCreateAppItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			Ecommerce_Item_Create(PublisherNamespace, AppItemRequest, TempStoreId, THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result)
+			Ecommerce_Item_Create(PublisherNamespace, AppItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create app item success"));
 				bCreateAppItemSuccess = true;
@@ -205,7 +245,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		}
 
 		// if doesn't have "SUBSCRIPTION" item on published store
-		if (!bHasSubsTypeItem)
+		if (SubsTypeItemId.IsEmpty())
 		{
 			TArray<FString> EmptyStrings;
 
@@ -230,11 +270,11 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool createSubsItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			Ecommerce_Item_Create(PublisherNamespace, SubsItemRequest, TempStoreId, THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result)
+			Ecommerce_Item_Create(PublisherNamespace, SubsItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create subs item success"));
-				createSubsItemSuccess = true;
 				appItemInfo = Result;
+				createSubsItemSuccess = true;
 			}), SubscriptionErrorHandler);
 			Waiting(createSubsItemSuccess, "Waiting for subs item created...");
 			check(createSubsItemSuccess);
@@ -243,7 +283,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 		// published temp store id to published store
 		bool bPublishTempStore = false;
-		Ecommerce_Store_Clone(PublisherNamespace, TempStoreId, "", FSimpleDelegate::CreateLambda([&bPublishTempStore]()
+		Ecommerce_Store_Clone(PublisherNamespace, SubscriptionTestStoreId, "", FSimpleDelegate::CreateLambda([&bPublishTempStore]()
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Published temp store success"));
 			bPublishTempStore = true;
@@ -400,6 +440,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 	// login into user 2, and check if has subs entitlement or not
 	UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Logout User"));
 	FRegistry::User.ForgetAllCredentials();
+
 	bLoginSuccess = false;
 	FRegistry::User.LoginWithUsername(GUsersMail[1], GUserPassword, FVoidHandler::CreateLambda([&bLoginSuccess]()
 	{
@@ -414,11 +455,13 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		GSubsTypeItemSku, 
 		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&doneGetUserEntitlement, &ownership](const FAccelByteModelsEntitlementOwnership& Result)
 		{
-			doneGetUserEntitlement = true;
+			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("GetUserEntitlementOwnershipBySku Success"));
 			ownership = Result;
+			doneGetUserEntitlement = true;
 		}), FErrorHandler::CreateLambda([&doneGetUserEntitlement](int32 ErrorCode, FString ErrorMessage)
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
+			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			doneGetUserEntitlement = true;
 		}));
 	Waiting(doneGetUserEntitlement, "Waiting for get subs entitlement");
@@ -486,7 +529,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSubs, "AccelByte.Tests.Subscription.C.CheckUserEligibleOwnedSubs", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedSubs, "AccelByte.Tests.Subscription.B.CheckUserEligibleOwnedSubs", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 {
 	FString OriAppId = FRegistry::Settings.AppId;
@@ -499,10 +542,10 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 	bool bLoginFinish = false;
 	FRegistry::User.LoginWithUsername(GUsersMail[1], GUserPassword, FVoidHandler::CreateLambda([&bLoginFinish]()
 	{
-		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
+		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User 2 Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginFinish, "Waiting user login...");
+	Waiting(bLoginFinish, "Waiting user login 2...");
 
 	bool bGetSubsOwnership = false;
 	FAccelByteModelsEntitlementOwnership ownership;
@@ -517,7 +560,7 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
 		bGetSubsOwnership = true;
 	}));
-	Waiting(bGetSubsOwnership, "Waiting for get subs entitlement");
+	Waiting(bGetSubsOwnership, "Waiting for get subs entitlement for User 2");
 	AB_TEST_TRUE(bGetSubsOwnership);
 	AB_TEST_TRUE(ownership.Owned);
 
@@ -526,7 +569,7 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.E.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CheckUserEligibleOwnedNone, "AccelByte.Tests.Subscription.B.CheckUserEligibleOwnedNone", AutomationFlagMaskSubscription);
 bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 {
 	FString OriAppId = FRegistry::Settings.AppId;
