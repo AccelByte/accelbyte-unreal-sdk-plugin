@@ -101,11 +101,6 @@ FString UAccelByteBlueprintsSettings::GetUGCServerUrl()
 	return FRegistry::Settings.UGCServerUrl;
 }
 
-FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
-{
-	return FRegistry::Settings.ReportingServerUrl;
-}
-
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -204,11 +199,6 @@ void UAccelByteBlueprintsSettings::SetUGCServerUrl(const FString& UGCServerUrl)
 void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonPassServerUrl)
 {
 	FRegistry::Settings.SeasonPassServerUrl = SeasonPassServerUrl;
-}
-
-void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& ReportingServerUrl)
-{
-	FRegistry::Settings.ReportingServerUrl = ReportingServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)

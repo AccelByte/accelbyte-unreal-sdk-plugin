@@ -36,7 +36,6 @@ public:
 	FString SessionBrowserServerUrl;
 	FString UGCServerUrl;
 	FString SeasonPassServerUrl;
-	FString ReportingServerUrl;
 	FString AppId;
 };
 
@@ -114,9 +113,6 @@ public:
 
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString UGCServerUrl;
-
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
-	FString ReportingServerUrl;
 	
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
 	FString AppId;
@@ -184,9 +180,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetUGCServerUrl();
-	
-	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static FString GetReportingServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetAppId();
@@ -244,9 +237,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetUGCServerUrl(const FString& UGCServerUrl);
-
-	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static void SetReportingServerUrl(const FString& ReportingServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);
