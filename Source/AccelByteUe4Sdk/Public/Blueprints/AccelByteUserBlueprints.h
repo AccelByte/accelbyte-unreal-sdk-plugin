@@ -31,6 +31,9 @@ public:
 	static void LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
+	static void Logout(const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
 	static void ForgetAllCredentials();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api")
