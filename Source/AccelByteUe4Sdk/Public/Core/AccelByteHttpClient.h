@@ -110,7 +110,7 @@ namespace AccelByte
 			{
 				if (Content.Num() > 0)
 				{
-					FString EncodedData = EncodeParamsData(Content);
+					const FString EncodedData = EncodeParamsData(Content);
 
 					Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 					Request->SetContentAsString(EncodedData);
@@ -138,13 +138,14 @@ namespace AccelByte
 		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const TMap<FString, FString>& Data, const U& OnSuccess, const V& OnError)
 		{
+			FString ApiUrl = FormatApiUrl(Url);
 			TMap<FString, FString> Headers = {
 				{TEXT("Accept"), TEXT("application/json")}
 			};
 
-			AddApiAccessTokenIfAvailable(Headers);
+			AddApiAuthorizationIfAvailable(Headers);
 
-			return Request(Verb, Url, Params, Data, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, Params, Data, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -163,14 +164,15 @@ namespace AccelByte
 		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const FString& Json, const U& OnSuccess, const V& OnError)
 		{
+			FString ApiUrl = FormatApiUrl(Url);
 			TMap<FString, FString> Headers = {
 				{TEXT("Content-Type"), TEXT("application/json")},
 				{TEXT("Accept"), TEXT("application/json")}
 			};
 
-			AddApiAccessTokenIfAvailable(Headers);
+			AddApiAuthorizationIfAvailable(Headers);
 
-			return Request(Verb, Url, Params, Json, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, Params, Json, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -189,12 +191,13 @@ namespace AccelByte
 		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const T& UStruct, const U& OnSuccess, const V& OnError)
 		{
+			FString ApiUrl = FormatApiUrl(Url);
 			TMap<FString, FString> Headers = {
 				{TEXT("Content-Type"), TEXT("application/json")},
 				{TEXT("Accept"), TEXT("application/json")}
 			};
 
-			AddApiAccessTokenIfAvailable(Headers);
+			AddApiAuthorizationIfAvailable(Headers);
 
 			FString Json;
 
@@ -205,7 +208,7 @@ namespace AccelByte
 				return false;
 			}
 
-			return Request(Verb, Url, Params, Json, Headers, OnSuccess, OnError);
+			return Request(Verb, ApiUrl, Params, Json, Headers, OnSuccess, OnError);
 		}
 
 	private:
@@ -213,9 +216,11 @@ namespace AccelByte
 		Credentials const& CredentialsRef;
 		Settings const& SettingsRef;
 
-		void AddApiAccessTokenIfAvailable(TMap<FString, FString>& Headers);
+		FString FormatApiUrl(const FString& Url) const;
 
-		FString EncodeParamsData(const TMap<FString, FString>& ParamsData);
+		void AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const;
+
+	    FString EncodeParamsData(const TMap<FString, FString>& ParamsData) const;
 
 		template<typename U, typename V>
 		void ProcessRequest(FHttpRequestPtr& Request, const FString& Verb, const FString& Url,

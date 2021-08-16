@@ -36,22 +36,24 @@ bool DoUStructTest::RunTest(const FString& Method)
 {
 	AB_TEST_TRUE(SetupTestUsers("deadbeef", 1, HttpClientTestUsers, HttpClientTestCredentials));
 
-	FAnythingResponse Result;
+	FHttpClientTestAnythingResponse Result;
 
 	bool bIsDone = false;
 	bool bIsSuccess = false;
 
-	FString Query = TEXT("=123");
+	const FString Query = TEXT("=123");
 
-	FAnythingRequest Content;
+	FHttpClientTestAnythingRequest Content;
 
 	Content.Name = "John Doe";
 	Content.Age = 24;
 
 	FHttpClient HttpClient(*HttpClientTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
-	HttpClient.ApiRequest(Method, "https://httpbin.org/anything", { { "q", Query }}, Content,
-		THandler<FAnythingResponse>::CreateLambda([&](const FAnythingResponse& Response)
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+	
+	HttpClient.ApiRequest(Method, Url, { { "q", Query }}, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
 			{
 				Result = Response;
 				bIsSuccess = true;
@@ -65,6 +67,7 @@ bool DoUStructTest::RunTest(const FString& Method)
 	Waiting(bIsDone, "Waiting ...");
 
 	AB_TEST_TRUE(bIsSuccess);
+	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestCredentials[0]->GetNamespace() + "/" + HttpClientTestCredentials[0]->GetUserId()));
 	AB_TEST_EQUAL(Result.Method, Method);
 	AB_TEST_EQUAL(Result.Args["q"], Query);
 	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestCredentials[0]->GetAccessToken()));
@@ -96,22 +99,24 @@ bool DoFormTest::RunTest(const FString& Method)
 {
 	AB_TEST_TRUE(SetupTestUsers("deadbeef", 1, HttpClientTestUsers, HttpClientTestCredentials));
 
-	FAnythingResponse Result;
+	FHttpClientTestAnythingResponse Result;
 
 	bool bIsDone = false;
 	bool bIsSuccess = false;
 
-	FString Query = TEXT("=123");
+	const FString Query = TEXT("=123");
 
-	TMap<FString, FString> Content = {
+	const TMap<FString, FString> Content = {
 		{"name", "John Doe"},
 		{"age", "24"},
 	};
 
 	FHttpClient HttpClient(*HttpClientTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
-	HttpClient.ApiRequest(Method, "https://httpbin.org/anything", { { "q", Query } }, Content,
-		THandler<FAnythingResponse>::CreateLambda([&](const FAnythingResponse& Response)
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+	
+	HttpClient.ApiRequest(Method, Url, { { "q", Query } }, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
 			{
 				Result = Response;
 				bIsSuccess = true;
@@ -126,6 +131,7 @@ bool DoFormTest::RunTest(const FString& Method)
 
 	AB_TEST_TRUE(bIsSuccess);
 	AB_TEST_EQUAL(Result.Method, Method);
+	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestCredentials[0]->GetNamespace() + "/" + HttpClientTestCredentials[0]->GetUserId()));
 	AB_TEST_EQUAL(Result.Args["q"], Query);
 	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestCredentials[0]->GetAccessToken()));
 	if (!Method.ToUpper().Equals(TEXT("GET")))

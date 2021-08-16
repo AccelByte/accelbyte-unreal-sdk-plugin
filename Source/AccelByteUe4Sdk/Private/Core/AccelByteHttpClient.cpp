@@ -6,40 +6,51 @@
 
 namespace AccelByte
 {
-
-FHttpClient::FHttpClient(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef) :
-	HttpRef{ HttpRef },
-	CredentialsRef{ CredentialsRef },
-	SettingsRef{ SettingsRef }
-{}
-
-void FHttpClient::AddApiAccessTokenIfAvailable(TMap<FString, FString>& Headers)
-{
-	FString AccessToken = CredentialsRef.GetAccessToken();
-
-	if (!AccessToken.IsEmpty())
+	FHttpClient::FHttpClient(Credentials const& CredentialsRef, Settings const& SettingsRef,
+	                         FHttpRetryScheduler& HttpRef) :
+		HttpRef{HttpRef},
+		CredentialsRef{CredentialsRef},
+		SettingsRef{SettingsRef}
 	{
-		Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *AccessToken));
-	}
-}
-
-FString FHttpClient::EncodeParamsData(const TMap<FString, FString>& ParamsData)
-{
-	FString Result;
-	int i = 0;
-
-	for (const auto& Kvp : ParamsData)
-	{
-		Result.Append(FString::Printf(TEXT("%s%s=%s"),
-			(i++ == 0 ? TEXT("") : TEXT("&")),
-			*FGenericPlatformHttp::UrlEncode(Kvp.Key),
-			*FGenericPlatformHttp::UrlEncode(Kvp.Value)));
 	}
 
-	return Result;
-}
+	FString FHttpClient::FormatApiUrl(const FString& Url) const
+	{
+		const FStringFormatNamedArguments UrlArgs = {
+			{TEXT("namespace"), FStringFormatArg(CredentialsRef.GetNamespace())},
+			{TEXT("userId"), FStringFormatArg(CredentialsRef.GetUserId())},
+		};
 
-FHttpClient::~FHttpClient()
-{}
+		return FString::Format(*Url, UrlArgs);
+	}
 
+	void FHttpClient::AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const
+	{
+		const FString AccessToken = CredentialsRef.GetAccessToken();
+
+		if (!AccessToken.IsEmpty())
+		{
+			Headers.Add(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *AccessToken));
+		}
+	}
+
+	FString FHttpClient::EncodeParamsData(const TMap<FString, FString>& ParamsData) const
+	{
+		FString Result;
+		int i = 0;
+
+		for (const auto& Kvp : ParamsData)
+		{
+			Result.Append(FString::Printf(TEXT("%s%s=%s"),
+			                              (i++ == 0 ? TEXT("") : TEXT("&")),
+			                              *FGenericPlatformHttp::UrlEncode(Kvp.Key),
+			                              *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+		}
+
+		return Result;
+	}
+
+	FHttpClient::~FHttpClient()
+	{
+	}
 }

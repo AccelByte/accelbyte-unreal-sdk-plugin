@@ -8,21 +8,23 @@
 #include "HttpClientTest.generated.h"
 
 USTRUCT()
-struct ACCELBYTEUE4SDK_API FAnythingRequest
+struct ACCELBYTEUE4SDK_API FHttpClientTestAnythingRequest
 {
 	GENERATED_BODY()
-		UPROPERTY()
+	UPROPERTY()
 		FString Name;
 	UPROPERTY()
 		int32 Age;
 };
 
 USTRUCT()
-struct ACCELBYTEUE4SDK_API FAnythingResponse
+struct ACCELBYTEUE4SDK_API FHttpClientTestAnythingResponse
 {
 	GENERATED_BODY()
-		UPROPERTY()
+	UPROPERTY()
 		FString Method;
+	UPROPERTY()
+		FString Url;
 	UPROPERTY()
 		TMap<FString, FString> Args;
 	UPROPERTY()
@@ -30,5 +32,5 @@ struct ACCELBYTEUE4SDK_API FAnythingResponse
 	UPROPERTY()
 		TMap<FString, FString> Form;
 	UPROPERTY()
-		FAnythingRequest Json;
+		FHttpClientTestAnythingRequest Json;
 };
