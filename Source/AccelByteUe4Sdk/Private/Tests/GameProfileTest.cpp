@@ -70,7 +70,7 @@ bool FGameProfileTestTearDown::RunTest(const FString& Parameters)
 			GetAllGameProfileResult = Result;
 			bGetAllGameProfileSuccess = true;
 		}), GameProfileTestErrorHandler);
-		Waiting(bGetAllGameProfileSuccess,"Waiting for get all game profiles...");
+		WaitUntil(bGetAllGameProfileSuccess,"Waiting for get all game profiles...");
 		UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\t%d game profile is found!"), GetAllGameProfileResult.Num());
 		AB_TEST_TRUE(bGetAllGameProfileSuccess);
 
@@ -83,7 +83,7 @@ bool FGameProfileTestTearDown::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteGameProfileTest, Log, TEXT("\t\t\tsuccess"));
 				bDeleteGameProfileSuccess = true;
 			}), GameProfileTestErrorHandler);
-			Waiting(bDeleteGameProfileSuccess,"Waiting for game profile deletion...");
+			WaitUntil(bDeleteGameProfileSuccess,"Waiting for game profile deletion...");
 			AB_TEST_TRUE(bDeleteGameProfileSuccess);
 		}
 	}
@@ -109,7 +109,7 @@ bool FGameProfileTestCreateGameProfile::RunTest(const FString& Parameters)
 		ActualResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bCreateGameProfileSuccess)
@@ -145,7 +145,7 @@ bool FGameProfileTestGetGameProfile::RunTest(const FString& Parameters)
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
@@ -155,7 +155,7 @@ bool FGameProfileTestGetGameProfile::RunTest(const FString& Parameters)
 		GetResult = Result;
 		bGetGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bGetGameProfileSuccess,"Waiting for get game profile...");
+	WaitUntil(bGetGameProfileSuccess,"Waiting for get game profile...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bGetGameProfileSuccess);
@@ -191,7 +191,7 @@ bool FGameProfileTestUpdateGameProfile::RunTest(const FString& Parameters)
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ARRANGEMENT UPDATE
@@ -206,7 +206,7 @@ bool FGameProfileTestUpdateGameProfile::RunTest(const FString& Parameters)
 		UpdateResult = Result;
 		bUpdateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bUpdateGameProfileSuccess,"Waiting for game profile updated...");
+	WaitUntil(bUpdateGameProfileSuccess,"Waiting for game profile updated...");
 
 	// ASSERTION COMPARE UPDATE RESULT WITH CREATED PROFILE
 	AB_TEST_TRUE(bUpdateGameProfileSuccess);
@@ -249,7 +249,7 @@ bool FGameProfileTestDeleteGameProfile::RunTest(const FString& Parameters)
 		ActualResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
@@ -257,7 +257,7 @@ bool FGameProfileTestDeleteGameProfile::RunTest(const FString& Parameters)
 	GameProfileApi.DeleteGameProfile(ActualResult.profileId, FVoidHandler::CreateLambda([&bDeleteGameProfileSuccess]() {
 		bDeleteGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bDeleteGameProfileSuccess,"Waiting for game profile deletion...");
+	WaitUntil(bDeleteGameProfileSuccess,"Waiting for game profile deletion...");
 
 	// ACT VERIFY WITH GET THE DELETED GAME_PROFILE ID
 	// EXPECT not found OR found an empty game profile
@@ -267,7 +267,7 @@ bool FGameProfileTestDeleteGameProfile::RunTest(const FString& Parameters)
 	}), FErrorHandler::CreateLambda([&bGameProfileDoesntExist](int32 Code, FString Message) {
 		bGameProfileDoesntExist = true;
 	}));
-	Waiting(bGameProfileDoesntExist,"Waiting for deleted game check...");
+	WaitUntil(bGameProfileDoesntExist,"Waiting for deleted game check...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bDeleteGameProfileSuccess);
@@ -300,7 +300,7 @@ bool FGameProfileTestGetAllGameProfiles::RunTest(const FString& Parameters)
 			CreateResults[i] = Result;
 			bCreateGameProfileSuccesses[i] = true;
 		}), GameProfileTestErrorHandler);
-		Waiting(bCreateGameProfileSuccesses[i],"Waiting for game profile created...");
+		WaitUntil(bCreateGameProfileSuccesses[i],"Waiting for game profile created...");
 		AB_TEST_TRUE(bCreateGameProfileSuccesses[i]);
 	}
 
@@ -311,7 +311,7 @@ bool FGameProfileTestGetAllGameProfiles::RunTest(const FString& Parameters)
 		bGetAllGameProfilesSuccess = true;
 		GetAllResult = Result;
 	}), GameProfileTestErrorHandler);
-	Waiting(bGetAllGameProfilesSuccess,"Waiting for get all game profile...");
+	WaitUntil(bGetAllGameProfilesSuccess,"Waiting for get all game profile...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bGetAllGameProfilesSuccess);
@@ -352,7 +352,7 @@ bool FGameProfileTestGetGameProfileAttribute::RunTest(const FString& Parameters)
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
@@ -362,7 +362,7 @@ bool FGameProfileTestGetGameProfileAttribute::RunTest(const FString& Parameters)
 		GetResult = Result;
 		bGetGameProfileAttributeSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bGetGameProfileAttributeSuccess,"Waiting for get game profile attribute...");
+	WaitUntil(bGetGameProfileAttributeSuccess,"Waiting for get game profile attribute...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bGetGameProfileAttributeSuccess);
@@ -385,7 +385,7 @@ bool FGameProfileTestUpdateGameProfileAttribute::RunTest(const FString& Paramete
 		CreateResult = Result;
 		bCreateGameProfileSuccess = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess);
 
 	// ACT
@@ -401,7 +401,7 @@ bool FGameProfileTestUpdateGameProfileAttribute::RunTest(const FString& Paramete
 		bUpdateGameProfileAttributeSuccess = true;
 		UpdateResult = Result;
 	}), GameProfileTestErrorHandler);
-	Waiting(bUpdateGameProfileAttributeSuccess,"Waiting for game profile updated...");
+	WaitUntil(bUpdateGameProfileAttributeSuccess,"Waiting for game profile updated...");
 
 	// ASSERTION
 	AB_TEST_TRUE(bUpdateGameProfileAttributeSuccess);
@@ -424,7 +424,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 		CreateResult1 = Result;
 		bCreateGameProfileSuccess1 = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess1,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess1,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess1);
 
 	// ARRANGEMENT USER INDEX 2
@@ -436,7 +436,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 		CreateResult2 = Result;
 		bCreateGameProfileSuccess2 = true;
 	}), GameProfileTestErrorHandler);
-	Waiting(bCreateGameProfileSuccess2,"Waiting for game profile created...");
+	WaitUntil(bCreateGameProfileSuccess2,"Waiting for game profile created...");
 	AB_TEST_TRUE(bCreateGameProfileSuccess2);
 
 	// ACT USER INDEX 0 GETTING USER INDEX 1 AND 2 PUBLIC GAME PROFILES
@@ -451,7 +451,7 @@ bool FGameProfileTestBatchGetPublicGameProfiles::RunTest(const FString& Paramete
 		bBatchGetPublicGameProfiles = true;
 		GetBatchPublicGameProfilesResult = Result;
 	}), GameProfileTestErrorHandler);
-	Waiting(bBatchGetPublicGameProfiles,"Waiting for batch public game profiles...");
+	WaitUntil(bBatchGetPublicGameProfiles,"Waiting for batch public game profiles...");
 
 	// ASSERTION
 	TArray<bool> ArrayRequestedGameProfileFound;

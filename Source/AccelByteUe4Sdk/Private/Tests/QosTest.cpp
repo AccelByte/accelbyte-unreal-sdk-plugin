@@ -41,7 +41,7 @@ bool QosGetServerLatencies::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bGetServerLatenciesSuccess;
-	}, 60, "Waiting for get server latencies...");
+	}, "Waiting for get server latencies...", 60);
 	AB_TEST_TRUE(bGetServerLatenciesSuccess);
 	AB_TEST_TRUE(Latencies.Num() > 0);
 	return true;
@@ -65,7 +65,7 @@ bool ServerQosGetServerLatencies::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bGetServerLatenciesSuccess;
-	}, 60, "Waiting for get server latencies...");
+	}, "Waiting for get server latencies...", 60);
 	AB_TEST_TRUE(bGetServerLatenciesSuccess);
 	AB_TEST_TRUE(Latencies.Num() > 0);
 	return true;

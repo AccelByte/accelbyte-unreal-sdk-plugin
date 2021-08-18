@@ -57,7 +57,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		clientLoginSuccess = true;
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Client Successfully Login."));
 	}), SubscriptionErrorHandler);
-	Waiting(clientLoginSuccess, "Waiting for client login.");
+	WaitUntil(clientLoginSuccess, "Waiting for client login.");
 
 	AB_TEST_TRUE(clientLoginSuccess);
 
@@ -68,7 +68,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		PublishedStoreInfo = Result;
 		bHasPublishedStore = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bHasPublishedStore, "Waiting for get published store");
+	WaitUntil(bHasPublishedStore, "Waiting for get published store");
 
 	AB_TEST_TRUE(bHasPublishedStore);
 	FString PublishedStoreId = PublishedStoreInfo.storeId;
@@ -88,7 +88,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bDoneGetItemBySku = true;
 	}));
-	Waiting(bDoneGetItemBySku, "Waiting to get item by sku");
+	WaitUntil(bDoneGetItemBySku, "Waiting to get item by sku");
 	
 	AB_TEST_TRUE(bDoneGetItemBySku);
 
@@ -107,7 +107,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bDoneGetItemBySku = true;
 	}));
-	Waiting(bDoneGetItemBySku, "Waiting to get item by sku");
+	WaitUntil(bDoneGetItemBySku, "Waiting to get item by sku");
 
 	AB_TEST_TRUE(bDoneGetItemBySku);
 
@@ -134,7 +134,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			GetAllResult = Result;
 			bGetAllStoreSuccess = true;
 		}), SubscriptionErrorHandler);
-		Waiting(bGetAllStoreSuccess, "Waiting for get all stores...");
+		WaitUntil(bGetAllStoreSuccess, "Waiting for get all stores...");
 
 		AB_TEST_TRUE(bGetAllStoreSuccess);
 
@@ -176,7 +176,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				bDoneCreateTempStore = true;
 				TempStoreInfo = Result;
 			}), SubscriptionErrorHandler);
-			Waiting(bDoneCreateTempStore, "Waiting to create temp store");
+			WaitUntil(bDoneCreateTempStore, "Waiting to create temp store");
 			SubscriptionTestStoreId = TempStoreInfo.storeId;
 			check(bDoneCreateTempStore);
 
@@ -186,7 +186,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Clone published store"));
 				bClonePublishedStore = true;
 			}), SubscriptionErrorHandler);
-			Waiting(bClonePublishedStore, "Waiting for clone published store...");
+			WaitUntil(bClonePublishedStore, "Waiting for clone published store...");
 			check(bClonePublishedStore);
 		}
 
@@ -239,7 +239,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 					bCreateAppItemSuccess = true;
 					appItemInfo = Result;
 				}), SubscriptionErrorHandler);
-			Waiting(bCreateAppItemSuccess, "Waiting for app item created...");
+			WaitUntil(bCreateAppItemSuccess, "Waiting for app item created...");
 			check(bCreateAppItemSuccess);
 			appTypeItemId = appItemInfo.itemId;
 		}
@@ -276,7 +276,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 					appItemInfo = Result;
 					createSubsItemSuccess = true;
 				}), SubscriptionErrorHandler);
-			Waiting(createSubsItemSuccess, "Waiting for subs item created...");
+			WaitUntil(createSubsItemSuccess, "Waiting for subs item created...");
 			check(createSubsItemSuccess);
 			SubsTypeItemId = appItemInfo.itemId;
 		}
@@ -288,7 +288,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Published temp store success"));
 			bPublishTempStore = true;
 		}), SubscriptionErrorHandler);
-		Waiting(bPublishTempStore, "Waiting for publish temp store...");
+		WaitUntil(bPublishTempStore, "Waiting for publish temp store...");
 		check(bPublishTempStore);
 	}
 
@@ -301,7 +301,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		bLoginWithDeviceSuccess = true;
 	}), SubscriptionErrorHandler);
 
-	Waiting(bLoginWithDeviceSuccess, "Waiting for Login...");
+	WaitUntil(bLoginWithDeviceSuccess, "Waiting for Login...");
 	check(bLoginWithDeviceSuccess);
 
 	bool bDoneSearchUser = false;
@@ -318,7 +318,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Search User"));
 			
 		}), SubscriptionErrorHandler);
-		Waiting(bDoneSearchUser, "Waiting for search user");
+		WaitUntil(bDoneSearchUser, "Waiting for search user");
 		check(bDoneSearchUser);
 
 		if (ReceivedUserData.Data.Num() > 0)
@@ -343,7 +343,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 				bDoneRegisterUser = true;
 			}), SubscriptionErrorHandler);
 
-			Waiting(bDoneRegisterUser, "Waiting for register user");
+			WaitUntil(bDoneRegisterUser, "Waiting for register user");
 			check(bDoneRegisterUser);
 			check(bRegisterSuccess);
 		}
@@ -361,7 +361,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 			bLoginSuccess = true;
 		}), SubscriptionErrorHandler);
-		Waiting(bLoginSuccess, "Waiting for login");
+		WaitUntil(bLoginSuccess, "Waiting for login");
 		check(bLoginSuccess);
 
 		bool doneGetUserMap = false;
@@ -372,7 +372,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			doneGetUserMap = true;
 			userMap = Result;
 		}), SubscriptionErrorHandler);
-		Waiting(doneGetUserMap, "Waiting for get user map");
+		WaitUntil(doneGetUserMap, "Waiting for get user map");
 		check(doneGetUserMap);
 
 		userPublisherIds.Add(userMap.userId);
@@ -401,7 +401,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 		bLoginSuccess = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for login");
+	WaitUntil(bLoginSuccess, "Waiting for login");
 
 	bool doneGetAppEntitlement = false;
 	FAccelByteModelsEntitlementOwnership appOwnership;
@@ -416,7 +416,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have APP."));
 		doneGetAppEntitlement = true;
 	}));
-	Waiting(doneGetAppEntitlement, "Waiting for get subs entitlement");
+	WaitUntil(doneGetAppEntitlement, "Waiting for get subs entitlement");
 	check(doneGetAppEntitlement);
 
 	if (!appOwnership.Owned)
@@ -433,7 +433,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			grantAppTypeSuccess = true;
 			grantResultInfo = Result;
 		}), SubscriptionErrorHandler);
-		Waiting(grantAppTypeSuccess, "Waiting for grant app type");
+		WaitUntil(grantAppTypeSuccess, "Waiting for grant app type");
 		check(grantAppTypeSuccess);
 	}
 
@@ -447,7 +447,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 		bLoginSuccess = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for login");
+	WaitUntil(bLoginSuccess, "Waiting for login");
 
 	bool doneGetUserEntitlement = false;
 	FAccelByteModelsEntitlementOwnership ownership;
@@ -464,7 +464,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			doneGetUserEntitlement = true;
 		}));
-	Waiting(doneGetUserEntitlement, "Waiting for get subs entitlement");
+	WaitUntil(doneGetUserEntitlement, "Waiting for get subs entitlement");
 	check(doneGetUserEntitlement);
 
 	FFreeSubscriptionRequest SubsRequest;
@@ -485,7 +485,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			bDoneGrantSubs = true;
 			subsItemInfo = Result;
 		}), SubscriptionErrorHandler);
-		Waiting(bDoneGrantSubs, "Waiting for grant free subs");
+		WaitUntil(bDoneGrantSubs, "Waiting for grant free subs");
 		check(bDoneGrantSubs);
 	}
 
@@ -511,7 +511,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginFinish, "Waiting user login...");
+	WaitUntil(bLoginFinish, "Waiting user login...");
 
 	bool bCheckEligibleFinish = false;
 	bool bCheckEligibleResult = false;
@@ -521,7 +521,7 @@ bool CheckUserEligibleOwnedAppId::RunTest(const FString& Parameters)
 		bCheckEligibleFinish = true;
 		bCheckEligibleResult = result;
 	}), SubscriptionErrorHandler);
-	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
+	WaitUntil(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	AB_TEST_TRUE(bCheckEligibleResult);
 	FRegistry::Settings.AppId = OriAppId;
@@ -545,7 +545,7 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User 2 Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginFinish, "Waiting user login 2...");
+	WaitUntil(bLoginFinish, "Waiting user login 2...");
 
 	bool bGetSubsOwnership = false;
 	FAccelByteModelsEntitlementOwnership ownership;
@@ -560,7 +560,7 @@ bool CheckUserEligibleOwnedSubs::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User doesn't have Subscription."));
 		bGetSubsOwnership = true;
 	}));
-	Waiting(bGetSubsOwnership, "Waiting for get subs entitlement for User 2");
+	WaitUntil(bGetSubsOwnership, "Waiting for get subs entitlement for User 2");
 	AB_TEST_TRUE(bGetSubsOwnership);
 	AB_TEST_TRUE(ownership.Owned);
 
@@ -585,7 +585,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 		bLoginFinish = true;
 	}), SubscriptionErrorHandler);
-	Waiting(bLoginFinish, "Waiting user login...");
+	WaitUntil(bLoginFinish, "Waiting user login...");
 
 	bool bCheckEligibleFinish = false;
 	bool bCheckEligibleResult = true;
@@ -595,7 +595,7 @@ bool CheckUserEligibleOwnedNone::RunTest(const FString& Parameters)
 		bCheckEligibleFinish = true;
 		bCheckEligibleResult = result;
 	}), SubscriptionErrorHandler);
-	Waiting(bCheckEligibleFinish, "Waiting checking user eligibility");
+	WaitUntil(bCheckEligibleFinish, "Waiting checking user eligibility");
 
 	AB_TEST_FALSE(bCheckEligibleResult);
 	FRegistry::Settings.AppId = OriAppId;

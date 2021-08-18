@@ -61,7 +61,7 @@ const auto AchievementTestQueryAchievements = [](const FString& InLanguage, cons
 				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 				bIsDone = true;
 			}), InOffset, InLimit);
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -84,7 +84,7 @@ const auto AchievementTestQueryUserAchievements = [](const EAccelByteAchievement
 				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 				bIsDone = true;
 			}), InOffset, InLimit, InPreferUnlocked);
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -105,7 +105,7 @@ const auto AchievementTestGetAchievement = [](const FString& AchievementCode, FA
 				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 				bIsDone = true;
 			}));
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -125,7 +125,7 @@ const auto AchievementTestServerUnlockAchievement = [](const FString& UserId, co
 				//AchievementTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 				bIsDone = true;
 			}));
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -233,7 +233,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
 			bUserLoginSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login ...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login ...");
 
 	bool bDeleteUserSuccess = false;
 	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
@@ -241,7 +241,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 			bDeleteUserSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bDeleteUserSuccess, "Waiting for user deletion ...");
+	WaitUntil(bDeleteUserSuccess, "Waiting for user deletion ...");
 
 	// Login again
 	bool bNewUserLoginSuccess = false;
@@ -250,7 +250,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("User Login Success"));
 			bNewUserLoginSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bNewUserLoginSuccess, "Waiting for Login new user ...");
+	WaitUntil(bNewUserLoginSuccess, "Waiting for Login new user ...");
 
 	// Client Login
 	bool bClientLoginSuccess = false;
@@ -259,7 +259,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Client login Success"));
 			bClientLoginSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 	AB_TEST_TRUE(bClientLoginSuccess);
 
 	for (const auto& StatisticRequest : AchievementTestAllStatisticRequests)
@@ -271,14 +271,14 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 			{
 				bCreateStatDone = true;
 			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
-		Waiting(bCreateStatDone, "Waiting for Create statistic code...");
+		WaitUntil(bCreateStatDone, "Waiting for Create statistic code...");
 
 		bool bCreateUserStatItemDone = false;
 		FRegistry::Statistic.CreateUserStatItems({ StatisticRequest.statCode }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 			{
 				bCreateUserStatItemDone = true;
 			}), AchievementTestErrorHandler);
-		Waiting(bCreateUserStatItemDone, "Waiting for create user stat item...");
+		WaitUntil(bCreateUserStatItemDone, "Waiting for create user stat item...");
 	}
 
 	for (const auto& AchievementRequest : AchievementTestAllAchievementRequests)
@@ -293,7 +293,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Can not delete achievement. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 					bDeleteAchievementDone = true;
 				}));
-		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
+		WaitUntil(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
 		AdminCreateAchievement(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
@@ -301,7 +301,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
 				bCreateAchievementSuccess = true;
 			}), AchievementTestErrorHandler);
-		Waiting(bCreateAchievementSuccess, "Waiting for creating achievement ...");
+		WaitUntil(bCreateAchievementSuccess, "Waiting for creating achievement ...");
 		AB_TEST_TRUE(bCreateAchievementSuccess);
 	}
 
@@ -564,7 +564,7 @@ bool FAchievementTestUnlockAchievement::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Unlock achievement 1 success"));
 				bUnlockAchievementSuccess = true;
 			}), AchievementTestErrorHandler);
-	Waiting(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
+	WaitUntil(bUnlockAchievementSuccess, "Waiting for unlocking achievement 1 ...");
 
 	AB_TEST_TRUE(bUnlockAchievementSuccess);
 	return true;
@@ -699,7 +699,7 @@ bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const
 			bGetUserStatItemSuccess = true;
 			getUserStatItemResult = Result;
 		}), AchievementTestErrorHandler);
-	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
+	WaitUntil(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
 	for (auto entry : getUserStatItemResult.Data)
 	{
 		if (entry.StatCode == currentStatCode)
@@ -717,7 +717,7 @@ bool FAchievementTestUnlockIncrementalAchievementClientUpdateStat::RunTest(const
 		{
 			bIncrementUserStatDone = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bIncrementUserStatDone, "Waiting for increment user stat item ...");
+	WaitUntil(bIncrementUserStatDone, "Waiting for increment user stat item ...");
 
 	WaitSecond(10.0f, "Waiting for KAFKA");
 
@@ -750,7 +750,7 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 		{
 			bClientLoginSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	// Arrange
 	FString currentStatCode = AchievementTestAchievementIncrementalServer.StatCode;
@@ -762,7 +762,7 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 			bGetUserStatItemSuccess = true;
 			getUserStatItemResult = Result;
 		}), AchievementTestErrorHandler);
-	Waiting(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
+	WaitUntil(bGetUserStatItemSuccess, "Waiting for get user stat item achievement ...");
 	for (auto entry : getUserStatItemResult.Data)
 	{
 		if (entry.StatCode == currentStatCode)
@@ -782,7 +782,7 @@ bool FAchievementTestUnlockIncrementalAchievementServerUpdateStat::RunTest(const
 				bIncrementStatDone = true;
 			}),
 		AchievementTestErrorHandler);
-	Waiting(bIncrementStatDone, "Waiting for increment user stat items...");
+	WaitUntil(bIncrementStatDone, "Waiting for increment user stat items...");
 
 	WaitSecond(10.0f, "Waiting for KAFKA");
 
@@ -820,7 +820,7 @@ bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 				bDeleteAchievementSuccess = true;
 				deleteAchievementResults.Add(true);
 			}), AchievementTestErrorHandler);
-		Waiting(bDeleteAchievementSuccess, "Waiting for deleting achievement ...");
+		WaitUntil(bDeleteAchievementSuccess, "Waiting for deleting achievement ...");
 	}
 
 	bool bDeleteSuccess = false;
@@ -829,7 +829,7 @@ bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 			bDeleteSuccess = true;
 		}), AchievementTestErrorHandler);
-	Waiting(bDeleteSuccess, "Waiting for user deletion...");
+	WaitUntil(bDeleteSuccess, "Waiting for user deletion...");
 
 	for (auto bDeleteAchievementSuccess : deleteAchievementResults)
 	{

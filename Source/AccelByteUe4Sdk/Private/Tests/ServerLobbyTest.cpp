@@ -233,7 +233,7 @@ void CleanPartyBeforeTest(const FSimpleDelegate& OnSuccess)
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Leaving Party...");
+		WaitUntil(bSLeavePartySuccess, "Leaving Party...");
 		SuccessLeaveCount++;
 	}
 
@@ -251,7 +251,7 @@ void FormParty(const FSimpleDelegate OnSuccess)
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 
 
 	SLobbies[0]->SetCreatePartyResponseDelegate(SCreatePartyDelegate);
@@ -259,10 +259,10 @@ void FormParty(const FSimpleDelegate OnSuccess)
 	SLobbies[0]->SetInfoPartyResponseDelegate(SGetInfoPartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating Party...");
+	WaitUntil(bSCreatePartySuccess, "Creating Party...");
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	for (int i = 1; i < STestUserCount; i++)
 	{
@@ -271,12 +271,12 @@ void FormParty(const FSimpleDelegate OnSuccess)
 		SLobbies[i]->SetInfoPartyResponseDelegate(SGetInfoPartyDelegate);
 
 		SLobbies[0]->SendInviteToPartyRequest(SUserCreds[i].GetUserId());
-		Waiting(bSInvitePartySuccess, "Inviting to Party...");
+		WaitUntil(bSInvitePartySuccess, "Inviting to Party...");
 		bSInvitePartySuccess = false;
 		WaitUntil([&]()
 		{
 			return bSGetInvitedNotifSuccess;
-		}, 30, "Waiting for Party Invitation");
+		}, "Waiting for Party Invitation", 30);
 		bSGetInvitedNotifSuccess = false;
 		invitedToParty[i - 1] = SinvitedToPartyResponse;
 	}
@@ -285,13 +285,13 @@ void FormParty(const FSimpleDelegate OnSuccess)
 	{
 		int32 index = i - 1;
 		SLobbies[i]->SendAcceptInvitationRequest(invitedToParty[index].PartyId, invitedToParty[index].InvitationToken);
-		Waiting(bSJoinPartySuccess, "Joining a Party...");
+		WaitUntil(bSJoinPartySuccess, "Joining a Party...");
 		bSJoinPartySuccess = false;
 	}
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	if (bSGetInfoPartySuccess && !SinfoPartyResponse.PartyId.IsEmpty() && (SinfoPartyResponse.Members.Num() == STestUserCount))
 	{
@@ -425,7 +425,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 			}
 		}));
 
-		Waiting(UsersCreationSuccess[i], "Waiting for user created...");
+		WaitUntil(UsersCreationSuccess[i], "Waiting for user created...");
 
 		SLobbyUsers[i]->LoginWithUsername(
 			Email,
@@ -437,7 +437,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		}),
 			ServerLobbyErrorHandler);
 
-		Waiting(UsersLoginSuccess[i], "Waiting for Login...");
+		WaitUntil(UsersLoginSuccess[i], "Waiting for Login...");
 
 		SLobbies.Add(MakeShared<Api::Lobby>(SUserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
 	}
@@ -453,7 +453,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		bLoginServerSuccess = true;
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("\t\tClient Successfully Login."));
 	}), ServerLobbyErrorHandler);
-	Waiting(bLoginServerSuccess, "Waiting for Client Login...");
+	WaitUntil(bLoginServerSuccess, "Waiting for Client Login...");
 
 	SLobbyConnect(4);
 
@@ -462,7 +462,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 		bSCleanupLeaveParty = false;
 		SLobbies[i]->SetLeavePartyResponseDelegate(SCleanupLeavePartyDelegate);
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSCleanupLeaveParty, "Leaving Party...");
+		WaitUntil(bSCleanupLeaveParty, "Leaving Party...");
 	}
 
 	SLobbyDisconnect(4);
@@ -501,7 +501,7 @@ bool ServerLobbyTestTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;
 		}), ServerLobbyErrorHandler);
-		Waiting(bDeleteUsersSuccessful[i], "Waiting for user deletion...");
+		WaitUntil(bDeleteUsersSuccessful[i], "Waiting for user deletion...");
 	}
 
 	for (int i = 0; i < STestUserCount; i++)
@@ -519,11 +519,11 @@ bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Param
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -535,13 +535,13 @@ bool PartyStorageTest_WritePartyStorage_ValidParty::RunTest(const FString& Param
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -556,11 +556,11 @@ bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& 
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -574,13 +574,13 @@ bool PartyStorageTest_WriteEmptyPartyStorage_ValidParty::RunTest(const FString& 
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -605,7 +605,7 @@ bool PartyStorageTest_WritePartyStorage_NonExistParty::RunTest(const FString& Pa
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 		bWritePartyStorageDone = true;
 	}));
-	Waiting(bWritePartyStorageDone, "Waiting for write result");
+	WaitUntil(bWritePartyStorageDone, "Waiting for write result");
 
 	AB_TEST_FALSE(bWritePartyStorageSuccess);
 
@@ -628,7 +628,7 @@ bool PartyStorageTest_GetPartyStorage_NonExistParty::RunTest(const FString& Para
 	{
 		bGetPartyStorageDone = true;
 	}));
-	Waiting(bGetPartyStorageDone, "Waiting for get result");
+	WaitUntil(bGetPartyStorageDone, "Waiting for get result");
 
 	AB_TEST_FALSE(bGetPartyStorageSuccess);
 
@@ -643,11 +643,11 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -659,14 +659,14 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyButEmptyStorage_Success::RunTest
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 	
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 	AB_TEST_EQUAL(PartyData.Custom_attribute.JsonObject->Values.Num(), 0);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -681,11 +681,11 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -697,7 +697,7 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 
@@ -709,13 +709,13 @@ bool PartyStorageTest_GetPartyStorage_ValidPartyStorage_Success::RunTest(const F
 		bGetPartyStorageSuccess = true;
 		PartyData = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -730,7 +730,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	TQueue<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 	int UpdateCount = 0;
@@ -747,7 +747,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -759,9 +759,9 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
-	WaitUntil([&UpdateCount]() { return UpdateCount  == 4; }, 5);
+	WaitUntil([&UpdateCount]() { return UpdateCount  == 4; }, "", 5);
 
 	AB_TEST_TRUE(bSGetInfoPartySuccess);
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
@@ -775,7 +775,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification::
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -791,7 +791,7 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_T
 	SLobbies[0]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Waiting for create party");
+	WaitUntil(bSCreatePartySuccess, "Waiting for create party");
 
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 	const auto PartyDataUpdateResponse = Api::Lobby::FPartyDataUpdateNotif::CreateLambda([&PartyDataNotifResults](FAccelByteModelsPartyDataNotif result)
@@ -822,14 +822,14 @@ bool PartyStorageTest_OverwritePartyStorage_PartyFormed_SuccessGotNotification_T
 		{
 			bServerUpdateDone++;
 		})));
-		Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+		WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 	}
 
-	WaitUntil([&bServerUpdateDone, &bSpamUpdateCount]() { return bServerUpdateDone == bSpamUpdateCount; }, 5);
+	WaitUntil([&bServerUpdateDone, &bSpamUpdateCount]() { return bServerUpdateDone == bSpamUpdateCount; }, "", 5);
 
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting for leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting for leave party");
 
 	bool bIsPartyDataNotifIsEqual = PartyDataNotifResults.Num() == bServerUpdateSuccessCount;
 	AB_TEST_TRUE(bIsPartyDataNotifIsEqual);
@@ -865,10 +865,10 @@ bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FS
 	SLobbies[0]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
 
-	WaitUntil([&PartyDataNotifResults]() { return PartyDataNotifResults.Num() > 0; }, 1.5);
+	WaitUntil([&PartyDataNotifResults]() { return PartyDataNotifResults.Num() > 0; }, "", 1.5);
 	FAccelByteModelsPartyDataNotif PartyDataNotif;
 	PartyDataNotif = PartyDataNotifResults[0];
 	AB_TEST_EQUAL(PartyDataNotif.Members.Num(), 1);
@@ -876,13 +876,13 @@ bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FS
 	PartyDataNotifResults.RemoveAt(0);
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
-	Waiting(bSGetInvitedNotifSuccess, "Waiting party invitation");
+	WaitUntil(bSGetInvitedNotifSuccess, "Waiting party invitation");
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 	AB_TEST_FALSE(bSJoinPartyError);
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return PartyDataNotifResults.Num() == PartySize; }, 1.5);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return PartyDataNotifResults.Num() == PartySize; }, "", 1.5);
 	PartyDataNotif = PartyDataNotifResults[1];
 	AB_TEST_TRUE(PartyDataNotif.Members.Num() > 1);
 	// clear array
@@ -894,17 +894,17 @@ bool PartyStorageTest_AllPartyState_ShouldGetPartyStorageNotif::RunTest(const FS
 	bSLeavePartyError = false;
 	bSLeavePartySuccess = false;
 	SLobbies[1]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting leave party");
 	AB_TEST_FALSE(bSLeavePartyError);
 
-	WaitUntil([&PartyDataNotifResults]() { return PartyDataNotifResults.Num() > 0; }, 5.0);
+	WaitUntil([&PartyDataNotifResults]() { return PartyDataNotifResults.Num() > 0; }, "", 5.0);
 	PartyDataNotif = PartyDataNotifResults[0];
 	AB_TEST_EQUAL(PartyDataNotif.Members.Num(), 1);
 
 	bSLeavePartyError = false;
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting leave party");
 	AB_TEST_FALSE(bSLeavePartyError);
 
 	SLobbyDisconnect(PartySize);
@@ -931,7 +931,7 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 	SLobbies[0]->SetPartyDataUpdateResponseDelegate(PartyDataUpdateResponse);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Waiting create party");
+	WaitUntil(bSCreatePartySuccess, "Waiting create party");
 	AB_TEST_TRUE(bSCreatePartySuccess);
 
 	FString PartyId = ScreatePartyResponse.PartyId;
@@ -943,7 +943,7 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 		bGetPartyStorageSuccess = true;
 		ClientPartyData = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 	AB_TEST_TRUE(ClientPartyData.Members.Contains(SUserIds[0]));
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 
@@ -954,12 +954,12 @@ bool PartyStorageTest_SomeoneCreateParty_GameClientAndServerGetPartyStorage_Succ
 		bGetPartyStorageSuccess = true;
 		ServerPartyData = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 	AB_TEST_TRUE(ClientPartyData.Members.Contains(SUserIds[0]));
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting for leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting for leave party");
 	
 	AB_TEST_TRUE(bSuccessGetPartyDataNotif);
 	AB_TEST_TRUE(PartyDataNotifResults.Members.Contains(SUserIds[0]));
@@ -983,7 +983,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 	SLobbies[1]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_TRUE(bSCreatePartySuccess);
 
 	FAccelByteModelsPartyDataNotif WriteNotif;
@@ -995,13 +995,13 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 
 	TArray< FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 
@@ -1024,7 +1024,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
 		FAccelByteModelsPartyDataNotif ServerPartyData;
@@ -1033,7 +1033,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		AB_TEST_EQUAL(ClientPartyData.Invitees.Num(), (PartySize - 1));
 		AB_TEST_EQUAL(ServerPartyData.Invitees.Num(), (PartySize - 1));
@@ -1042,7 +1042,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 	}
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 	AB_TEST_FALSE(bSJoinPartyError);
 
 	// assertion get party storage
@@ -1054,7 +1054,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
 		FAccelByteModelsPartyDataNotif ServerPartyData;
@@ -1063,7 +1063,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		AB_TEST_EQUAL(ClientPartyData.Invitees.Num(), 0);
 		AB_TEST_EQUAL(ServerPartyData.Invitees.Num(), 0);
@@ -1071,7 +1071,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		AB_TEST_EQUAL(ServerPartyData.Members.Num(), PartySize);
 	}
 
-	WaitUntil([&PartyDataNotifResults]() { return (PartyDataNotifResults.Num() == 2); }, 10.0);
+	WaitUntil([&PartyDataNotifResults]() { return (PartyDataNotifResults.Num() == 2); }, "", 10.0);
 
 	for (auto& PartyDataNotif : PartyDataNotifResults)
 	{
@@ -1084,7 +1084,7 @@ bool PartyStorageTest_SomeoneJoinParty_GameClientAndServerGetPartyStorage_Succes
 		bSLeavePartyError = false;
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Waiting leave party");
+		WaitUntil(bSLeavePartySuccess, "Waiting leave party");
 		AB_TEST_FALSE(bSLeavePartyError);
 	}
 
@@ -1109,7 +1109,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 	}
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
 
 	FAccelByteModelsPartyDataNotif WriteNotif;
@@ -1121,25 +1121,25 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 	bSGetInvitedNotifSuccess = false;
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[2]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 	bSJoinPartySuccess = false;
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 
 	WaitSecond(3, "delay wait for random partydatanotif");
 
@@ -1158,7 +1158,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 
 	int LeaveMemberIndex = 1;
 	SLobbies[LeaveMemberIndex]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting leave party");
 
 	// assertion get party storage
 	{
@@ -1169,7 +1169,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
 		FAccelByteModelsPartyDataNotif ServerPartyData;
@@ -1178,7 +1178,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		AB_TEST_EQUAL(ClientPartyData.Members.Num(), (PartySize - 1));
 		AB_TEST_EQUAL(ServerPartyData.Members.Num(), (PartySize - 1));
@@ -1186,7 +1186,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		AB_TEST_FALSE(ServerPartyData.Members.Contains(SUserIds[LeaveMemberIndex]));
 	}
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, 2.0);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, "", 2.0);
 
 	for (int i = 0; i < PartyDataNotifResults.Num(); i++)
 	{
@@ -1202,7 +1202,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 		bSLeavePartyError = false;
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Waiting leave party", 120);
+		WaitUntil(bSLeavePartySuccess, "Waiting leave party", 120);
 		AB_TEST_FALSE(bSLeavePartyError);
 	}
 
@@ -1230,7 +1230,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	SLobbies[1]->SetPartyKickNotifDelegate(ServerKickedFromPartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
 
 	FAccelByteModelsPartyDataNotif WriteNotif;
@@ -1242,25 +1242,25 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 	bSGetInvitedNotifSuccess = false;
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[2]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 	bSJoinPartySuccess = false;
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 
 	WaitSecond(3, "delay wait for random partydatanotif");
 
@@ -1280,8 +1280,8 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	int KickedMemberIndex = 1;
 
 	SLobbies[0]->SendKickPartyMemberRequest(SUserCreds[KickedMemberIndex].GetUserId());
-	Waiting(bSKickPartyMemberSuccess, "kicking party member...");
-	Waiting(bSKickedFromPartySuccess, "waiting to get kicked from party...");
+	WaitUntil(bSKickPartyMemberSuccess, "kicking party member...");
+	WaitUntil(bSKickedFromPartySuccess, "waiting to get kicked from party...");
 
 	// assertion get party storage
 	{
@@ -1292,7 +1292,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 			bGetPartyStorageSuccess = true;
 			ClientPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		bGetPartyStorageSuccess = false;
 		FAccelByteModelsPartyDataNotif ServerPartyData;
@@ -1301,7 +1301,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 			bGetPartyStorageSuccess = true;
 			ServerPartyData = result;
 		}), ServerLobbyErrorHandler);
-		Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+		WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 		AB_TEST_EQUAL(ClientPartyData.Members.Num(), (PartySize - 1));
 		AB_TEST_EQUAL(ServerPartyData.Members.Num(), (PartySize - 1));
@@ -1309,7 +1309,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		AB_TEST_FALSE(ServerPartyData.Members.Contains(SUserIds[KickedMemberIndex]));
 	}
 
-	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, 10.0);
+	WaitUntil([&PartyDataNotifResults, &PartySize]() { return (PartyDataNotifResults.Num() == (PartySize - 1)); }, "", 10.0);
 
 	for (int i = 0; i < PartyDataNotifResults.Num(); i++)
 	{
@@ -1325,7 +1325,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 		bSLeavePartyError = false;
 		bSLeavePartySuccess = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "Waiting leave party", 120);
+		WaitUntil(bSLeavePartySuccess, "Waiting leave party", 120);
 		AB_TEST_FALSE(bSLeavePartyError);
 	}
 
@@ -1350,7 +1350,7 @@ bool PartyStorageTest_ClientGetPartyStorage_NonExistParty::RunTest(const FString
 			{
 				bGetPartyStorageDone = true;
 			}));
-	Waiting(bGetPartyStorageDone, "Waiting for get result");
+	WaitUntil(bGetPartyStorageDone, "Waiting for get result");
 
 	AB_TEST_FALSE(bGetPartyStorageSuccess);
 
@@ -1365,11 +1365,11 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success::R
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -1381,14 +1381,14 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyButEmptyStorage_Success::R
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 	AB_TEST_EQUAL(PartyData.Custom_attribute.JsonObject->Values.Num(), 0);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -1403,11 +1403,11 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -1419,7 +1419,7 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 
@@ -1431,13 +1431,13 @@ bool PartyStorageTest_ClientGetPartyStorage_ValidPartyStorage_Success::RunTest(c
 			bGetPartyStorageSuccess = true;
 			PartyData = result;
 		}), ServerLobbyErrorHandler);
-	Waiting(bGetPartyStorageSuccess, "Waiting for get result");
+	WaitUntil(bGetPartyStorageSuccess, "Waiting for get result");
 
 	AB_TEST_TRUE(bGetPartyStorageSuccess);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -1462,7 +1462,7 @@ bool PartyStorageTest_ClientWritePartyStorage_NonExistParty::RunTest(const FStri
 				bWritePartyStorageFailed = true;
 				bWritePartyStorageDone = true;
 			}));
-	Waiting(bWritePartyStorageDone, "Waiting for write result");
+	WaitUntil(bWritePartyStorageDone, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageFailed);
 
@@ -1477,11 +1477,11 @@ bool PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty::RunTest(const FSt
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -1495,13 +1495,13 @@ bool PartyStorageTest_ClientWriteEmptyPartyStorage_ValidParty::RunTest(const FSt
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -1517,7 +1517,7 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 	SLobbies[0]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Waiting for create party");
+	WaitUntil(bSCreatePartySuccess, "Waiting for create party");
 
 	FAccelByteModelsPartyDataNotif PartyDataNotifResult;
 	bool bGetPartyDataNotif = false;
@@ -1538,15 +1538,15 @@ bool PartyStorageTest_ClientWritePartyStorage_Success::RunTest(const FString& Pa
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
-	Waiting(bGetPartyDataNotif, "Waiting get party data notif");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bGetPartyDataNotif, "Waiting get party data notif");
 
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
 	AB_TEST_TRUE(bGetPartyDataNotif);
 	AB_TEST_TRUE(ComparePartyData(PartyDataNotifResult.Custom_attribute));
 
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting for leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting for leave party");
 
 	SLobbyDisconnect(1);
 	ResetServerResponses();
@@ -1567,17 +1567,17 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 	SLobbies[1]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
 
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 
 	FString PartyId = ScreatePartyResponse.PartyId;
 	int WriteSuccessCount = 0;
@@ -1599,7 +1599,7 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 		}));
 	}
 
-	WaitUntil([&ResultCount] {return ResultCount == 2; }, 2.5, "Waiting for write result");
+	WaitUntil([&ResultCount] {return ResultCount == 2; }, "Waiting for write result", 2.5);
 
 	// rarely happen
 	bool bWriteSuccessPass = WriteSuccessCount == 1 || WriteSuccessCount == 2;
@@ -1618,7 +1618,7 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	TQueue<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 	int UpdateCount = 0;
@@ -1635,7 +1635,7 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -1647,9 +1647,9 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 			WriteNotif = notifResult;
 			bWritePartyStorageSuccess = true;
 		}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
-	WaitUntil([&UpdateCount]() { return UpdateCount == 4; }, 5);
+	WaitUntil([&UpdateCount]() { return UpdateCount == 4; }, "", 5);
 
 	AB_TEST_TRUE(bSGetInfoPartySuccess);
 	AB_TEST_TRUE(bWritePartyStorageSuccess);
@@ -1663,7 +1663,7 @@ bool PartyStorageTest_ClientOverwritePartyStorage_PartyFormed_SuccessGotNotifica
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -1678,11 +1678,11 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return bPartyFormed;
-	}, 30, "Waiting for Party Formed...");
+	}, "Waiting for Party Formed...", 30);
 
 	bSGetInfoPartySuccess = false;
 	SLobbies[0]->SendInfoPartyRequest();
-	Waiting(bSGetInfoPartySuccess, "Getting Info Party...");
+	WaitUntil(bSGetInfoPartySuccess, "Getting Info Party...");
 
 	FString PartyId = SinfoPartyResponse.PartyId;
 
@@ -1694,7 +1694,7 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 		WriteNotif = notifResult;
 		bWritePartyStorageSuccess = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bWritePartyStorageSuccess, "Waiting for write result");
+	WaitUntil(bWritePartyStorageSuccess, "Waiting for write result");
 
 	bool bGetActivePartiesSuccess = false;
 	FAccelByteModelsActivePartiesData PartiesData;
@@ -1705,7 +1705,7 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 		bGetActivePartiesSuccess = true;
 		PartiesData = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 
 	FAccelByteModelsPartyDataNotif PartyDataNotif;
 	bool bHasParty = PartiesData.Data.ContainsByPredicate([&WriteNotif, &PartyDataNotif](FAccelByteModelsPartyDataNotif party)
@@ -1725,7 +1725,7 @@ bool PartyStorageTest_GetActivesPartyAfterPartyCreated::RunTest(const FString& P
 
 	bool bCleanUpDone = false;
 	CleanPartyBeforeTest(FSimpleDelegate::CreateLambda([&]() { bCleanUpDone = true; }));
-	Waiting(bCleanUpDone, "Waiting for clean up done");
+	WaitUntil(bCleanUpDone, "Waiting for clean up done");
 	SLobbyDisconnect(4);
 	ResetServerResponses();
 
@@ -1746,11 +1746,11 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 		bSLeavePartySuccess = false;
 		bSLeavePartyError = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "waiting leave party");
+		WaitUntil(bSLeavePartySuccess, "waiting leave party");
 		bSCreatePartySuccess = false;
 		bSCreatePartyError = false;
 		SLobbies[i]->SendCreatePartyRequest();
-		Waiting(bSCreatePartySuccess, "waiting leave party");
+		WaitUntil(bSCreatePartySuccess, "waiting leave party");
 		AB_TEST_FALSE(bSCreatePartyError);
 	}
 
@@ -1763,7 +1763,7 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 		bGetActivePartiesSuccess = true;
 		PartiesData1 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	bGetActivePartiesSuccess = false;
@@ -1775,7 +1775,7 @@ bool PartyStorageTest_GetActivesParty_CheckLimitAndOffsetParam::RunTest(const FS
 		bGetActivePartiesSuccess = true;
 		PartiesData2 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	for (int i = 0; i < PartySize; i++)
@@ -1814,11 +1814,11 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bSLeavePartySuccess = false;
 		bSLeavePartyError = false;
 		SLobbies[i]->SendLeavePartyRequest();
-		Waiting(bSLeavePartySuccess, "waiting leave party");
+		WaitUntil(bSLeavePartySuccess, "waiting leave party");
 		bSCreatePartySuccess = false;
 		bSCreatePartyError = false;
 		SLobbies[i]->SendCreatePartyRequest();
-		Waiting(bSCreatePartySuccess, "waiting leave party");
+		WaitUntil(bSCreatePartySuccess, "waiting leave party");
 		AB_TEST_FALSE(bSCreatePartyError);
 	}
 
@@ -1832,7 +1832,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData1 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	// next page (2)
@@ -1845,7 +1845,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData2 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	// first page (1)
@@ -1858,7 +1858,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData3 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	// previous page from page 2 (1)
@@ -1871,7 +1871,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData4 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	// next page from page 2 (3)
@@ -1884,7 +1884,7 @@ bool PartyStorageTest_GetActivesParty_UsingPagination::RunTest(const FString& Pa
 		bGetActivePartiesSuccess = true;
 		PartiesData5 = result;
 	}), ServerLobbyErrorHandler);
-	Waiting(bGetActivePartiesSuccess, "Waiting for get result");
+	WaitUntil(bGetActivePartiesSuccess, "Waiting for get result");
 	AB_TEST_TRUE(bGetActivePartiesSuccess);
 
 	for (int i = 0; i < PartySize; i++)
@@ -1927,10 +1927,10 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 	SLobbies[0]->SetLeavePartyResponseDelegate(SLeavePartyDelegate);
 
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting for leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting for leave party");
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Waiting for create party");
+	WaitUntil(bSCreatePartySuccess, "Waiting for create party");
 
 	TArray< FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 	bool bSuccessGetPartyDataNotif = false;
@@ -1964,13 +1964,13 @@ bool PartyStorageTest_WriteRacingCondition_6ServersAtOnce_Success::RunTest(const
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Can't write party storage. Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			ServerUpdateDone++;
 		}));
-		Waiting(bWritePartyStorageSuccess, "write party storage successful");
+		WaitUntil(bWritePartyStorageSuccess, "write party storage successful");
 	}
 
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting for leave party");
-	WaitUntil([&ConcurrentServerWriteCount, &PartyDataNotifResults]() { return ConcurrentServerWriteCount == PartyDataNotifResults.Num(); }, 2, "Wait until write done");
+	WaitUntil(bSLeavePartySuccess, "Waiting for leave party");
+	WaitUntil([&ConcurrentServerWriteCount, &PartyDataNotifResults]() { return ConcurrentServerWriteCount == PartyDataNotifResults.Num(); }, "Wait until write done", 2);
 
 	AB_TEST_EQUAL(PartyDataNotifResults.Num(), ConcurrentServerWriteCount);
 	bool bLatestNotifFound = false;
@@ -2002,14 +2002,14 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	// Setup, make sure users have no party
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Lobby 0 waiting setup leave party");
+	WaitUntil(bSLeavePartySuccess, "Lobby 0 waiting setup leave party");
 	bSLeavePartySuccess = false;
 	SLobbies[1]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Lobby 1 waiting setup leave party");
+	WaitUntil(bSLeavePartySuccess, "Lobby 1 waiting setup leave party");
 	bSLeavePartySuccess = false;
 
 	SLobbies[0]->SendCreatePartyRequest();
-	Waiting(bSCreatePartySuccess, "Creating party");
+	WaitUntil(bSCreatePartySuccess, "Creating party");
 	AB_TEST_FALSE(bSCreatePartyError);
 
 	FAccelByteModelsDataPartyResponse queryAfterCreateParty;
@@ -2023,17 +2023,17 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 
 	}),
 		ServerLobbyErrorHandler);
-	Waiting(queryAfterCreatePartySuccess, "Waiting query after creating party");
+	WaitUntil(queryAfterCreatePartySuccess, "Waiting query after creating party");
 
 	bSGetInvitedNotifSuccess = false;
 	SLobbies[0]->SendInviteToPartyRequest(SUserIds[1]);
 	WaitUntil([&]()
 	{
 		return bSGetInvitedNotifSuccess;
-	}, 30, "Waiting party invitation");
+	}, "Waiting party invitation", 30);
 
 	SLobbies[1]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
-	Waiting(bSJoinPartySuccess, "Waiting join party");
+	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 	AB_TEST_FALSE(bSJoinPartyError);
 
 	FAccelByteModelsDataPartyResponse queryAfterInviteToParty0;
@@ -2058,12 +2058,12 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 	}),
 		ServerLobbyErrorHandler);
 
-	Waiting(queryAfterInviteToParty0Success, "Waiting query after invite to party 0");
-	Waiting(queryAfterInviteToParty1Success, "Waiting query after invite to party 1");
+	WaitUntil(queryAfterInviteToParty0Success, "Waiting query after invite to party 0");
+	WaitUntil(queryAfterInviteToParty1Success, "Waiting query after invite to party 1");
 
 
 	SLobbies[1]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting 1 leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting 1 leave party");
 	AB_TEST_TRUE(bSLeavePartySuccess);
 
 	FAccelByteModelsDataPartyResponse queryAfterLeaveParty0;
@@ -2093,13 +2093,13 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 		queryAfterLeaveNotFound1 = true;
 	})
 		);
-	Waiting(queryAfterLeaveParty0Success, "Waiting query after leave party 0");
-	Waiting(queryAfterLeaveComplete1, "Waiting query after leave party 1");
+	WaitUntil(queryAfterLeaveParty0Success, "Waiting query after leave party 0");
+	WaitUntil(queryAfterLeaveComplete1, "Waiting query after leave party 1");
 
 	bSLeavePartyError = false;
 	bSLeavePartySuccess = false;
 	SLobbies[0]->SendLeavePartyRequest();
-	Waiting(bSLeavePartySuccess, "Waiting 0 leave party");
+	WaitUntil(bSLeavePartySuccess, "Waiting 0 leave party");
 	AB_TEST_TRUE(bSLeavePartySuccess);
 
 	FAccelByteModelsDataPartyResponse queryAfterDisbandParty;
@@ -2118,7 +2118,7 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 		queryAfterDisbandPartyNotFound0 = true;
 	})
 		);
-	Waiting(queryAfterDisbandComplete, "Waiting 0 disband party");
+	WaitUntil(queryAfterDisbandComplete, "Waiting 0 disband party");
 
 	AB_TEST_TRUE(ScreatePartyResponse.PartyId.Equals(queryAfterCreateParty.partyId));
 
@@ -2173,7 +2173,7 @@ bool ServerLobbyGetSetSessionAttribute_Ok::RunTest(const FString& Parameters)
 	FRegistry::ServerLobby.SetSessionAttribute(SUserIds[0], AttributeKeys[1], Attributes[AttributeKeys[1]], FVoidHandler::CreateLambda([&bServerSetSessionAttributeComplete]() {
 		bServerSetSessionAttributeComplete = true;
 	}), ServerLobbyErrorHandler);
-	Waiting(bServerSetSessionAttributeComplete, "Waiting server set session attribute 1");
+	WaitUntil(bServerSetSessionAttributeComplete, "Waiting server set session attribute 1");
 
 	// Setup Server get session attribute
 	bool bServerGetSessionAttribute = false;
@@ -2192,8 +2192,8 @@ bool ServerLobbyGetSetSessionAttribute_Ok::RunTest(const FString& Parameters)
 		getSessionAttributeAllResult = result;
 	}), ServerLobbyErrorHandler);
 
-	Waiting(bServerGetSessionAttribute, "Waiting get session attribute response");
-	Waiting(bServerGetSessionAttributeAll, "Waiting get session attribute all response");
+	WaitUntil(bServerGetSessionAttribute, "Waiting get session attribute response");
+	WaitUntil(bServerGetSessionAttributeAll, "Waiting get session attribute all response");
 
 	// ASSERT
 	AB_TEST_TRUE(bServerSetSessionAttributeComplete);

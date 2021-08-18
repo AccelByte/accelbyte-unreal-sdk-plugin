@@ -153,7 +153,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bUGCLoginUserSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bUGCLoginUserSuccess, "Waiting for login...");
+	WaitUntil(bUGCLoginUserSuccess, "Waiting for login...");
 
 	AB_TEST_TRUE(bUGCLoginUserSuccess);
 
@@ -164,7 +164,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bUGCDeleteUserSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bUGCDeleteUserSuccess, "Waiting for user deletion...");
+	WaitUntil(bUGCDeleteUserSuccess, "Waiting for user deletion...");
 
 	AB_TEST_TRUE(bUGCDeleteUserSuccess);
 
@@ -176,7 +176,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bUGCLoginUserSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bUGCLoginUserSuccess, "Waiting for login...");
+	WaitUntil(bUGCLoginUserSuccess, "Waiting for login...");
 
 	AB_TEST_TRUE(bUGCLoginUserSuccess);
 	
@@ -191,7 +191,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bGetTagsSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetTagsSuccess, "Waiting for getting tags...");
+	WaitUntil(bGetTagsSuccess, "Waiting for getting tags...");
 
 	for(const FString& UGCTag : UGCTags)
 	{
@@ -206,7 +206,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 					bDeleteTagSuccess = true;
 				}), UGCOnError);
 				FlushHttpRequests();
-				Waiting(bDeleteTagSuccess, "Waiting for deleting tag...");
+				WaitUntil(bDeleteTagSuccess, "Waiting for deleting tag...");
 
 				AB_TEST_TRUE(bDeleteTagSuccess);
 			}
@@ -223,7 +223,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bGetTypesSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetTypesSuccess, "Waiting for getting types...");
+	WaitUntil(bGetTypesSuccess, "Waiting for getting types...");
 
 	for (const FAccelByteModelsUGCTypeResponse& ResponseType : GetTypesResponse.Data)
 	{
@@ -236,7 +236,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 				bDeleteTypeSuccess = true;
 			}), UGCOnError);
 			FlushHttpRequests();
-			Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
+			WaitUntil(bDeleteTypeSuccess, "Waiting for deleting type...");
 
 			AB_TEST_TRUE(bDeleteTypeSuccess);
 		}
@@ -263,7 +263,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bGetChannelsDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetChannelsDone, "Waiting for getting channels...");
+	WaitUntil(bGetChannelsDone, "Waiting for getting channels...");
 
 	AB_TEST_TRUE(bGetChannelsDone);
 
@@ -280,7 +280,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			bDeleteChannelDone = true;
 		}));
 		FlushHttpRequests();
-		Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
+		WaitUntil(bDeleteChannelDone, "Waiting for deleting channel...");
 
 		AB_TEST_TRUE(bDeleteChannelDone);
 	}
@@ -294,7 +294,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bCreateTypeSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateTypeSuccess, "Waiting for creating type...");
+	WaitUntil(bCreateTypeSuccess, "Waiting for creating type...");
 
 	AB_TEST_TRUE(bCreateTypeSuccess);
 	
@@ -309,7 +309,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			bCreateTagSuccess = true;
 		}), UGCOnError);
 		FlushHttpRequests();
-		Waiting(bCreateTagSuccess, "Waiting for creating tag...");
+		WaitUntil(bCreateTagSuccess, "Waiting for creating tag...");
 
 		AB_TEST_TRUE(bCreateTagSuccess);
 	}
@@ -327,7 +327,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		ReceivedUserData = Result;
 		bDoneSearchUser = true;
 	}), UGCOnError);
-	Waiting(bDoneSearchUser, "Waiting for searching user...");
+	WaitUntil(bDoneSearchUser, "Waiting for searching user...");
 	AB_TEST_TRUE(bDoneSearchUser);
 
 	if (ReceivedUserData.Data.Num() > 0)
@@ -351,7 +351,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			bRegisterSuccess = true;
 		}), UGCOnError);
 
-		Waiting(bRegisterSuccess, "Waiting for registering user2...");
+		WaitUntil(bRegisterSuccess, "Waiting for registering user2...");
 		AB_TEST_TRUE(bRegisterSuccess);
 	}
 
@@ -361,7 +361,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bLoginSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bLoginSuccess, "Waiting for login user2...");
+	WaitUntil(bLoginSuccess, "Waiting for login user2...");
 
 	AB_TEST_TRUE(bLoginSuccess);
 
@@ -378,7 +378,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		bDeleteTypeSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteTypeSuccess, "Waiting for deleting type...");
+	WaitUntil(bDeleteTypeSuccess, "Waiting for deleting type...");
 
 	AB_TEST_TRUE(bDeleteTypeSuccess);
 	
@@ -391,7 +391,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 			bDeleteTagSuccess = true;
 		}), UGCOnError);
 		FlushHttpRequests();
-		Waiting(bDeleteTagSuccess, "Waiting for deleting tag...");
+		WaitUntil(bDeleteTagSuccess, "Waiting for deleting tag...");
 
 		AB_TEST_TRUE(bDeleteTagSuccess);
 	}
@@ -407,7 +407,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		bDeleteChannelDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bDeleteChannelDone, "Waiting for deleting channel...");
+	WaitUntil(bDeleteChannelDone, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelDone);
 	
@@ -418,7 +418,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		bDeleteUserSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteUserSuccess, "Waiting for deleting user...");
+	WaitUntil(bDeleteUserSuccess, "Waiting for deleting user...");
 
 	AB_TEST_TRUE(bDeleteUserSuccess);
 	
@@ -429,7 +429,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 		bDeleteUser2Success = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteUserSuccess, "Waiting for deleting User2...");
+	WaitUntil(bDeleteUserSuccess, "Waiting for deleting User2...");
 	
 	UGCUser2Registry->User.ForgetAllCredentials();
 
@@ -449,7 +449,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		bCreateChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+	WaitUntil(bCreateChannelSuccess, "Waiting for creating channel...");
 
 	AB_TEST_TRUE(bCreateChannelSuccess);
 	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
@@ -463,7 +463,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		bGetChannelsSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetChannelsSuccess, "Waiting for getting channels...");
+	WaitUntil(bGetChannelsSuccess, "Waiting for getting channels...");
 
 	AB_TEST_TRUE(bGetChannelsSuccess);
 	AB_TEST_TRUE(UGCCheckContainChannel(UGCChannelId, GetChannelsResponse.Data));
@@ -475,7 +475,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		bDeleteChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+	WaitUntil(bDeleteChannelSuccess, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelSuccess);
 
@@ -488,7 +488,7 @@ bool UGCCreate_Get_Delete_Channel::RunTest(const FString& Parameters)
 		bGetChannelsNotFoundSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetChannelsSuccess, "Waiting for getting channels...");
+	WaitUntil(bGetChannelsSuccess, "Waiting for getting channels...");
 
 	AB_TEST_TRUE(bGetChannelsNotFoundSuccess);
 	AB_TEST_FALSE(UGCCheckContainChannel(UGCChannelId, GetChannelsNotFoundResponse.Data));
@@ -508,7 +508,7 @@ bool UGCGetTags::RunTest(const FString& Parameters)
 		bGetTagsSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetTagsSuccess, "Waiting for getting tags...");
+	WaitUntil(bGetTagsSuccess, "Waiting for getting tags...");
 
 	AB_TEST_TRUE(bGetTagsSuccess);
 	AB_TEST_TRUE(UGCCheckContainTag(UGCTags[0], UGCTagIds[0], GetTagsResponse.Data));
@@ -530,7 +530,7 @@ bool UGCGetTypes::RunTest(const FString& Parameters)
 		bGetTypesSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetTypesSuccess, "Waiting for getting types...");
+	WaitUntil(bGetTypesSuccess, "Waiting for getting types...");
 
 	AB_TEST_TRUE(bGetTypesSuccess);
 	AB_TEST_TRUE(UGCCheckContainType(UGCType, UGCTypeId, GetTypesResponse.Data));
@@ -552,7 +552,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bCreateChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+	WaitUntil(bCreateChannelSuccess, "Waiting for creating channel...");
 
 	AB_TEST_TRUE(bCreateChannelSuccess);
 	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
@@ -568,7 +568,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bCreateContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateContentSuccess, "Waiting for creating content...");
+	WaitUntil(bCreateContentSuccess, "Waiting for creating content...");
 
 	AB_TEST_TRUE(bCreateContentSuccess);
 	AB_TEST_EQUAL(CreateContentResponse.ChannelId, UGCChannelId);
@@ -592,7 +592,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bUploadSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bUploadSuccess, "Waiting for uploading content...");
+	WaitUntil(bUploadSuccess, "Waiting for uploading content...");
 
 	AB_TEST_TRUE(bUploadSuccess);
 
@@ -607,7 +607,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+	WaitUntil(bGetContentSuccess, "Waiting for getting content by content id...");
 
 	AB_TEST_TRUE(bGetContentSuccess);
 	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, CreateContentResponse));
@@ -626,7 +626,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bDownloadSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDownloadSuccess, "Waiting for downloading content...");
+	WaitUntil(bDownloadSuccess, "Waiting for downloading content...");
 
 	AB_TEST_TRUE(bDownloadSuccess);
 	AB_TEST_EQUAL(DownloadBytes, UGCContentBytes);
@@ -642,7 +642,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContenttByShareCodeSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContenttByShareCodeSuccess, "Waiting for getting content by share code by its content creator...");
+	WaitUntil(bGetContenttByShareCodeSuccess, "Waiting for getting content by share code by its content creator...");
 
 	AB_TEST_TRUE(bGetContenttByShareCodeSuccess);
 	AB_TEST_TRUE(UGCCheckContentEqual(GetContenttByShareCodeResponse, CreateContentResponse));
@@ -658,7 +658,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContenttByShareCodeUser2Success = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContenttByShareCodeUser2Success, "Waiting for getting content by share code by User2...");
+	WaitUntil(bGetContenttByShareCodeUser2Success, "Waiting for getting content by share code by User2...");
 
 	AB_TEST_TRUE(bGetContenttByShareCodeUser2Success);
 	AB_TEST_TRUE(UGCCheckContentEqual(GetContentByShareCodeUser2Response, CreateContentResponse));
@@ -677,7 +677,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bDownloadSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDownloadSuccess, "Waiting for downloading content...");
+	WaitUntil(bDownloadSuccess, "Waiting for downloading content...");
 
 	AB_TEST_TRUE(bDownloadSuccess);
 	AB_TEST_EQUAL(DownloadBytes, UGCContentBytes);
@@ -692,7 +692,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetPreviewSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetPreviewSuccess, "Waiting for getting content as string...");
+	WaitUntil(bGetPreviewSuccess, "Waiting for getting content as string...");
 
 	AB_TEST_TRUE(bGetPreviewSuccess); 
 	AB_TEST_EQUAL(GetPreviewResponse.Preview, UGCCreateContentRequest.Preview);
@@ -707,7 +707,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetPreviewBytesSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetPreviewBytesSuccess, "Waiting for getting content as TArray<uint8>...");
+	WaitUntil(bGetPreviewBytesSuccess, "Waiting for getting content as TArray<uint8>...");
 
 	AB_TEST_TRUE(bGetPreviewBytesSuccess);
 	AB_TEST_EQUAL(GetPreviewBytesResponse, UGCPreviewBytes);
@@ -723,7 +723,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bModifyContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bModifyContentSuccess, "Waiting for modifying content...");
+	WaitUntil(bModifyContentSuccess, "Waiting for modifying content...");
 
 	AB_TEST_TRUE(bModifyContentSuccess);
 
@@ -738,7 +738,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+	WaitUntil(bGetContentSuccess, "Waiting for getting content by content id...");
 
 	AB_TEST_TRUE(bGetContentSuccess);
 	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, ModifyContentResponse));
@@ -753,7 +753,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bModifyContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bModifyContentSuccess, "Waiting for modifying content...");
+	WaitUntil(bModifyContentSuccess, "Waiting for modifying content...");
 
 	AB_TEST_TRUE(bModifyContentSuccess);
 
@@ -768,7 +768,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content by content id...");
+	WaitUntil(bGetContentSuccess, "Waiting for getting content by content id...");
 
 	AB_TEST_TRUE(bGetContentSuccess);
 	AB_TEST_TRUE(UGCCheckContentEqual(GetContentResponse, ModifyContentResponse));
@@ -781,7 +781,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bDeleteContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteContentSuccess, "Waiting for deleting Content...");
+	WaitUntil(bDeleteContentSuccess, "Waiting for deleting Content...");
 
 	AB_TEST_TRUE(bDeleteContentSuccess);
 
@@ -800,7 +800,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bGetContentNotFoundDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetContentNotFoundDone, "Waiting for getting content...");
+	WaitUntil(bGetContentNotFoundDone, "Waiting for getting content...");
 
 	AB_TEST_TRUE(bGetContentNotFoundSuccess);
 	AB_TEST_TRUE(bGetContentNotFoundDone);
@@ -813,7 +813,7 @@ bool UGCCreate_Get_Modify_Delete_Content_As_String::RunTest(const FString& Param
 		bDeleteChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+	WaitUntil(bDeleteChannelSuccess, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelSuccess);
 
@@ -834,7 +834,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 		bCreateChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateChannelSuccess, "Waiting for creating channel...");
+	WaitUntil(bCreateChannelSuccess, "Waiting for creating channel...");
 
 	AB_TEST_TRUE(bCreateChannelSuccess);
 	AB_TEST_EQUAL(CreatedChannelName, UGCChannelName);
@@ -850,7 +850,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 		bCreateContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bCreateContentSuccess, "Waiting for creating content...");
+	WaitUntil(bCreateContentSuccess, "Waiting for creating content...");
 
 	AB_TEST_TRUE(bCreateContentSuccess);
 	AB_TEST_EQUAL(CreateContentResponse.ChannelId, UGCChannelId);
@@ -872,7 +872,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 		bGetContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bGetContentSuccess, "Waiting for getting content...");
+	WaitUntil(bGetContentSuccess, "Waiting for getting content...");
 
 	// Delete content.
 	bool bDeleteContentSuccess = false;
@@ -882,7 +882,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 		bDeleteContentSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteContentSuccess, "Waiting for deleting Content...");
+	WaitUntil(bDeleteContentSuccess, "Waiting for deleting Content...");
 
 	AB_TEST_TRUE(bDeleteContentSuccess);
 
@@ -894,7 +894,7 @@ bool UGCCreate_Get_Delete_Content_As_Bytes::RunTest(const FString& Parameters)
 		bDeleteChannelSuccess = true;
 	}), UGCOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteChannelSuccess, "Waiting for deleting channel...");
+	WaitUntil(bDeleteChannelSuccess, "Waiting for deleting channel...");
 
 	AB_TEST_TRUE(bDeleteChannelSuccess);
 
@@ -917,7 +917,7 @@ bool UGCCreateContentEmptyChannelId::RunTest(const FString& Parameters)
 		bCreateContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bCreateContentDone, "Waiting for creating content...");
+	WaitUntil(bCreateContentDone, "Waiting for creating content...");
 
 	AB_TEST_TRUE(bCreateContentDone);
 	AB_TEST_FALSE(bCreateContentSuccess);
@@ -941,7 +941,7 @@ bool UGCCreateContentInvalidChannelId::RunTest(const FString& Parameters)
 		bCreateContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bCreateContentDone, "Waiting for creating content...");
+	WaitUntil(bCreateContentDone, "Waiting for creating content...");
 
 	AB_TEST_TRUE(bCreateContentDone);
 	AB_TEST_FALSE(bCreateContentSuccess);
@@ -966,7 +966,7 @@ bool UGCGetContentEmptyContentId::RunTest(const FString& Parameters)
 		bGetContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetContentDone, "Waiting for getting content by empty content id...");
+	WaitUntil(bGetContentDone, "Waiting for getting content by empty content id...");
 
 	AB_TEST_TRUE(bGetContentDone);
 	AB_TEST_FALSE(bGetContentSuccess);
@@ -991,7 +991,7 @@ bool UGCGetContentInvalidContentId::RunTest(const FString& Parameters)
 		bGetContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetContentDone, "Waiting for getting content by invalid content id...");
+	WaitUntil(bGetContentDone, "Waiting for getting content by invalid content id...");
 
 	AB_TEST_TRUE(bGetContentDone);
 	AB_TEST_FALSE(bGetContentSuccess);
@@ -1016,7 +1016,7 @@ bool UGCGetContentEmptyShareCode::RunTest(const FString& Parameters)
 		bGetContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetContentDone, "Waiting for getting content by empty share code...");
+	WaitUntil(bGetContentDone, "Waiting for getting content by empty share code...");
 
 	AB_TEST_TRUE(bGetContentDone);
 	AB_TEST_FALSE(bGetContentSuccess);
@@ -1041,7 +1041,7 @@ bool UGCGetContentInvalidShareCode::RunTest(const FString& Parameters)
 		bGetContentDone = true;
 	}));
 	FlushHttpRequests();
-	Waiting(bGetContentDone, "Waiting for getting content by invalid share code...");
+	WaitUntil(bGetContentDone, "Waiting for getting content by invalid share code...");
 
 	AB_TEST_TRUE(bGetContentDone);
 	AB_TEST_FALSE(bGetContentSuccess);

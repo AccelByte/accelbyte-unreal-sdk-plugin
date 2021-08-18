@@ -58,7 +58,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bQuerySeasonSuccess = true;
 		SeasonsResponse = Result;
 	}), SeasonPassOnError);
-	Waiting(bQuerySeasonSuccess, "Waiting to query existing season...");
+	WaitUntil(bQuerySeasonSuccess, "Waiting to query existing season...");
 	AB_TEST_TRUE(bQuerySeasonSuccess);
 
 	for (const FSeasonPassCreateGetSeasonResponse& Season : SeasonsResponse.Data)
@@ -72,7 +72,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteSeasonPassTest, Log,	TEXT("unpublish season succeed"));
 				bUnpublishSuccess = true;
 			}), SeasonPassOnError);
-			Waiting(bUnpublishSuccess, "Waiting to unpublish season...");
+			WaitUntil(bUnpublishSuccess, "Waiting to unpublish season...");
 			AB_TEST_TRUE(bUnpublishSuccess);
 		}
 
@@ -82,7 +82,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete season succeed"));
 			bDeleteSeasonSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bDeleteSeasonSuccess, "Waiting delete season...");
+		WaitUntil(bDeleteSeasonSuccess, "Waiting delete season...");
 		AB_TEST_TRUE(bDeleteSeasonSuccess);
 	}
 
@@ -106,7 +106,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bCurrencyAlreadyExist = false;
 		bCurrencyCheckDone = true;
 	}));
-	Waiting(bCurrencyCheckDone, "Waiting for currency check...");
+	WaitUntil(bCurrencyCheckDone, "Waiting for currency check...");
 	AB_TEST_TRUE(bCurrencyCheckDone);
 
 	if (!bCurrencyAlreadyExist)
@@ -132,7 +132,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCurrencyCreated = false;
 			SeasonPassOnError.ExecuteIfBound(Code, Message);
 		}));
-		Waiting(bCurrencyCreated, "Waiting for currency created...");
+		WaitUntil(bCurrencyCreated, "Waiting for currency created...");
 		AB_TEST_TRUE(bCurrencyCreated);
 	}
 
@@ -147,7 +147,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("No published store found. Ignoring"));
 		bDeletePublishedStore = true; // just ignore
 	}));
-	Waiting(bDeletePublishedStore, "Waiting to delete published store ...");
+	WaitUntil(bDeletePublishedStore, "Waiting to delete published store ...");
 	AB_TEST_TRUE(bDeletePublishedStore);
 
 	bool bGetAllStoreSuccess = false;
@@ -158,7 +158,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			GetAllResult = Result;
 			bGetAllStoreSuccess = true;
 		}), SeasonPassOnError);
-	Waiting(bGetAllStoreSuccess, "Waiting for get all store...");
+	WaitUntil(bGetAllStoreSuccess, "Waiting for get all store...");
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		bool bDeleteTestingStoreSuccess = false;
@@ -167,7 +167,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete store succeed"));
 			bDeleteTestingStoreSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
+		WaitUntil(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
 		AB_TEST_TRUE(bDeleteTestingStoreSuccess);
 	}
 
@@ -190,7 +190,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		SeasonStoreInfo = Result;
 		bTemporaryStoreCreated = true;
 	}), SeasonPassOnError);
-	Waiting(bTemporaryStoreCreated, "Waiting for store created...");
+	WaitUntil(bTemporaryStoreCreated, "Waiting for store created...");
 	AB_TEST_TRUE(bTemporaryStoreCreated);
 
 	FCategoryCreateRequest CategoryRequest;
@@ -202,7 +202,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create category succeed"));
 			bCreateCategorySuccess = true;
 		}), SeasonPassOnError);
-	Waiting(bCreateCategorySuccess, "Waiting to create category...");
+	WaitUntil(bCreateCategorySuccess, "Waiting to create category...");
 	AB_TEST_TRUE(bCreateCategorySuccess);
 
 	FLocalization itemLocalization
@@ -261,7 +261,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCreateFreeSeasonSuccess = true;
 			FreeSeasonPassItem = Result;
 		}), SeasonPassOnError);
-	Waiting(bCreateFreeSeasonSuccess, "Waiting to create free season pass item...");
+	WaitUntil(bCreateFreeSeasonSuccess, "Waiting to create free season pass item...");
 	AB_TEST_TRUE(bCreateFreeSeasonSuccess);
 
 	FCreateRegionDataItem PremiumRegionDataItem{
@@ -306,7 +306,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCreatePremiumSeasonSuccess = true;
 			PremiumSeasonPassItem = Result;
 		}), SeasonPassOnError);
-	Waiting(bCreatePremiumSeasonSuccess, "Waiting to create premium season pass item...");
+	WaitUntil(bCreatePremiumSeasonSuccess, "Waiting to create premium season pass item...");
 	AB_TEST_TRUE(bCreatePremiumSeasonSuccess);
 
 	FCreateRegionDataItem TierRegionDataItem{
@@ -351,7 +351,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCreateTierSeasonSuccess = true;
 			TierSeasonPassItem = Result;
 		}), SeasonPassOnError);
-	Waiting(bCreateTierSeasonSuccess, "Waiting to create tier season pass item...");
+	WaitUntil(bCreateTierSeasonSuccess, "Waiting to create tier season pass item...");
 	AB_TEST_TRUE(bCreateTierSeasonSuccess);
 
 	FCreateRegionDataItem CurrencyItemRegionDataItem{
@@ -396,7 +396,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCreateCurrencyItemSuccess = true;
 			SeasonCurrencyItemInfo = Result;
 		}), SeasonPassOnError);
-	Waiting(bCreateCurrencyItemSuccess, "Waiting to create currency item...");
+	WaitUntil(bCreateCurrencyItemSuccess, "Waiting to create currency item...");
 	AB_TEST_TRUE(bCreateCurrencyItemSuccess);
 
 	FCreateRegionDataItem ItemRewardRegionDataItem{
@@ -441,7 +441,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			bCreateItemRewardSuccess = true;
 			SeasonRewardItemInfo = Result;
 		}), SeasonPassOnError);
-	Waiting(bCreateItemRewardSuccess, "Waiting to create item Reward...");
+	WaitUntil(bCreateItemRewardSuccess, "Waiting to create item Reward...");
 	AB_TEST_TRUE(bCreateItemRewardSuccess);
 #pragma endregion SETUP_DRAFT_STORE
 
@@ -471,7 +471,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bCreateSeasonSuccess = true;
 		SeasonResponse = Result;
 	}), SeasonPassOnError);
-	Waiting(bCreateSeasonSuccess, "Waiting to create season");
+	WaitUntil(bCreateSeasonSuccess, "Waiting to create season");
 	AB_TEST_TRUE(bCreateSeasonSuccess);
 
 	FLocalization FreePassLocalization
@@ -493,7 +493,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FreePassResponse = Result;
 		bCreateFreePassSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreateFreePassSuccess, "Waiting to create season pass free pass...");
+	WaitUntil(bCreateFreePassSuccess, "Waiting to create season pass free pass...");
 	AB_TEST_TRUE(bCreateFreePassSuccess);
 
 	FLocalization PremiumPassLocalization
@@ -515,7 +515,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		PremiumPassResponse = Result;
 		bCreatePremiumPassSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreatePremiumPassSuccess, "Waiting to create season pass Premium pass...");
+	WaitUntil(bCreatePremiumPassSuccess, "Waiting to create season pass Premium pass...");
 	AB_TEST_TRUE(bCreatePremiumPassSuccess);
 
 	FSeasonPassCreateReward CoinsReward{
@@ -529,7 +529,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bCreateFreeRewardSuccess = true;
 		CurrencyRewardResponse = Result;
 	}), SeasonPassOnError);
-	Waiting(bCreateFreeRewardSuccess, "Waiting to create season pass coins reward to free pass...");
+	WaitUntil(bCreateFreeRewardSuccess, "Waiting to create season pass coins reward to free pass...");
 	AB_TEST_TRUE(bCreateFreeRewardSuccess);
 
 	FSeasonPassCreateReward PremiumReward{
@@ -544,7 +544,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bCreatePremiumRewardSuccess = true;
 		ItemRewardResponse = Result;
 	}), SeasonPassOnError);
-	Waiting(bCreatePremiumRewardSuccess, "Waiting to create season pass item reward...");
+	WaitUntil(bCreatePremiumRewardSuccess, "Waiting to create season pass item reward...");
 	AB_TEST_TRUE(bCreatePremiumRewardSuccess);
 
 	// make sure SeasonTierCount is not less than 4! If less, it will not coverage all the test
@@ -586,7 +586,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bCreateTierSuccess = true;
 		SeasonTiersResponse.Append(Result);
 	}), SeasonPassOnError);
-	Waiting(bCreateTierSuccess, "Waiting to create tier...");
+	WaitUntil(bCreateTierSuccess, "Waiting to create tier...");
 	AB_TEST_TRUE(bCreateTierSuccess);
 
 #pragma endregion SETUP_SEASONPASS
@@ -602,7 +602,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season Pass STORE is published"));
 		bPublishStoreSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bPublishStoreSuccess, "Waiting for publish Season Pass store...");
+	WaitUntil(bPublishStoreSuccess, "Waiting for publish Season Pass store...");
 	check(bPublishStoreSuccess);
 
 	bool bPublishSeasonPassSuccess = false;
@@ -611,7 +611,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season is published"));
 	bPublishSeasonPassSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bPublishSeasonPassSuccess, "Waiting to publish season pass");
+	WaitUntil(bPublishSeasonPassSuccess, "Waiting to publish season pass");
 	AB_TEST_TRUE(bPublishSeasonPassSuccess);
 
 	bool bLoginSuccess = false;
@@ -620,7 +620,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("user login succeed"));
 		bLoginSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bLoginSuccess, "Waiting to logon...");
+	WaitUntil(bLoginSuccess, "Waiting to logon...");
 	AB_TEST_TRUE(bLoginSuccess);
 
 	return true;
@@ -638,7 +638,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		bQuerySeasonSuccess = true;
 		SeasonsResponse = Result;
 	}), SeasonPassOnError);
-	Waiting(bQuerySeasonSuccess, "Waiting to query existing season...");
+	WaitUntil(bQuerySeasonSuccess, "Waiting to query existing season...");
 	AB_TEST_TRUE(bQuerySeasonSuccess);
 
 	for (const FSeasonPassCreateGetSeasonResponse& Season : SeasonsResponse.Data)
@@ -652,7 +652,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("unpublish season succeed"));
 				bUnpublishSuccess = true;
 			}), SeasonPassOnError);
-			Waiting(bUnpublishSuccess, "Waiting to unpublish season...");
+			WaitUntil(bUnpublishSuccess, "Waiting to unpublish season...");
 			AB_TEST_TRUE(bUnpublishSuccess);
 		}
 
@@ -662,7 +662,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete season succeed"));
 			bDeleteSeasonSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bDeleteSeasonSuccess, "Waiting delete season...");
+		WaitUntil(bDeleteSeasonSuccess, "Waiting delete season...");
 		AB_TEST_TRUE(bDeleteSeasonSuccess);
 	}
 
@@ -673,7 +673,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("CURRENCY is deleted"));
 		bCurrencyDeleted = true;
 	}), SeasonPassOnError);
-	Waiting(bCurrencyDeleted, "Waiting for currency deletion...");
+	WaitUntil(bCurrencyDeleted, "Waiting for currency deletion...");
 	check(bCurrencyDeleted);
 
 	// Delete published testing store
@@ -683,7 +683,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season pass store is deleted"));
 		bPublishedStoreDeleted = true;
 	}), nullptr);
-	Waiting(bPublishedStoreDeleted, "Waiting for Season pass store deletion...");
+	WaitUntil(bPublishedStoreDeleted, "Waiting for Season pass store deletion...");
 	check(bPublishedStoreDeleted);
 
 	bool bGetAllStoreSuccess = false;
@@ -694,7 +694,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 			GetAllResult = Result;
 			bGetAllStoreSuccess = true;
 		}), SeasonPassOnError);
-	Waiting(bGetAllStoreSuccess, "Waiting for get all store...");
+	WaitUntil(bGetAllStoreSuccess, "Waiting for get all store...");
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		bool bDeleteTestingStoreSuccess = false;
@@ -703,7 +703,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete store succeed"));
 			bDeleteTestingStoreSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
+		WaitUntil(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
 		AB_TEST_TRUE(bDeleteTestingStoreSuccess);
 	}
 
@@ -713,7 +713,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete user succeed"));
 		bDeleteUserSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bDeleteUserSuccess, "Waiting to delete user...");
+	WaitUntil(bDeleteUserSuccess, "Waiting to delete user...");
 	AB_TEST_TRUE(bDeleteUserSuccess);
 
 	return true;
@@ -730,7 +730,7 @@ bool SeasonGetCurrentSeason::RunTest(const FString& Parameters)
 		bGetSeason = true;
 		GetSeason = Result;
 	}), SeasonPassOnError);
-	Waiting(bGetSeason, "Waiting to get season...");
+	WaitUntil(bGetSeason, "Waiting to get season...");
 	AB_TEST_TRUE(bGetSeason);
 	AB_TEST_EQUAL(GetSeason.Id, SeasonResponse.Id);
 
@@ -748,7 +748,7 @@ bool SeasonGetCurrentUserSeason::RunTest(const FString& Parameters)
 		bGetSeason = true;
 		GetSeason = Result;
 	}), SeasonPassOnError);
-	Waiting(bGetSeason, "Waiting to get season...");
+	WaitUntil(bGetSeason, "Waiting to get season...");
 	AB_TEST_TRUE(bGetSeason);
 	AB_TEST_EQUAL(GetSeason.Id, SeasonResponse.Id);
 
@@ -760,7 +760,7 @@ bool SeasonGetCurrentUserSeason::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, GetSeason.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -772,7 +772,7 @@ bool SeasonGetCurrentUserSeason::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, GetSeason.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -795,7 +795,7 @@ bool SeasonGetInvalidUserSeason::RunTest(const FString& Parameters)
 		bGetUserSeasonInfo = true;
 		bGetUserSeasonInfoFailed = true;
 	}));
-	Waiting(bGetUserSeasonInfo, "Waiting to get invalid user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get invalid user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfoFailed);
 
 	return true;
@@ -827,7 +827,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 			}
 		}
 	}), SeasonPassOnError);
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get item...");
 	AB_TEST_TRUE(bExpectedItemFound);
 
 	bool bLoginClientSuccess = false;
@@ -836,7 +836,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 		bLoginClientSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+	WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 	AB_TEST_TRUE(bLoginClientSuccess);
 
 	// Grant currency
@@ -849,7 +849,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("credit wallet succeed"));
 		bCreditUserWalletSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreditUserWalletSuccess, "Waiting to credit user wallet...");
+	WaitUntil(bCreditUserWalletSuccess, "Waiting to credit user wallet...");
 
 	const int32 Quantity = 1;
 	FAccelByteModelsOrderCreate OrderCreate;
@@ -874,7 +874,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("    Success"));
 		bCreateNewOrderSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreateNewOrderSuccess, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess, "Waiting for new order created...");
 
 	bool bGetUserSeasonInfo = false;
 	FAccelByteModelsUserSeasonInfo GetUserSeason;
@@ -885,7 +885,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -907,7 +907,7 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 		bGetSeason = true;
 		GetSeason = Result;
 	}), SeasonPassOnError);
-	Waiting(bGetSeason, "Waiting to get season...");
+	WaitUntil(bGetSeason, "Waiting to get season...");
 	AB_TEST_TRUE(bGetSeason);
 	AB_TEST_EQUAL(GetSeason.Id, SeasonResponse.Id);
 
@@ -920,7 +920,7 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, GetSeason.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -933,7 +933,7 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 		bLoginClientSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+	WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 	AB_TEST_TRUE(bLoginClientSuccess);
 
 	const int32 ExpectedExp = FMath::RoundToInt(LastExp + (SeasonTierRequiredExp * 0.5)) % SeasonTierRequiredExp;
@@ -948,7 +948,7 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 		bGrantExpSuccess = true;
 		UserSeasonAfterGrantedExp = Result;
 	}), SeasonPassOnError);
-	Waiting(bGrantExpSuccess, "Waiting to grant exp using server api...");
+	WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
 	AB_TEST_TRUE(bGrantExpSuccess);
 	AB_TEST_EQUAL(ExpectedExp, UserSeasonAfterGrantedExp.CurrentExp);
 
@@ -967,7 +967,7 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 		bGetSeason = true;
 		GetSeason = Result;
 	}), SeasonPassOnError);
-	Waiting(bGetSeason, "Waiting to get season...");
+	WaitUntil(bGetSeason, "Waiting to get season...");
 	AB_TEST_TRUE(bGetSeason);
 	AB_TEST_EQUAL(GetSeason.Id, SeasonResponse.Id);
 
@@ -980,7 +980,7 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, GetSeason.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -993,7 +993,7 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 		bLoginClientSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+	WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 	AB_TEST_TRUE(bLoginClientSuccess);
 
 	const int32 ExpectedExp = (LastExp + SeasonTierRequiredExp) % SeasonTierRequiredExp;
@@ -1008,7 +1008,7 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 		bGrantExpSuccess = true;
 		UserSeasonAfterGrantedExp = Result;
 	}), SeasonPassOnError);
-	Waiting(bGrantExpSuccess, "Waiting to grant exp using server api...");
+	WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
 	AB_TEST_TRUE(bGrantExpSuccess);
 	AB_TEST_EQUAL(ExpectedExp, UserSeasonAfterGrantedExp.CurrentExp);
 
@@ -1027,7 +1027,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 	AB_TEST_EQUAL(GetUserSeason.RequiredExp, SeasonTierRequiredExp);
@@ -1038,7 +1038,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 		bLoginClientSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+	WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 	AB_TEST_TRUE(bLoginClientSuccess);
 
 	// Grant currency
@@ -1052,7 +1052,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("credit wallet succeed"));
 		bCreditUserWalletSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreditUserWalletSuccess, "Waiting to credit user wallet...");
+	WaitUntil(bCreditUserWalletSuccess, "Waiting to credit user wallet...");
 
 	FAccelByteModelsItemCriteria ItemCriteria;
 	ItemCriteria.Language = TEXT("en");
@@ -1077,7 +1077,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 			}
 		}
 	}), SeasonPassOnError);
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get item...");
 	AB_TEST_TRUE(bExpectedItemFound);
 
 	const int32 Quantity = 1;
@@ -1103,7 +1103,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("    Success"));
 		bCreateNewOrderSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bCreateNewOrderSuccess, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess, "Waiting for new order created...");
 
 
 	bGetUserSeasonInfo = false;
@@ -1115,7 +1115,7 @@ bool SeasonBuyTiers::RunTest(const FString& Parameters)
 		UserSeasonAfterOrderTier = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, UserSeasonAfterOrderTier.SeasonId);
 	AB_TEST_EQUAL(UserSeasonAfterOrderTier.RequiredExp, SeasonTierRequiredExp);
@@ -1138,7 +1138,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 
@@ -1151,7 +1151,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 			bLoginClientSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+		WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 		AB_TEST_TRUE(bLoginClientSuccess);
 
 		// Gain exp by one level
@@ -1163,7 +1163,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
 			bGrantExpSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bGrantExpSuccess, "Waiting to grant exp using server api...");
+		WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
 		AB_TEST_TRUE(bGrantExpSuccess);
 
 		bGetUserSeasonInfo = false;
@@ -1174,7 +1174,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 			GetUserSeason = Result;
 			bGetUserSeasonInfo = true;
 		}), SeasonPassOnError);
-		Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+		WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 		AB_TEST_TRUE(bGetUserSeasonInfo);
 		AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 	}
@@ -1197,7 +1197,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 						WalletInfo = Result;
 						bGetWalletInfoSuccess = true;
 					}), SeasonPassOnError);
-					Waiting(bGetWalletInfoSuccess, "Waiting to get wallet info");
+					WaitUntil(bGetWalletInfoSuccess, "Waiting to get wallet info");
 				}
 
 				FAccelByteModelsSeasonClaimRewardRequest ClaimRequest{
@@ -1210,7 +1210,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Claim Reward success : %s"), *RewardCode);
 					bClaimRewardSuccess = true;
 				}), SeasonPassOnError);
-				Waiting(bClaimRewardSuccess,FString::Printf(TEXT("Waiting to claim reward. Tier : %d, Pass : %s, RewardCode : %s"), ClaimReward.Key, *PassReward.Key, *RewardCode));
+				WaitUntil(bClaimRewardSuccess,FString::Printf(TEXT("Waiting to claim reward. Tier : %d, Pass : %s, RewardCode : %s"), ClaimReward.Key, *PassReward.Key, *RewardCode));
 				AB_TEST_TRUE(bClaimRewardSuccess);
 
 				if (RewardCode.Equals(CurrencyRewardCode))
@@ -1224,7 +1224,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 						LastBalance = Result.Balance;
 						bGetWalletInfoSuccess = true;
 					}), SeasonPassOnError);
-					Waiting(bGetWalletInfoSuccess, "Waiting to get wallet info");
+					WaitUntil(bGetWalletInfoSuccess, "Waiting to get wallet info");
 					AB_TEST_TRUE(LastBalance > WalletInfo.Balance);
 				}
 				else
@@ -1249,7 +1249,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 							}
 						}
 					}), SeasonPassOnError, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-					Waiting(bGetEntitlementSuccess, "Waiting to get entitlement");
+					WaitUntil(bGetEntitlementSuccess, "Waiting to get entitlement");
 
 					if (bIsFound)
 					{
@@ -1260,7 +1260,7 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 							UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Consume right away!"));
 							bConsumeEntitlementSuccess = true;
 						}), SeasonPassOnError);
-						Waiting(bConsumeEntitlementSuccess, "Waiting to consume the entitlement");
+						WaitUntil(bConsumeEntitlementSuccess, "Waiting to consume the entitlement");
 					}
 				}
 			}
@@ -1282,7 +1282,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		LastBalanceCount = Result.Balance;
 		bGetWalletInfoSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bGetWalletInfoSuccess, "Waiting to get wallet info");
+	WaitUntil(bGetWalletInfoSuccess, "Waiting to get wallet info");
 	
 	bool bGetEntitlementSuccess = false;
 	int32 EntitlementUseCount = 0;
@@ -1301,7 +1301,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 			}
 		}
 	}), SeasonPassOnError, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bGetEntitlementSuccess, "Waiting to get entitlement");
+	WaitUntil(bGetEntitlementSuccess, "Waiting to get entitlement");
 	
 	// Get current progress
 	bool bGetUserSeasonInfo = false;
@@ -1313,7 +1313,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 
@@ -1329,7 +1329,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
 			bLoginClientSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bLoginClientSuccess, "Waiting to login with server creds...");
+		WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
 		AB_TEST_TRUE(bLoginClientSuccess);
 
 		const int32 LevelUp = 2 - GetUserSeason.ToClaimRewards.Num();
@@ -1342,7 +1342,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
 			bGrantExpSuccess = true;
 		}), SeasonPassOnError);
-		Waiting(bGrantExpSuccess, "Waiting to grant exp using server api...");
+		WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
 		AB_TEST_TRUE(bGrantExpSuccess);
 
 		bGetUserSeasonInfo = false;
@@ -1353,7 +1353,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 			GetUserSeason = Result;
 			bGetUserSeasonInfo = true;
 		}), SeasonPassOnError);
-		Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+		WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 		AB_TEST_TRUE(bGetUserSeasonInfo);
 		AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 	}
@@ -1384,7 +1384,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Bulk Claim Reward success"));
 		bClaimRewardSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bClaimRewardSuccess, FString::Printf(TEXT("Waiting to bulk claim reward.")));
+	WaitUntil(bClaimRewardSuccess, FString::Printf(TEXT("Waiting to bulk claim reward.")));
 	AB_TEST_TRUE(bClaimRewardSuccess);
 
 	bGetUserSeasonInfo = false;
@@ -1395,7 +1395,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		GetUserSeason = Result;
 		bGetUserSeasonInfo = true;
 	}), SeasonPassOnError);
-	Waiting(bGetUserSeasonInfo, "Waiting to get user season data info...");
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get user season data info...");
 	AB_TEST_TRUE(bGetUserSeasonInfo);
 	AB_TEST_EQUAL(GetUserSeason.SeasonId, SeasonResponse.Id);
 	AB_TEST_EQUAL(0, GetUserSeason.ToClaimRewards.Num()); // must be 0 after bulk claim
@@ -1409,7 +1409,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		LastBalanceCount = Result.Balance;
 		bGetWalletInfoSuccess = true;
 	}), SeasonPassOnError);
-	Waiting(bGetWalletInfoSuccess, "Waiting to get wallet info");
+	WaitUntil(bGetWalletInfoSuccess, "Waiting to get wallet info");
 	AB_TEST_EQUAL(LastBalanceCount, ExpectedCurrencyBalance);
 	
 	bGetEntitlementSuccess = false;
@@ -1429,7 +1429,7 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 			}
 		}
 	}), SeasonPassOnError, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bGetEntitlementSuccess, "Waiting to get entitlement");
+	WaitUntil(bGetEntitlementSuccess, "Waiting to get entitlement");
 	AB_TEST_EQUAL(EntitlementInfo.UseCount, ExpectedItemUseCount);
 	
 	return true;

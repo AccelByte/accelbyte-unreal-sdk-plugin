@@ -84,7 +84,7 @@ bool TestCleanUp()
 			bDequeueSuccess = true;
 		}), JoinableSessionTestErrorHandler);
 
-		Waiting(bDequeueSuccess, "Dequeueing Joinable Session...");
+		WaitUntil(bDequeueSuccess, "Dequeueing Joinable Session...");
 
 		isSessionQueued = false;
 	}
@@ -99,7 +99,7 @@ bool TestCleanUp()
 			bUnregisterLocalServerSuccess = true;
 		}), JoinableSessionTestErrorHandler);
 
-		Waiting(bUnregisterLocalServerSuccess, "Deregistering Local Server...");
+		WaitUntil(bUnregisterLocalServerSuccess, "Deregistering Local Server...");
 
 		isDSRegistered = false;
 		DSGetMatchData = FAccelByteModelsMatchmakingResult();
@@ -120,7 +120,7 @@ bool RegisterDS()
 	}),
 		JoinableSessionTestErrorHandler);
 
-	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	bool canBind = false;
 	TSharedRef<FInternetAddr> LocalIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, canBind);
@@ -137,7 +137,7 @@ bool RegisterDS()
 	}),
 		JoinableSessionTestErrorHandler);
 
-	Waiting(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
+	WaitUntil(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 	return bRegisterLocalServerToDSMDone;
 }
 
@@ -152,7 +152,7 @@ bool RegisterSessionAsync(const FAccelByteModelsMatchmakingResult matchmakingRes
 		{
 			bEnqueueResultSuccess = true;
 		}), JoinableSessionTestErrorHandler);
-		Waiting(bEnqueueResultSuccess, "Wait enqueue joinable session");
+		WaitUntil(bEnqueueResultSuccess, "Wait enqueue joinable session");
 
 		if (!bEnqueueResultSuccess) { return false; }
 		isSessionQueued = true;
@@ -176,7 +176,7 @@ bool GetMatchData()
 			bGetSessionId = true;
 			sessionId = result.Session_id;
 		}), JoinableSessionTestErrorHandler);
-		Waiting(bGetSessionId, "Waiting GetSessionId");
+		WaitUntil(bGetSessionId, "Waiting GetSessionId");
 		return !sessionId.IsEmpty();
 	});
 
@@ -186,7 +186,7 @@ bool GetMatchData()
 		DSGetMatchData = result;
 		bQuerySessionStatusDone = true;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionStatusDone, "Waiting QuerySessionStatus");
+	WaitUntil(bQuerySessionStatusDone, "Waiting QuerySessionStatus");
 
 	return true;
 }
@@ -241,7 +241,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 				}
 			}));
 		
-		Waiting(UsersCreationSuccess[i],"Waiting for user created...");
+		WaitUntil(UsersCreationSuccess[i],"Waiting for user created...");
 
 		ActiveUsers[i]->LoginWithUsername(
 			Email,
@@ -253,7 +253,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 			}), 
 			JoinableSessionTestErrorHandler);
 		
-		Waiting(UsersLoginSuccess[i],"Waiting for Login...");
+		WaitUntil(UsersLoginSuccess[i],"Waiting for Login...");
 	}
 	
 	for (int i = 0; i < ActiveUserCount; i++)
@@ -279,7 +279,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bCreateMatchmakingChannelSuccess;
-	}, 60, "Create Joinable Matchmaking channel...");
+	}, "Create Joinable Matchmaking channel...", 60);
 	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 
 	NonJoinableChannelName = "ue4sdktestnonjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -293,7 +293,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bCreateMatchmakingChannelSuccess;
-	}, 60, "Create NonJoinable Matchmaking channel...");
+	}, "Create NonJoinable Matchmaking channel...", 60);
 	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 
 	return true;
@@ -314,7 +314,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;
 		}), JoinableSessionTestErrorHandler);
-		Waiting(bDeleteUsersSuccessful[i],"Waiting for user deletion...");
+		WaitUntil(bDeleteUsersSuccessful[i],"Waiting for user deletion...");
 	}
 
 	for (int i = 0; i < ActiveUserCount; i++)
@@ -329,7 +329,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 
 	bDeleteMatchmakingChannelSuccess = false;
@@ -338,7 +338,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 
 	return true;
@@ -354,7 +354,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	WaitUntil([&lobbyA]()
 	{
 		return lobbyA->IsConnected();
-	}, 10, "Lobby Connect...");
+	}, "Lobby Connect...", 10);
 
 	FString AMatchId = "";
 	FString BMatchId = "";
@@ -382,7 +382,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		leavePartyDoneA = true;
 	}));
 	lobbyA->SendLeavePartyRequest();
-	Waiting(leavePartyDoneA, "wait leaving party A");
+	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
 	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
@@ -390,11 +390,11 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		leavePartyDoneB = true;
 	}));
 	lobbyB->SendLeavePartyRequest();
-	Waiting(leavePartyDoneB, "wait leaving party B");
+	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
 	isDSRegistered = RegisterDS();
-	Waiting(isDSRegistered, "Waiting DS Register...");
+	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -405,7 +405,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
@@ -415,22 +415,22 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "A Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 15);
+	}, "", 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
 	bGetMatchDataComplete = GetMatchData();
-	Waiting(bGetMatchDataComplete, "Waiting get match data");
+	WaitUntil(bGetMatchDataComplete, "Waiting get match data");
 
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
-	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
 	WaitSecond(3, "Waiting backend session sync");
 
@@ -443,7 +443,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
 	bIsStartMatchmakingSuccess = false;
@@ -453,13 +453,13 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyB->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "B Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
 		return !BMatchId.IsEmpty();
-	}, 20);
+	}, "", 20);
 
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
@@ -485,7 +485,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	WaitUntil([&lobbyA]()
 	{
 		return lobbyA->IsConnected();
-	}, 10, "Lobby Connect...");
+	}, "Lobby Connect...", 10);
 
 	FString AMatchId = "";
 
@@ -506,11 +506,11 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		leavePartyDoneA = true;
 	}));
 	lobbyA->SendLeavePartyRequest();
-	Waiting(leavePartyDoneA, "wait leaving party A");
+	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	// register local DS
 	isDSRegistered = RegisterDS();
-	Waiting(isDSRegistered, "Waiting DS Register...");
+	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -521,7 +521,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
@@ -531,22 +531,22 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 15);
+	}, "", 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
 	bGetMatchDataComplete = GetMatchData();
-	Waiting(bGetMatchDataComplete, "Waiting get match data");
+	WaitUntil(bGetMatchDataComplete, "Waiting get match data");
 
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
-	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
 	WaitSecond(3, "Waiting backend syncing session");
 
@@ -555,7 +555,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bAddUserSuccess, "Waiting Add User...");
+	WaitUntil(bAddUserSuccess, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
 	bool bQuerySessionSuccess = false;
@@ -564,14 +564,14 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
 	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
+	WaitUntil(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
 	FAccelByteModelsMatchmakingResult mmResultAfterRemoveUser;
@@ -581,7 +581,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 	
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
 	{
@@ -668,7 +668,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	WaitUntil([&lobbyA]()
 	{
 		return lobbyA->IsConnected();
-	}, 10, "Lobby Connect...");
+	}, "Lobby Connect...", 10);
 
 	FString AMatchId = "";
 
@@ -689,7 +689,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		leavePartyDoneA = true;
 	}));
 	lobbyA->SendLeavePartyRequest();
-	Waiting(leavePartyDoneA, "wait leaving party A");
+	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
 	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
@@ -697,11 +697,11 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		leavePartyDoneB = true;
 	}));
 	lobbyB->SendLeavePartyRequest();
-	Waiting(leavePartyDoneB, "wait leaving party B");
+	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
 	isDSRegistered = RegisterDS();
-	Waiting(isDSRegistered, "Waiting DS Register...");
+	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -712,7 +712,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
@@ -722,22 +722,22 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(JoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 15);
+	}, "", 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
 	bGetMatchDataComplete = GetMatchData();
-	Waiting(bGetMatchDataComplete, "Waiting get match data");
+	WaitUntil(bGetMatchDataComplete, "Waiting get match data");
 
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
-	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
 	WaitSecond(3, "Waiting backend to sync session");
 
@@ -750,14 +750,14 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	bool bAddUserSuccess = false;
 	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
 	{
 		bAddUserSuccess = true;
 	}), JoinableSessionTestErrorHandler, BCreatePartyResult.PartyId);
-	Waiting(bAddUserSuccess, "Waiting Add User...");
+	WaitUntil(bAddUserSuccess, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
 	bool bQuerySessionSuccess = false;
@@ -766,14 +766,14 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
 	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
+	WaitUntil(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
 	FAccelByteModelsMatchmakingResult mmResultAfterRemoveUser;
@@ -783,7 +783,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
 	{
@@ -887,7 +887,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	WaitUntil([&lobbyA, &lobbyB]()
 	{
 		return lobbyA->IsConnected() && lobbyB->IsConnected();
-	}, 10, "Lobby Connect...");
+	}, "Lobby Connect...", 10);
 
 	FString AMatchId = "";
 	FString BMatchId = "";
@@ -921,7 +921,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		leavePartyDoneA = true;
 	}));
 	lobbyA->SendLeavePartyRequest();
-	Waiting(leavePartyDoneA, "wait leaving party A");
+	WaitUntil(leavePartyDoneA, "wait leaving party A");
 
 	bool leavePartyDoneB = false;
 	lobbyB->SetLeavePartyResponseDelegate(THandler<FAccelByteModelsLeavePartyResponse>::CreateLambda([&leavePartyDoneB](const FAccelByteModelsLeavePartyResponse& result)
@@ -929,11 +929,11 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		leavePartyDoneB = true;
 	}));
 	lobbyB->SendLeavePartyRequest();
-	Waiting(leavePartyDoneB, "wait leaving party B");
+	WaitUntil(leavePartyDoneB, "wait leaving party B");
 
 	// register local DS
 	isDSRegistered = RegisterDS();
-	Waiting(isDSRegistered, "Waiting DS Register...");
+	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -944,7 +944,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
@@ -954,22 +954,22 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 15);
+	}, "", 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
 	bGetMatchDataComplete = GetMatchData();
-	Waiting(bGetMatchDataComplete, "Waiting get match data");
+	WaitUntil(bGetMatchDataComplete, "Waiting get match data");
 
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
-	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
 	WaitSecond(3, "Waiting backend to sync session");
 
@@ -982,7 +982,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyB->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby B creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby B creating party");
 
 	FAccelByteModelsMatchmakingResponse BMatchmakingResult;
 	bIsStartMatchmakingSuccess = false;
@@ -992,13 +992,13 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyB->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&BMatchId]()
 	{
 		return !BMatchId.IsEmpty();
-	}, 20);
+	}, "", 20);
 
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
@@ -1024,7 +1024,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	WaitUntil([&lobbyA]()
 	{
 		return lobbyA->IsConnected();
-	}, 10, "Lobby Connect...");
+	}, "Lobby Connect...", 10);
 
 	FString AMatchId = "";
 
@@ -1045,11 +1045,11 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		leavePartyDone = true;
 	}));
 	lobbyA->SendLeavePartyRequest();
-	Waiting(leavePartyDone, "wait leaving party");
+	WaitUntil(leavePartyDone, "wait leaving party");
 
 	// register local DS
 	isDSRegistered = RegisterDS();
-	Waiting(isDSRegistered, "Waiting DS Register...");
+	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -1060,7 +1060,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bIsCreatePartySuccess = true;
 	}));
 	lobbyA->SendCreatePartyRequest();
-	Waiting(bIsCreatePartySuccess, "Lobby A creating party");
+	WaitUntil(bIsCreatePartySuccess, "Lobby A creating party");
 
 	FAccelByteModelsMatchmakingResponse AMatchmakingResult;
 	bool bIsStartMatchmakingSuccess = false;
@@ -1070,22 +1070,22 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bIsStartMatchmakingSuccess = true;
 	}));
 	lobbyA->SendStartMatchmaking(NonJoinableChannelName, LocalDSPodName);
-	Waiting(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
+	WaitUntil(bIsStartMatchmakingSuccess, "Waiting for StartMatchmaking...");
 	AB_TEST_TRUE(bIsStartMatchmakingSuccess);
 
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, 15);
+	}, "", 15);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
 	bGetMatchDataComplete = GetMatchData();
-	Waiting(bGetMatchDataComplete, "Waiting get match data");
+	WaitUntil(bGetMatchDataComplete, "Waiting get match data");
 
 	bool bRegisterSessionSuccess = false;
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
-	Waiting(bRegisterSessionSuccess, "Waiting Session Register...");
+	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
 	WaitSecond(3, "Waiting backend to sync session");
 
@@ -1100,7 +1100,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bAddUserDone = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Add User Error: %d | %s"), Code, *Message);
 	}));
-	Waiting(bAddUserDone, "Waiting Add User...");
+	WaitUntil(bAddUserDone, "Waiting Add User...");
 
 	FAccelByteModelsMatchmakingResult mmResultAfterAddUser;
 	bool bQuerySessionSuccess = false;
@@ -1109,14 +1109,14 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bQuerySessionSuccess = true;
 		mmResultAfterAddUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	bool bRemoveUserSuccess = false;
 	FRegistry::ServerMatchmaking.RemoveUserFromSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[0].GetUserId(), FVoidHandler::CreateLambda([&bRemoveUserSuccess]()
 	{
 		bRemoveUserSuccess = true;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bRemoveUserSuccess, "Waiting for Remove User...");
+	WaitUntil(bRemoveUserSuccess, "Waiting for Remove User...");
 
 
 	FAccelByteModelsMatchmakingResult mmResultAfterRemoveUser;
@@ -1126,7 +1126,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 		bQuerySessionSuccess = true;
 		mmResultAfterRemoveUser = Result;
 	}), JoinableSessionTestErrorHandler);
-	Waiting(bQuerySessionSuccess, "Waiting for Query Status...");
+	WaitUntil(bQuerySessionSuccess, "Waiting for Query Status...");
 
 	for (int i = ActiveLobbies.Num() - 1; i >= 0; i--)
 	{

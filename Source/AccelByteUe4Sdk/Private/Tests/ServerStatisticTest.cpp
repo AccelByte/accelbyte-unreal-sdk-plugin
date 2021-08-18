@@ -60,7 +60,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Test User can't be created"));
 		}
 	}));
-	Waiting(bUserCreated, "Waiting for user created...");
+	WaitUntil(bUserCreated, "Waiting for user created...");
 
 	FRegistry::User.LoginWithUsername(
 		Email,
@@ -70,7 +70,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 		bUserLoggedIn = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("\t\tSuccessfully Login."));
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bUserLoggedIn, "Waiting for Login...");
+	WaitUntil(bUserLoggedIn, "Waiting for Login...");
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
@@ -78,7 +78,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("\t\tClient Successfully Login."));
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	AB_TEST_TRUE(bClientLoginSuccess);
 	AB_TEST_TRUE(bUserLoggedIn);
@@ -105,7 +105,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			}
 			bGetStatDone = true;
 		}));
-		Waiting(bGetStatDone, "Waiting for get stat...");
+		WaitUntil(bGetStatDone, "Waiting for get stat...");
 
 		if (!bStatIsExist)
 		{
@@ -129,7 +129,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 				bCreateStatDone = true;
 				bStatIsExist = true;
 			}), ServerStatisticTestErrorHandler);
-			Waiting(bCreateStatDone, "Waiting for stat created...");
+			WaitUntil(bCreateStatDone, "Waiting for stat created...");
 			AB_TEST_TRUE(bCreateStatDone);
 		}
 		AB_TEST_TRUE(bStatIsExist);
@@ -150,7 +150,7 @@ bool ServerStatisticTearDown::RunTest(const FString& Parameters)
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Success"));
 		bDeleteUsersSuccessful = true;
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bDeleteUsersSuccessful, "Waiting for user deletion...");
+	WaitUntil(bDeleteUsersSuccessful, "Waiting for user deletion...");
 	AB_TEST_TRUE(bDeleteUsersSuccessful);
 
 	return true;
@@ -166,7 +166,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 		GetUserStatItemResult = Result;
 		bGetUserStatItemDone = true;
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetUserStatItemDone, "Waiting for get statitem...");
+	WaitUntil(bGetUserStatItemDone, "Waiting for get statitem...");
 
 	for (int i = 0; i < GetUserStatItemResult.Data.Num(); i++)
 	{
@@ -184,7 +184,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 				bDeleteUserStatSuccess = true;
 			}
 		}));
-		Waiting(bDeleteUserStatSuccess, "Waiting for user statitem deletion...");
+		WaitUntil(bDeleteUserStatSuccess, "Waiting for user statitem deletion...");
 		AB_TEST_TRUE(bDeleteUserStatSuccess);
 	}
 
@@ -208,7 +208,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 			}
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
+	WaitUntil(bCreateStatItemDone, "Waiting for statitem created...");
 	AB_TEST_TRUE(bCreateStatItemDone);
 	AB_TEST_TRUE(bCreateStatItemSuccess);
 
@@ -228,7 +228,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 				bStatItemDeleteSuccess = true;
 			}
 		}));
-		Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
+		WaitUntil(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
 		AB_TEST_TRUE(bStatItemDeleteSuccess);
 	}
 
@@ -258,7 +258,7 @@ bool ServerStatisticBulkCreateStatItemInvalid::RunTest(const FString& Parameters
 			}
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
+	WaitUntil(bCreateStatItemDone, "Waiting for statitem created...");
 	AB_TEST_TRUE(bCreateStatItemDone);
 	AB_TEST_TRUE(bStatItemInvalid);
 
@@ -281,7 +281,7 @@ bool ServerStatisticGetAllUserStatItems::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetAllUserStatItemsSuccess, "Waiting for get all stat items...");
+	WaitUntil(bGetAllUserStatItemsSuccess, "Waiting for get all stat items...");
 	AB_TEST_TRUE(bGetAllUserStatItemsSuccess);
 	return true;
 }
@@ -302,7 +302,7 @@ bool ServerStatisticGetUserStatItemsByStatCodes::RunTest(const FString& Paramete
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
+	WaitUntil(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
 	AB_TEST_TRUE(bGetUserStatItemsByStatCodesSuccess);
 	return true;
 }
@@ -323,7 +323,7 @@ bool ServerStatisticGetUserStatItemsByTags::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetUserStatItemsByTagsSuccess, "Waiting for get stat items...");
+	WaitUntil(bGetUserStatItemsByTagsSuccess, "Waiting for get stat items...");
 	AB_TEST_TRUE(bGetUserStatItemsByTagsSuccess);
 	return true;
 }
@@ -351,7 +351,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 			}
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
+	WaitUntil(bCreateStatItemDone, "Waiting for statitem created...");
 
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("INCREMENT USER STATITEMS BY 7..."));
 	bool bIncrementManyUsersStatItemsSuccess = false;
@@ -370,7 +370,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 			}
 		}), 
 		ServerStatisticTestErrorHandler);
-	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for increment user stat items...");
+	WaitUntil(bIncrementManyUsersStatItemsSuccess, "Waiting for increment user stat items...");
 	
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("GETTING USER STATITEMS BY STATCODES..."));
 	bool bGetUserStatItemsByStatCodesSuccess = false;
@@ -385,7 +385,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
+	WaitUntil(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
 
 	bool bStatItemDeleteSuccess = false;
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete User StatItem"));
@@ -401,7 +401,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 			bStatItemDeleteSuccess = true;
 		}
 	}));
-	Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
+	WaitUntil(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
 
 	AB_TEST_TRUE(bIncrementManyUsersStatItemsSuccess);
 	AB_TEST_TRUE(bGetUserStatItemsByStatCodesSuccess);
@@ -433,7 +433,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 			}
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bCreateStatItemDone, "Waiting for statitem created...");
+	WaitUntil(bCreateStatItemDone, "Waiting for statitem created...");
 
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("INCREMENT USER STATITEMS BY 7..."));
 	bool bIncrementManyUsersStatItemsSuccess = false;
@@ -451,7 +451,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 			}
 		}), 
 		ServerStatisticTestErrorHandler);
-	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for increment user stat items...");
+	WaitUntil(bIncrementManyUsersStatItemsSuccess, "Waiting for increment user stat items...");
 	
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("GETTING USER STATITEMS BY STATCODES..."));
 	bool bGetUserStatItemsByStatCodesSuccess = false;
@@ -466,7 +466,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("StatCode: %s | Value: %d"), *data.StatCode, data.Value);
 		}
 	}), ServerStatisticTestErrorHandler);
-	Waiting(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
+	WaitUntil(bGetUserStatItemsByStatCodesSuccess, "Waiting for get stat items...");
 
 	bool bStatItemDeleteSuccess = false;
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete User StatItem"));
@@ -482,7 +482,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 			bStatItemDeleteSuccess = true;
 		}
 	}));
-	Waiting(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
+	WaitUntil(bStatItemDeleteSuccess, "Waiting for statitem deleted...");
 
 	AB_TEST_TRUE(bIncrementManyUsersStatItemsSuccess);
 	AB_TEST_TRUE(IncrementResult[0].Success);

@@ -121,7 +121,7 @@ bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce CURRENCY...");
+	WaitUntil(bWaitingTerminated, "Waiting for Setup Ecommerce CURRENCY...");
 	AB_TEST_TRUE(bSetupCurrencySuccess);
 
 	bool bSetupStoreSuccess = false;
@@ -135,7 +135,7 @@ bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce STORE...");
+	WaitUntil(bWaitingTerminated, "Waiting for Setup Ecommerce STORE...");
 	AB_TEST_TRUE(bSetupStoreSuccess);
 
 	bool bSetupCampaignSuccess = false;
@@ -149,7 +149,7 @@ bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce CAMPAIGN...");
+	WaitUntil(bWaitingTerminated, "Waiting for Setup Ecommerce CAMPAIGN...");
 	AB_TEST_TRUE(bSetupCampaignSuccess);
 
 	bool bUserLoginSuccess = false;
@@ -157,7 +157,7 @@ bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 	return true;
 }
@@ -167,7 +167,7 @@ bool FEcommerceTestTearDown::RunTest(const FString& Parameters)
 {
 	bool bTearDownSuccess = false;
 	TearDownEcommerce(EcommerceTestExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bTearDownSuccess = true; }), EcommerceTestErrorHandler);
-	Waiting(bTearDownSuccess, "Waiting for teardown...");
+	WaitUntil(bTearDownSuccess, "Waiting for teardown...");
 	AB_TEST_TRUE(bTearDownSuccess)
 
 #pragma region DeleteUser
@@ -182,7 +182,7 @@ bool FEcommerceTestTearDown::RunTest(const FString& Parameters)
 			bDeleteDone = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for user deletion...");
+	WaitUntil(bDeleteDone, "Waiting for user deletion...");
 
 #pragma endregion DeleteUser
 
@@ -203,7 +203,7 @@ bool FEcommerceTestGetCategory::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 			bGetCategorySuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bGetCategorySuccess, "Waiting for get category...");
+	WaitUntil(bGetCategorySuccess, "Waiting for get category...");
 
 #pragma endregion GetCategory
 
@@ -233,7 +233,7 @@ bool FEcommerceTestGetRootCategories::RunTest(const FString& Parameters)
 			bGetRootCategoriesSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetRootCategoriesSuccess, "Waiting for get root category...");
+	WaitUntil(bGetRootCategoriesSuccess, "Waiting for get root category...");
 
 #pragma endregion GetRootCategories
 
@@ -264,7 +264,7 @@ bool FEcommerceTestGetChildCategories::RunTest(const FString& Parameters)
 			bGetChildCategoriesSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetChildCategoriesSuccess, "Waiting for get child category...");
+	WaitUntil(bGetChildCategoriesSuccess, "Waiting for get child category...");
 
 #pragma endregion GetChildCategories
 
@@ -299,7 +299,7 @@ bool FEcommerceTestGetDescendantCategories::RunTest(const FString& Parameters)
 			bGetDescendantCategoriesSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetDescendantCategoriesSuccess, "Waiting for get descendant category...");
+	WaitUntil(bGetDescendantCategoriesSuccess, "Waiting for get descendant category...");
 
 #pragma endregion GetDescendantCategories
 
@@ -335,7 +335,7 @@ bool FEcommerceTestGetItemsByCriteria::RunTest(const FString& Parameters)
 			bGetItemByCriteriaSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
 
@@ -375,7 +375,7 @@ bool FEcommerceTestGetItemById::RunTest(const FString& Parameters)
 			bGetItemByCriteriaSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
 
@@ -389,7 +389,7 @@ bool FEcommerceTestGetItemById::RunTest(const FString& Parameters)
 			bGetItemByIdSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByIdSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByIdSuccess, "Waiting for get items...");
 
 #pragma endregion GetItem
 
@@ -430,7 +430,7 @@ bool FEcommerceTestGetItemsByCriteriaDiscounted::RunTest(const FString& Paramete
 			bGetItemByCriteriaSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 
 #pragma endregion GetItemByCriteria
 
@@ -463,7 +463,7 @@ bool FEcommerceTestSearchItem::RunTest(const FString& Parameters)
 			bSearchItemSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bSearchItemSuccess, "Waiting for search item...");
+	WaitUntil(bSearchItemSuccess, "Waiting for search item...");
 
 #pragma endregion SearchItem
 
@@ -492,7 +492,7 @@ bool FEcommerceTestCreateDistributionReceiver::RunTest(const FString& Parameters
 			bCreateDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateDistributionSuccess, "Waiting for create distribution receiver...");
+	WaitUntil(bCreateDistributionSuccess, "Waiting for create distribution receiver...");
 
 #pragma endregion CreateDistributionReceiver
 #pragma region GetDistributionReceiver
@@ -514,7 +514,7 @@ bool FEcommerceTestCreateDistributionReceiver::RunTest(const FString& Parameters
 			bGetDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetDistributionSuccess, "Waiting for get distribution receiver...");
+	WaitUntil(bGetDistributionSuccess, "Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region DeleteDistributionReceiver
 	bool bDeleteDistributionSuccess = false;
@@ -525,7 +525,7 @@ bool FEcommerceTestCreateDistributionReceiver::RunTest(const FString& Parameters
 			bDeleteDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bDeleteDistributionSuccess, "Waiting for delete distribution receiver...");
+	WaitUntil(bDeleteDistributionSuccess, "Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
 	AB_TEST_TRUE(bCreateDistributionSuccess);
@@ -555,7 +555,7 @@ bool FEcommerceTestUpdateDistributionReceiver::RunTest(const FString& Parameters
 			bCreateDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateDistributionSuccess, "Waiting for create distribution receiver...");
+	WaitUntil(bCreateDistributionSuccess, "Waiting for create distribution receiver...");
 
 #pragma endregion CreateDistributionReceiver
 #pragma region GetDistributionReceiver
@@ -577,7 +577,7 @@ bool FEcommerceTestUpdateDistributionReceiver::RunTest(const FString& Parameters
 			bGetDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetDistributionSuccess, "Waiting for get distribution receiver...");
+	WaitUntil(bGetDistributionSuccess, "Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region UpdateDistributionReceiver
 	Attributes.ServerId = "70391cb5af52427e896e05290bc65831";
@@ -593,7 +593,7 @@ bool FEcommerceTestUpdateDistributionReceiver::RunTest(const FString& Parameters
 			bUpdateDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bUpdateDistributionSuccess, "Waiting for update distribution receiver...");
+	WaitUntil(bUpdateDistributionSuccess, "Waiting for update distribution receiver...");
 
 #pragma endregion UpdateDistributionReceiver
 #pragma region GetDistributionReceiver
@@ -615,7 +615,7 @@ bool FEcommerceTestUpdateDistributionReceiver::RunTest(const FString& Parameters
 			bGetDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetDistributionSuccess, "Waiting for get distribution receiver...");
+	WaitUntil(bGetDistributionSuccess, "Waiting for get distribution receiver...");
 #pragma endregion GetDistributionReceiver
 #pragma region DeleteDistributionReceiver
 	bool bDeleteDistributionSuccess = false;
@@ -626,7 +626,7 @@ bool FEcommerceTestUpdateDistributionReceiver::RunTest(const FString& Parameters
 			bDeleteDistributionSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bDeleteDistributionSuccess, "Waiting for delete distribution receiver...");
+	WaitUntil(bDeleteDistributionSuccess, "Waiting for delete distribution receiver...");
 #pragma endregion DeleteDistributionReceiver
 
 	AB_TEST_TRUE(bCreateDistributionSuccess);
@@ -667,7 +667,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 			}
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
 
@@ -692,7 +692,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 			bCreateNewOrderSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateNewOrderSuccess, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess, "Waiting for new order created...");
 
 #pragma endregion CreateOrder
 
@@ -719,7 +719,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 			}
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get item...");
 
 #pragma endregion GetItemByCriteria_InGameItem
 
@@ -742,7 +742,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 			bCreateNewOrderSuccess2 = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateNewOrderSuccess2, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess2, "Waiting for new order created...");
 
 #pragma endregion CreateOrder_InGameItem
 
@@ -787,7 +787,7 @@ bool FEcommerceTestGetUserOrder::RunTest(const FString& Parameters)
 			}
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
 
@@ -813,7 +813,7 @@ bool FEcommerceTestGetUserOrder::RunTest(const FString& Parameters)
 			bCreateNewOrderSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateNewOrderSuccess, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess, "Waiting for new order created...");
 
 #pragma endregion CreateOrder
 
@@ -827,7 +827,7 @@ bool FEcommerceTestGetUserOrder::RunTest(const FString& Parameters)
 			bGetUserOrderSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetUserOrderSuccess, "Waiting for get user order...");
+	WaitUntil(bGetUserOrderSuccess, "Waiting for get user order...");
 
 #pragma endregion GetUserOrder
 
@@ -870,7 +870,7 @@ bool FEcommerceTestGetUserOrderHistory::RunTest(const FString& Parameters)
 			}
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get item...");
 
 #pragma endregion GetItemByCriteria
 
@@ -896,7 +896,7 @@ bool FEcommerceTestGetUserOrderHistory::RunTest(const FString& Parameters)
 			bCreateNewOrderSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bCreateNewOrderSuccess, "Waiting for new order created...");
+	WaitUntil(bCreateNewOrderSuccess, "Waiting for new order created...");
 
 #pragma endregion CreateOrder
 
@@ -910,7 +910,7 @@ bool FEcommerceTestGetUserOrderHistory::RunTest(const FString& Parameters)
 			bGetUserOrderHistorySuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetUserOrderHistorySuccess, "Waiting for get user order history...");
+	WaitUntil(bGetUserOrderHistorySuccess, "Waiting for get user order history...");
 
 #pragma endregion GetUserOrderHistory
 
@@ -934,7 +934,7 @@ bool FEcommerceTestGetUserOrders::RunTest(const FString& Parameters)
 			bGetUserOrdersSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetUserOrdersSuccess, "Waiting for get user order...");
+	WaitUntil(bGetUserOrdersSuccess, "Waiting for get user order...");
 
 #pragma endregion GetUserOrders
 
@@ -953,7 +953,7 @@ bool FEcommerceTestGetWalletInfoByCurrencyCode::RunTest(const FString& Parameter
 			bGetWalletSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
+	WaitUntil(bGetWalletSuccess, "Waiting for get wallet...");
 
 	AB_TEST_TRUE(bGetWalletSuccess);
 	return true;
@@ -974,7 +974,7 @@ bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 			bGetWalletSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
+	WaitUntil(bGetWalletSuccess, "Waiting for get wallet...");
 
 #pragma endregion GetWalletInfo
 
@@ -986,7 +986,7 @@ bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 			{
 				bServerLoginWithClientCredentialsDone = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 #pragma endregion ClientLogin
 
@@ -1005,7 +1005,7 @@ bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 			bBalanceIncrease = ((WalletInfo.Balance + request.Amount) == Result.Balance);
 			bCreditWalletSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
+	WaitUntil(bCreditWalletSuccess, "Waiting for get wallet...");
 
 #pragma endregion CreditUserWallet
 
@@ -1030,7 +1030,7 @@ bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 			bGetWalletSuccess = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetWalletSuccess, "Waiting for get wallet...");
+	WaitUntil(bGetWalletSuccess, "Waiting for get wallet...");
 	AB_TEST_TRUE(bGetWalletSuccess)
 #pragma endregion GetWalletInfo
 
@@ -1042,7 +1042,7 @@ bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 			{
 				bServerLoginWithClientCredentialsDone = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
 
 	AB_TEST_TRUE(bServerLoginWithClientCredentialsDone)
 #pragma endregion ServerLogin
@@ -1063,7 +1063,7 @@ bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 			bCreditWalletSuccess = true;
 			WalletInfo = Result;
 		}), EcommerceTestErrorHandler);
-	Waiting(bCreditWalletSuccess, "Waiting for get wallet...");
+	WaitUntil(bCreditWalletSuccess, "Waiting for get wallet...");
 	AB_TEST_TRUE(bCreditWalletSuccess)
 #pragma endregion CreditUserWallet
 
@@ -1080,7 +1080,7 @@ bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 				bWalletDecreased = ((WalletInfo.Balance - DebitRequest.Amount) == Result.Balance);
 				bDebitWalletSuccess = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bDebitWalletSuccess, "Waiting for debiting the user wallet");
+	WaitUntil(bDebitWalletSuccess, "Waiting for debiting the user wallet");
 
 	AB_TEST_TRUE(bWalletDecreased)
 #pragma endregion DebitUserWallet
@@ -1107,7 +1107,7 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 #pragma endregion GetItemByCriteria
 
@@ -1118,7 +1118,7 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsEntitlementGrant GrantedEntitlement;
 	GrantedEntitlement.ItemId = Items.Data[0].ItemId;
@@ -1143,7 +1143,7 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 			}
 		}), EcommerceTestErrorHandler);
-	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
@@ -1157,7 +1157,7 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 			UserEntitlement = Result;
 			bQueryEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = false;
 	for (auto Entitlement : UserEntitlement.Data)
@@ -1185,7 +1185,7 @@ bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Pa
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsEntitlementGrant GrantedEntitlement;
 	GrantedEntitlement.ItemId = "Invalid";
@@ -1221,7 +1221,7 @@ bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Pa
 					bGrantEntitlementDone = true;
 				}
 			}));
-	Waiting(bGrantEntitlementDone, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementDone, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementDone);
 	AB_TEST_FALSE(bGrantEntitlementSuccess);
@@ -1236,7 +1236,7 @@ bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Pa
 			UserEntitlement = Result;
 			bQueryEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = false;
 	for (auto Entitlement : UserEntitlement.Data)
@@ -1268,7 +1268,7 @@ bool FEcommerceTestQueryUserEntitlements::RunTest(const FString& Parameters)
 				EcommerceTestExpectedEntitlementId = Result.Data[0].Id;
 			}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 
-	Waiting(bQueryEntitlementSuccess, "Waiting for get user entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bQueryEntitlementSuccess);
 	AB_TEST_TRUE(bQueryResultTrue);
@@ -1290,7 +1290,7 @@ bool FEcommerceTestConsumeUserEntitlement::RunTest(const FString& Parameters)
 				bConsumeEntitlement1Success = true;
 				bConsumeResult1True = (Result.Status == EAccelByteEntitlementStatus::CONSUMED);
 			}), EcommerceTestErrorHandler);
-	Waiting(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
+	WaitUntil(bConsumeEntitlement1Success, "Waiting for consume user entitlement...");
 
 #pragma endregion FirstConsumption
 
@@ -1308,7 +1308,7 @@ bool FEcommerceTestConsumeUserEntitlement::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 					bConsumeEntitlement2Success = true;
 				}));
-	Waiting(bConsumeEntitlement2Success, "Waiting for consume user entitlement...");
+	WaitUntil(bConsumeEntitlement2Success, "Waiting for consume user entitlement...");
 
 #pragma endregion SecondConsumption
 
@@ -1332,7 +1332,7 @@ bool FEcommerceTestGetUserEntitlementById::RunTest(const FString& Parameters)
 				bGetResultTrue = (Result.Id == EcommerceTestExpectedEntitlementId);
 			}), EcommerceTestErrorHandler);
 
-	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementSuccess);
 	AB_TEST_TRUE(bGetResultTrue);
@@ -1360,7 +1360,7 @@ bool FEcommerceTestGetUserEntitlementByIdInvalidId::RunTest(const FString& Param
 					}
 				}));
 
-	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementDone, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementError);
 	return true;
@@ -1375,7 +1375,7 @@ bool FEcommerceTestServerGetUserEntitlementById::RunTest(const FString& Paramete
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+	WaitUntil(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
@@ -1387,7 +1387,7 @@ bool FEcommerceTestServerGetUserEntitlementById::RunTest(const FString& Paramete
 				bGetEntitlementSuccess = true;
 				bGetResultTrue = (Result.Id == EcommerceTestExpectedEntitlementId);
 			}), EcommerceTestErrorHandler);
-	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementSuccess);
 	AB_TEST_TRUE(bGetResultTrue);
@@ -1403,7 +1403,7 @@ bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Pa
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+	WaitUntil(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
@@ -1415,7 +1415,7 @@ bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Pa
 				bGetEntitlementSuccess = true;
 				bGetResultTrue = (Result.Id == EcommerceTestExpectedEntitlementId);
 			}), EcommerceTestErrorHandler);
-	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementSuccess);
 	AB_TEST_TRUE(bGetResultTrue);
@@ -1431,7 +1431,7 @@ bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameter
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+	WaitUntil(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
@@ -1444,7 +1444,7 @@ bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameter
 				bGetEntitlementSuccess = true;
 				bGetResultTrue = (Result.Data[0].Id == EcommerceTestExpectedEntitlementId);
 			}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bGetEntitlementSuccess, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementSuccess);
 	AB_TEST_TRUE(bGetResultTrue);
@@ -1460,7 +1460,7 @@ bool FEcommerceTestServerGetUserEntitlementByIdInvalidId::RunTest(const FString&
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bLoginSuccess, "Waiting for Login Creds...");
+	WaitUntil(bLoginSuccess, "Waiting for Login Creds...");
 
 	bool bGetEntitlementDone = false;
 	bool bGetEntitlementError = false;
@@ -1480,7 +1480,7 @@ bool FEcommerceTestServerGetUserEntitlementByIdInvalidId::RunTest(const FString&
 					}
 				}));
 
-	Waiting(bGetEntitlementDone, "Waiting for get user entitlement...");
+	WaitUntil(bGetEntitlementDone, "Waiting for get user entitlement...");
 
 	AB_TEST_TRUE(bGetEntitlementError);
 	return true;
@@ -1494,7 +1494,7 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 #pragma region GetItemByCriteria
@@ -1512,7 +1512,7 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 #pragma endregion GetItemByCriteria
 
@@ -1523,7 +1523,7 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	TArray<FAccelByteModelsEntitlementGrant> GrantedEntitlements;
 	TArray<FString> ItemIdsGranted;
@@ -1567,7 +1567,7 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 			}
 		}), EcommerceTestErrorHandler);
-	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
@@ -1581,7 +1581,7 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 			UserEntitlement = Result;
 			bQueryEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementGranted = true;
 	for (auto Grant : GrantedEntitlements)
@@ -1617,7 +1617,7 @@ bool FEcommerceTestServerConsumeUserEntitlement::RunTest(const FString& Paramete
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 #pragma region GetItemByCriteria
@@ -1636,7 +1636,7 @@ bool FEcommerceTestServerConsumeUserEntitlement::RunTest(const FString& Paramete
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 
 	FAccelByteModelsItemCriteria ItemCriteria2;
@@ -1652,7 +1652,7 @@ bool FEcommerceTestServerConsumeUserEntitlement::RunTest(const FString& Paramete
 			bGetItemByCriteriaSuccess2 = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
@@ -1680,7 +1680,7 @@ bool FEcommerceTestServerConsumeUserEntitlement::RunTest(const FString& Paramete
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 			}
 		}), EcommerceTestErrorHandler);
-	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
@@ -1693,7 +1693,7 @@ bool FEcommerceTestServerConsumeUserEntitlement::RunTest(const FString& Paramete
 			{
 				bIsConsumed = Result.UseCount == LastEntitlementCount - 1;
 			}), EcommerceTestErrorHandler);
-	Waiting(bIsConsumed, "Waiting to be consumed");
+	WaitUntil(bIsConsumed, "Waiting to be consumed");
 
 	AB_TEST_TRUE(bIsConsumed);
 #pragma endregion ConsumeEntitlement
@@ -1708,7 +1708,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 #pragma region GetItemByCriteria
@@ -1726,7 +1726,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 
 	FAccelByteModelsItemCriteria ItemCriteria2;
@@ -1742,7 +1742,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 			bGetItemByCriteriaSuccess2 = true;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
@@ -1753,7 +1753,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsEntitlementGrant GrantedEntitlement;
 	GrantedEntitlement.ItemId = Items.Data[0].ItemId;
@@ -1778,7 +1778,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 			}
 		}), EcommerceTestErrorHandler);
-	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
@@ -1791,7 +1791,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Enable the Entitlement Success"));
 				bIsEnable = Result.Status == EAccelByteEntitlementStatus::ACTIVE;
 			}), EcommerceTestErrorHandler);
-	Waiting(bIsEnable, "Waiting to enable the entitlement");
+	WaitUntil(bIsEnable, "Waiting to enable the entitlement");
 	AB_TEST_TRUE(bIsEnable);
 #pragma endregion EnableEntitlement
 
@@ -1803,7 +1803,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Disable the Entitlement Success"));
 				bIsDisabled = Result.Status == EAccelByteEntitlementStatus::INACTIVE;
 			}), EcommerceTestErrorHandler);
-	Waiting(bIsDisabled, "Waiting to disable the entitlement");
+	WaitUntil(bIsDisabled, "Waiting to disable the entitlement");
 	AB_TEST_TRUE(bIsDisabled);
 #pragma endregion DisableEntitlement
 
@@ -1815,7 +1815,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlement::RunTest(const FString& Pa
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Revoke the Entitlement Success"));
 				bIsRevoked = Result.Status == EAccelByteEntitlementStatus::REVOKED;
 			}), EcommerceTestErrorHandler);
-	Waiting(bIsRevoked, "Waiting to revoke the entitlement");
+	WaitUntil(bIsRevoked, "Waiting to revoke the entitlement");
 	AB_TEST_TRUE(bIsRevoked);
 #pragma endregion RevokeEntitlement
 
@@ -1830,7 +1830,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlementInvalidEntitlementId::RunTe
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 	const FString InvalidId = TEXT("Invalid");
@@ -1845,7 +1845,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlementInvalidEntitlementId::RunTe
 				bIsDisabledFailed = true;
 				})
 				);
-	Waiting(bIsDisabledFailed, "Waiting to disable the entitlement");
+	WaitUntil(bIsDisabledFailed, "Waiting to disable the entitlement");
 	AB_TEST_TRUE(bIsDisabledFailed);
 #pragma endregion DisableEntitlement
 
@@ -1859,7 +1859,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlementInvalidEntitlementId::RunTe
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Failed Disable the Entitlement (EXPECTED)"));
 				bIsEnableFailed = true;
 				}));
-	Waiting(bIsEnableFailed, "Waiting to enable the entitlement");
+	WaitUntil(bIsEnableFailed, "Waiting to enable the entitlement");
 	AB_TEST_TRUE(bIsEnableFailed);
 #pragma endregion EnableEntitlement
 
@@ -1873,7 +1873,7 @@ bool FEcommerceTestDisableEnableRevokeUserEntitlementInvalidEntitlementId::RunTe
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Failed Disable the Entitlement (EXPECTED)"));
 				bIsRevokedFailed = true;
 				}));
-	Waiting(bIsRevokedFailed, "Waiting to revoke the entitlement");
+	WaitUntil(bIsRevokedFailed, "Waiting to revoke the entitlement");
 	AB_TEST_TRUE(bIsRevokedFailed);
 #pragma endregion RevokeEntitlement
 
@@ -1888,7 +1888,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 		{
 			bUserLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for Login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 #pragma region GetItemByCriteria
@@ -1906,7 +1906,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 
 	FAccelByteModelsItemCriteria ItemCriteria2;
@@ -1923,7 +1923,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 			Items2 = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
@@ -1971,7 +1971,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 					UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
 				}
 			}), EcommerceTestErrorHandler);
-	Waiting(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bGrantEntitlementSuccess);
 #pragma endregion GrantEntitlement
@@ -1983,7 +1983,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 			{
 				bIsRevokeSuccess = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bIsRevokeSuccess, "Waiting for revoking the entitlements");
+	WaitUntil(bIsRevokeSuccess, "Waiting for revoking the entitlements");
 
 	AB_TEST_TRUE(bIsRevokeSuccess);
 
@@ -2013,7 +2013,7 @@ bool FEcommerceTestRevokeUserEntitlements::RunTest(const FString& Parameters)
 					}
 				}
 			}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
-	Waiting(bServerQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bServerQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 	AB_TEST_TRUE(bServerQueryEntitlementSuccess);
 	AB_TEST_TRUE(bServerEntitlementRevoked);
 #pragma endregion CheckEntitlementRevoked
@@ -2035,7 +2035,7 @@ bool FECommerceTestFulfillmentRedeemCode::RunTest(const FString& Parameters)
 				fulfillmentResult = Result;
 				bRedeemCodeSuccess = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bRedeemCodeSuccess, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeSuccess, "Waiting for redeem code...");
 
 	AB_TEST_EQUAL(fulfillmentResult.EntitlementSummaries[0].ItemId, EcommerceTestExpectedVariable.redeemableItem.itemId);
 
@@ -2046,7 +2046,7 @@ bool FECommerceTestFulfillmentRedeemCode::RunTest(const FString& Parameters)
 			getUserEntitlementByIdResult = Result;
 			bGetEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler);
-	Waiting(bGetEntitlementSuccess, "Waiting for get entitlement...");
+	WaitUntil(bGetEntitlementSuccess, "Waiting for get entitlement...");
 
 	AB_TEST_EQUAL(getUserEntitlementByIdResult.Id, fulfillmentResult.EntitlementSummaries[0].Id);
 	AB_TEST_EQUAL(getUserEntitlementByIdResult.ItemId, EcommerceTestExpectedVariable.redeemableItem.itemId);
@@ -2076,7 +2076,7 @@ bool FECommerceTestFulfillmentRedeemCodeExceeded::RunTest(const FString& Paramet
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2112,7 +2112,7 @@ bool FECommerceTestFulfillmentRedeemCodeInactived::RunTest(const FString& Parame
 				updateCampaignResult = Result;
 				bUpdateCampaignSuccess = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bUpdateCampaignSuccess, "Waiting for update campaign...");
+	WaitUntil(bUpdateCampaignSuccess, "Waiting for update campaign...");
 
 	AB_TEST_TRUE(bUpdateCampaignSuccess);
 
@@ -2135,7 +2135,7 @@ bool FECommerceTestFulfillmentRedeemCodeInactived::RunTest(const FString& Parame
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2155,7 +2155,7 @@ bool FECommerceTestFulfillmentRedeemCodeDisabled::RunTest(const FString& Paramet
 				disableCodeResult = Result;
 				bDisableCodeSuccess = true;
 			}), EcommerceTestErrorHandler);
-	Waiting(bDisableCodeSuccess, "Waiting for disabling code...");
+	WaitUntil(bDisableCodeSuccess, "Waiting for disabling code...");
 
 	AB_TEST_TRUE(bDisableCodeSuccess);
 
@@ -2178,7 +2178,7 @@ bool FECommerceTestFulfillmentRedeemCodeDisabled::RunTest(const FString& Paramet
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2208,7 +2208,7 @@ bool FECommerceTestFulfillmentRedeemCodeInvalid::RunTest(const FString& Paramete
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2238,7 +2238,7 @@ bool FECommerceTestFulfillmentRedeemCodeNotStarted::RunTest(const FString& Param
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2268,7 +2268,7 @@ bool FECommerceTestFulfillmentRedeemCodeAlreadyEnded::RunTest(const FString& Par
 				ErrorCode = Code;
 				bRedeemCodeDone = true;
 			}));
-	Waiting(bRedeemCodeDone, "Waiting for redeem code...");
+	WaitUntil(bRedeemCodeDone, "Waiting for redeem code...");
 
 	AB_TEST_FALSE(bRedeemCodeSuccess);
 	AB_TEST_TRUE(bRedeemCodeDone);
@@ -2295,7 +2295,7 @@ bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Paramete
 			Items = Result;
 		}), EcommerceTestErrorHandler);
 
-	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 #pragma endregion GetItemByCriteria
 
@@ -2307,7 +2307,7 @@ bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Paramete
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsFulfillmentRequest FulfillEntitlement;
 	FulfillEntitlement.ItemId = Items.Data[0].ItemId;
@@ -2332,7 +2332,7 @@ bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Paramete
 			}
 		}), EcommerceTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bFulfillEntitlementSuccess, "Waiting for entitlement granted...");
+	WaitUntil(bFulfillEntitlementSuccess, "Waiting for entitlement granted...");
 
 	AB_TEST_TRUE(bFulfillEntitlementSuccess);
 #pragma endregion FulfillEntitlement
@@ -2347,7 +2347,7 @@ bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Paramete
 			bQueryEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 	FlushHttpRequests();
-	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementFulfilled = false;
 	for (auto Entitlement : UserEntitlement.Data)
@@ -2376,7 +2376,7 @@ bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Param
 			bClientLoginSuccess = true;
 		}), EcommerceTestErrorHandler);
 	FlushHttpRequests();
-	Waiting(bClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsFulfillmentRequest FulfilledEntitlement;
 	FulfilledEntitlement.ItemId = "Invalid";
@@ -2412,7 +2412,7 @@ bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Param
 				}
 			}));
 	FlushHttpRequests();
-	Waiting(bFulfillEntitlementDone, "Waiting for entitlement Fulfilled...");
+	WaitUntil(bFulfillEntitlementDone, "Waiting for entitlement Fulfilled...");
 
 	AB_TEST_TRUE(bFulfillEntitlementDone);
 	AB_TEST_FALSE(bFulfillEntitlementSuccess);
@@ -2428,7 +2428,7 @@ bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Param
 			bQueryEntitlementSuccess = true;
 		}), EcommerceTestErrorHandler, EAccelByteEntitlementClass::NONE, EAccelByteAppType::NONE);
 	FlushHttpRequests();
-	Waiting(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
+	WaitUntil(bQueryEntitlementSuccess, "Waiting for Query User's Entitlement...");
 
 	bool bEntitlementFulfilled = false;
 	for (auto Entitlement : UserEntitlement.Data)

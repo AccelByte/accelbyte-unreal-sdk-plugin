@@ -67,7 +67,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
             bServerClientLoginSuccess = true;
             UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("\t\tClient Successfully Login."));
         }), SessionBrowserTestErrorHandler);
-	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bServerClientLoginSuccess, "Waiting for Client Login...");
 	TArray<FString> LoginUserIDs;
 	for (int i = 0; i < SessionBrowserUserCount; i++)
 	{
@@ -101,7 +101,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			}
 			bUsersCreationDone = true;
 		}));
-		Waiting(bUsersCreationDone, "Waiting for user created...");
+		WaitUntil(bUsersCreationDone, "Waiting for user created...");
 
 		// USER LOG IN
 		UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("LOG USER IN...%d out of %d"), i + 1, SessionBrowserUserCount);
@@ -115,7 +115,7 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			UsersLoginSuccess[i] = true;
 			UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("\t\tSuccessfully Login."));
 		}), SessionBrowserTestErrorHandler);
-		Waiting(UsersLoginSuccess[i], "Waiting for login with user name...");
+		WaitUntil(UsersLoginSuccess[i], "Waiting for login with user name...");
 		UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 		//User connect to lobby
@@ -145,7 +145,7 @@ bool SessionBrowserTearDown::RunTest(const FString& Parameters)
 		{
 			bDeleteSessionBrowser = true;
 		}), SessionBrowserTestErrorHandler);
-		Waiting(bDeleteSessionBrowser, "Waiting for session browser deletion...");
+		WaitUntil(bDeleteSessionBrowser, "Waiting for session browser deletion...");
 	}
 	for (auto &Lobby : SessionBrowserLobbies)
 	{
@@ -176,7 +176,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 		bCreated = true;
 		Result = Data;
 	}), SessionBrowserTestErrorHandler);
-	Waiting(bCreated, "Waiting for session browser created...");
+	WaitUntil(bCreated, "Waiting for session browser created...");
 	AB_TEST_TRUE(bCreated);
 
 	//update game session
@@ -188,7 +188,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bUpdated = true;
         ResultUpdated = Data;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bUpdated, "Waiting for session browser updated...");
+	WaitUntil(bUpdated, "Waiting for session browser updated...");
 	AB_TEST_TRUE(bUpdated);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Max_player, UpdatedMaxPlayer);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Current_player, UpdatedPlayerCount);
@@ -204,7 +204,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bQueried, "Waiting for session browser queried...");
+	WaitUntil(bQueried, "Waiting for session browser queried...");
 	AB_TEST_TRUE(bQueried);
 	AB_TEST_TRUE(QueryResult.Sessions.Num() > 0);
 
@@ -230,7 +230,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
 			bGameSessionGet = true;
 			getByIdResult = result;
 		}), SessionBrowserTestErrorHandler);
-	Waiting(bGameSessionGet, "Waiting get session by session id");
+	WaitUntil(bGameSessionGet, "Waiting get session by session id");
 	AB_TEST_EQUAL(getByIdResult.Session_id, QueryResult.Sessions[0].Session_id);
 
 	//Remove game session
@@ -240,7 +240,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
     {
         bRemoved = true;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bRemoved, "Waiting for session browser removed...");
+	WaitUntil(bRemoved, "Waiting for session browser removed...");
 	AB_TEST_TRUE(bUpdated);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Max_player, UpdatedMaxPlayer);
 	AB_TEST_EQUAL(ResultUpdated.Game_session_setting.Current_player, UpdatedPlayerCount);
@@ -253,7 +253,7 @@ bool SessionBrowserCRUD::RunTest(const FString& Parameters)
         bQueried = true;
         QueryResult = QueryData;
     }), SessionBrowserTestErrorHandler);
-	Waiting(bQueried, "Waiting for session browser queried...");
+	WaitUntil(bQueried, "Waiting for session browser queried...");
 	AB_TEST_TRUE(bQueried);
 
 	bFounded = false;

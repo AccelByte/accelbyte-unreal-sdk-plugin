@@ -35,7 +35,7 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 			bLoginSuccessful = true;
 			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), ServerTelemetryErrorHandler);
-	Waiting(bLoginSuccessful, "Waiting for Client Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Client Login...");
 	
 	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
 	FRegistry::ServerGameTelemetry.SetImmediateEventList({});
@@ -63,7 +63,7 @@ bool ServerGameTelemetryTestSendProtectedEvent::RunTest(const FString& Parameter
 	}
 
 	
-	WaitUntil([&SuccessResultCount, EVENT_COUNT]() {return SuccessResultCount == EVENT_COUNT; }, 60, "batch telemetry event sent successfully");
+	WaitUntil([&SuccessResultCount, EVENT_COUNT]() {return SuccessResultCount == EVENT_COUNT; }, "batch telemetry event sent successfully", 60);
 
 	FRegistry::ServerCredentials.ForgetAll();
 	
@@ -81,7 +81,7 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 			bLoginSuccessful = true;
 			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), ServerTelemetryErrorHandler);
-	Waiting(bLoginSuccessful, "Waiting for Client Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Client Login...");
 
 	FString CurrentImmediateEventName = "SDK_UE4_Immediate_Event";
 	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(5.0f));
@@ -112,7 +112,7 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 				}), ServerTelemetryErrorHandler);
 	}
 
-	Waiting(allEventDone, "Sending multiple immediate telemetry events");
+	WaitUntil(allEventDone, "Sending multiple immediate telemetry events");
 
 	FRegistry::ServerCredentials.ForgetAll();
 

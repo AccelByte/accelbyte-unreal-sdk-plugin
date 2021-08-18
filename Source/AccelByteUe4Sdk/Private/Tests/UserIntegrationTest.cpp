@@ -72,7 +72,7 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -87,7 +87,7 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
 
@@ -101,7 +101,7 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -137,7 +137,7 @@ bool FUserRegisterv2Test::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -152,7 +152,7 @@ bool FUserRegisterv2Test::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
 
@@ -166,7 +166,7 @@ bool FUserRegisterv2Test::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -201,7 +201,7 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
@@ -211,7 +211,7 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	// set session expired time to 0
 	const FString AccessToken = FRegistry::Credentials.GetAccessToken();
@@ -228,8 +228,8 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString& Parameter)
 
 			return AccessToken != NewAccessToken && RefreshToken != NewRefreshToken;
 		},
-		10,
-			"Wait refresh token");
+		"Wait refresh token",
+		10);
 
 #pragma region DeleteUserById
 
@@ -243,7 +243,7 @@ bool FUserAutomatedRefreshSessionTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -282,7 +282,7 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -299,7 +299,7 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bVerifyUserSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("VerifyingAccount"));
@@ -309,7 +309,7 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 			bVerifyUserSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bVerifyUserSuccessful, "Waiting for Verfying Account...");
+	WaitUntil(bVerifyUserSuccessful, "Waiting for Verfying Account...");
 
 	bool bGetDataSuccessful = false;
 	FAccountUserData GetDataResult;
@@ -322,7 +322,7 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetDataSuccessful, "Waiting for Get Data...");
+	WaitUntil(bGetDataSuccessful, "Waiting for Get Data...");
 
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
@@ -334,7 +334,7 @@ bool FUserLoginTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 	AB_TEST_TRUE(bGetDataSuccessful);
 	AB_TEST_TRUE(bLoginSuccessful);
@@ -368,7 +368,7 @@ bool FUserLoginFailedTest::RunTest(const FString& Parameter)
 			}));
 
 	FlushHttpRequests();
-	Waiting(bLoginDone, "Waiting for Login...");
+	WaitUntil(bLoginDone, "Waiting for Login...");
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
@@ -402,7 +402,7 @@ bool FUserLoginSteamFailedTest::RunTest(const FString& Parameter)
 			}));
 
 	FlushHttpRequests();
-	Waiting(bLoginDone, "Waiting for Login...");
+	WaitUntil(bLoginDone, "Waiting for Login...");
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
@@ -436,7 +436,7 @@ bool FUserLoginEmailFailedNoContentTest::RunTest(const FString& Parameter)
 			}));
 
 	FlushHttpRequests();
-	Waiting(bLoginDone, "Waiting for Login...");
+	WaitUntil(bLoginDone, "Waiting for Login...");
 
 	const FString DefaultMessage = ErrorMessages::Default.at(ErrorCode);
 
@@ -472,7 +472,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -487,7 +487,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bForgotPasswordSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("RequestPasswordReset"));
@@ -498,7 +498,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			bForgotPasswordSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
+	WaitUntil(bForgotPasswordSuccessful, "Waiting for Code to be sent...");
 
 	bool bGetVerificationCodeSuccess = false;
 	FString VerificationCode;
@@ -508,7 +508,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			VerificationCode = result.passwordReset;
 			bGetVerificationCodeSuccess = true;
 		}), UserTestErrorHandler);
-	Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
+	WaitUntil(bGetVerificationCodeSuccess, "Getting Verification Code...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Verification code: %s"), *VerificationCode);
 
@@ -522,7 +522,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			bResetPasswordSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bResetPasswordSuccessful, "Waiting for Reset...");
+	WaitUntil(bResetPasswordSuccessful, "Waiting for Reset...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
 	FRegistry::User.ForgetAllCredentials();
@@ -536,7 +536,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserById
 
@@ -550,7 +550,7 @@ bool FUserResetPasswordTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -576,7 +576,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString& Parameter)
 			bDeviceLoginSuccessful1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful1, "Waiting for Login...");
 
 	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 
@@ -588,7 +588,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
 			bDeviceLoginSuccessful2 = true;
 		}), UserTestErrorHandler);
-	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful2, "Waiting for Login...");
 
 	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
@@ -605,7 +605,7 @@ bool FLoginWithDeviceIdSuccess::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Delete...");
+	WaitUntil(bDeleteDone, "Waiting for Delete...");
 
 #pragma endregion DeleteUserById
 
@@ -631,7 +631,7 @@ bool FLogoutSuccess::RunTest(const FString& Parameter)
 		bDeviceLoginSuccessful = true;
 	}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful, "Waiting for Login with device id...");
+	WaitUntil(bDeviceLoginSuccessful, "Waiting for Login with device id...");
 
 	FString UserId = FRegistry::Credentials.GetUserId();
 	bool bLogoutSuccessful = false;
@@ -640,7 +640,7 @@ bool FLogoutSuccess::RunTest(const FString& Parameter)
 	{
 		bLogoutSuccessful = true;
 	}), UserTestErrorHandler);
-	Waiting(bLogoutSuccessful, "Waiting for Logout...");
+	WaitUntil(bLogoutSuccessful, "Waiting for Logout...");
 
 #pragma region DeleteUserById
 
@@ -652,7 +652,7 @@ bool FLogoutSuccess::RunTest(const FString& Parameter)
 		bDeleteSuccessful = true;
 	}), UserTestErrorHandler);
 
-	Waiting(bDeleteSuccessful, "Waiting for Delete...");
+	WaitUntil(bDeleteSuccessful, "Waiting for Delete...");
 
 #pragma endregion DeleteUserById
 
@@ -676,7 +676,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 			bDeviceLoginSuccessful1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful1, "Waiting for Login...");
 
 	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 
@@ -692,7 +692,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -706,7 +706,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 				bDeviceLoginSuccessful2 = true;
 			}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful2, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful2, "Waiting for Login...");
 
 	const FString SecondUserId = FRegistry::Credentials.GetUserId();
 
@@ -722,7 +722,7 @@ bool FLoginWithDeviceIdUniqueIdCreated::RunTest(const FString& Parameter)
 			bDeleteDone2 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone2, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone2, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -880,7 +880,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone1 = true;
 			}));
 
-	Waiting(bSteamLoginDone1, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
 	{
@@ -904,7 +904,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone2 = true;
 			}));
 
-	Waiting(bSteamLoginDone2, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone2, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful2)
 	{
@@ -925,7 +925,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -962,7 +962,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 				bSteamLoginDone1 = true;
 			}));
 
-	Waiting(bSteamLoginDone1, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
 	{
@@ -983,7 +983,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -1003,7 +1003,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 				bSteamLoginDone2 = true;
 			}));
 
-	Waiting(bSteamLoginDone2, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone2, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful2)
 	{
@@ -1024,7 +1024,7 @@ bool FLoginWithSteamUniqueIdCreated::RunTest(const FString& Parameter)
 			bDeleteDone2 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone2, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone2, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -1064,7 +1064,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
@@ -1076,7 +1076,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1094,7 +1094,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 	const FString FirstUserId = FRegistry::Credentials.GetUserId();
 	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
 
@@ -1109,7 +1109,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 			bUpgradeSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
+	WaitUntil(bUpgradeSuccessful, "Waiting for Upgrade...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1121,7 +1121,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 			bLoginEmailSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginEmailSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginEmailSuccessful, "Waiting for Login...");
 
 	const FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
 
@@ -1137,7 +1137,7 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser1
 
@@ -1178,7 +1178,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	bool bDeleteDone1 = false;
 	bool bDeleteSuccessful1 = false;
@@ -1190,7 +1190,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1208,7 +1208,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1226,7 +1226,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 			bUpgradeSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bUpgradeSuccessful, "Waiting for Upgrade...");
+	WaitUntil(bUpgradeSuccessful, "Waiting for Upgrade...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1238,7 +1238,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 			bLoginUsernameSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginUsernameSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginUsernameSuccessful, "Waiting for Login...");
 
 	const FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
 
@@ -1254,7 +1254,7 @@ bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser1
 
@@ -1292,7 +1292,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1311,7 +1311,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserSteam
 
@@ -1338,7 +1338,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -1353,7 +1353,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
 	FAccountUserData UserData;
@@ -1368,7 +1368,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 	bool bLinkSteamAcc = false;
 	bool bLinkSteamSuccess = false;
@@ -1384,7 +1384,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				bLinkSteamAcc = true;
 			}));
 
-	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
+	WaitUntil(bLinkSteamAcc, "Waiting for Link Account...");
 
 	bool bGetPlatformLinks = false;
 	bool bGetPlatformLinksSuccess = false;
@@ -1398,7 +1398,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("GetPlatformLinks..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetPlatformLinks, "Waiting for GetPlatformLinks...");
+	WaitUntil(bGetPlatformLinks, "Waiting for GetPlatformLinks...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
 	FRegistry::User.ForgetAllCredentials();
@@ -1417,7 +1417,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1437,7 +1437,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
 
@@ -1451,7 +1451,7 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
 
@@ -1488,7 +1488,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1518,7 +1518,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -1533,7 +1533,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
 	FAccountUserData UserData;
@@ -1548,7 +1548,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 	bool bLinkSteamAcc = false;
 	bool bLinkSteamSuccess = false;
@@ -1566,7 +1566,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				bLinkSteamAcc = true;
 			}));
 
-	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
+	WaitUntil(bLinkSteamAcc, "Waiting for Link Account...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
 	FRegistry::User.ForgetAllCredentials();
@@ -1585,7 +1585,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1605,7 +1605,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
 
@@ -1619,7 +1619,7 @@ bool FLinkSteamAccountConflict::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
 
@@ -1655,7 +1655,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1685,7 +1685,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -1700,7 +1700,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserData = false;
 	FAccountUserData UserData;
@@ -1715,7 +1715,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
 	const FString SteamUserID = GetSteamUserId();
@@ -1734,7 +1734,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				bLinkSteamAcc = true;
 			}));
 
-	Waiting(bLinkSteamAcc, "Waiting for Link Account...");
+	WaitUntil(bLinkSteamAcc, "Waiting for Link Account...");
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
 	FRegistry::User.ForgetAllCredentials();
@@ -1753,7 +1753,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				bSteamLoginDone = true;
 			}));
 
-	Waiting(bSteamLoginDone, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
 
 	if (!bLoginPlatformSuccessful)
 	{
@@ -1773,7 +1773,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
 			}));
 
-	Waiting(bGetUserData, "Waiting for Get User Data...");
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
 #pragma region DeleteUser
 
@@ -1787,7 +1787,7 @@ bool FLinkSteamAccountForcedSuccess::RunTest(const FString& Parameter)
 			bDeleteDone1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone1, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
 
 #pragma endregion DeleteUser
 
@@ -1834,7 +1834,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -1849,7 +1849,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
 	ProfileCreate.FirstName = "Jirolu";
@@ -1883,7 +1883,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 				}
 			}));
 
-	Waiting(bCreateProfileDone, "Waiting for Create Profile...");
+	WaitUntil(bCreateProfileDone, "Waiting for Create Profile...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1897,7 +1897,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful, "Waiting for login...");
+	WaitUntil(bDeviceLoginSuccessful, "Waiting for login...");
 
 	bool bGetProfileSuccessful = false;
 	FAccelByteModelsPublicUserProfileInfo OtherUserProfile;
@@ -1912,7 +1912,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetProfileSuccessful, "Waiting for Get Profile...");
+	WaitUntil(bGetProfileSuccessful, "Waiting for Get Profile...");
 
 	FRegistry::User.ForgetAllCredentials();
 
@@ -1924,7 +1924,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 #pragma region DeleteUserProfile
 	bool bDeleteProfileDone = false;
@@ -1937,7 +1937,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			bDeleteProfileDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteProfileDone, "Waiting for Deletion...");
 #pragma endregion DeleteUserProfile
 
 #pragma region DeleteUserById
@@ -1952,7 +1952,7 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 	AB_TEST_EQUAL(OtherUserProfile.AvatarSmallUrl, CreatedProfile.AvatarSmallUrl);
@@ -1998,7 +1998,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 					bIsDone = true;
 				}));
 
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		return bIsOk;
 	};
 
@@ -2018,7 +2018,7 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 				{
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		return bIsOk;
 	};
 
@@ -2084,7 +2084,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			bDeviceLoginSuccessful1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful1, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful1, "Waiting for Login...");
 
 	bool bCreateProfileSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
@@ -2117,7 +2117,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 				}
 			}));
 
-	Waiting(bCreateProfileSuccessful1, "Waiting for Create Profile...");
+	WaitUntil(bCreateProfileSuccessful1, "Waiting for Create Profile...");
 
 	bool bGetProfileSuccessful1 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile"));
@@ -2127,7 +2127,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			bGetProfileSuccessful1 = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bGetProfileSuccessful1, "Waiting for Get Profile...");
+	WaitUntil(bGetProfileSuccessful1, "Waiting for Get Profile...");
 
 	bool bUpdateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateProfile"));
@@ -2140,7 +2140,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bUpdateProfileSuccessful, "Waiting for Update...");
+	WaitUntil(bUpdateProfileSuccessful, "Waiting for Update...");
 
 	bool bGetProfileSuccessful2 = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetProfile // Second attempt"));
@@ -2151,7 +2151,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			UpdatedDateOfBirth = Result.DateOfBirth;
 		}), UserTestErrorHandler);
 
-	Waiting(bGetProfileSuccessful2, "Waiting for Get Profile...");
+	WaitUntil(bGetProfileSuccessful2, "Waiting for Get Profile...");
 
 #pragma region DeleteUserProfile
 	bool bDeleteProfileDone = false;
@@ -2164,7 +2164,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			bDeleteProfileDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteProfileDone, "Waiting for Deletion...");
 #pragma endregion DeleteUserProfile
 
 #pragma region DeleteUserById
@@ -2179,7 +2179,7 @@ bool FUserProfileUtilitiesSuccess::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2206,7 +2206,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeviceLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful, "Waiting for Login...");
 
 	bool bCreateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
@@ -2242,7 +2242,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 				}
 			}));
 
-	Waiting(bCreateProfileSuccessful, "Waiting for Create Profile...");
+	WaitUntil(bCreateProfileSuccessful, "Waiting for Create Profile...");
 
 	bool bUpdateCustomAttributeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateCustomAttributeProfile"));
@@ -2264,7 +2264,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 				bUpdateCustomAttributeSuccessful = true;
 			}), UserTestErrorHandler);
 
-	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
+	WaitUntil(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
 
 	bool bGetCustomAttributeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetCustomAttributeProfile"));
@@ -2285,7 +2285,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 				bGetCustomAttributeSuccessful = true;
 			}), UserTestErrorHandler);
 
-	Waiting(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
+	WaitUntil(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
 
 	int32 getNumberAttribute;
 	getCustomAttribute.TryGetNumberField("Two", getNumberAttribute);
@@ -2305,7 +2305,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeleteProfileDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteProfileDone, "Waiting for Deletion...");
 #pragma endregion DeleteUserProfile
 
 #pragma region DeleteUserById
@@ -2320,7 +2320,7 @@ bool FUserProfileCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2350,7 +2350,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeviceLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeviceLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bDeviceLoginSuccessful, "Waiting for Login...");
 
 	bool bCreateProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateProfile"));
@@ -2386,7 +2386,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 				}
 			}));
 
-	Waiting(bCreateProfileSuccessful, "Waiting for Create Profile...");
+	WaitUntil(bCreateProfileSuccessful, "Waiting for Create Profile...");
 
 	bool bUpdateCustomAttributeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpdateCustomAttributeProfile"));
@@ -2408,7 +2408,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 				bUpdateCustomAttributeSuccessful = true;
 			}), UserTestErrorHandler);
 
-	Waiting(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
+	WaitUntil(bUpdateCustomAttributeSuccessful, "Waiting for Update Custom Attributes...");
 
 	bool bGetCustomAttributeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetCustomAttributeProfile"));
@@ -2444,7 +2444,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -2459,7 +2459,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	FJsonObject getCustomAttribute;
 	User2Registry->UserProfile.GetPublicCustomAttributes(User1Registry->Credentials.GetUserId(),
@@ -2470,7 +2470,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 				bGetCustomAttributeSuccessful = true;
 			}), UserTestErrorHandler);
 
-	Waiting(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
+	WaitUntil(bGetCustomAttributeSuccessful, "Waiting for Get Custom Attributes...");
 
 	int32 getNumberAttribute;
 	getCustomAttribute.TryGetNumberField("Two", getNumberAttribute);
@@ -2490,7 +2490,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeleteProfileDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteProfileDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteProfileDone, "Waiting for Deletion...");
 #pragma endregion DeleteUserProfile
 
 #pragma region DeleteUserById
@@ -2505,7 +2505,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 	bool bDeleteUser2Done = false;
 	bool bDeleteUser2Successful = false;
@@ -2517,7 +2517,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 			bDeleteUser2Done = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteUser2Done, "Waiting for Deletion...");
+	WaitUntil(bDeleteUser2Done, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2557,7 +2557,7 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 				bSteamLoginDone1 = true;
 			}));
 
-	Waiting(bSteamLoginDone1, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
 	{
@@ -2582,7 +2582,7 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Login...");
+	WaitUntil(bGetUserDone, "Waiting for Login...");
 
 #pragma region DeleteUserById
 
@@ -2596,7 +2596,7 @@ bool FGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2630,7 +2630,7 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 				bSteamLoginDone1 = true;
 			}));
 
-	Waiting(bSteamLoginDone1, "Waiting for Login...");
+	WaitUntil(bSteamLoginDone1, "Waiting for Login...");
 
 	if (!bSteamLoginSuccessful1)
 	{
@@ -2655,7 +2655,7 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Login...");
+	WaitUntil(bGetUserDone, "Waiting for Login...");
 
 #pragma region DeleteUserById
 
@@ -2669,7 +2669,7 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2706,7 +2706,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -2721,7 +2721,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	// Complete email.
 	bool bGetUserDone = false;
@@ -2740,7 +2740,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Search Users...");
+	WaitUntil(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2754,7 +2754,7 @@ bool FGetUserByEmailAddressTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2792,7 +2792,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -2807,7 +2807,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	// Complete DisplayName.
 	bool bGetUserDone = false;
@@ -2826,7 +2826,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Search Users...");
+	WaitUntil(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2840,7 +2840,7 @@ bool FGetUserByDisplayNameTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2882,7 +2882,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -2897,7 +2897,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	// Complete username.
 	bool bGetUserDone = false;
@@ -2916,7 +2916,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Search Users...");
+	WaitUntil(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -2930,7 +2930,7 @@ bool FGetUserByUsernameTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -2971,7 +2971,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -2997,7 +2997,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
 	if (!bRegisterSuccessful)
 	{
@@ -3012,7 +3012,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	bool bGetUserDone = false;
 	FPagedPublicUsersInfo ReceivedUserData;
@@ -3027,7 +3027,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 			}),
 		UserTestErrorHandler);
 
-	Waiting(bGetUserDone, "Waiting for Search Users...");
+	WaitUntil(bGetUserDone, "Waiting for Search Users...");
 
 #pragma region DeleteUserById
 
@@ -3041,7 +3041,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 	bDeleteDone = false;
 	bDeleteSuccessful = false;
@@ -3053,7 +3053,7 @@ bool FGetUserFilterByUsernameTest::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 
 #pragma endregion DeleteUserById
 
@@ -3087,7 +3087,7 @@ bool FGetCountryFromIP::RunTest(const FString& Parameter)
 					*ReceivedCountryInfo.City);
 			}), UserTestErrorHandler);
 
-	Waiting(bGetCountryDone, "Waiting for CountryInfo...");
+	WaitUntil(bGetCountryDone, "Waiting for CountryInfo...");
 
 	AB_TEST_TRUE(bGetCountryDone);
 	AB_TEST_FALSE(ReceivedCountryInfo.CountryCode.IsEmpty());
@@ -3122,7 +3122,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 	AB_TEST_TRUE(bRegisterSuccessful);
 
 	bool bLoginSuccessful = false;
@@ -3132,7 +3132,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString& Parameter)
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccessful, "Waiting for Login...");
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 	AB_TEST_TRUE(bLoginSuccessful);
 
 	bool bSuccessSendVerifCode = false;
@@ -3142,7 +3142,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString& Parameter)
 			bSuccessSendVerifCode = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bSuccessSendVerifCode, "Waiting send verification code");
+	WaitUntil(bSuccessSendVerifCode, "Waiting send verification code");
 	AB_TEST_TRUE(bSuccessSendVerifCode);
 
 	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::accountRegistration);
@@ -3154,7 +3154,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Verify User"));
 			bSuccessVerifyUser = true;
 		}), UserTestErrorHandler);
-	Waiting(bSuccessVerifyUser, "Waiting verify user");
+	WaitUntil(bSuccessVerifyUser, "Waiting verify user");
 	AB_TEST_TRUE(bSuccessVerifyUser);
 
 	bool bDeleteDone = false;
@@ -3166,7 +3166,7 @@ bool FRegisterThenVerifyByRequestVerification::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 	AB_TEST_TRUE(bDeleteSuccessful);
 
 	return true;
@@ -3203,7 +3203,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 				bRegisterDone = true;
 			}));
 
-	Waiting(bRegisterDone, "Waiting for Registered...");
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
 	AB_TEST_TRUE(bRegisterSuccess);
 
 	bool bLoginSuccess = false;
@@ -3213,7 +3213,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bLoginSuccess = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccess, "Waiting for Login...");
+	WaitUntil(bLoginSuccess, "Waiting for Login...");
 	AB_TEST_TRUE(bLoginSuccess);
 
 	bool bSendChangeEmailSuccess = false;
@@ -3223,7 +3223,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bSendChangeEmailSuccess = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bSendChangeEmailSuccess, "Waiting for Send Verification Request...");
+	WaitUntil(bSendChangeEmailSuccess, "Waiting for Send Verification Request...");
 	AB_TEST_TRUE(bSendChangeEmailSuccess);
 
 	const FString VerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
@@ -3239,7 +3239,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bUpdateEmailSuccess = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bUpdateEmailSuccess, "Waiting for Update Email...");
+	WaitUntil(bUpdateEmailSuccess, "Waiting for Update Email...");
 	AB_TEST_TRUE(bUpdateEmailSuccess);
 
 	const FString NewEmailVerificationCode = GetVerificationCode(RegisterResult.UserId, EVerificationCode::updateEmail);
@@ -3252,7 +3252,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bVerifyNewEmailSuccess = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bVerifyNewEmailSuccess, "Waiting for Verify on New Email...");
+	WaitUntil(bVerifyNewEmailSuccess, "Waiting for Verify on New Email...");
 	AB_TEST_TRUE(bVerifyNewEmailSuccess);
 
 	FRegistry::User.ForgetAllCredentials();
@@ -3264,7 +3264,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bLoginSuccess = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bLoginSuccess, "Waiting for Login New Email...");
+	WaitUntil(bLoginSuccess, "Waiting for Login New Email...");
 	AB_TEST_TRUE(bLoginSuccess);
 
 	bool bDeleteDone = false;
@@ -3276,7 +3276,7 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 			bDeleteDone = true;
 		}), UserTestErrorHandler);
 
-	Waiting(bDeleteDone, "Waiting for Deletion...");
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
 	AB_TEST_TRUE(bDeleteSuccessful);
 
 	FRegistry::User.ForgetAllCredentials();
@@ -3357,7 +3357,7 @@ bool FLoginWithAwscognito::RunTest(const FString& Parameter)
 		})
 	);
 
-	Waiting(bAwsAuthComplete, "AWS Cognito authenticate user password...");
+	WaitUntil(bAwsAuthComplete, "AWS Cognito authenticate user password...");
 
 	AB_TEST_TRUE(bAwsAuthSuccess);
 
@@ -3383,7 +3383,7 @@ bool FLoginWithAwscognito::RunTest(const FString& Parameter)
 		})
 	);
 
-	Waiting(bLoginWithAwsCognitoComplete, "Login with AWS Cognito...");
+	WaitUntil(bLoginWithAwsCognitoComplete, "Login with AWS Cognito...");
 
 	AB_TEST_TRUE(bLoginWithAwsCognitoSuccess);
 
@@ -3400,7 +3400,7 @@ FString GetVerificationCode(const FString& userId, EVerificationCode code)
 			verificationCode = result;
 			bGetVerificationCodeSuccess = true;
 		}), UserTestErrorHandler);
-	Waiting(bGetVerificationCodeSuccess, "Getting Verification Code...");
+	WaitUntil(bGetVerificationCodeSuccess, "Getting Verification Code...");
 
 	switch (code)
 	{

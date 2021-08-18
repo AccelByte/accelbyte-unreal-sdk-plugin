@@ -113,7 +113,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 					}
 					bGetStatDone = true;
 				}));
-		Waiting(bGetStatDone, "Waiting for get stat...");
+		WaitUntil(bGetStatDone, "Waiting for get stat...");
 
 		if (!bStatIsExist)
 		{
@@ -137,7 +137,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 					CreateStatResult = Result;
 					bCreateStatDone = true;
 				}), LeaderboardTestErrorHandler);
-			Waiting(bCreateStatDone, "Waiting for stat created...");
+			WaitUntil(bCreateStatDone, "Waiting for stat created...");
 		}
 	}
 
@@ -175,7 +175,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 						UE_LOG(LogAccelByteLeaderboardTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 					}
 				}));
-		Waiting(bCreateLeaderboardConfigDone, "Waiting for config leaderboard...");
+		WaitUntil(bCreateLeaderboardConfigDone, "Waiting for config leaderboard...");
 	}
 
 	// SERVER LOGIN
@@ -184,7 +184,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			bServerClientLoginSuccess = true;
 			UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("\t\tClient Successfully Login."));
 		}), LeaderboardTestErrorHandler);
-	Waiting(bServerClientLoginSuccess, "Waiting for Client Login...");
+	WaitUntil(bServerClientLoginSuccess, "Waiting for Client Login...");
 
 	TArray<FString> LoginUserIDs;
 	for (int i = 0; i < LeaderboardTestUserInfo_.UserCount; i++)
@@ -217,7 +217,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			}
 			bUsersCreationDone = true;
 		}));
-		Waiting(bUsersCreationDone, "Waiting for user created...");
+		WaitUntil(bUsersCreationDone, "Waiting for user created...");
 
 		// USER LOG IN
 		UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("LOG USER IN...%d out of %d"), i + 1, LeaderboardTestUserInfo_.UserCount);
@@ -231,7 +231,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			UsersLoginSuccess[i] = true;
 			UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("\t\tSuccessfully Login."));
 		}), LeaderboardTestErrorHandler);
-		Waiting(UsersLoginSuccess[i], "Waiting for login with user name...");
+		WaitUntil(UsersLoginSuccess[i], "Waiting for login with user name...");
 		UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 		// USER's STAT ITEM CREATION
@@ -243,7 +243,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("User stat items are created."));
 				UserStatCodeInitSuccess[i] = true;
 			}), LeaderboardTestErrorHandler);
-		Waiting(UserStatCodeInitSuccess[i], "Waiting for create user stat items...");
+		WaitUntil(UserStatCodeInitSuccess[i], "Waiting for create user stat items...");
 	}
 	TestUsersID = LoginUserIDs;
 
@@ -277,7 +277,7 @@ bool LeaderboardTearDown::RunTest(const FString& Parameters)
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Success"));
 				bDeleteLeaderboard = true;
 			}), LeaderboardTestErrorHandler);
-		Waiting(bDeleteLeaderboard, "Waiting for leaderboard code deletion...");
+		WaitUntil(bDeleteLeaderboard, "Waiting for leaderboard code deletion...");
 	}
 
 	return true;
@@ -319,7 +319,7 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 				bIncrementManyUsersStatItemsSuccess = true;
 			}),
 		LeaderboardTestErrorHandler);
-	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
+	WaitUntil(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
 
 
 	//ACT
@@ -358,7 +358,7 @@ bool LeaderboardGetRankings::RunTest(const FString& Parameters)
 			{
 				FRegistry::Leaderboard.GetRankings(leaderboardCode, timeFrame, 0, 9999, leaderboardGetRankingsHandler, GetLeaderboardErrorHandler);
 
-				Waiting(bGetRankingDone, FString::Printf(TEXT("Waiting for get rankings [%d]..."), i));
+				WaitUntil(bGetRankingDone, FString::Printf(TEXT("Waiting for get rankings [%d]..."), i));
 
 				if (bGetRankingFound)
 				{
@@ -454,7 +454,7 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 				bIncrementManyUsersStatItemsSuccess = true;
 			}),
 		LeaderboardTestErrorHandler);
-	Waiting(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
+	WaitUntil(bIncrementManyUsersStatItemsSuccess, "Waiting for IncrementManyUsersStatItems...");
 
 	//ACT
 	/// Currently the logged in user is the last user in the TestUsersID
@@ -493,7 +493,7 @@ bool LeaderboardGetUserRanking::RunTest(const FString& Parameters)
 			{
 				FRegistry::Leaderboard.GetUserRanking(userId, leaderboardCode, leaderboardGetRankingsHandler, GetLeaderboardErrorHandler);
 
-				Waiting(bGetUserRankingDone, FString::Printf(TEXT("Waiting for GetUserRanking [%d]..."), i));
+				WaitUntil(bGetUserRankingDone, FString::Printf(TEXT("Waiting for GetUserRanking [%d]..."), i));
 
 				if (bGetUserRankingFound)
 				{

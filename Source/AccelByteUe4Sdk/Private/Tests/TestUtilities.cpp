@@ -9,6 +9,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Api/AccelByteOauth2Api.h"
+#include "Api/AccelByteUserApi.h"
 #include "Misc/Base64.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteTest);
@@ -20,45 +21,29 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void Waiting(bool& bCondition, FString Message, double TimeoutDelay)
+void WaitUntil(const bool& bCondition, const FString Message, const double TimeoutSeconds)
 {
-	const double StartTime = FPlatformTime::Seconds();
-	const double TimeoutSeconds = StartTime + TimeoutDelay;
-	double LastTickTime = StartTime;
-
-	while (!bCondition && (FPlatformTime::Seconds() < TimeoutSeconds))
-	{
-		FPlatformProcess::Sleep(.2f);
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s"), *Message);
-		LastTickTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(.2f);
-		FTicker::GetCoreTicker().Tick(.2f);
-	}
-
-	if (FPlatformTime::Seconds() >= TimeoutSeconds)
-	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("Waiting timed out, message %s"), *Message);
-	}
+	WaitUntil([&] { return bCondition; }, Message, TimeoutSeconds);
 }
 
-void WaitUntil(TFunction<bool()> Condition, double TimeoutSeconds, const FString Message)
+void WaitUntil(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
 {
-	const double StartTime = FPlatformTime::Seconds();
-	TimeoutSeconds = StartTime + TimeoutSeconds;
-	double LastTickTime = StartTime;
+	const double StartSeconds = FPlatformTime::Seconds();
+	const double LimitSeconds = StartSeconds + TimeoutSeconds;
+	double LastTickSeconds = StartSeconds;
 
-	while (Condition && !Condition() && (FPlatformTime::Seconds() < TimeoutSeconds))
+	while (Condition && !Condition() && (FPlatformTime::Seconds() < LimitSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
-		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
-		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
-		LastTickTime = FPlatformTime::Seconds();
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s\tElapsed %f s)"), *Message, FPlatformTime::Seconds() - StartSeconds);
+		FTicker::GetCoreTicker().Tick(.2f);
+		FHttpModule::Get().GetHttpManager().Tick(.2f);
+		LastTickSeconds = FPlatformTime::Seconds();
 		FPlatformProcess::Sleep(.2f);
 	}
 
-	if (Condition && !Condition() && (FPlatformTime::Seconds() > TimeoutSeconds))
+	if (Condition && !Condition() && (FPlatformTime::Seconds() > LimitSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("WaitUntil timed out, message %s"), *Message);
+		UE_LOG(LogAccelByteTest, Error, TEXT("%s\tTimed Out"), *Message);
 	}
 }
 
@@ -162,7 +147,7 @@ FString GetAdminUserAccessToken()
 		});
 	CurrentTime = FPlatformTime::Seconds();
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), CurrentTime);
-	Waiting(bGetTokenSuccess, "Waiting for get token...");
+	WaitUntil(bGetTokenSuccess, "Waiting for get token...");
 
 	AdminUserTokenCache = TokenResult.Access_token;
 	AdminUserTokenExpiry = CurrentTime + TokenResult.Expires_in;
@@ -232,7 +217,7 @@ bool CheckSteamTicket() {
 					bIsDone = true;
 				})),
 		FPlatformTime::Seconds());
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
 };
 
@@ -306,7 +291,7 @@ bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<T
 					}
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		return bIsOk;
 	};
 
@@ -342,7 +327,7 @@ bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<T
 				{
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		return bIsOk;
 	};
 
@@ -412,7 +397,7 @@ bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials)
 				{
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		return bIsOk;
 	};
 
@@ -438,7 +423,7 @@ void DeleteUserById(const FString& UserId, const FSimpleDelegate& OnSuccess, con
 				userMap = Result;
 				bGetUserMapSuccess = true;
 			}), OnError);
-	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+	WaitUntil(bGetUserMapSuccess, "Wait for getting user map data...");
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
@@ -488,7 +473,7 @@ void User_Get_Verification_Code(const FString& userId, const THandler<FVerificat
 				userMap = Result;
 				bGetUserMapSuccess = true;
 			}), OnError);
-	Waiting(bGetUserMapSuccess, "Wait for getting user map data...");
+	WaitUntil(bGetUserMapSuccess, "Wait for getting user map data...");
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
@@ -529,7 +514,7 @@ void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDele
 				bGetUserDone = true;
 				OnError.Execute(ErrorCode, Message);
 			}));
-	Waiting(bGetUserDone, "Wait for getting user map data...");
+	WaitUntil(bGetUserDone, "Wait for getting user map data...");
 
 	if (bGetUserSuccess)
 	{

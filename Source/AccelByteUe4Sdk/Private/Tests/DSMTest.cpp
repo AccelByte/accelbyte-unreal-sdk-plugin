@@ -136,7 +136,7 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Login client...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Login client...");
 	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
@@ -145,7 +145,7 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bServerRegisterSuccess, "Waiting for register local server Url...");
+	WaitUntil(bServerRegisterSuccess, "Waiting for register local server Url...");
 	AB_TEST_TRUE(bServerRegisterSuccess);
 
 	bool bServerShutdownSuccess = false;
@@ -154,7 +154,7 @@ bool DSMRegisterLocalServer::RunTest(const FString& Parameters)
 		bServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
+	WaitUntil(bServerShutdownSuccess, "Waiting for deregister server Url...");
 	AB_TEST_TRUE(bServerShutdownSuccess);
 	return true;
 }
@@ -169,7 +169,7 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		bClientLoginSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Login Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bClientLoginSuccess, "Waiting for Login client...");
+	WaitUntil(bClientLoginSuccess, "Waiting for Login client...");
 	AB_TEST_TRUE(bClientLoginSuccess);
 
 	bool bServerRegisterSuccess = false;
@@ -178,7 +178,7 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		bServerRegisterSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Register Local with public IP Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bServerRegisterSuccess, "Waiting for Register Local with public IP...");
+	WaitUntil(bServerRegisterSuccess, "Waiting for Register Local with public IP...");
 	AB_TEST_TRUE(bServerRegisterSuccess);
 
 	bool bServerShutdownSuccess = false;
@@ -187,7 +187,7 @@ bool DSMRegisterLocalServerWithPublicIP::RunTest(const FString& Parameters)
 		bServerShutdownSuccess = true;
 		UE_LOG(LogAccelByteDSMTest, Log, TEXT("Deregister Success..!"));
 	}), DSMTestErrorHandler);
-	Waiting(bServerShutdownSuccess, "Waiting for deregister server Url...");
+	WaitUntil(bServerShutdownSuccess, "Waiting for deregister server Url...");
 	AB_TEST_TRUE(bServerShutdownSuccess);
 	return true;
 }

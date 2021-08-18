@@ -60,7 +60,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 					MultiRegistryTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, "Waiting ...");
+		WaitUntil(bIsDone, "Waiting ...");
 		AB_TEST_TRUE(bIsOk);
 	}
 
@@ -104,7 +104,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 					MultiRegistryTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 					bIsDone = true;
 				}));
-		Waiting(bIsDone, TEXT("Waiting ..."));
+		WaitUntil(bIsDone, TEXT("Waiting ..."));
 		AB_TEST_TRUE(bIsOk);
 		AB_TEST_EQUAL(AccountUserData.UserId, MultiRegistryTestCredentials[i]->GetUserId());
 	}

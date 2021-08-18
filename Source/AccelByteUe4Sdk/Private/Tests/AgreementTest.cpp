@@ -52,7 +52,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	}), FErrorHandler::CreateLambda([&UsersDeletionDone](int32 Code, FString Message) {
 		UsersDeletionDone = true;
 	}));
-	Waiting(UsersDeletionDone, "Waiting for cleanup previous user...");
+	WaitUntil(UsersDeletionDone, "Waiting for cleanup previous user...");
 
 	// USER CREATION
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user creation ..."));
@@ -79,7 +79,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		}
 		bUsersCreationDone = true;
 	}));
-	Waiting(bUsersCreationDone, "Waiting for user created...");
+	WaitUntil(bUsersCreationDone, "Waiting for user created...");
 
 	// USER LOG IN
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login..."));
@@ -94,7 +94,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		bUserLoggedIn = true;
 		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("\t\tSuccessfully Login."));
 	}), AgreementTestErrorHandler);
-	Waiting(bUserLoggedIn, "Waiting for login with user name...");
+	WaitUntil(bUserLoggedIn, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	AB_TEST_TRUE(bUserCreated);
@@ -107,7 +107,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		bGetBasePoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
 
-	Waiting(bGetBasePoliciesSuccess, "Waiting for get base policies...");
+	WaitUntil(bGetBasePoliciesSuccess, "Waiting for get base policies...");
 
 	FString countryPolicyId;
 	FAgreementBasePolicy basePolicy;
@@ -128,7 +128,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 			bGetPolicyTypesDone = true;
 		}), AgreementTestErrorHandler);
 
-		Waiting(bGetPolicyTypesDone, "Waiting for get policy types...");
+		WaitUntil(bGetPolicyTypesDone, "Waiting for get policy types...");
 
 		FString policyTypeId;
 		for (const auto& type : policyTypes)
@@ -153,7 +153,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 			bCreatePoliciesDone = true;
 		}), AgreementTestErrorHandler);
 
-		Waiting(bCreatePoliciesDone, "Waiting for creating policy...");
+		WaitUntil(bCreatePoliciesDone, "Waiting for creating policy...");
 	}
 
 	AB_TEST_FALSE(basePolicy.Id.IsEmpty());
@@ -177,7 +177,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		bGetCountryPolicySuccess = true;
 	}), AgreementTestErrorHandler);
 
-	Waiting(bGetCountryPolicySuccess, "Waiting for get country policy...");
+	WaitUntil(bGetCountryPolicySuccess, "Waiting for get country policy...");
 
 	AB_TEST_FALSE(countryPolicy.Id.IsEmpty())
 
@@ -195,7 +195,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 			bCreatePolicyVersionSuccess = true;
 		}), AgreementTestErrorHandler);
 
-		Waiting(bCreatePolicyVersionSuccess, "Waiting for create policy version...");
+		WaitUntil(bCreatePolicyVersionSuccess, "Waiting for create policy version...");
 	}
 	else
 	{
@@ -224,7 +224,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		bGetLocalizedPolicySuccess = true;
 	}), AgreementTestErrorHandler);
 
-	Waiting(bGetLocalizedPolicySuccess, "Waiting for get localized policies...");
+	WaitUntil(bGetLocalizedPolicySuccess, "Waiting for get localized policies...");
 
 	if (localizedPolicies.Num() == 0)
 	{
@@ -239,7 +239,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 			bCreateLocalizedPolicySuccess = true;
 		}), AgreementTestErrorHandler);
 
-		Waiting(bCreateLocalizedPolicySuccess, "Waiting for create localized policy...");
+		WaitUntil(bCreateLocalizedPolicySuccess, "Waiting for create localized policy...");
 	}
 
 	if (!bPolicyPublished)
@@ -248,7 +248,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		AdminPublishAgreementPolicyVersion(policyVersion.Id, false, FSimpleDelegate::CreateLambda([&bPublishPolicyVersionSuccess]() {
 			bPublishPolicyVersionSuccess = true;
 		}), AgreementTestErrorHandler);
-		Waiting(bPublishPolicyVersionSuccess, "Publish policy version...");
+		WaitUntil(bPublishPolicyVersionSuccess, "Publish policy version...");
 	}
 
 	return true;
@@ -267,7 +267,7 @@ bool AgreementTearDown::RunTest(const FString& Parameters)
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bDeleteDone, "Waiting for deletion...");
+	WaitUntil(bDeleteDone, "Waiting for deletion...");
 
 	AB_TEST_TRUE(bDeleteSuccessful);
 
@@ -286,7 +286,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTag::RunTest(const FString& Parame
 		policies = Policies;
 		bGetPoliciesDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+	WaitUntil(bGetPoliciesDone, "Waiting for get policies by country...");
 
 	AB_TEST_TRUE(policies.Num() > 0);
 	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
@@ -306,7 +306,7 @@ bool AgreementGetLegalPoliciesByCountryWithSomeTags::RunTest(const FString& Para
 		policies = Policies;
 		bGetPoliciesDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+	WaitUntil(bGetPoliciesDone, "Waiting for get policies by country...");
 
 	AB_TEST_TRUE(policies.Num() > 0);
 	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
@@ -327,7 +327,7 @@ bool AgreementGetLegalPoliciesByCountryWithOneTag::RunTest(const FString& Parame
 		policies = Policies;
 		bGetPoliciesDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+	WaitUntil(bGetPoliciesDone, "Waiting for get policies by country...");
 
 	AB_TEST_TRUE(policies.Num() > 0);
 	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
@@ -348,7 +348,7 @@ bool AgreementGetLegalPoliciesByCountryWithUnmatchTag::RunTest(const FString& Pa
 		policies = Policies;
 		bGetPoliciesDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+	WaitUntil(bGetPoliciesDone, "Waiting for get policies by country...");
 
 	AB_TEST_EQUAL(policies.Num() , 0);
 
@@ -369,7 +369,7 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 		policies = Policies;
 		bGetPoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesSuccess, "Waiting for get policies...");
+	WaitUntil(bGetPoliciesSuccess, "Waiting for get policies...");
 
 	AB_TEST_TRUE(policies.Num() > 0);
 	AB_TEST_EQUAL(policies[0].Namespace , FRegistry::Settings.Namespace);
@@ -401,7 +401,7 @@ bool AgreementGetLegalPoliciesAndBulkAcceptPolicyVersions::RunTest(const FString
 		bProceed = Response.Proceed;
 		bAcceptPoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bAcceptPoliciesSuccess, "Waiting for accept policies...");
+	WaitUntil(bAcceptPoliciesSuccess, "Waiting for accept policies...");
 
 	AB_TEST_TRUE(bProceed);
 
@@ -424,7 +424,7 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 		policies = Policies;
 		bGetPoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesSuccess, "Waiting for get policies...");
+	WaitUntil(bGetPoliciesSuccess, "Waiting for get policies...");
 
 	FString LocalizedPolicyVersionId;
 	for (const auto& policy : policies)
@@ -447,7 +447,7 @@ bool AgreementGetLegalPoliciesAndAcceptPolicyVersion::RunTest(const FString& Par
 	{
 		bAcceptPolicySuccess = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bAcceptPolicySuccess, "Waiting for accept policies...");
+	WaitUntil(bAcceptPolicySuccess, "Waiting for accept policies...");
 
 	AB_TEST_TRUE(bAcceptPolicySuccess);
 
@@ -470,7 +470,7 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 		bGetPoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
 	
-	Waiting(bGetPoliciesSuccess, "Waiting for get policies...");
+	WaitUntil(bGetPoliciesSuccess, "Waiting for get policies...");
 	FString LocalizedPolicyUrl;
 	for (const auto& policy : policies) 
 	{
@@ -492,7 +492,7 @@ bool AgreementGetPublisherLegalPoliciesAndGetTheContent::RunTest(const FString& 
 		bGetLegalDocSuccess = true;
 		result = Result;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetLegalDocSuccess, "Waiting for get legal docs...");
+	WaitUntil(bGetLegalDocSuccess, "Waiting for get legal docs...");
 	
 	AB_TEST_TRUE(bGetLegalDocSuccess);
 	AB_TEST_FALSE(result.IsEmpty());
@@ -511,7 +511,7 @@ bool AgreementCheckUserEligibilitiesNotComply::RunTest(const FString& Parameters
 		AgreementTestUserInfo_.UserId = FRegistry::Credentials.GetUserId();
 		bUserLoginSuccess = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bUserLoginSuccess, "Waiting for login...");
+	WaitUntil(bUserLoginSuccess, "Waiting for login...");
 	
 	TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesResult;
 	bool bGetEligibilitiesSuccess = false;
@@ -522,7 +522,7 @@ bool AgreementCheckUserEligibilitiesNotComply::RunTest(const FString& Parameters
 		bGetEligibilitiesSuccess = true;
 		EligibilitiesResult = Result;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
+	WaitUntil(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
 	
 	bool bIsComply = false;
 	for (const auto& eligibility : EligibilitiesResult) 
@@ -554,7 +554,7 @@ bool AgreementCheckUserEligibilitiesAlreadyComply::RunTest(const FString& Parame
 		bGetEligibilitiesSuccess = true;
 		EligibilitiesResult = Result;
 	}), AgreementTestErrorHandler);
-	Waiting(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
+	WaitUntil(bGetEligibilitiesSuccess, "Waiting for get eligibilities...");
 
 	bool bIsComply = false;
 	for (const auto& eligibility : EligibilitiesResult)
@@ -586,7 +586,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 			policies = Policies;
 			bGetPoliciesDone = true;
 			}), AgreementTestErrorHandler);
-	Waiting(bGetPoliciesDone, "Waiting for get policies by country...");
+	WaitUntil(bGetPoliciesDone, "Waiting for get policies by country...");
 
 	AB_TEST_TRUE(policies.Num() > 0);
 	AB_TEST_EQUAL(policies[0].CountryCode , AgreementTestUserInfo_.CountryCode);
@@ -621,7 +621,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 		bDeleteSuccessful = true;
 		bDeleteDone = true;
 	}), AgreementTestErrorHandler);
-	Waiting(bDeleteDone, "Waiting for deletion...");
+	WaitUntil(bDeleteDone, "Waiting for deletion...");
 
 	AB_TEST_TRUE(bDeleteSuccessful);
 
@@ -661,7 +661,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 				}
 				bUsersCreationDone = true;
 			}));
-	Waiting(bUsersCreationDone, "Waiting for user created...");
+	WaitUntil(bUsersCreationDone, "Waiting for user created...");
 
 	//User Loging in
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Agreement user login..."));
@@ -676,7 +676,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 			bUserLoggedIn = true;
 			UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Successfully Login."));
 		}), AgreementTestErrorHandler);
-	Waiting(bUserLoggedIn, "Waiting for login with user name...");
+	WaitUntil(bUserLoggedIn, "Waiting for login with user name...");
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 
 	AB_TEST_TRUE(bUserCreated);

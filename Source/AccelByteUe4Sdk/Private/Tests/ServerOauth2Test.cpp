@@ -43,7 +43,7 @@ bool LoginGameClientSuccess::RunTest(const FString& Parameters)
 		bClientTokenObtained = true;
 	}), ServerOauthErrorHandler);
 
-	Waiting(bClientTokenObtained, "Waiting for Login...");
+	WaitUntil(bClientTokenObtained, "Waiting for Login...");
 
 	AB_TEST_TRUE(bClientTokenObtained);
 	return true;
@@ -63,7 +63,7 @@ bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 			bClientTokenObtained = true;
 		}), ServerOauthErrorHandler);
 
-	Waiting(bClientTokenObtained, "Waiting for Login...");
+	WaitUntil(bClientTokenObtained, "Waiting for Login...");
 
 	// set session expired time to 0
 	const FString ClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
@@ -77,8 +77,8 @@ bool ClientAutomatedRefreshTokenTest::RunTest(const FString& Parameter)
 			NewClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
 			return ClientAccessToken != NewClientAccessToken;
 		},
-		10,
-		"Wait refresh token success");
+		"Wait refresh token success",
+		10);
 
 	AB_TEST_NOT_EQUAL(ClientAccessToken, NewClientAccessToken);
 	return true;

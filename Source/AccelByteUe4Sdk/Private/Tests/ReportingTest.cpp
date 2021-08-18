@@ -44,7 +44,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 		bReportingLoginUserSuccess = true;
 	}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bReportingLoginUserSuccess, "Waiting for login...");
+	WaitUntil(bReportingLoginUserSuccess, "Waiting for login...");
 
 	AB_TEST_TRUE(bReportingLoginUserSuccess);
 
@@ -55,7 +55,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 		bReportingDeleteUserSuccess = true;
 	}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bReportingDeleteUserSuccess, "Waiting for user deletion...");
+	WaitUntil(bReportingDeleteUserSuccess, "Waiting for user deletion...");
 
 	AB_TEST_TRUE(bReportingDeleteUserSuccess);
 
@@ -67,7 +67,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 		bReportingLoginUserSuccess = true;
 	}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bReportingLoginUserSuccess, "Waiting for login...");
+	WaitUntil(bReportingLoginUserSuccess, "Waiting for login...");
 
 	AB_TEST_TRUE(bReportingLoginUserSuccess);
 	
@@ -83,7 +83,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 			bGetReasonsSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess, "Waiting for getting reasons...");
+	WaitUntil(bGetReasonsSuccess, "Waiting for getting reasons...");
 
 	AB_TEST_TRUE(bGetReasonsSuccess);
 
@@ -99,7 +99,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 						bDeleteReasonSuccess = true;
 					}), ReportingOnError);
 
-				Waiting(bDeleteReasonSuccess, "Waiting Delete Reason Group...");
+				WaitUntil(bDeleteReasonSuccess, "Waiting Delete Reason Group...");
 			}
 		}
 	}
@@ -114,7 +114,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 			bGetReasonsGroupSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsGroupSuccess, "Waiting for getting reason groups...");
+	WaitUntil(bGetReasonsGroupSuccess, "Waiting for getting reason groups...");
 
 	AB_TEST_TRUE(bGetReasonsGroupSuccess);
 
@@ -130,7 +130,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 						bDeleteReasonSuccess = true;
 					}), ReportingOnError);
 
-				Waiting(bDeleteReasonSuccess, "Waiting Delete Reason Group...");
+				WaitUntil(bDeleteReasonSuccess, "Waiting Delete Reason Group...");
 			}
 		}
 	}
@@ -148,7 +148,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 				bSubmitReasonSuccess = true;
 			}), ReportingOnError);
 
-		Waiting(bSubmitReasonSuccess, "Waiting Submit Reason...");
+		WaitUntil(bSubmitReasonSuccess, "Waiting Submit Reason...");
 
 		AB_TEST_TRUE(bSubmitReasonSuccess);
 	}
@@ -164,7 +164,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 			bGetReasonsSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess, "Waiting for getting reasons...");
+	WaitUntil(bGetReasonsSuccess, "Waiting for getting reasons...");
 
 	// Add ReasonGroup
 	bool bSubmitReasonGroupSuccess = false;
@@ -183,7 +183,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 	AddReasonRequest1.Title = ReportingReasonGroupsTest[0];
 	ReportingAddReasonGroup(AddReasonRequest1, AddReasonGroupSuccessHandler, ReportingOnError);
 
-	Waiting(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 1...");
+	WaitUntil(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 1...");
 	AB_TEST_TRUE(bSubmitReasonGroupSuccess);
 
 	// Add ReasonGroup link without reason
@@ -192,7 +192,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 	AddReasonRequest2.Title = ReportingReasonGroupsTest[1];
 	ReportingAddReasonGroup(AddReasonRequest2, AddReasonGroupSuccessHandler, ReportingOnError);
 
-	Waiting(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 2...");
+	WaitUntil(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 2...");
 	AB_TEST_TRUE(bSubmitReasonGroupSuccess);
 
 	// Add ReasonGroup link without reason
@@ -201,7 +201,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 	AddReasonRequest3.Title = ReportingReasonGroupsTest[2];
 	ReportingAddReasonGroup(AddReasonRequest3, AddReasonGroupSuccessHandler, ReportingOnError);
 
-	Waiting(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 3...");
+	WaitUntil(bSubmitReasonGroupSuccess, "Waiting Submit Reason Group 3...");
 	AB_TEST_TRUE(bSubmitReasonGroupSuccess);
 
 	// Retrieve User2 info or register it.
@@ -242,7 +242,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 				}
 			}));
 
-	Waiting(bUserCreationSuccess, "Waiting for User2 created...");
+	WaitUntil(bUserCreationSuccess, "Waiting for User2 created...");
 
 	bool bUser2LoginSuccess = false;
 	User2->LoginWithUsername(
@@ -254,7 +254,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 			}),
 		ReportingOnError);
 
-	Waiting(bUser2LoginSuccess, "Waiting for User2 Login...");
+	WaitUntil(bUser2LoginSuccess, "Waiting for User2 Login...");
 
 	AB_TEST_TRUE(bUser2LoginSuccess);
 
@@ -272,7 +272,7 @@ bool ReportingTeardown::RunTest(const FString& Parameters)
 		bDeleteUserSuccess = true;
 	}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bDeleteUserSuccess, "Waiting for deleting user...");
+	WaitUntil(bDeleteUserSuccess, "Waiting for deleting user...");
 
 	AB_TEST_TRUE(bDeleteUserSuccess);
 
@@ -284,7 +284,7 @@ bool ReportingTeardown::RunTest(const FString& Parameters)
 			}),
 		ReportingOnError);
 
-	Waiting(bUser2LogoutSuccess, "Waiting for User2 Logout...");
+	WaitUntil(bUser2LogoutSuccess, "Waiting for User2 Logout...");
 
 	AB_TEST_TRUE(bUser2LogoutSuccess);
 
@@ -304,7 +304,7 @@ bool ReportingGetReasonGroups::RunTest(const FString& Parameters)
 			bGetReasonGroupsSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonGroupsSuccess, "Waiting for get reason groups...");
+	WaitUntil(bGetReasonGroupsSuccess, "Waiting for get reason groups...");
 
 	AB_TEST_NOT_EQUAL(ReasonGroupsResponse.Data.Num(), 0);
 	AB_TEST_EQUAL(ReasonGroupsResponse.Data.Num(), 2);
@@ -327,7 +327,7 @@ bool ReportingGetReasons::RunTest(const FString& Parameters)
 		bGetReasonsSuccess = true;
 	}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess, "Waiting for get reasons...");
+	WaitUntil(bGetReasonsSuccess, "Waiting for get reasons...");
 
 	AB_TEST_TRUE(bGetReasonsSuccess);
 	AB_TEST_NOT_EQUAL(ReasonsResponse.Data.Num(), 0);
@@ -354,7 +354,7 @@ bool ReportingGetReasons_WithReasonGroup::RunTest(const FString& Parameters)
 			bGetReasonGroupsSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonGroupsSuccess, "Waiting for get reason groups...");
+	WaitUntil(bGetReasonGroupsSuccess, "Waiting for get reason groups...");
 
 	// Get Reason With Reason Group
 	FRegistry::Reporting.GetReasons(ReasonGroupsResponse.Data[0].Title, 0, 2, THandler<FAccelByteModelsReasonsResponse>::CreateLambda([&bGetReasonsSuccess_Group1, &ReasonsResponse_Group1](const FAccelByteModelsReasonsResponse& Response)
@@ -364,7 +364,7 @@ bool ReportingGetReasons_WithReasonGroup::RunTest(const FString& Parameters)
 			bGetReasonsSuccess_Group1 = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess_Group1, "Waiting for get reasons...");
+	WaitUntil(bGetReasonsSuccess_Group1, "Waiting for get reasons...");
 
 	// Get Reason With Unlinked Reason Group
 	FRegistry::Reporting.GetReasons(ReasonGroupsResponse.Data[1].Title, 0, 0, THandler<FAccelByteModelsReasonsResponse>::CreateLambda([&bGetReasonsSuccess_Group2, &ReasonsResponse_Group2](const FAccelByteModelsReasonsResponse& Response)
@@ -374,7 +374,7 @@ bool ReportingGetReasons_WithReasonGroup::RunTest(const FString& Parameters)
 			bGetReasonsSuccess_Group2 = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess_Group2, "Waiting for get reasons...");
+	WaitUntil(bGetReasonsSuccess_Group2, "Waiting for get reasons...");
 
 	AB_TEST_TRUE(bGetReasonsSuccess_Group1);
 	AB_TEST_NOT_EQUAL(ReasonsResponse_Group1.Data.Num(), 0);
@@ -400,7 +400,7 @@ bool ReportingSubmitReport::RunTest(const FString& Parameters)
 			bGetReasonsSuccess = true;
 		}), ReportingOnError);
 	FlushHttpRequests();
-	Waiting(bGetReasonsSuccess, "Waiting for getting reasons...");
+	WaitUntil(bGetReasonsSuccess, "Waiting for getting reasons...");
 
 	bool bSubmitReport = false;
 	FAccelByteModelsReportingSubmitData SubmitData;
@@ -418,7 +418,7 @@ bool ReportingSubmitReport::RunTest(const FString& Parameters)
 			bSubmitReport = true;
 		}), ReportingOnError);
 
-	Waiting(bSubmitReport, "Waiting for Submit Report...");
+	WaitUntil(bSubmitReport, "Waiting for Submit Report...");
 	AB_TEST_TRUE(bSubmitReport);
 
 	return true;

@@ -28,7 +28,7 @@ void SetupEcommerceCurrency(EcommerceExpectedVariable& Variables, const FSimpleD
 			bCurrencyAlreadyExist = false;
 			bCurrencyCheckDone = true;
 		}));
-	Waiting(bCurrencyCheckDone, "Waiting for CURRENCY check...");
+	WaitUntil(bCurrencyCheckDone, "Waiting for CURRENCY check...");
 
 	if (!bCurrencyAlreadyExist) {
 		bool bWaitingTerminated = false;
@@ -44,7 +44,7 @@ void SetupEcommerceCurrency(EcommerceExpectedVariable& Variables, const FSimpleD
 				OnError.ExecuteIfBound(Code, Message);
 				bWaitingTerminated = true;
 			}));
-		Waiting(bWaitingTerminated, "Waiting for CURRENCY creation...");
+		WaitUntil(bWaitingTerminated, "Waiting for CURRENCY creation...");
 	}
 
 	if (bCurrencyCreated) {
@@ -72,7 +72,7 @@ bool DeleteEcommerceStore(const FSimpleDelegate&, const FErrorHandler& OnError)
 			bStoreDeleted = true;  // Ignore if there is no published store to delete
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Published STORE deletion...");
+	WaitUntil(bWaitingTerminated, "Waiting for Published STORE deletion...");
 
 	// Delete ALL draft stores
 	bool bGetAllStoreSuccess = false;
@@ -89,7 +89,7 @@ bool DeleteEcommerceStore(const FSimpleDelegate&, const FErrorHandler& OnError)
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting to retrieve all STORE data...");
+	WaitUntil(bWaitingTerminated, "Waiting to retrieve all STORE data...");
 
 	for (int index = 0; index < GetAllResult.Num(); index++) {
 		bool bDeleteTestingStoreSuccess = false;
@@ -106,7 +106,7 @@ bool DeleteEcommerceStore(const FSimpleDelegate&, const FErrorHandler& OnError)
 				OnError.ExecuteIfBound(Code, Message);
 				bWaitingTerminated = true;
 			}));
-		Waiting(bWaitingTerminated, "Waiting for STORE deletion...");
+		WaitUntil(bWaitingTerminated, "Waiting for STORE deletion...");
 		bStoreDeleted &= bDeleteTestingStoreSuccess;
 	}
 
@@ -136,7 +136,7 @@ bool CreateEcommerceStore(const FStoreCreateRequest& StoreRequest, const FSimple
 				OnError.ExecuteIfBound(Code, Message);
 				bWaitingTerminated = true;
 			}));
-		Waiting(bWaitingTerminated, "Waiting for STORE creation...");
+		WaitUntil(bWaitingTerminated, "Waiting for STORE creation...");
 		bResult &= bStoreCreated;
 	}
 
@@ -161,7 +161,7 @@ bool CreateEcommerceCategory(const FString& StoreId, const FString& CategoryPath
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for CATEGORY creation...");
+	WaitUntil(bWaitingTerminated, "Waiting for CATEGORY creation...");
 
 	return bCreateCategorySuccess;
 }
@@ -183,7 +183,7 @@ bool CreateEcommerceItem(const FString& StoreId, const FItemCreateRequest& ItemR
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for ITEM creation...");
+	WaitUntil(bWaitingTerminated, "Waiting for ITEM creation...");
 
 	return bItemCreated;
 }
@@ -461,7 +461,7 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for publishing STORE...");
+	WaitUntil(bWaitingTerminated, "Waiting for publishing STORE...");
 
 	if (!bPublishTemporaryStoreSuccess) {
 		return;
@@ -490,7 +490,7 @@ bool GetEcommerceCampaignByName(const FString& Name, const FSimpleDelegate& OnSu
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting to retrieve CAMPAIGN Info...");
+	WaitUntil(bWaitingTerminated, "Waiting to retrieve CAMPAIGN Info...");
 
 	return bGetCampaignSuccess;
 }
@@ -512,7 +512,7 @@ bool CreateEcommerceCampaign(const FCampaignCreateModel& CampaignCreateRequest, 
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for CAMPAIGN Created...");
+	WaitUntil(bWaitingTerminated, "Waiting for CAMPAIGN Created...");
 
 	return bCreateCampaignSuccess;
 }
@@ -534,7 +534,7 @@ bool UpdateEcommerceCampaign(const FString CampaignId, const FCampaignUpdateMode
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Campaign Update...");
+	WaitUntil(bWaitingTerminated, "Waiting for Campaign Update...");
 
 	return bUpdateCampaignSuccess;
 }
@@ -555,7 +555,7 @@ bool GetEcommerceCampaignCode(const FString CampaignId, const FSimpleDelegate& O
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting to retrieve CAMPAIGN CODES...");
+	WaitUntil(bWaitingTerminated, "Waiting to retrieve CAMPAIGN CODES...");
 
 	return bGetCampaignCodesSuccess;
 }
@@ -577,7 +577,7 @@ bool CreateEcommerceCampaignCode(const FString CampaignId, const FSimpleDelegate
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for CAMPAIGN CODE creation...");
+	WaitUntil(bWaitingTerminated, "Waiting for CAMPAIGN CODE creation...");
 
 	return bCreateCampaignCodeSuccess;
 }
@@ -799,7 +799,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 			OnError.ExecuteIfBound(Code, Message);
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for CURRENCY deletion...");
+	WaitUntil(bWaitingTerminated, "Waiting for CURRENCY deletion...");
 
 	if (!bCurrencyDeleted) {
 		return;
@@ -817,7 +817,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Published STORE %s can not be deleted"));
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting for Published STORE deletion...");
+	WaitUntil(bWaitingTerminated, "Waiting for Published STORE deletion...");
 
 	if (!bPublishedStoreDeleted) {
 		return;
@@ -836,7 +836,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Published STORE %s can not be deleted"));
 			bWaitingTerminated = true;
 		}));
-	Waiting(bWaitingTerminated, "Waiting to retrieve all STORE data...");
+	WaitUntil(bWaitingTerminated, "Waiting to retrieve all STORE data...");
 
 	for (int index = 0; index < GetAllResult.Num(); index++) {
 		bWaitingTerminated = false;
@@ -855,7 +855,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s can not be published / restored again"), *StoreId);
 					bWaitingTerminated = true;
 				}));
-			Waiting(bWaitingTerminated, "Waiting for Published STORE restored...");
+			WaitUntil(bWaitingTerminated, "Waiting for Published STORE restored...");
 
 			bool bArchiveStoreDeleteSuccess = false;
 			bWaitingTerminated = false;
@@ -869,7 +869,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s can not be deleted"), *StoreId);
 					bWaitingTerminated = true;
 				}));
-			Waiting(bWaitingTerminated, "Waiting for Archive STORE deletion...");
+			WaitUntil(bWaitingTerminated, "Waiting for Archive STORE deletion...");
 		} else {
 			// DELETE all testing store
 			if (GetAllResult[index].title == Variables.ExpectedStoreTemporary.title) {
@@ -886,7 +886,7 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 						UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: STORE %s can not be deleted"), *StoreId);
 						bWaitingTerminated = true;
 					}));
-				Waiting(bWaitingTerminated, "Waiting for STORE deletion...");
+				WaitUntil(bWaitingTerminated, "Waiting for STORE deletion...");
 			}
 		}
 	}

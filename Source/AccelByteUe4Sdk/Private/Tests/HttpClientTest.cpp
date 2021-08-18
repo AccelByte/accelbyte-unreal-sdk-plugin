@@ -64,7 +64,7 @@ bool DoUStructTest::RunTest(const FString& Method)
 				bIsDone = true;
 			}));
 
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 
 	AB_TEST_TRUE(bIsSuccess);
 	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestCredentials[0]->GetNamespace() + "/" + HttpClientTestCredentials[0]->GetUserId()));
@@ -127,7 +127,7 @@ bool DoFormTest::RunTest(const FString& Method)
 				bIsDone = true;
 			}));
 
-	Waiting(bIsDone, "Waiting ...");
+	WaitUntil(bIsDone, "Waiting ...");
 
 	AB_TEST_TRUE(bIsSuccess);
 	AB_TEST_EQUAL(Result.Method, Method);
