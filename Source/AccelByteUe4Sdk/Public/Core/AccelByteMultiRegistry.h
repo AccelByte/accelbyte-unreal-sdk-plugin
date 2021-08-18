@@ -86,7 +86,7 @@ public:
 class ACCELBYTEUE4SDK_API FMultiRegistry
 {
 public:
-	static TSharedPtr<FApiClient> GetApiClient(FString key);
+	static TSharedPtr<FApiClient> GetApiClient(const FString Key = TEXT("default"));
 
 private:
 	static TMap<FString, TSharedPtr<FApiClient>> ApiClientInstances;
