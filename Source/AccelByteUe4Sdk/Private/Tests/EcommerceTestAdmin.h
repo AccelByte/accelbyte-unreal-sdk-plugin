@@ -19,6 +19,7 @@ struct EcommerceExpectedVariable
 	FString redeemableItemTitle;
 	FString ExpectedRootItemTitle;
 	FString ExpectedChildItemTitle;
+	FString purchasingItemTitle;
 	FStoreCreateRequest ExpectedStoreArchive;
 	FStoreCreateRequest ExpectedStoreTemporary;
 	int32 LootCoinQuantity;

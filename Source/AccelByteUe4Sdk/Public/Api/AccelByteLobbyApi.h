@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -930,24 +930,9 @@ public:
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
 	};
 
-	/**
-	 * @brief misnamed, same as SetPartyDataUpdateNotifDelegate
-	 *
-	 * @param OnPartyDataUpdateNotif set delegate
-	 */
-	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateNotif) 
+	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
 	{
-		PartyDataUpdateNotif = OnPartyDataUpdateNotif;
-	};
-	
-	/**
-	* @brief set party data update notif delegate
-	*
-	* @param OnPartyDataUpdateNotif set delegate
-	*/
-	void SetPartyDataUpdateNotifDelegate(FPartyDataUpdateNotif OnPartyDataUpdateNotif) 
-	{
-		PartyDataUpdateNotif = OnPartyDataUpdateNotif;
+		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
 	};
 
 	/**

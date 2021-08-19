@@ -956,7 +956,7 @@ struct FAchievementRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
 		bool Incremental;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
-		float GoalValue;
+		int32 GoalValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementRequest")
 		FString StatCode;
 };
@@ -988,7 +988,7 @@ struct FAchievementResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
 		bool Incremental;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
-		float GoalValue;
+		int32 GoalValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Achievements | AchievementResponse")

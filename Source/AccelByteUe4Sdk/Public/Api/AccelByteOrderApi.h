@@ -40,6 +40,15 @@ public:
 	void CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest, THandler<FAccelByteModelsOrderInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Cancel Order after ord created with a specific Order number
+	 *
+	 * @param OrderNo Order number.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void CancelOrder(FString const& OrderNo, THandler<FAccelByteModelsOrderInfo> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Get user's order information. 
 	 * 
 	 * @param OrderNo Order number.

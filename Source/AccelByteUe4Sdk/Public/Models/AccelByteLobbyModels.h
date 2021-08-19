@@ -819,9 +819,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyDataNotif
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 		FString PartyId;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-		FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-		FString Leader;
+		FString LeaderId;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 		TArray<FString> Members;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
