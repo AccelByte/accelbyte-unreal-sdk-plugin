@@ -1189,12 +1189,12 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 
 	FString chatMessage = "Hello Chat, from " + UserCreds[0].GetUserDisplayName();
 	Lobbies[0]->SendChannelMessage(chatMessage);
-	WaitSecond(3);
+	DelaySeconds(3);
 
 	Lobbies[1]->Disconnect();
-	WaitSecond(1);
+	DelaySeconds(1);
 	Lobbies[1]->Connect();
-	WaitSecond(1);
+	DelaySeconds(1);
 
 	Lobbies[0]->SendChannelMessage(chatMessage);
 
@@ -1333,7 +1333,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 		}
 	}
 
-	WaitSecond(5, "Waiting backend to sync lobby disconnect");
+	DelaySeconds(5, "Waiting backend to sync lobby disconnect");
 
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
@@ -1411,7 +1411,7 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 		}
 	}
 
-	WaitSecond(5, "Waiting backend to sync lobby disconnect");
+	DelaySeconds(5, "Waiting backend to sync lobby disconnect");
 
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
@@ -6101,7 +6101,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 
 	User.ForgetAllCredentials();
 
-	WaitSecond(1, "Waiting 1 sec to make sure different token is generated.");
+	DelaySeconds(1, "Waiting 1 sec to make sure different token is generated.");
 
 	bLoginDone = false;
 
@@ -6171,7 +6171,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 
 	OtherLobby.Connect();
 
-	WaitSecond(10, "waiting if lobby is connecting");
+	DelaySeconds(10, "waiting if lobby is connecting");
 
 	AB_TEST_TRUE(Lobby.IsConnected());
 	AB_TEST_FALSE(bLobbyDisconnected);

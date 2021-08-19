@@ -1141,7 +1141,7 @@ bool PartyStorageTest_SomeoneLeaveParty_GameClientAndServerGetPartyStorage_Succe
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
 	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 
-	WaitSecond(3, "delay wait for random partydatanotif");
+	DelaySeconds(3, "delay wait for random partydatanotif");
 
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults = {};
 
@@ -1262,7 +1262,7 @@ bool PartyStorageTest_SomeoneKicked_GameClientAndServerGetPartyStorage_Success::
 	SLobbies[2]->SendAcceptInvitationRequest(*SinvitedToPartyResponse.PartyId, *SinvitedToPartyResponse.InvitationToken);
 	WaitUntil(bSJoinPartySuccess, "Waiting join party");
 
-	WaitSecond(3, "delay wait for random partydatanotif");
+	DelaySeconds(3, "delay wait for random partydatanotif");
 
 	TArray<FAccelByteModelsPartyDataNotif> PartyDataNotifResults;
 

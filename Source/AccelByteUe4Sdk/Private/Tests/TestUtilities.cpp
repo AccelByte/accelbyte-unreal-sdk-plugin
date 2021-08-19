@@ -34,7 +34,8 @@ void WaitUntil(const TFunction<bool()> Condition, const FString Message, const d
 
 	while (Condition && !Condition() && (FPlatformTime::Seconds() < LimitSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s\tElapsed %f s)"), *Message, FPlatformTime::Seconds() - StartSeconds);
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
+			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartSeconds);
 		FTicker::GetCoreTicker().Tick(.2f);
 		FHttpModule::Get().GetHttpManager().Tick(.2f);
 		LastTickSeconds = FPlatformTime::Seconds();
@@ -43,19 +44,20 @@ void WaitUntil(const TFunction<bool()> Condition, const FString Message, const d
 
 	if (Condition && !Condition() && (FPlatformTime::Seconds() > LimitSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("%s\tTimed Out"), *Message);
+		UE_LOG(LogAccelByteTest, Error, TEXT("%s\t%s Timed Out"), *Message, *FString(__FUNCTION__));
 	}
 }
 
-void WaitSecond(double WaitTime, const FString Message)
+void DelaySeconds(double Seconds, const FString Message)
 {
 	const double StartTime = FPlatformTime::Seconds();
-	WaitTime = StartTime + WaitTime;
+	const double LimitSeconds = StartTime + Seconds;
 	double LastTickTime = StartTime;
 
-	while ((FPlatformTime::Seconds() < WaitTime))
+	while ((FPlatformTime::Seconds() < LimitSeconds))
 	{
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s. Elapsed: %f"), *Message, FPlatformTime::Seconds() - StartTime);
+		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
+			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartTime);
 		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();

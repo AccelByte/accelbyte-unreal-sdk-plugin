@@ -432,7 +432,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
-	WaitSecond(3, "Waiting backend session sync");
+	DelaySeconds(3, "Waiting backend session sync");
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -548,7 +548,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
-	WaitSecond(3, "Waiting backend syncing session");
+	DelaySeconds(3, "Waiting backend syncing session");
 
 	bool bAddUserSuccess = false;
 	FRegistry::ServerMatchmaking.AddUserToSession(DSGetMatchData.Game_mode, DSGetMatchData.Match_id, ActiveUserCreds[1].GetUserId(), FVoidHandler::CreateLambda([&bAddUserSuccess]()
@@ -739,7 +739,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
-	WaitSecond(3, "Waiting backend to sync session");
+	DelaySeconds(3, "Waiting backend to sync session");
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -971,7 +971,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
-	WaitSecond(3, "Waiting backend to sync session");
+	DelaySeconds(3, "Waiting backend to sync session");
 
 	// player B complete matchmaking with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse BCreatePartyResult;
@@ -1087,7 +1087,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	bRegisterSessionSuccess = RegisterSessionAsync(DSGetMatchData);
 	WaitUntil(bRegisterSessionSuccess, "Waiting Session Register...");
 
-	WaitSecond(3, "Waiting backend to sync session");
+	DelaySeconds(3, "Waiting backend to sync session");
 
 	bool bAddUserSuccess = false;
 	bool bAddUserDone = false;

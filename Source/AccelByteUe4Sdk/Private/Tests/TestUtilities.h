@@ -85,11 +85,11 @@ void DeleteUserProfile(
 
 void FlushHttpRequests();
 
-void WaitUntil(const bool& bCondition, const FString Message, const double TimeoutSeconds = 60.0);
+void WaitUntil(const bool& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0);
 
 void WaitUntil(const TFunction<bool()> Condition, const FString Message = "", const double TimeoutSeconds = 60.0);
 
-void WaitSecond(double WaitTime, FString Message = "");
+void DelaySeconds(double Seconds, FString Message = "");
 
 FString GetPublisherNamespace();
 
