@@ -88,7 +88,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 		bool bStatIsExist = false;
 		bool bGetStatDone = false;
 		FAccelByteModelsStatInfo GetStatResult;
-		Statistic_Get_Stat_By_StatCode(StatisticStatCodes[i], THandler<FAccelByteModelsStatInfo>::CreateLambda([&bStatIsExist, &bGetStatDone, &GetStatResult](const FAccelByteModelsStatInfo& Result)
+		AdminGetStatisticByStatCode(StatisticStatCodes[i], THandler<FAccelByteModelsStatInfo>::CreateLambda([&bStatIsExist, &bGetStatDone, &GetStatResult](const FAccelByteModelsStatInfo& Result)
 		{
 			GetStatResult = Result;
 			bStatIsExist = true;
@@ -123,7 +123,7 @@ bool ServerStatisticSetup::RunTest(const FString& Parameters)
 			createStat.statCode = StatisticStatCodes[i];
 			createStat.tags = { StatisticStatCodes[i] };
 
-			Statistic_Create_Stat(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&bStatIsExist, &bCreateStatDone, &CreateStatResult](FAccelByteModelsStatInfo Result)
+			AdminCreateStatistic(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&bStatIsExist, &bCreateStatDone, &CreateStatResult](FAccelByteModelsStatInfo Result)
 			{
 				CreateStatResult = Result;
 				bCreateStatDone = true;
@@ -172,7 +172,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 	{
 		bool bDeleteUserStatSuccess = false;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete StatItem"));
-		Statistic_Delete_StatItem(FRegistry::Credentials.GetUserId(), GetUserStatItemResult.Data[i].StatCode, FSimpleDelegate::CreateLambda([&bDeleteUserStatSuccess]()
+		AdminDeleteStatisticItem(FRegistry::Credentials.GetUserId(), GetUserStatItemResult.Data[i].StatCode, FSimpleDelegate::CreateLambda([&bDeleteUserStatSuccess]()
 		{
 			bDeleteUserStatSuccess = true;
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Success..!"));
@@ -216,7 +216,7 @@ bool ServerStatisticBulkCreateStatItem::RunTest(const FString& Parameters)
 	{
 		bool bStatItemDeleteSuccess = false;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete User StatItem"));
-		Statistic_Delete_StatItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[i], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
+		AdminDeleteStatisticItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[i], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
 		{
 			bStatItemDeleteSuccess = true;
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Success"));
@@ -389,7 +389,7 @@ bool ServerstatisticIncrementUserStatItems::RunTest(const FString& Parameters)
 
 	bool bStatItemDeleteSuccess = false;
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete User StatItem"));
-	Statistic_Delete_StatItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[0], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
+	AdminDeleteStatisticItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[0], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
 	{
 		bStatItemDeleteSuccess = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Success"));
@@ -470,7 +470,7 @@ bool ServerstatisticIncrementManyUsersStatItems::RunTest(const FString& Paramete
 
 	bool bStatItemDeleteSuccess = false;
 	UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Delete User StatItem"));
-	Statistic_Delete_StatItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[1], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
+	AdminDeleteStatisticItem(FRegistry::Credentials.GetUserId(), StatisticStatCodes[1], FSimpleDelegate::CreateLambda([&bStatItemDeleteSuccess]()
 	{
 		bStatItemDeleteSuccess = true;
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("Success"));

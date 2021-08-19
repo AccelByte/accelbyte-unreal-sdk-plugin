@@ -5,7 +5,7 @@
 #include "MatchmakingTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
-void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
+void AdminCreateMatchmakingChannel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
 {
 	FAllianceRule AllianceRule;
 	AllianceRule.min_number = 2;
@@ -13,15 +13,15 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, const FSimpl
 	AllianceRule.player_min_number = 1;
 	AllianceRule.player_max_number = 1;
 
-	Matchmaking_Create_Matchmaking_Channel(channel, AllianceRule, OnSuccess, OnError, joinable);
+	AdminCreateMatchmakingChannel(channel, AllianceRule, OnSuccess, OnError, joinable);
 }
 
-void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
+void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
 {
-	Matchmaking_Create_Matchmaking_Channel(channel, AllianceRule, TArray<FMatchingRule>(), OnSuccess, OnError, joinable);
+	AdminCreateMatchmakingChannel(channel, AllianceRule, TArray<FMatchingRule>(), OnSuccess, OnError, joinable);
 }
 
-void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
+void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
 {
 	FMatchmakingCreateRequest RequestBody;
 	RequestBody.description = channel;
@@ -40,7 +40,7 @@ void Matchmaking_Create_Matchmaking_Channel(const FString& channel, FAllianceRul
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Matchmaking_Delete_Matchmaking_Channel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteMatchmakingChannel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *channel);

@@ -145,8 +145,8 @@ struct FDsmConfig
 	TMap<FString, int32> Version_image_size_mapping;
 };
 
-void LobbyGetConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError);
-void LobbySetConfig(const FLobbyModelConfig& Config, const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError);
-void DSMDeleteServer(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-void DSMGetConfig(const THandler<FDsmConfig> & OnSuccess, const FErrorHandler & OnError);
-void DSMSetConfig(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminGetLobbyConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError);
+void AdminSetLobbyConfig(const FLobbyModelConfig& Config, const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteLobbyDSMServer(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminGetLobbyDSMConfig(const THandler<FDsmConfig> & OnSuccess, const FErrorHandler & OnError);
+void AdminSetLobbyDSMConfig(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);

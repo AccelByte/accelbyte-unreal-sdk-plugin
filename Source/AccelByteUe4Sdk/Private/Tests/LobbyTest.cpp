@@ -879,7 +879,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool bGetDsmConfigComplete = false;
 	
 	FDsmConfig dsmConfig;
-	DSMGetConfig(THandler<FDsmConfig>::CreateLambda([&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
+	AdminGetLobbyDSMConfig(THandler<FDsmConfig>::CreateLambda([&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
 	{
 		dsmConfig = result;
 
@@ -912,7 +912,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	if (isUpdateDsmConfig)
 	{
 		bool bSetDsmConfigComplete = false;
-		DSMSetConfig(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
+		AdminSetLobbyDSMConfig(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
 			bSetDsmConfigComplete = true;
 		}), LobbyTestErrorHandler);
 		Waiting(bSetDsmConfigComplete, "Waiting set dsm config");
@@ -3481,7 +3481,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -3570,7 +3570,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -3666,7 +3666,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -3756,7 +3756,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -3861,7 +3861,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 		{
 			bCreateMatchmakingChannelSuccess = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -4013,7 +4013,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	Waiting(bDeregisterLocalServerFromDSMDone, "Waiting Deregister Local DS From DSM");
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 		{
 			bDeleteMatchmakingChannelSuccess = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -4158,7 +4158,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	MatchingRules.Add(MmrRule);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, MatchingRules,
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, MatchingRules,
 		FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
@@ -4254,7 +4254,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -4299,7 +4299,7 @@ bool LobbyTestStartMatchmakingAllParams_ReturnOk::RunTest(const FString& Paramet
 	MatchingRules.Add(MmrRule);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, MatchingRules,
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, MatchingRules,
 		FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
@@ -4443,7 +4443,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -4543,7 +4543,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -4672,7 +4672,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -4788,7 +4788,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	AB_TEST_FALSE(bLatencyDsNotifError[1]);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -4874,7 +4874,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -4934,7 +4934,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -5001,7 +5001,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	AllianceRule.player_max_number = 2;
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -5054,7 +5054,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -5171,7 +5171,7 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 	AllianceRule.player_max_number = 1;
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -5196,7 +5196,7 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 	AB_TEST_TRUE(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -5322,7 +5322,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -5464,7 +5464,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -5552,7 +5552,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -5683,7 +5683,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	Waiting(bDeregisterLocalServerFromDSMDone, "Waiting Deregister Local DS From DSM");
 
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -5772,7 +5772,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	AllianceRule.player_min_number = 1;
 	AllianceRule.player_max_number = 1;
 
-	Matchmaking_Create_Matchmaking_Channel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -5843,7 +5843,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 
 	AB_TEST_FALSE(bDsNotifError);
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -6322,7 +6322,7 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 
 	bool bGetConfigSuccess = false;
 	FLobbyModelConfig DefaultConfig;
-	LobbyGetConfig(THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	AdminGetLobbyConfig(THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Getting config success"));
 		bGetConfigSuccess = true;
@@ -6336,7 +6336,7 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	ShortBurstConfig.GeneralRateLimitDuration = HighLimitDuration;
 
 	bool bSetConfigSuccess = false;
-	LobbySetConfig(ShortBurstConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	AdminSetLobbyConfig(ShortBurstConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Setting config success"));
 		bSetConfigSuccess = true;
@@ -6363,7 +6363,7 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bReachedBurst);
 	
 	bSetConfigSuccess = false;
-	LobbySetConfig(DefaultConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
+	AdminSetLobbyConfig(DefaultConfig, THandler<FLobbyModelConfig>::CreateLambda([&](const FLobbyModelConfig& Response)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Setting config to default success"));
 		bSetConfigSuccess = true;

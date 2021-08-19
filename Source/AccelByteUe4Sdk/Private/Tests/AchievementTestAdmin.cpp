@@ -5,7 +5,7 @@
 #include "AchievementTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
-void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateAchievement(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
@@ -15,7 +15,7 @@ void Achievement_Create(const FAchievementRequest& AchievementRequest, const THa
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteAchievement(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/achievement/v1/admin/namespaces/%s/achievements/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *AchievementCode);

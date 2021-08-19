@@ -10,6 +10,7 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
+#include "StatisticTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -89,7 +90,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 	bool bStatIsExist = false;
 	bool bGetStatDone = false;
 	FAccelByteModelsStatInfo GetStatResult;
-	Statistic_Get_Stat_By_StatCode(StatisticStatCode, THandler<FAccelByteModelsStatInfo>::CreateLambda([&GetStatResult, &bStatIsExist, &bGetStatDone](const FAccelByteModelsStatInfo& Result)
+	AdminGetStatisticByStatCode(StatisticStatCode, THandler<FAccelByteModelsStatInfo>::CreateLambda([&GetStatResult, &bStatIsExist, &bGetStatDone](const FAccelByteModelsStatInfo& Result)
 	{
 		GetStatResult = Result;
 		bStatIsExist = true;
@@ -124,7 +125,7 @@ bool StatisticSetup::RunTest(const FString& Parameters)
 		createStat.statCode = StatisticStatCode;
 		createStat.tags = { StatisticStatCode };
 
-		Statistic_Create_Stat(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&CreateStatResult, &bCreateStatDone](FAccelByteModelsStatInfo Result)
+		AdminCreateStatistic(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&CreateStatResult, &bCreateStatDone](FAccelByteModelsStatInfo Result)
 		{
 			CreateStatResult = Result;
 			bCreateStatDone = true;

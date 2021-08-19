@@ -5,7 +5,7 @@
 #include "SubscriptionTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
-void Subscription_GrantFreeSubs(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminGrantSubscriptionFree(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/subscriptions/platformSubscribe"), *GetAdminBaseUrl(), *FRegistry::Settings.PublisherNamespace, *UserId);

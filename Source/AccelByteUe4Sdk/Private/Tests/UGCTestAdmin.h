@@ -9,10 +9,10 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteUGCModels.h"
 
-void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminCreateUGCType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError);
 
-void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminCreateUGCTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError);
 
-void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteUGCType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
-void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteUGCTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);

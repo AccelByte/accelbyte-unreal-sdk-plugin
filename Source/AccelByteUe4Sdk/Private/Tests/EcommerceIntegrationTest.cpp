@@ -2155,7 +2155,7 @@ bool FECommerceTestFulfillmentRedeemCodeInactived::RunTest(const FString& Parame
 	};
 	FCampaignInfo updateCampaignResult;
 	bool bUpdateCampaignSuccess = false;
-	Ecommerce_Campaign_Update(
+	AdminUpdateEcommerceCampaign(
 		EcommerceTestExpectedVariable.campaignResult.id,
 		CampaignUpdate,
 		THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &updateCampaignResult](const FCampaignInfo& Result)
@@ -2199,7 +2199,7 @@ bool FECommerceTestFulfillmentRedeemCodeDisabled::RunTest(const FString& Paramet
 {
 	FCodeInfo disableCodeResult;
 	bool bDisableCodeSuccess = false;
-	Ecommerce_CampaignCode_Disable(
+	AdminDisableEcommerceCampaignCode(
 		EcommerceTestExpectedVariable.codeInfo.value,
 		THandler<FCodeInfo>::CreateLambda([&bDisableCodeSuccess, &disableCodeResult](const FCodeInfo& Result)
 			{

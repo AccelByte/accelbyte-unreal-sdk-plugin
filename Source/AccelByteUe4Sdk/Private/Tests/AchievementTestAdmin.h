@@ -6,5 +6,5 @@
 
 #include "TestUtilities.h"
 
-void Achievement_Create(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError);
-void Achievement_Delete(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void AdminCreateAchievement(const FAchievementRequest& AchievementRequest, const THandler<FAchievementResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteAchievement(const FString& AchievementCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);

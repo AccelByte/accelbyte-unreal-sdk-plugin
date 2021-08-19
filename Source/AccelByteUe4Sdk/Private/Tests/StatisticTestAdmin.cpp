@@ -5,7 +5,7 @@
 #include "StatisticTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 
-void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetStatisticByStatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *statCode);
@@ -13,7 +13,7 @@ void Statistic_Get_Stat_By_StatCode(FString statCode, const THandler<FAccelByteM
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateStatistic(FStatCreateRequest body, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
@@ -23,7 +23,7 @@ void Statistic_Create_Stat(FStatCreateRequest body, const THandler<FAccelByteMod
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteStatistic(const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/stats/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *statCode);
@@ -31,7 +31,7 @@ void Statistic_Delete_Stat(const FString& statCode, const FSimpleDelegate& OnSuc
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Statistic_Delete_StatItem(const FString& userId, const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteStatisticItem(const FString& userId, const FString& statCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/social/v1/admin/namespaces/%s/users/%s/stats/%s/statitems"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *statCode);

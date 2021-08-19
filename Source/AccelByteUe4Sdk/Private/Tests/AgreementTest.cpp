@@ -102,7 +102,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	bool bGetBasePoliciesSuccess = false;
 	TArray<FAgreementBasePolicy> basePolicies;
-	Agreement_Get_Base_Policies(THandler<TArray<FAgreementBasePolicy>>::CreateLambda([&basePolicies, &bGetBasePoliciesSuccess](const TArray<FAgreementBasePolicy>& BasePolicies) {
+	AdminGetAgreementBasePolicies(THandler<TArray<FAgreementBasePolicy>>::CreateLambda([&basePolicies, &bGetBasePoliciesSuccess](const TArray<FAgreementBasePolicy>& BasePolicies) {
 		basePolicies = BasePolicies;
 		bGetBasePoliciesSuccess = true;
 	}), AgreementTestErrorHandler);
@@ -123,7 +123,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	{
 		bool bGetPolicyTypesDone = false;
 		TArray<FAgreementPolicyTypeObject> policyTypes;
-		Agreement_Get_Policy_Types(THandler<TArray<FAgreementPolicyTypeObject>>::CreateLambda([&bGetPolicyTypesDone, &policyTypes](const TArray<FAgreementPolicyTypeObject>& PolicyTypes) {
+		AdminGetAgreementPolicyTypes(THandler<TArray<FAgreementPolicyTypeObject>>::CreateLambda([&bGetPolicyTypesDone, &policyTypes](const TArray<FAgreementPolicyTypeObject>& PolicyTypes) {
 			policyTypes = PolicyTypes;
 			bGetPolicyTypesDone = true;
 		}), AgreementTestErrorHandler);
@@ -147,7 +147,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		CreateRequest.AffectedClientIds = TArray<FString>();
 		CreateRequest.TypeId = policyTypeId;
 		CreateRequest.Namespace = FRegistry::Settings.Namespace;
-		Agreement_Create_Base_Policy(CreateRequest, THandler<FAgreementBasePolicy>::CreateLambda([&bCreatePoliciesDone, &basePolicy](const FAgreementBasePolicy& BasePolicy)
+		AdminCreateAgreementBasePolicy(CreateRequest, THandler<FAgreementBasePolicy>::CreateLambda([&bCreatePoliciesDone, &basePolicy](const FAgreementBasePolicy& BasePolicy)
 		{
 			basePolicy = BasePolicy;
 			bCreatePoliciesDone = true;
@@ -171,7 +171,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	bool bGetCountryPolicySuccess = false;
 	FAgreementCountryPolicy countryPolicy;
-	Agreement_Get_Country_Base_Policy(basePolicy.Id, AgreementTestUserInfo_.CountryCode, THandler<FAgreementCountryPolicy>::CreateLambda([&bGetCountryPolicySuccess, &countryPolicy](const FAgreementCountryPolicy& Policy)
+	AdminGetAgreementCountryBasePolicy(basePolicy.Id, AgreementTestUserInfo_.CountryCode, THandler<FAgreementCountryPolicy>::CreateLambda([&bGetCountryPolicySuccess, &countryPolicy](const FAgreementCountryPolicy& Policy)
 	{
 		countryPolicy = Policy;
 		bGetCountryPolicySuccess = true;
@@ -190,7 +190,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		CreateRequest.DisplayVersion = "1.0.0";
 		CreateRequest.IsCommitted = true;
 		CreateRequest.Description = "SDK Policy Test";
-		Agreement_Create_Policy_Version(PolicyId, CreateRequest, THandler<FAgreementPolicyVersion>::CreateLambda([&policyVersion, &bCreatePolicyVersionSuccess](const FAgreementPolicyVersion& PolicyVersion) {
+		AdminCreateAgreementPolicyVersion(PolicyId, CreateRequest, THandler<FAgreementPolicyVersion>::CreateLambda([&policyVersion, &bCreatePolicyVersionSuccess](const FAgreementPolicyVersion& PolicyVersion) {
 			policyVersion = PolicyVersion;
 			bCreatePolicyVersionSuccess = true;
 		}), AgreementTestErrorHandler);
@@ -219,7 +219,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 
 	TArray<FAgreementLocalizedPolicy> localizedPolicies;
 	bool bGetLocalizedPolicySuccess = false;
-	Agreement_Get_Localized_Policies(policyVersion.Id, THandler<TArray<FAgreementLocalizedPolicy>>::CreateLambda([&bGetLocalizedPolicySuccess, &localizedPolicies](const TArray<FAgreementLocalizedPolicy>& LocalizedPolicies) {
+	AdminGetAgreementLocalizedPolicies(policyVersion.Id, THandler<TArray<FAgreementLocalizedPolicy>>::CreateLambda([&bGetLocalizedPolicySuccess, &localizedPolicies](const TArray<FAgreementLocalizedPolicy>& LocalizedPolicies) {
 		localizedPolicies = LocalizedPolicies;
 		bGetLocalizedPolicySuccess = true;
 	}), AgreementTestErrorHandler);
@@ -234,7 +234,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 		CreateRequest.LocaleCode = "en";
 		CreateRequest.ContentType = "text/plain";
 		CreateRequest.Description = "SDK Policy Test";
-		Agreement_Create_Localized_Policy(policyVersion.Id, CreateRequest, THandler<FAgreementLocalizedPolicy>::CreateLambda([&localizedPolicy, &bCreateLocalizedPolicySuccess](const FAgreementLocalizedPolicy& LocalizedPolicy) {
+		AdminCreateAgreementLocalizedPolicy(policyVersion.Id, CreateRequest, THandler<FAgreementLocalizedPolicy>::CreateLambda([&localizedPolicy, &bCreateLocalizedPolicySuccess](const FAgreementLocalizedPolicy& LocalizedPolicy) {
 			localizedPolicy = LocalizedPolicy;
 			bCreateLocalizedPolicySuccess = true;
 		}), AgreementTestErrorHandler);
@@ -245,7 +245,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	if (!bPolicyPublished)
 	{
 		bool bPublishPolicyVersionSuccess = false;
-		Agreement_Publish_Policy_Version(policyVersion.Id, false, FSimpleDelegate::CreateLambda([&bPublishPolicyVersionSuccess]() {
+		AdminPublishAgreementPolicyVersion(policyVersion.Id, false, FSimpleDelegate::CreateLambda([&bPublishPolicyVersionSuccess]() {
 			bPublishPolicyVersionSuccess = true;
 		}), AgreementTestErrorHandler);
 		Waiting(bPublishPolicyVersionSuccess, "Publish policy version...");

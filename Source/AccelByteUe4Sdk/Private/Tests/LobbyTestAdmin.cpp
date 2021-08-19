@@ -8,7 +8,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteRegistry.h"
 
-void LobbyGetConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetLobbyConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/config/namespaces/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace);
@@ -16,7 +16,7 @@ void LobbyGetConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHa
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void LobbySetConfig(const FLobbyModelConfig& Config, const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
+void AdminSetLobbyConfig(const FLobbyModelConfig& Config, const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/config/namespaces/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace);
@@ -26,7 +26,7 @@ void LobbySetConfig(const FLobbyModelConfig& Config, const THandler<FLobbyModelC
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void DSMDeleteServer(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteLobbyDSMServer(const FString& podName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/servers/local/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *podName);
@@ -34,7 +34,7 @@ void DSMDeleteServer(const FString& podName, const FVoidHandler& OnSuccess, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void DSMGetConfig(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetLobbyDSMConfig(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/namespaces/%s/configs"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
@@ -42,7 +42,7 @@ void DSMGetConfig(const THandler<FDsmConfig>& OnSuccess, const FErrorHandler& On
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void DSMSetConfig(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void AdminSetLobbyDSMConfig(const FDsmConfig& Body, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/dsmcontroller/admin/configs"), *GetAdminBaseUrl());

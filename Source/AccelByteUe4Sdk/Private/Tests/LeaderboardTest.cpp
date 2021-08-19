@@ -96,7 +96,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 		bool bStatIsExist = false;
 		bool bGetStatDone = false;
 
-		Statistic_Get_Stat_By_StatCode(StatisticStatCode, THandler<FAccelByteModelsStatInfo>::CreateLambda([&i, &StatCodeInitSuccess, &bStatIsExist, &bGetStatDone](const FAccelByteModelsStatInfo& Result)
+		AdminGetStatisticByStatCode(StatisticStatCode, THandler<FAccelByteModelsStatInfo>::CreateLambda([&i, &StatCodeInitSuccess, &bStatIsExist, &bGetStatDone](const FAccelByteModelsStatInfo& Result)
 			{
 				StatCodeInitSuccess[i] = true;
 				bStatIsExist = true;
@@ -131,7 +131,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 			createStat.statCode = StatisticStatCode;
 			createStat.tags = { StatisticStatCode };
 
-			Statistic_Create_Stat(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&i, &StatCodeInitSuccess, &CreateStatResult, &bCreateStatDone](FAccelByteModelsStatInfo Result)
+			AdminCreateStatistic(createStat, THandler<FAccelByteModelsStatInfo>::CreateLambda([&i, &StatCodeInitSuccess, &CreateStatResult, &bCreateStatDone](FAccelByteModelsStatInfo Result)
 				{
 					StatCodeInitSuccess[i] = true;
 					CreateStatResult = Result;
@@ -158,7 +158,7 @@ bool LeaderboardSetup::RunTest(const FString& Parameters)
 		TestLeaderboardCodes.Add(createRequest.leaderboardCode);
 
 		bool bCreateLeaderboardConfigDone = false;
-		Leaderboard_Create_Leaderboard(createRequest, THandler<FLeaderboardConfigRequest>::CreateLambda([&](FLeaderboardConfigRequest result)
+		AdminCreateLeaderboard(createRequest, THandler<FLeaderboardConfigRequest>::CreateLambda([&](FLeaderboardConfigRequest result)
 			{
 				LeaderboardConfigSuccess[i] = true;
 				bCreateLeaderboardConfigDone = true;
@@ -272,7 +272,7 @@ bool LeaderboardTearDown::RunTest(const FString& Parameters)
 	{
 		bool bDeleteLeaderboard = false;
 
-		Leaderboard_Delete_Leaderboard(leaderboardCode, FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteLeaderboard(leaderboardCode, FSimpleDelegate::CreateLambda([&]()
 			{
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("Success"));
 				bDeleteLeaderboard = true;

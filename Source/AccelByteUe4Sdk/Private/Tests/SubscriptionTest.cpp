@@ -63,7 +63,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 	bool bHasPublishedStore = false;
 	FStoreInfo PublishedStoreInfo;
-	Ecommerce_PublishedStore_Get(PublisherNamespace, THandler<FStoreInfo>::CreateLambda([&bHasPublishedStore, &PublishedStoreInfo](const FStoreInfo& Result)
+	AdminGetEcommercePublishedStore(PublisherNamespace, THandler<FStoreInfo>::CreateLambda([&bHasPublishedStore, &PublishedStoreInfo](const FStoreInfo& Result)
 	{
 		PublishedStoreInfo = Result;
 		bHasPublishedStore = true;
@@ -76,7 +76,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 	GAppTypeItemSku = TEXT("sdktestSkuApp001");
 	FString appTypeItemId;
 	bool bDoneGetItemBySku = false;
-	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GAppTypeItemSku, true,
+	AdminGetEcommerceItemBySKU(*GetPublisherNamespace(), PublishedStoreId, GAppTypeItemSku, true,
 		THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &appTypeItemId](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Has APP Item type on store"));
@@ -95,7 +95,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 	GSubsTypeItemSku = TEXT("sdktestSkuSubs001");
 	FString SubsTypeItemId;
 	bDoneGetItemBySku = false;
-	Ecommerce_GetItem_BySKU(*GetPublisherNamespace(), PublishedStoreId, GSubsTypeItemSku, true,
+	AdminGetEcommerceItemBySKU(*GetPublisherNamespace(), PublishedStoreId, GSubsTypeItemSku, true,
 		THandler<FItemFullInfo>::CreateLambda([&bDoneGetItemBySku, &SubsTypeItemId](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Has Subscription Item type on store"));
@@ -128,7 +128,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		// Fetch all publisher stores.
 		bool bGetAllStoreSuccess = false;
 		TArray<FStoreInfo> GetAllResult;
-		Ecommerce_Store_Get_All(PublisherNamespace, THandler<TArray<FStoreInfo>>::CreateLambda([&PublisherNamespace, &bGetAllStoreSuccess, &GetAllResult](const TArray<FStoreInfo>& Result)
+		AdminGetEcommerceStoreAll(PublisherNamespace, THandler<TArray<FStoreInfo>>::CreateLambda([&PublisherNamespace, &bGetAllStoreSuccess, &GetAllResult](const TArray<FStoreInfo>& Result)
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Get %s stores Success"), *PublisherNamespace);
 			GetAllResult = Result;
@@ -170,7 +170,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		{
 			bool bDoneCreateTempStore = false;
 			FStoreInfo TempStoreInfo;
-			Ecommerce_Store_Create(PublisherNamespace, TemporaryStore, THandler<FStoreInfo>::CreateLambda([&bDoneCreateTempStore, &TempStoreInfo](const FStoreInfo& Result)
+			AdminCreateEcommerceStore(PublisherNamespace, TemporaryStore, THandler<FStoreInfo>::CreateLambda([&bDoneCreateTempStore, &TempStoreInfo](const FStoreInfo& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create temp store success"));
 				bDoneCreateTempStore = true;
@@ -181,7 +181,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			check(bDoneCreateTempStore);
 
 			bool bClonePublishedStore = false;
-			Ecommerce_Store_Clone(PublisherNamespace, PublishedStoreId, SubscriptionTestStoreId, FSimpleDelegate::CreateLambda([&bClonePublishedStore]()
+			AdminCloneEcommerceStore(PublisherNamespace, PublishedStoreId, SubscriptionTestStoreId, FSimpleDelegate::CreateLambda([&bClonePublishedStore]()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Clone published store"));
 				bClonePublishedStore = true;
@@ -233,7 +233,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool bCreateAppItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			Ecommerce_Item_Create(PublisherNamespace, AppItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result)
+			AdminCreateEcommerceItem(PublisherNamespace, AppItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create app item success"));
 				bCreateAppItemSuccess = true;
@@ -270,7 +270,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool createSubsItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			Ecommerce_Item_Create(PublisherNamespace, SubsItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result)
+			AdminCreateEcommerceItem(PublisherNamespace, SubsItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create subs item success"));
 				appItemInfo = Result;
@@ -283,7 +283,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 		// published temp store id to published store
 		bool bPublishTempStore = false;
-		Ecommerce_Store_Clone(PublisherNamespace, SubscriptionTestStoreId, "", FSimpleDelegate::CreateLambda([&bPublishTempStore]()
+		AdminCloneEcommerceStore(PublisherNamespace, SubscriptionTestStoreId, "", FSimpleDelegate::CreateLambda([&bPublishTempStore]()
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Published temp store success"));
 			bPublishTempStore = true;
@@ -423,7 +423,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 	{
 		bool grantAppTypeSuccess = false;
 		TArray<FAccelByteModelsStackableEntitlementInfo> grantResultInfo;
-		Ecommerce_GrantUserEntitlements(
+		AdminGrantEcommerceUserEntitlements(
 			PublisherNamespace,
 			userPublisherIds[0],
 			EntitlementGrants,
@@ -479,7 +479,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 	{
 		bool bDoneGrantSubs = false;
 		FItemFullInfo subsItemInfo;
-		Subscription_GrantFreeSubs(userPublisherIds[1], SubsRequest, THandler<FItemFullInfo>::CreateLambda([&bDoneGrantSubs, &subsItemInfo](const FItemFullInfo& Result)
+		AdminGrantSubscriptionFree(userPublisherIds[1], SubsRequest, THandler<FItemFullInfo>::CreateLambda([&bDoneGrantSubs, &subsItemInfo](const FItemFullInfo& Result)
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Grant free subs to User 1 success"));
 			bDoneGrantSubs = true;

@@ -271,7 +271,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	JoinableChannelName = "ue4sdktestjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bool bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(JoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(JoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -285,7 +285,7 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 	NonJoinableChannelName = "ue4sdktestnonjoinable" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 	bCreateMatchmakingChannelSuccess = false;
-	Matchmaking_Create_Matchmaking_Channel(NonJoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	AdminCreateMatchmakingChannel(NonJoinableChannelName, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Create Matchmaking Channel Success..!"));
@@ -324,7 +324,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 
 	//Delete Matchmaking Channel
 	bool bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(JoinableChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(JoinableChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
@@ -333,7 +333,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 
 	bDeleteMatchmakingChannelSuccess = false;
-	Matchmaking_Delete_Matchmaking_Channel(NonJoinableChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	AdminDeleteMatchmakingChannel(NonJoinableChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
 	{
 		bDeleteMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Delete Matchmaking Channel Success..!"));

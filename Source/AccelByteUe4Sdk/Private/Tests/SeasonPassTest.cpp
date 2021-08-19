@@ -51,7 +51,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	// Check if there any season, delete if any
 	bool bQuerySeasonSuccess = false;
 	FSeasonPassCreateGetSeasonsPagingResponse SeasonsResponse;
-	SeasonQuerySeason({EAccelByteSeasonPassStatus::DRAFT, EAccelByteSeasonPassStatus::PUBLISHED},
+	AdminQuerySeason({EAccelByteSeasonPassStatus::DRAFT, EAccelByteSeasonPassStatus::PUBLISHED},
 					THandler<FSeasonPassCreateGetSeasonsPagingResponse>::CreateLambda([&bQuerySeasonSuccess, &SeasonsResponse](const FSeasonPassCreateGetSeasonsPagingResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("query existing season succeed"));
@@ -67,7 +67,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		{
 			// Unpublish before delete
 			bool bUnpublishSuccess = false;
-			SeasonForceUnpublishSeason(Season.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&bUnpublishSuccess](const FSeasonPassCreateSeasonResponse& Result)
+			AdminForceUnpublishSeason(Season.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&bUnpublishSuccess](const FSeasonPassCreateSeasonResponse& Result)
 			{
 				UE_LOG(LogAccelByteSeasonPassTest, Log,	TEXT("unpublish season succeed"));
 				bUnpublishSuccess = true;
@@ -77,7 +77,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		}
 
 		bool bDeleteSeasonSuccess = false;
-		SeasonDeleteSeason(Season.Id, FSimpleDelegate::CreateLambda([&bDeleteSeasonSuccess]()
+		AdminDeleteSeason(Season.Id, FSimpleDelegate::CreateLambda([&bDeleteSeasonSuccess]()
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete season succeed"));
 			bDeleteSeasonSuccess = true;
@@ -93,7 +93,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	bool bCurrencyAlreadyExist = false;
 	bool bCurrencyCreated = false;
 	bool bCurrencyCheckDone = false;
-	Ecommerce_Currency_Get(CurrencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]()
+	AdminGetEcommerceCurrency(CurrencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("CURRENCY is created already."));
 		bCurrencyAlreadyExist = true;
@@ -122,7 +122,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 			-1
 		};
 
-		Ecommerce_Currency_Create(CurrencyRequest, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
+		AdminCreateEcommerceCurrency(CurrencyRequest, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("SetupEcommerce: CURRENCY is created"));
 			bCurrencyCreated = true;
@@ -138,7 +138,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 
 	// delete if any, only 1 allowed
 	bool bDeletePublishedStore = false;
-	Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&]()
+	AdminDeleteEcommercePublishedStore(FSimpleDelegate::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete published store succeed"));
 		bDeletePublishedStore = true;
@@ -152,7 +152,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 
 	bool bGetAllStoreSuccess = false;
 	TArray<FStoreInfo> GetAllResult;
-	Ecommerce_Store_Get_All(
+	AdminGetEcommerceStoreAll(
 		THandler<TArray<FStoreInfo>>::CreateLambda([&](const TArray<FStoreInfo>& Result)
 		{
 			GetAllResult = Result;
@@ -162,7 +162,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		bool bDeleteTestingStoreSuccess = false;
-		Ecommerce_Store_Delete(GetAllResult[i].storeId,FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteEcommerceStore(GetAllResult[i].storeId,FSimpleDelegate::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete store succeed"));
 			bDeleteTestingStoreSuccess = true;
@@ -184,7 +184,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		TEXT("US")
 	};
 	bool bTemporaryStoreCreated = false;
-	Ecommerce_Store_Create(StoreRequest, THandler<FStoreInfo>::CreateLambda([this, &bTemporaryStoreCreated](const FStoreInfo& Result)
+	AdminCreateEcommerceStore(StoreRequest, THandler<FStoreInfo>::CreateLambda([this, &bTemporaryStoreCreated](const FStoreInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("season pass store is created"));
 		SeasonStoreInfo = Result;
@@ -197,7 +197,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	CategoryRequest.categoryPath = SeasonItemCategoryPath;
 	CategoryRequest.localizationDisplayNames = {{"en", SeasonItemCategoryPath}};
 	bool bCreateCategorySuccess = false;
-	Ecommerce_Category_Create(CategoryRequest, SeasonStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateCategorySuccess](const FCategoryInfo& Result)
+	AdminCreateEcommerceCategory(CategoryRequest, SeasonStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateCategorySuccess](const FCategoryInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create category succeed"));
 		bCreateCategorySuccess = true;
@@ -255,7 +255,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateFreeSeasonSuccess = false;
-	Ecommerce_Item_Create(FreeSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateFreeSeasonSuccess](const FItemFullInfo& Result)
+	AdminCreateEcommerceItem(FreeSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateFreeSeasonSuccess](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Free season pass item succeed"));
 		bCreateFreeSeasonSuccess = true;
@@ -300,7 +300,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreatePremiumSeasonSuccess = false;
-	Ecommerce_Item_Create(PremiumSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreatePremiumSeasonSuccess](const FItemFullInfo& Result)
+	AdminCreateEcommerceItem(PremiumSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreatePremiumSeasonSuccess](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log,
 				TEXT("Create Premium Season Pass item succeed"));
@@ -346,7 +346,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateTierSeasonSuccess = false;
-	Ecommerce_Item_Create(TierSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateTierSeasonSuccess](const FItemFullInfo& Result)
+	AdminCreateEcommerceItem(TierSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateTierSeasonSuccess](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Tier item succeed"));
 		bCreateTierSeasonSuccess = true;
@@ -391,7 +391,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateCurrencyItemSuccess = false;
-	Ecommerce_Item_Create(CurrencyItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateCurrencyItemSuccess](const FItemFullInfo& Result)
+	AdminCreateEcommerceItem(CurrencyItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateCurrencyItemSuccess](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Currency item succeed"));
 		bCreateCurrencyItemSuccess = true;
@@ -436,7 +436,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateItemRewardSuccess = false;
-	Ecommerce_Item_Create(ItemRewardRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateItemRewardSuccess](const FItemFullInfo& Result)
+	AdminCreateEcommerceItem(ItemRewardRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateItemRewardSuccess](const FItemFullInfo& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Reward Item succeed"));
 		bCreateItemRewardSuccess = true;
@@ -466,7 +466,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 	bool bCreateSeasonSuccess = false;
-	SeasonCreateSeason(SeasonRequest, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([this, &bCreateSeasonSuccess](const FSeasonPassCreateSeasonResponse& Result)
+	AdminCreateSeason(SeasonRequest, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([this, &bCreateSeasonSuccess](const FSeasonPassCreateSeasonResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Season succeed"));
 		bCreateSeasonSuccess = true;
@@ -488,7 +488,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 	bool bCreateFreePassSuccess = false;
-	SeasonCreatePass(SeasonResponse.Id, FreePassRequest, THandler<FSeasonPassCreatePassResponse>::CreateLambda([this, &bCreateFreePassSuccess](const FSeasonPassCreatePassResponse& Result)
+	AdminCreateSeasonPass(SeasonResponse.Id, FreePassRequest, THandler<FSeasonPassCreatePassResponse>::CreateLambda([this, &bCreateFreePassSuccess](const FSeasonPassCreatePassResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Pass succeed"));
 		FreePassResponse = Result;
@@ -510,7 +510,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 	bool bCreatePremiumPassSuccess = false;
-	SeasonCreatePass(SeasonResponse.Id, PremiumPassRequest, THandler<FSeasonPassCreatePassResponse>::CreateLambda([this, &bCreatePremiumPassSuccess](const FSeasonPassCreatePassResponse& Result)
+	AdminCreateSeasonPass(SeasonResponse.Id, PremiumPassRequest, THandler<FSeasonPassCreatePassResponse>::CreateLambda([this, &bCreatePremiumPassSuccess](const FSeasonPassCreatePassResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Premium Pass succeed"));
 		PremiumPassResponse = Result;
@@ -524,7 +524,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 	bool bCreateFreeRewardSuccess = false;
-	SeasonCreateReward(SeasonResponse.Id, CoinsReward, THandler<FSeasonPassRewardResponse>::CreateLambda([this, &bCreateFreeRewardSuccess](const FSeasonPassRewardResponse& Result)
+	AdminCreateSeasonReward(SeasonResponse.Id, CoinsReward, THandler<FSeasonPassRewardResponse>::CreateLambda([this, &bCreateFreeRewardSuccess](const FSeasonPassRewardResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Coin Reward succeed"));
 		bCreateFreeRewardSuccess = true;
@@ -539,7 +539,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	};
 
 	bool bCreatePremiumRewardSuccess = false;
-	SeasonCreateReward(SeasonResponse.Id, PremiumReward, THandler<FSeasonPassRewardResponse>::CreateLambda([this, &bCreatePremiumRewardSuccess](const FSeasonPassRewardResponse& Result)
+	AdminCreateSeasonReward(SeasonResponse.Id, PremiumReward, THandler<FSeasonPassRewardResponse>::CreateLambda([this, &bCreatePremiumRewardSuccess](const FSeasonPassRewardResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Premium Reward succeed"));
 		bCreatePremiumRewardSuccess = true;
@@ -581,7 +581,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		0, 6, Tier
 	};
 	bool bCreateTierSuccess = false;
-	SeasonCreateTier(SeasonResponse.Id, TierRequest,THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>::CreateLambda(
+	AdminCreateSeasonTier(SeasonResponse.Id, TierRequest,THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>::CreateLambda(
 	[this, &bCreateTierSuccess](const TArray<FAccelByteModelsSeasonPassTierJsonObject>& Result)
 	{
 		bCreateTierSuccess = true;
@@ -598,7 +598,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	Publish this store, CreatedTemporaryStoreInfo.
 	*/
 	bool bPublishStoreSuccess = false;
-	Ecommerce_Store_Clone(SeasonStoreInfo.storeId, "", FSimpleDelegate::CreateLambda([&]()
+	AdminCloneEcommerceStore(SeasonStoreInfo.storeId, "", FSimpleDelegate::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season Pass STORE is published"));
 		bPublishStoreSuccess = true;
@@ -607,7 +607,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	check(bPublishStoreSuccess);
 
 	bool bPublishSeasonPassSuccess = false;
-	SeasonPublishSeason(SeasonResponse.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&](const FSeasonPassCreateSeasonResponse& Result)
+	AdminPublishSeason(SeasonResponse.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&](const FSeasonPassCreateSeasonResponse& Result)
 	{
 	UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season is published"));
 	bPublishSeasonPassSuccess = true;
@@ -632,7 +632,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 {
 	bool bQuerySeasonSuccess = false;
 	FSeasonPassCreateGetSeasonsPagingResponse SeasonsResponse;
-	SeasonQuerySeason({EAccelByteSeasonPassStatus::DRAFT, EAccelByteSeasonPassStatus::PUBLISHED},THandler<FSeasonPassCreateGetSeasonsPagingResponse>::CreateLambda([&bQuerySeasonSuccess, &SeasonsResponse](
+	AdminQuerySeason({EAccelByteSeasonPassStatus::DRAFT, EAccelByteSeasonPassStatus::PUBLISHED},THandler<FSeasonPassCreateGetSeasonsPagingResponse>::CreateLambda([&bQuerySeasonSuccess, &SeasonsResponse](
 	const FSeasonPassCreateGetSeasonsPagingResponse& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("query existing season succeed"));
@@ -648,7 +648,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		{
 			// Unpublish before delete
 			bool bUnpublishSuccess = false;
-			SeasonForceUnpublishSeason(Season.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&bUnpublishSuccess](const FSeasonPassCreateSeasonResponse& Result)
+			AdminForceUnpublishSeason(Season.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&bUnpublishSuccess](const FSeasonPassCreateSeasonResponse& Result)
 			{
 				UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("unpublish season succeed"));
 				bUnpublishSuccess = true;
@@ -658,7 +658,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		}
 
 		bool bDeleteSeasonSuccess = false;
-		SeasonDeleteSeason(Season.Id, FSimpleDelegate::CreateLambda([&bDeleteSeasonSuccess]()
+		AdminDeleteSeason(Season.Id, FSimpleDelegate::CreateLambda([&bDeleteSeasonSuccess]()
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete season succeed"));
 			bDeleteSeasonSuccess = true;
@@ -669,7 +669,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 
 	// Delete testing currency
 	bool bCurrencyDeleted = false;
-	Ecommerce_Currency_Delete(CurrencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
+	AdminDeleteEcommerceCurrency(CurrencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("CURRENCY is deleted"));
 		bCurrencyDeleted = true;
@@ -679,7 +679,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 
 	// Delete published testing store
 	bool bPublishedStoreDeleted = false;
-	Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted]()
+	AdminDeleteEcommercePublishedStore(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Season pass store is deleted"));
 		bPublishedStoreDeleted = true;
@@ -689,7 +689,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 
 	bool bGetAllStoreSuccess = false;
 	TArray<FStoreInfo> GetAllResult;
-	Ecommerce_Store_Get_All(
+	AdminGetEcommerceStoreAll(
 		THandler<TArray<FStoreInfo>>::CreateLambda([&](const TArray<FStoreInfo>& Result)
 		{
 			GetAllResult = Result;
@@ -699,7 +699,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 	for (int i = 0; i < GetAllResult.Num(); i++)
 	{
 		bool bDeleteTestingStoreSuccess = false;
-		Ecommerce_Store_Delete(GetAllResult[i].storeId,FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteEcommerceStore(GetAllResult[i].storeId,FSimpleDelegate::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete store succeed"));
 			bDeleteTestingStoreSuccess = true;

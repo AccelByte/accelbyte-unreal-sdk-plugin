@@ -189,29 +189,29 @@ struct FSeasonPassCreateTierRequest
 	FSeasonPassTierRequest Tier;
 };
 
-void SeasonCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
+void AdminCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
 						const FErrorHandler& OnError);
-void SeasonQuerySeason(const TArray<EAccelByteSeasonPassStatus>& Status,
+void AdminQuerySeason(const TArray<EAccelByteSeasonPassStatus>& Status,
 						const THandler<FSeasonPassCreateGetSeasonsPagingResponse>& OnSuccess,
 						const FErrorHandler& OnError, int32 offset = 0, int32 limit = 20);
-void SeasonDeleteSeason(const FString& SeasonId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
-void SeasonPublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
+void AdminDeleteSeason(const FString& SeasonId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void AdminPublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
 						const FErrorHandler& OnError);
-void SeasonForceUnpublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
+void AdminForceUnpublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess,
 								const FErrorHandler& OnError);
-void SeasonCreatePass(const FString& SeasonId, const FSeasonPassCreatePassRequest& Req,
+void AdminCreateSeasonPass(const FString& SeasonId, const FSeasonPassCreatePassRequest& Req,
 					const THandler<FSeasonPassCreatePassResponse>& OnSuccess, const FErrorHandler& OnError);
-void SeasonDeletePass(const FString& SeasonId, const FString& PassCode, const FSimpleDelegate& OnSuccess,
+void AdminDeleteSeasonPass(const FString& SeasonId, const FString& PassCode, const FSimpleDelegate& OnSuccess,
 					const FErrorHandler& OnError);
-void SeasonCreateReward(const FString& SeasonId, const FSeasonPassCreateReward& Req,
+void AdminCreateSeasonReward(const FString& SeasonId, const FSeasonPassCreateReward& Req,
 						const THandler<FSeasonPassRewardResponse>& OnSuccess, const FErrorHandler& OnError);
-void SeasonDeleteReward(const FString& SeasonId, const FString& RewardCode, const FSimpleDelegate& OnSuccess,
+void AdminDeleteSeasonReward(const FString& SeasonId, const FString& RewardCode, const FSimpleDelegate& OnSuccess,
 						const FErrorHandler& OnError);
-void SeasonCreateTier(const FString& SeasonId, const FSeasonPassCreateTierRequest& Req,
+void AdminCreateSeasonTier(const FString& SeasonId, const FSeasonPassCreateTierRequest& Req,
 					const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess,
 					const FErrorHandler& OnError);
-void SeasonModifyTier(const FString& SeasonId, const FString& TierId, const FSeasonPassTierRequest& Req,
+void AdminModifySeasonTier(const FString& SeasonId, const FString& TierId, const FSeasonPassTierRequest& Req,
 					const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess,
 					const FErrorHandler& OnError);
-void SeasonDeleteTier(const FString& SeasonId, const FString& TierId, const FSimpleDelegate& OnSuccess,
+void AdminDeleteSeasonTier(const FString& SeasonId, const FString& TierId, const FSimpleDelegate& OnSuccess,
 					const FErrorHandler& OnError);

@@ -267,7 +267,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		bool bCreateStatDone = false;
 
 		// Even though it fails, as long as it exists in the namespace should not be a problem.
-		Statistic_Create_Stat(StatisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
+		AdminCreateStatistic(StatisticRequest, THandler<FAccelByteModelsStatInfo>::CreateLambda([&](FAccelByteModelsStatInfo Result)
 			{
 				bCreateStatDone = true;
 			}), FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage) { bCreateStatDone = true; }));
@@ -284,7 +284,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 	for (const auto& AchievementRequest : AchievementTestAllAchievementRequests)
 	{
 		bool bDeleteAchievementDone = false;
-		Achievement_Delete(AchievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
+		AdminDeleteAchievement(AchievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&bDeleteAchievementDone]()
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
 				bDeleteAchievementDone = true;
@@ -296,7 +296,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 		Waiting(bDeleteAchievementDone, "Waiting for deleting achievement ...");
 
 		bool bCreateAchievementSuccess = false;
-		Achievement_Create(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
+		AdminCreateAchievement(AchievementRequest, THandler<FAchievementResponse>::CreateLambda([&](FAchievementResponse achievement)
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Create achievement  success"));
 				bCreateAchievementSuccess = true;
@@ -810,7 +810,7 @@ bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 	for (auto achievementRequest : AchievementTestAllAchievementRequests)
 	{
 		bool bDeleteAchievementSuccess = false;
-		Achievement_Delete(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteAchievement(achievementRequest.AchievementCode, FSimpleDelegate::CreateLambda([&]()
 			{
 				UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete achievement success"));
 				bDeleteAchievementSuccess = true;

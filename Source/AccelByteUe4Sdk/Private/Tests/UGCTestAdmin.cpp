@@ -5,7 +5,7 @@
 #include "UGCTestAdmin.h"
 #include "TestUtilities.h"
 
-void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateUGCType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
@@ -35,7 +35,7 @@ void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const TH
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateUGCTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
@@ -56,7 +56,7 @@ void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResp
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteUGCType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
@@ -77,7 +77,7 @@ void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const F
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteUGCTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FString BaseUrl = GetAdminBaseUrl();
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());

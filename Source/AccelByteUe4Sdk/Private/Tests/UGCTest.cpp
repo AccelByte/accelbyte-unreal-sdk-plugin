@@ -17,10 +17,10 @@ DEFINE_LOG_CATEGORY(LogAccelByteUGCTest);
 
 const int32 AutomationFlagMaskUGC = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 void FlushHttpRequests();
-void UGCCreateType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError);
-void UGCCreateTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError);
-void UGCDeleteType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-void UGCDeleteTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminCreateUGCType(const FString& Type, const TArray<FString>& SubType, const THandler<FAccelByteModelsUGCTypeResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminCreateUGCTags(const FString& Tag, const THandler<FAccelByteModelsUGCTagResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteUGCType(const FString& TypeId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteUGCTag(const FString& TagId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 // Setup variables.
 FString UGCChannelName = TEXT("Integration Test Channel UE4");
@@ -200,7 +200,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 			if(ResponseTag.Tag.Equals(UGCTag))
 			{
 				bool bDeleteTagSuccess = false;
-				UGCDeleteTag(ResponseTag.Id, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
+				AdminDeleteUGCTag(ResponseTag.Id, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
 				{
 					UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete tag Success"));
 					bDeleteTagSuccess = true;
@@ -230,7 +230,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		if (ResponseType.Type.Equals(UGCType))
 		{
 			bool bDeleteTypeSuccess = false;
-			UGCDeleteType(ResponseType.Id, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
+			AdminDeleteUGCType(ResponseType.Id, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
 			{
 				UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
 				bDeleteTypeSuccess = true;
@@ -287,7 +287,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 
 	// Create type.
 	bool bCreateTypeSuccess;
-	UGCCreateType(UGCType, UGCSubTypes, THandler<FAccelByteModelsUGCTypeResponse>::CreateLambda([&bCreateTypeSuccess](const FAccelByteModelsUGCTypeResponse& Response)
+	AdminCreateUGCType(UGCType, UGCSubTypes, THandler<FAccelByteModelsUGCTypeResponse>::CreateLambda([&bCreateTypeSuccess](const FAccelByteModelsUGCTypeResponse& Response)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create type Success"));
 		UGCTypeId = Response.Id;
@@ -302,7 +302,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	for(const FString& UGCTag : UGCTags)
 	{
 		bool bCreateTagSuccess = false;
-		UGCCreateTags(UGCTag, THandler<FAccelByteModelsUGCTagResponse>::CreateLambda([&bCreateTagSuccess](const FAccelByteModelsUGCTagResponse& Response)
+		AdminCreateUGCTags(UGCTag, THandler<FAccelByteModelsUGCTagResponse>::CreateLambda([&bCreateTagSuccess](const FAccelByteModelsUGCTagResponse& Response)
 		{
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Create tag Success"));
 			UGCTagIds.Add(Response.Id);
@@ -372,7 +372,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(UGCTeardown, "AccelByte.Tests.UGC.Z.Teardown", 
 bool UGCTeardown::RunTest(const FString& Parameters)
 {
 	bool bDeleteTypeSuccess;
-	UGCDeleteType(UGCTypeId, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
+	AdminDeleteUGCType(UGCTypeId, FVoidHandler::CreateLambda([&bDeleteTypeSuccess]()
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete type Success"));
 		bDeleteTypeSuccess = true;
@@ -385,7 +385,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 	for(const FString& UGCTagId : UGCTagIds)
 	{
 		bool bDeleteTagSuccess = false;
-		UGCDeleteTag(UGCTagId, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
+		AdminDeleteUGCTag(UGCTagId, FVoidHandler::CreateLambda([&bDeleteTagSuccess]()
 		{
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete tag Success"));
 			bDeleteTagSuccess = true;

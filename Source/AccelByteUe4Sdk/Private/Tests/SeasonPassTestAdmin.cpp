@@ -6,7 +6,7 @@
 #include "SeasonPassTestAdmin.h"
 
 
-void SeasonCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace);
@@ -16,7 +16,7 @@ void SeasonCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSea
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonQuerySeason(const TArray<EAccelByteSeasonPassStatus>& Status, const THandler<FSeasonPassCreateGetSeasonsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 offset, int32 limit)
+void AdminQuerySeason(const TArray<EAccelByteSeasonPassStatus>& Status, const THandler<FSeasonPassCreateGetSeasonsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 offset, int32 limit)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Params;
@@ -42,7 +42,7 @@ void SeasonQuerySeason(const TArray<EAccelByteSeasonPassStatus>& Status, const T
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonDeleteSeason(const FString& SeasonId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteSeason(const FString& SeasonId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf( TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -50,7 +50,7 @@ void SeasonDeleteSeason(const FString& SeasonId, const FSimpleDelegate& OnSucces
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonPublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminPublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf( TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/publish"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -59,7 +59,7 @@ void SeasonPublishSeason(const FString& SeasonId, const THandler<FSeasonPassCrea
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonForceUnpublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminForceUnpublishSeason(const FString& SeasonId, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf( TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/unpublish?force=true"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -68,7 +68,7 @@ void SeasonForceUnpublishSeason(const FString& SeasonId, const THandler<FSeasonP
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonCreatePass(const FString& SeasonId, const FSeasonPassCreatePassRequest& Req, const THandler<FSeasonPassCreatePassResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateSeasonPass(const FString& SeasonId, const FSeasonPassCreatePassRequest& Req, const THandler<FSeasonPassCreatePassResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf( TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/passes"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -78,7 +78,7 @@ void SeasonCreatePass(const FString& SeasonId, const FSeasonPassCreatePassReques
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonDeletePass(const FString& SeasonId, const FString& PassCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteSeasonPass(const FString& SeasonId, const FString& PassCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/passes/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId, *PassCode);
@@ -86,7 +86,7 @@ void SeasonDeletePass(const FString& SeasonId, const FString& PassCode, const FS
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonCreateReward(const FString& SeasonId, const FSeasonPassCreateReward& Req, const THandler<FSeasonPassRewardResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateSeasonReward(const FString& SeasonId, const FSeasonPassCreateReward& Req, const THandler<FSeasonPassRewardResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/rewards"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -96,7 +96,7 @@ void SeasonCreateReward(const FString& SeasonId, const FSeasonPassCreateReward& 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonDeleteReward(const FString& SeasonId, const FString& RewardCode, const FSimpleDelegate& OnSuccess,
+void AdminDeleteSeasonReward(const FString& SeasonId, const FString& RewardCode, const FSimpleDelegate& OnSuccess,
 						const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
@@ -105,7 +105,7 @@ void SeasonDeleteReward(const FString& SeasonId, const FString& RewardCode, cons
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonCreateTier(const FString& SeasonId, const FSeasonPassCreateTierRequest& Req, const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateSeasonTier(const FString& SeasonId, const FSeasonPassCreateTierRequest& Req, const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/tiers"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId);
@@ -115,7 +115,7 @@ void SeasonCreateTier(const FString& SeasonId, const FSeasonPassCreateTierReques
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonModifyTier(const FString& SeasonId, const FString& TierId, const FSeasonPassTierRequest& Req, const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess, const FErrorHandler& OnError)
+void AdminModifySeasonTier(const FString& SeasonId, const FString& TierId, const FSeasonPassTierRequest& Req, const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/tiers/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId, *TierId);
@@ -125,7 +125,7 @@ void SeasonModifyTier(const FString& SeasonId, const FString& TierId, const FSea
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void SeasonDeleteTier(const FString& SeasonId, const FString& TierId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteSeasonTier(const FString& SeasonId, const FString& TierId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/tiers/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId, *TierId);
