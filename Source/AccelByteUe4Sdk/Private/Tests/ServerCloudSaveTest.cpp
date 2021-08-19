@@ -54,7 +54,7 @@ bool ServerCloudSaveCompareJsonObject(const FJsonObject& Compare1, const FJsonOb
 
 		if (!bIsFound) { return false; }
 	}
-	
+
 	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("chocolate") != Compare2.GetObjectField("consumable").Get()->GetNumberField("chocolate")) { return false; }
 	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("water") != Compare2.GetObjectField("consumable").Get()->GetNumberField("water")) { return false; }
 	if (Compare1.GetObjectField("consumable").Get()->GetNumberField("apple") != Compare2.GetObjectField("consumable").Get()->GetNumberField("apple")) { return false; }
@@ -64,7 +64,7 @@ bool ServerCloudSaveCompareJsonObject(const FJsonObject& Compare1, const FJsonOb
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudSaveSetup, "AccelByte.Tests.ServerCloudSave.A.Setup", AutomationFlagMaskServerCloudSave);
 bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
-{	
+{
 	ServerCloudRecord.SetStringField("map", "Oslo");
 	ServerCloudRecord.SetNumberField("maxTeamMember", 1);
 	const TArray<TSharedPtr<FJsonValue>> EquipmentDrops{
@@ -96,7 +96,7 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	ServerCloudRecord2.SetObjectField("consumable", ConsumableDrops2);
 
 	FRegistry::ServerOauth2.ForgetAllCredentials();
-	
+
 	ServerCloudUser = MakeShared<Api::User>(ServerCloudUserCreds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
 	Email.ToLowerInline();
@@ -151,29 +151,28 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 
 	UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("LoginWithClientCredentials"));
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-    {
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("    Success"));
-        bClientTokenObtained = true;
-    }), ServerCloudSaveErrorHandler);
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("    Success"));
+		bClientTokenObtained = true;
+	}), ServerCloudSaveErrorHandler);
 
 	WaitUntil(bClientTokenObtained, "Waiting for Login...");
 
-	
 	/*
 	bool bDeleteGameRecordSuccess = false;
 	FRegistry::ServerCloudSave.DeleteGameRecord(ServerCloudGameRecordKey, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
-    {
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
-        bDeleteGameRecordSuccess = true;
-    }), ServerCloudSaveErrorHandler);
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
+		bDeleteGameRecordSuccess = true;
+	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecordUnExistSuccess = false;
 	FRegistry::ServerCloudSave.DeleteGameRecord(ServerCloudGameRecordKeyUnExist, FVoidHandler::CreateLambda([&bDeleteGameRecordUnExistSuccess]()
-    {
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
-        bDeleteGameRecordUnExistSuccess = true;
-    }), ServerCloudSaveErrorHandler);
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
+		bDeleteGameRecordUnExistSuccess = true;
+	}), ServerCloudSaveErrorHandler);
 	Waiting(bDeleteGameRecordUnExistSuccess, "Waiting for deleting game record ...");
 	*/
 
@@ -196,10 +195,10 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 
 	bool bDeleteGameRecordUnExistSuccess = false;
 	FRegistry::ServerCloudSave.DeleteGameRecord(ServerCloudGameRecordKeyUnExist, FVoidHandler::CreateLambda([&bDeleteGameRecordUnExistSuccess]()
-    {
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
-        bDeleteGameRecordUnExistSuccess = true;
-    }), ServerCloudSaveErrorHandler);
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete game record success"));
+		bDeleteGameRecordUnExistSuccess = true;
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecordUnExistSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteSuccess = false;
@@ -214,7 +213,7 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
 	AB_TEST_TRUE(bDeleteGameRecordUnExistSuccess);
 	AB_TEST_TRUE(bDeleteSuccess);
-	
+
 	return true;
 }
 
@@ -248,7 +247,7 @@ bool ServerCloudTestGetAdminGameRecord::RunTest(const FString& Parameters)
 	[&bGetGameRecordDone](int32 Code, FString Message)
 	{
 		bGetGameRecordDone = true;
-		
+
 		UE_LOG(LogAccelByteServerCloudSaveTest, Fatal, TEXT("Failed to GET Game ServerCloudRecord. Error code: %d\nError message:%s"), Code, *Message);
 	}
 	));
@@ -266,23 +265,21 @@ bool ServerCloudTestGetAdminGameRecordUnExistKey::RunTest(const FString& Paramet
 	bool bGetGameRecordSuccess = true;
 	bool bGetGameRecordDone = false;
 	FRegistry::ServerCloudSave.GetGameRecord(ServerCloudGameRecordKeyUnExist, THandler<FAccelByteModelsGameRecord>::CreateLambda([&bGetGameRecordDone](FAccelByteModelsGameRecord Rec)
-    {
-        bGetGameRecordDone = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("GET Game ServerCloudRecord success"));
-    }), FErrorHandler::CreateLambda(
-    [&bGetGameRecordSuccess, &bGetGameRecordDone](int32 Code, FString Message)
-    {
-        bGetGameRecordDone = true;
-    	bGetGameRecordSuccess = false;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Failed to GET Game ServerCloudRecord. Error code: %d\nError message:%s"), Code, *Message);
-    }
-    ));
+	{
+		bGetGameRecordDone = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("GET Game ServerCloudRecord success"));
+	}), FErrorHandler::CreateLambda([&bGetGameRecordSuccess, &bGetGameRecordDone](int32 Code, FString Message)
+	{
+		bGetGameRecordDone = true;
+		bGetGameRecordSuccess = false;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Failed to GET Game ServerCloudRecord. Error code: %d\nError message:%s"), Code, *Message);
+	}));
 
 	WaitUntil(bGetGameRecordDone, "Waiting for Get Game ServerCloudRecord with UnExist Key ...");
 
 	AB_TEST_FALSE(bGetGameRecordSuccess)
 
-    return true;
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceAdminGameRecord, "AccelByte.Tests.ServerCloudSave.D.ReplaceGameRecord", AutomationFlagMaskServerCloudSave)
@@ -297,7 +294,7 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 	WaitUntil(bUpdateGameRecord, "Waiting for Updating ServerCloudRecord value ... ");
 
 	AB_TEST_TRUE(bUpdateGameRecord)
-	
+
 	bool bGetGameRecord = false;
 	FAccelByteModelsGameRecord Compare;
 	FRegistry::ServerCloudSave.GetGameRecord(ServerCloudGameRecordKey, THandler<FAccelByteModelsGameRecord>::CreateLambda([&Compare, &bGetGameRecord](FAccelByteModelsGameRecord Result)
@@ -310,7 +307,7 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetGameRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudGameRecordKey);
-	
+
 	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 }
 
@@ -327,7 +324,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	WaitUntil(bReplaceGameRecordUnexistKey, "Waiting replace game record on unexist key ...");
 
 	AB_TEST_TRUE(bReplaceGameRecordUnexistKey)
-	
+
 	bool bGetGameRecordUnexistKey = false;
 	FAccelByteModelsGameRecord Compare;
 	FRegistry::ServerCloudSave.GetGameRecord(UnexistKey, THandler<FAccelByteModelsGameRecord>::CreateLambda([&bGetGameRecordUnexistKey, &Compare](FAccelByteModelsGameRecord Result)
@@ -339,7 +336,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	WaitUntil(bGetGameRecordUnexistKey, "Waiting get game record on unexist key ...");
 
 	AB_TEST_TRUE(bGetGameRecordUnexistKey)
-	
+
 	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
 
@@ -352,7 +349,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	WaitUntil(bDeleteGameRecordUnexistKey, "Waiting to delete game record on unexist key ...");
 
 	AB_TEST_TRUE(bDeleteGameRecordUnexistKey)
-	
+
 	return true;
 }
 
@@ -406,15 +403,15 @@ bool ServerCloudTestSavePlayerRecordPublic::RunTest(const FString& Parameters)
 {
 	bool bSavePlayerRecord = false;
 	FRegistry::ServerCloudSave.SaveUserRecord(ServerCloudPlayerRecordKeyPublic, ServerCloudUserCreds.GetUserId(), ServerCloudRecord, true, FVoidHandler::CreateLambda([&bSavePlayerRecord]()
-    {
-        bSavePlayerRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Saving new user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bSavePlayerRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success Saving new user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bSavePlayerRecord, "Waiting saving user record ...");
 
 	AB_TEST_TRUE(bSavePlayerRecord)
 
-    return true;
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetPlayerRecord, "AccelByte.Tests.ServerCloudSave.G.GetPlayerRecord", AutomationFlagMaskServerCloudSave)
@@ -432,7 +429,7 @@ bool ServerCloudTestGetPlayerRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetPlayerRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKey);
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);	
+	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetPlayerRecordPublic, "AccelByte.Tests.ServerCloudSave.G.GetPlayerRecordPublic", AutomationFlagMaskServerCloudSave)
@@ -441,16 +438,16 @@ bool ServerCloudTestGetPlayerRecordPublic::RunTest(const FString& Parameters)
 	bool bGetPlayerRecord = false;
 	FAccelByteModelsUserRecord Compare;
 	FRegistry::ServerCloudSave.GetPublicUserRecord(ServerCloudPlayerRecordKeyPublic, ServerCloudUserCreds.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetPlayerRecord, &Compare](FAccelByteModelsUserRecord Result)
-    {
-        bGetPlayerRecord = true;
-        Compare = Result;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success get user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bGetPlayerRecord = true;
+		Compare = Result;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Success get user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bGetPlayerRecord, "Waiting getting the user record ...");
 
 	AB_TEST_TRUE(bGetPlayerRecord)
-    AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
-    return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);	
+	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
+	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetPlayerRecordUnexistKey, "AccelByte.Tests.ServerCloudSave.G.GetPlayerRecordUnexistKey", AutomationFlagMaskServerCloudSave)
@@ -465,7 +462,7 @@ bool ServerCloudTestGetPlayerRecordUnexistKey::RunTest(const FString& Parameters
 	{
 		bGetRecordDone = true;
 		bGetRecordUnexistKey = false;
-		
+
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Failed get user record (expected behaviour)"))
 	}));
 	WaitUntil(bGetRecordDone, "Waiting getting user record unexist key ...");
@@ -509,28 +506,28 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
 {
 	bool bReplaceUserRecord = false;
 	FRegistry::ServerCloudSave.ReplaceUserRecord(ServerCloudPlayerRecordKeyPublic, ServerCloudUserCreds.GetUserId(), ServerCloudRecord2, true, FVoidHandler::CreateLambda([&bReplaceUserRecord]()
-    {
-        bReplaceUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bReplaceUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bReplaceUserRecord, "Waiting to replace user record");
 
 	AB_TEST_TRUE(bReplaceUserRecord)
 
-    bool bGetReplacedUserRecord = false;
+	bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
 	FRegistry::ServerCloudSave.GetPublicUserRecord(ServerCloudPlayerRecordKeyPublic, ServerCloudUserCreds.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetReplacedUserRecord, &Compare](FAccelByteModelsUserRecord Result)
-    {
-        bGetReplacedUserRecord = true;
-        Compare = Result;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bGetReplacedUserRecord = true;
+		Compare = Result;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bGetReplacedUserRecord, "Waiting to get user record");
 
 	AB_TEST_TRUE(bGetReplacedUserRecord)
-    AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
+	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
 
-    return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceUnExistingPlayerRecord, "AccelByte.Tests.ServerCloudSave.H.ReplaceUnExistingUserRecord", AutomationFlagMaskServerCloudSave)
@@ -539,28 +536,28 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
 	bool bReplaceUserRecord = false;
 	const FString UnexistKey = "UE4UnexistKeyPlayerRecord";
 	FRegistry::ServerCloudSave.ReplaceUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), ServerCloudRecord2, false, FVoidHandler::CreateLambda([&bReplaceUserRecord]()
-    {
-        bReplaceUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bReplaceUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bReplaceUserRecord, "Waiting to replace user record");
 
 	AB_TEST_TRUE(bReplaceUserRecord)
 
-    bool bGetReplacedUserRecord = false;
+	bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
 	FRegistry::ServerCloudSave.GetUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetReplacedUserRecord, &Compare](FAccelByteModelsUserRecord Result)
-    {
-        bGetReplacedUserRecord = true;
-        Compare = Result;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bGetReplacedUserRecord = true;
+		Compare = Result;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bGetReplacedUserRecord, "Waiting to get user record");
 
 	AB_TEST_TRUE(bGetReplacedUserRecord)
-    AB_TEST_EQUAL(Compare.Key, UnexistKey);
+	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
-    ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), false, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
@@ -581,40 +578,40 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
 	bool bReplaceUserRecord = false;
 	const FString UnexistKey = "UE4UnexistKeyPlayerRecord2";
 	FRegistry::ServerCloudSave.ReplaceUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), ServerCloudRecord2, true, FVoidHandler::CreateLambda([&bReplaceUserRecord]()
-    {
-        bReplaceUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bReplaceUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Replace user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bReplaceUserRecord, "Waiting to replace user record");
 
 	AB_TEST_TRUE(bReplaceUserRecord)
 
-    bool bGetReplacedUserRecord = false;
+	bool bGetReplacedUserRecord = false;
 	FAccelByteModelsUserRecord Compare;
 	FRegistry::ServerCloudSave.GetPublicUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetReplacedUserRecord, &Compare](FAccelByteModelsUserRecord Result)
-    {
-        bGetReplacedUserRecord = true;
-        Compare = Result;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bGetReplacedUserRecord = true;
+		Compare = Result;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Successfuly get replaced user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bGetReplacedUserRecord, "Waiting to get user record");
 
 	AB_TEST_TRUE(bGetReplacedUserRecord)
-    AB_TEST_EQUAL(Compare.Key, UnexistKey);
+	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
-    ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
 
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), true, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
-    {
-        bDeleteUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Succefully delete user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bDeleteUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Succefully delete user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecord, "Waiting to delete user record");
 
 	AB_TEST_TRUE(bDeleteUserRecord);
 
-    return true;
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestDeletePlayerRecord, "AccelByte.Tests.ServerCloudSave.I.DeleteUserRecord", AutomationFlagMaskServerCloudSave)
@@ -638,15 +635,15 @@ bool ServerCloudTestDeletePlayerRecordPublic::RunTest(const FString& Parameters)
 {
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(ServerCloudPlayerRecordKeyPublic, ServerCloudUserCreds.GetUserId(), true, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
-    {
-        bDeleteUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
-    }), ServerCloudSaveErrorHandler);
+	{
+		bDeleteUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
+	}), ServerCloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecord, "Waiting deleting user record");
 
 	AB_TEST_TRUE(bDeleteUserRecord);
 
-    return true;
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestDeletePlayerRecordUnExist, "AccelByte.Tests.ServerCloudSave.H.DeleteUserRecordUnExist", AutomationFlagMaskServerCloudSave)
@@ -654,32 +651,33 @@ bool ServerCloudTestDeletePlayerRecordUnExist::RunTest(const FString& Parameters
 {
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(ServerCloudPlayerRecordKeyUnExist, ServerCloudUserCreds.GetUserId(), false, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
-    {
-        bDeleteUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
-    }),ServerCloudSaveErrorHandler);
+	{
+		bDeleteUserRecord = true;
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
+	}),ServerCloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecord, "Waiting deleting user record");
 
 	AB_TEST_TRUE(bDeleteUserRecord);
 
-    return true;
+	return true;
 }
 
-// DISABLE this integration test since it returns unexpected error response and for not blocking current jenkins test. Need to investigate and fix later.
-#if 0
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestDeletePlayerRecordUnExistPublic, "AccelByte.Tests.ServerCloudSave.H.DeleteUserRecordUnExistPublic", AutomationFlagMaskServerCloudSave)
 bool ServerCloudTestDeletePlayerRecordUnExistPublic::RunTest(const FString& Parameters)
 {
-	bool bDeleteUserRecord = false;
-	FRegistry::ServerCloudSave.DeleteUserRecord(ServerCloudPlayerRecordKeyUnExist, ServerCloudUserCreds.GetUserId(), true, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
-    {
-        bDeleteUserRecord = true;
-        UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
-    }), ServerCloudSaveErrorHandler);
-	Waiting(bDeleteUserRecord, "Waiting deleting user record");
+	bool bDeleteUserRecordDone = false;
+	FRegistry::ServerCloudSave.DeleteUserRecord(ServerCloudPlayerRecordKeyUnExist, ServerCloudUserCreds.GetUserId(), true, FVoidHandler::CreateLambda([&bDeleteUserRecordDone]()
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user record"))
+		bDeleteUserRecordDone = true;
+	}), FErrorHandler::CreateLambda([&bDeleteUserRecordDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		bDeleteUserRecordDone = true;
+	}));
+	WaitUntil(bDeleteUserRecordDone, "Waiting deleting user record");
 
-	AB_TEST_TRUE(bDeleteUserRecord);
+	AB_TEST_TRUE(bDeleteUserRecordDone);
 
-    return true;
+	return true;
 }
-#endif
