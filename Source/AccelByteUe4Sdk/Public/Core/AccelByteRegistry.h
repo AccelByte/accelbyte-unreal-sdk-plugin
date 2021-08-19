@@ -39,6 +39,7 @@ namespace Api
 	class Achievement;
 	class SessionBrowser;
 	class UGC;
+	class SeasonPass;
 }
 
 namespace GameServerApi
@@ -53,6 +54,7 @@ namespace GameServerApi
 	class ServerMatchmaking;
 	class ServerLobby;
 	class ServerCloudSave;
+	class ServerSeasonPass;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -84,6 +86,7 @@ public:
 	static Api::Achievement Achievement;
 	static Api::SessionBrowser SessionBrowser;
 	static Api::UGC UGC;
+	static Api::SeasonPass SeasonPass;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
@@ -94,6 +97,7 @@ public:
 	static GameServerApi::ServerMatchmaking ServerMatchmaking;
 	static GameServerApi::ServerLobby ServerLobby;
 	static GameServerApi::ServerCloudSave ServerCloudSave;
+	static GameServerApi::ServerSeasonPass ServerSeasonPass;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;

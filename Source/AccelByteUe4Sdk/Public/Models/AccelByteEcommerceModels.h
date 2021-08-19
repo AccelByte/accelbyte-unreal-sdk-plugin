@@ -1,5 +1,5 @@
-// Copyright (c) 2019 - 2020 AccelByte Inc. All Rights Reserved.
-// This is licensed software from Accelbyte Inc, for limitations
+// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #pragma once
@@ -18,7 +18,8 @@ enum class EAccelByteItemType : uint8
 	INGAMEITEM,
 	BUNDLE,
 	CODE,
-	SUBSCRIPTION
+	SUBSCRIPTION,
+	SEASON
 };
 
 UENUM(BlueprintType)
@@ -116,6 +117,8 @@ enum class EAccelByteEntitlementSource : uint8
 	ACHIEVEMENT,
 	REFERRAL_BONUS,
 	REDEEM_CODE,
+	REWARD,
+	GIFT,
 	OTHER
 };
 
@@ -150,6 +153,13 @@ enum class EAccelBytePlatformSync : uint8
 	STADIA,
 	EPIC_GAMES,
 	OTHER
+};
+
+UENUM(BlueprintType)
+enum class EAccelByteSeasonType : uint8
+{
+	PASS = 0,
+	TIER
 };
 
 #pragma endregion EnumField

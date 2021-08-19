@@ -74,6 +74,8 @@ static FString GetPlatformString(EAccelBytePlatformType PlatformType)
 		return "epicgames";
 	case EAccelBytePlatformType::Stadia:
 		return "stadia";
+	case EAccelBytePlatformType::AwsCognito:
+		return "awscognito";
 	default:
 		return "unknown";
 	}

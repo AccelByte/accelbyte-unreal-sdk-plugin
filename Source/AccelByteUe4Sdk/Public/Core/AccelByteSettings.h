@@ -35,6 +35,7 @@ public:
 	FString AchievementServerUrl;
 	FString SessionBrowserServerUrl;
 	FString UGCServerUrl;
+	FString SeasonPassServerUrl;
 	FString AppId;
 };
 
@@ -236,6 +237,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetUGCServerUrl(const FString& UGCServerUrl);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetSeasonPassServerUrl(const FString& SeasonPassServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);

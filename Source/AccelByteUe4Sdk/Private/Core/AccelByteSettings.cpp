@@ -196,6 +196,11 @@ void UAccelByteBlueprintsSettings::SetUGCServerUrl(const FString& UGCServerUrl)
 	FRegistry::Settings.UGCServerUrl = UGCServerUrl;
 }
 
+void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonPassServerUrl)
+{
+	FRegistry::Settings.SeasonPassServerUrl = SeasonPassServerUrl;
+}
+
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 {
 	FRegistry::Settings.AppId = AppId;

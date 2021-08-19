@@ -8,7 +8,25 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 
 ## Dependencies
 
-AccelByte SDK is compatible with these AccelByte Services version 3.2.0
+AccelByte SDK v4.0.1 is compatible with these AccelByte Services version 3.3.1:
+
+| Service                                             | Version        |
+|-----------------------------------------------------|----------------|
+| justice-iam-service                                 | 4.3.0          |
+| justice-legal-service                               | 1.12.1         |
+| justice-basic-service                               | 1.21.1         |
+| justice-platform-service                            | 3.32.0         |
+| justice-social-service                              | 1.17.1         |
+| justice-leaderboard-service                         | 2.8.0          |
+| justice-achievement-service                         | 2.5.4          |
+| justice-cloudsave-service                           | 1.6.4          |
+| justice-ugc-service                                 | 1.4.0          |
+| justice-lobby-server                                | 1.34.0         |
+| justice-group-service                               | 2.7.3          |
+| Justice QoS Manager Service                         | 1.7.6          |
+| justice-dedicated-server-manager-controller-service | 2.4.1          |
+| amalgam_game_telemetry                              | 1.1.2-392420e1 |          
+
 
 ## Features
 
