@@ -9,6 +9,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "AgreementTestAdmin.h"
 
 using AccelByte::FErrorHandler;
@@ -47,7 +48,7 @@ bool AgreementSetup::RunTest(const FString& Parameters)
 	bool bUserLoggedIn = false;
 
 	// CLEAN UP PREVIOUS USER
-	User_Delete_By_Email_Address(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&UsersDeletionDone]() {
+	AdminDeleteUserByEmailAddress(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&UsersDeletionDone]() {
 		UsersDeletionDone = true;
 	}), FErrorHandler::CreateLambda([&UsersDeletionDone](int32 Code, FString Message) {
 		UsersDeletionDone = true;
@@ -261,7 +262,7 @@ bool AgreementTearDown::RunTest(const FString& Parameters)
 	bool bDeleteSuccessful = false;
 
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(AgreementTestUserInfo_.UserId, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUser(AgreementTestUserInfo_.UserId, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;
@@ -615,7 +616,7 @@ bool AgreementGetLegalPoliciesByCountryWithoutTagAndRegiterUser::RunTest(const F
 	bool bDeleteSuccessful = false;
 
 	UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Delete User By ID"));
-	User_Delete_By_Email_Address(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUserByEmailAddress(AgreementTestUserInfo_.EmailAddress, FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteAgreementTest, Log, TEXT("Success Delete User By Email"));
 		bDeleteSuccessful = true;

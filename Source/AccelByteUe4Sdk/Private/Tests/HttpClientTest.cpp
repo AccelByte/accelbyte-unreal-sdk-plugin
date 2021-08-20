@@ -10,6 +10,7 @@
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpClient.h"
+#include "UserTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpClientTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpClientTest);

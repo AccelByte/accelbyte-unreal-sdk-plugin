@@ -72,17 +72,6 @@ public:
 		static TArray<uint8> FStringToBytes(FString Input);
 };
 
-void DeleteUserById(
-	const FString& UserId,
-	const FSimpleDelegate& OnSuccess,
-	const FErrorHandler& OnError);
-
-void DeleteUserProfile(
-	const FString& UserId,
-	const FString& Namespace,
-	const FSimpleDelegate& OnSuccess,
-	const FErrorHandler& OnError);
-
 void FlushHttpRequests();
 
 void WaitUntil(const bool& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0);
@@ -1038,14 +1027,3 @@ struct FTestUser
 
 FString GetAdminBaseUrl();
 FString GetAdminUserAccessToken();
-
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers);
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials);
-bool CheckTestUsers(const TArray<TSharedPtr<FTestUser>>& InUsers, const TArray<TSharedPtr<Credentials>>& InCredentials);
-bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials);
-
-void User_Get_User_Mapping(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
-void User_Get_Verification_Code(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
-void User_Get_By_Email_Address(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError);
-void User_Delete_By_Email_Address(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
-void User_Get_MyData_Direct(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);

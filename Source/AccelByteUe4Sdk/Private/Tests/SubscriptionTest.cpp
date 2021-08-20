@@ -10,6 +10,7 @@
 #include "Core/AccelByteCredentials.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "EcommerceTestAdmin.h"
 #include "SubscriptionTestAdmin.h"
 
@@ -366,7 +367,7 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 		bool doneGetUserMap = false;
 		FUserMapResponse userMap;
-		User_Get_User_Mapping(FRegistry::Credentials.GetUserId(), THandler<FUserMapResponse>::CreateLambda([&doneGetUserMap, &userMap](const FUserMapResponse& Result) 
+		AdminGetUserMap(FRegistry::Credentials.GetUserId(), THandler<FUserMapResponse>::CreateLambda([&doneGetUserMap, &userMap](const FUserMapResponse& Result) 
 		{
 			UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Get User Map"));
 			doneGetUserMap = true;

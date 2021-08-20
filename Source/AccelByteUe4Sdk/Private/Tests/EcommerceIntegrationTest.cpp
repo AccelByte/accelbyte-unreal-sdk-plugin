@@ -175,7 +175,7 @@ bool FEcommerceTestTearDown::RunTest(const FString& Parameters)
 		bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 			bDeleteSuccessful = true;

@@ -14,6 +14,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "AchievementTestAdmin.h"
 #include "StatisticTestAdmin.h"
 
@@ -236,7 +237,7 @@ bool FAchievementTestSetup::RunTest(const FString& Parameters)
 	WaitUntil(bUserLoginSuccess, "Waiting for Login ...");
 
 	bool bDeleteUserSuccess = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
 		{
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 			bDeleteUserSuccess = true;
@@ -824,7 +825,7 @@ bool FAchievementTestAchievementTearDown::RunTest(const FString& Parameters)
 	}
 
 	bool bDeleteSuccess = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
 		{
 			UE_LOG(LogAccelByteAchievementTest, Log, TEXT("Delete user by id success"));
 			bDeleteSuccess = true;

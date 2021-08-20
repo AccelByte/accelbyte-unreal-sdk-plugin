@@ -8,11 +8,11 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerLobby.h"
 #include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Models/AccelByteLobbyModels.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerLobbyTest, Log, All);
@@ -496,7 +496,7 @@ bool ServerLobbyTestTeardown::RunTest(const FString& Parameters)
 	{
 		UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, STestUserCount);
 		bDeleteUsersSuccessful[i] = false;
-		DeleteUserById(SUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteUser(SUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;

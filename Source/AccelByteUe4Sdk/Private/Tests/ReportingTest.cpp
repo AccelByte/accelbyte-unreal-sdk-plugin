@@ -3,11 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
+#include "Core/AccelByteRegistry.h"
+#include "Api/AccelByteReportingApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
 #include "ReportingTestAdmin.h"
-#include "Api/AccelByteReportingApi.h"
-#include "Core/AccelByteRegistry.h"
-#include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "UserTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteReportingTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteReportingTest);
@@ -49,7 +50,7 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bReportingLoginUserSuccess);
 
 	bool bReportingDeleteUserSuccess = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bReportingDeleteUserSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bReportingDeleteUserSuccess]()
 	{
 		UE_LOG(LogAccelByteReportingTest, Log, TEXT("Delete user Success"));
 		bReportingDeleteUserSuccess = true;
@@ -266,7 +267,7 @@ bool ReportingTeardown::RunTest(const FString& Parameters)
 {
 	
 	bool bDeleteUserSuccess;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&]()
 	{
 		UE_LOG(LogAccelByteReportingTest, Log, TEXT("Delete user Success"));
 		bDeleteUserSuccess = true;

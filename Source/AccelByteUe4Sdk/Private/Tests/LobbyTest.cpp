@@ -940,7 +940,7 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 	for (int i = 0; i < TestUserCount; i++)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, TestUserCount);
-		DeleteUserById(
+		AdminDeleteUser(
 			UserCreds[i].GetUserId(),
 			FSimpleDelegate::CreateLambda([&SuccessfulDeletions, i]()
 			{
@@ -6129,7 +6129,7 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 	WaitUntil([&]() { return !OtherLobby.IsConnected() && !Lobby.IsConnected(); }, "", 15);
 
 	bool bDeleteDone = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
 	{
 		bDeleteDone = true;
 	}), LobbyTestErrorHandler);
@@ -6184,7 +6184,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 	WaitUntil([&]() { return !OtherLobby.IsConnected() && !Lobby.IsConnected(); }, "", 15);
 
 	bool bDeleteDone = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
 	{
 		bDeleteDone = true;
 	}), LobbyTestErrorHandler);
@@ -6235,7 +6235,7 @@ bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Pa
 	WaitUntil([&]() { return !Lobby.IsConnected(); }, "", 15);
 
 	bool bDeleteDone = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
 		{
 			bDeleteDone = true;
 		}), LobbyTestErrorHandler);

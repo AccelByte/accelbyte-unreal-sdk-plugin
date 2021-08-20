@@ -5,6 +5,7 @@
 #include "Misc/AutomationTest.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;

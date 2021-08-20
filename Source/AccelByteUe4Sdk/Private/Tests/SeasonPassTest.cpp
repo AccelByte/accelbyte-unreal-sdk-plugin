@@ -708,7 +708,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 	}
 
 	bool bDeleteUserSuccess = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUserSuccess]()
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Delete user succeed"));
 		bDeleteUserSuccess = true;
