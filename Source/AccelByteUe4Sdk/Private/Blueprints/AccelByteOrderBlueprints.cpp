@@ -25,17 +25,6 @@ void UAccelByteBlueprintsOrder::CreateNewOrder(const FAccelByteModelsOrderCreate
 	}));
 }
 
-void UAccelByteBlueprintsOrder::CancelOrder(const FString& OrderNo, const FCancelOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
-{
-	FRegistry::Order.CancelOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)
-	{
-		OnSuccess.ExecuteIfBound(Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
-}
-
 void UAccelByteBlueprintsOrder::GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError)
 {
 	FRegistry::Order.GetUserOrder(OrderNo, THandler<FAccelByteModelsOrderInfo>::CreateLambda([OnSuccess](const FAccelByteModelsOrderInfo& Result)

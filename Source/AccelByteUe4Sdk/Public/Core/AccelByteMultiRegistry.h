@@ -29,7 +29,6 @@
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
-#include "Api/AccelByteCurrencyApi.h"
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 
@@ -73,7 +72,6 @@ public:
 	Api::SessionBrowser SessionBrowser{Credentials, FRegistry::Settings, Http};
 	Api::UGC UGC{Credentials, FRegistry::Settings, Http};
 	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
-	Api::Currency Currency{ Credentials, FRegistry::Settings, Http };
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
@@ -81,7 +79,8 @@ public:
 		static_assert(std::is_base_of<FApiBase, T>::value, "API class must be subclass of FApiBase");
 
 		return T(Credentials, FRegistry::Settings, Http, Forward<U>(Args)...);
-	}};
+	}
+};
 
 class ACCELBYTEUE4SDK_API FMultiRegistry
 {

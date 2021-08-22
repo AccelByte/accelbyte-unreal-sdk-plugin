@@ -246,7 +246,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedRootCategoryPath,
 		rootLocalizationMap,
 		EAccelByteItemStatus::ACTIVE,
-		"UE4rootSku",
+		"sku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
 		FRegionDataUS{{rootRegionData}},
@@ -372,7 +372,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedGrandChildCategoryPath,
 		grandchildLocalizationMap,
 		EAccelByteItemStatus::ACTIVE,
-		"UE4grandchildSku",
+		"sku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
 		FRegionDataUS{{grandchildRegionData}},
@@ -393,73 +393,6 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		}), OnError);
 	Waiting(bGrandchildItemCreated, "Waiting for grand child item created...");
 	check(bGrandchildItemCreated);
-
-#pragma region CreatePurchasingItem
-
-	/*
-	 Create purchasing ITEM
-	*/
-	FLocalization purchaseitemLocalization
-	{
-		"UE4_PurchasingItem",
-		"Purchasing item",
-		"Purchasing item, real currency, not free, USD"
-	};
-	TMap<FString, FLocalization> purchaseitemLocalizationMap;
-	purchaseitemLocalizationMap.Add("en", purchaseitemLocalization);
-	FCreateRegionDataItem purchaseitemRegionData
-	{
-		1, //not free so it will not auto fulfill.
-		0,
-		0,
-		0,
-		"USD",
-		EAccelByteItemCurrencyType::REAL,
-		FRegistry::Settings.Namespace,
-		FDateTime::MinValue().ToIso8601(),
-		FDateTime::MaxValue().ToIso8601(),
-		FDateTime::MinValue().ToIso8601(),
-		FDateTime::MaxValue().ToIso8601()
-	};
-	FItemCreateRequest purchaseItemRequest
-	{
-		EAccelByteItemType::COINS,
-		EAccelByteSeasonType::PASS, // set as default
-		Variables.purchasingItemTitle,
-		EAccelByteEntitlementType::CONSUMABLE,
-		10,
-		0,
-		"",
-		EAccelByteAppType::GAME,
-		"",
-		Variables.ExpectedCurrency.currencyCode,
-		FRegistry::Settings.Namespace,
-		Variables.ExpectedRootCategoryPath,
-		purchaseitemLocalizationMap,
-		EAccelByteItemStatus::ACTIVE,
-		"UE4purchaseitemSku",
-		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
-		"",
-		FRegionDataUS{{purchaseitemRegionData}},
-		emptyStrings,
-		emptyStrings,
-		-1,
-		-1,
-		"",
-		0,
-		"classless",
-		FRecurring { }
-	};
-	bool bPurchasingItemCreated = false;
-	AdminCreateEcommerceItem(purchaseItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bPurchasingItemCreated](const FItemFullInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM purchase is created"));
-			bPurchasingItemCreated = true;
-		}), OnError);
-	Waiting(bPurchasingItemCreated, "Waiting for purchase item created...");
-	check(bPurchasingItemCreated);
-
-#pragma endregion
 
 #pragma region CreateRedeemableInGameItem
 
@@ -502,7 +435,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedRootCategoryPath,
 		redeemableItemLocalizations,
 		EAccelByteItemStatus::ACTIVE,
-		"UE4redeemableitemSku",
+		"skuReedemableItem",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
 		FRegionDataUS{{redeemableItemRegionData}},

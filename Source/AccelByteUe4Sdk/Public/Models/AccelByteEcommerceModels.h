@@ -162,14 +162,6 @@ enum class EAccelByteSeasonType : uint8
 	TIER
 };
 
-UENUM(BlueprintType)
-enum class EAccelByteCurrencyType : uint8
-{
-	NONE = 0,
-	REAL,
-	VIRTUAL
-};
-
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -1028,29 +1020,3 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsFulfillmentResult
 };
 
 #pragma endregion FulfillmentModelsField
-
-#pragma region CurrencyModelsField
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyList
-{
-	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		FString CurrencyCode;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		TMap<FString, FString> LocalizationDescriptions;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		FString CurrencySymbol;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		EAccelByteCurrencyType CurrencyType; // ['REAL', 'VIRTUAL'],
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		int32 Decimals;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		FDateTime CreatedAt;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Currency | Models | CurrencyList")
-		FDateTime UpdateAt;
-};
-
-#pragma endregion CurrencyModelsField
