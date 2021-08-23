@@ -28,6 +28,7 @@
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
 #include "Api/AccelByteCurrencyApi.h"
+#include "Api/AccelByteReportingApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
@@ -70,6 +71,7 @@ Api::SessionBrowser FRegistry::SessionBrowser(FRegistry::Credentials, FRegistry:
 Api::UGC FRegistry::UGC(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::SeasonPass FRegistry::SeasonPass(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Currency FRegistry::Currency(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+Api::Reporting FRegistry::Reporting(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 GameServerApi::ServerOauth2 FRegistry::ServerOauth2(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerDSM FRegistry::ServerDSM(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerStatistic FRegistry::ServerStatistic(FRegistry::ServerCredentials, FRegistry::ServerSettings);
