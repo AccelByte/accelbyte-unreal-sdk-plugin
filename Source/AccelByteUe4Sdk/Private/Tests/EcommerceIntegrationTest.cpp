@@ -82,6 +82,7 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	"UE4RedeemableItem", // RedeemableItemTitle
 	"UE4RootItem",
 	"UE4ChildItem",
+	"UE4GrandChildItem",
 	EcommerceTestArchiveStore,
 	EcommerceTestTemporaryStore,
 	1000, // LootCoin Quantity
@@ -109,11 +110,47 @@ FString EcommerceTestExpectedEntitlementId;
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 {
+	bool bSetupCurrencySuccess = false;
+	bool bWaitingTerminated = false;
+	SetupEcommerceCurrency(EcommerceTestExpectedVariable, 
+		FSimpleDelegate::CreateLambda([&bSetupCurrencySuccess, &bWaitingTerminated]() {
+			bSetupCurrencySuccess = true; 
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message) {
+			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce CURRENCY...");
+	AB_TEST_TRUE(bSetupCurrencySuccess);
 
-	bool bSetupSuccess = false;
-	SetupEcommerce(EcommerceTestExpectedVariable, FSimpleDelegate::CreateLambda([&]() { bSetupSuccess = true; }), EcommerceTestErrorHandler);
-	Waiting(bSetupSuccess, "Waiting for setup ecommerce...");
-	AB_TEST_TRUE(bSetupSuccess);
+	bool bSetupStoreSuccess = false;
+	bWaitingTerminated = false;
+	SetupEcommerceStore(EcommerceTestExpectedVariable, 
+		FSimpleDelegate::CreateLambda([&bSetupStoreSuccess, &bWaitingTerminated]() { 
+			bSetupStoreSuccess = true; 
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message) {
+			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce STORE...");
+	AB_TEST_TRUE(bSetupStoreSuccess);
+
+	bool bSetupCampaignSuccess = false;
+	bWaitingTerminated = false;
+	SetupEcommerceCampaign(EcommerceTestExpectedVariable,
+		FSimpleDelegate::CreateLambda([&bSetupCampaignSuccess, &bWaitingTerminated]() {
+			bSetupCampaignSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message) {
+			EcommerceTestErrorHandler.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Setup Ecommerce CAMPAIGN...");
+	AB_TEST_TRUE(bSetupCampaignSuccess);
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
@@ -1461,7 +1498,6 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bUserLoginSuccess);
 
 #pragma region GetItemByCriteria
-
 	FAccelByteModelsItemCriteria ItemCriteria;
 	ItemCriteria.Language = TEXT("en");
 	ItemCriteria.Region = TEXT("US");
@@ -1478,23 +1514,6 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 
 	Waiting(bGetItemByCriteriaSuccess, "Waiting for get items...");
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
-
-	FAccelByteModelsItemCriteria ItemCriteria2;
-	ItemCriteria2.Language = TEXT("en");
-	ItemCriteria2.Region = TEXT("US");
-	ItemCriteria2.ItemType = EAccelByteItemType::COINS;
-	bool bGetItemByCriteriaSuccess2 = false;
-	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
-	FAccelByteModelsItemPagingSlicedResult Items2;
-	FRegistry::Item.GetItemsByCriteria(ItemCriteria2, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
-		{
-			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-			bGetItemByCriteriaSuccess2 = true;
-			Items2 = Result;
-		}), EcommerceTestErrorHandler);
-
-	Waiting(bGetItemByCriteriaSuccess2, "Waiting for get items...");
-	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 #pragma endregion GetItemByCriteria
 
 #pragma region GrantEntitlement
@@ -1523,18 +1542,18 @@ bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 	GrantedEntitlements.Add(GrantedEntitlement);
 	ItemIdsGranted.Add(Items.Data[0].ItemId);
 
-	GrantedEntitlement.ItemId = Items2.Data[0].ItemId;
-	GrantedEntitlement.ItemNamespace = Items2.Data[0].Namespace;
+	GrantedEntitlement.ItemId = Items.Data[1].ItemId;
+	GrantedEntitlement.ItemNamespace = Items.Data[1].Namespace;
 	GrantedEntitlement.GrantedCode = "123456789";
 	GrantedEntitlement.Quantity = 1;
 	GrantedEntitlement.Source = EAccelByteEntitlementSource::ACHIEVEMENT;
-	GrantedEntitlement.Region = Items2.Data[0].Region;
-	GrantedEntitlement.Language = Items2.Data[0].Language;
+	GrantedEntitlement.Region = Items.Data[1].Region;
+	GrantedEntitlement.Language = Items.Data[1].Language;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GrantingUserEntitlement"));
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
 
 	GrantedEntitlements.Add(GrantedEntitlement);
-	ItemIdsGranted.Add(Items2.Data[0].ItemId);
+	ItemIdsGranted.Add(Items.Data[1].ItemId);
 
 	bool bGrantEntitlementSuccess = false;
 	TArray<FAccelByteModelsStackableEntitlementInfo> GrantedEntitlementResult;

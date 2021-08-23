@@ -233,12 +233,12 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool bCreateAppItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			AdminCreateEcommerceItem(PublisherNamespace, AppItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result)
-			{
-				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create app item success"));
-				bCreateAppItemSuccess = true;
-				appItemInfo = Result;
-			}), SubscriptionErrorHandler);
+			AdminCreateEcommerceItem(PublisherNamespace, SubscriptionTestStoreId, AppItemRequest,
+				THandler<FItemFullInfo>::CreateLambda([&bCreateAppItemSuccess, &appItemInfo](const FItemFullInfo& Result) {
+					UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create app item success"));
+					bCreateAppItemSuccess = true;
+					appItemInfo = Result;
+				}), SubscriptionErrorHandler);
 			Waiting(bCreateAppItemSuccess, "Waiting for app item created...");
 			check(bCreateAppItemSuccess);
 			appTypeItemId = appItemInfo.itemId;
@@ -270,12 +270,12 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 
 			bool createSubsItemSuccess = false;
 			FItemFullInfo appItemInfo;
-			AdminCreateEcommerceItem(PublisherNamespace, SubsItemRequest, SubscriptionTestStoreId, THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result)
-			{
-				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create subs item success"));
-				appItemInfo = Result;
-				createSubsItemSuccess = true;
-			}), SubscriptionErrorHandler);
+			AdminCreateEcommerceItem(PublisherNamespace, SubscriptionTestStoreId, SubsItemRequest,
+				THandler<FItemFullInfo>::CreateLambda([&createSubsItemSuccess, &appItemInfo](const FItemFullInfo& Result) {
+					UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Create subs item success"));
+					appItemInfo = Result;
+					createSubsItemSuccess = true;
+				}), SubscriptionErrorHandler);
 			Waiting(createSubsItemSuccess, "Waiting for subs item created...");
 			check(createSubsItemSuccess);
 			SubsTypeItemId = appItemInfo.itemId;

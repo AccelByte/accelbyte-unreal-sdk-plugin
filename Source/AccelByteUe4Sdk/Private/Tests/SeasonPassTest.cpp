@@ -197,11 +197,11 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	CategoryRequest.categoryPath = SeasonItemCategoryPath;
 	CategoryRequest.localizationDisplayNames = {{"en", SeasonItemCategoryPath}};
 	bool bCreateCategorySuccess = false;
-	AdminCreateEcommerceCategory(CategoryRequest, SeasonStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateCategorySuccess](const FCategoryInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create category succeed"));
-		bCreateCategorySuccess = true;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceCategory(SeasonStoreInfo.storeId, CategoryRequest,
+		THandler<FCategoryInfo>::CreateLambda([&bCreateCategorySuccess](const FCategoryInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create category succeed"));
+			bCreateCategorySuccess = true;
+		}), SeasonPassOnError);
 	Waiting(bCreateCategorySuccess, "Waiting to create category...");
 	AB_TEST_TRUE(bCreateCategorySuccess);
 
@@ -255,12 +255,12 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateFreeSeasonSuccess = false;
-	AdminCreateEcommerceItem(FreeSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateFreeSeasonSuccess](const FItemFullInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Free season pass item succeed"));
-		bCreateFreeSeasonSuccess = true;
-		FreeSeasonPassItem = Result;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceItem(SeasonStoreInfo.storeId, FreeSeasonPassItemRequest,
+		THandler<FItemFullInfo>::CreateLambda([this, &bCreateFreeSeasonSuccess](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Free season pass item succeed"));
+			bCreateFreeSeasonSuccess = true;
+			FreeSeasonPassItem = Result;
+		}), SeasonPassOnError);
 	Waiting(bCreateFreeSeasonSuccess, "Waiting to create free season pass item...");
 	AB_TEST_TRUE(bCreateFreeSeasonSuccess);
 
@@ -300,13 +300,12 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreatePremiumSeasonSuccess = false;
-	AdminCreateEcommerceItem(PremiumSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreatePremiumSeasonSuccess](const FItemFullInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log,
-				TEXT("Create Premium Season Pass item succeed"));
-		bCreatePremiumSeasonSuccess = true;
-		PremiumSeasonPassItem = Result;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceItem(SeasonStoreInfo.storeId, PremiumSeasonPassItemRequest,
+		THandler<FItemFullInfo>::CreateLambda([this, &bCreatePremiumSeasonSuccess](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Premium Season Pass item succeed"));
+			bCreatePremiumSeasonSuccess = true;
+			PremiumSeasonPassItem = Result;
+		}), SeasonPassOnError);
 	Waiting(bCreatePremiumSeasonSuccess, "Waiting to create premium season pass item...");
 	AB_TEST_TRUE(bCreatePremiumSeasonSuccess);
 
@@ -346,12 +345,12 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateTierSeasonSuccess = false;
-	AdminCreateEcommerceItem(TierSeasonPassItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateTierSeasonSuccess](const FItemFullInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Tier item succeed"));
-		bCreateTierSeasonSuccess = true;
-		TierSeasonPassItem = Result;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceItem(SeasonStoreInfo.storeId, TierSeasonPassItemRequest,
+		THandler<FItemFullInfo>::CreateLambda([this, &bCreateTierSeasonSuccess](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Tier item succeed"));
+			bCreateTierSeasonSuccess = true;
+			TierSeasonPassItem = Result;
+		}), SeasonPassOnError);
 	Waiting(bCreateTierSeasonSuccess, "Waiting to create tier season pass item...");
 	AB_TEST_TRUE(bCreateTierSeasonSuccess);
 
@@ -391,12 +390,12 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateCurrencyItemSuccess = false;
-	AdminCreateEcommerceItem(CurrencyItemRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateCurrencyItemSuccess](const FItemFullInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Currency item succeed"));
-		bCreateCurrencyItemSuccess = true;
-		SeasonCurrencyItemInfo = Result;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceItem(SeasonStoreInfo.storeId, CurrencyItemRequest, 
+		THandler<FItemFullInfo>::CreateLambda([this, &bCreateCurrencyItemSuccess](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Currency item succeed"));
+			bCreateCurrencyItemSuccess = true;
+			SeasonCurrencyItemInfo = Result;
+		}), SeasonPassOnError);
 	Waiting(bCreateCurrencyItemSuccess, "Waiting to create currency item...");
 	AB_TEST_TRUE(bCreateCurrencyItemSuccess);
 
@@ -436,12 +435,12 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		FRecurring{}
 	};
 	bool bCreateItemRewardSuccess = false;
-	AdminCreateEcommerceItem(ItemRewardRequest, SeasonStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([this, &bCreateItemRewardSuccess](const FItemFullInfo& Result)
-	{
-		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Reward Item succeed"));
-		bCreateItemRewardSuccess = true;
-		SeasonRewardItemInfo = Result;
-	}), SeasonPassOnError);
+	AdminCreateEcommerceItem(SeasonStoreInfo.storeId, ItemRewardRequest,
+		THandler<FItemFullInfo>::CreateLambda([this, &bCreateItemRewardSuccess](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Create Reward Item succeed"));
+			bCreateItemRewardSuccess = true;
+			SeasonRewardItemInfo = Result;
+		}), SeasonPassOnError);
 	Waiting(bCreateItemRewardSuccess, "Waiting to create item Reward...");
 	AB_TEST_TRUE(bCreateItemRewardSuccess);
 #pragma endregion SETUP_DRAFT_STORE

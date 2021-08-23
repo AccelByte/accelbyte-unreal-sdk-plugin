@@ -3,221 +3,235 @@
 // and restrictions contact your company contract manager.
 
 #include "EcommerceTestAdmin.h"
+#include "TestUtilities.h"
 
-void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+#pragma region SetupEcommerceCurrency
+
+void SetupEcommerceCurrency(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	/*
-	 Check the currency that expected for integration test. If it's already created, it doesn't need to be created again.
-	 If it doesn't exist, then it will be created.
-	*/
+	 * Check the currency that expected for integration test. If it's already created, it doesn't need to be created again.
+	 * If it doesn't exist, then it will be created.
+	 */
 	bool bCurrencyAlreadyExist = false;
 	bool bCurrencyCreated = false;
 	bool bCurrencyCheckDone = false;
-	AdminGetEcommerceCurrency(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]()
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY is created already."));
+	AdminGetEcommerceCurrency(Variables.ExpectedCurrency.currencyCode,
+		FSimpleDelegate::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCreated, &bCurrencyCheckDone]() {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY is created already"));
 			bCurrencyAlreadyExist = true;
 			bCurrencyCreated = true;
 			bCurrencyCheckDone = true;
-		}), FErrorHandler::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCheckDone](int32 Code, FString Message)
-			{
-				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
-				bCurrencyAlreadyExist = false;
-				bCurrencyCheckDone = true;
-			}));
-	Waiting(bCurrencyCheckDone, "Waiting for currency check...");
+		}),
+		FErrorHandler::CreateLambda([&bCurrencyAlreadyExist, &bCurrencyCheckDone](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY does not exist. Creating..."));
+			bCurrencyAlreadyExist = false;
+			bCurrencyCheckDone = true;
+		}));
+	Waiting(bCurrencyCheckDone, "Waiting for CURRENCY check...");
 
-	if (!bCurrencyAlreadyExist)
-	{
-		AdminCreateEcommerceCurrency(Variables.ExpectedCurrency, FSimpleDelegate::CreateLambda([&bCurrencyCreated]()
-			{
+	if (!bCurrencyAlreadyExist) {
+		bool bWaitingTerminated = false;
+		AdminCreateEcommerceCurrency(Variables.ExpectedCurrency,
+			FSimpleDelegate::CreateLambda([&bCurrencyCreated, &bWaitingTerminated]() {
 				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY is created"));
 				bCurrencyCreated = true;
-			}), FErrorHandler::CreateLambda([&OnError, &bCurrencyCreated](int32 Code, FString Message)
-				{
-					UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY can not be created."));
-					bCurrencyCreated = false;
-					OnError.ExecuteIfBound(Code, Message);
-				}));
-		Waiting(bCurrencyCreated, "Waiting for currency created...");
+				bWaitingTerminated = true;
+			}),
+			FErrorHandler::CreateLambda([&OnError, &bCurrencyCreated, &bWaitingTerminated](int32 Code, const FString& Message) {
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CURRENCY can not be created"));
+				bCurrencyCreated = false;
+				OnError.ExecuteIfBound(Code, Message);
+				bWaitingTerminated = true;
+			}));
+		Waiting(bWaitingTerminated, "Waiting for CURRENCY creation...");
 	}
 
-#if 1 
-	// 2021-7-1 Backend change: only 1 draft store is allowed now
+	if (bCurrencyCreated) {
+		OnSuccess.ExecuteIfBound();
+	}
+}
 
+#pragma endregion SetupEcommerceCurrency
+
+#pragma region SetupEcommerceStore
+
+bool DeleteEcommerceStore(const FSimpleDelegate&, const FErrorHandler& OnError)
+{
 	// Delete published store (if any)
-	bool bPublishedStoreDeleted = false;
+	bool bWaitingTerminated = false;
+	bool bStoreDeleted = false;
 	AdminDeleteEcommercePublishedStore(
-		FSimpleDelegate::CreateLambda([&]()
-			{
-				bPublishedStoreDeleted = true;
-			}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-			{
-				bPublishedStoreDeleted = true;  // Ignore if there is no published store to delete
-			}));
-	Waiting(bPublishedStoreDeleted, "Waiting for published store deletion...");
+		FSimpleDelegate::CreateLambda([&bStoreDeleted, &bWaitingTerminated]() {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: Published STORE is deleted"));
+			bStoreDeleted = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bStoreDeleted, &bWaitingTerminated](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: no Published STORE"));
+			bStoreDeleted = true;  // Ignore if there is no published store to delete
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Published STORE deletion...");
 
 	// Delete ALL draft stores
 	bool bGetAllStoreSuccess = false;
+	bWaitingTerminated = false;
 	TArray<FStoreInfo> GetAllResult;
 	AdminGetEcommerceStoreAll(
-		THandler<TArray<FStoreInfo>>::CreateLambda([&](const TArray<FStoreInfo>& Result)
-			{
-				GetAllResult = Result;
-				bGetAllStoreSuccess = true;
-			}), OnError);
-	Waiting(bGetAllStoreSuccess, "Waiting for get all store...");
-	for (int i = 0; i < GetAllResult.Num(); i++)
-	{
+		THandler<TArray<FStoreInfo>>::CreateLambda([&bGetAllStoreSuccess, &bWaitingTerminated, &GetAllResult](const TArray<FStoreInfo>& Result) {
+			GetAllResult = Result;
+			bGetAllStoreSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE data can not be retrieved"));
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting to retrieve all STORE data...");
+
+	for (int index = 0; index < GetAllResult.Num(); index++) {
 		bool bDeleteTestingStoreSuccess = false;
-		AdminDeleteEcommerceStore(GetAllResult[i].storeId,
-			FSimpleDelegate::CreateLambda([&]()
-				{
-					bDeleteTestingStoreSuccess = true;
-				}), OnError);
-		Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
-	}
-#else
-	/*
-	 Get the published store, obtain the language and region to create another draft store as an archive.
-	 IF there's published store:
-	 * Create a new store
-	 * Clone the published to the store
-	 IF there's no published store: just go on.
-	*/
-	bool bTheresPublishedStore = false;
-	bool bPublishedStoreCheck = false;
-	FStoreInfo PublishedStoreInfo;
-	Ecommerce_PublishedStore_Get(THandler<FStoreInfo>::CreateLambda([&Variables, &bTheresPublishedStore, &PublishedStoreInfo, &bPublishedStoreCheck](const FStoreInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is found"));
-			Variables.ExpectedStoreArchive.defaultLanguage = Result.defaultLanguage;
-			Variables.ExpectedStoreArchive.defaultRegion = Result.defaultRegion;
-			Variables.ExpectedStoreArchive.supportedLanguages = Result.supportedLanguages;
-			Variables.ExpectedStoreArchive.supportedRegions = Result.supportedRegions;
-			PublishedStoreInfo = Result;
-			bTheresPublishedStore = true;
-			bPublishedStoreCheck = true;
-		}), FErrorHandler::CreateLambda([&OnError, &bPublishedStoreCheck](int32 Code, FString Message)
-			{
-				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: PUBLISHED_STORE is not found: %d | %s"), Code, *Message);
-				bPublishedStoreCheck = true;
+		bWaitingTerminated = false;
+		FString StoreId = GetAllResult[index].storeId;
+		AdminDeleteEcommerceStore(StoreId,
+			FSimpleDelegate::CreateLambda([&bDeleteTestingStoreSuccess, &bWaitingTerminated, &StoreId]() {
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE %s is deleted"), *StoreId);
+				bDeleteTestingStoreSuccess = true;
+				bWaitingTerminated = true;
+			}),
+			FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &StoreId](int32 Code, const FString& Message) {
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE %s can not be deleted"), *StoreId);
+				OnError.ExecuteIfBound(Code, Message);
+				bWaitingTerminated = true;
 			}));
-	Waiting(bPublishedStoreCheck, "Waiting for ");
-
-	if (bTheresPublishedStore)
-	{
-		bool bArchiveStoreCreated = false;
-		FStoreInfo CreatedArchiveStoreInfo;
-		Ecommerce_Store_Create(Variables.ExpectedStoreArchive, THandler<FStoreInfo>::CreateLambda([&bArchiveStoreCreated, &CreatedArchiveStoreInfo](const FStoreInfo& Result)
-			{
-				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     ARCHIVE_STORE for PUBLISHED_STORE is created"));
-				CreatedArchiveStoreInfo = Result;
-				bArchiveStoreCreated = true;
-			}), OnError);
-		Waiting(bArchiveStoreCreated, "Waiting for archive store created...");
-		bool bArchiveCloned = false;
-		Ecommerce_Store_Clone(PublishedStoreInfo.storeId, CreatedArchiveStoreInfo.storeId, FSimpleDelegate::CreateLambda([&bArchiveCloned]()
-			{
-				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is cloned to ARCHIVE_STORE"));
-				bArchiveCloned = true;
-			}), OnError);
-		Waiting(bArchiveCloned, "Waiting for archive store cloned...");
-		check(bArchiveStoreCreated);
-		check(bArchiveCloned);
-
-		/*
-		 Try to delete the published store, if failed no problem.
-		*/
-		bool bDeleteStoreDone = false;
-		Ecommerce_PublishedStore_Delete(FSimpleDelegate::CreateLambda([&bDeleteStoreDone]()
-			{
-				bDeleteStoreDone = true;
-				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce:     PUBLISHED_STORE is deleted"));
-			}), FErrorHandler::CreateLambda([&bDeleteStoreDone](int32, FString)
-				{
-					bDeleteStoreDone = true;
-				}));
-
-		WaitUntil([&bDeleteStoreDone]() { return bDeleteStoreDone; }, 5.0, "Waiting for archive store cloned...");
+		Waiting(bWaitingTerminated, "Waiting for STORE deletion...");
+		bStoreDeleted &= bDeleteTestingStoreSuccess;
 	}
-#endif
 
+	return bStoreDeleted;
+}
 
-	/*
-	 Create a new store, for testing purpose, temporary store.
-	*/
-	FStoreInfo CreatedTemporaryStoreInfo;
-	bool bTemporaryStoreCreated = false;
-	AdminCreateEcommerceStore(Variables.ExpectedStoreTemporary, THandler<FStoreInfo>::CreateLambda([&CreatedTemporaryStoreInfo, &bTemporaryStoreCreated](const FStoreInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: TESTING_STORE is created"));
-			CreatedTemporaryStoreInfo = Result;
-			bTemporaryStoreCreated = true;
-		}), OnError);
-	Waiting(bTemporaryStoreCreated, "Waiting for store created...");
-	check(bTemporaryStoreCreated);
+bool CreateEcommerceStore(const FStoreCreateRequest& StoreRequest, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FString& StoreId)
+{
+	// 2021-7-1 Backend change: only 1 draft store is allowed now
+	bool bResult = DeleteEcommerceStore(OnSuccess, OnError);
+	
+	if (bResult) {
+		/*
+		 * Create a new store, for testing purpose, temporary store.
+		 */
+		bool bStoreCreated = false;
+		bool bWaitingTerminated = false;
+		AdminCreateEcommerceStore(StoreRequest,
+			THandler<FStoreInfo>::CreateLambda([&StoreId, &bStoreCreated, &bWaitingTerminated](const FStoreInfo& Result) {
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE is created"));
+				StoreId = Result.storeId;
+				bStoreCreated = true;
+				bWaitingTerminated = true;
+			}),
+			FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated](int32 Code, const FString& Message) {
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE can not be created"));
+				OnError.ExecuteIfBound(Code, Message);
+				bWaitingTerminated = true;
+			}));
+		Waiting(bWaitingTerminated, "Waiting for STORE creation...");
+		bResult &= bStoreCreated;
+	}
 
-	/*
-	 Create root CATEGORY
-	*/
+	return bResult;
+}
+
+bool CreateEcommerceCategory(const FString& StoreId, const FString& CategoryPath, const FString& LanguageCode, const FString& Description, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
 	TMap<FString, FString> Localization;
-	Localization.Add("en", "UE4's ecommerce root category");
-	FCategoryCreateRequest CategoryRequest{ Variables.ExpectedRootCategoryPath, Localization };
-	bool bCreateRootCategorySuccess = false;
-	AdminCreateEcommerceCategory(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateRootCategorySuccess](const FCategoryInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY root is created"));
-			bCreateRootCategorySuccess = true;
-		}), OnError);
-	Waiting(bCreateRootCategorySuccess, "Waiting for root category created...");
-	check(bCreateRootCategorySuccess);
+	Localization.Add(LanguageCode, Description);
+	FCategoryCreateRequest CategoryRequest{ CategoryPath, Localization };
+	bool bCreateCategorySuccess = false;
+	bool bWaitingTerminated = false;
+	AdminCreateEcommerceCategory(StoreId, CategoryRequest,
+		THandler<FCategoryInfo>::CreateLambda([&bCreateCategorySuccess, &bWaitingTerminated, &CategoryPath](const FCategoryInfo& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY %s is created"), *CategoryPath);
+			bCreateCategorySuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CategoryPath](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY %s can not be created"), *CategoryPath);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for CATEGORY creation...");
+
+	return bCreateCategorySuccess;
+}
+
+bool CreateEcommerceItem(const FString& StoreId, const FItemCreateRequest& ItemRequest, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FItemFullInfo& ItemResult)
+{
+	bool bItemCreated = false;
+	bool bWaitingTerminated = false;
+	FString ItemName = ItemRequest.name;
+	AdminCreateEcommerceItem(StoreId, ItemRequest,
+		THandler<FItemFullInfo>::CreateLambda([&bItemCreated, &bWaitingTerminated, &ItemName, &ItemResult](const FItemFullInfo& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM %s is created"), *ItemName);
+			ItemResult = Result;
+			bItemCreated = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated, &OnError, &ItemName](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM %s can not be created"), *ItemName);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for ITEM creation...");
+
+	return bItemCreated;
+}
+
+void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString NewStoreId;
+	if (!CreateEcommerceStore(Variables.ExpectedStoreTemporary, OnSuccess, OnError, NewStoreId)) {
+		return;
+	}
+
+#pragma region SetupEcommerceCategory
+	/*
+	 * Create root CATEGORY
+	 */
+	if (!CreateEcommerceCategory(NewStoreId, Variables.ExpectedRootCategoryPath, TEXT("en"), TEXT("UE4 Ecommerce Root Category"), OnSuccess, OnError)) {
+		return;
+	}
 
 	/*
-	 Create child CATEGORY
-	*/
-	Localization.Reset();
-	Localization.Add("en", "UE4's ecommerce child category");
-	CategoryRequest = FCategoryCreateRequest{ Variables.ExpectedChildCategoryPath, Localization };
-	bool bCreateChildCategorySuccess = false;
-	AdminCreateEcommerceCategory(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateChildCategorySuccess](const FCategoryInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY child is created"));
-			bCreateChildCategorySuccess = true;
-		}), OnError);
-	Waiting(bCreateChildCategorySuccess, "Waiting for child category created...");
-	check(bCreateChildCategorySuccess);
+	 * Create child CATEGORY
+	 */
+	if (!CreateEcommerceCategory(NewStoreId, Variables.ExpectedChildCategoryPath, TEXT("en"), TEXT("UE4 Ecommerce Child Category"), OnSuccess, OnError)) {
+		return;
+	}
 
 	/*
-	 Create grand child CATEGORY
-	*/
-	Localization.Reset();
-	Localization.Add("en", "UE4's ecommerce grand child category");
-	CategoryRequest = FCategoryCreateRequest{ Variables.ExpectedGrandChildCategoryPath, Localization };
-	bool bCreateGrandChildCategorySuccess = false;
-	AdminCreateEcommerceCategory(CategoryRequest, CreatedTemporaryStoreInfo.storeId, THandler<FCategoryInfo>::CreateLambda([&bCreateGrandChildCategorySuccess](const FCategoryInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CATEGORY grandchild is created"));
-			bCreateGrandChildCategorySuccess = true;
-		}), OnError);
-	Waiting(bCreateGrandChildCategorySuccess, "Waiting for grand child category created...");
-	check(bCreateGrandChildCategorySuccess);
+	 * Create grand child CATEGORY
+	 */
+	if (!CreateEcommerceCategory(NewStoreId, Variables.ExpectedGrandChildCategoryPath, TEXT("en"), TEXT("UE4 Ecommerce Grand Child Category"), OnSuccess, OnError)) {
+		return;
+	}
+#pragma endregion
 
-	TArray<FString> emptyStrings;
+#pragma region SetupEcommerceItem
+	TArray<FString> EmptyStrings;
+	FItemFullInfo ItemResult;
 	/*
 	 Create root ITEM
 	*/
-	FLocalization rootLocalization
-	{
+	FLocalization RootLocalization {
 		Variables.ExpectedRootItemTitle,
 		"Root item",
 		"Root item, virtual currency, not free",
 	};
-	TMap<FString, FLocalization> rootLocalizationMap;
-	rootLocalizationMap.Add("en", rootLocalization);
-	FCreateRegionDataItem rootRegionData
-	{
+	TMap<FString, FLocalization> RootLocalizationMap;
+	RootLocalizationMap.Add("en", RootLocalization);
+	FCreateRegionDataItem RootRegionData {
 		1,
 		0,
 		0,
@@ -230,8 +244,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601()
 	};
-	FItemCreateRequest RootItemRequest
-	{
+	FItemCreateRequest RootItemRequest {
 		EAccelByteItemType::INGAMEITEM,
 		EAccelByteSeasonType::PASS, // set as default
 		Variables.ExpectedRootItemTitle,
@@ -244,14 +257,14 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedRootCategoryPath,
-		rootLocalizationMap,
+		RootLocalizationMap,
 		EAccelByteItemStatus::ACTIVE,
-		"sku",
+		"UE4rootSku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
-		FRegionDataUS{{rootRegionData}},
-		emptyStrings,
-		emptyStrings,
+		FRegionDataUS{{RootRegionData}},
+		EmptyStrings,
+		EmptyStrings,
 		-1,
 		-1,
 		"",
@@ -259,28 +272,22 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		"",
 		FRecurring { }
 	};
-	bool bRootItemCreated = false;
-	AdminCreateEcommerceItem(RootItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRootItemCreated](const FItemFullInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM root is created "));
-			bRootItemCreated = true;
-		}), OnError);
-	Waiting(bRootItemCreated, "Waiting for root item created...");
-	check(bRootItemCreated);
+
+	if (!CreateEcommerceItem(NewStoreId, RootItemRequest, OnSuccess, OnError, ItemResult)) {
+		return;
+	}
 
 	/*
 	 Create child ITEM
 	*/
-	FLocalization childLocalization
-	{
+	FLocalization ChildLocalization {
 		Variables.ExpectedChildItemTitle,
 		"Child item",
 		"Child item, real currency, free, USD"
 	};
-	TMap<FString, FLocalization> childLocalizationMap;
-	childLocalizationMap.Add("en", childLocalization);
-	FCreateRegionDataItem childRegionData
-	{
+	TMap<FString, FLocalization> ChildLocalizationMap;
+	ChildLocalizationMap.Add("en", ChildLocalization);
+	FCreateRegionDataItem ChildRegionData {
 		0,
 		0,
 		0,
@@ -293,8 +300,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601()
 	};
-	FItemCreateRequest ChildItemRequest
-	{
+	FItemCreateRequest ChildItemRequest {
 		EAccelByteItemType::COINS,
 		EAccelByteSeasonType::PASS, // set as default
 		Variables.ExpectedChildItemTitle,
@@ -307,14 +313,14 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedChildCategoryPath,
-		childLocalizationMap,
+		ChildLocalizationMap,
 		EAccelByteItemStatus::ACTIVE,
 		"UE4childSku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
-		FRegionDataUS{{childRegionData}},
-		emptyStrings,
-		emptyStrings,
+		FRegionDataUS{{ChildRegionData}},
+		EmptyStrings,
+		EmptyStrings,
 		-1,
 		-1,
 		"",
@@ -322,28 +328,22 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		"classless",
 		FRecurring { }
 	};
-	bool bChildItemCreated = false;
-	AdminCreateEcommerceItem(ChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bChildItemCreated](const FItemFullInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM child is created"));
-			bChildItemCreated = true;
-		}), OnError);
-	Waiting(bChildItemCreated, "Waiting for child item created...");
-	check(bChildItemCreated);
+
+	if (!CreateEcommerceItem(NewStoreId, ChildItemRequest, OnSuccess, OnError, ItemResult)) {
+		return;
+	}
 
 	/*
 	 Create grandchild ITEM
 	*/
-	FLocalization grandchildLocalization
-	{
+	FLocalization GrandChildLocalization {
 		"UE4_GrandChildItem",
 		"Grandchild item",
 		"Grandchild item, real currency, free, USD"
 	};
-	TMap<FString, FLocalization> grandchildLocalizationMap;
-	grandchildLocalizationMap.Add("en", grandchildLocalization);
-	FCreateRegionDataItem grandchildRegionData
-	{
+	TMap<FString, FLocalization> GrandChildLocalizationMap;
+	GrandChildLocalizationMap.Add("en", GrandChildLocalization);
+	FCreateRegionDataItem GrandChildRegionData {
 		0,
 		0,
 		0,
@@ -356,11 +356,10 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601()
 	};
-	FItemCreateRequest grandChildItemRequest
-	{
+	FItemCreateRequest GrandChildItemRequest {
 		EAccelByteItemType::COINS,
 		EAccelByteSeasonType::PASS, // set as default
-		Variables.ExpectedChildItemTitle,
+		Variables.ExpectedGrandChildItemTitle,
 		EAccelByteEntitlementType::CONSUMABLE,
 		10,
 		0,
@@ -370,14 +369,14 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedGrandChildCategoryPath,
-		grandchildLocalizationMap,
+		GrandChildLocalizationMap,
 		EAccelByteItemStatus::ACTIVE,
-		"sku",
+		"UE4grandchildSku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
-		FRegionDataUS{{grandchildRegionData}},
-		emptyStrings,
-		emptyStrings,
+		FRegionDataUS{{GrandChildRegionData}},
+		EmptyStrings,
+		EmptyStrings,
 		-1,
 		-1,
 		"",
@@ -385,28 +384,22 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		"classless",
 		FRecurring { }
 	};
-	bool bGrandchildItemCreated = false;
-	AdminCreateEcommerceItem(grandChildItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bGrandchildItemCreated](const FItemFullInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM grandchild is created"));
-			bGrandchildItemCreated = true;
-		}), OnError);
-	Waiting(bGrandchildItemCreated, "Waiting for grand child item created...");
-	check(bGrandchildItemCreated);
 
-#pragma region CreateRedeemableInGameItem
+	if (!CreateEcommerceItem(NewStoreId, GrandChildItemRequest, OnSuccess, OnError, ItemResult)) {
+		return;
+	}
+#pragma endregion
 
-	FLocalization redeemableItemLocalization
-	{
+#pragma region SetupEcommerceRedeemableInGameItem
+	FLocalization RedeemableItemLocalization {
 		Variables.redeemableItemTitle,
 		"Redeemable item",
 		"Redeemable item, virtual currency, free"
 	};
-	TMap<FString, FLocalization> redeemableItemLocalizations;
-	redeemableItemLocalizations.Add("en", redeemableItemLocalization);
+	TMap<FString, FLocalization> RedeemableItemLocalizations;
+	RedeemableItemLocalizations.Add("en", RedeemableItemLocalization);
 
-	FCreateRegionDataItem redeemableItemRegionData
-	{
+	FCreateRegionDataItem RedeemableItemRegionData {
 		0,
 		0,
 		0,
@@ -419,8 +412,7 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		FDateTime::UtcNow().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601()
 	};
-	FItemCreateRequest redeemableItemRequest
-	{
+	FItemCreateRequest RedeemableItemRequest {
 		EAccelByteItemType::INGAMEITEM,
 		EAccelByteSeasonType::PASS, // set as default
 		Variables.redeemableItemTitle,
@@ -433,69 +425,183 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		Variables.ExpectedCurrency.currencyCode,
 		FRegistry::Settings.Namespace,
 		Variables.ExpectedRootCategoryPath,
-		redeemableItemLocalizations,
+		RedeemableItemLocalizations,
 		EAccelByteItemStatus::ACTIVE,
-		"skuReedemableItem",
+		"UE4reedemableSku",
 		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
 		"",
-		FRegionDataUS{{redeemableItemRegionData}},
-		emptyStrings,
-		emptyStrings,
+		FRegionDataUS{{RedeemableItemRegionData}},
+		EmptyStrings,
+		EmptyStrings,
 		-1,
 		-1,
 		"",
 		0,
 		"classless"
 	};
-	bool bRedeemableItemCreated = false;
-	AdminCreateEcommerceItem(redeemableItemRequest, CreatedTemporaryStoreInfo.storeId, THandler<FItemFullInfo>::CreateLambda([&bRedeemableItemCreated, &Variables](const FItemFullInfo& Result)
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: ITEM redeemable is created"));
-			Variables.redeemableItem = Result;
-			bRedeemableItemCreated = true;
-		}), OnError);
-	Waiting(bRedeemableItemCreated, "Waiting for child item created...");
-	check(bRedeemableItemCreated);
+
+	if (!CreateEcommerceItem(NewStoreId, RedeemableItemRequest, OnSuccess, OnError, Variables.redeemableItem)) {
+		return;
+	}
 #pragma endregion
 
 	/*
-	 Publish this store, CreatedTemporaryStoreInfo.
-	*/
+	 * Publish this store, CreatedTemporaryStoreInfo.
+	 */
 	bool bPublishTemporaryStoreSuccess = false;
-	AdminCloneEcommerceStore(CreatedTemporaryStoreInfo.storeId, "", FSimpleDelegate::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: TESTING_STORE is published"));
+	bool bWaitingTerminated = false;
+	AdminCloneEcommerceStore(NewStoreId, "",
+		FSimpleDelegate::CreateLambda([&bPublishTemporaryStoreSuccess, &bWaitingTerminated, &NewStoreId]() {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE %s is published"), *NewStoreId);
 			bPublishTemporaryStoreSuccess = true;
-		}), OnError);
-	Waiting(bPublishTemporaryStoreSuccess, "Waiting for publish temp store...");
-	check(bPublishTemporaryStoreSuccess);
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &NewStoreId](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: STORE %s can not be published"), *NewStoreId);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for publishing STORE...");
 
+	if (!bPublishTemporaryStoreSuccess) {
+		return;
+	}
 
-#pragma region CreateCampaign
+	OnSuccess.ExecuteIfBound();
+}
+
+#pragma endregion
+
+#pragma region SetupEcommerceCampaign
+
+bool GetEcommerceCampaignByName(const FString& Name, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FCampaignPagingSlicedResult& Campaigns)
+{
 	bool bGetCampaignSuccess = false;
+	bool bWaitingTerminated = false;
+	AdminGetEcommerceCampaignByName(Name,
+		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetCampaignSuccess, &bWaitingTerminated, &Campaigns, &Name](const FCampaignPagingSlicedResult& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s is retrieved"), *Name);
+			Campaigns = Result;
+			bGetCampaignSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &Name](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s can not be retrieved"), *Name);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting to retrieve CAMPAIGN Info...");
+
+	return bGetCampaignSuccess;
+}
+
+bool CreateEcommerceCampaign(const FCampaignCreateModel& CampaignCreateRequest, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FCampaignInfo& CampaignInfo)
+{
+	bool bCreateCampaignSuccess = false;
+	bool bWaitingTerminated = false;
+	FString CampaignName = CampaignCreateRequest.name;
+	AdminCreateEcommerceCampaign(CampaignCreateRequest,
+		THandler<FCampaignInfo>::CreateLambda([&bCreateCampaignSuccess, &bWaitingTerminated, &CampaignInfo, &CampaignName](const FCampaignInfo& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s is created"), *CampaignName);
+			CampaignInfo = Result;
+			bCreateCampaignSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CampaignName](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s can not be created"), *CampaignName);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for CAMPAIGN Created...");
+
+	return bCreateCampaignSuccess;
+}
+
+bool UpdateEcommerceCampaign(const FString CampaignId, const FCampaignUpdateModel& CampaignUpdateRequest, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FCampaignInfo& CampaignInfo)
+{
+	bool bUpdateCampaignSuccess = false;
+	bool bWaitingTerminated = false;
+	FString CampaignName = CampaignUpdateRequest.name;
+	AdminUpdateEcommerceCampaign(CampaignId, CampaignUpdateRequest,
+		THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &bWaitingTerminated, &CampaignInfo, &CampaignName](const FCampaignInfo& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s is updated"), *CampaignName);
+			CampaignInfo = Result;
+			bUpdateCampaignSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CampaignName](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN %s can not be updated"), *CampaignName);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Campaign Update...");
+
+	return bUpdateCampaignSuccess;
+}
+
+bool GetEcommerceCampaignCode(const FString CampaignId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FCodeInfoPagingSlicedResult& CampaignCodesResult)
+{
+	bool bGetCampaignCodesSuccess = false;
+	bool bWaitingTerminated = false;
+	AdminGetEcommerceCampaignCodes(CampaignId,
+		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetCampaignCodesSuccess, &bWaitingTerminated, &CampaignCodesResult, &CampaignId](const FCodeInfoPagingSlicedResult& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN CODES for CAMPAIGN ID %s is retrieved"), *CampaignId);
+			CampaignCodesResult = Result;
+			bGetCampaignCodesSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CampaignId](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN CODES for CAMPAIGN ID %s can not be retrieved"), *CampaignId);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting to retrieve CAMPAIGN CODES...");
+
+	return bGetCampaignCodesSuccess;
+}
+
+bool CreateEcommerceCampaignCode(const FString CampaignId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, FCampaignCodeCreateResult& CampaignCodeResult)
+{
+	bool bCreateCampaignCodeSuccess = false;
+	bool bWaitingTerminated = false;
+	FCampaignCodeCreateModel CampaignCodeCreate = FCampaignCodeCreateModel{ 1 };
+	AdminCreateEcommerceCampaignCodes(CampaignId, CampaignCodeCreate,
+		THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateCampaignCodeSuccess, &bWaitingTerminated, &CampaignCodeResult, &CampaignId](const FCampaignCodeCreateResult& Result) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN CODE for CAMPAIGN ID %s is created"), *CampaignId);
+			CampaignCodeResult = Result;
+			bCreateCampaignCodeSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CampaignId](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: CAMPAIGN CODE for CAMPAIGN ID %s can not be created"), *CampaignId);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for CAMPAIGN CODE creation...");
+
+	return bCreateCampaignCodeSuccess;
+}
+
+void SetupEcommerceCampaign(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+#pragma region CreateCampaign
 	FCampaignPagingSlicedResult GetCampaignResult;
-	AdminGetEcommerceCampaignByName(
-		Variables.campaignName,
-		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result)
-			{
-				GetCampaignResult = Result;
-				bGetCampaignSuccess = true;
-			}), OnError);
-	Waiting(bGetCampaignSuccess, "Waiting for get Campaign Info...");
 
-	check(bGetCampaignSuccess);
+	/*
+	 * Setup standard campaign
+	 */
+	if (!GetEcommerceCampaignByName(Variables.campaignName, OnSuccess, OnError, GetCampaignResult)) {
+		return;
+	}
 
-	FRedeemableItem redeemableItem = FRedeemableItem
-	{
+	FRedeemableItem RedeemableItem = FRedeemableItem {
 		Variables.redeemableItem.itemId,
 		Variables.redeemableItemTitle,
 		1
 	};
 
-	if (GetCampaignResult.data.Num() == 0)
-	{
-		FCampaignCreateModel campaignCreate
-		{
+	if (GetCampaignResult.data.Num() == 0) {
+		FCampaignCreateModel CampaignCreate {
 			Variables.campaignName,
 			"UE4 Campaign Test",
 			TArray<FString>(),
@@ -507,25 +613,14 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			FDateTime::UtcNow().ToIso8601(),
 			FDateTime::MaxValue().ToIso8601(),
 			"ITEM",
-			TArray<FRedeemableItem>{ redeemableItem }
+			TArray<FRedeemableItem>{ RedeemableItem }
 		};
 
-		bool bCreateCampaignSuccess = false;
-		AdminCreateEcommerceCampaign(
-			campaignCreate,
-			THandler<FCampaignInfo>::CreateLambda([&bCreateCampaignSuccess, &Variables](const FCampaignInfo& Result)
-				{
-					Variables.campaignResult = Result;
-					bCreateCampaignSuccess = true;
-				}), OnError);
-		Waiting(bCreateCampaignSuccess, "Waiting for Campaign Created...");
-
-		check(bCreateCampaignSuccess);
-	}
-	else
-	{
-		FCampaignUpdateModel campaignUpdate
-		{
+		if (!CreateEcommerceCampaign(CampaignCreate, OnSuccess, OnError, Variables.campaignResult)) {
+			return;
+		}
+	} else {
+		FCampaignUpdateModel CampaignUpdate {
 			Variables.campaignName,
 			"UE4 Campaign Test",
 			TArray<FString>(),
@@ -537,39 +632,23 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			FDateTime::UtcNow().ToIso8601(),
 			FDateTime::MaxValue().ToIso8601(),
 			"ITEM",
-			TArray<FRedeemableItem>{ redeemableItem }
+			TArray<FRedeemableItem>{ RedeemableItem }
 		};
 
-		bool bUpdateCampaignSuccess = false;
-		AdminUpdateEcommerceCampaign(
-			GetCampaignResult.data[0].id,
-			campaignUpdate,
-			THandler<FCampaignInfo>::CreateLambda([&bUpdateCampaignSuccess, &Variables](const FCampaignInfo& Result)
-				{
-					Variables.campaignResult = Result;
-					bUpdateCampaignSuccess = true;
-				}), OnError);
-		Waiting(bUpdateCampaignSuccess, "Waiting for Campaign Update...");
-
-		check(bUpdateCampaignSuccess);
+		if (!UpdateEcommerceCampaign(GetCampaignResult.data[0].id, CampaignUpdate, OnSuccess, OnError, Variables.campaignResult)) {
+			return;
+		}
 	}
 
-	bGetCampaignSuccess = false;
-	AdminGetEcommerceCampaignByName(
-		Variables.expiredCampaignName,
-		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result)
-			{
-				GetCampaignResult = Result;
-				bGetCampaignSuccess = true;
-			}), OnError);
-	Waiting(bGetCampaignSuccess, "Waiting for get Campaign Info...");
+	/*
+	 * Setup expired campaign
+	 */
+	if (!GetEcommerceCampaignByName(Variables.expiredCampaignName, OnSuccess, OnError, GetCampaignResult)) {
+		return;
+	}
 
-	check(bGetCampaignSuccess);
-
-	if (GetCampaignResult.data.Num() == 0)
-	{
-		FCampaignCreateModel campaignCreate
-		{
+	if (GetCampaignResult.data.Num() == 0) {
+		FCampaignCreateModel CampaignCreate {
 			Variables.expiredCampaignName,
 			"UE4 Expired Campaign Test",
 			TArray<FString>(),
@@ -584,39 +663,22 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			TArray<FRedeemableItem>()
 		};
 
-		bool bCreateExpiredCampaignSuccess = false;
-		AdminCreateEcommerceCampaign(
-			campaignCreate,
-			THandler<FCampaignInfo>::CreateLambda([&bCreateExpiredCampaignSuccess, &Variables](const FCampaignInfo& Result)
-				{
-					Variables.expiredCampaignResult = Result;
-					bCreateExpiredCampaignSuccess = true;
-				}), OnError);
-		Waiting(bCreateExpiredCampaignSuccess, "Waiting for Campaign Created...");
-
-		check(bCreateExpiredCampaignSuccess);
-	}
-	else
-	{
+		if (!CreateEcommerceCampaign(CampaignCreate, OnSuccess, OnError, Variables.expiredCampaignResult)) {
+			return;
+		}
+	} else {
 		Variables.expiredCampaignResult = GetCampaignResult.data[0];
 	}
 
-	bool bGetNotStartedCampaignSuccess = false;
-	AdminGetEcommerceCampaignByName(
-		Variables.notStartedCampaignName,
-		THandler<FCampaignPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignSuccess, &GetCampaignResult](const FCampaignPagingSlicedResult& Result)
-			{
-				GetCampaignResult = Result;
-				bGetNotStartedCampaignSuccess = true;
-			}), OnError);
-	Waiting(bGetNotStartedCampaignSuccess, "Waiting for get Campaign Info...");
+	/*
+	 * Setup not started campaign
+	 */
+	if (!GetEcommerceCampaignByName(Variables.notStartedCampaignName, OnSuccess, OnError, GetCampaignResult)) {
+		return;
+	}
 
-	check(bGetNotStartedCampaignSuccess);
-
-	if (GetCampaignResult.data.Num() == 0)
-	{
-		FCampaignCreateModel campaignCreate
-		{
+	if (GetCampaignResult.data.Num() == 0) {
+		FCampaignCreateModel CampaignCreate {
 			Variables.notStartedCampaignName,
 			"UE4 Not Started Campaign Test",
 			TArray<FString>(),
@@ -630,55 +692,31 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 			"ITEM",
 			TArray<FRedeemableItem>()
 		};
-		bool bCreateNotStartedCampaignSuccess = false;
-		AdminCreateEcommerceCampaign(
-			campaignCreate,
-			THandler<FCampaignInfo>::CreateLambda([&bCreateNotStartedCampaignSuccess, &Variables](const FCampaignInfo& Result)
-				{
-					Variables.notStartedCampaignResult = Result;
-					bCreateNotStartedCampaignSuccess = true;
-				}), OnError);
-		Waiting(bCreateNotStartedCampaignSuccess, "Waiting for Campaign Created...");
 
-		check(bCreateNotStartedCampaignSuccess);
-	}
-	else
-	{
+		if (!CreateEcommerceCampaign(CampaignCreate, OnSuccess, OnError, Variables.notStartedCampaignResult)) {
+			return;
+		}
+	} else {
 		Variables.notStartedCampaignResult = GetCampaignResult.data[0];
 	}
-#pragma endregion CreateCampaign
+#pragma endregion
 
 #pragma region CreateCampaignCode
+	FCampaignCodeCreateResult CreateCampaignCodeResult;
+	if (!CreateEcommerceCampaignCode(Variables.campaignResult.id, OnSuccess, OnError, CreateCampaignCodeResult)) {
+		return;
+	}
 
-	FCampaignCodeCreateModel campaignCodesCreate = FCampaignCodeCreateModel{ 1 };
-	FCampaignCodeCreateResult createCampaignCodesResult;
-	bool bCreateCampaignCodesSuccess = false;
-	AdminCreateEcommerceCampaignCodes(
-		Variables.campaignResult.id,
-		campaignCodesCreate,
-		THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result)
-			{
-				createCampaignCodesResult = Result;
-				bCreateCampaignCodesSuccess = true;
-			}), OnError);
-	Waiting(bCreateCampaignCodesSuccess, "Waiting fore create Campaign Code...");
+	FCodeInfoPagingSlicedResult GetCampaignCodesResult;
 
-	check(bCreateCampaignCodesSuccess);
+	/*
+	 * Process standard campaign code
+	 */
+	if (!GetEcommerceCampaignCode(Variables.campaignResult.id, OnSuccess, OnError, GetCampaignCodesResult)) {
+		return;
+	}
 
-	FCodeInfoPagingSlicedResult getCampaignCodesResult;
-	bool bGetCampaignCodeSuccess = false;
-	AdminGetEcommerceCampaignCodes(
-		Variables.campaignResult.id,
-		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result)
-			{
-				getCampaignCodesResult = Result;
-				bGetCampaignCodeSuccess = true;
-			}), OnError);
-	Waiting(bGetCampaignCodeSuccess, "Waiting for Get Campaign Code...");
-
-	check(bGetCampaignCodeSuccess);
-
-	for (auto codeInfo : getCampaignCodesResult.data)
+	for (auto codeInfo : GetCampaignCodesResult.data)
 	{
 		bool bCodeFound = false;
 		for (auto codeItem : codeInfo.items)
@@ -693,171 +731,170 @@ void SetupEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate&
 		if (bCodeFound) break;
 	}
 
-	check(!Variables.codeInfo.id.IsEmpty());
-
-	bool bGetExpiredCampaignCodeSuccess = false;
-	AdminGetEcommerceCampaignCodes(
-		Variables.expiredCampaignResult.id,
-		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetExpiredCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result)
-			{
-				getCampaignCodesResult = Result;
-				bGetExpiredCampaignCodeSuccess = true;
-			}), OnError);
-	Waiting(bGetExpiredCampaignCodeSuccess, "Waiting for Get Campaign Code...");
-
-	check(bGetExpiredCampaignCodeSuccess);
-
-	if (getCampaignCodesResult.data.Num() == 0)
-	{
-		bool bCreateExpiredCampaignCodesSuccess = false;
-		AdminCreateEcommerceCampaignCodes(
-			Variables.expiredCampaignResult.id,
-			campaignCodesCreate,
-			THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateExpiredCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result)
-				{
-					createCampaignCodesResult = Result;
-					bCreateExpiredCampaignCodesSuccess = true;
-				}), OnError);
-		Waiting(bCreateExpiredCampaignCodesSuccess, "Waiting fore create Campaign Code...");
-
-		check(bCreateExpiredCampaignCodesSuccess);
-
-		bGetExpiredCampaignCodeSuccess = false;
-		AdminGetEcommerceCampaignCodes(
-			Variables.expiredCampaignResult.id,
-			THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetExpiredCampaignCodeSuccess, &getCampaignCodesResult, &Variables](const FCodeInfoPagingSlicedResult& Result)
-				{
-					getCampaignCodesResult = Result;
-					Variables.expiredCodeInfo = getCampaignCodesResult.data[0];
-					bGetExpiredCampaignCodeSuccess = true;
-				}), OnError);
-		Waiting(bGetExpiredCampaignCodeSuccess, "Waiting for Get Campaign Code...");
-
-		check(bGetExpiredCampaignCodeSuccess);
-	}
-	else
-	{
-		Variables.expiredCodeInfo = getCampaignCodesResult.data[0];
+	if (Variables.codeInfo.id.IsEmpty()) {
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupEcommerce: couldn't find CAMPAIGN CODE for CAMPAIGN ID %s"), *Variables.campaignResult.id);
+		int32 ErrorCode = static_cast<int32>(AccelByte::ErrorCodes::UnknownError);
+		OnError.ExecuteIfBound(ErrorCode, AccelByte::ErrorMessages::Default.at(ErrorCode));
+		return;
 	}
 
-	bool bGetNotStartedCampaignCodeSuccess = false;
-	AdminGetEcommerceCampaignCodes(
-		Variables.notStartedCampaignResult.id,
-		THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignCodeSuccess, &getCampaignCodesResult](const FCodeInfoPagingSlicedResult& Result)
-			{
-				getCampaignCodesResult = Result;
-				bGetNotStartedCampaignCodeSuccess = true;
-			}), OnError);
-	Waiting(bGetNotStartedCampaignCodeSuccess, "Waiting for Get Campaign Code...");
-
-	check(bGetExpiredCampaignCodeSuccess);
-
-	if (getCampaignCodesResult.data.Num() == 0)
-	{
-		bool bCreateNotStartedCampaignCodesSuccess = false;
-		AdminCreateEcommerceCampaignCodes(
-			Variables.notStartedCampaignResult.id,
-			campaignCodesCreate,
-			THandler<FCampaignCodeCreateResult>::CreateLambda([&bCreateNotStartedCampaignCodesSuccess, &createCampaignCodesResult](const FCampaignCodeCreateResult& Result)
-				{
-					createCampaignCodesResult = Result;
-					bCreateNotStartedCampaignCodesSuccess = true;
-				}), OnError);
-		Waiting(bCreateNotStartedCampaignCodesSuccess, "Waiting fore create Campaign Code...");
-
-		check(bCreateNotStartedCampaignCodesSuccess);
-
-		bGetNotStartedCampaignCodeSuccess = false;
-		AdminGetEcommerceCampaignCodes(
-			Variables.notStartedCampaignResult.id,
-			THandler<FCodeInfoPagingSlicedResult>::CreateLambda([&bGetNotStartedCampaignCodeSuccess, &getCampaignCodesResult, &Variables](const FCodeInfoPagingSlicedResult& Result)
-				{
-					getCampaignCodesResult = Result;
-					Variables.notStartedCodeInfo = getCampaignCodesResult.data[0];
-					bGetNotStartedCampaignCodeSuccess = true;
-				}), OnError);
-		Waiting(bGetNotStartedCampaignCodeSuccess, "Waiting for Get Campaign Code...");
-
-		check(bGetNotStartedCampaignCodeSuccess);
+	/*
+	 * Process expired campaign code
+	 */
+	if (!GetEcommerceCampaignCode(Variables.expiredCampaignResult.id, OnSuccess, OnError, GetCampaignCodesResult)) {
+		return;
 	}
-	else
-	{
-		Variables.notStartedCodeInfo = getCampaignCodesResult.data[0];
+
+	if (GetCampaignCodesResult.data.Num() == 0) {
+		if (!CreateEcommerceCampaignCode(Variables.expiredCampaignResult.id, OnSuccess, OnError, CreateCampaignCodeResult)) {
+			return;
+		}
+
+		if (!GetEcommerceCampaignCode(Variables.expiredCampaignResult.id, OnSuccess, OnError, GetCampaignCodesResult)) {
+			return;
+		}
 	}
-#pragma endregion CreateCampaignCode
+		
+	Variables.expiredCodeInfo = GetCampaignCodesResult.data[0];
+
+	/*
+	 * Process not started campaign code
+	 */
+	if (!GetEcommerceCampaignCode(Variables.notStartedCampaignResult.id, OnSuccess, OnError, GetCampaignCodesResult)) {
+		return;
+	}
+
+	if (GetCampaignCodesResult.data.Num() == 0) {
+		if (!CreateEcommerceCampaignCode(Variables.notStartedCampaignResult.id, OnSuccess, OnError, CreateCampaignCodeResult)) {
+			return;
+		}
+
+		if (!GetEcommerceCampaignCode(Variables.notStartedCampaignResult.id, OnSuccess, OnError, GetCampaignCodesResult)) {
+			return;
+		}
+	}
+
+	Variables.notStartedCodeInfo = GetCampaignCodesResult.data[0];
+#pragma endregion
+
 	OnSuccess.ExecuteIfBound();
 }
+
+#pragma endregion
 
 void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	// Delete testing currency
 	bool bCurrencyDeleted = false;
-	AdminDeleteEcommerceCurrency(Variables.ExpectedCurrency.currencyCode, FSimpleDelegate::CreateLambda([&bCurrencyDeleted]()
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: CURRENCY is deleted"));
+	bool bWaitingTerminated = false;
+	FString CurrencyCode = Variables.ExpectedCurrency.currencyCode;
+	AdminDeleteEcommerceCurrency(CurrencyCode,
+		FSimpleDelegate::CreateLambda([&bCurrencyDeleted, &bWaitingTerminated, &CurrencyCode]() {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: CURRENCY %s is deleted"), *CurrencyCode);
 			bCurrencyDeleted = true;
-		}), OnError);
-	Waiting(bCurrencyDeleted, "Waiting for currency deletion...");
-	check(bCurrencyDeleted);
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&OnError, &bWaitingTerminated, &CurrencyCode](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: CURRENCY %s can not be deleted"), *CurrencyCode);
+			OnError.ExecuteIfBound(Code, Message);
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for CURRENCY deletion...");
+
+	if (!bCurrencyDeleted) {
+		return;
+	}
 
 	// Delete published testing store
 	bool bPublishedStoreDeleted = false;
-	AdminDeleteEcommercePublishedStore(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted]()
-		{
-			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: TESTING_STORE (PUBLISHED_STORE) is deleted"));
+	bWaitingTerminated = false;
+	AdminDeleteEcommercePublishedStore(FSimpleDelegate::CreateLambda([&bPublishedStoreDeleted, &bWaitingTerminated]() {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Published STORE is deleted"));
 			bPublishedStoreDeleted = true;
-		}), nullptr);
-	Waiting(bPublishedStoreDeleted, "Waiting for published store deletion...");
-	check(bPublishedStoreDeleted);
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Published STORE %s can not be deleted"));
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting for Published STORE deletion...");
+
+	if (!bPublishedStoreDeleted) {
+		return;
+	}
 
 	// Fetch all store
 	bool bGetAllStoreSuccess = false;
+	bWaitingTerminated = false;
 	TArray<FStoreInfo> GetAllResult;
-	AdminGetEcommerceStoreAll(THandler<TArray<FStoreInfo>>::CreateLambda([&bGetAllStoreSuccess, &GetAllResult](const TArray<FStoreInfo>& Result)
-		{
+	AdminGetEcommerceStoreAll(THandler<TArray<FStoreInfo>>::CreateLambda([&bGetAllStoreSuccess, &bWaitingTerminated, &GetAllResult](const TArray<FStoreInfo>& Result) {
 			GetAllResult = Result;
 			bGetAllStoreSuccess = true;
-		}), OnError);
-	Waiting(bGetAllStoreSuccess, "Waiting for get all store...");
-	for (int i = 0; i < GetAllResult.Num(); i++)
-	{
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Published STORE %s can not be deleted"));
+			bWaitingTerminated = true;
+		}));
+	Waiting(bWaitingTerminated, "Waiting to retrieve all STORE data...");
+
+	for (int index = 0; index < GetAllResult.Num(); index++) {
+		bWaitingTerminated = false;
+		FString StoreId = GetAllResult[index].storeId;
 		// PUBLISH then DELETE the Archive
-		if (GetAllResult[i].title == Variables.ExpectedStoreArchive.title)
-		{
+		if (GetAllResult[index].title == Variables.ExpectedStoreArchive.title) {
+			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE is found"));
 			bool bRestorePublishedStore = false;
-			UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: ARCHIVE_STORE is found"));
-			AdminCloneEcommerceStore(GetAllResult[i].storeId, "", FSimpleDelegate::CreateLambda([&bRestorePublishedStore]()
-				{
-					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is published / restored again"));
+			AdminCloneEcommerceStore(StoreId, "", 
+				FSimpleDelegate::CreateLambda([&bRestorePublishedStore, &bWaitingTerminated, &StoreId]() {
+					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s is published / restored again"), *StoreId);
 					bRestorePublishedStore = true;
-				}), nullptr);
-			Waiting(bRestorePublishedStore, "Waiting for published store restored...");
+					bWaitingTerminated = true;
+				}),
+				FErrorHandler::CreateLambda([&bWaitingTerminated, &StoreId](int32 Code, const FString& Message) {
+					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s can not be published / restored again"), *StoreId);
+					bWaitingTerminated = true;
+				}));
+			Waiting(bWaitingTerminated, "Waiting for Published STORE restored...");
+
 			bool bArchiveStoreDeleteSuccess = false;
-			AdminDeleteEcommerceStore(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bArchiveStoreDeleteSuccess]()
-				{
-					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     ARCHIVE_STORE is deleted"));
+			bWaitingTerminated = false;
+			AdminDeleteEcommerceStore(StoreId, 
+				FSimpleDelegate::CreateLambda([&bArchiveStoreDeleteSuccess, &bWaitingTerminated, &StoreId]() {
+					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s is deleted"), *StoreId);
 					bArchiveStoreDeleteSuccess = true;
-				}), nullptr);
-			Waiting(bArchiveStoreDeleteSuccess, "Waiting for archive store deletion...");
-		}
-		else // DELETE all testing store
-			if (GetAllResult[i].title == Variables.ExpectedStoreTemporary.title)
-			{
+					bWaitingTerminated = true;
+				}),
+				FErrorHandler::CreateLambda([&bWaitingTerminated, &StoreId](int32 Code, const FString& Message) {
+					UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: Archive STORE %s can not be deleted"), *StoreId);
+					bWaitingTerminated = true;
+				}));
+			Waiting(bWaitingTerminated, "Waiting for Archive STORE deletion...");
+		} else {
+			// DELETE all testing store
+			if (GetAllResult[index].title == Variables.ExpectedStoreTemporary.title) {
+				UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: STORE is found"));
 				bool bDeleteTestingStoreSuccess = false;
-				UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: TESTING_STORE is found"));
-				AdminDeleteEcommerceStore(GetAllResult[i].storeId, FSimpleDelegate::CreateLambda([&bDeleteTestingStoreSuccess]()
-					{
-						UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce:     TESTING_STORE is deleted"));
+				bWaitingTerminated = false;
+				AdminDeleteEcommerceStore(StoreId, 
+					FSimpleDelegate::CreateLambda([&bDeleteTestingStoreSuccess, &bWaitingTerminated, &StoreId]() {
+						UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: STORE %s is deleted"), *StoreId);
 						bDeleteTestingStoreSuccess = true;
-					}), nullptr);
-				Waiting(bDeleteTestingStoreSuccess, "Waiting for testing store deletion...");
+						bWaitingTerminated = true;
+					}),
+					FErrorHandler::CreateLambda([&bWaitingTerminated, &StoreId](int32 Code, const FString& Message) {
+						UE_LOG(LogAccelByteTest, Log, TEXT("TeardownEcommerce: STORE %s can not be deleted"), *StoreId);
+						bWaitingTerminated = true;
+					}));
+				Waiting(bWaitingTerminated, "Waiting for STORE deletion...");
 			}
+		}
 	}
 
 	OnSuccess.ExecuteIfBound();
 }
 
-void AdminCreateEcommerceCurrency(FCurrencyCreateRequest Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceCurrency(const FCurrencyCreateRequest& Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
@@ -867,7 +904,7 @@ void AdminCreateEcommerceCurrency(FCurrencyCreateRequest Currency, const FSimple
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminGetEcommerceCurrency(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminGetEcommerceCurrency(const FString& CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s/summary"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CurrencyCode);
@@ -875,7 +912,7 @@ void AdminGetEcommerceCurrency(FString CurrencyCode, const FSimpleDelegate& OnSu
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminDeleteEcommerceCurrency(FString CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteEcommerceCurrency(const FString& CurrencyCode, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/currencies/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CurrencyCode);
@@ -905,7 +942,7 @@ void AdminDeleteEcommercePublishedStore(const FSimpleDelegate& OnSuccess, const 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCreateEcommerceStore(const FString& Namespace, FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceStore(const FString& Namespace, const FStoreCreateRequest& Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores"), *GetAdminBaseUrl(), *Namespace);
@@ -915,7 +952,7 @@ void AdminCreateEcommerceStore(const FString& Namespace, FStoreCreateRequest Sto
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCreateEcommerceStore(FStoreCreateRequest Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceStore(const FStoreCreateRequest& Store, const THandler<FStoreInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Namespace = *FRegistry::Settings.Namespace;
 	AdminCreateEcommerceStore(Namespace, Store, OnSuccess, OnError);
@@ -934,7 +971,7 @@ void AdminGetEcommerceStoreAll(const THandler<TArray<FStoreInfo>>& OnSuccess, co
 	AdminGetEcommerceStoreAll(FRegistry::Settings.Namespace, OnSuccess, OnError);
 }
 
-void AdminDeleteEcommerceStore(FString StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminDeleteEcommerceStore(const FString& StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *StoreId);
@@ -942,7 +979,7 @@ void AdminDeleteEcommerceStore(FString StoreId, const FSimpleDelegate& OnSuccess
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCloneEcommerceStore(const FString& Namespace, FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminCloneEcommerceStore(const FString& Namespace, const FString& Source, const FString& Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/stores/%s/clone%s"), *GetAdminBaseUrl(), *Namespace, *Source, *((Target != "") ? "?targetStoreId=" + Target : ""));
@@ -951,13 +988,13 @@ void AdminCloneEcommerceStore(const FString& Namespace, FString Source, FString 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCloneEcommerceStore(FString Source, FString Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+void AdminCloneEcommerceStore(const FString& Source, const FString& Target, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Namespace = *FRegistry::Settings.Namespace;
 	AdminCloneEcommerceStore(Namespace, Source, Target, OnSuccess, OnError);
 }
 
-void AdminCreateEcommerceCategory(FCategoryCreateRequest Category, FString StoreId, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceCategory(const FString& StoreId, const FCategoryCreateRequest& Category, const THandler<FCategoryInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/categories?storeId=%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *StoreId);
@@ -967,13 +1004,13 @@ void AdminCreateEcommerceCategory(FCategoryCreateRequest Category, FString Store
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCreateEcommerceItem(FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceItem(const FString& StoreId, const FItemCreateRequest& Item, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Namespace = *FRegistry::Settings.Namespace;
-	AdminCreateEcommerceItem(Namespace, Item, StoreId, OnSuccess, OnError);
+	AdminCreateEcommerceItem(Namespace, StoreId, Item, OnSuccess, OnError);
 }
 
-void AdminCreateEcommerceItem(const FString& Namespace, FItemCreateRequest Item, FString StoreId, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceItem(const FString& Namespace, const FString& StoreId, const FItemCreateRequest& Item, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items?storeId=%s"), *GetAdminBaseUrl(), *Namespace, *StoreId);
@@ -985,7 +1022,7 @@ void AdminCreateEcommerceItem(const FString& Namespace, FItemCreateRequest Item,
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminGetEcommerceItemBySKU(const FString& Namespace, const FString& StoreId, const FString& SKU, const bool& ActiveOnly, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetEcommerceItemBySKU(const FString& Namespace, const FString& StoreId, const FString& SKU, bool ActiveOnly, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items/bySku?storeId=%s&sku=%s&activeOnly=%s"), *GetAdminBaseUrl(), *Namespace, *StoreId, *SKU, ActiveOnly ? TEXT("true") : TEXT("false"));
@@ -1016,58 +1053,58 @@ void AdminGrantEcommerceUserEntitlements(const FString& Namespace, const FString
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCreateEcommerceCampaign(FCampaignCreateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceCampaign(const FCampaignCreateModel& Body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminUpdateEcommerceCampaign(FString campaignId, FCampaignUpdateModel body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminUpdateEcommerceCampaign(const FString& CampaignId, const FCampaignUpdateModel& Body, const THandler<FCampaignInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CampaignId);
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
 	AB_HTTP_PUT(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminCreateEcommerceCampaignCodes(FString campaignId, FCampaignCodeCreateModel body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError)
+void AdminCreateEcommerceCampaignCodes(const FString& CampaignId, const FCampaignCodeCreateModel& Body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CampaignId);
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(body, Content);
+	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminGetEcommerceCampaignByName(FString name, const THandler<FCampaignPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetEcommerceCampaignByName(const FString& Name, const THandler<FCampaignPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/campaigns"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
-	FString Query = FString::Printf(TEXT("?name=%s"), *name);
-	Url.Append(name.IsEmpty() ? TEXT("") : FString::Printf(TEXT("%s"), *Query));
+	FString Query = FString::Printf(TEXT("?name=%s"), *Name);
+	Url.Append(Name.IsEmpty() ? TEXT("") : FString::Printf(TEXT("%s"), *Query));
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminGetEcommerceCampaignCodes(FString campaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
+void AdminGetEcommerceCampaignCodes(const FString& CampaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *campaignId);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/campaigns/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CampaignId);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void AdminDisableEcommerceCampaignCode(FString code, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError)
+void AdminDisableEcommerceCampaignCode(const FString& CampaignCode, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *code);
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CampaignCode);
 	FString Content;
 	AB_HTTP_PUT(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
