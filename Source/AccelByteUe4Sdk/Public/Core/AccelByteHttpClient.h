@@ -36,10 +36,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is created successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		bool Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const FString& Content, const TMap<FString, FString>& Headers,
 			const U& OnSuccess, const V& OnError)
 		{
@@ -50,9 +50,7 @@ namespace AccelByte
 				Request->SetContentAsString(Content);
 			}
 
-			ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
-
-			return true;
+			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -66,10 +64,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is processed successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		bool Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const TArray<uint8>& Content, const TMap<FString, FString>& Headers,
 			const U& OnSuccess, const V& OnError)
 		{
@@ -81,9 +79,7 @@ namespace AccelByte
 				Request->SetContent(Content);
 			}
 
-			ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
-
-			return true;
+			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -97,10 +93,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is processed successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		bool Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr Request(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const TMap<FString, FString>& Content, const TMap<FString, FString>& Headers,
 			const U& OnSuccess, const V& OnError)
 		{
@@ -117,9 +113,7 @@ namespace AccelByte
 				}
 			}
 
-			ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
-
-			return true;
+			return ProcessRequest(Request, Verb, Url, Params, Headers, OnSuccess, OnError);
 		}
 
 		/**
@@ -132,10 +126,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is processed successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const TMap<FString, FString>& Data, const U& OnSuccess, const V& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
@@ -158,10 +152,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is created successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename U, typename V>
-		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const FString& Json, const U& OnSuccess, const V& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
@@ -185,10 +179,10 @@ namespace AccelByte
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
 		 *
-		 * @return True if the HTTP request is created successfully.
+		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename T, typename U, typename V>
-		bool ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
+		FAccelByteTaskPtr ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
 			const T& UStruct, const U& OnSuccess, const V& OnError)
 		{
 			FString ApiUrl = FormatApiUrl(Url);
@@ -204,8 +198,6 @@ namespace AccelByte
 			if (!FJsonObjectConverter::UStructToJsonObjectString(UStruct, Json))
 			{
 				UE_LOG(LogTemp, Error, TEXT("HttpClient Request UStructToJsonObjectString failed!"));
-
-				return false;
 			}
 
 			return Request(Verb, ApiUrl, Params, Json, Headers, OnSuccess, OnError);
@@ -223,7 +215,7 @@ namespace AccelByte
 	    FString EncodeParamsData(const TMap<FString, FString>& ParamsData) const;
 
 		template<typename U, typename V>
-		void ProcessRequest(FHttpRequestPtr& Request, const FString& Verb, const FString& Url,
+		FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr& Request, const FString& Verb, const FString& Url,
 			const TMap<FString, FString>& Params, const TMap<FString, FString>& Headers,
 			const U& OnSuccess, const V& OnError)
 		{
@@ -242,7 +234,7 @@ namespace AccelByte
 				Request->SetHeader(Kvp.Key, Kvp.Value); // Override existing headers
 			}
 
-			HttpRef.ProcessRequest(
+			return HttpRef.ProcessRequest(
 				Request,
 				CreateHttpResultHandler(
 					OnSuccess,
