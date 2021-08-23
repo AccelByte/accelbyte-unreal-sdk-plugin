@@ -40,6 +40,7 @@ namespace Api
 	class SessionBrowser;
 	class UGC;
 	class SeasonPass;
+	class Reporting;
 }
 
 namespace GameServerApi
@@ -87,6 +88,7 @@ public:
 	static Api::SessionBrowser SessionBrowser;
 	static Api::UGC UGC;
 	static Api::SeasonPass SeasonPass;
+	static Api::Reporting Reporting;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;
