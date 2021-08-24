@@ -211,7 +211,7 @@ const auto ServerKickedFromPartyDelegate = Api::Lobby::FPartyKickNotif::CreateLa
 	}
 });
 
-const auto ServerSetSessionAttributeDelagate = Api::Lobby::FSetSessionAttributeResponse::CreateLambda([](FAccelByteModelsSetSessionAttributesResponse result)
+const auto ServerSetSessionAttributeDelegate = Api::Lobby::FSetSessionAttributeResponse::CreateLambda([](FAccelByteModelsSetSessionAttributesResponse result)
 {
 	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Set Session Attribute Success!"));
 	{
@@ -2165,8 +2165,12 @@ bool ServerLobbyGetSetSessionAttribute_Ok::RunTest(const FString& Parameters)
 
 	// ACT
 	// Setup User set Session Attribute
-	SLobbies[0]->SetSetSessionAttributeDelegate(ServerSetSessionAttributeDelagate);
+	SLobbies[0]->SetSetSessionAttributeDelegate(ServerSetSessionAttributeDelegate);
 	SLobbies[0]->SetSessionAttribute(AttributeKeys[0], Attributes[AttributeKeys[0]]);
+
+	WaitUntil(bSetSessionAttribute, "Waiting client set session attribute");
+
+	DelaySeconds(5, "waiting 5 sec");
 
 	// Setup Server set session attribute
 	bool bServerSetSessionAttributeComplete = false;
