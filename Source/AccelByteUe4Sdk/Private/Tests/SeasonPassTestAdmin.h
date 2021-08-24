@@ -5,19 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "TestUtilities.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteRegistry.h"
 #include "Models/AccelByteSeasonPassModels.h"
-
+#include "EcommerceTestAdmin.h"
 #include "SeasonPassTestAdmin.generated.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
-
 
 USTRUCT()
 struct FSeasonPassCreateRequest
