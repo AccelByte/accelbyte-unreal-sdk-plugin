@@ -2364,7 +2364,7 @@ bool FECommerceTestServerEntitlementFulfillItem::RunTest(const FString& Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FECommerceTestServerEntitlementFulfillInvalid, "AccelByte.Tests.Ecommerce.Fulfillment.5.ServerEntitlementFulfillInvalidFailed", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FECommerceTestServerEntitlementFulfillInvalid, "AccelByte.IntegrationTests.Ecommerce.Fulfillment.5.ServerEntitlementFulfillInvalidFailed", AutomationFlagMaskEcommerce);
 bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Parameters)
 {
 
@@ -2379,7 +2379,7 @@ bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Param
 	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
 
 	FAccelByteModelsFulfillmentRequest FulfilledEntitlement;
-	FulfilledEntitlement.ItemId = "Invalid";
+	FulfilledEntitlement.ItemId = "ffffffffffff4fff8fffffffffffffff"; // Invalid item id
 	FulfilledEntitlement.OrderNo = "123456789";
 	FulfilledEntitlement.Quantity = 1;
 	FulfilledEntitlement.Source = EAccelByteItemSource::ACHIEVEMENT;
