@@ -440,7 +440,7 @@ bool FEcommerceTestGetItemsByCriteriaDiscounted::RunTest(const FString& Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSearchItem, "AccelByte.unTested.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSearchItem, "AccelByte.DisabledTests.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
 bool FEcommerceTestSearchItem::RunTest(const FString& Parameters)
 {
 #pragma region SearchItem

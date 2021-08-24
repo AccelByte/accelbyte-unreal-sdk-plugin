@@ -2206,7 +2206,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect, "AccelByte.IgnoredTests.Lobby.B.Connect1Mins", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect, "AccelByte.DisabledTests.Lobby.B.Connect1Mins", AutomationFlagMaskLobby);
 bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FString& Parameters)
 {
 	LobbyConnect(1);
