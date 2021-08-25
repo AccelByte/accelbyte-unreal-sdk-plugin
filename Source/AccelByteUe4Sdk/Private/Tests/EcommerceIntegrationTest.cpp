@@ -178,7 +178,7 @@ bool FEcommerceTestTearDown::RunTest(const FString& Parameters)
 		bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 			bDeleteSuccessful = true;
@@ -443,7 +443,7 @@ bool FEcommerceTestGetItemsByCriteriaDiscounted::RunTest(const FString& Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSearchItem, "AccelByte.unTested.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSearchItem, "AccelByte.DisabledTests.Ecommerce.C.SearchItem", AutomationFlagMaskEcommerce);
 bool FEcommerceTestSearchItem::RunTest(const FString& Parameters)
 {
 #pragma region SearchItem

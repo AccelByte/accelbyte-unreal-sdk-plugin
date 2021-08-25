@@ -4,6 +4,7 @@
 
 
 #include "SeasonPassTestAdmin.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 
 void AdminCreateSeason(const FSeasonPassCreateRequest& Req, const THandler<FSeasonPassCreateSeasonResponse>& OnSuccess, const FErrorHandler& OnError)

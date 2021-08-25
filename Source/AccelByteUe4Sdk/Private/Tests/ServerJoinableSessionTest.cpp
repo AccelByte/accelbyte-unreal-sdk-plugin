@@ -3,8 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Misc/AutomationTest.h"
-#include "HttpModule.h"
-#include "HttpManager.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
@@ -14,6 +12,7 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "MatchmakingTestAdmin.h"
 
 #include <IPAddress.h>
@@ -309,7 +308,7 @@ bool JoinableSessionTestTeardown::RunTest(const FString& Parameters)
 	for (int i = 0; i < ActiveUserCount; i++)
 	{
 		UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, ActiveUserCount);
-		DeleteUserById(ActiveUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
+		AdminDeleteUser(ActiveUserCreds[i].GetUserId(), FSimpleDelegate::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Success"));
 			bDeleteUsersSuccessful[i] = true;

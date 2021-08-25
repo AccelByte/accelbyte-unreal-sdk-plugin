@@ -56,7 +56,7 @@ bool CloudStorageTearDown::RunTest(const FString& Parameters)
 	bool bDeleteSuccessful = false;
 	
 	UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 	{
 		UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("    Success"));
 		bDeleteSuccessful = true;

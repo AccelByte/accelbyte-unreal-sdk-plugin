@@ -10,6 +10,7 @@
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "StatisticTestAdmin.h"
 
 using AccelByte::FErrorHandler;
@@ -153,7 +154,7 @@ bool StatisticTearDown::RunTest(const FString& Parameters)
 {
 	UE_LOG(LogAccelByteStatisticTest, Log, TEXT("DeleteUserById..."));
 	bool bDeleteUsersSuccess = false;
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUsersSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUsersSuccess]()
 	{
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Success"));
 		bDeleteUsersSuccess = true;

@@ -1424,7 +1424,7 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 
 	bool bDeleteSuccess = false;
 	UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user by id success"));
 		bDeleteSuccess = true;

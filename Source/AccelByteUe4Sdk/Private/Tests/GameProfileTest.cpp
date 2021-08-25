@@ -7,6 +7,7 @@
 #include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteGameProfileApi.h"
+#include "UserTestAdmin.h"
 #include "TestUtilities.h"
 
 using AccelByte::FErrorHandler;

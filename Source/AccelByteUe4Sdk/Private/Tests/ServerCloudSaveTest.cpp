@@ -2,13 +2,14 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "TestUtilities.h"
 #include "Api/AccelByteUserApi.h"
 #include "Misc/AutomationTest.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteRegistry.h"
 #include "GameServerApi/AccelByteServerCloudSaveApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "TestUtilities.h"
+#include "UserTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerCloudSaveTest, Log, All);
 
@@ -203,7 +204,7 @@ bool ServerCloudSaveTearDown::RunTest(const FString& Parameters)
 
 	bool bDeleteSuccess = false;
 	UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("DeleteUserById"));
-	DeleteUserById(ServerCloudUserCreds.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
+	AdminDeleteUser(ServerCloudUserCreds.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
 	{
 		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Delete user by id success"));
 		bDeleteSuccess = true;
