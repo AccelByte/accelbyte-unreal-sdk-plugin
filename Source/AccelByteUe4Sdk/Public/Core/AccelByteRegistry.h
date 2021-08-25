@@ -41,6 +41,7 @@ namespace Api
 	class UGC;
 	class SeasonPass;
 	class Reporting;
+	class Currency;
 }
 
 namespace GameServerApi
@@ -89,6 +90,7 @@ public:
 	static Api::UGC UGC;
 	static Api::SeasonPass SeasonPass;
 	static Api::Reporting Reporting;
+	static Api::Currency Currency;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

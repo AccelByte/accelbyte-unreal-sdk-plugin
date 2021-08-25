@@ -21,6 +21,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const FCreateNewOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FCancelOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api")
+	static void CancelOrder(const FString& OrderNo, const FCancelOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserOrderSuccess, const FAccelByteModelsOrderInfo&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order | Api ")
 	static void GetUserOrder(const FString& OrderNo, const FGetUserOrderSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
