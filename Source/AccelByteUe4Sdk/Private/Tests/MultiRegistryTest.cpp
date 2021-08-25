@@ -26,9 +26,8 @@ const auto MultiRegistryTestErrorHandler = FErrorHandler::CreateLambda([](int32 
 		UE_LOG(LogAccelByteMultiRegistryTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 	});
 
-TArray<TSharedPtr<FTestUser>> MultiRegistryTestUsers;
+TArray<FTestUser> MultiRegistryTestUsers;
 TArray<TSharedPtr<Credentials>> MultiRegistryTestCredentials;
-const FString MultiRegistryTestUID = TEXT("25479f26"); // Arbitrary UID for this test
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMultiRegistryTestLogin, "AccelByte.Tests.MultiRegistry.User", AutomationFlagMaskMultiRegistry);
 bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
@@ -39,7 +38,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	// Setup
 
-	AB_TEST_TRUE(SetupTestUsers(MultiRegistryTestUID, 2, MultiRegistryTestUsers)); // Register test users only (no login)
+	AB_TEST_TRUE(SetupTestUsers(2, MultiRegistryTestUsers)); // Register test users only (no login)
 
 	// Multi user login using FMultiRegistry and FApiClient
 
@@ -47,9 +46,9 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 	{
 		bool bIsDone = false;
 		bool bIsOk = false;
-		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Logging in"), *User->Email);
-		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User->Email); // Using email as key
-		ApiClient->User.LoginWithUsername(User->Email, User->Password,
+		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Logging in"), *User.Email);
+		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User.Email); // Using email as key
+		ApiClient->User.LoginWithUsername(User.Email, User.Password,
 			FVoidHandler::CreateLambda([&]()
 				{
 					UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("OK"));
@@ -73,7 +72,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	for (const auto& User : MultiRegistryTestUsers)
 	{
-		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User->Email);
+		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User.Email);
 		FString UserId = ApiClient->Credentials.GetUserId();
 		AB_TEST_TRUE(!UserId.IsEmpty());
 		UniqueUserIds.Add(UserId);
@@ -90,8 +89,8 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 		FAccountUserData AccountUserData;
 		bool bIsDone = false;
 		bool bIsOk = false;
-		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Getting user data"), *MultiRegistryTestUsers[i]->Email);
-		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(MultiRegistryTestUsers[i]->Email);
+		UE_LOG(LogAccelByteMultiRegistryTest, Log, TEXT("%s: %s"), TEXT("Getting user data"), *MultiRegistryTestUsers[i].Email);
+		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(MultiRegistryTestUsers[i].Email);
 		ApiClient->User.GetData(
 			THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
 				{
@@ -112,7 +111,7 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 
 	// Tear down
 
-	AB_TEST_TRUE(TearDownTestUsers(MultiRegistryTestCredentials));
+	AB_TEST_TRUE(TeardownTestUsers(MultiRegistryTestUsers));
 
 	return true;
 }

@@ -73,7 +73,7 @@ struct FTestUser
 {
 	FString FirstName = TEXT("John");
 	FString LastName = TEXT("Doe");
-	FString DateOfBirth = TEXT("2000-01-01");
+	FString DateOfBirth;
 	FString Country = TEXT("US");
 	FString Language = TEXT("en");
 	FString Timezone = TEXT("Etc/UTC");
@@ -83,10 +83,21 @@ struct FTestUser
 	FString AvatarSmallUrl = TEXT("http://example.com/avatar/small.jpg");
 	FString AvatarUrl = TEXT("http://example.com/avatar/normal.jpg");
 	FString AvatarLargeUrl = TEXT("http://example.com/avatar/large.jpg");
+	Credentials Credentials;
 
-	FTestUser(const FString& TestUID, const int32 UserIndex = 0) :
-		DisplayName(FString::Printf(TEXT("%s%s-%s-%02d"), *FirstName, *LastName, *TestUID, UserIndex).ToLower()),
-		Email(FString::Printf(TEXT("%s_%s_%s_%02d@example.com"), TEXT("justice-ue4-sdk"), TEXT("test"), *TestUID, UserIndex).ToLower())
+	FTestUser(const int32 UserIndex = 0) : FTestUser(
+		FGuid::NewGuid().ToString(EGuidFormats::Digits).Left(8), // Random unique ID
+		UserIndex
+		)
+	{}
+
+	FTestUser(const FString& UniqueID, const int32 UserIndex = 0) :
+		DateOfBirth((FDateTime::Today() - FTimespan::FromDays(365 * 21 + 7))
+		            .ToIso8601().Left(10)), // 21 years old as of today, date only
+		DisplayName(FString::Printf(TEXT("%s%s-%s-%02d"), 
+		                            *FirstName, *LastName, *UniqueID, UserIndex).ToLower()),
+		Email(FString::Printf(TEXT("%s-%s-%02d@example.com"), 
+		                      TEXT("justice-unreal-sdk"), *UniqueID, UserIndex).ToLower())
 	{}
 };
 
@@ -97,8 +108,11 @@ void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, co
 void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteUserProfile(const FString& UserId,const FString& Namespace,const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers);
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials);
-bool CheckTestUsers(const TArray<TSharedPtr<FTestUser>>& InUsers, const TArray<TSharedPtr<Credentials>>& InCredentials);
-bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials);
 void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+
+bool RegisterTestUser(const FTestUser& InTestUser);
+bool LoginTestUser(FTestUser& TestUser);
+bool DeleteTestUser(FTestUser& InTestUser);
+
+bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUsers);
+bool TeardownTestUsers(TArray<FTestUser>& InTestUsers);

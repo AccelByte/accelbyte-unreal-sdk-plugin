@@ -4,13 +4,10 @@
 
 #pragma once
 
-#include "Core/AccelByteRegistry.h"
-#include "Core/AccelByteError.h"
-#include "Models/AccelByteEcommerceModels.h"
-#include "Models/AccelByteStatisticModels.h"
-#include "Models/AccelByteAchievementModels.h"
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteError.h"
 #include "TestUtilities.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
@@ -72,14 +69,6 @@ public:
 		static TArray<uint8> FStringToBytes(FString Input);
 };
 
-void FlushHttpRequests();
-
-void WaitUntil(const bool& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0);
-
-void WaitUntil(const TFunction<bool()> Condition, const FString Message = "", const double TimeoutSeconds = 60.0);
-
-void DelaySeconds(double Seconds, FString Message = "");
-
 FString GetPublisherNamespace();
 
 FString GetSteamUserId();
@@ -91,4 +80,13 @@ FString GetSteamTicket();
 bool CheckSteamTicket();
 
 FString GetAdminBaseUrl();
+
 FString GetAdminUserAccessToken();
+
+void FlushHttpRequests();
+
+void WaitUntil(const bool& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0);
+
+void WaitUntil(const TFunction<bool()> Condition, const FString Message = "", const double TimeoutSeconds = 60.0);
+
+void DelaySeconds(double Seconds, FString Message = "");

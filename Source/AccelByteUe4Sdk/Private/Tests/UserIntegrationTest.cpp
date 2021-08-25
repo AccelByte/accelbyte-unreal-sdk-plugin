@@ -2022,40 +2022,37 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 	};
 
 #pragma endregion
-
-	const FString TestUID = TEXT("29008abd"); // Arbitrary unique id to identify this specific automation test
-
-	TArray<TSharedPtr<FTestUser>> TestUsers;
-	TArray<TSharedPtr<Credentials>> TestCredentials;
+	
+	TArray<FTestUser> TestUsers;
 
 	// Setup
 
-	AB_TEST_TRUE(SetupTestUsers(TestUID, 2, TestUsers, TestCredentials));
+	AB_TEST_TRUE(SetupTestUsers(2, TestUsers));
 
 	// Create user profiles
 
 	for (int i = 0; i < TestUsers.Num(); i++)
 	{
-		AB_TEST_TRUE(CreateUserProfile(*TestUsers[i], *TestCredentials[i]));
+		AB_TEST_TRUE(CreateUserProfile(TestUsers[i], TestUsers[i].Credentials));
 	}
 
 	// Batch get public user profile infos
 
 	FString UserIdsCsv;
 
-	for (const auto& Credentials : TestCredentials)
+	for (const auto& TestUser : TestUsers)
 	{
-		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *Credentials->GetUserId()));
+		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.Credentials.GetUserId()));
 	}
 
 	TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
 
-	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(*TestCredentials[0], UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
+	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0].Credentials, UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
 	AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
 
 	// Tear down
 
-	AB_TEST_TRUE(TearDownTestUsers(TestCredentials));
+	AB_TEST_TRUE(TeardownTestUsers(TestUsers));
 
 	return true;
 }

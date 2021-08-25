@@ -17,8 +17,7 @@ DEFINE_LOG_CATEGORY(LogAccelByteHttpClientTest);
 
 static const int32 AutomationFlagMaskCustomization = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-TArray<TSharedPtr<FTestUser>> HttpClientTestUsers;
-TArray<TSharedPtr<Credentials>> HttpClientTestCredentials;
+TArray<FTestUser> HttpClientTestUsers;
 
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoUStructTest, "AccelByte.Tests.Core.HttpClient.DoUStruct", AutomationFlagMaskCustomization)
 void DoUStructTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
@@ -35,7 +34,7 @@ void DoUStructTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FStrin
 
 bool DoUStructTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers("deadbeef", 1, HttpClientTestUsers, HttpClientTestCredentials));
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -49,7 +48,7 @@ bool DoUStructTest::RunTest(const FString& Method)
 	Content.Name = "John Doe";
 	Content.Age = 24;
 
-	FHttpClient HttpClient(*HttpClientTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 	
@@ -68,17 +67,17 @@ bool DoUStructTest::RunTest(const FString& Method)
 	WaitUntil(bIsDone, "Waiting ...");
 
 	AB_TEST_TRUE(bIsSuccess);
-	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestCredentials[0]->GetNamespace() + "/" + HttpClientTestCredentials[0]->GetUserId()));
+	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestUsers[0].Credentials.GetNamespace() + "/" + HttpClientTestUsers[0].Credentials.GetUserId()));
 	AB_TEST_EQUAL(Result.Method, Method);
 	AB_TEST_EQUAL(Result.Args["q"], Query);
-	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestCredentials[0]->GetAccessToken()));
+	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestUsers[0].Credentials.GetAccessToken()));
 	if (!Method.ToUpper().Equals(TEXT("GET")))
 	{
 		AB_TEST_EQUAL(Result.Json.Name, Content.Name);
 		AB_TEST_EQUAL(Result.Json.Age, Content.Age);
 	}
 
-	AB_TEST_TRUE(TearDownTestUsers(HttpClientTestCredentials));
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
 
 	return bIsSuccess;
 }
@@ -98,7 +97,7 @@ void DoFormTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>&
 
 bool DoFormTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers("deadbeef", 1, HttpClientTestUsers, HttpClientTestCredentials));
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -112,7 +111,7 @@ bool DoFormTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(*HttpClientTestCredentials[0], FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 	
@@ -132,16 +131,16 @@ bool DoFormTest::RunTest(const FString& Method)
 
 	AB_TEST_TRUE(bIsSuccess);
 	AB_TEST_EQUAL(Result.Method, Method);
-	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestCredentials[0]->GetNamespace() + "/" + HttpClientTestCredentials[0]->GetUserId()));
+	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestUsers[0].Credentials.GetNamespace() + "/" + HttpClientTestUsers[0].Credentials.GetUserId()));
 	AB_TEST_EQUAL(Result.Args["q"], Query);
-	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestCredentials[0]->GetAccessToken()));
+	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestUsers[0].Credentials.GetAccessToken()));
 	if (!Method.ToUpper().Equals(TEXT("GET")))
 	{
 		AB_TEST_EQUAL(Result.Form[TEXT("name")], TEXT("John Doe"));
 		AB_TEST_EQUAL(Result.Form[TEXT("age")], TEXT("24"));
 	}
 
-	AB_TEST_TRUE(TearDownTestUsers(HttpClientTestCredentials));
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
 
 	return bIsSuccess;
 }

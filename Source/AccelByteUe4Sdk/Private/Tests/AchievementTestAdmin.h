@@ -5,6 +5,7 @@
 #pragma once
 
 #include "TestUtilities.h"
+#include "Models/AccelByteAchievementModels.h"
 #include "AchievementTestAdmin.generated.h"
 
 USTRUCT(BlueprintType)

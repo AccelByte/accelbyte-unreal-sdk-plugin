@@ -101,147 +101,84 @@ void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDel
 	}
 }
 
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers)
+bool RegisterTestUser(const FTestUser& InTestUser)
 {
-	const auto Register = [](const FTestUser& InUser)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s: %s %s"), TEXT("SetupTestUsers"), TEXT("Registering"), *InUser.Email);
-		FRegistry::User.Register(InUser.Email, InUser.Password, InUser.DisplayName, InUser.Country, InUser.DateOfBirth,
-			THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	bool bIsDone = false;
+	bool bIsOk = false;
+
+	FRegistry::User.Register(
+		InTestUser.Email,
+		InTestUser.Password,
+		InTestUser.DisplayName,
+		InTestUser.Country,
+		InTestUser.DateOfBirth,
+		THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+			{
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+			{
+				if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 				{
 					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-				{
-					if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException)
-					{
-						bIsOk = true;
-					}
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
+				}
+				bIsDone = true;
+			}));
 
-	OutUsers.Empty();
-
-	for (int i = 0; i < InNumOfUsers; i++)
-	{
-		OutUsers.Add(MakeShared<FTestUser>(InTestUID, i));
-		if (!Register(*OutUsers[i]))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool SetupTestUsers(const FString& InTestUID, const int32 InNumOfUsers, TArray<TSharedPtr<FTestUser>>& OutUsers, TArray<TSharedPtr<Credentials>>& OutCredentials)
-{
-	const auto Login = [](const FTestUser& InUser, Credentials& OutCredentials)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s: %s"), TEXT("Logging in"), *InUser.Email);
-		Api::User UserApi(OutCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserApi.LoginWithUsername(InUser.Email, InUser.Password,
-			FVoidHandler::CreateLambda([&]()
-				{
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	if (!SetupTestUsers(InTestUID, InNumOfUsers, OutUsers))
-	{
-		return false;
-	}
-
-	OutCredentials.Empty();
-
-	for (int i = 0; i < InNumOfUsers; i++)
-	{
-		OutCredentials.Add(MakeShared<Credentials>());
-		if (!Login(*OutUsers[i], *OutCredentials[i]))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool CheckTestUsers(const TArray<TSharedPtr<FTestUser>>& InUsers, const TArray<TSharedPtr<Credentials>>& InCredentials)
-{
-	bool bIsOk = true;
-
-	if (InUsers.Num() == 0)
-	{
-		bIsOk = false;
-	}
-
-	if (InUsers.Num() != InCredentials.Num())
-	{
-		bIsOk = false;
-	}
-
-	for (const auto& Credentials : InCredentials)
-	{
-		if (Credentials->GetUserId().IsEmpty())
-		{
-			bIsOk = false;
-		}
-	}
-
-	if (!bIsOk)
-	{
-		UE_LOG(LogAccelByteTest, Error, TEXT("%s: %s"), TEXT("CheckTestUsers"), TEXT("Test users are not ready. Maybe SetupTestUsers has not been invoked?"));
-	}
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
 
 	return bIsOk;
 }
 
-bool TearDownTestUsers(TArray<TSharedPtr<Credentials>>& InCredentials)
+bool LoginTestUser(FTestUser& TestUser)
 {
-	const auto Delete = [](const Credentials& InCredentials)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteTest, Log, TEXT("%s: %s %s"), TEXT("TearDownTestUsers"), TEXT("Deleting"), *InCredentials.GetUserId());
-		AdminDeleteUser(InCredentials.GetUserId(),
-			FSimpleDelegate::CreateLambda([&]()
-				{
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
+	AccelByte::Api::User UserApi(
+		TestUser.Credentials,
+		FRegistry::Settings,
+		FRegistry::HttpRetryScheduler);
+	
+	bool bIsDone = false;
+	bool bIsOk = false;
+	
+	UserApi.LoginWithUsername(
+		TestUser.Email,
+		TestUser.Password,
+		FVoidHandler::CreateLambda([&]()
+			{
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				bIsDone = true;
+			}));
 
-	for (int i = 0; i < InCredentials.Num(); i++)
-	{
-		if (!Delete(*InCredentials[i]))
-		{
-			return false;
-		}
-		InCredentials[i]->ForgetAll();
-	}
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
 
-	return true;
+	return bIsOk;
+}
+
+bool DeleteTestUser(FTestUser& TestUser)
+{
+	bool bIsDone = false;
+	bool bIsOk = false;
+		
+	AdminDeleteUser(TestUser.Credentials.GetUserId(),
+		FSimpleDelegate::CreateLambda([&]()
+			{
+				bIsOk = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				bIsDone = true;
+			}));
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
+		
+	TestUser.Credentials.ForgetAll();
+
+	return bIsOk;
 }
 
 void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
@@ -250,4 +187,47 @@ void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUs
 	FString Url = FString::Printf(TEXT("%s/iam/v3/public/users/me"), *FRegistry::Settings.BaseUrl);
 	AB_HTTP_GET(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUsers)
+{
+	OutTestUsers.Empty();
+
+	for (int i = 0; i < InNumOfTestUsers; i++)
+	{
+		OutTestUsers.Add(FTestUser(i));
+	}
+
+	for (int i = 0; i < InNumOfTestUsers; i++)
+	{
+		if (!RegisterTestUser(OutTestUsers[i]))
+		{
+			return false; // Stop immediately on the first register error
+		}
+	}
+
+	for (int i = 0; i < InNumOfTestUsers; i++)
+	{
+		if (!LoginTestUser(OutTestUsers[i]))
+		{
+			return false; // Stop immediately on the first login error
+		}
+	}
+
+	return true;
+}
+
+bool TeardownTestUsers(TArray<FTestUser>& InTestUsers)
+{
+	bool bIsOk = true;
+	
+	for (int i = 0; i < InTestUsers.Num(); i++)
+	{
+		if (!DeleteTestUser(InTestUsers[i]))
+		{
+			bIsOk = false; // One or more errors has happened but try to continue deleting the remaining test users
+		}
+	}
+
+	return bIsOk;
 }

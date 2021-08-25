@@ -5,6 +5,7 @@
 #pragma once
 
 #include "TestUtilities.h"
+#include "Models/AccelByteStatisticModels.h"
 #include "StatisticTestAdmin.generated.h"
 
 USTRUCT(BlueprintType)
