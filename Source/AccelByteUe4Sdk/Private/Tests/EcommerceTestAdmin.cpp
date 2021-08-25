@@ -388,6 +388,64 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 	if (!CreateEcommerceItem(NewStoreId, GrandChildItemRequest, OnSuccess, OnError, ItemResult)) {
 		return;
 	}
+	/*
+	Create purchasing ITEM
+	*/
+	FLocalization PurchaseitemLocalization
+	{
+		"UE4_PurchasingItem",
+		"Purchasing item",
+		"Purchasing item, real currency, not free, USD"
+	};
+	TMap<FString, FLocalization> PurchaseItemLocalizationMap;
+	PurchaseItemLocalizationMap.Add("en", PurchaseitemLocalization);
+	FCreateRegionDataItem PurchaseItemRegionData
+	{
+		1, //not free so it will not auto fulfill.
+		0,
+		0,
+		0,
+		"USD",
+		EAccelByteItemCurrencyType::REAL,
+		FRegistry::Settings.Namespace,
+		FDateTime::MinValue().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601(),
+		FDateTime::MinValue().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601()
+	};
+	FItemCreateRequest PurchaseItemRequest
+	{
+		EAccelByteItemType::COINS,
+		EAccelByteSeasonType::PASS, // set as default
+		Variables.ExpectedPurchasingItemTitle,
+		EAccelByteEntitlementType::CONSUMABLE,
+		10,
+		0,
+		"",
+		EAccelByteAppType::GAME,
+		"",
+		Variables.ExpectedCurrency.currencyCode,
+		FRegistry::Settings.Namespace,
+		Variables.ExpectedRootCategoryPath,
+		PurchaseItemLocalizationMap,
+		EAccelByteItemStatus::ACTIVE,
+		"UE4purchaseitemSku",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
+		FRegionDataUS{{PurchaseItemRegionData}},
+		EmptyStrings,
+		EmptyStrings,
+		-1,
+		-1,
+		"",
+		0,
+		"classless",
+		FRecurring { }
+	};
+	if (!CreateEcommerceItem(NewStoreId, PurchaseItemRequest, OnSuccess, OnError, ItemResult)) {
+		return;
+	}
+
 #pragma endregion
 
 #pragma region SetupEcommerceRedeemableInGameItem
