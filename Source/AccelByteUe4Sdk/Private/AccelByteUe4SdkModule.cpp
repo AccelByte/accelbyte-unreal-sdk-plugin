@@ -8,7 +8,8 @@
 #include "CoreUObject.h"
 #include "Api/AccelByteGameTelemetryApi.h"
 #include "Core/AccelByteReport.h"
-#include "Runtime/Core/Public/Containers/Ticker.h"
+#include "Core/Version.h"
+#include "Interfaces/IPluginManager.h"
 
 #if WITH_EDITOR
 #include "ISettingsModule.h"
@@ -47,6 +48,9 @@ class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 	bool LoadSettingsFromConfigUobject();
 	bool LoadServerSettingsFromConfigUobject();
 	void NullCheckConfig(FString value, FString configField);
+	static FVersion GetPluginVersion();
+	void GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const;
+	void CheckServicesCompatibility() const;
 };
 
 void FAccelByteUe4SdkModule::StartupModule()
@@ -58,10 +62,12 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FModuleManager::Get().LoadModuleChecked("Websockets");
 	FModuleManager::Get().LoadModuleChecked("Json");
 	FModuleManager::Get().LoadModuleChecked("JsonUtilities");
+	FModuleManager::Get().LoadModuleChecked("Projects");
 
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
 	LoadServerSettingsFromConfigUobject();
+	CheckServicesCompatibility();
 
 	FRegistry::HttpRetryScheduler.Startup();
 	FRegistry::Credentials.Startup();
@@ -194,6 +200,76 @@ void FAccelByteUe4SdkModule::NullCheckConfig(FString value, FString configField)
 	if (value.IsEmpty())
 	{
 		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
+	}
+}
+
+FVersion FAccelByteUe4SdkModule::GetPluginVersion()
+{
+	FString const PluginName = "AccelByteUe4Sdk";
+ 
+	TSharedPtr<IPlugin> const Plugin = IPluginManager::Get().FindPlugin("AccelByteUe4Sdk");
+	const FPluginDescriptor& Descriptor = Plugin->GetDescriptor();
+
+	return Descriptor.VersionName;
+}
+
+void FAccelByteUe4SdkModule::GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const
+{
+	FHttpRequestPtr const Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb("GET");
+	Request->SetURL(FString::Printf(TEXT("%s/version"), *Url));
+	Request->OnProcessRequestComplete().BindLambda(
+		[Callback](FHttpRequestPtr const RequestPtr, FHttpResponsePtr const ResponsePtr, bool const bFinished)
+		{
+			if (!bFinished || !ResponsePtr.IsValid())
+			{
+				UE_LOG(LogAccelByte, Warning, TEXT("Getting version info failed:%s"), *RequestPtr->GetURL());
+				return;
+			}
+
+			FString const Content = ResponsePtr->GetContentAsString();
+
+			ensureAlwaysMsgf(!Content.IsEmpty(), TEXT("Version info empty: %s"), *RequestPtr->GetURL());
+
+			FVersionInfo VersionInfo;
+			FJsonObjectConverter::JsonObjectStringToUStruct(Content, &VersionInfo, 0, 0);
+
+			if (Callback)
+			{
+				Callback(VersionInfo);
+			}
+		});
+
+	Request->ProcessRequest();
+
+}
+
+void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
+{
+	if (GetPluginVersion().Compare(FVersion{TEXT("4.0.0")}) <= 0)
+	{
+		return;
+	}
+
+	FString const Path = FPaths::ProjectPluginsDir() / "AccelByteUe4Sdk/Content/CompatibilityMap.json";
+	FString String;
+	FFileHelper::LoadFileToString(String, *Path);
+	auto CompatibilityMapPtr = MakeShared<FServiceCompatibilityMap>(FServiceCompatibilityMap::FromJson(String));
+
+	for (auto const& ServiceName : CompatibilityMapPtr->GetServices())
+	{
+		if (ServiceName.IsEmpty())
+		{
+			return;
+		}
+
+		GetVersionInfo(
+			FRegistry::Settings.BaseUrl / ServiceName,
+			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
+			{
+				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version);
+				ensureAlwaysMsgf(!Result.bIsError, TEXT("%s"), *Result.Message);
+			});
 	}
 }
 

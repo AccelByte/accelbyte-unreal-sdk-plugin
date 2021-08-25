@@ -36,12 +36,17 @@ public class AccelByteUe4Sdk : ModuleRules
             "WebSockets",
             "Networking",
             "SSL",
-            "Icmp"
+            "Icmp",
+        });
+        
+        PrivateDependencyModuleNames.AddRange(new []
+        {
+            "Projects"
         });
 
         if (Target.bBuildEditor)
         {
-            PrivateDependencyModuleNames.AddRange(new string[]
+            PrivateDependencyModuleNames.AddRange(new[]
             {
                 "Settings"
             });
