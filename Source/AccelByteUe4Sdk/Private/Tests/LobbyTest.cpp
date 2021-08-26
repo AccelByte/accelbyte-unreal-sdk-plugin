@@ -14,6 +14,7 @@
 #include "GameServerApi/AccelByteServerDSMApi.h"
 #include "GameServerApi/AccelByteServerMatchmakingApi.h"
 #include "TestUtilities.h"
+#include "UserTestAdmin.h"
 #include "LobbyTestAdmin.h"
 #include "MatchmakingTestAdmin.h"
 
@@ -5150,6 +5151,8 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(!bMatchmakingNotifError);
 	AB_TEST_TRUE(matchmakingNotifResponse.Status == EAccelByteMatchmakingStatus::Cancel);*/
 
+	DelaySeconds(30, "wait 30 second to make sure matchmaking process finishes");
+
 	LobbyDisconnect(1);
 	ResetResponses();
 	return true;
@@ -5180,7 +5183,7 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 
 	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FAllianceRule AllianceRule;
-	AllianceRule.min_number = 1;
+	AllianceRule.min_number = 2;
 	AllianceRule.max_number = 2;
 	AllianceRule.player_min_number = 1;
 	AllianceRule.player_max_number = 1;
@@ -5217,6 +5220,8 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
 	}), LobbyTestErrorHandler);
 	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	DelaySeconds(30, "wait 30 second to make sure matchmaking process finishes");
 
 	LobbyDisconnect(1);
 	ResetResponses();
