@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "EcommerceTestAdmin.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "TestUtilities.h"
 
 #pragma region SetupEcommerceCurrency

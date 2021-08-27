@@ -32,13 +32,9 @@ TArray<TSharedPtr<Credentials>> MultiRegistryTestCredentials;
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMultiRegistryTestLogin, "AccelByte.Tests.MultiRegistry.User", AutomationFlagMaskMultiRegistry);
 bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 {
-	//const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21 + 7)); // 21 years old
-	//const FString DateOfBirthIso8601 = FString::Printf(TEXT("%04d-%02d-%02d"),
-	//	DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-
 	// Setup
 
-	AB_TEST_TRUE(SetupTestUsers(2, MultiRegistryTestUsers)); // Register test users only (no login)
+	AB_TEST_TRUE(SetupTestUsers(2, MultiRegistryTestUsers));
 
 	// Multi user login using FMultiRegistry and FApiClient
 
