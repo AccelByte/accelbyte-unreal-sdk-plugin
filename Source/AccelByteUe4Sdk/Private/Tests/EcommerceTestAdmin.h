@@ -5,6 +5,7 @@
 #pragma once
 
 #include "TestUtilities.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "EcommerceTestAdmin.generated.h"
 
 #pragma region ECOMMERCE_MODEL
