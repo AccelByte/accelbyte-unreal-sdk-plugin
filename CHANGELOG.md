@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/5.0.0%0D4.0.1) (2021-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* **Achievement:** Change the type of GoalValue of FAccelByteModelsPublicAchievement and FAccelByteModelsMultiLanguageAchievement and model from int32 into float.
+
+### Features
+
+* **Error:** parse oauth error response ([c795d02](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c795d02849124226195caa971a965d6ae51af73e))
+* **Error:** parse oauth error response ([3e2da7f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e2da7f53f7a64a8a68751de2f1a93b641154516))
+* **FApiClient:** add GetApi method template to support API extension ([6e6c247](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e6c247dd7329ad4f4ec98ed52d44b81613a2b72))
+* **FHttpClient:** implement http client to make api request easier ([4eb0821](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4eb08212cd861602504efc022ecabf36108fbd74))
+* **User:** Add Logout api ([572758c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/572758cabadae8f90a14f49af5d44b503779b593))
+
+
+### Bug Fixes
+
+* **Achievement:** Fix the Achievement Api's Public Achievement and Multi Language Achievement model difference with the Backend response. Fix the Test Helper's Achievement Request and Achievement Response model difference with the Backend response. ([c701114](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c70111429e118870b94c7c7ac161423d669a0c4b))
+* **Subscription:** Fix subscription integration test. ([b9bb250](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b9bb250dd966209156881ea49fe5c49bf191e0a0))
+
+
+### Refactors
+
+* **FApiClient and FRegistry:** Each API receive FHttpRetryScheduler reference from constructur instead of directly referring the singleton ([7d39e38](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7d39e38d6db25e09c1df17e35fb4023a9c911945))
+
+
+### Tests
+
+* **agreement:** make more resistant to dirty data ([ab9fa83](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ab9fa83ecd54abe58f3350d818f25fb5f1484f7f))
+* **FHttpClient:** add core test for FHttpClient ([116e456](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/116e456178aa1b184ce8d3d62981e09ca346c4cc))
+* **lobby:** fix LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk ([cc50770](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cc50770684608dd41c8b518dff87e7b735e8844b))
+
 ### [4.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/4.0.1%0D4.0.0) (2021-08-16)
 
 ## [4.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/4.0.0%0D3.2.0) (2021-08-02)
