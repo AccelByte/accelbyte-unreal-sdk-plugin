@@ -68,10 +68,15 @@ namespace AccelByte
 				{
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
+						FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 						FAccelByteModelsServerInfo Result;
 						if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 						{
 							SetServerName(Result.Pod_name);
+						}
+						if (CountdownTimeStart != -1)
+						{
+							AutoShutdownDelegateHandle = FTicker::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
 						}
 						SetServerType(EServerType::CLOUDSERVER);
 						HandleHttpResultOk(Response, OnSuccess);
@@ -127,6 +132,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
 				FReport::Log(TEXT("Starting DSM Shutdown Request..."));
+				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 			}
@@ -167,6 +173,12 @@ namespace AccelByte
 				{
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
+						FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
+
+						if (CountdownTimeStart != -1)
+						{
+							AutoShutdownDelegateHandle = FTicker::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
+						}
 						SetServerType(EServerType::LOCALSERVER);
 						HandleHttpResultOk(Response, OnSuccess);
 						return;
@@ -221,6 +233,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Accept"), Accept);
 				Request->SetContentAsString(Contents);
 				FReport::Log(TEXT("Starting DSM Deregister Request..."));
+				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 			}
@@ -229,19 +242,85 @@ namespace AccelByte
 		void ServerDSM::GetSessionId(const THandler<FAccelByteModelsServerSessionResponse>& OnSuccess, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
-			FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-			FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace(), *ServerName);
-			FString Verb = TEXT("GET");
-			FString ContentType = TEXT("application/json");
-			FString Accept = TEXT("application/json");
 
-			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-			Request->SetURL(Url);
-			Request->SetHeader(TEXT("Authorization"), Authorization);
-			Request->SetVerb(Verb);
-			Request->SetHeader(TEXT("Content-Type"), ContentType);
-			Request->SetHeader(TEXT("Accept"), Accept);
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			if (ServerType == EServerType::NONE)
+			{
+				OnError.ExecuteIfBound(400, TEXT("Server not Registered."));
+			}
+			else
+			{
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace(), *ServerName);
+				FString Verb = TEXT("GET");
+				FString ContentType = TEXT("application/json");
+				FString Accept = TEXT("application/json");
+
+				FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+				Request->SetURL(Url);
+				Request->SetHeader(TEXT("Authorization"), Authorization);
+				Request->SetVerb(Verb);
+				Request->SetHeader(TEXT("Content-Type"), ContentType);
+				Request->SetHeader(TEXT("Accept"), Accept);
+
+				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(THandler<FAccelByteModelsServerSessionResponse>::CreateLambda([OnSuccess, this](const FAccelByteModelsServerSessionResponse& Result)
+					{
+						if (!Result.Session_id.IsEmpty())
+						{
+							bIsDSClaimed = true;
+						}
+						OnSuccess.ExecuteIfBound(Result);
+					}), OnError), FPlatformTime::Seconds());
+			}
+		}
+
+		bool ServerDSM::ShutdownTick(float DeltaTime)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			if (CountdownTimeStart != -1 && bIsDSClaimed && (ServerType == EServerType::CLOUDSERVER))
+			{
+				if (ShutdownCountdown <= 0)
+				{
+					SendShutdownToDSM(true, "", OnAutoShutdown, OnAutoShutdownError);
+				}
+				else
+				{
+					if (GetPlayerNum() == 0)
+					{
+						ShutdownCountdown -= ShutdownTickSeconds;
+					}
+					else
+					{
+						ShutdownCountdown = CountdownTimeStart;
+					}
+				}
+			}
+			return true;
+		}
+
+		void ServerDSM::ConfigureAutoShutdown(uint32 TickSeconds, int CountdownStart)
+		{
+			if (CountdownStart >= -1)
+			{
+				CountdownTimeStart = CountdownStart;
+				ShutdownCountdown = CountdownStart;
+				ShutdownTickSeconds = TickSeconds;
+			}
+			else
+			{
+				CountdownTimeStart = -1;
+				ShutdownCountdown = -1;
+			}
+		}
+
+		void ServerDSM::SetOnAutoShutdownResponse(FVoidHandler OnAutoShutdown_)
+		{
+			OnAutoShutdown = OnAutoShutdown_;
+		}
+
+		void ServerDSM::SetOnAutoShutdownErrorDelegate(const FErrorHandler& OnError)
+		{
+			OnAutoShutdownError = OnError;
 		}
 
 		// Should not be called from constructor, FCommandLine::Get() is not ready.
@@ -275,7 +354,40 @@ namespace AccelByte
 			}
 		}
 
-		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) {}
+		int32 ServerDSM::GetPlayerNum()
+		{
+			UGameEngine* GameEngine = CastChecked<UGameEngine>(GEngine);
+			if (GameEngine)
+			{
+				UWorld* World = GameEngine->GetGameWorld();
+				if (World)
+				{
+					AGameStateBase* GameState = World->GetGameState();
+					if (GameState)
+					{
+						auto PlayerArray = GameState->PlayerArray;
+						return PlayerArray.Num();
+					}
+					else
+					{
+						return 0;
+					}
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings)
+		{
+			AutoShutdownDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::ShutdownTick);
+		}
 
 		ServerDSM::~ServerDSM() {}
 
