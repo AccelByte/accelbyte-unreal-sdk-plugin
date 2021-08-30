@@ -72,6 +72,14 @@ namespace AccelByte
 			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
+			 * @brief login with refresh token
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
 			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
