@@ -8,25 +8,7 @@ This documentation assumes that you are already familiar with modern C++, Unreal
 
 ## Dependencies
 
-AccelByte SDK v4.0.1 is compatible with these AccelByte Services version 3.3.1:
-
-| Service                                             | Version        |
-|-----------------------------------------------------|----------------|
-| justice-iam-service                                 | 4.3.0          |
-| justice-legal-service                               | 1.12.1         |
-| justice-basic-service                               | 1.21.1         |
-| justice-platform-service                            | 3.32.0         |
-| justice-social-service                              | 1.17.1         |
-| justice-leaderboard-service                         | 2.8.0          |
-| justice-achievement-service                         | 2.5.4          |
-| justice-cloudsave-service                           | 1.6.4          |
-| justice-ugc-service                                 | 1.4.0          |
-| justice-lobby-server                                | 1.34.0         |
-| justice-group-service                               | 2.7.3          |
-| Justice QoS Manager Service                         | 1.7.6          |
-| justice-dedicated-server-manager-controller-service | 2.4.1          |
-| amalgam_game_telemetry                              | 1.1.2-392420e1 |          
-
+AccelByte SDK is compatible with these AccelByte Services version 3.2.0
 
 ## Features
 
@@ -51,9 +33,20 @@ The classes are categorized as follow:
 - The `Blueprint` classes are simple _glue code_ to provide interface to Unreal Engine Blueprint.
 - The `Core` classes are for core functionalities (error handler, settings, credential store, and HTTP retry system). 
 
+## Packaging
+
+- `/Plugins` The actual plugin is located in `/Plugins/AccelByteUe4Sdk`.
+- `/Content` This contains example widget blueprints and other asset.
+- `/Source` This contains C++ source code for the examples.
+- `/Documentation` This contains Doxyfile and this documentation.
+  
 ## Terminology
 
 > There are only two hard things in Computer Science: cache invalidation and naming things. ―Phil Karlton
+
+### `Namespace` vs `GameId` vs `PublisherId`
+
+The backend call it `namespace`, but since namespace can be many things, in here it's called `GameId` and `PublisherId`. They are like AppId in Steam, ProductId in GOG, GameId in GameSparks, TitleId in PlayFab. 
 
 ### `UserId` vs `LoginId` vs `Username`
 
@@ -91,7 +84,7 @@ Here's how to get it up and running quickly.
 
 4. Create or open existing Unreal Engine project.
 
-5. Copy the the top folder to your game's plugins folder as `AccelbyteUe4Sdk` folder. 
+5. Copy the plugin folder `Plugins/AccelByteUe4Sdk` to your game's plugins folder. 
 
 6. Add the plugin to your `/MyAwesomeGame.uproject` file,
 ```java

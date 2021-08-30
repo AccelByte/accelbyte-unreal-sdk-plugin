@@ -14,11 +14,15 @@ namespace AccelByte
 {
 namespace Api
 {
-
-GameTelemetry::GameTelemetry(const AccelByte::Credentials & Credentials, const AccelByte::Settings & Settings)
-: Credentials(Credentials)
-, Settings(Settings)
-, ShuttingDown(false)
+GameTelemetry::GameTelemetry(
+	AccelByte::Credentials const& CredentialsRef,
+	AccelByte::Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	Credentials(CredentialsRef),
+	Settings(SettingsRef),
+	ShuttingDown(false)
 {
 }
 
@@ -40,12 +44,12 @@ void GameTelemetry::SetBatchFrequency(FTimespan Interval)
 	}
 }
 
-void GameTelemetry::SetImmediateEventList(const TArray<FString>& EventNames)
+void GameTelemetry::SetImmediateEventList(TArray<FString> const& EventNames)
 {
 	ImmediateEvents = TSet<FString>(EventNames);
 }
 
-void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (ShuttingDown)
 	{
@@ -110,13 +114,18 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 			}
 		}
 
-		SendProtectedEvents(TelemetryBodies, FVoidHandler::CreateLambda([OnSuccessCallbacks]()
-			{
-				for (auto& OnSuccessCallback : OnSuccessCallbacks)
+		SendProtectedEvents(
+			TelemetryBodies,
+			FVoidHandler::CreateLambda(
+				[OnSuccessCallbacks]()
 				{
-					OnSuccessCallback.ExecuteIfBound();
-				}
-			}), FErrorHandler::CreateLambda([OnErrorCallbacks](int32 Code, FString Message)
+					for (auto& OnSuccessCallback : OnSuccessCallbacks)
+					{
+						OnSuccessCallback.ExecuteIfBound();
+					}
+				}),
+			FErrorHandler::CreateLambda(
+				[OnErrorCallbacks](int32 Code, FString Message)
 				{
 					for (auto& OnErrorCallback : OnErrorCallbacks)
 					{
@@ -127,7 +136,7 @@ bool GameTelemetry::PeriodicTelemetry(float DeltaTime)
 	return true;
 }
 
-void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Events, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (ShuttingDown)
 	{
@@ -144,7 +153,7 @@ void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Ev
 	FString Content = TEXT("");
 
 	TArray<TSharedPtr<FJsonValue>> JsonArray;
-	for (const auto& Event : Events)
+	for (auto const& Event : Events)
 	{
 		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>();
 		JsonObject->SetStringField("EventNamespace", Event.EventNamespace);
@@ -164,7 +173,7 @@ void GameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBody> Ev
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } 

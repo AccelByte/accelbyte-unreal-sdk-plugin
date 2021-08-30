@@ -13,8 +13,14 @@ namespace AccelByte
 namespace Api
 {
 
-	Statistic::Statistic(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
-	{}
+Statistic::Statistic(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
 
 	Statistic::~Statistic()
 	{}
@@ -23,20 +29,21 @@ namespace Api
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/bulk"), *Settings.StatisticServerUrl, *Settings.Namespace, *Credentials.GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/bulk"), *SettingsRef.StatisticServerUrl, *SettingsRef.Namespace, *CredentialsRef.GetUserId());
 		FString Verb = TEXT("POST");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 		FString Contents = "[";
 		FString Content;
-		FAccelByteModelsBulkStatItemCreate statItemCreate;
+		FAccelByteModelsBulkStatItemCreate StatItemCreate;
 
 		for (int i = 0; i < StatCodes.Num(); i++)
 		{
-			statItemCreate.StatCode = StatCodes[i];
-			FJsonObjectConverter::UStructToJsonObjectString(statItemCreate, Content);
+			StatItemCreate.StatCode = StatCodes[i];
+			FJsonObjectConverter::UStructToJsonObjectString(StatItemCreate, Content);
 			Contents += Content;
+
 			if (i < StatCodes.Num() - 1)
 			{
 				Contents += ",";
@@ -54,7 +61,7 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Contents);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void Statistic::GetAllUserStatItems(const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
@@ -68,8 +75,8 @@ namespace Api
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *Settings.StatisticServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -92,20 +99,21 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void Statistic::IncrementUserStatItems(const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/value/bulk"), *Settings.StatisticServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/statitems/value/bulk"), *SettingsRef.StatisticServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
 		FString Contents = "[";
 		FString Content;
+	
 		for (int i = 0; i < Data.Num(); i++)
 		{
 			FJsonObjectConverter::UStructToJsonObjectString(Data[i], Content);
@@ -119,6 +127,7 @@ namespace Api
 				Contents += "]";
 			}
 		}
+
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
 		Request->SetHeader(TEXT("Authorization"), Authorization);
@@ -126,7 +135,7 @@ namespace Api
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Contents);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // Namespace Api

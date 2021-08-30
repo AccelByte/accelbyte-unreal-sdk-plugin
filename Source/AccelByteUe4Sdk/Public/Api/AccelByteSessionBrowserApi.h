@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSessionBrowserModels.h"
 
 class FJsonObject;
@@ -24,11 +25,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API SessionBrowser 
 {
 public:
-	SessionBrowser(const Credentials& Credentials, const Settings& Settings);
+	SessionBrowser(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~SessionBrowser();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 public:
 	/**
@@ -43,7 +45,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateGameSession(const FString &GameMode, const FString &GameMapName, const FString &GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void CreateGameSession(FString const&GameMode, FString const&GameMapName, FString const&GameVersion, uint32 BotCount, uint32 MaxPlayer, TSharedPtr<FJsonObject> OtherSettings, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Update the session to Session Browser.
@@ -54,7 +56,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void UpdateGameSession(const FString& SessionId, uint32 MaxPlayer, uint32 CurrentPlayerCount, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateGameSession(FString const& SessionId, uint32 MaxPlayer, uint32 CurrentPlayerCount, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Remove the session to Session Browser.
@@ -63,7 +65,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void RemoveGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void RemoveGameSession(FString const& SessionId, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Query game session.
@@ -75,7 +77,7 @@ public:
 	* @param Offset offset of the query
 	* @param Limit number of data to return
 	*/
-	void GetGameSessions(const FString &SessionType, const FString &GameMode, const THandler<FAccelByteModelsSessionBrowserGetResult>& OnSuccess, const FErrorHandler& OnError, uint32 Offset = 0, uint32 Limit = 50);
+	void GetGameSessions(FString const&SessionType, FString const&GameMode, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset = 0, uint32 Limit = 50);
 
 	/**
 	* @brief Get game session data by session ID.
@@ -84,7 +86,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetGameSession(const FString& SessionId, const THandler<FAccelByteModelsSessionBrowserData>& OnSuccess, const FErrorHandler& OnError);
+	void GetGameSession(FString const& SessionId, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError);
 
 private:
 	SessionBrowser() = delete;

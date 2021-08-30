@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteUGCModels.h"
 
 namespace AccelByte
@@ -24,13 +25,13 @@ class ACCELBYTEUE4SDK_API UGC
 
 public:
 
-	UGC(const Credentials& Credentials, const Settings& Settings);
+	UGC(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~UGC();
 
 private:
-
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 public:
 
@@ -41,7 +42,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateContent(const FString& ChannelId, const FAccelByteModelsUGCRequest& UGCRequest, const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError);
+	void CreateContent(FString const& ChannelId, FAccelByteModelsUGCRequest const& UGCRequest, THandler<FAccelByteModelsUGCResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Create a content with TArray<uint8> Preview paramater and get the payload url to upload the content.
 	*
@@ -55,8 +56,16 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateContent(const FString& ChannelId, const FString& Name, const FString& Type, const FString& SubType, const TArray<FString>& Tags, const TArray<uint8>& Preview,
-						const FString& FileExtension, const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError);
+	void CreateContent(
+		FString const& ChannelId,
+		FString const& Name,
+		FString const& Type,
+		FString const& SubType,
+		TArray<FString> const& Tags,
+		TArray<uint8> const& Preview,
+		FString const& FileExtension,
+		THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+		FErrorHandler const& OnError);
 
 	/** @brief Modify existing content to update some information with FString preview.
 	*
@@ -66,7 +75,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void ModifyContent(const FString& ChannelId, const FString& ContentId, const FAccelByteModelsUGCRequest& UGCRequest, const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError);
+	void ModifyContent(FString const& ChannelId, FString const& ContentId, FAccelByteModelsUGCRequest const& UGCRequest, THandler<FAccelByteModelsUGCResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Modify existing content to update some information with TArray<uint8> Preview paramater.
 	*
@@ -81,8 +90,17 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void ModifyContent(const FString& ChannelId, const FString& ContentId, const FString& Name, const FString& Type, const FString& SubType, const TArray<FString>& Tags, const TArray<uint8>& Preview,
-						const FString& FileExtension, const THandler<FAccelByteModelsUGCResponse>& OnSuccess, const FErrorHandler& OnError);
+	void ModifyContent(
+		FString const& ChannelId,
+		FString const& ContentId,
+		FString const& Name,
+		FString const& Type,
+		FString const& SubType,
+		TArray<FString> const& Tags,
+		TArray<uint8> const& Preview,
+		FString const& FileExtension,
+		THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
+		FErrorHandler const& OnError);
 	
 	/** @brief Delete a content based on the its channel id and content id.
 	*
@@ -91,7 +109,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void DeleteContent(const FString& ChannelId, const FString& ContentId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteContent(FString const& ChannelId, FString const& ContentId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Get a content information by its content id
 	*
@@ -99,7 +117,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetContentByContentId(const FString& ContentId, const THandler<FAccelByteModelsUGCContentResponse>& OnSuccess, const FErrorHandler& OnError);
+	void GetContentByContentId(FString const& ContentId, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Get a content information by its share code.
 	*
@@ -107,7 +125,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCContentResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetContentByShareCode(const FString& ShareCode, const THandler<FAccelByteModelsUGCContentResponse>& OnSuccess, const FErrorHandler& OnError);
+	void GetContentByShareCode(FString const& ShareCode, THandler<FAccelByteModelsUGCContentResponse> const& OnSuccess, FErrorHandler const& OnError);
 
 	/** @brief Get content Preview as FAccelByteModelsUGCPreview.
 	*
@@ -115,7 +133,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCPreview.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetContentPreview(const FString& ContentId, const THandler<FAccelByteModelsUGCPreview>& OnSuccess, const FErrorHandler& OnError);
+	void GetContentPreview(FString const& ContentId, THandler<FAccelByteModelsUGCPreview> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Get content preview as TArray<uint8>.
 	*
@@ -123,7 +141,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is TArray<uint8>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetContentPreview(const FString& ContentId, const THandler<TArray<uint8>>& OnSuccess, const FErrorHandler& OnError);
+	void GetContentPreview(FString const& ContentId, THandler<TArray<uint8>> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Get all tags.
 	*
@@ -132,7 +150,7 @@ public:
 	* @param Limit The limit of the tags results. Default value is 1000.
 	* @param Offset The offset of the tags results. Default value is 0.
 	*/
-	void GetTags(const THandler<FAccelByteModelsUGCTagsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit = 1000, int32 Offset = 0);
+	void GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit = 1000, int32 Offset = 0);
 	
 	/** @brief Get all types and subtypes.
 	*
@@ -141,7 +159,7 @@ public:
 	* @param Limit The limit of the types and subtypes results. Default value is 1000.
 	* @param Offset The offset of the types and subtypes results. Default value is 0.
 	*/
-	void GetTypes(const THandler<FAccelByteModelsUGCTypesPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit = 1000, int32 Offset = 0);
+	void GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit = 1000, int32 Offset = 0);
 
 	/** @brief Create a player's channel with specific channel name.
 	*
@@ -149,7 +167,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCChannelResponse.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateChannel(const FString& ChannelName, const THandler<FAccelByteModelsUGCChannelResponse>& OnSuccess, const FErrorHandler& OnError);
+	void CreateChannel(FString const& ChannelName, THandler<FAccelByteModelsUGCChannelResponse> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/** @brief Get all of the player's channels.
 	*
@@ -158,7 +176,7 @@ public:
 	* @param Limit The limit of the channel results. Default value is 1000.
 	* @param Offset The offset of the channel results. Default value is 0.
 	*/
-	void GetChannels(const THandler<FAccelByteModelsUGCChannelsPagingResponse>& OnSuccess, const FErrorHandler& OnError, int32 Limit = 1000, int32 Offset = 0);
+	void GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit = 1000, int32 Offset = 0);
 
 	/** @brief Delete a player's channel based on the its channel id.
 	*
@@ -166,7 +184,7 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void DeleteChannel(const FString& ChannelId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	
 	private:
 	UGC() = delete;

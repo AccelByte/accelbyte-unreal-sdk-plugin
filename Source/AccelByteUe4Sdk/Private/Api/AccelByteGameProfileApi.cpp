@@ -13,7 +13,14 @@ namespace AccelByte
 namespace Api
 {
 
-GameProfile::GameProfile(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting)
+GameProfile::GameProfile(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef)
+	:
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef}
 {
 }
 
@@ -29,8 +36,8 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 	}
 	else
 	{
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace());
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/profiles"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace());
 		FString Verb            = TEXT("GET");
 		FString ContentType     = TEXT("application/json");
 		FString Accept          = TEXT("application/json");
@@ -48,7 +55,7 @@ void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THan
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 }
 
@@ -56,8 +63,8 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -70,15 +77,15 @@ void GameProfile::GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameP
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -92,15 +99,15 @@ void GameProfile::CreateGameProfile(const FAccelByteModelsGameProfileRequest & G
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -113,15 +120,15 @@ void GameProfile::GetGameProfile(const FString & ProfileId, const THandler<FAcce
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteModelsGameProfileRequest & GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("PUT");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -135,15 +142,15 @@ void GameProfile::UpdateGameProfile(const FString & ProfileId, const FAccelByteM
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ProfileId);
 	FString Verb            = TEXT("DELETE");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -156,15 +163,15 @@ void GameProfile::DeleteGameProfile(const FString & ProfileId, const FVoidHandle
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FString & AttributeName, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *AttributeName);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ProfileId, *AttributeName);
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -177,15 +184,15 @@ void GameProfile::GetGameProfileAttribute(const FString & ProfileId, const FStri
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler & OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *Settings.GameProfileServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *ProfileId, *Attribute.name);
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/profiles/%s/attributes/%s"), *SettingsRef.GameProfileServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ProfileId, *Attribute.name);
 	FString Verb            = TEXT("PUT");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -199,7 +206,7 @@ void GameProfile::UpdateGameProfileAttribute(const FString & ProfileId, const FA
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

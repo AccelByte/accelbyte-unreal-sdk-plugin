@@ -13,16 +13,22 @@ namespace AccelByte
 {
 namespace Api
 {
-Fulfillment::Fulfillment(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Setting) : Credentials(Credentials), Settings(Setting){}
+Fulfillment::Fulfillment(
+	Credentials const& CredentialsRef,
+	Settings const& SettingsRef,
+	FHttpRetryScheduler& HttpRef):
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef} {}
 
 Fulfillment::~Fulfillment(){}
 
-void Fulfillment::RedeemCode(const FString& Code, const FString& Region, const FString& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError)
+void Fulfillment::RedeemCode(FString const& Code, FString const& Region, FString const& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *Settings.PlatformServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/fulfillment/code"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
@@ -46,7 +52,7 @@ void Fulfillment::RedeemCode(const FString& Code, const FString& Region, const F
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 	
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

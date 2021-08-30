@@ -485,7 +485,7 @@ FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FStrin
 				partyAttributeSerialized.Append(", ");
 			}
 		}
-		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}"), *partyAttributeSerialized));
+		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
 	}
 
 	if (TempPartyUserIds.Num() > 0)
@@ -642,7 +642,7 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModelsPartyData>& OnSuccess, const FErrorHandler& OnError) const
@@ -660,7 +660,7 @@ void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModels
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<FAccelByteModelsBulkUserStatusNotif>& OnSuccess, const FErrorHandler& OnError, bool CountOnly)
@@ -691,7 +691,7 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<F
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError)
@@ -711,7 +711,7 @@ void Lobby::GetPartyStorage(const FString & PartyId, const THandler<FAccelByteMo
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
@@ -731,7 +731,7 @@ void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelBy
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
@@ -751,7 +751,7 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 
 }
 
@@ -772,7 +772,7 @@ void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteMo
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
@@ -792,7 +792,7 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::SendNotificationToUser(const FString& SendToUserId, const FAccelByteModelsFreeFormNotificationRequest& Message, bool bAsync, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -816,7 +816,7 @@ void Lobby::SendNotificationToUser(const FString& SendToUserId, const FAccelByte
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler & OnError, uint32 RetryAttempt)
@@ -1423,15 +1423,17 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteMod
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
 
-	FErrorHandler ErrorHandler = AccelByte::FErrorHandler::CreateLambda([OnConflicted](int32 Code, FString Message)
-	{
-		if (Code == (int32)ErrorCodes::StatusPreconditionFailed || Code == (int32)ErrorCodes::PartyStorageOutdatedUpdateData)
+	FErrorHandler ErrorHandler = FErrorHandler::CreateLambda(
+		[OnConflicted](int32 Code, FString Message)
 		{
-			OnConflicted.ExecuteIfBound();
-		}
-	});
+			if (Code == (int32)ErrorCodes::StatusPreconditionFailed || Code == (int32)
+				ErrorCodes::PartyStorageOutdatedUpdateData)
+			{
+				OnConflicted.ExecuteIfBound();
+			}
+		});
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
 }
 
 void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
@@ -1441,25 +1443,35 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
 	}
 
-	GetPartyStorage(DataWrapper->PartyId,
-		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda([this, DataWrapper](FAccelByteModelsPartyDataNotif Result)
-		{
-			Result.Custom_attribute = DataWrapper->PayloadModifier(Result.Custom_attribute);
+	GetPartyStorage(
+		DataWrapper->PartyId,
+		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
+			[this, DataWrapper](FAccelByteModelsPartyDataNotif Result)
+			{
+				Result.Custom_attribute = DataWrapper->PayloadModifier(Result.Custom_attribute);
 
-			FAccelByteModelsPartyDataUpdateRequest PartyStorageBodyRequest;
+				FAccelByteModelsPartyDataUpdateRequest PartyStorageBodyRequest;
 
-			PartyStorageBodyRequest.UpdatedAt = FCString::Atoi64(*Result.UpdatedAt);
-			PartyStorageBodyRequest.Custom_attribute = Result.Custom_attribute;
+				PartyStorageBodyRequest.UpdatedAt = FCString::Atoi64(*Result.UpdatedAt);
+				PartyStorageBodyRequest.Custom_attribute = Result.Custom_attribute;
 
-			RequestWritePartyStorage(DataWrapper->PartyId, PartyStorageBodyRequest, DataWrapper->OnSuccess, DataWrapper->OnError, FSimpleDelegate::CreateLambda([this, DataWrapper]() {
-				DataWrapper->RemainingAttempt--;
-				WritePartyStorageRecursive(DataWrapper);
-			}));
-		}),
-		FErrorHandler::CreateLambda([DataWrapper](int32 ErrorCode, FString ErrorMessage)
-		{
-			DataWrapper->OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-		})
+				RequestWritePartyStorage(
+					DataWrapper->PartyId,
+					PartyStorageBodyRequest,
+					DataWrapper->OnSuccess,
+					DataWrapper->OnError,
+					FSimpleDelegate::CreateLambda(
+						[this, DataWrapper]()
+						{
+							DataWrapper->RemainingAttempt--;
+							WritePartyStorageRecursive(DataWrapper);
+						}));
+			}),
+		FErrorHandler::CreateLambda(
+			[DataWrapper](int32 ErrorCode, FString ErrorMessage)
+			{
+				DataWrapper->OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			})
 		);
 }
 
@@ -1478,20 +1490,30 @@ void Lobby::SetRetryParameters(int32 NewTotalTimeout, int32 NewBackoffDelay, int
 	Lobby::MaxBackoffDelay = NewMaxDelay;
 }
 
-Lobby::Lobby(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, float PingDelay, float InitialBackoffDelay, float MaxBackoffDelay, float TotalTimeout, TSharedPtr<IWebSocket> WebSocket)
-	: Credentials(Credentials)
-	, Settings(Settings)
-	, PingDelay(PingDelay)
-	, InitialBackoffDelay(InitialBackoffDelay)
-	, MaxBackoffDelay(MaxBackoffDelay)
-	, TotalTimeout(TotalTimeout)
-	, BackoffDelay(InitialBackoffDelay)
-	, RandomizedBackoffDelay(InitialBackoffDelay)
-	, TimeSinceLastPing(0.f)
-	, TimeSinceLastReconnect(0.f)
-	, WsState(EWebSocketState::Closed)
-	, WsEvents(EWebSocketEvent::None)
-	, WebSocket(WebSocket)
+	Lobby::Lobby(
+		const AccelByte::Credentials& Credentials,
+		const AccelByte::Settings& Settings,
+		FHttpRetryScheduler& HttpRef,
+		float PingDelay,
+		float InitialBackoffDelay,
+		float MaxBackoffDelay,
+		float TotalTimeout,
+		TSharedPtr<IWebSocket> WebSocket)
+		:
+		HttpRef(HttpRef),
+		Credentials(Credentials),
+		Settings(Settings),
+		PingDelay(PingDelay),
+		InitialBackoffDelay(InitialBackoffDelay),
+		MaxBackoffDelay(MaxBackoffDelay),
+		TotalTimeout(TotalTimeout),
+		BackoffDelay(InitialBackoffDelay),
+		RandomizedBackoffDelay(InitialBackoffDelay),
+		TimeSinceLastPing(0.f),
+		TimeSinceLastReconnect(0.f),
+		WsState(EWebSocketState::Closed),
+		WsEvents(EWebSocketEvent::None),
+		WebSocket(WebSocket)
 {
 	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
 	LobbyTickDelegateHandle.Reset();

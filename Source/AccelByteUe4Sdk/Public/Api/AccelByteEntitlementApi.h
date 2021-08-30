@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
@@ -19,11 +20,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Entitlement
 {
 public:
-	Entitlement(const Credentials& Credentials, const Settings& Settings);
+	Entitlement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Entitlement();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	* @brief Get list of user's Entitlement(s).
@@ -37,7 +39,7 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlements(const FString& EntitlementName, const FString& ItemId, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, FString const& ItemId, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
 	/**
 	* @brief Get list of user's Entitlement(s).
@@ -51,7 +53,7 @@ public:
 	* @param EntitlementClass Class of the entitlement (optional).
 	* @param AppType This is the type of application that entitled (optional).
 	*/
-	void QueryUserEntitlements(const FString& EntitlementName, const TArray<FString>& ItemIds, const int32& Offset, const int32& Limit, const THandler<FAccelByteModelsEntitlementPagingSlicedResult>& OnSuccess, const FErrorHandler & OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
+	void QueryUserEntitlements(FString const& EntitlementName, TArray<FString> const& ItemIds, int32 const& Offset, int32 const& Limit, THandler<FAccelByteModelsEntitlementPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError, EAccelByteEntitlementClass EntitlementClass, EAccelByteAppType AppType);
 
 	/**
 	* @brief Get user's Entitlement by the EntitlementId.
@@ -60,7 +62,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get user's Entitlement ownership of the AppId.
@@ -69,7 +71,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementOwnershipByAppId(const FString& AppId, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserEntitlementOwnershipByAppId(FString const& AppId, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Get user's Entitlement ownership of the sku.
@@ -78,7 +80,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementOwnershipBySku(const FString & Sku, const THandler<FAccelByteModelsEntitlementOwnership>& OnSuccess, const FErrorHandler & OnError);
+	void GetUserEntitlementOwnershipBySku(FString const& Sku, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get user's Entitlement ownership for multiple checks.
@@ -89,7 +91,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership will return true if any one parameters are owned.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetUserEntitlementOwnershipAny(const TArray<FString> ItemIds, const TArray<FString> AppIds, const TArray<FString> Skus, const THandler<FAccelByteModelsEntitlementOwnership> OnSuccess, const FErrorHandler & Error);
+	void GetUserEntitlementOwnershipAny(TArray<FString> const ItemIds, TArray<FString> const AppIds, TArray<FString> const Skus, THandler<FAccelByteModelsEntitlementOwnership> const OnSuccess, FErrorHandler const& Error);
 
 	/**
 	* @brief Consume a use entitlement.
@@ -99,7 +101,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementInfo.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void ConsumeUserEntitlement(const FString& EntitlementId, const int32& UseCount, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError);
+	void ConsumeUserEntitlement(FString const& EntitlementId, int32 const& UseCount, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Create Distribution Receiver.
@@ -109,7 +111,7 @@ public:
 	* @param OnSuccess This will be called when the operation success.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void CreateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void CreateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const Attributes, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Delete Distribution Receiver.
@@ -119,7 +121,7 @@ public:
 	* @param OnSuccess This will be called when the operation success.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void DeleteDistributionReceiver(const FString& ExtUserId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteDistributionReceiver(FString const& ExtUserId, FString const& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	* @brief Get Distribution Receiver.
@@ -129,7 +131,7 @@ public:
 	* @param OnSuccess This will be called when the operation success. The result is const TArray<FAccelByteModelsDistributionReceiver>.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetDistributionReceiver(const FString& PublisherNamespace, const FString& PublisherUserId, const THandler<TArray<FAccelByteModelsDistributionReceiver>>& OnSuccess, const FErrorHandler& OnError);
+	void GetDistributionReceiver(FString const& PublisherNamespace, FString const& PublisherUserId, THandler<TArray<FAccelByteModelsDistributionReceiver>> const& OnSuccess, FErrorHandler const& OnError);
 	
 	/**
 	* @brief Update Distribution Receiver.
@@ -139,7 +141,7 @@ public:
 	* @param OnSuccess This will be called when the operation success.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void UpdateDistributionReceiver(const FString& ExtUserId, const FAccelByteModelsAttributes Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void UpdateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const Attributes, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Sync entitlement from 3rd party platform purchase.
@@ -148,7 +150,7 @@ public:
 	 * @param OnSuccess This will be called when the operation success.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;

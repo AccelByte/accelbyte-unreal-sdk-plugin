@@ -24,7 +24,7 @@ public:
 	static const int MaximumDelay;
 	static const int TotalTimeout;
 
-	FAccelByteTaskRef ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
+	FAccelByteTaskPtr ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 
 	void Startup();
 	void Shutdown();
@@ -34,13 +34,14 @@ protected:
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue;
 	FDelegateHandle PollRetryHandle;
 
-	enum class EHttpRetrySchedulerState
+	enum class EState
 	{
-		UNINITIALIZED,
-		INITIALIZED,
-		SHUTTING_DOWN
+		Uninitialized,
+		Initialized,
+		ShuttingDown
 	};
-	EHttpRetrySchedulerState State = EHttpRetrySchedulerState::UNINITIALIZED;
+
+	EState State{EState::Uninitialized};
 };
 
 }

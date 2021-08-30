@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteLobbyModels.h"
 
 // Forward declarations
@@ -48,9 +49,18 @@ ENUM_CLASS_FLAGS(EWebSocketEvent);
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-	Lobby(const Credentials& Credentials, const Settings& Settings, float PingDelay = 30.f, float InitialBackoffDelay = 1.f, float MaxBackoffDelay = 30.f, float TotalTimeout = 60.f, TSharedPtr<IWebSocket> WebSocket = nullptr);
+	Lobby(
+		const Credentials& Credentials,
+		const Settings& Settings,
+		FHttpRetryScheduler& HttpRef,
+		float PingDelay = 30.f,
+		float InitialBackoffDelay = 1.f,
+		float MaxBackoffDelay = 30.f,
+		float TotalTimeout = 60.f,
+		TSharedPtr<IWebSocket> WebSocket = nullptr);
 	~Lobby();
 private:
+	FHttpRetryScheduler& HttpRef;
 	const Credentials& Credentials;
 	const Settings& Settings;
 

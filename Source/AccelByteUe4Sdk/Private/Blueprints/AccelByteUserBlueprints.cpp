@@ -47,6 +47,18 @@ void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler
 	}));
 }
 
+void UBPUser::Logout(const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+{
+	FRegistry::User.Logout(FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
 void UBPUser::ForgetAllCredentials()
 {
 	FRegistry::User.ForgetAllCredentials();

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteGameProfileModels.h"
 
 // Forward declarations
@@ -25,11 +26,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameProfile
 {
 public:
-	GameProfile(const Credentials& Credentials, const Settings& Settings);
+	GameProfile(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~GameProfile();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 public:
 
@@ -40,7 +42,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array of FAccelByteModelsPublicGameProfile.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void BatchGetPublicGameProfiles(TArray<FString> UserIds, const THandler<TArray<FAccelByteModelsPublicGameProfile>>& OnSuccess, const FErrorHandler& OnError);
+	void BatchGetPublicGameProfiles(TArray<FString> UserIds, THandler<TArray<FAccelByteModelsPublicGameProfile>> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get all user's game profiles.
@@ -48,7 +50,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an array FAccelByteModelsGameProfile.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetAllGameProfiles(const THandler<TArray<FAccelByteModelsGameProfile>>& OnSuccess, const FErrorHandler& OnError);
+	void GetAllGameProfiles(THandler<TArray<FAccelByteModelsGameProfile>> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Create a game profile.
@@ -57,7 +59,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that created.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void CreateGameProfile(const FAccelByteModelsGameProfileRequest& GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler& OnError);
+	void CreateGameProfile(FAccelByteModelsGameProfileRequest const& GameProfileRequest, THandler<FAccelByteModelsGameProfile> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get a specific game profile.
@@ -66,7 +68,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that requested.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void GetGameProfile(const FString& ProfileId, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler& OnError);
+	void GetGameProfile(FString const& ProfileId, THandler<FAccelByteModelsGameProfile> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update a specific game profile.
@@ -76,7 +78,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile that updated.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void UpdateGameProfile(const FString& ProfileId, const FAccelByteModelsGameProfileRequest& GameProfileRequest, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateGameProfile(FString const& ProfileId, FAccelByteModelsGameProfileRequest const& GameProfileRequest, THandler<FAccelByteModelsGameProfile> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Delete a specific game profile.
@@ -85,7 +87,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void DeleteGameProfile(const FString& ProfileId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void DeleteGameProfile(FString const& ProfileId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get an attribute value from a game profile.
@@ -95,7 +97,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is an attribute name and value as string.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void GetGameProfileAttribute(const FString& ProfileId, const FString& AttributeName, const THandler<FAccelByteModelsGameProfileAttribute>& OnSuccess, const FErrorHandler& OnError);
+	void GetGameProfileAttribute(FString const& ProfileId, FString const& AttributeName, THandler<FAccelByteModelsGameProfileAttribute> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Update an attribute from a game profile.
@@ -105,7 +107,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is a FAccelByteModelsGameProfile with an updated attribute.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	void UpdateGameProfileAttribute(const FString& ProfileId, const FAccelByteModelsGameProfileAttribute& Attribute, const THandler<FAccelByteModelsGameProfile>& OnSuccess, const FErrorHandler& OnError);
+	void UpdateGameProfileAttribute(FString const& ProfileId, FAccelByteModelsGameProfileAttribute const& Attribute, THandler<FAccelByteModelsGameProfile> const& OnSuccess, FErrorHandler const& OnError);
 	
 private:
 	GameProfile() = delete;

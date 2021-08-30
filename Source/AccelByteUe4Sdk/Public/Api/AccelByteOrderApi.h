@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Http.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
 
 namespace AccelByte
@@ -22,11 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API Order
 {
 public:
-	Order(const Credentials& Credentials, const Settings& Settings);
+	Order(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Order();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief Create order to purchase something from the store. 
@@ -35,7 +37,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	void CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreateRequest, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest, THandler<FAccelByteModelsOrderInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get user's order information. 
@@ -44,7 +46,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfo.
 	 * @param OnError This will be called when the operation failed. 
 	 */
-	void GetUserOrder(const FString& OrderNo, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrder(FString const& OrderNo, THandler<FAccelByteModelsOrderInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief Get all of user's orders that have been created with paging.
@@ -53,7 +55,7 @@ public:
 	 * @param Size Items per page.
 	 * @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOrderInfoPaging.
 	 */
-	void GetUserOrders(int32 Page, int32 Size, const THandler<FAccelByteModelsPagedOrderInfo>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrders(int32 Page, int32 Size, THandler<FAccelByteModelsPagedOrderInfo> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
 	 * @brief  Get the history of the created orders.
@@ -63,7 +65,7 @@ public:
 	 * The result is TArray<FAccelByteModelsOrderHistoryInfo>.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void GetUserOrderHistory(const FString& OrderNo, const THandler<TArray<FAccelByteModelsOrderHistoryInfo>>& OnSuccess, const FErrorHandler& OnError);
+	void GetUserOrderHistory(FString const& OrderNo, THandler<TArray<FAccelByteModelsOrderHistoryInfo>> const& OnSuccess, FErrorHandler const& OnError);
 private:
 	Order() = delete;
 	Order(Order const&) = delete;

@@ -5,15 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Models/AccelByteUserModels.h"
-#include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteSettings.h"
+#include "Models/AccelByteUserModels.h"
 
 
 namespace AccelByte
 {
-	class Credentials;
-	class Settings;
 	namespace Api
 	{
 		class Entitlement;
@@ -24,11 +23,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API User
 		{
 		public:
-			User(Credentials& Credentials, Settings& Settings);
+			User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& HttpRef);
 			~User();
 		private:
-			Credentials& Creds;
-			Settings& Settings;
+			FHttpRetryScheduler& HttpRef;
+			Credentials& CredentialsRef;
+			Settings const& SettingsRef;
 		public:
 			/**
 			* @brief delegate for handling upgrade headless account notification.
@@ -64,12 +64,20 @@ namespace AccelByte
 			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
-			 * @brief login from Accelbyte Launcher
+			 * @brief Log in from Accelbyte Launcher.
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief Remove access tokens, user ID, and other credentials from memory.
@@ -345,15 +353,6 @@ namespace AccelByte
 			User(User&&) = delete;
 
 			void SendVerificationCode(const FVerificationCodeRequest& Request, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-			static FString TempUsername;
-			FUpgradeNotif UpgradeNotif;
-
-		public:
-			void SetUpgradeNotifDelegate(const FUpgradeNotif& OnUpgradeNotif)
-			{
-				UpgradeNotif = OnUpgradeNotif;
-			}
 		};
 
 	} // Namespace Api

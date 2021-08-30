@@ -216,18 +216,18 @@ bool FHttpRetryTask::IsFinished()
 		Request->GetStatus() == EHttpRequestStatus::Succeeded;
 }
 
-FAccelByteTaskRef FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
+FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
 {
 	FAccelByteTaskPtr Task(nullptr);
-	if (State == EHttpRetrySchedulerState::SHUTTING_DOWN)
+	if (State == EState::ShuttingDown)
 	{
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is SHUTTING DOWN"));
-		return Task.ToSharedRef();
+		return Task;
 	}
-	if (State == EHttpRetrySchedulerState::UNINITIALIZED)
+	if (State == EState::Uninitialized)
 	{
 		UE_LOG(LogAccelByteHttpRetry, Warning, TEXT("Cannot process request, HTTP Retry Scheduler is UNINITIALIZED"));
-		return Task.ToSharedRef();
+		return Task;
 	}
 
 	FReport::LogHttpRequest(Request);
@@ -308,13 +308,13 @@ void FHttpRetryScheduler::Startup()
         }),
         0.2f);
 
-	State = EHttpRetrySchedulerState::INITIALIZED;
+	State = EState::Initialized;
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler has been INITIALIZED"));
 }
 
 void FHttpRetryScheduler::Shutdown()
 {
-	State = EHttpRetrySchedulerState::SHUTTING_DOWN;
+	State = EState::ShuttingDown;
 
 	if (PollRetryHandle.IsValid())
 	{
