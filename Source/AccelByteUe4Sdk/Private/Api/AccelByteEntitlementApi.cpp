@@ -422,6 +422,14 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoi
 	case EAccelBytePlatformSync::PLAYSTATION:
 		PlatformText = TEXT("psn");
 		break;
+	case EAccelBytePlatformSync::EPIC_GAMES:
+		PlatformText = TEXT("epicgames");
+		if (platformUserId.IsEmpty())
+		{
+			OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
+			return;
+		}
+		break;
 	default:
 		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::InvalidRequest), TEXT("Platform Sync Type is not found"));
 		return;
