@@ -1,4 +1,4 @@
-// Copyright (c) 2019 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -27,4 +27,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 		FString Next;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
 		FString Previous;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FTime
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Miscellaneous")
+		FDateTime CurrentTime;
 };

@@ -42,6 +42,7 @@ namespace Api
 	class SeasonPass;
 	class Reporting;
 	class Currency;
+	class Miscellaneous;
 }
 
 namespace GameServerApi
@@ -91,6 +92,7 @@ public:
 	static Api::SeasonPass SeasonPass;
 	static Api::Reporting Reporting;
 	static Api::Currency Currency;
+	static Api::Miscellaneous Miscellaneous;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

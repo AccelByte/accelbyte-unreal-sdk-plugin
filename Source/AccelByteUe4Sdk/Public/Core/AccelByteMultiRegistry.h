@@ -31,6 +31,7 @@
 #include "Api/AccelByteSeasonPassApi.h"
 #include "Api/AccelByteReportingApi.h"
 #include "Api/AccelByteCurrencyApi.h"
+#include "Api/AccelByteMiscellaneousApi.h"
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 
@@ -76,7 +77,8 @@ public:
 	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
 	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
 	Api::Currency Currency{ Credentials, FRegistry::Settings, Http };
-
+	Api::Miscellaneous Miscellaneous{ Credentials, FRegistry::Settings, Http };
+	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
 	{
