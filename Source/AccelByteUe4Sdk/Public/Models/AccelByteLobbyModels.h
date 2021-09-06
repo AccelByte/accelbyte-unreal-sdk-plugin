@@ -1002,6 +1002,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbySessionId
 	FString LobbySessionID;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLobbyMessages
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="AccelByte | Lobby | Models | General | LobbyError")
+	FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="AccelByte | Lobby | Models | General | LobbyError")
+	FString CodeName;
+};
+
 // ------------------------------------------------------------------------------------------------
 // Ban
 // ------------------------------------------------------------------------------------------------

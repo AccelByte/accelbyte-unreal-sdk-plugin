@@ -16,6 +16,9 @@
 namespace AccelByte
 {
 
+	// forward declaration
+	class FHttpRetryScheduler;
+	
 /**
  * @brief Singleston class for storing credentials.
  */

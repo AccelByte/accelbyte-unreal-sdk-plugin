@@ -790,6 +790,21 @@ public:
 	*/
 	void UnbindChatResponseEvents();
 
+	/**
+	* @brief Unbind all Block notif delegates set previously.
+	*/
+	void UnbindBlockNotifEvents();
+
+	/**
+	* @brief Unbind all Block response delegates set previously.
+	*/
+	void UnbindBlockResponseEvents();
+
+	/**
+	* @brief Unbind all session attribute response delegates set previously.
+	*/
+	void UnbindSessionAttributeEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -884,70 +899,84 @@ public:
 	* @brief set info party response
 	*
 	* @param OnInfoPartyResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetInfoPartyResponseDelegate(FPartyInfoResponse OnInfoPartyResponse)
+	void SetInfoPartyResponseDelegate(FPartyInfoResponse OnInfoPartyResponse, FErrorHandler OnError = {})
 	{
 		PartyInfoResponse = OnInfoPartyResponse;
+		OnPartyInfoError = OnError;
 	};
 
 	/**
 	* @brief create party response delegate
 	*
 	* @param OnCreatePartyResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetCreatePartyResponseDelegate(FPartyCreateResponse OnCreatePartyResponse)
+	void SetCreatePartyResponseDelegate(FPartyCreateResponse OnCreatePartyResponse, FErrorHandler OnError = {})
 	{
 		PartyCreateResponse = OnCreatePartyResponse;
+		OnPartyCreateError = OnError;
 	};
 
 	/**
 	* @brief set leave party response delegate
 	*
 	* @param OnLeavePartyResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetLeavePartyResponseDelegate(FPartyLeaveResponse OnLeavePartyResponse)
+	void SetLeavePartyResponseDelegate(FPartyLeaveResponse OnLeavePartyResponse, FErrorHandler OnError = {})
 	{
 		PartyLeaveResponse = OnLeavePartyResponse;
+		OnPartyLeaveError = OnError;
 	};
 
 	/**
 	* @brief set invite party response delegate
 	*
 	* @param OnInvitePartyResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetInvitePartyResponseDelegate(FPartyInviteResponse OnInvitePartyResponse)
+	void SetInvitePartyResponseDelegate(FPartyInviteResponse OnInvitePartyResponse, FErrorHandler OnError = {})
 	{
 		PartyInviteResponse = OnInvitePartyResponse;
+		OnPartyInviteError = OnError;
 	};
 
 	/**
 	* @brief set invite party join response
 	*
 	* @param OnInvitePartyJoinResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse)
+	void SetInvitePartyJoinResponseDelegate(FPartyJoinResponse OnInvitePartyJoinResponse, FErrorHandler OnError = {})
 	{
 		PartyJoinResponse = OnInvitePartyJoinResponse;
+		OnPartyJoinError = OnError;
 	};
 	
 	/**
 	* @brief set invite party reject response
 	*
 	* @param OnInvitePartyRejectResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetInvitePartyRejectResponseDelegate(FPartyRejectResponse OnInvitePartyRejectResponse)
+	void SetInvitePartyRejectResponseDelegate(FPartyRejectResponse OnInvitePartyRejectResponse, FErrorHandler OnError = {})
 	{
 		PartyRejectResponse = OnInvitePartyRejectResponse;
+		OnPartyRejectError = OnError;
 	};
 
 	/**
 	* @brief set invite party kick member reponse
 	*
 	* @param OnInvitePartyKickMemberResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetInvitePartyKickMemberResponseDelegate(FPartyKickResponse OnInvitePartyKickMemberResponse)
+	void SetInvitePartyKickMemberResponseDelegate(FPartyKickResponse OnInvitePartyKickMemberResponse, FErrorHandler OnError = {})
 	{
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
+		OnPartyKickError = OnError;
 	};
 
 	/**
@@ -974,50 +1003,60 @@ public:
 	* @brief generate party code reponse
 	*
 	* @param OnPartyGenerateCodeResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyGenerateCodeResponseDelegate(FPartyGenerateCodeResponse OnPartyGenerateCodeResponse)
+	void SetPartyGenerateCodeResponseDelegate(FPartyGenerateCodeResponse OnPartyGenerateCodeResponse, FErrorHandler OnError = {})
 	{
 		PartyGenerateCodeResponse = OnPartyGenerateCodeResponse;
+		OnPartyGenerateCodeError = OnError;
 	};
 
 	/**
 	* @brief get party code reponse
 	*
 	* @param OnPartyGetCodeResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyGetCodeResponseDelegate(FPartyGetCodeResponse OnPartyGetCodeResponse)
+	void SetPartyGetCodeResponseDelegate(FPartyGetCodeResponse OnPartyGetCodeResponse, FErrorHandler OnError = {})
 	{
 		PartyGetCodeResponse = OnPartyGetCodeResponse;
+		OnPartyGetCodeError = OnError;
 	};
 
 	/**
 	* @brief delete party code reponse
 	*
 	* @param OnPartyDeleteCodeResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyDeleteCodeResponseDelegate(FPartyDeleteCodeResponse OnPartyDeleteCodeResponse)
+	void SetPartyDeleteCodeResponseDelegate(FPartyDeleteCodeResponse OnPartyDeleteCodeResponse, FErrorHandler OnError = {})
 	{
 		PartyDeleteCodeResponse = OnPartyDeleteCodeResponse;
+		OnPartyDeleteCodeError = OnError;
 	};
 
 	/**
 	* @brief join party via party code reponse
 	*
 	* @param OnPartyJoinViaCodeResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyJoinViaCodeResponseDelegate(FPartyJoinViaCodeResponse OnPartyJoinViaCodeResponse)
+	void SetPartyJoinViaCodeResponseDelegate(FPartyJoinViaCodeResponse OnPartyJoinViaCodeResponse, FErrorHandler OnError = {})
 	{
 		PartyJoinViaCodeResponse = OnPartyJoinViaCodeResponse;
+		OnPartyJoinViaCodeError = OnError;
 	};
 
 	/**
 	* @brief set promote party leader reponse
 	*
 	* @param OnPromotePartyLeaderResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyPromoteLeaderResponseDelegate(FPartyPromoteLeaderResponse OnPartyPromoteLeaderResponse)
+	void SetPartyPromoteLeaderResponseDelegate(FPartyPromoteLeaderResponse OnPartyPromoteLeaderResponse, FErrorHandler OnError = {})
 	{
 		PartyPromoteLeaderResponse = OnPartyPromoteLeaderResponse;
+		OnPartyPromoteLeaderError = OnError;
 	};
 
 	// Chat
@@ -1025,40 +1064,48 @@ public:
 	* @brief set private message delegate
 	*
 	* @param OnPrivateMessageResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse)
+	void SetPrivateMessageResponseDelegate(FPersonalChatResponse OnPrivateMessageResponse, FErrorHandler OnError = {})
 	{
 		PersonalChatResponse = OnPrivateMessageResponse;
+		OnPersonalChatError = OnError;
 	};
 
 	/**
 	* @brief set party message response
 	*
 	* @param OnPartyMessageResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetPartyMessageResponseDelegate(FPartyChatResponse OnPartyMessageResponse)
+	void SetPartyMessageResponseDelegate(FPartyChatResponse OnPartyMessageResponse, FErrorHandler OnError = {})
 	{
 		PartyChatResponse = OnPartyMessageResponse;
+		OnPartyChatError = OnError;
 	};
 
 	/**
 	* @brief set join channel chat response
 	*
 	* @param OnJoinDefaultChannelResponse set delegate.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetJoinChannelChatResponseDelegate(FJoinDefaultChannelChatResponse OnJoinDefaultChannelResponse)
+	void SetJoinChannelChatResponseDelegate(FJoinDefaultChannelChatResponse OnJoinDefaultChannelResponse, FErrorHandler OnError = {})
 	{
 		JoinDefaultChannelResponse = OnJoinDefaultChannelResponse;
+		OnJoinDefaultChannelChatError = OnError;
 	};
 
 	/**
 	* @brief set channel message response
 	*
 	* @param OnChannelMessageResponse set delegate.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetChannelMessageResponseDelegate(FChannelChatResponse OnChannelMessageResponse)
+	void SetChannelMessageResponseDelegate(FChannelChatResponse OnChannelMessageResponse, FErrorHandler OnError = {})
 	{
 		ChannelChatResponse = OnChannelMessageResponse;
+		OnChannelChatError = OnError;
 	};
 
 	/**
@@ -1076,30 +1123,36 @@ public:
 	* @brief set user presence response
 	*
 	* @param OnSetUserPresenceResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnSetUserPresenceResponse)
+	void SetUserPresenceResponseDelegate(FSetUserPresenceResponse OnSetUserPresenceResponse, FErrorHandler OnError = {})
 	{
 		SetUserPresenceResponse = OnSetUserPresenceResponse;
+		OnSetUserPresenceError = OnError;
 	};
 
 	/**
 	* @brief (obsolete) misnamed, please use SetGetOnlineFriendsPresenceResponseDelegate
 	*
 	* @param OnGetAllUserPresenceResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse)
+	void SetGetAllUserPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetAllUserPresenceResponse, FErrorHandler OnError = {})
 	{
 		GetAllFriendsStatusResponse = OnGetAllUserPresenceResponse;
+		OnGetAllFriendsStatusError = OnError;
 	};
 
 	/**
 	* @brief Set GetFriendsPresenceResponse delegate. 
 	*
 	* @param OnGetFriendsPresenceResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetGetOnlineFriendsPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetFriendsPresenceResponse)
+	void SetGetOnlineFriendsPresenceResponseDelegate(FGetAllFriendsStatusResponse OnGetFriendsPresenceResponse, FErrorHandler OnError = {})
 	{
 		GetAllFriendsStatusResponse = OnGetFriendsPresenceResponse;
+		OnGetAllFriendsStatusError = OnError;
 	};
 
 	// Notification
@@ -1109,30 +1162,36 @@ public:
 	* @brief set start matchmaking response
 	*
 	* @param OnMatchmakingStart set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart)
+	void SetStartMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingStart, FErrorHandler OnError = {})
 	{
 		MatchmakingStartResponse = OnMatchmakingStart;
+		OnMatchmakingStartError = OnError;
 	};
 
 	/**
 	* @brief set cancel matchmaking notification
 	*
 	* @param OnMatchmakingCancel set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel)
+	void SetCancelMatchmakingResponseDelegate(FMatchmakingResponse OnMatchmakingCancel, FErrorHandler OnError = {})
 	{
 		MatchmakingCancelResponse = OnMatchmakingCancel;
+		OnMatchmakingCancelError = OnError;
 	};
 
 	/**
 	* @brief set ready consent response notification
 	*
 	* @param OnReadyConsentResponse set delegate .
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse)
+	void SetReadyConsentResponseDelegate(FReadyConsentResponse OnReadyConsentResponse, FErrorHandler OnError = {})
 	{
 		ReadyConsentResponse = OnReadyConsentResponse;
+		OnReadyConsentError = OnError;
 	};
 
 	/**
@@ -1180,112 +1239,133 @@ public:
 	* @brief Set request for friends response.
 	*
 	* @param OnRequestFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetRequestFriendsResponseDelegate(FRequestFriendsResponse OnRequestFriendsResponse)
+	void SetRequestFriendsResponseDelegate(FRequestFriendsResponse OnRequestFriendsResponse, FErrorHandler OnError = {})
 	{
 		RequestFriendsResponse = OnRequestFriendsResponse;
+		OnRequestFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set unfriend response.
 	*
 	* @param OnUnfriendResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetUnfriendResponseDelegate(FUnfriendResponse OnUnfriendResponse)
+	void SetUnfriendResponseDelegate(FUnfriendResponse OnUnfriendResponse, FErrorHandler OnError = {})
 	{
 		UnfriendResponse = OnUnfriendResponse;
+		OnUnfriendError = OnError;
 	};
 
 	/**
 	* @brief Set list outgoing request of friend response.
 	*
 	* @param OnListOutgoingFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetListOutgoingFriendsResponseDelegate(FListOutgoingFriendsResponse OnListOutgoingFriendsResponse)
+	void SetListOutgoingFriendsResponseDelegate(FListOutgoingFriendsResponse OnListOutgoingFriendsResponse, FErrorHandler OnError = {})
 	{
 		ListOutgoingFriendsResponse = OnListOutgoingFriendsResponse;
+		OnListOutgoingFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set cancel request of friend response.
 	*
 	* @param OnCancelFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetCancelFriendsResponseDelegate(FCancelFriendsResponse OnCancelFriendsResponse)
+	void SetCancelFriendsResponseDelegate(FCancelFriendsResponse OnCancelFriendsResponse, FErrorHandler OnError = {})
 	{
 		CancelFriendsResponse = OnCancelFriendsResponse;
+		OnCancelFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set incoming request of friend response.
 	*
 	* @param OnListIncomingFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetListIncomingFriendsResponseDelegate(FListIncomingFriendsResponse OnListIncomingFriendsResponse)
+	void SetListIncomingFriendsResponseDelegate(FListIncomingFriendsResponse OnListIncomingFriendsResponse, FErrorHandler OnError = {})
 	{
 		ListIncomingFriendsResponse = OnListIncomingFriendsResponse;
+		OnListIncomingFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set accept friend response.
 	*
 	* @param OnAcceptFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetAcceptFriendsResponseDelegate(FAcceptFriendsResponse OnAcceptFriendsResponse)
+	void SetAcceptFriendsResponseDelegate(FAcceptFriendsResponse OnAcceptFriendsResponse, FErrorHandler OnError = {})
 	{
 		AcceptFriendsResponse = OnAcceptFriendsResponse;
+		OnAcceptFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set reject request for friend response.
 	*
 	* @param OnRejectFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetRejectFriendsResponseDelegate(FRejectFriendsResponse OnRejectFriendsResponse)
+	void SetRejectFriendsResponseDelegate(FRejectFriendsResponse OnRejectFriendsResponse, FErrorHandler OnError = {})
 	{
 		RejectFriendsResponse = OnRejectFriendsResponse;
+		OnRejectFriendsError = OnError;
 	};
 
 	/**
 	* @brief Set load friend list response.
 	*
 	* @param OnLoadFriendListResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetLoadFriendListResponseDelegate(FLoadFriendListResponse OnLoadFriendListResponse)
+	void SetLoadFriendListResponseDelegate(FLoadFriendListResponse OnLoadFriendListResponse, FErrorHandler OnError = {})
 	{
 		LoadFriendListResponse = OnLoadFriendListResponse;
+		OnLoadFriendListError = OnError;
 	};
 
 	/**
 	* @brief Set get friendship status response.
 	*
 	* @param OnGetFriendshipStatusResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponse OnGetFriendshipStatusResponse)
+	void SetGetFriendshipStatusResponseDelegate(FGetFriendshipStatusResponse OnGetFriendshipStatusResponse, FErrorHandler OnError = {})
 	{
 		GetFriendshipStatusResponse = OnGetFriendshipStatusResponse;
+		OnGetFriendshipStatusError = OnError;
 	};
 
 	// Player
-
-	void SetBlockPlayerResponseDelegate(FBlockPlayerResponse OnBlockPlayerResponse)
+	/**
+	* @brief set unblock player responses
+	*
+	* @param OnBlockPlayerResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
+	* */
+	void SetBlockPlayerResponseDelegate(FBlockPlayerResponse OnBlockPlayerResponse, FErrorHandler OnError = {})
 	{
 		BlockPlayerResponse = OnBlockPlayerResponse;
+		OnBlockPlayerError = OnError;
 	};
 
-	void SetUnblockPlayerResponseDelegate(FUnblockPlayerResponse OnUnblockPlayerResponse)
+	/**
+	 * @brief set unblock player responses
+	 *
+	 * @param OnUnblockPlayerResponse Delegate that will be set.
+	 * @param OnError Delegate that will be called when operation failed.
+	 * */
+	void SetUnblockPlayerResponseDelegate(FUnblockPlayerResponse OnUnblockPlayerResponse, FErrorHandler OnError = {})
 	{
 		UnblockPlayerResponse = OnUnblockPlayerResponse;
-	};
-
-	void SetListBlockedUserResponseDelegate(FListBlockedUserResponse OnListBlockedUserResponse)
-	{
-		ListBlockedUserResponse = OnListBlockedUserResponse;
-	};
-
-	void SetListBlockerResponseDelegate(FListBlockerResponse OnListBlockerResponse)
-	{
-		ListBlockerResponse = OnListBlockerResponse;
+		OnUnblockPlayerError = OnError;
 	};
 
 	void SetBlockPlayerNotifDelegate(FBlockPlayerNotif OnBlockPlayerNotif)
@@ -1318,30 +1398,37 @@ public:
 	* @brief Set SetSessionAttribute delegate.
 	*
 	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetSetSessionAttributeDelegate(FSetSessionAttributeResponse OnSetSessionAttributeResponse)
+	void SetSetSessionAttributeDelegate(FSetSessionAttributeResponse OnSetSessionAttributeResponse, FErrorHandler OnError = {})
 	{
 		SetSessionAttributeResponse = OnSetSessionAttributeResponse;
+		OnSetSessionAttributeError = OnError;
+		
 	};
 
 	/**
 	* @brief Set GetSessionAttribute delegate.
 	*
 	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetGetSessionAttributeDelegate(FGetSessionAttributeResponse OnGetSessionAttributeResponse)
+	void SetGetSessionAttributeDelegate(FGetSessionAttributeResponse OnGetSessionAttributeResponse, FErrorHandler OnError = {})
 	{
 		GetSessionAttributeResponse = OnGetSessionAttributeResponse;
+		OnGetSessionAttributeError = OnError;
 	};
 
 	/**
 	* @brief Set SetSessionAttribute delegate.
 	*
 	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
 	*/
-	void SetGetAllSessionAttributeDelegate(FGetAllSessionAttributeResponse OnGetAllSessionAttributeResponse)
+	void SetGetAllSessionAttributeDelegate(FGetAllSessionAttributeResponse OnGetAllSessionAttributeResponse, FErrorHandler OnError = {})
 	{
 		GetAllSessionAttributeResponse = OnGetAllSessionAttributeResponse;
+		OnGetAllSessionAttributeError = OnError;
 	};
 
 	/**
@@ -1460,7 +1547,9 @@ private:
     bool Tick(float DeltaTime);
     FString GenerateMessageID(FString Prefix = TEXT(""));
 	void CreateWebSocket();
+	void FetchLobbyErrorMessages();
 
+	TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;
 	const float PingDelay;
 	float InitialBackoffDelay;
@@ -1585,6 +1674,43 @@ private:
 	FSetSessionAttributeResponse SetSessionAttributeResponse;
 	FGetSessionAttributeResponse GetSessionAttributeResponse;
 	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
+
+	// Error Handler
+	FErrorHandler OnPartyInfoError;
+	FErrorHandler OnPartyCreateError;
+	FErrorHandler OnPartyLeaveError;
+	FErrorHandler OnPartyInviteError;
+	FErrorHandler OnPartyJoinError;
+	FErrorHandler OnPartyRejectError;
+	FErrorHandler OnPartyKickError;
+	FErrorHandler OnPartyGenerateCodeError;
+	FErrorHandler OnPartyGetCodeError;
+	FErrorHandler OnPartyDeleteCodeError;
+	FErrorHandler OnPartyJoinViaCodeError;
+	FErrorHandler OnPartyPromoteLeaderError;
+	FErrorHandler OnPersonalChatError;
+	FErrorHandler OnPartyChatError;
+	FErrorHandler OnJoinDefaultChannelChatError;
+	FErrorHandler OnChannelChatError;
+	FErrorHandler OnSetUserPresenceError;
+	FErrorHandler OnGetAllFriendsStatusError;
+	FErrorHandler OnMatchmakingStartError;
+	FErrorHandler OnMatchmakingCancelError;
+	FErrorHandler OnReadyConsentError;
+	FErrorHandler OnRequestFriendsError;
+	FErrorHandler OnUnfriendError;
+	FErrorHandler OnListOutgoingFriendsError;
+	FErrorHandler OnCancelFriendsError;
+	FErrorHandler OnListIncomingFriendsError;
+	FErrorHandler OnAcceptFriendsError;
+	FErrorHandler OnRejectFriendsError;
+	FErrorHandler OnLoadFriendListError;
+	FErrorHandler OnGetFriendshipStatusError;
+	FErrorHandler OnBlockPlayerError;
+	FErrorHandler OnUnblockPlayerError;
+	FErrorHandler OnSetSessionAttributeError;
+	FErrorHandler OnGetSessionAttributeError;
+	FErrorHandler OnGetAllSessionAttributeError;
 };
 
 } // Namespace Api

@@ -3295,14 +3295,6 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 
 	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
 
-	Lobbies[0]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
-
-	Lobbies[0]->SetListBlockerResponseDelegate(ListBlockerDelegate);
-
-	Lobbies[1]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
-
-	Lobbies[1]->SetListBlockerResponseDelegate(ListBlockerDelegate);
-
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 
 	WaitUntil(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
@@ -3387,14 +3379,6 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	Lobbies[0]->SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
 
 	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
-
-	Lobbies[0]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
-
-	Lobbies[0]->SetListBlockerResponseDelegate(ListBlockerDelegate);
-
-	Lobbies[1]->SetListBlockedUserResponseDelegate(ListBlockedUserDelegate);
-
-	Lobbies[1]->SetListBlockerResponseDelegate(ListBlockerDelegate);
 
 	// Start Test
 	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
@@ -6354,6 +6338,91 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 	AB_TEST_EQUAL(P2PDestinationId, UserCreds[1].GetUserId());
 	
 	LobbyDisconnect(2);
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestErrorMessage, "AccelByte.Tests.Lobby.E.LobbyTestErrorHasMessage", AutomationFlagMaskLobby);
+bool LobbyTestErrorMessage::RunTest(const FString& Parameters)
+{
+	// ACT
+	// connect lobby
+	LobbyConnect(1);
+
+	
+	// ARRANGE
+	FAccelByteModelsCreatePartyResponse CreatePartyResult;
+	bool bCreatePartyDone = false;
+	bool bError = false;
+	int32 ErrorCode;
+	FString ErrorMessage = "";
+	Lobbies[0]->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
+	{
+		CreatePartyResult = result;
+		bCreatePartyDone = true;
+	}), FErrorHandler::CreateLambda([&bCreatePartyDone, &bError, &ErrorCode, &ErrorMessage](const int32 code, const FString& message)
+	{
+		bCreatePartyDone = true;
+		bError = true;
+		ErrorCode = code;
+		ErrorMessage = message;
+	}));
+	
+	// create party
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party");
+
+	// crate party again, error
+	bCreatePartyDone = false;
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party2");
+
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party2 responded with code %d, codename %s"), ErrorCode, *ErrorMessage);
+
+	// ASSERT error create party has message
+	AB_TEST_TRUE(bError);
+	AB_TEST_NOT_EQUAL(ErrorCode, 0);
+	AB_TEST_FALSE(ErrorMessage.IsEmpty());
+
+	// Cleanup
+	LobbyDisconnect(1);
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNoErrorHandlerHasResponseCode, "AccelByte.Tests.Lobby.E.LobbyTestNoErrorHandlerHasResponseCode", AutomationFlagMaskLobby);
+bool LobbyTestNoErrorHandlerHasResponseCode::RunTest(const FString& Parameters)
+{
+	// ACT
+	// connect lobby
+	LobbyConnect(1);
+
+	// ARRANGE
+	FAccelByteModelsCreatePartyResponse CreatePartyResult;
+	bool bCreatePartyDone = false;
+	Lobbies[0]->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
+	{
+		CreatePartyResult = result;
+		bCreatePartyDone = true;
+	}));
+	
+	// create party
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party");
+
+	// crate party again, error
+	bCreatePartyDone = false;
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party2");
+
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party2 responded with code %s"), *CreatePartyResult.Code);
+
+	// ASSERT error create party has message
+	const FString SuccessCode("0");
+	AB_TEST_NOT_EQUAL(CreatePartyResult.Code, SuccessCode);
+
+	// Cleanup
+	LobbyDisconnect(1);
 	ResetResponses();
 	return true;
 }
