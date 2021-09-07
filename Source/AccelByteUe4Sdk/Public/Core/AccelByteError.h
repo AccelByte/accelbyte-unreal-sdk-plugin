@@ -371,23 +371,26 @@ namespace AccelByte
 		OutMessage = "";
 		if (Response.IsValid())
 		{
-			if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
+			if (!Response->GetContentAsString().IsEmpty())
 			{
-				if (Error.NumericErrorCode != -1)
+				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
 				{
-					Code = Error.NumericErrorCode;
-				}
-				else if (Error.ErrorCode != -1)
-				{
-					Code = Error.ErrorCode;
-				}
-				else if (Error.Code != -1)
-				{
-					Code = Error.Code;
-				}
-				else
-				{
-					Code = Response->GetResponseCode();
+					if (Error.NumericErrorCode != -1)
+					{
+						Code = Error.NumericErrorCode;
+					}
+					else if (Error.ErrorCode != -1)
+					{
+						Code = Error.ErrorCode;
+					}
+					else if (Error.Code != -1)
+					{
+						Code = Error.Code;
+					}
+					else
+					{
+						Code = Response->GetResponseCode();
+					}
 				}
 			}
 			else
@@ -400,13 +403,15 @@ namespace AccelByte
 			Code = (int32)ErrorCodes::NetworkError;
 		}
 
+		OutCode = Code;
+
 		if (!Error.ErrorMessage.IsEmpty())
 		{
-			OutMessage += " " + Error.ErrorMessage;
+			OutMessage = Error.ErrorMessage;
 		}
 		else if (!Error.Error.IsEmpty())
 		{
-			OutMessage += " " + Error.Error;
+			OutMessage = Error.Error;
 		}
 		else
 		{
@@ -453,7 +458,6 @@ namespace AccelByte
 			OutMessage += "\n";
 		}
 #endif
-		OutCode = Code;
 	}
 
 	inline void HandleHttpResultOk(FHttpResponsePtr Response, const FVoidHandler& OnSuccess)

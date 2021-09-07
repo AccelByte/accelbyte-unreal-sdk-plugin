@@ -4,6 +4,7 @@
 
 #include "Misc/AutomationTest.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Api/AccelByteReportingApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"

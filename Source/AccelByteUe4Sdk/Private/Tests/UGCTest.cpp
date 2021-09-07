@@ -11,6 +11,7 @@
 #include "Core/AccelByteUtilities.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Misc/AutomationTest.h"
+#include "UserTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUGCTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUGCTest);
