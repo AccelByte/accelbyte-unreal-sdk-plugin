@@ -64,6 +64,8 @@ private:
 	const Credentials& Credentials;
 	const Settings& Settings;
 
+	bool BanNotifReceived = false;
+
 public:
 
     // Party 
@@ -222,6 +224,16 @@ public:
 	 * @brief delegate for handling incoming notification
 	*/
 	DECLARE_DELEGATE_OneParam(FMessageNotif, const FAccelByteModelsNotificationMessage&); //Passive
+
+	/*
+	* @brief delegate for handling ban notification
+	*/
+	DECLARE_DELEGATE_OneParam(FUserBannedNotification, const FAccelByteModelsUserBannedNotification&); //Passive
+
+	/*
+	* @brief delegate for handling unban notification
+	*/
+	DECLARE_DELEGATE_OneParam(FUserUnbannedNotification, const FAccelByteModelsUserBannedNotification&); //Passive
 
     // Matchmaking
 	/**
@@ -833,6 +845,14 @@ public:
 	void SetMessageNotifDelegate(const FMessageNotif& OnNotificationMessage)
 	{
 		MessageNotif = OnNotificationMessage;
+	}
+	void SetUserBannedNotificationDelegate(FUserBannedNotification OnUserBannedNotification)
+	{
+		UserBannedNotification = OnUserBannedNotification;
+	}
+	void SetUserUnbannedNotificationDelegate(FUserUnbannedNotification OnUserUnbannedNotification)
+	{
+		UserUnbannedNotification = OnUserUnbannedNotification;
 	}
 	void SetOnFriendRequestAcceptedNotifDelegate(const FAcceptFriendsNotif& OnAcceptFriendsNotif)
 	{
@@ -1502,6 +1522,8 @@ private:
 
     // Notification
 	FMessageNotif MessageNotif;
+	FUserBannedNotification UserBannedNotification;
+	FUserUnbannedNotification UserUnbannedNotification;
 
     // Matchmaking
 	FMatchmakingResponse MatchmakingStartResponse;

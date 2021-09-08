@@ -69,6 +69,58 @@ struct FUserSearchResponse
 		FAccelByteModelsPaging Paging;
 };
 
+USTRUCT(BlueprintType)
+struct FBanRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanRequest")
+		EBanType Ban;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanRequest")
+		FString Comment;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanRequest")
+		FString EndDate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanRequest")
+		EBanReason Reason;
+};
+
+USTRUCT(BlueprintType)
+struct FBannedBy
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString UserId;
+};
+
+USTRUCT(BlueprintType)
+struct FBanResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		EBanType Ban;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString BanId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FBannedBy BannedBy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString Comment;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString DisabledAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		bool Enabled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString EndDate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		EBanReason Reason;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ban | BanResponse")
+		FString UserId;
+};
+
 struct FTestUser
 {
 	FString FirstName = TEXT("John");
@@ -107,6 +159,8 @@ void AdminGetUserByEmailAddress(const FString& EmailAddress, const THandler<FUse
 void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteUserProfile(const FString& UserId,const FString& Namespace,const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void AdminBanUser(const FString& userId, const FBanRequest& requestBody, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool enabled, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError);
 
 void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 

@@ -15,6 +15,7 @@
 #include "TestUtilities.h"
 #include "EcommerceTestAdmin.h"
 #include "SeasonPassTestAdmin.h"
+#include "UserTestAdmin.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteSeasonPassTest, Log, All);
 

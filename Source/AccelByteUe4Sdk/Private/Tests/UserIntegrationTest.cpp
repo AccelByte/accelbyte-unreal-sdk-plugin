@@ -3407,3 +3407,546 @@ FString GetVerificationCode(const FString& userId, EVerificationCode code)
 	}
 	return FString("");
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBan_FeatureBan_TokenRefreshed, "AccelByte.Tests.AUser.Ban_FeatureBan_TokenRefreshed", AutomationFlagMaskUser);
+bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
+{
+	//Create User and Login
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	const FString OldSessionId = FRegistry::Credentials.GetAccessToken();
+
+	//Ban
+	FBanRequest body =
+	{
+		EBanType::MATCHMAKING,
+		"User Ban Test",
+		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
+		EBanReason::IMPERSONATION
+	};
+
+	bool bBanSuccessful = false;
+	FString BanId;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("BanUser"));
+	AdminBanUser(FRegistry::Credentials.GetUserId(), body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			BanId = Result.BanId;
+			bBanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bBanSuccessful, "Waiting for Ban...");
+
+	int RandomRequestsCount = 5;
+	//Perform Several requests
+	bool bSearchUserSuccessful = false;
+	int SearchUserSuccessfulCount = 0;
+	for (int i = 0; i < RandomRequestsCount; i++)
+	{
+		FPagedPublicUsersInfo GetDataResult;
+		FRegistry::User.SearchUsers("",
+			THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("SearchUsers On Ban Success"));
+					SearchUserSuccessfulCount++;
+					bSearchUserSuccessful = true;
+					GetDataResult = Result;
+				}),
+			UserTestErrorHandler);
+
+		FPlatformProcess::Sleep(0.2f);
+		FTicker::GetCoreTicker().Tick(0.2f);
+	}
+
+	// wait session to refresh
+	FString NewSessionId = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionId = FRegistry::Credentials.GetAccessToken();
+
+		if (OldSessionId != NewSessionId)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserSuccessful, "Waiting for Search User...");
+
+	//Unban
+	bool bUnbanSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UnbanUser"));
+	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
+			bUnbanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bUnbanSuccessful, "Waiting for Unban...");
+
+	//Perform Several requests
+	bool bSearchUserSuccessfulAfter = false;
+	int SearchUserSuccessfulAfterCount = 0;
+	FPagedPublicUsersInfo GetDataResultAfter;
+	for (int i = 0; i < RandomRequestsCount; i++)
+	{
+		FRegistry::User.SearchUsers("",
+			THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("SearchUsers On UnBan Success"));
+					bSearchUserSuccessfulAfter = true;
+					SearchUserSuccessfulAfterCount++;
+					GetDataResultAfter = Result;
+				}),
+			UserTestErrorHandler);
+
+		FPlatformProcess::Sleep(0.2f);
+		FTicker::GetCoreTicker().Tick(0.2f);
+	}
+
+	// wait session to refresh
+	FString NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
+
+		if (NewSessionId != NewSessionIdAfter)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserSuccessfulAfter, "Waiting for Search User...");
+
+	//Enable Ban
+	bool bEnableBanSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("EnablebanUser"));
+	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, true, THandler<FBanResponse>::CreateLambda([&bEnableBanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			bEnableBanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bEnableBanSuccessful, "Waiting for Enable Ban...");
+
+	//Random request
+	bool bSearchUserSuccessfulAfterEnable = false;
+	FPagedPublicUsersInfo GetDataResultAfterEnable;
+	int SearchUserSuccessfulAfterEnableCount = 0;
+	for (int i = 0; i < RandomRequestsCount; i++)
+	{
+		FRegistry::User.SearchUsers("",
+			THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+				{
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("SearchUsers On Enable Ban Success"));
+					bSearchUserSuccessfulAfterEnable = true;
+					SearchUserSuccessfulAfterEnableCount++;
+					GetDataResultAfterEnable = Result;
+				}),
+			UserTestErrorHandler);
+
+		FPlatformProcess::Sleep(0.2f);
+		FTicker::GetCoreTicker().Tick(0.2f);
+	}
+
+	// wait session to refresh
+	FString NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
+
+		if (NewSessionIdAfter != NewSessionIdAfterEnable)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserSuccessfulAfterEnable, "Waiting for Search User...");
+
+	//Assert
+	AB_TEST_TRUE(bSearchUserSuccessful);
+	AB_TEST_EQUAL(SearchUserSuccessfulCount, RandomRequestsCount);
+	AB_TEST_TRUE(bSearchUserSuccessfulAfter);
+	AB_TEST_EQUAL(SearchUserSuccessfulAfterCount, RandomRequestsCount);
+	AB_TEST_TRUE(bSearchUserSuccessfulAfterEnable);
+	AB_TEST_EQUAL(SearchUserSuccessfulAfterEnableCount, RandomRequestsCount);
+	AB_TEST_TRUE(OldSessionId != NewSessionId);
+	AB_TEST_TRUE(NewSessionId != NewSessionIdAfter);
+	AB_TEST_TRUE(NewSessionIdAfter != NewSessionIdAfterEnable);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBan_AccountBan, "AccelByte.Tests.AUser.Ban_AccountBan", AutomationFlagMaskUser);
+bool FBan_AccountBan::RunTest(const FString& Parameter)
+{
+	//Create User and Login
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	const FString OldSessionId = FRegistry::Credentials.GetAccessToken();
+	const FString UserId = FRegistry::Credentials.GetUserId();
+
+	//Ban
+	FBanRequest body =
+	{
+		EBanType::LOGIN,
+		"User Ban Test",
+		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
+		EBanReason::IMPERSONATION
+	};
+
+	bool bBanSuccessful = false;
+	FString BanId;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("BanUser"));
+	AdminBanUser(UserId, body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			BanId = Result.BanId;
+			bBanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bBanSuccessful, "Waiting for Ban...");
+
+	//Random request
+	bool bSearchUserSuccessful = false;
+	bool bSearchUserError = false;
+	bool bSearchUserDone = false;
+	FPagedPublicUsersInfo GetDataResult;
+	int ErrorCode;
+	FRegistry::User.SearchUsers("",
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bSearchUserSuccessful = true;
+				bSearchUserDone = true;
+				GetDataResult = Result;
+			}),
+		FErrorHandler::CreateLambda([&bSearchUserDone, &bSearchUserError, &ErrorCode](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				ErrorCode = Code;
+				bSearchUserError = true;
+				bSearchUserDone = true;
+			}));
+
+	// wait session to refresh
+	FString NewSessionId = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionId = FRegistry::Credentials.GetAccessToken();
+
+		if (OldSessionId != NewSessionId)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserDone, "Waiting for Search User...");
+	AB_TEST_TRUE(bSearchUserError);
+
+	//try to relogin
+	FRegistry::Credentials.ForgetAll();
+	bLoginSuccessful = false;
+	bool bLoginError = false;
+	bool bLoginDone = false;
+	int LoginErrorCode;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&bLoginError, &bLoginDone, &LoginErrorCode](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				LoginErrorCode = Code;
+				bLoginError = true;
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDone, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginError);
+
+	//Unban
+	bool bUnbanSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UnbanUser"));
+	AdminBanUserChangeStatus(UserId, BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
+			bUnbanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bUnbanSuccessful, "Waiting for Unban...");
+
+	//try to relogin
+	FRegistry::Credentials.ForgetAll();
+	bLoginSuccessful = false;
+	bool bLoginErrorAfterUnban = false;
+	bool bLoginDoneAfterUnban = false;
+	int LoginErrorCodeAfterUnban;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+			bLoginDoneAfterUnban = true;
+		}), FErrorHandler::CreateLambda([&bLoginErrorAfterUnban, &bLoginDoneAfterUnban, &LoginErrorCodeAfterUnban](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				LoginErrorCodeAfterUnban = Code;
+				bLoginErrorAfterUnban = true;
+				bLoginDoneAfterUnban = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDoneAfterUnban, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_TRUE(!bLoginErrorAfterUnban);
+
+	//Random request
+	bool bSearchUserSuccessfulAfter = false;
+	FPagedPublicUsersInfo GetDataResultAfter;
+	FRegistry::User.SearchUsers("",
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bSearchUserSuccessfulAfter = true;
+				GetDataResultAfter = Result;
+			}),
+		UserTestErrorHandler);
+
+	// wait session to refresh
+	FString NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionIdAfter = FRegistry::Credentials.GetAccessToken();
+
+		if (NewSessionId != NewSessionIdAfter)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserSuccessfulAfter, "Waiting for Search User...");
+
+	//Enable Ban
+	bool bEnableBanSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("EnablebanUser"));
+	AdminBanUserChangeStatus(UserId, BanId, true, THandler<FBanResponse>::CreateLambda([&bEnableBanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			bEnableBanSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bEnableBanSuccessful, "Waiting for Enable Ban...");
+
+	//Random request
+	bool bSearchUserSuccessfulAfterEnable = false;
+	bool bSearchUserDoneAfterEnable = false;
+	bool bSearchUserErrorAfterEnable = false;
+	int ErrorCodeAfterEnable;
+	FPagedPublicUsersInfo GetDataResultAfterEnable;
+	FRegistry::User.SearchUsers("",
+		THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				bSearchUserSuccessfulAfterEnable = true;
+				bSearchUserDoneAfterEnable = true;
+				GetDataResultAfterEnable = Result;
+			}),
+		FErrorHandler::CreateLambda([&bSearchUserDoneAfterEnable, &bSearchUserErrorAfterEnable, &ErrorCodeAfterEnable](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				ErrorCodeAfterEnable = Code;
+				bSearchUserErrorAfterEnable = true;
+				bSearchUserDoneAfterEnable = true;
+			}));
+
+	// wait session to refresh
+	FString NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
+	for (int i = 0; i < 20; i++)
+	{
+		FPlatformProcess::Sleep(0.5f);
+		FTicker::GetCoreTicker().Tick(0.5f);
+
+		NewSessionIdAfterEnable = FRegistry::Credentials.GetAccessToken();
+
+		if (NewSessionIdAfter != NewSessionIdAfterEnable)
+		{
+			break;
+		}
+	}
+	FlushHttpRequests();
+	WaitUntil(bSearchUserDoneAfterEnable, "Waiting for Search User...");
+	AB_TEST_TRUE(bSearchUserErrorAfterEnable);
+
+	//try to relogin
+	FRegistry::Credentials.ForgetAll();
+	bLoginSuccessful = false;
+	bool bLoginErrorAfterEnable = false;
+	bool bLoginDoneAfterEnable = false;
+	int LoginErrorCodeAfterEnable;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+			bLoginDoneAfterEnable = true;
+		}), FErrorHandler::CreateLambda([&bLoginErrorAfterEnable, &bLoginDoneAfterEnable, &LoginErrorCodeAfterEnable](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				LoginErrorCodeAfterEnable = Code;
+				bLoginErrorAfterEnable = true;
+				bLoginDoneAfterEnable = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDoneAfterEnable, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginError);
+
+	//Assert
+	AB_TEST_TRUE(!bSearchUserSuccessful);
+	AB_TEST_TRUE(bSearchUserSuccessfulAfter);
+	AB_TEST_TRUE(!bSearchUserSuccessfulAfterEnable);
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(UserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}

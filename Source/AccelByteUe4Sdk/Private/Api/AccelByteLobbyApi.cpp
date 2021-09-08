@@ -120,6 +120,8 @@ namespace Api
 
 		// Notification
 		const FString MessageNotif = TEXT("messageNotif");
+		const FString UserBannedNotification = TEXT("userBannedNotification");
+		const FString UserUnbannedNotification = TEXT("userUnbannedNotification");
 
 		// Matchmaking
 		const FString StartMatchmaking = TEXT("startMatchmakingResponse");
@@ -908,6 +910,9 @@ void Lobby::UnbindEvent()
 
 	UnbindChatNotifEvents();
 	UnbindChatResponseEvents();
+
+	UserBannedNotification.Unbind();
+	UserUnbannedNotification.Unbind();
 }
 
 void Lobby::UnbindFriendNotifEvents()
@@ -1018,7 +1023,7 @@ void Lobby::OnConnectionError(const FString& Error)
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
 	OnMessage(Reason);
-	if (StatusCode >= 4000)
+	if (StatusCode >= 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}
@@ -1027,6 +1032,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 		WsEvents |= EWebSocketEvent::Closed;
 	}
 
+	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
@@ -1367,6 +1373,27 @@ if (lobbyResponseType.Equals(MessageType)) \
 	// Block + Notification
 	HANDLE_LOBBY_MESSAGE_NOTIF(LobbyResponse::BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif, BlockPlayerNotif);
 	HANDLE_LOBBY_MESSAGE_NOTIF(LobbyResponse::UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif, UnblockPlayerNotif);
+
+	// Shadow Ban
+	if (lobbyResponseType.Equals(LobbyResponse::UserBannedNotification) ||
+		lobbyResponseType.Equals(LobbyResponse::UserUnbannedNotification)) 
+	{
+		BanNotifReceived = true;
+		FAccelByteModelsUserBannedNotification Result;
+		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		if (bParseSuccess)
+		{
+			HttpRef.BearerAuthRejected();
+			if (lobbyResponseType.Equals(LobbyResponse::UserBannedNotification))
+			{
+				UserBannedNotification.ExecuteIfBound(Result);
+			}
+			else if (lobbyResponseType.Equals(LobbyResponse::UserUnbannedNotification))
+			{
+				UserUnbannedNotification.ExecuteIfBound(Result);
+			}
+		}
+	}
 
 	// Error
 	if(lobbyResponseType.Equals(LobbyResponse::ErrorNotif))

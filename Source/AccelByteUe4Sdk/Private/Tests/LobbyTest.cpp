@@ -72,6 +72,8 @@ bool bBlockPlayerSuccess, bBlockPlayerError, bUnblockPlayerSuccess, bUnblockPlay
 bool bListBlockedUserListSuccess,  bListBlockerUserListError, bListBlockerListSuccess, bListBlockerListError; 
 // Block Notif
 bool bBlockPlayerNotifSuccess, bUnblockPlayerNotifSuccess, bBlockPlayerNotifError, bUnblockPlayerNotifError;
+// Ban
+bool bUserBannedNotif, bUsersUnbannedNotif;
 
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
@@ -102,6 +104,8 @@ FAccelByteModelsBlockPlayerResponse blockPlayerResponse;
 FAccelByteModelsUnblockPlayerResponse unblockPlayerResponse;
 FAccelByteModelsListBlockedUserResponse listBlockedUserResponse;
 FAccelByteModelsListBlockerResponse listBlockerResponse;
+
+FAccelByteModelsUserBannedNotification userBanNotifResponse;
 
 FAccelByteModelsMatchmakingResponse matchmakingResponse;
 FAccelByteModelsReadyConsentNotice readyConsentNotice;
@@ -744,6 +748,22 @@ const auto UserPresenceNotifDelegate = Api::Lobby::FFriendStatusNotif::CreateLam
 		bUserPresenceNotifError = true;
 	}
 });
+#pragma endregion
+
+#pragma region BanDelegate
+const auto UserBannedNotifDelegate = Api::Lobby::FUserBannedNotification::CreateLambda([](FAccelByteModelsUserBannedNotification Result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Banned"));
+		userBanNotifResponse = Result;
+		bUserBannedNotif = true;
+	});
+
+const auto UserUnbannedNotifDelegate = Api::Lobby::FUserUnbannedNotification::CreateLambda([](FAccelByteModelsUserBannedNotification Result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User UnBanned"));
+		userBanNotifResponse = Result;
+		bUsersUnbannedNotif = true;
+	});
 #pragma endregion
 
 TSharedRef<TMap<FString, int32>> GetNewCustomPorts()
@@ -3422,9 +3442,14 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	AB_TEST_TRUE(bFound);
 
 	// reblock should result in success
+	bBlockPlayerSuccess = false;
+	bBlockPlayerNotifSuccess = false;
+	bUnblockPlayerSuccess = false;
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
 	WaitUntil(bBlockPlayerSuccess, "Player 0 Blocks Player 1 Again");
 	AB_TEST_FALSE(bBlockPlayerError);
+
+	WaitUntil(bBlockPlayerNotifSuccess, "Waiting for block notif");
 
 	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
 	WaitUntil(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
@@ -6391,5 +6416,442 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	WaitUntil(bSetConfigSuccess, "Waiting Set Back Default Configuration...");
 	AB_TEST_TRUE(bSetConfigSuccess);
 	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLobbyTestFeatureBan, "AccelByte.Tests.Lobby.E.LobbyTestFeatureBan", AutomationFlagMaskLobby);
+bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
+{
+	//Arrange
+	AccelByte::Api::User& User = FRegistry::User;
+
+	User.ForgetAllCredentials();
+
+	//Create User and Login
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("CreateEmailAccount"));
+	User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLobbyConnectionClosed = false;
+	bool bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	auto LobbyConnectionClosed = Api::Lobby::FConnectionClosed::CreateLambda([&bLobbyConnectionClosed](int32 CloseCode, FString Reason, bool bWasClean)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby Connection Closed"));
+			bLobbyConnectionClosed = true;
+		});
+
+	auto LobbyDisconnected = Api::Lobby::FDisconnectNotif::CreateLambda([&bLobbyDisconnected](const FAccelByteModelsDisconnectNotif& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby Disconnected"));
+			bLobbyDisconnected = true;
+		});
+
+	const FString UserId = FRegistry::Credentials.GetUserId();
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	Lobby.SetUserBannedNotificationDelegate(UserBannedNotifDelegate);
+	Lobby.SetUserUnbannedNotificationDelegate(UserUnbannedNotifDelegate);
+	Lobby.SetConnectionClosedDelegate(LobbyConnectionClosed);
+	Lobby.SetDisconnectNotifDelegate(LobbyDisconnected);
+	Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 5);
+
+	//Ban
+	FBanRequest body =
+	{
+		EBanType::MATCHMAKING,
+		"User Ban Test",
+		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
+		EBanReason::IMPERSONATION
+	};
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	FString BanId;
+	bool bBanSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("BanUser"));
+	AdminBanUser(FRegistry::Credentials.GetUserId(), body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			BanId = Result.BanId;
+			bBanSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+
+	WaitUntil(bBanSuccessful, "Waiting for Ban...");
+	WaitUntil(bUserBannedNotif, "Waiting Ban Notification...");
+
+	// Wait Lobby connection closed
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	bool bUserBannedLobbyConnectionClosed = bLobbyConnectionClosed && !Lobby.IsConnected();
+
+	// Wait Lobby connection auto reconnect
+	WaitUntil(bUsersConnected, "Waiting Lobby Reconnected...");
+	bool bUserBannedLobbyReconnected = bUsersConnected && Lobby.IsConnected();
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	//Unban
+	bool bUnbanSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("UnbanUser"));
+	AdminBanUserChangeStatus(UserId, BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
+			bUnbanSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bUnbanSuccessful, "Waiting for Unban...");
+	WaitUntil(bUsersUnbannedNotif, "Waiting Unban Notification...");
+
+	// Wait Lobby connection closed
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	bool bUserUnbannedLobbyConnectionClosed = bLobbyConnectionClosed && !Lobby.IsConnected();
+
+	// Wait Lobby connection auto reconnect
+	WaitUntil(bUsersConnected, "Waiting Lobby Reconnected...");
+	bool bUserUnbannedLobbyReconnected = bUsersConnected && Lobby.IsConnected();
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	//Enable Ban
+	bool bEnableBanSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("EnablebanUser"));
+	AdminBanUserChangeStatus(UserId, BanId, true, THandler<FBanResponse>::CreateLambda([&bEnableBanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			bEnableBanSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bEnableBanSuccessful, "Waiting for Enable Ban...");
+	WaitUntil(bUserBannedNotif, "Waiting Ban Notification...");
+
+	// Wait Lobby connection closed
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	bool bUserBanEnableLobbyConnectionClosed = bLobbyConnectionClosed && !FRegistry::Lobby.IsConnected();
+
+	// Wait Lobby connection auto reconnect
+	WaitUntil(bUsersConnected, "Waiting Lobby Reconnected...");
+	bool bUserBanEnableLobbyReconnected = bUsersConnected && FRegistry::Lobby.IsConnected();
+
+	//Assert
+	AB_TEST_TRUE(bUserBannedLobbyConnectionClosed);
+	AB_TEST_TRUE(bUserBannedLobbyReconnected);
+	AB_TEST_TRUE(bUserUnbannedLobbyConnectionClosed);
+	AB_TEST_TRUE(bUserUnbannedLobbyReconnected);
+	AB_TEST_TRUE(bUserBanEnableLobbyConnectionClosed);
+	AB_TEST_TRUE(bUserBanEnableLobbyReconnected);
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, "", 15);
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(UserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+
+#pragma endregion DeleteUserById
+
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLobbyTestAccountBan, "AccelByte.Tests.Lobby.E.LobbyTestAccountBan", AutomationFlagMaskLobby);
+bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
+{//Arrange
+	AccelByte::Api::User& User = FRegistry::User;
+
+	User.ForgetAllCredentials();
+
+	//Create User and Login
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	double LastTime = 0;
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("CreateEmailAccount"));
+	User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLobbyConnectionClosed = false;
+	bool bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	auto LobbyConnectionClosed = Api::Lobby::FConnectionClosed::CreateLambda([&bLobbyConnectionClosed](int32 CloseCode, FString Reason, bool bWasClean)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby Connection Closed"));
+			bLobbyConnectionClosed = true;
+		});
+
+	auto LobbyDisconnected = Api::Lobby::FDisconnectNotif::CreateLambda([&bLobbyDisconnected](const FAccelByteModelsDisconnectNotif& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby Disconnected"));
+			bLobbyDisconnected = true;
+		});
+
+	const FString UserId = FRegistry::Credentials.GetUserId();
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	Lobby.SetUserBannedNotificationDelegate(UserBannedNotifDelegate);
+	Lobby.SetUserUnbannedNotificationDelegate(UserUnbannedNotifDelegate);
+	Lobby.SetConnectionClosedDelegate(LobbyConnectionClosed);
+	Lobby.SetDisconnectNotifDelegate(LobbyDisconnected);
+	Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 5);
+
+	//Ban
+	FBanRequest body =
+	{
+		EBanType::LOGIN,
+		"User Ban Test",
+		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
+		EBanReason::IMPERSONATION
+	};
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	FString BanId;
+	bool bBanSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("BanUser"));
+	AdminBanUser(UserId, body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Banned: %s"), *Result.UserId);
+			BanId = Result.BanId;
+			bBanSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+
+	WaitUntil(bBanSuccessful, "Waiting for Ban...");
+
+	// Wait Lobby connection closed
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	WaitUntil(bLobbyDisconnected, "Waiting Lobby Disconnected...", 120.0);
+	bool bUserBannedNotifReceived = bUserBannedNotif;
+	bool bUserBannedLobbyDisconnected = bLobbyConnectionClosed && bLobbyDisconnected && !Lobby.IsConnected();
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	Lobby.Connect();
+	WaitUntil(bUsersConnectionSuccess, "Wait Lobby Connect");
+	bool bBannedLobbyConnectFailed = !bUsersConnected;
+
+	//try to relogin
+	FRegistry::Credentials.ForgetAll();
+	bLoginSuccessful = false;
+	bool bLoginError = false;
+	bool bLoginDone = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&bLoginError, &bLoginDone](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				bLoginError = true;
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDone, "Waiting for Login...");
+	bool bLoginFailedUserBanned = bLoginError;
+
+	//Unban
+	bool bUnbanSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("UnbanUser"));
+	AdminBanUserChangeStatus(UserId, BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
+			bUnbanSuccessful = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bUnbanSuccessful, "Waiting for Unban...");
+
+	//try to relogin
+	FRegistry::Credentials.ForgetAll();
+	bLoginSuccessful = false;
+	bLoginDone = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+			bLoginDone = true;
+		}), FErrorHandler::CreateLambda([&bLoginDone](int Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+				bLoginDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDone, "Waiting for Login...");
+	bool bLoginSuccessUnbannedUser = bLoginSuccessful;
+
+	bLobbyConnectionClosed = false;
+	bLobbyDisconnected = false;
+	bUserBannedNotif = false;
+	bUsersUnbannedNotif = false;
+	bUsersConnected = false;
+	bUsersConnectionSuccess = false;
+
+	Lobby.Connect();
+	WaitUntil(bUsersConnectionSuccess, "Wait Lobby Connect");
+	bool bUnbannedLobbyConnectSuccess = bUsersConnected;
+
+	//Assert
+	AB_TEST_FALSE(bUserBannedNotifReceived);
+	AB_TEST_TRUE(bUserBannedLobbyDisconnected);
+	AB_TEST_TRUE(bBannedLobbyConnectFailed);
+	AB_TEST_TRUE(bLoginFailedUserBanned);
+	AB_TEST_TRUE(bLoginSuccessUnbannedUser);
+	AB_TEST_TRUE(bUnbannedLobbyConnectSuccess);
+
+	Lobby.Disconnect();
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(UserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), LobbyTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+
+#pragma endregion DeleteUserById
+
 	return true;
 }
