@@ -16,6 +16,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "TestUtilities.h"
 #include "EcommerceTestAdmin.h"
+#include "Api/AccelByteRewardApi.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -72,6 +73,7 @@ FStoreCreateRequest EcommerceTestTemporaryStore
 FItemFullInfo EcommerceTestEmptyItem;
 FCampaignInfo EcommerceTestEmptyCampaignInfo;
 FCodeInfo EcommerceTestEmptyCodeInfo;
+FRewardCreateInfo RewardCreateInfo;
 EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	"/UE4RootCategory",
 	"/UE4RootCategory/UE4ChildCategory",
@@ -102,7 +104,8 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	EcommerceTestEmptyCampaignInfo, // NotStartedCampaign Result
 	EcommerceTestEmptyCodeInfo, // CodeInfo Result
 	EcommerceTestEmptyCodeInfo, // ExpiredCodeInfo Result
-	EcommerceTestEmptyCodeInfo // NotStartedCodeInfo Result
+	EcommerceTestEmptyCodeInfo, // NotStartedCodeInfo Result
+	RewardCreateInfo // RewardId
 };
 
 FString EcommerceTestExpectedRootCategoryPath = EcommerceTestExpectedVariable.ExpectedRootCategoryPath;
@@ -159,6 +162,21 @@ bool FEcommerceTestSetup::RunTest(const FString& Parameters)
 		}));
 	WaitUntil(bWaitingTerminated, "Waiting for Setup Ecommerce CAMPAIGN...");
 	AB_TEST_TRUE(bSetupCampaignSuccess);
+
+	bool bSetupRewardSuccess = false;
+	bWaitingTerminated = false;
+	SetupEcommerceReward(EcommerceTestExpectedVariable,
+		FSimpleDelegate::CreateLambda([&bSetupRewardSuccess, &bWaitingTerminated]()
+		{
+			bSetupRewardSuccess = true;
+			bWaitingTerminated = true;
+		}),
+		FErrorHandler::CreateLambda([&bWaitingTerminated](int32 Code, const FString& Message)
+		{
+			bWaitingTerminated = true;
+		}));
+	WaitUntil(bWaitingTerminated, "Waiting for Setup Reward...");
+	AB_TEST_TRUE(bSetupRewardSuccess);
 
 	bool bUserLoginSuccess = false;
 	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
@@ -2608,6 +2626,83 @@ bool FECommerceTestGetCurrencyList::RunTest(const FString& Parameters)
 		}), EcommerceTestErrorHandler);
 	WaitUntil(bGetCurrencyListDone, "Waiting for getting currency list...");
 	AB_TEST_TRUE(bGetCurrencyListDone);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FECommerceTestGetRewardByRewardCode, "AccelByte.Tests.Ecommerce.Reward.1.GetRewardByRewardCode", AutomationFlagMaskEcommerce);
+bool FECommerceTestGetRewardByRewardCode::RunTest(const FString& Parameters)
+{
+	bool bLoginWithDeviceId = false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginWithDeviceId]()
+	{
+		bLoginWithDeviceId = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bLoginWithDeviceId, "Waiting for login...");
+	AB_TEST_TRUE(bLoginWithDeviceId);
+	
+	bool bGetRewardByRewardCodeDone = false;
+	FRegistry::Reward.GetRewardByRewardCode(*EcommerceTestExpectedVariable.RewardCreateInfo.RewardCode, THandler<FAccelByteModelsRewardInfo>::CreateLambda([&bGetRewardByRewardCodeDone](const FAccelByteModelsRewardInfo& Result)
+	{
+		bGetRewardByRewardCodeDone = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bGetRewardByRewardCodeDone, "Waiting for get reward by reward code...");
+	AB_TEST_TRUE(bGetRewardByRewardCodeDone);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetRewardByRewardId, "AccelByte.Tests.Ecommerce.Reward.2.GetRewardByRewardId", AutomationFlagMaskEcommerce);
+bool FEcommerceTestGetRewardByRewardId::RunTest(const FString& Parameters)
+{
+	bool bLoginWithDeviceId = false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginWithDeviceId]()
+	{
+		bLoginWithDeviceId = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bLoginWithDeviceId, "Waiting for login...");
+	AB_TEST_TRUE(bLoginWithDeviceId);
+
+	bool bGetRewardByRewardIdDone = false;
+	FRegistry::Reward.GetRewardByRewardId(*EcommerceTestExpectedVariable.RewardCreateInfo.RewardId, THandler<FAccelByteModelsRewardInfo>::CreateLambda([&bGetRewardByRewardIdDone](const FAccelByteModelsRewardInfo& Result)
+	{
+		bGetRewardByRewardIdDone = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bGetRewardByRewardIdDone, "Waiting for get reward by reward id...");
+	AB_TEST_TRUE(bGetRewardByRewardIdDone);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestQueryRewards, "AccelByte.Tests.Ecommerce.Reward.3.QueryRewards", AutomationFlagMaskEcommerce);
+bool FEcommerceTestQueryRewards::RunTest(const FString& Parameters)
+{
+	bool bLoginWithDeviceId = false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginWithDeviceId]()
+	{
+		bLoginWithDeviceId = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bLoginWithDeviceId, "Waiting for login...");
+	AB_TEST_TRUE(bLoginWithDeviceId);
+
+	FString EventTopic;
+	EventTopic = "statistic";
+	bool bQueryRewardsStatisticTopicDone = false;
+	FRegistry::Reward.QueryRewards(EventTopic, 0, 99, EAccelByteRewardListSortBy::NONE, THandler<FAccelByteModelsQueryReward>::CreateLambda([&bQueryRewardsStatisticTopicDone](const FAccelByteModelsQueryReward& Result)
+	{
+		bQueryRewardsStatisticTopicDone = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bQueryRewardsStatisticTopicDone, "Waiting for query statistic topic rewards...");
+	AB_TEST_TRUE(bQueryRewardsStatisticTopicDone);
+
+	EventTopic = "achievement";
+	bool bQueryRewardsAchievementTopicDone = false;
+	FRegistry::Reward.QueryRewards(EventTopic, 0, 99, EAccelByteRewardListSortBy::NONE, THandler<FAccelByteModelsQueryReward>::CreateLambda([&bQueryRewardsAchievementTopicDone](const FAccelByteModelsQueryReward& Result)
+	{
+		bQueryRewardsAchievementTopicDone = true;
+	}), EcommerceTestErrorHandler);
+	WaitUntil(bQueryRewardsAchievementTopicDone, "Waiting for query achievement topic rewards");
+	AB_TEST_TRUE(bQueryRewardsAchievementTopicDone);
 
 	return true;
 }

@@ -903,6 +903,104 @@ void SetupEcommerceCampaign(EcommerceExpectedVariable& Variables, const FSimpleD
 
 #pragma endregion
 
+#pragma region SetupReward
+void SetupEcommerceReward(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FRewardItemRequest RewardItemRequest;
+	RewardItemRequest.ItemId = Variables.redeemableItem.itemId;
+	RewardItemRequest.Quantity = 1;
+
+	FRewardConditionRequest RewardConditionRequest;
+	RewardConditionRequest.EventName = "EventNameTest";
+	RewardConditionRequest.ConditionName = "ConditionNameTest";
+	RewardConditionRequest.Condition = "$.[?(@.statCode == \"statcodetest\" && @.latestValue == 5)]";
+	RewardConditionRequest.RewardItems.Add(RewardItemRequest);
+	
+	FRewardCreateRequest RewardCreateRequest;
+	RewardCreateRequest.RewardCode = "ue4rewardtest";
+	RewardCreateRequest.Description = "RewardDescriptionTest",
+	RewardCreateRequest.EventTopic = "statistic";
+	RewardCreateRequest.RewardConditions.Add(RewardConditionRequest);
+	RewardCreateRequest.MaxAwardedPerUser = -1;
+	RewardCreateRequest.MaxAwarded = -1;
+
+	bool bQueryRewardExist = false;
+	bool bQueryRewardDone = false;
+	FQueryRewardInfo RewardInfo;
+	AdminQueryReward(THandler<FQueryRewardInfo>::CreateLambda([&bQueryRewardDone, &bQueryRewardExist, &RewardInfo](const FQueryRewardInfo& Result)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Query Reward Success"));
+		RewardInfo = Result;
+		bQueryRewardDone = true;
+		bQueryRewardExist = true;
+	}),
+	FErrorHandler::CreateLambda([&bQueryRewardDone, &bQueryRewardExist](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Error Query Reward"));
+		bQueryRewardDone = true;
+		bQueryRewardExist = false;
+	}));
+	WaitUntil(bQueryRewardDone, "Waiting for Query Reward...");
+
+	if (bQueryRewardExist)
+	{
+		bool bDeleteRewardDone = false;
+		int32 Index = RewardInfo.Data.IndexOfByPredicate([RewardCreateRequest](const FQueryRewardDataInfo& Entry)
+		{
+			return Entry.RewardCode == RewardCreateRequest.RewardCode;
+		});
+		if (Index != INDEX_NONE)
+		{
+			AdminDeleteReward(RewardInfo.Data[Index].RewardId, THandler<FRewardCreateInfo>::CreateLambda([&bDeleteRewardDone](const FRewardCreateInfo& Result)
+			{
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Delete Reward Success"));
+				bDeleteRewardDone = true;
+			}),
+			FErrorHandler::CreateLambda([&bDeleteRewardDone](int32 Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Error Delete Reward"));
+				bDeleteRewardDone = true;
+			}));
+		}
+		else
+		{
+			bDeleteRewardDone = true;
+		}
+		WaitUntil(bDeleteRewardDone, TEXT("Waiting for Delete Reward..."));
+	}
+	
+	// Create Reward
+	bool bCreateRewardDone = false;
+	bool bCreateRewardSuccess = false;
+	int32 ErrorCode;
+	FString ErrorMessage;
+	AdminCreateReward(RewardCreateRequest, THandler<FRewardCreateInfo>::CreateLambda([&bCreateRewardDone, &bCreateRewardSuccess, &Variables](const FRewardCreateInfo& Result)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Create Reward Success"));
+		bCreateRewardDone = true;
+		bCreateRewardSuccess = true;
+		Variables.RewardCreateInfo = Result;
+	}),
+	FErrorHandler::CreateLambda([&bCreateRewardDone, &ErrorCode, &ErrorMessage](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("SetupReward: Error Create Reward"));
+		bCreateRewardDone = true;
+		ErrorCode = Code;
+		ErrorMessage = Message;
+	}));
+	WaitUntil(bCreateRewardDone, TEXT("Waiting for Create Reward..."));
+	
+	if (bCreateRewardSuccess)
+	{
+		OnSuccess.ExecuteIfBound();
+	}
+	else
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}
+}
+#pragma endregion SetupReward
+
 void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	// Delete testing currency
@@ -1011,6 +1109,21 @@ void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelega
 			}
 		}
 	}
+
+	bWaitingTerminated = false;
+	bool bDeleteRewardSuccess = false;
+	AdminDeleteReward(Variables.RewardCreateInfo.RewardId, THandler<FRewardCreateInfo>::CreateLambda([&bWaitingTerminated, &bDeleteRewardSuccess](const FRewardCreateInfo& Result)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("Teardown Ecommerce: Success Delete Reward"));
+		bWaitingTerminated = true;
+		bDeleteRewardSuccess = true;
+	}),
+	FErrorHandler::CreateLambda(([&bWaitingTerminated](int32 Code, const FString& Message)
+	{
+		UE_LOG(LogAccelByteTest, Log, TEXT("Teardown Ecommerce: Error Delete Reward"));
+		bWaitingTerminated = true;
+	})));
+	WaitUntil(bWaitingTerminated, TEXT("Waiting for Delete Reward"));
 
 	OnSuccess.ExecuteIfBound();
 }
@@ -1228,5 +1341,32 @@ void AdminDisableEcommerceCampaignCode(const FString& CampaignCode, const THandl
 	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/codes/%s/disable"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *CampaignCode);
 	FString Content;
 	AB_HTTP_PUT(Request, Url, Authorization, Content);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminCreateReward(const FRewardCreateRequest& Body, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/rewards"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
+	AB_HTTP_POST(Request, Url, Authorization, Content);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminQueryReward(const THandler<FQueryRewardInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/rewards/byCriteria"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
+	AB_HTTP_GET(Request, Url, Authorization);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminDeleteReward(const FString& RewardId, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/rewards/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *RewardId);
+	FString Content;
+	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

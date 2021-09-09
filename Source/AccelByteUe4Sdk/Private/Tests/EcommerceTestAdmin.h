@@ -488,6 +488,127 @@ struct FCodeInfoPagingSlicedResult
 		FAccelByteModelsPaging paging;
 };
 
+USTRUCT(BlueprintType)
+struct FRewardItemRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 Quantity;
+};
+
+USTRUCT(BlueprintType)
+struct FRewardConditionRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString ConditionName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Condition;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString EventName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	TArray<FRewardItemRequest> RewardItems;
+};
+
+USTRUCT(BlueprintType)
+struct FRewardCreateRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString RewardCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString EventTopic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	TArray<FRewardConditionRequest> RewardConditions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwarded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwardedPerUser;
+};
+
+USTRUCT(BlueprintType)
+struct FRewardCreateInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString RewardId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString RewardCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString EventTopic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	TArray<FRewardConditionRequest> RewardConditions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwarded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwardedPerUser;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FDateTime CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FDateTime UpdatedAt;
+};
+
+USTRUCT(BlueprintType)
+struct FQueryRewardDataInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString RewardId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString RewardCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString EventTopic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	TArray<FRewardConditionRequest> RewardConditions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwarded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	int32 MaxAwardedPerUser;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FDateTime CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FDateTime UpdatedAt;
+};
+
+USTRUCT(BlueprintType)
+struct FQueryRewardPagingInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Previous;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FString Next;
+};
+
+USTRUCT(BlueprintType)
+struct FQueryRewardInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	TArray<FQueryRewardDataInfo> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Reward")
+	FQueryRewardPagingInfo Paging;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -520,6 +641,7 @@ struct EcommerceExpectedVariable
 	FCodeInfo codeInfo;
 	FCodeInfo expiredCodeInfo;
 	FCodeInfo notStartedCodeInfo;
+	FRewardCreateInfo RewardCreateInfo;
 };
 
 #pragma endregion ECOMMERCE_MODEL
@@ -527,6 +649,7 @@ struct EcommerceExpectedVariable
 void SetupEcommerceCurrency(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void SetupEcommerceCampaign(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
+void SetupEcommerceReward(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void TearDownEcommerce(EcommerceExpectedVariable& Variables, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 
 void AdminCreateEcommerceCurrency(const FCurrencyCreateRequest& Currency, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
@@ -558,3 +681,7 @@ void AdminGetEcommerceCampaignByName(const FString& Name, const THandler<FCampai
 void AdminCreateEcommerceCampaignCodes(const FString& CampaignId, const FCampaignCodeCreateModel& Body, const THandler<FCampaignCodeCreateResult>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetEcommerceCampaignCodes(const FString& CampaignId, const THandler<FCodeInfoPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError);
 void AdminDisableEcommerceCampaignCode(const FString& CampaignCode, const THandler<FCodeInfo>& OnSuccess, const FErrorHandler& OnError);
+
+void AdminCreateReward(const FRewardCreateRequest& Body, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError);
+void AdminQueryReward(const THandler<FQueryRewardInfo>& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteReward(const FString& RewardId, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError);

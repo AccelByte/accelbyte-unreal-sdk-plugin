@@ -171,6 +171,18 @@ enum class EAccelByteCurrencyType : uint8
 	VIRTUAL
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteRewardListSortBy : uint8
+{
+	NONE = 0,
+	NAMESPACE,
+	NAMESPACE_ASC,
+	NAMESPACE_DESC,
+	REWARDCODE,
+	REWARDCODE_ASC,
+	REWARDCODE_DESC
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -1055,3 +1067,81 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCurrencyList
 };
 
 #pragma endregion CurrencyModelsField
+
+#pragma region RewardModelsField
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardItem
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
+	FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardItem")
+	int32 Quantity;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardCondition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardCondition")
+	FString ConditionName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardCondition")
+	FString Condition;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardCondition")
+	FString EventName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardCOndition")
+	TArray<FAccelByteModelsRewardItem> RewardItems;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRewardInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FString RewardId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FString RewardCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FString Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FString EventTopic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	TArray<FAccelByteModelsRewardCondition> RewardConditions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	int32 MaxAwarded;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	int32 MaxAwardedPerUser;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FDateTime CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | RewardInfo")
+	FDateTime UpdatedAt;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsQueryRewardPaging
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | QueryRewardPaging")
+	FString Previous;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | QueryRewardPaging")
+	FString Next;
+};
+
+USTRUCT(BlueprintType)
+struct FAccelByteModelsQueryReward
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | QueryReward")
+	TArray<FAccelByteModelsRewardInfo> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Reward | Models | QueryReward")
+	FAccelByteModelsQueryRewardPaging Paging;
+};
+
+#pragma endregion RewardModelsField
