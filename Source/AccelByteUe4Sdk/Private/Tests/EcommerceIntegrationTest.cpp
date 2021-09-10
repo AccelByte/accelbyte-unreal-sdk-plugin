@@ -76,12 +76,14 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	"/UE4RootCategory",
 	"/UE4RootCategory/UE4ChildCategory",
 	"/UE4RootCategory/UE4ChildCategory/UE4GrandChildCategory",
+	"/UE4MediaCategory",
 	EcommerceTestCurrencyRequest,
 	"", // CampaignCode
 	"UE4CampaignTest", // CampaignName
 	"UE4ExpiredCampaignTest", // ExpiredCaimpaignName
 	"UE4NotStartedCampaignTest", // NotStartedCampaignName
 	"UE4RedeemableItem", // RedeemableItemTitle
+	"UE4MediaItem", // MediaItemTitle
 	"UE4RootItem",
 	"UE4ChildItem",
 	"UE4GrandChildItem",
@@ -90,6 +92,7 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	EcommerceTestTemporaryStore,
 	1000, // LootCoin Quantity
 	EcommerceTestEmptyItem, // RedeemableItem Result
+	EcommerceTestEmptyItem, // MediaItem Result
 	EcommerceTestEmptyItem, // LootItem Result
 	EcommerceTestEmptyItem, // LootCoin Result
 	EcommerceTestEmptyItem, // Lootbox Result
@@ -105,8 +108,10 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 FString EcommerceTestExpectedRootCategoryPath = EcommerceTestExpectedVariable.ExpectedRootCategoryPath;
 FString EcommerceTestExpectedChildCategoryPath = EcommerceTestExpectedVariable.ExpectedChildCategoryPath;
 FString EcommerceTestExpectedGrandChildCategoryPath = EcommerceTestExpectedVariable.ExpectedGrandChildCategoryPath;
+FString EcommerceTestExpectedMediaCategoryPath = EcommerceTestExpectedVariable.ExpectedMediaCategoryPath;
 FString EcommerceTestExpectedRootItemTitle = EcommerceTestExpectedVariable.ExpectedRootItemTitle; //"INGAMEITEM", 2 DOGECOIN, 0 Discount
 FString EcommerceTestExpectedChildItemTitle = EcommerceTestExpectedVariable.ExpectedChildItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
+FString EcommerceTestExpectedMediaItemTitle = EcommerceTestExpectedVariable.mediaItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
 FString EcommerceTestExpectedCurrencyCode = EcommerceTestExpectedVariable.ExpectedCurrency.currencyCode;
 FString EcommerceTestExpectedEntitlementId;
 
@@ -749,12 +754,64 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 
 #pragma endregion CreateOrder_InGameItem
 
+#pragma region GetItemByCriteria_MediaItem
+
+	ItemCriteria.CategoryPath = EcommerceTestExpectedMediaCategoryPath;
+	ItemCriteria.ItemType = EAccelByteItemType::MEDIA;
+	bool bGetItemByCriteriaSuccess3 = false;
+	bool bExpectedItemFound3 = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_MediaItem"));
+	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    ChildFound: %d"), Result.Data.Num());
+			for (int i = 0; i < Result.Data.Num(); i++)
+			{
+				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+				if (Result.Data[i].Title == EcommerceTestExpectedMediaItemTitle)
+				{
+					UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("        Found"));
+					Item = Result.Data[i];
+					bExpectedItemFound3 = true;
+					bGetItemByCriteriaSuccess3 = true;
+				}
+			}
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get item...");
+
+#pragma endregion GetItemByCriteria_MediaItem
+
+#pragma region CreateOrder_MediaItem
+
+	OrderCreate.CurrencyCode = Item.RegionData[0].CurrencyCode;
+	OrderCreate.DiscountedPrice = Item.RegionData[0].DiscountedPrice * Quantity;
+	OrderCreate.Price = Item.RegionData[0].Price * Quantity;
+	OrderCreate.Quantity = Quantity;
+	OrderCreate.ReturnUrl = TEXT("https://sdk.example.com");
+	OrderCreate.ItemId = Item.ItemId;
+	OrderCreate.Region = "US";
+	OrderCreate.Language = "en";
+
+	bool bCreateNewOrderSuccess3 = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder3"));
+	FRegistry::Order.CreateNewOrder(OrderCreate, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bCreateNewOrderSuccess3 = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bCreateNewOrderSuccess3, "Waiting for new order created...");
+
+#pragma endregion CreateOrder_MediaItem
+
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	AB_TEST_TRUE(bExpectedItemFound);
 	AB_TEST_TRUE(bCreateNewOrderSuccess);
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 	AB_TEST_TRUE(bExpectedItemFound2);
 	AB_TEST_TRUE(bCreateNewOrderSuccess2);
+	AB_TEST_TRUE(bExpectedItemFound3);
+	AB_TEST_TRUE(bCreateNewOrderSuccess3);
 	return true;
 }
 

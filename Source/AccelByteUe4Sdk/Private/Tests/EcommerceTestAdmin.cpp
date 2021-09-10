@@ -217,6 +217,13 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 	if (!CreateEcommerceCategory(NewStoreId, Variables.ExpectedGrandChildCategoryPath, TEXT("en"), TEXT("UE4 Ecommerce Grand Child Category"), OnSuccess, OnError)) {
 		return;
 	}
+
+	/*
+	 * Create grand child CATEGORY
+	 */
+	if (!CreateEcommerceCategory(NewStoreId, Variables.ExpectedMediaCategoryPath, TEXT("en"), TEXT("UE4 Ecommerce Media Category"), OnSuccess, OnError)) {
+		return;
+	}
 #pragma endregion
 
 #pragma region SetupEcommerceItem
@@ -500,6 +507,61 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 	};
 
 	if (!CreateEcommerceItem(NewStoreId, RedeemableItemRequest, OnSuccess, OnError, Variables.redeemableItem)) {
+		return;
+	}
+#pragma endregion
+
+#pragma region SetupEcommerceMediaItem
+	FLocalization MediaItemLocalization{
+		Variables.mediaItemTitle,
+		"Media item",
+		"Purchasing item, real currency, not free, USD"
+	};
+	TMap<FString, FLocalization> MediaItemLocalizations;
+	MediaItemLocalizations.Add("en", MediaItemLocalization);
+	FCreateRegionDataItem MediaItemRegionData
+	{
+		1, //not free so it will not auto fulfill.
+		0,
+		0,
+		0,
+		"USD",
+		EAccelByteItemCurrencyType::REAL,
+		FRegistry::Settings.Namespace,
+		FDateTime::MinValue().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601(),
+		FDateTime::MinValue().ToIso8601(),
+		FDateTime::MaxValue().ToIso8601()
+	};
+	FItemCreateRequest MediaItemRequest{
+		EAccelByteItemType::MEDIA,
+		EAccelByteSeasonType::PASS, // set as default
+		Variables.mediaItemTitle,
+		EAccelByteEntitlementType::CONSUMABLE,
+		1,
+		false,
+		"",
+		EAccelByteAppType::GAME,
+		"",
+		Variables.ExpectedCurrency.currencyCode,
+		FRegistry::Settings.Namespace,
+		Variables.ExpectedMediaCategoryPath,
+		MediaItemLocalizations,
+		EAccelByteItemStatus::ACTIVE,
+		"UE4mediaSku",
+		{ FAccelByteModelsItemImage{"image", "itemImage" ,32, 32, "http://example.com", "http://example.com"} },
+		"",
+		FRegionDataUS{{MediaItemRegionData}},
+		EmptyStrings,
+		EmptyStrings,
+		-1,
+		-1,
+		"",
+		0,
+		"classless"
+	};
+
+	if (!CreateEcommerceItem(NewStoreId, MediaItemRequest, OnSuccess, OnError, Variables.mediaItem)) {
 		return;
 	}
 #pragma endregion

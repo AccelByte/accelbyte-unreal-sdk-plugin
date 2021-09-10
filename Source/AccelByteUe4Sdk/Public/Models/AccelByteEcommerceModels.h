@@ -19,7 +19,8 @@ enum class EAccelByteItemType : uint8
 	BUNDLE,
 	CODE,
 	SUBSCRIPTION,
-	SEASON
+	SEASON,
+	MEDIA
 };
 
 UENUM(BlueprintType)

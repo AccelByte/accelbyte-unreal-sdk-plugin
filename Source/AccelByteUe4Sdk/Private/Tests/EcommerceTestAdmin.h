@@ -493,12 +493,14 @@ struct EcommerceExpectedVariable
 	FString ExpectedRootCategoryPath;
 	FString ExpectedChildCategoryPath;
 	FString ExpectedGrandChildCategoryPath;
+	FString ExpectedMediaCategoryPath;
 	FCurrencyCreateRequest ExpectedCurrency;
 	FString campaignCode;
 	FString campaignName;
 	FString expiredCampaignName;
 	FString notStartedCampaignName;
 	FString redeemableItemTitle;
+	FString mediaItemTitle;
 	FString ExpectedRootItemTitle;
 	FString ExpectedChildItemTitle;
 	FString ExpectedGrandChildItemTitle;
@@ -507,6 +509,7 @@ struct EcommerceExpectedVariable
 	FStoreCreateRequest ExpectedStoreTemporary;
 	int32 LootCoinQuantity;
 	FItemFullInfo redeemableItem;
+	FItemFullInfo mediaItem;
 	FItemFullInfo LootItem;
 	FItemFullInfo LootCoin;
 	FItemFullInfo LootResult;
