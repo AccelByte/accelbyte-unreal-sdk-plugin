@@ -1691,11 +1691,11 @@ void Lobby::FetchLobbyErrorMessages()
 
 	bool bFetchErrorMessageDone = false;
 	FHttpClient HttpClient(Credentials, Settings, HttpRef);
-	HttpClient.Request("GET", Url, {}, "", {}, THandler<TArray<FLobbyMessages>>::CreateLambda([&](const TArray<FLobbyMessages>& result)
+	HttpClient.Request("GET", Url, {}, "", {}, THandler<TArray<FLobbyMessages>>::CreateLambda([&](const TArray<FLobbyMessages>& Result)
 	{
-		for(const FLobbyMessages code : result)
+		for(const FLobbyMessages& LobbyMessages : Result)
 		{
-			LobbyErrorMessages.Add(code.Code, code.CodeName);
+			LobbyErrorMessages.Add(LobbyMessages.Code, LobbyMessages.CodeName);
 		}
 
 		bFetchErrorMessageDone = true;
