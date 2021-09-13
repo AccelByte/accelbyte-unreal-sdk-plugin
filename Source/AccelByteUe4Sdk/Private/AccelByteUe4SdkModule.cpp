@@ -67,7 +67,10 @@ void FAccelByteUe4SdkModule::StartupModule()
 	RegisterSettings();
 	LoadSettingsFromConfigUobject();
 	LoadServerSettingsFromConfigUobject();
+
+#if UE_BUILD_DEVELOPMENT
 	CheckServicesCompatibility();
+#endif
 
 	FRegistry::HttpRetryScheduler.Startup();
 	FRegistry::Credentials.Startup();
