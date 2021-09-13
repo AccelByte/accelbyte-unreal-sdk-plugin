@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -738,6 +738,46 @@ public:
 	*/
 	void UnbindEvent();
 
+	/**
+	* @brief Unbind all party notif delegates set previously.
+	*/
+	void UnbindPartyNotifEvents();
+
+	/**
+	* @brief Unbind all party response delegates set previously.
+	*/
+	void UnbindPartyResponseEvents();
+
+	/**
+	* @brief Unbind all friend notif delegates set previously.
+	*/
+	void UnbindFriendNotifEvents();
+
+	/**
+	* @brief Unbind all friend response delegates set previously.
+	*/
+	void UnbindFriendResponseEvents();
+
+	/**
+	* @brief Unbind all matchmaking notif delegates set previously.
+	*/
+	void UnbindMatchmakingNotifEvents();
+
+	/**
+	* @brief Unbind all matchmaking response delegates set previously.
+	*/
+	void UnbindMatchmakingResponseEvents();
+
+	/**
+	* @brief Unbind all chat notif delegates set previously.
+	*/
+	void UnbindChatNotifEvents();
+
+	/**
+	* @brief Unbind all chat response delegates set previously.
+	*/
+	void UnbindChatResponseEvents();
+
 	void SetConnectSuccessDelegate(const FConnectSuccess& OnConnectSuccess)
 	{
 		ConnectSuccess = OnConnectSuccess;
@@ -890,9 +930,24 @@ public:
 		PartyKickResponse = OnInvitePartyKickMemberResponse;
 	};
 
-	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateResponse) 
+	/**
+	 * @brief misnamed, same as SetPartyDataUpdateNotifDelegate
+	 *
+	 * @param OnPartyDataUpdateNotif set delegate
+	 */
+	void SetPartyDataUpdateResponseDelegate(FPartyDataUpdateNotif OnPartyDataUpdateNotif) 
 	{
-		PartyDataUpdateNotif = OnPartyDataUpdateResponse;
+		PartyDataUpdateNotif = OnPartyDataUpdateNotif;
+	};
+	
+	/**
+	* @brief set party data update notif delegate
+	*
+	* @param OnPartyDataUpdateNotif set delegate
+	*/
+	void SetPartyDataUpdateNotifDelegate(FPartyDataUpdateNotif OnPartyDataUpdateNotif) 
+	{
+		PartyDataUpdateNotif = OnPartyDataUpdateNotif;
 	};
 
 	/**

@@ -158,6 +158,18 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	}));
 }
 
+void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	Oauth2::GetTokenWithRefreshToken(SettingsRef.ClientId, SettingsRef.ClientSecret, CredentialsRef.GetRefreshToken(),
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result) {
+			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
+			OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); }));
+}
+
 void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

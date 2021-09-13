@@ -72,6 +72,14 @@ namespace AccelByte
 			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 			/**
+			 * @brief login with refresh token
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
 			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
@@ -294,6 +302,8 @@ namespace AccelByte
 
 			/**
 			 * @brief This function will get user by other platform user id it linked to.
+			 * Note : For Nintendo Login you have to add Environment ID Suffix behind platform id with PlatformID:EnvironmentID as format
+			 * e.g csg123jskansdk:dd1
 			 *
 			 * @param PlatformType Other platform type .
 			 * @param OtherPlatformUserId Targeted user's ID.
@@ -322,7 +332,9 @@ namespace AccelByte
 
 			/**
 			 * @brief This function will get user(s) by other platform user id(s) it linked to.
-			 *
+			* Note : For Nintendo Login you have to add Environment ID Suffix behind platform id with PlatformID:EnvironmentID as format
+			 * e.g csg123jskansdk:dd1
+			 * 
 			 * @param PlatformType Other platform type .
 			 * @param OtherPlatformUserId Targeted user's ID(s).
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FBulkPlatformUserIdResponse.

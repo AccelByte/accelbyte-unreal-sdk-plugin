@@ -58,7 +58,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicAchievement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
 		bool Incremental;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		int32 GoalValue;
+		float GoalValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
@@ -102,7 +102,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMultiLanguageAchievement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
 		bool Incremental;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		int32 GoalValue;
+		float GoalValue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
 		FString StatCode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")

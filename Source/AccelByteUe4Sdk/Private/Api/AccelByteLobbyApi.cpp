@@ -892,25 +892,112 @@ void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	BlockPlayerNotif.Unbind();
+	UnblockPlayerNotif.Unbind();
+	MessageNotif.Unbind();
+	PartyDataUpdateNotif.Unbind();
+
+	UnbindFriendNotifEvents();
+	UnbindFriendResponseEvents();
+
+	UnbindPartyNotifEvents();
+	UnbindPartyResponseEvents();
+
+	UnbindMatchmakingNotifEvents();
+	UnbindMatchmakingResponseEvents();
+
+	UnbindChatNotifEvents();
+	UnbindChatResponseEvents();
+}
+
+void Lobby::UnbindFriendNotifEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FriendStatusNotif.Unbind();
+	AcceptFriendsNotif.Unbind();
+	RequestFriendsNotif.Unbind();
+	UnfriendNotif.Unbind();
+	CancelFriendsNotif.Unbind();
+	RejectFriendsNotif.Unbind();
+}
+
+void Lobby::UnbindFriendResponseEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SetUserPresenceResponse.Unbind();
+	GetAllFriendsStatusResponse.Unbind();
+	RequestFriendsResponse.Unbind();
+	UnfriendResponse.Unbind();
+	ListOutgoingFriendsResponse.Unbind();
+	CancelFriendsResponse.Unbind();
+	ListIncomingFriendsResponse.Unbind();
+	AcceptFriendsResponse.Unbind();
+	RejectFriendsResponse.Unbind();
+	LoadFriendListResponse.Unbind();
+	GetFriendshipStatusResponse.Unbind();
+}
+
+void Lobby::UnbindPartyNotifEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
 	PartyLeaveNotif.Unbind();
 	PartyInviteNotif.Unbind();
 	PartyGetInvitedNotif.Unbind();
 	PartyJoinNotif.Unbind();
+	PartyRejectNotif.Unbind();
 	PartyKickNotif.Unbind();
-	PersonalChatNotif.Unbind();
-	PartyChatNotif.Unbind();
-	FriendStatusNotif.Unbind();
-	ReadyConsentNotif.Unbind();
-	MessageNotif.Unbind();
+}
+
+void Lobby::UnbindPartyResponseEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	PartyInfoResponse.Unbind();
+	PartyCreateResponse.Unbind();
+	PartyLeaveResponse.Unbind();
+	PartyInviteResponse.Unbind();
+	PartyJoinResponse.Unbind();
+	PartyRejectResponse.Unbind();
+	PartyKickResponse.Unbind();
+}
+
+void Lobby::UnbindMatchmakingNotifEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
 	MatchmakingNotif.Unbind();
+	ReadyConsentNotif.Unbind();
 	RematchmakingNotif.Unbind();
 	DsNotif.Unbind();
-	AcceptFriendsNotif.Unbind();
-	RequestFriendsNotif.Unbind();
-	BlockPlayerNotif.Unbind();
-	UnblockPlayerNotif.Unbind();
+}
+
+void Lobby::UnbindMatchmakingResponseEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	MatchmakingStartResponse.Unbind();
+	MatchmakingCancelResponse.Unbind();
+	ReadyConsentResponse.Unbind();
+}
+
+void Lobby::UnbindChatNotifEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	PersonalChatNotif.Unbind();
+	PartyChatNotif.Unbind();
 	ChannelChatNotif.Unbind();
-	PartyDataUpdateNotif.Unbind();
+}
+
+void Lobby::UnbindChatResponseEvents()
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	PersonalChatResponse.Unbind();
+	PartyChatResponse.Unbind();
 }
 
 void Lobby::OnConnected()

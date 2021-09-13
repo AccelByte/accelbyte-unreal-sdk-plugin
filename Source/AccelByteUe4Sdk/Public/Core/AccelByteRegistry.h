@@ -40,6 +40,8 @@ namespace Api
 	class SessionBrowser;
 	class UGC;
 	class SeasonPass;
+	class Reporting;
+	class Currency;
 }
 
 namespace GameServerApi
@@ -61,10 +63,10 @@ class ACCELBYTEUE4SDK_API FRegistry
 {
 public:
 	static Settings Settings;
+	static FHttpRetryScheduler HttpRetryScheduler;
 	static Credentials Credentials;
 	static ServerSettings ServerSettings;
 	static ServerCredentials ServerCredentials;
-	static FHttpRetryScheduler HttpRetryScheduler;
 	static Api::User User;
 	static Api::UserProfile UserProfile;
 	static Api::Category Category;
@@ -87,6 +89,8 @@ public:
 	static Api::SessionBrowser SessionBrowser;
 	static Api::UGC UGC;
 	static Api::SeasonPass SeasonPass;
+	static Api::Reporting Reporting;
+	static Api::Currency Currency;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

@@ -29,6 +29,8 @@
 #include "Api/AccelByteSessionBrowserApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
+#include "Api/AccelByteReportingApi.h"
+#include "Api/AccelByteCurrencyApi.h"
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 
@@ -72,6 +74,8 @@ public:
 	Api::SessionBrowser SessionBrowser{Credentials, FRegistry::Settings, Http};
 	Api::UGC UGC{Credentials, FRegistry::Settings, Http};
 	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
+	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
+	Api::Currency Currency{ Credentials, FRegistry::Settings, Http };
 
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
@@ -85,7 +89,7 @@ public:
 class ACCELBYTEUE4SDK_API FMultiRegistry
 {
 public:
-	static TSharedPtr<FApiClient> GetApiClient(FString key);
+	static TSharedPtr<FApiClient> GetApiClient(const FString Key = TEXT("default"));
 
 private:
 	static TMap<FString, TSharedPtr<FApiClient>> ApiClientInstances;
