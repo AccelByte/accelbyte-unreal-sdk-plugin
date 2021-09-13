@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.0.0%0D5.0.0) (2021-09-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **httpclient:** change methods to return FAccelByteTaskPtr so that http request can be cancelled
+
+### Features
+
+* **ecommerce:** new currency list and cancel order endpoint ([1568489](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/15684898e89e3b5f2b985dc1d21871db00a5a4c6))
+* **ecommerce:** New CurrencyList and CancelOrder endpoint ([02cdd53](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/02cdd53b661bb62dd5b637867590e8b0979e49ba))
+* **ecommerce:** New CurrencyList and CancelOrder endpoint ([940a819](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/940a8194d253c086985e9046b5cfa03ccf60049d))
+* **ecommerce:** New CurrencyList and CancelOrder endpoint ([2b75447](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2b75447a24ae723030defc76d2fb39e86070ffc8))
+* **ecommerce:** New CurrencyList and CancelOrder endpoint ([f883dca](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f883dca9eec3fff37a600054b86e1e104f4c520d))
+* **FHttpClient:** make building url easier with namespace and user id token replacement with values in credentials ([f132fab](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f132fabe9b2d8a67b58c96edea12c111ded43481))
+* **httpclient:** change methods to return FAccelByteTaskPtr so that http request can be cancelled ([6e46b25](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e46b25a67d0156e1628db07e071690bbc1a145c))
+* **lobby:** add unbind event per lobby scope ([ec76f4f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ec76f4fe2089a2ee0e8569b30c689e66e9680797))
+* **lobby:** add unbind event per lobby scope ([c446e76](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c446e76e81f37b4038c50a3307917e2eb80802ba))
+* **MultiRegistry:** Add "default" key parameter to GetClientApi static method ([2d7a9b8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2d7a9b8ab068a1b7f32aead64aef6b7a1235b927))
+* **MultiRegistry:** Add"default" key parameter to GetClientApi static method (again) ([85c8afb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/85c8afb1967d4f8e8e6b490a9f5fb873b583178f))
+* **reporting:** re-add reporting SDK ([fc509f6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fc509f62b496faceab420b40a61c6400c3b8f0f9))
+* **User:** Add LoginWithRefreshToken ([5f5b47c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5f5b47c28489770a544ef8bdd5db8397e69f7009))
+
+
+### Bug Fixes
+
+* **lobby:** fixed PartyDataUpdateNotif Leader field typo. ([e78c4cb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e78c4cb2b09b5922da8ec56bf14482699cef3fa6))
+
+
+### Refactors
+
+* revert back changes that cause errors ([86be55c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86be55cc63a43792d309649c15858654eed54c54))
+
+
+### Tests
+
+* **ecommerce:** update Ecommerce Test Admin to fix some crashes during Ecommerce Setup process ([469c088](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/469c088f5e2dacbbe0cd994155dd8657a10f704c))
+* **ecommerce:** use valid uuid format for testing item that does not exist + move ServerEntitlementFulfillInvalidFailed to integration tests ([0e460dd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0e460dd2f459d436c1dd275fac8e36ad03a12f07))
+* **lobby:** fix intermttent test error on rematchmaking ([bb41553](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bb41553f98fb5e6c1cdefcf6b1f4748bea5be69b))
+* **serverlobby:** fix intermittent test error in get set session attribute ([d620ea7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d620ea7a3d2c4136ff4807d64b018b3b6bdc5097))
+
 ## [5.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/5.0.0%0D4.0.1) (2021-08-30)
 
 
