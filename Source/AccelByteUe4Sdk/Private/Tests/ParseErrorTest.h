@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interfaces/IHttpResponse.h"
 
 /*
 * Class for make mock response to handled by HandleHttpError
