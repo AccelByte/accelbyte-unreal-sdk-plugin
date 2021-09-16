@@ -331,7 +331,7 @@ void User::UpdateUser(FUserUpdateRequest UpdateRequest, const THandler<FAccountU
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
-	FString Verb = TEXT("PUT");
+	FString Verb = TEXT("PATCH");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content;

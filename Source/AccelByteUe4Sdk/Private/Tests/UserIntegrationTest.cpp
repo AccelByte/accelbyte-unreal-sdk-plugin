@@ -3280,6 +3280,106 @@ bool FUpdateUserEmail::RunTest(const FString& Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpdateUserMultiFields, "AccelByte.Tests.AUser.UpdateUserMultiFields", AutomationFlagMaskUser);
+bool FUpdateUserMultiFields::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 22));
+	const FString FormatDOB = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccess = false;
+	bool bRegisterDone = false;
+	FRegisterResponse RegisterResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Register User"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, FormatDOB, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess, &bRegisterDone, &RegisterResult](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Register User"));
+		bRegisterSuccess = true;
+		bRegisterDone = true;
+		RegisterResult = Result;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+	AB_TEST_TRUE(bRegisterSuccess);
+
+	bool bLoginSuccess = false;
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&bLoginSuccess]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Login User"));
+			bLoginSuccess = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccess, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccess);
+
+	const FString NewCountry = "ID";
+	const FDateTime NewDateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 23));
+	const FString NewFormatDOB = FString::Printf(TEXT("%04d-%02d-%02d"), NewDateOfBirth.GetYear(), NewDateOfBirth.GetMonth(), NewDateOfBirth.GetDay());
+	FString NewDisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+	FUserUpdateRequest UpdateUserRequest;
+	UpdateUserRequest.Country = NewCountry;
+	UpdateUserRequest.DateOfBirth = NewFormatDOB;
+	UpdateUserRequest.DisplayName = NewDisplayName;
+	bool bUpdateUserSuccess = false;
+	FAccountUserData UpdateUserResult;
+	FRegistry::User.UpdateUser(UpdateUserRequest, THandler<FAccountUserData>::CreateLambda([&bUpdateUserSuccess, &UpdateUserResult](const FAccountUserData& Response)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Update User Data"));
+		UpdateUserResult = Response;
+		bUpdateUserSuccess = true;
+	}), 
+	FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	}));
+
+	WaitUntil(bUpdateUserSuccess, "Waiting for update User Datas");
+	AB_TEST_TRUE(bUpdateUserSuccess);
+
+	bool bGetDataSuccessful = false;
+	FAccountUserData GetDataResult;
+	FRegistry::User.GetData(
+	THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bGetDataSuccessful = true;
+		GetDataResult = Result;
+	}),
+	FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	}));
+
+	WaitUntil(bGetDataSuccessful, "Waiting for Get Data...");
+	AB_TEST_TRUE(bGetDataSuccessful);
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Delete User"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+	AB_TEST_TRUE(bDeleteSuccessful);
+
+	FRegistry::User.ForgetAllCredentials();
+
+	return true;
+}
+
 void AwsCognitoAuthUserPassword(const FString& AwsRegion, const FString& AwsClientId, const FString& Username, const FString& Password, const THandler<FAwsCognitoAuthResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
