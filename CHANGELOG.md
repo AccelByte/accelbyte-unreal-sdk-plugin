@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.0.1%0D6.0.0) (2021-09-16)
+
+
+### Bug Fixes
+
+* **User:** change UpdateUser verb from PUT to PATCH ([d0babcf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d0babcf7ad8c2e60fa1d6c1f59c095c09f94a9b0))
+
 ## [6.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.0.0%0D5.0.0) (2021-09-13)
 
 
