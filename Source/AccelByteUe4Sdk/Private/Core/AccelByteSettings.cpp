@@ -11,6 +11,82 @@ UAccelByteSettings::UAccelByteSettings()
 {
 }
 
+UAccelByteSettingsDev::UAccelByteSettingsDev()
+{
+}
+
+UAccelByteSettingsCert::UAccelByteSettingsCert()
+{
+}
+
+UAccelByteSettingsProd::UAccelByteSettingsProd()
+{
+}
+
+template< class T >
+static bool SetEnvironment()
+{
+	FRegistry::Settings.ClientId = GetDefault<T>()->ClientId;
+	FRegistry::Settings.ClientSecret = GetDefault<T>()->ClientSecret;
+	FRegistry::Settings.Namespace = GetDefault<T>()->Namespace;
+	FRegistry::Settings.PublisherNamespace = GetDefault<T>()->PublisherNamespace;
+	FRegistry::Settings.RedirectURI = GetDefault<T>()->RedirectURI;
+	FRegistry::Settings.BaseUrl = GetDefault<T>()->BaseUrl;
+	FRegistry::Settings.IamServerUrl = GetDefaultAPIUrl(GetDefault<T>()->IamServerUrl, TEXT("iam"));
+	FRegistry::Settings.PlatformServerUrl = GetDefaultAPIUrl(GetDefault<T>()->PlatformServerUrl, TEXT("platform"));
+	FRegistry::Settings.LobbyServerUrl = GetDefault<T>()->LobbyServerUrl;
+	if (FRegistry::Settings.LobbyServerUrl.IsEmpty())
+	{
+		const FString BaseUrl = FRegistry::Settings.BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+		FRegistry::Settings.LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *BaseUrl, TEXT("lobby/"));
+	}
+	FRegistry::Settings.BasicServerUrl = GetDefaultAPIUrl(GetDefault<T>()->BasicServerUrl, TEXT("basic"));
+	FRegistry::Settings.CloudStorageServerUrl = GetDefaultAPIUrl(GetDefault<T>()->CloudStorageServerUrl, TEXT("social"));
+	FRegistry::Settings.GameProfileServerUrl = GetDefaultAPIUrl(GetDefault<T>()->GameProfileServerUrl, TEXT("social"));
+	FRegistry::Settings.StatisticServerUrl = GetDefaultAPIUrl(GetDefault<T>()->StatisticServerUrl, TEXT("social"));
+	FRegistry::Settings.QosManagerServerUrl = GetDefaultAPIUrl(GetDefault<T>()->QosManagerServerUrl, TEXT("qosm"));
+	FRegistry::Settings.LeaderboardServerUrl = GetDefaultAPIUrl(GetDefault<T>()->LeaderboardServerUrl, TEXT("leaderboard"));
+	FRegistry::Settings.GameTelemetryServerUrl = GetDefaultAPIUrl(GetDefault<T>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
+	FRegistry::Settings.AgreementServerUrl = GetDefaultAPIUrl(GetDefault<T>()->AgreementServerUrl, TEXT("agreement"));
+	FRegistry::Settings.CloudSaveServerUrl = GetDefaultAPIUrl(GetDefault<T>()->CloudSaveServerUrl, TEXT("cloudsave"));
+	FRegistry::Settings.AchievementServerUrl = GetDefaultAPIUrl(GetDefault<T>()->AchievementServerUrl, TEXT("achievement"));
+	FRegistry::Settings.SessionBrowserServerUrl = GetDefaultAPIUrl(GetDefault<T>()->SessionBrowserServerUrl, TEXT("sessionbrowser"));
+	FRegistry::Settings.UGCServerUrl = GetDefaultAPIUrl(GetDefault<T>()->UGCServerUrl, TEXT("ugc"));
+	FRegistry::Settings.SeasonPassServerUrl = GetDefaultAPIUrl(GetDefault<T>()->UGCServerUrl, TEXT("seasonpass"));
+	FRegistry::Settings.ReportingServerUrl = GetDefaultAPIUrl(GetDefault<T>()->ReportingServerUrl, TEXT("reporting"));
+	FRegistry::Settings.AppId = GetDefault<T>()->AppId;
+	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+
+	return true;
+}
+
+void Settings::Reset(const ESettingsEnvironment& Environment)
+{
+	switch (Environment)
+	{
+	case ESettingsEnvironment::Development : SetEnvironment<UAccelByteSettingsDev>();
+		break;
+	case ESettingsEnvironment::Certification: SetEnvironment<UAccelByteSettingsCert>();
+		break;
+	case ESettingsEnvironment::Production: SetEnvironment<UAccelByteSettingsProd>();
+		break;
+	case ESettingsEnvironment::Default:
+	default:
+		SetEnvironment<UAccelByteSettings>();
+		break;
+	}
+}
+
+static FString GetDefaultAPIUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
+{
+	if (SpecificServerUrl.IsEmpty())
+	{
+		return FString::Printf(TEXT("%s/%s"), *FRegistry::Settings.BaseUrl, *DefaultServerPath);
+	}
+
+	return SpecificServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetClientId()
 {
 	return FRegistry::Settings.ClientId;
@@ -214,4 +290,9 @@ void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& Reportin
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 {
 	FRegistry::Settings.AppId = AppId;
+}
+
+void UAccelByteBlueprintsSettings::ResetSettings(const TEnumAsByte<ESettingsEnvironment>& Environment)
+{
+	FRegistry::Settings.Reset(Environment);
 }

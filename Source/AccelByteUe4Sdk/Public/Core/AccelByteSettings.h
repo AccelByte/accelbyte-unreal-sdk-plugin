@@ -38,9 +38,24 @@ public:
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
 	FString AppId;
+
+	void Reset(const ESettingsEnvironment& Environment);
 };
 
 } // Namespace AccelByte
+
+UENUM(BlueprintType)
+enum class ESettingsEnvironment : uint8
+{
+	/** Dev environment settings */
+	Development,
+	/** Cert environment settings */
+	Certification,
+	/** Prod environment settings */
+	Production,
+	/** Default environment settings */
+	Default
+};
 
 /**
  * @brief UObject for storing settings into configuration file.
@@ -52,76 +67,99 @@ class ACCELBYTEUE4SDK_API UAccelByteSettings : public UObject
 public:
 	UAccelByteSettings();
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ClientId;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ClientSecret;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString Namespace;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString PublisherNamespace;
 
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
-    FString RedirectURI;
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString RedirectURI;
 
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
-    FString BaseUrl;
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString BaseUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString IamServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString PlatformServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString LobbyServerUrl;
 
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
-    FString CloudStorageServerUrl;
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString CloudStorageServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString BasicServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString GameProfileServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString StatisticServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString QosManagerServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString LeaderboardServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString CloudSaveServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString GameTelemetryServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AgreementServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AchievementServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString SessionBrowserServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString UGCServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString ReportingServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Client | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId;
 };
 
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteSettingsDev : public UAccelByteSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteSettingsDev();
+};
+
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteSettingsCert : public UAccelByteSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteSettingsCert();
+};
+
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteSettingsProd : public UAccelByteSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteSettingsProd();
+};
 
 /**
  * @brief Get or update settings via blueprint.
@@ -152,8 +190,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetLobbyServerUrl();
 
-    UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-    static FString GetCloudStorageServerUrl();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetCloudStorageServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetBasicServerUrl();
@@ -212,8 +250,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetLobbyServerUrl(const FString& LobbyServerUrl);
 
-    UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-    static void SetCloudStorageServerUrl(const FString& CloudStorageServerUrl);
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetCloudStorageServerUrl(const FString& CloudStorageServerUrl);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetBasicServerUrl(const FString& BasicServerUrl);
@@ -253,5 +291,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void ResetSettings(const TEnumAsByte<ESettingsEnvironment>& Environment);
 };
 
