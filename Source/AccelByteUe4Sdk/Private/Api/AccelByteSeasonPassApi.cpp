@@ -57,16 +57,13 @@ namespace AccelByte
 							// Convert the Tier JsonObject to TMap<FString, TArray<FString>>
 							TArray<FAccelByteModelsSeasonPassTier> Tiers;
 
-							for (FString const& PassCode : SeasonResult.PassCodes)
+							for (FAccelByteModelsSeasonPassTierJsonObject const& Tier : SeasonResult.Tiers)
 							{
-								for (FAccelByteModelsSeasonPassTierJsonObject const& Tier : SeasonResult.Tiers)
-								{
-									FAccelByteModelsSeasonPassTier TierRes;
-									TierRes.Id = Tier.Id;
-									TierRes.RequiredExp = Tier.RequiredExp;
-									TierRes.Rewards = FJsonObjectToPassRewards(Tier.Rewards.JsonObject);
-									Tiers.Add(TierRes);
-								}
+								FAccelByteModelsSeasonPassTier TierRes;
+								TierRes.Id = Tier.Id;
+								TierRes.RequiredExp = Tier.RequiredExp;
+								TierRes.Rewards = FJsonObjectToPassRewards(Tier.Rewards.JsonObject);
+								Tiers.Add(TierRes);
 							}
 							
 							FAccelByteModelsSeasonInfo const EndResult
