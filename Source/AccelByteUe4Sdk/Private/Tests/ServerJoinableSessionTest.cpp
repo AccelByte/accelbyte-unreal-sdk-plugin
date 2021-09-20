@@ -137,6 +137,7 @@ bool RegisterDS()
 		JoinableSessionTestErrorHandler);
 
 	WaitUntil(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
+
 	return bRegisterLocalServerToDSMDone;
 }
 
@@ -395,6 +396,21 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	isDSRegistered = RegisterDS();
 	WaitUntil(isDSRegistered, "Waiting DS Register...");
 
+	bool bGetServerInfoDone = false;
+	FAccelByteModelsServerInfo ServerInfo;
+	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda([&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
+		{
+			ServerInfo = result;
+			bGetServerInfoDone = true;
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
+		}),
+		FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
+			{
+				bGetServerInfoDone = true;
+				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+			}));
+	WaitUntil(bGetServerInfoDone, "Waiting Get Server Info");
+
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
 	bool bIsCreatePartySuccess = false;
@@ -468,6 +484,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 		ActiveLobbies.RemoveAt(i);
 	}
 
+	AB_TEST_FALSE(ServerInfo.Pod_name.IsEmpty());
 	AB_TEST_FALSE(AMatchId.IsEmpty());
 	AB_TEST_FALSE(BMatchId.IsEmpty());
 	AB_TEST_EQUAL(AMatchId, BMatchId);
@@ -510,6 +527,21 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	// register local DS
 	isDSRegistered = RegisterDS();
 	WaitUntil(isDSRegistered, "Waiting DS Register...");
+	
+	bool bGetServerInfoDone = false;
+	FAccelByteModelsServerInfo ServerInfo;
+	FRegistry::ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda([&bGetServerInfoDone, &ServerInfo](const FAccelByteModelsServerInfo& result)
+		{
+			ServerInfo = result;
+			bGetServerInfoDone = true;
+			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Server Info Found, Pod Name %s"), *result.Pod_name);
+		}),
+		FErrorHandler::CreateLambda([&bGetServerInfoDone](int32 ErrorCode, FString ErrorMessage)
+			{
+				bGetServerInfoDone = true;
+				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+			}));
+	WaitUntil(bGetServerInfoDone, "Waiting Get Server Info");
 
 	// player A complete matchmaking flow with joinable gamemode channel
 	FAccelByteModelsCreatePartyResponse ACreatePartyResult;
@@ -591,6 +623,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 
 	// Assertions
 
+	AB_TEST_FALSE(ServerInfo.Pod_name.IsEmpty());
 	AB_TEST_FALSE(AMatchId.IsEmpty());
 
 	bool userIdExist = false;
