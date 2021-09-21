@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -35,7 +35,7 @@ enum class EAccelBytePlatformType : uint8
 
 enum class EAccelByteSearchType : uint8
 {
-	ALL, EMAILADDRESS, DISPLAYNAME, USERNAME
+	ALL, DISPLAYNAME, USERNAME
 };
 
 UENUM(BlueprintType)
@@ -161,6 +161,8 @@ struct ACCELBYTEUE4SDK_API FRegisterResponse
 		FString Country;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
 		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
+		FString Username;
 };
 
 USTRUCT(BlueprintType)

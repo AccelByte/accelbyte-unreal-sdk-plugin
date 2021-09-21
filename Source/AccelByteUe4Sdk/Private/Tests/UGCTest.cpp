@@ -318,10 +318,11 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	// Login or registration for User2.
 	FString User2EmailAddress = "ugc+test+ue4sdk@game.test";
 	FString User2Password = "1Password1";
+	FString User2DisplayName = "ugctestue4sdk";
 	bool bDoneSearchUser = false;
 	bool bIsUser2Exist = false;
 	FPagedPublicUsersInfo ReceivedUserData;
-	FRegistry::User.SearchUsers(User2EmailAddress, EAccelByteSearchType::EMAILADDRESS,
+	FRegistry::User.SearchUsers(User2DisplayName, EAccelByteSearchType::DISPLAYNAME,
 		THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Search user Success"));
@@ -345,7 +346,7 @@ bool UGCSetup::RunTest(const FString& Parameters)
 		bool bRegisterSuccess = false;
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
 		const FString Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-		UGCUser2Registry->User.Register(User2EmailAddress, User2Password, TEXT("ugctestue4sdk"), TEXT("US"), Format,
+		UGCUser2Registry->User.Register(User2EmailAddress, User2Password, User2DisplayName, TEXT("US"), Format,
 			THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess](const FRegisterResponse& Result)
 		{
 			UE_LOG(LogAccelByteUGCTest, Log, TEXT("Success Register User"));

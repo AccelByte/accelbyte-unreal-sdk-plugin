@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -312,7 +312,8 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 		bDoneSearchUser = false;
 		bIsUserExist = false;
 		FPagedPublicUsersInfo ReceivedUserData;
-		FRegistry::User.SearchUsers(GUsersMail[i], EAccelByteSearchType::EMAILADDRESS, THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+		FString DisplayName = FString("Subs UE4 " + FString::FromInt(i + 1));
+		FRegistry::User.SearchUsers(DisplayName, EAccelByteSearchType::DISPLAYNAME, THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
 		{
 			bDoneSearchUser = true;
 			ReceivedUserData = Result;
@@ -334,10 +335,9 @@ bool SubscriptionSetup::RunTest(const FString& Parameters)
 			FString EmailAddress = GUsersMail[i];
 			FDateTime const DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 22));
 			FString const Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-			FString Username = FString("Subs UE4 " + FString::FromInt(i+1));
 			bool bRegisterSuccess = false;
 			bool bDoneRegisterUser = false;
-			FRegistry::User.Register(GUsersMail[i], GUserPassword, Username, "MG", Format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess, &bDoneRegisterUser](const FRegisterResponse& Result)
+			FRegistry::User.Register(GUsersMail[i], GUserPassword, DisplayName, "MG", Format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess, &bDoneRegisterUser](const FRegisterResponse& Result)
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Register User"));
 				bRegisterSuccess = true;
