@@ -839,6 +839,29 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 
 #pragma endregion CreateOrder_MediaItem
 
+#pragma region CreateOrder_EmptyReturnURL
+
+	OrderCreate.CurrencyCode = Item.RegionData[0].CurrencyCode;
+	OrderCreate.DiscountedPrice = Item.RegionData[0].DiscountedPrice * Quantity;
+	OrderCreate.Price = Item.RegionData[0].Price * Quantity;
+	OrderCreate.Quantity = 1;
+	OrderCreate.ReturnUrl = TEXT("");
+	OrderCreate.ItemId = Item.ItemId;
+	OrderCreate.Region = "US";
+	OrderCreate.Language = "en";
+
+	bool bCreateNewOrderSuccess4 = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreateNewOrder"));
+	FRegistry::Order.CreateNewOrder(OrderCreate, THandler<FAccelByteModelsOrderInfo>::CreateLambda([&](FAccelByteModelsOrderInfo Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bCreateNewOrderSuccess4 = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bCreateNewOrderSuccess4, "Waiting for new order created...");
+
+#pragma endregion CreateOrder
+
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	AB_TEST_TRUE(bExpectedItemFound);
 	AB_TEST_TRUE(bCreateNewOrderSuccess);
@@ -848,6 +871,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bExpectedItemFound3);
 	AB_TEST_TRUE(bCreateNewOrderSuccess3);
 	AB_TEST_TRUE(MediaItemEntitlementSuccess);
+	AB_TEST_TRUE(bCreateNewOrderSuccess4);
 	return true;
 }
 

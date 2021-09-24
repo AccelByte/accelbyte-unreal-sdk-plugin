@@ -8,6 +8,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -32,8 +33,12 @@ void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(OrderCreate, Content);
+	FString Content;	
+
+	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(OrderCreate);
+	FAccelByteUtilities::RemoveEmptyStrings(JsonObject);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
