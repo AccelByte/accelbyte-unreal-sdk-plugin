@@ -83,6 +83,15 @@ public:
 	void GetUserEntitlementOwnershipBySku(FString const& Sku, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	* @brief Get user's Entitlement ownership of the ItemId.
+	*
+	* @param ItemId The item's ItemId.
+	* @param OnSuccess This will be called when the operation success. The result is const FAccelByteModelsEntitlementOwnership.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetUserEntitlementOwnershipByItemId(FString const& ItemId, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	* @brief Get user's Entitlement ownership for multiple checks.
 	*
 	* @param ItemIds The item's IDs to check.

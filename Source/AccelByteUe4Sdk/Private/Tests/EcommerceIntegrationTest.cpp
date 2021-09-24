@@ -795,7 +795,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 			}
 		}), EcommerceTestErrorHandler);
 
-	WaitUntil(bGetItemByCriteriaSuccess2, "Waiting for get item...");
+	WaitUntil(bGetItemByCriteriaSuccess3, "Waiting for get item...");
 
 #pragma endregion GetItemByCriteria_MediaItem
 
@@ -820,6 +820,23 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 
 	WaitUntil(bCreateNewOrderSuccess3, "Waiting for new order created...");
 
+	bool bGetEntitlementByItemId = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementOwnershipByItemId for Media Item"));
+	FAccelByteModelsEntitlementOwnership OwnershipResult;
+	FRegistry::Entitlement.GetUserEntitlementOwnershipByItemId(Item.ItemId,
+		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&](FAccelByteModelsEntitlementOwnership Result)
+			{
+				OwnershipResult = Result;
+				bGetEntitlementByItemId = true;
+			}), EcommerceTestErrorHandler);
+	WaitUntil(bGetEntitlementByItemId, "Waiting for Query User's Entitlement...");
+
+	bool MediaItemEntitlementSuccess = false;
+	if (OwnershipResult.Owned) {
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		MediaItemEntitlementSuccess = true;
+	}
+
 #pragma endregion CreateOrder_MediaItem
 
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
@@ -830,6 +847,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bCreateNewOrderSuccess2);
 	AB_TEST_TRUE(bExpectedItemFound3);
 	AB_TEST_TRUE(bCreateNewOrderSuccess3);
+	AB_TEST_TRUE(MediaItemEntitlementSuccess);
 	return true;
 }
 
@@ -1331,6 +1349,92 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 		}
 	}
 	AB_TEST_TRUE(bEntitlementGranted);
+#pragma endregion CheckEntitlementGranted
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsForMedia, "AccelByte.Tests.Ecommerce.F1.GrantUserEntitlementsForMedia", AutomationFlagMaskEcommerce);
+bool FEcommerceTestGrantUserEntitlementsForMedia::RunTest(const FString& Parameters)
+{
+#pragma region GetItemByCriteria
+
+	FAccelByteModelsItemCriteria ItemCriteria;
+	ItemCriteria.Language = TEXT("en");
+	ItemCriteria.Region = TEXT("US");
+	ItemCriteria.ItemType = EAccelByteItemType::MEDIA;
+	bool bGetItemByCriteriaSuccess = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
+	FAccelByteModelsItemPagingSlicedResult Items;
+	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bGetItemByCriteriaSuccess = true;
+			Items = Result;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetItemByCriteriaSuccess, "Waiting for get items...");
+	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
+#pragma endregion GetItemByCriteria
+
+#pragma region GrantEntitlement
+	bool bClientLoginSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bClientLoginSuccess]()
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Login Success"));
+			bClientLoginSuccess = true;
+		}), EcommerceTestErrorHandler);
+	WaitUntil(bClientLoginSuccess, "Waiting for Client Login...");
+
+	FAccelByteModelsEntitlementGrant GrantedEntitlement;
+	GrantedEntitlement.ItemId = Items.Data[0].ItemId;
+	GrantedEntitlement.ItemNamespace = Items.Data[0].Namespace;
+	GrantedEntitlement.GrantedCode = "123456789";
+	GrantedEntitlement.Quantity = 1;
+	GrantedEntitlement.Source = EAccelByteEntitlementSource::ACHIEVEMENT;
+	GrantedEntitlement.Region = Items.Data[0].Region;
+	GrantedEntitlement.Language = Items.Data[0].Language;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GrantingUserEntitlement"));
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("UserId: %s"), *FRegistry::Credentials.GetUserId());
+
+	bool bGrantEntitlementSuccess = false;
+	TArray<FAccelByteModelsStackableEntitlementInfo> GrantedEntitlementResult;
+	FRegistry::ServerEcommerce.GrantUserEntitlements(FRegistry::Credentials.GetUserId(), { GrantedEntitlement }, THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>::CreateLambda([&bGrantEntitlementSuccess, &GrantedEntitlementResult](const TArray<FAccelByteModelsStackableEntitlementInfo>& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			GrantedEntitlementResult = Result;
+			bGrantEntitlementSuccess = true;
+			for (auto Entitlement : Result)
+			{
+				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Entitlement: %s"), *Entitlement.Name);
+			}
+		}), EcommerceTestErrorHandler);
+	WaitUntil(bGrantEntitlementSuccess, "Waiting for entitlement granted...");
+
+	AB_TEST_TRUE(bGrantEntitlementSuccess);
+#pragma endregion GrantEntitlement
+
+#pragma region CheckEntitlementGranted
+
+	bool bGetEntitlementByItemId = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetUserEntitlementOwnershipByItemId for Media Item"));
+	FAccelByteModelsEntitlementOwnership OwnershipResult;
+	FRegistry::Entitlement.GetUserEntitlementOwnershipByItemId(Items.Data[0].ItemId,
+		THandler<FAccelByteModelsEntitlementOwnership>::CreateLambda([&](FAccelByteModelsEntitlementOwnership Result)
+			{
+				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+				bGetEntitlementByItemId = true;
+				OwnershipResult = Result;
+			}), EcommerceTestErrorHandler);
+	WaitUntil(bGetEntitlementByItemId, "Waiting for Query User's Entitlement...");
+
+	bool MediaItemEntitlementSuccess = false;
+	if (OwnershipResult.Owned) {
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		MediaItemEntitlementSuccess = true;
+	}
+
+	AB_TEST_TRUE(MediaItemEntitlementSuccess);
+
 #pragma endregion CheckEntitlementGranted
 	return true;
 }

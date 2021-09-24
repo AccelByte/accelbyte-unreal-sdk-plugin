@@ -46,7 +46,8 @@ enum class EAccelByteEntitlementClass : uint8
 	APP,
 	ENTITLEMENT,
 	DISTRIBUTION,
-	CODE
+	CODE,
+	MEDIA
 };
 
 UENUM(BlueprintType)
@@ -558,6 +559,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementOwnership
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
 		bool Owned;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+		FDateTime EndDate;
 };
 
 USTRUCT(BlueprintType)

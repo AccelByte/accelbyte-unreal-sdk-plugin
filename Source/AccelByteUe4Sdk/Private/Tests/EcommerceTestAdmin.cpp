@@ -515,7 +515,7 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 	FLocalization MediaItemLocalization{
 		Variables.mediaItemTitle,
 		"Media item",
-		"Purchasing item, real currency, not free, USD"
+		"Purchasing item, virtual currency, not free"
 	};
 	TMap<FString, FLocalization> MediaItemLocalizations;
 	MediaItemLocalizations.Add("en", MediaItemLocalization);
@@ -525,8 +525,8 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 		0,
 		0,
 		0,
-		"USD",
-		EAccelByteItemCurrencyType::REAL,
+		"SDKC",
+		EAccelByteItemCurrencyType::VIRTUAL,
 		FRegistry::Settings.Namespace,
 		FDateTime::MinValue().ToIso8601(),
 		FDateTime::MaxValue().ToIso8601(),
@@ -558,7 +558,7 @@ void SetupEcommerceStore(EcommerceExpectedVariable& Variables, const FSimpleDele
 		-1,
 		"",
 		0,
-		"classless"
+		"MEDIA"
 	};
 
 	if (!CreateEcommerceItem(NewStoreId, MediaItemRequest, OnSuccess, OnError, Variables.mediaItem)) {
