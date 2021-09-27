@@ -8,6 +8,7 @@
 #include "JsonObjectWrapper.h"
 #include "Dom/JsonValue.h"
 #include "Models/AccelByteGeneralModels.h"
+#include "Models/AccelByteUserModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
 // Emulate namespace with long class names
@@ -999,4 +1000,36 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbySessionId
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | General | LobbySessionId")
 	FString LobbySessionID;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FLobbyMessages
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="AccelByte | Lobby | Models | General | LobbyError")
+	FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category ="AccelByte | Lobby | Models | General | LobbyError")
+	FString CodeName;
+};
+
+// ------------------------------------------------------------------------------------------------
+// Ban
+// ------------------------------------------------------------------------------------------------
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserBannedNotification
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		EBanType Ban;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		FString EndDate;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		EBanReason Reason;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+		bool Enable;
 };

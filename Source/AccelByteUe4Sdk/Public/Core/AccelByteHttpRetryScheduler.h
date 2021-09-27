@@ -12,6 +12,7 @@
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteError.h"
 #include "Core/AccelByteTask.h"
 
 namespace AccelByte
@@ -19,12 +20,22 @@ namespace AccelByte
 
 class ACCELBYTEUE4SDK_API FHttpRetryScheduler
 {
+
 public:
+
+	DECLARE_DELEGATE(FBearerAuthRejected);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FBearerAuthRejectedRefresh, const FString&);
+
 	static const int InitialDelay;
 	static const int MaximumDelay;
 	static const int TotalTimeout;
 
 	FAccelByteTaskPtr ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
+
+	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);
+	void BearerAuthRejected();
+	void PauseBearerAuthRequest();
+	void ResumeBearerAuthRequest(const FString& AccessToken);
 
 	void Startup();
 	void Shutdown();
@@ -34,10 +45,14 @@ protected:
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue;
 	FDelegateHandle PollRetryHandle;
 
+	FBearerAuthRejected BearerAuthRejectedDelegate;
+	FBearerAuthRejectedRefresh BearerAuthRejectedRefresh;
+
 	enum class EState
 	{
 		Uninitialized,
 		Initialized,
+		Paused,
 		ShuttingDown
 	};
 

@@ -99,6 +99,8 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -118,6 +120,8 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -136,6 +140,8 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler & OnError)
@@ -156,6 +162,8 @@ void User::LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler 
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 
 void User::LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)

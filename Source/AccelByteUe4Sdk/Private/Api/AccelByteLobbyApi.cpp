@@ -7,6 +7,7 @@
 #include "IWebSocket.h"
 #include "WebSocketsModule.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -120,6 +121,8 @@ namespace Api
 
 		// Notification
 		const FString MessageNotif = TEXT("messageNotif");
+		const FString UserBannedNotification = TEXT("userBannedNotification");
+		const FString UserUnbannedNotification = TEXT("userUnbannedNotification");
 
 		// Matchmaking
 		const FString StartMatchmaking = TEXT("startMatchmakingResponse");
@@ -211,6 +214,11 @@ void Lobby::Connect()
 	WebSocket->Connect();
 	WsEvents |= EWebSocketEvent::Connect;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
+	
+	if(LobbyErrorMessages.Num() == 0)
+	{
+		FetchLobbyErrorMessages();
+	}
 }
 
 void Lobby::Disconnect()
@@ -892,8 +900,6 @@ void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	BlockPlayerNotif.Unbind();
-	UnblockPlayerNotif.Unbind();
 	MessageNotif.Unbind();
 	PartyDataUpdateNotif.Unbind();
 
@@ -908,6 +914,14 @@ void Lobby::UnbindEvent()
 
 	UnbindChatNotifEvents();
 	UnbindChatResponseEvents();
+
+	UnbindBlockNotifEvents();
+	UnbindBlockResponseEvents();
+
+	UnbindSessionAttributeEvents();
+	
+	UserBannedNotification.Unbind();
+	UserUnbannedNotification.Unbind();
 }
 
 void Lobby::UnbindFriendNotifEvents()
@@ -937,6 +951,18 @@ void Lobby::UnbindFriendResponseEvents()
 	RejectFriendsResponse.Unbind();
 	LoadFriendListResponse.Unbind();
 	GetFriendshipStatusResponse.Unbind();
+
+	OnSetUserPresenceError.Unbind();
+	OnGetAllFriendsStatusError.Unbind();
+	OnRequestFriendsError.Unbind();
+	OnUnfriendError.Unbind();
+	OnListOutgoingFriendsError.Unbind();
+	OnCancelFriendsError.Unbind();
+	OnListIncomingFriendsError.Unbind();
+	OnAcceptFriendsError.Unbind();
+	OnRejectFriendsError.Unbind();
+	OnLoadFriendListError.Unbind();
+	OnGetFriendshipStatusError.Unbind();
 }
 
 void Lobby::UnbindPartyNotifEvents()
@@ -962,6 +988,24 @@ void Lobby::UnbindPartyResponseEvents()
 	PartyJoinResponse.Unbind();
 	PartyRejectResponse.Unbind();
 	PartyKickResponse.Unbind();
+	PartyGetCodeResponse.Unbind();
+	PartyGenerateCodeResponse.Unbind();
+	PartyDeleteCodeResponse.Unbind();
+	PartyJoinViaCodeResponse.Unbind();
+	PartyPromoteLeaderResponse.Unbind();
+
+	OnPartyInfoError.Unbind();
+	OnPartyCreateError.Unbind();
+	OnPartyLeaveError.Unbind();
+	OnPartyInviteError.Unbind();
+	OnPartyJoinError.Unbind();
+	OnPartyRejectError.Unbind();
+	OnPartyKickError.Unbind();
+	OnPartyGenerateCodeError.Unbind();
+	OnPartyGetCodeError.Unbind();
+	OnPartyDeleteCodeError.Unbind();
+	OnPartyJoinViaCodeError.Unbind();
+	OnPartyPromoteLeaderError.Unbind();
 }
 
 void Lobby::UnbindMatchmakingNotifEvents()
@@ -981,6 +1025,10 @@ void Lobby::UnbindMatchmakingResponseEvents()
 	MatchmakingStartResponse.Unbind();
 	MatchmakingCancelResponse.Unbind();
 	ReadyConsentResponse.Unbind();
+
+	OnMatchmakingStartError.Unbind();
+	OnMatchmakingCancelError.Unbind();
+	OnReadyConsentError.Unbind();
 }
 
 void Lobby::UnbindChatNotifEvents()
@@ -998,12 +1046,39 @@ void Lobby::UnbindChatResponseEvents()
 
 	PersonalChatResponse.Unbind();
 	PartyChatResponse.Unbind();
+	JoinDefaultChannelResponse.Unbind();
+	ChannelChatResponse.Unbind();
+
+	OnPersonalChatError.Unbind();
+	OnPartyChatError.Unbind();
+	OnJoinDefaultChannelChatError.Unbind();
+	OnChannelChatError.Unbind();
+}
+
+void Lobby::UnbindBlockNotifEvents()
+{
+	BlockPlayerNotif.Unbind();
+	UnblockPlayerNotif.Unbind();
+}
+	
+void Lobby::UnbindBlockResponseEvents()
+{
+	OnBlockPlayerError.Unbind();
+	OnUnblockPlayerError.Unbind();
+}
+
+void Lobby::UnbindSessionAttributeEvents()
+{
+	OnGetSessionAttributeError.Unbind();
+	OnSetSessionAttributeError.Unbind();
+	OnGetAllSessionAttributeError.Unbind();
 }
 
 void Lobby::OnConnected()
 {
 	WsEvents |= EWebSocketEvent::Connected;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
+		
 	ConnectSuccess.ExecuteIfBound();
 }
 
@@ -1018,7 +1093,7 @@ void Lobby::OnConnectionError(const FString& Error)
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
 	OnMessage(Reason);
-	if (StatusCode >= 4000)
+	if (StatusCode >= 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}
@@ -1027,6 +1102,7 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 		WsEvents |= EWebSocketEvent::Closed;
 	}
 
+	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
 }
@@ -1368,6 +1444,27 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_NOTIF(LobbyResponse::BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif, BlockPlayerNotif);
 	HANDLE_LOBBY_MESSAGE_NOTIF(LobbyResponse::UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif, UnblockPlayerNotif);
 
+	// Shadow Ban
+	if (lobbyResponseType.Equals(LobbyResponse::UserBannedNotification) ||
+		lobbyResponseType.Equals(LobbyResponse::UserUnbannedNotification)) 
+	{
+		BanNotifReceived = true;
+		FAccelByteModelsUserBannedNotification Result;
+		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		if (bParseSuccess)
+		{
+			HttpRef.BearerAuthRejected();
+			if (lobbyResponseType.Equals(LobbyResponse::UserBannedNotification))
+			{
+				UserBannedNotification.ExecuteIfBound(Result);
+			}
+			else if (lobbyResponseType.Equals(LobbyResponse::UserUnbannedNotification))
+			{
+				UserUnbannedNotification.ExecuteIfBound(Result);
+			}
+		}
+	}
+
 	// Error
 	if(lobbyResponseType.Equals(LobbyResponse::ErrorNotif))
 	{
@@ -1383,7 +1480,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 
 #undef HANDLE_LOBBY_MESSAGE_NOTIF
 		
-#define HANDLE_LOBBY_MESSAGE_RESPONSE(MessageType, Model, ResponseCallback) \
+#define HANDLE_LOBBY_MESSAGE_RESPONSE(MessageType, Model, ResponseCallback, ErrorCallback) \
 if (lobbyResponseType.Equals(MessageType)) \
 { \
 	Model Result; \
@@ -1392,8 +1489,19 @@ if (lobbyResponseType.Equals(MessageType)) \
 		if(lobbyResponseCode == 0) \
 			bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0); \
 		else { \
-			Result.Code = FString::FromInt(lobbyResponseCode); \
-			bSuccess = true; \
+			FString ErrorCodeString = FString::FromInt(lobbyResponseCode); \
+			bool bHasErrorName = LobbyErrorMessages.Contains(ErrorCodeString); \
+			UE_LOG(LogAccelByteLobby, Display, TEXT("%s returned non zero error code, code is %d with codename %s"), *MessageType, lobbyResponseCode, (bHasErrorName ? *LobbyErrorMessages[ErrorCodeString] : TEXT("NO NAME"))); \
+			if(ErrorCallback.IsBound()) \
+			{ \
+				ErrorCallback.ExecuteIfBound(lobbyResponseCode, bHasErrorName ? *LobbyErrorMessages[ErrorCodeString] : TEXT("NO NAME")); \
+				bSuccess = false; \
+			} \
+			else \
+			{ \
+				Result.Code = FString::FromInt(lobbyResponseCode); \
+				bSuccess = true; \
+			} \
 		} \
 	} \
 	if (bSuccess) \
@@ -1422,38 +1530,38 @@ if (lobbyResponseType.Equals(MessageType)) \
 
 	// RESPONSE
 	// Party
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, PartyInfoResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyCreate, FAccelByteModelsCreatePartyResponse, PartyCreateResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyLeave, FAccelByteModelsLeavePartyResponse, PartyLeaveResponse);
-    HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyInvite, FAccelByteModelsPartyInviteResponse, PartyInviteResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyJoin, FAccelByteModelsPartyJoinReponse, PartyJoinResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyReject, FAccelByteModelsPartyRejectResponse, PartyRejectResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGetCode, FAccelByteModelsPartyGetCodeResponse, PartyGetCodeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGenerateCode, FAccelByteModelsPartyGenerateCodeResponse, PartyGenerateCodeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyDeleteCode, FAccelByteModelsPartyDeleteCodeResponse, PartyDeleteCodeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyJoinViaCode, FAccelByteModelsPartyJoinReponse, PartyJoinViaCodeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyPromoteLeader, FAccelByteModelsPartyPromoteLeaderResponse, PartyPromoteLeaderResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyInfo, FAccelByteModelsInfoPartyResponse, PartyInfoResponse, OnPartyInfoError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyCreate, FAccelByteModelsCreatePartyResponse, PartyCreateResponse, OnPartyCreateError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyLeave, FAccelByteModelsLeavePartyResponse, PartyLeaveResponse, OnPartyLeaveError);
+    HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyInvite, FAccelByteModelsPartyInviteResponse, PartyInviteResponse, OnPartyInviteError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyJoin, FAccelByteModelsPartyJoinReponse, PartyJoinResponse, OnPartyJoinError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyReject, FAccelByteModelsPartyRejectResponse, PartyRejectResponse, OnPartyRejectError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyKick, FAccelByteModelsKickPartyMemberResponse, PartyKickResponse, OnPartyKickError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGetCode, FAccelByteModelsPartyGetCodeResponse, PartyGetCodeResponse, OnPartyGetCodeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyGenerateCode, FAccelByteModelsPartyGenerateCodeResponse, PartyGenerateCodeResponse, OnPartyGenerateCodeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyDeleteCode, FAccelByteModelsPartyDeleteCodeResponse, PartyDeleteCodeResponse, OnPartyDeleteCodeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyJoinViaCode, FAccelByteModelsPartyJoinReponse, PartyJoinViaCodeResponse, OnPartyJoinViaCodeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyPromoteLeader, FAccelByteModelsPartyPromoteLeaderResponse, PartyPromoteLeaderResponse, OnPartyPromoteLeaderError);
 	// Chat
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyChatResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ChannelChat, FAccelByteModelsChannelMessageResponse, ChannelChatResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PersonalChat, FAccelByteModelsPersonalMessageResponse, PersonalChatResponse, OnPersonalChatError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::PartyChat, FAccelByteModelsPartyMessageResponse, PartyChatResponse, OnPartyChatError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ChannelChat, FAccelByteModelsChannelMessageResponse, ChannelChatResponse, OnChannelChatError);
 	// Presence
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse, OnSetUserPresenceError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse, OnGetAllFriendsStatusError);
 	// Matchmaking
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::CancelMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ReadyConsentResponse, FAccelByteModelsReadyConsentRequest, ReadyConsentResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse, OnMatchmakingStartError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::CancelMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse, OnMatchmakingCancelError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ReadyConsentResponse, FAccelByteModelsReadyConsentRequest, ReadyConsentResponse, OnReadyConsentError);
 	// Friends
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RequestFriends, FAccelByteModelsRequestFriendsResponse, RequestFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::Unfriend, FAccelByteModelsUnfriendResponse, UnfriendResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse, ListOutgoingFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::CancelFriends, FAccelByteModelsCancelFriendsResponse, CancelFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse, ListIncomingFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::AcceptFriends, FAccelByteModelsAcceptFriendsResponse, AcceptFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RejectFriends, FAccelByteModelsRejectFriendsResponse, RejectFriendsResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::LoadFriendList, FAccelByteModelsLoadFriendListResponse, LoadFriendListResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RequestFriends, FAccelByteModelsRequestFriendsResponse, RequestFriendsResponse, OnRequestFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::Unfriend, FAccelByteModelsUnfriendResponse, UnfriendResponse, OnUnfriendError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse, ListOutgoingFriendsResponse, OnListOutgoingFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::CancelFriends, FAccelByteModelsCancelFriendsResponse, CancelFriendsResponse, OnCancelFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse, ListIncomingFriendsResponse, OnListIncomingFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::AcceptFriends, FAccelByteModelsAcceptFriendsResponse, AcceptFriendsResponse, OnAcceptFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RejectFriends, FAccelByteModelsRejectFriendsResponse, RejectFriendsResponse, OnRejectFriendsError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::LoadFriendList, FAccelByteModelsLoadFriendListResponse, LoadFriendListResponse, OnLoadFriendListError);
 	if (lobbyResponseType.Equals(LobbyResponse::GetFriendshipStatus))
 	{
 		FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
@@ -1468,12 +1576,12 @@ if (lobbyResponseType.Equals(MessageType)) \
 		}
 	}
 	// Block
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::BlockPlayer, FAccelByteModelsBlockPlayerResponse, BlockPlayerResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::UnblockPlayer, FAccelByteModelsUnblockPlayerResponse, UnblockPlayerResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::BlockPlayer, FAccelByteModelsBlockPlayerResponse, BlockPlayerResponse, OnBlockPlayerError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::UnblockPlayer, FAccelByteModelsUnblockPlayerResponse, UnblockPlayerResponse, OnUnblockPlayerError);
 	// Session Attribute
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGet, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGetAll, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse, OnSetSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGet, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse, OnGetSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGetAll, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse, OnGetAllSessionAttributeError);
 
 #undef HANDLE_LOBBY_MESSAGE_RESPONSE
 		
@@ -1575,6 +1683,40 @@ void Lobby::SetRetryParameters(int32 NewTotalTimeout, int32 NewBackoffDelay, int
 	Lobby::TotalTimeout = NewTotalTimeout;
 	Lobby::InitialBackoffDelay = NewBackoffDelay;
 	Lobby::MaxBackoffDelay = NewMaxDelay;
+}
+
+void Lobby::FetchLobbyErrorMessages()
+{
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *Settings.BaseUrl);
+
+	bool bFetchErrorMessageDone = false;
+	FHttpClient HttpClient(Credentials, Settings, HttpRef);
+	HttpClient.Request("GET", Url, {}, "", {}, THandler<TArray<FLobbyMessages>>::CreateLambda([&](const TArray<FLobbyMessages>& result)
+	{
+		for(const FLobbyMessages code : result)
+		{
+			LobbyErrorMessages.Add(code.Code, code.CodeName);
+		}
+
+		bFetchErrorMessageDone = true;
+		UE_LOG(LogAccelByteLobby, Log, TEXT("fetching lobby error messages DONE! %d lobby messages has been cached"), LobbyErrorMessages.Num());
+	}), FErrorHandler::CreateLambda([&bFetchErrorMessageDone](const int32 code, const FString& message)
+	{
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("Error fetching lobby error messages! code %d, message %s"), code, *message);
+		bFetchErrorMessageDone = true;
+	}));
+
+	double LastTime = FPlatformTime::Seconds();
+	double Timeout = LastTime + 3;
+	while (!bFetchErrorMessageDone && (LastTime < Timeout))
+	{
+		const double AppTime = FPlatformTime::Seconds();
+		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
+		FTicker::GetCoreTicker().Tick(AppTime - LastTime);
+		HttpRef.PollRetry(FPlatformTime::Seconds());
+		LastTime = AppTime;
+		FPlatformProcess::Sleep(0.2f);
+	}
 }
 
 	Lobby::Lobby(

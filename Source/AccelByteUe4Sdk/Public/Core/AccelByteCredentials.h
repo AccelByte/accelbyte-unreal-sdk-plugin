@@ -6,6 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteOauth2Models.h"
+#include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
@@ -14,11 +16,16 @@
 namespace AccelByte
 {
 
+	// forward declaration
+	class FHttpRetryScheduler;
+	
 /**
  * @brief Singleston class for storing credentials.
  */
 class ACCELBYTEUE4SDK_API Credentials
 {
+	DECLARE_MULTICAST_DELEGATE(FRefreshTokenAdditionalActions);
+
 public:
 	enum class ESessionState
 	{
@@ -37,6 +44,7 @@ public:
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
+	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef);
 
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
@@ -65,6 +73,9 @@ private:
 	double UserRefreshBackoff;
 
 	FDelegateHandle PollRefreshTokenHandle;
+	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
+
+	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
 };
 
 } // Namespace AccelByte

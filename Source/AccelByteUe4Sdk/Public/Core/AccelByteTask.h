@@ -17,6 +17,9 @@ enum class EAccelByteTaskState
 	/** Task execution is still pending. */
 	Pending,
 
+	/** Task execution is paused because Bearer Auth Rejected. */
+	Paused,
+
 	/** Task is executing. */
 	Running,
 

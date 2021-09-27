@@ -19,16 +19,22 @@ const int FHttpRetryScheduler::InitialDelay = 1;
 const int FHttpRetryScheduler::MaximumDelay = 30;
 const int FHttpRetryScheduler::TotalTimeout = 60;
 
+typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefresh;
+
 class FHttpRetryTask : public FAccelByteTask
 {
+
 public:
-	FHttpRetryTask(const FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay);
+	FHttpRetryTask(const FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay, const FVoidHandler& OnBearerAuthRejectDelegate, FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh);
 	virtual ~FHttpRetryTask();
 
 	virtual bool Start() override;
 	virtual bool Cancel() override;
 	virtual void Tick(double CurrentTime) override;
 	virtual bool Finish() override;
+
+	EAccelByteTaskState Pause();
+
 private:
 	const FHttpRequestPtr Request;
 	const FHttpRequestCompleteDelegate CompleteDelegate;
@@ -36,13 +42,17 @@ private:
 	double NextRetryTime;
 	float NextDelay;
 	bool ScheduledRetry;
+	const FVoidHandler OnBearerAuthRejectDelegate;
+	FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh;
+	bool bIsBeenRunFromPause;
 
+	void BearerAuthUpdated(const FString& AccessToken);
 	EAccelByteTaskState Retry();
 	EAccelByteTaskState ScheduleNextRetry();
 	bool IsFinished();
 };
 
-FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay)
+FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay, const FVoidHandler& OnBearerAuthRejectDelegate, FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh)
 	: FAccelByteTask()
 	, Request(Request)
 	, CompleteDelegate(CompleteDelegate)
@@ -50,6 +60,9 @@ FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpReques
 	, NextRetryTime(NextDelay)
 	, NextDelay(NextDelay)
 	, ScheduledRetry(false)
+	, OnBearerAuthRejectDelegate(OnBearerAuthRejectDelegate)
+	, BearerAuthRejectedRefresh(BearerAuthRejectedRefresh)
+	, bIsBeenRunFromPause(false)
 {
 
 }
@@ -85,6 +98,25 @@ bool FHttpRetryTask::Cancel()
 	return FAccelByteTask::Cancel();
 }
 
+EAccelByteTaskState FHttpRetryTask::Pause()
+{
+	if (bIsBeenRunFromPause) 
+	{
+		return EAccelByteTaskState::Completed;
+	}
+	
+	if (TaskState != EAccelByteTaskState::Paused)
+	{
+		OnBearerAuthRejectDelegate.ExecuteIfBound();
+		BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
+			{
+				BearerAuthUpdated(AccessToken);
+			}));
+	}
+
+	return EAccelByteTaskState::Paused;
+}
+
 void FHttpRetryTask::Tick(double CurrentTime)
 {
 	if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
@@ -102,7 +134,7 @@ void FHttpRetryTask::Tick(double CurrentTime)
 
 	TaskTime = CurrentTime;
 
-	if (ScheduledRetry)
+	if (ScheduledRetry && TaskState != EAccelByteTaskState::Paused)
 	{
 		if (TaskTime >= NextRetryTime)
 		{
@@ -138,6 +170,11 @@ void FHttpRetryTask::Tick(double CurrentTime)
 				NextState = EAccelByteTaskState::Completed;
 			}
 			break;
+		case EHttpResponseCodes::Denied:
+			if (Request->GetHeader("Authorization").Contains("Bearer")) {
+				NextState = Pause();
+				break;
+			}
 		default:
 			NextState = EAccelByteTaskState::Completed;
 			break;
@@ -176,6 +213,20 @@ bool FHttpRetryTask::Finish()
 		CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), IsFinished());
 	}
 	return FAccelByteTask::Finish();
+}
+
+void FHttpRetryTask::BearerAuthUpdated(const FString& AccessToken)
+{
+	bIsBeenRunFromPause = true;
+
+	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("BearerAuthUpdated"));
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	ScheduledRetry = true;
+
+	TaskState = EAccelByteTaskState::Pending;
+	NextRetryTime = FPlatformTime::Seconds();
+	ScheduledRetry = true;
 }
 
 EAccelByteTaskState FHttpRetryTask::Retry()
@@ -231,12 +282,56 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Req
 	}
 
 	FReport::LogHttpRequest(Request);
-	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>(Request, CompleteDelegate, RequestTime, InitialDelay);
-	Task->Start();
 
+	FVoidHandler OnBearerAuthReject = FVoidHandler::CreateLambda([&]() {BearerAuthRejected(); });
+
+	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>(Request, CompleteDelegate, RequestTime, InitialDelay, OnBearerAuthReject, BearerAuthRejectedRefresh);
+
+	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
+	{
+		StaticCastSharedPtr<FHttpRetryTask>(Task)->Pause();
+	}
+	else 
+	{
+		Task->Start();
+	}
 	TaskQueue.Enqueue(Task);
 
 	return Task.ToSharedRef();
+}
+
+void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected)
+{
+	if (BearerAuthRejectedDelegate.IsBound()) 
+	{
+		BearerAuthRejectedDelegate.Unbind();
+	}
+
+	BearerAuthRejectedDelegate = BearerAuthRejected;
+}
+
+void FHttpRetryScheduler::BearerAuthRejected()
+{
+	if (State != EState::Paused)
+	{
+		BearerAuthRejectedDelegate.ExecuteIfBound();
+	}
+}
+
+void FHttpRetryScheduler::PauseBearerAuthRequest()
+{
+	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler PAUSED"));
+	State = EState::Paused;
+}
+  
+void FHttpRetryScheduler::ResumeBearerAuthRequest(const FString& AccessToken)
+{
+	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler RESUME"));
+	if (BearerAuthRejectedRefresh.IsBound()) {
+		BearerAuthRejectedRefresh.Broadcast(AccessToken);
+		BearerAuthRejectedRefresh.Clear();
+	}
+	State = EState::Initialized;
 }
 
 bool FHttpRetryScheduler::PollRetry(double Time)
@@ -254,6 +349,7 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 		if (TaskPtr != nullptr)
 		{
 			FAccelByteTaskPtr Task = *TaskPtr;
+
 			if (Task->Time() < Time)
 			{
 				TaskQueue.Pop();

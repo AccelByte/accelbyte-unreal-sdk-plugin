@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Api/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
@@ -129,6 +130,11 @@ void Credentials::PollRefreshToken(double CurrentTime)
 				THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
 			{
 				SetAuthToken(Result, CurrentTime);
+				if (RefreshTokenAdditionalActions.IsBound()) 
+				{
+					RefreshTokenAdditionalActions.Broadcast();
+					RefreshTokenAdditionalActions.Clear();
+				}
 			}),
 				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
 			{
@@ -141,6 +147,11 @@ void Credentials::PollRefreshToken(double CurrentTime)
 				UserRefreshBackoff += FMath::FRandRange(1.0, 60.0);
 				ScheduleRefreshToken(CurrentTime + UserRefreshBackoff);
 
+				if (RefreshTokenAdditionalActions.IsBound())
+				{
+					RefreshTokenAdditionalActions.Broadcast();
+					RefreshTokenAdditionalActions.Clear();
+				}
 				UserSessionState = ESessionState::Expired;
 			}));
 
@@ -162,6 +173,33 @@ void Credentials::ScheduleRefreshToken(double RefreshTime)
 const FOauth2Token& Credentials::GetAuthToken() const
 {
 	return AuthToken;
+}
+
+void AccelByte::Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
+{
+	HttpRef.SetBearerAuthRejectedDelegate(
+		FHttpRetryScheduler::FBearerAuthRejected::CreateLambda([&]()
+			{
+				BearerAuthRejectedRefreshToken(HttpRef);
+			}));
+}
+
+void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
+{
+	if (GetSessionState() == ESessionState::Refreshing)
+	{
+		return;
+	}
+
+	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("BearerAuthRejectedRefreshToken"));
+	HttpRef.PauseBearerAuthRequest();
+
+	RefreshTokenAdditionalActions.Add(FVoidHandler::CreateLambda([&]()
+		{
+			HttpRef.ResumeBearerAuthRequest(GetAccessToken());
+		}));
+
+	ScheduleRefreshToken(FPlatformTime::Seconds());
 }
 } // Namespace AccelByte
 
