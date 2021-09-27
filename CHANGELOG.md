@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.1.0%0D6.0.1) (2021-09-27)
+
+
+### Features
+
+* **ecommerce:** add epicgames entitlement on SyncPlatformPurchase ([b78d9a5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b78d9a59e6c79c6d8b334b7e966457bfd647e481))
+* **ecommerce:** add Media Item type ([f17b815](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f17b815e8ee7312cf67168c0dc46b4b808ed0b0e))
+* **lobby:** add lobby ws request error handler and error message ([0eabf1d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0eabf1d2d77004789d6b83e93c274ff73449dca0))
+* **misc:** add GetServerCurrentTime ([c3afc90](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c3afc9072a27e2ffaac704f06159a13e23a7de35))
+* **shadowban:** Add refresh token when token revoked. Pause task and resume after new token retrieved ([e16d45a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e16d45a62971b8a8fcf8c3401a455f31de51202d))
+* **Version:** Ensure version is compatible ([41b9b73](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/41b9b73d53bf6899a9be1822276f9b9c0e913894))
+
+
+### Tests
+
+* **agreement:** revision ([e481ab0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e481ab0d3d1c35e056500c815317f265bca6b4f3))
+
+### [6.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.0.1%0D6.0.0) (2021-09-16)
+
+
+### Bug Fixes
+
+* **User:** change UpdateUser verb from PUT to PATCH ([d0babcf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d0babcf7ad8c2e60fa1d6c1f59c095c09f94a9b0))
+
 ## [6.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.0.0%0D5.0.0) (2021-09-13)
 
 
