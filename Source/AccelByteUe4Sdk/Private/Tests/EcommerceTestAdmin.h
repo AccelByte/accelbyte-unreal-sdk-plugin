@@ -639,6 +639,18 @@ struct FGoogleIAPConfig
 	FString P12FileName;
 };
 
+USTRUCT(BlueprintType)
+struct FFulfillmentRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
+	FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
+	int32 Quantity {0};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Fulfillment")
+	FString EndDate; // in ISO8601 format
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -720,3 +732,5 @@ void AdminGetAppleIAPConfig(const FString& Namespace, const THandler<FAppleIAPCo
 void AdminGetAppleIAPConfig(const THandler<FAppleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetGoogleIAPConfig(const FString& Namespace, const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetGoogleIAPConfig(const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
+
+void AdminFulfillItem(const FString& Namespace, const FString& UserId, FFulfillmentRequest FulfillmentRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);

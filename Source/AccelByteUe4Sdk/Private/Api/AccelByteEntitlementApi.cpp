@@ -10,6 +10,7 @@
 #include "Core/AccelByteHttpClient.h"
 #include "JsonUtilities.h"
 #include "EngineMinimal.h"
+#include "Core/AccelByteJwtWrapper.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -284,6 +285,98 @@ void Entitlement::GetUserEntitlementOwnershipAny(
 		Request->SetHeader(TEXT("Accept"), Accept);
 
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+}
+
+void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey, const TArray<FString>& ItemIds, const TArray<FString>& AppIds, const TArray<FString>& Skus, const THandler<FAccelByteModelsEntitlementOwnershipDetails>& OnSuccess, const FErrorHandler& OnError, const bool VerifySignature, const bool VerifyExpiration, const FString& VerifySub)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ItemIds.Num() < 1
+		&& AppIds.Num() < 1
+		&& Skus.Num() < 1)
+	{
+		OnError.ExecuteIfBound(EHttpResponseCodes::NotFound, TEXT("Please provide at least one itemId, AppId or Sku."));
+	}
+	else if (PublicKey.IsEmpty())
+	{
+		OnError.ExecuteIfBound(EHttpResponseCodes::NotFound, TEXT("No Public key provided."));
+	}
+	else
+	{
+		auto ProcessOnSuccess = THandler<FAccelByteModelsOwnershipToken>::CreateLambda([OnSuccess, OnError, PublicKey, VerifySignature, VerifyExpiration, VerifySub](const FAccelByteModelsOwnershipToken& Result)
+		{
+			TSharedPtr<FJsonObject> DecodedResult;
+			FAccelByteJwtError Error;
+			AccelByteJwtWrapper::TryDecode(Result.OwnershipToken, PublicKey, DecodedResult, Error, VerifySignature, VerifyExpiration, VerifySub);
+
+			if(Error.Code == 0)
+			{
+				FAccelByteModelsEntitlementOwnershipDetails EntitlementDetails;
+				bool isSuccess = FJsonObjectConverter::JsonObjectToUStruct<FAccelByteModelsEntitlementOwnershipDetails>(DecodedResult.ToSharedRef(), &EntitlementDetails);
+				if(isSuccess)
+				{
+					OnSuccess.ExecuteIfBound(EntitlementDetails);
+				}
+				else
+				{
+					OnError.ExecuteIfBound(-1, "Cannot parse decoded token.");
+				}
+			}
+			else
+			{
+				OnError.ExecuteIfBound(Error.Code, Error.Message);
+			}
+		});
+		
+		GetUserEntitlementOwnershipTokenOnly(ItemIds, AppIds, Skus, ProcessOnSuccess, OnError);
+	}
+}
+	
+void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& ItemIds, const TArray<FString>& AppIds, const TArray<FString>& Skus, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (ItemIds.Num() < 1
+		&& AppIds.Num() < 1
+		&& Skus.Num() < 1)
+	{
+		OnError.ExecuteIfBound(EHttpResponseCodes::NotFound, TEXT("Please provide at least one itemId, AppId or Sku."));
+	}
+	else
+	{
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownershipToken"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace);
+
+		int paramCount = 0;
+		for (int i = 0; i < ItemIds.Num(); i++)
+		{
+			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("itemIds=")).Append(ItemIds[i]);
+			paramCount++;
+		}
+		for (int i = 0; i < AppIds.Num(); i++)
+		{
+			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("appIds=")).Append(AppIds[i]);
+			paramCount++;
+		}
+		for (int i = 0; i < Skus.Num(); i++)
+		{
+			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("skus=")).Append(Skus[i]);
+			paramCount++;
+		}
+
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 }
 

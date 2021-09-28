@@ -1398,3 +1398,13 @@ void AdminGetGoogleIAPConfig(const THandler<FGoogleIAPConfig>& OnSuccess, const 
 	FString Namespace = *FRegistry::Settings.Namespace;
 	AdminGetGoogleIAPConfig(Namespace, OnSuccess, OnError);
 }
+
+void AdminFulfillItem(const FString& Namespace, const FString& UserId, FFulfillmentRequest FulfillmentRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/users/%s/fulfillment"), *GetAdminBaseUrl(), *Namespace, *UserId);
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(FulfillmentRequest, Content);
+	AB_HTTP_POST(Request, Url, Authorization, Content);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}

@@ -561,6 +561,38 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementOwnership
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsOwnershipToken
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnershipToken")
+	FString OwnershipToken;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementOwnershipDetail
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	FString AppId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	FString AppType;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	FString Sku;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	FString ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	FString ItemNamespace;	
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementOwnershipDetails
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | EntitlementOwnership")
+	TArray<FAccelByteModelsEntitlementOwnershipDetail> Entitlements;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementGrant
 {
 	GENERATED_BODY()
