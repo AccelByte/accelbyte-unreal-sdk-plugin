@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [6.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.1.1%0D6.1.0) (2021-10-01)
+
+
+### Tests
+
+* **Reporting:** add missing include ([326d54e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/326d54e7deea4a57b741c28c70036d70dc259d67))
+
 ## [6.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.1.0%0D6.0.1) (2021-09-27)
 
 

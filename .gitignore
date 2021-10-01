@@ -80,3 +80,6 @@ Content/StarterContent/*
 
 # Doxygen generated files
 Doxygen/*
+
+# Config
+Config/*
