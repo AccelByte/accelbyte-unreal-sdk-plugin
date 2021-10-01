@@ -9,6 +9,7 @@
 #include "TestUtilities.h"
 #include "ReportingTestAdmin.h"
 #include "UserTestAdmin.h"
+#include "Api/AccelByteUserApi.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteReportingTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteReportingTest);
