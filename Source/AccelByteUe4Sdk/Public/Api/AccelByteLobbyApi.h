@@ -1532,6 +1532,8 @@ public:
 	
 	static FString LobbyMessageToJson(FString Message);
 
+	void ClearLobbyErrorMessages();
+
 private:
 	Lobby(Lobby const&) = delete; // Copy constructor
 	Lobby(Lobby&&) = delete; // Move constructor
