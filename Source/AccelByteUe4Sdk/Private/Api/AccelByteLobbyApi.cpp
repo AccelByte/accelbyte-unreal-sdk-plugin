@@ -675,6 +675,12 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<F
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound((int32)ErrorCodes::InvalidRequest, TEXT("UserIds cannot be empty!"));
+		return;
+	}
+
 	FString Query = TEXT("?userIds=");
 	for (int i = 0; i < UserIds.Num(); i++)
 	{

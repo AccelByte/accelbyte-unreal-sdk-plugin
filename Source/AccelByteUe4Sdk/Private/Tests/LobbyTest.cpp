@@ -1470,14 +1470,16 @@ bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Paramet
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
 	bool bGetPresenceSuccess = false;
 	bool bGetPresenceDone = false;
+	int32 GetPresenceErrorCode;
 	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &bGetPresenceDone, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
 		{
 			GetPresenceResult = Result;
 			bGetPresenceSuccess = true;
 			bGetPresenceDone = true;
-		}), FErrorHandler::CreateLambda([&bGetPresenceDone](int32 Code, const FString& Message) 
+		}), FErrorHandler::CreateLambda([&bGetPresenceDone, &GetPresenceErrorCode](int32 Code, const FString& Message) 
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get User's Presence Error. Code: %d | Message: %s"), Code, *Message);
+			GetPresenceErrorCode = Code;
 			bGetPresenceDone = true;
 		}));
 	FlushHttpRequests();
@@ -1490,6 +1492,7 @@ bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Paramet
 	LobbyDisconnect(1);
 
 	AB_TEST_FALSE(bGetPresenceSuccess);
+	AB_TEST_EQUAL(GetPresenceErrorCode, (int32)ErrorCodes::InvalidRequest);
 	return true;
 }
 
