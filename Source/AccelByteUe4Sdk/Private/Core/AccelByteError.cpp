@@ -92,15 +92,16 @@ namespace AccelByte
 		// Namespace Error Code List
 		{ static_cast<int32>(ErrorCodes::NamespaceNotFoundException), TEXT("errors.net.accelbyte.platform.namespace.namespace_not_found") },
 		{ static_cast<int32>(ErrorCodes::NamespaceAlreadyExistsException), TEXT("errors.net.accelbyte.platform.namespace.namespace_already_exists") },
+		{ static_cast<int32>(ErrorCodes::NamespaceContainsInvalidCharacterException), TEXT("errors.net.accelbyte.platform.namespace.namespace_contains_invalid_character") },
+		{ static_cast<int32>(ErrorCodes::DisplayNameContainsInvalidCharacterException), TEXT("errors.net.accelbyte.platform.namespace.display_name_contains_invalid_character") },
 		// Profile Error Code List
 		{ static_cast<int32>(ErrorCodes::UserProfileNotFoundException), TEXT("errors.net.accelbyte.platform.profile.user_profile_not_found") },
 		{ static_cast<int32>(ErrorCodes::UserProfileAlreadyExistsException), TEXT("errors.net.accelbyte.platform.profile.user_profile_already_exists") },
 		// FileStorage Error Code List
 		{ static_cast<int32>(ErrorCodes::FileTypeNotSupportedException), TEXT("errors.net.accelbyte.platform.filestorage.file_type_not_supported") },
 		{ static_cast<int32>(ErrorCodes::UserFileStorageExceedLimitException), TEXT("errors.net.accelbyte.platform.filestorage.user_file_storage_exceed_limit") },
-		// Buildinfo Error Code List
+		// Build info Error Code List
 		{ static_cast<int32>(ErrorCodes::EntitlementRequiredException), TEXT("errors.net.accelbyte.platform.buildinfo.entitlement_required") },
-		{ static_cast<int32>(ErrorCodes::EntitlementRequiredException2), TEXT("errors.net.accelbyte.platform.buildinfo.conditional_write_failed") },
 		{ static_cast<int32>(ErrorCodes::BlockEmptyException), TEXT("errors.net.accelbyte.platform.buildinfo.block_empty") },
 		{ static_cast<int32>(ErrorCodes::BlockUuidRequiredException), TEXT("errors.net.accelbyte.platform.buildinfo.block_uuid_required") },
 		{ static_cast<int32>(ErrorCodes::InvalidPlatformIdException), TEXT("errors.net.accelbyte.platform.buildinfo.platform_id_not_found") },
@@ -120,47 +121,46 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::UploadAlreadyStartedException), TEXT("errors.net.accelbyte.platform.buildinfo.upload_already_started") },
 		{ static_cast<int32>(ErrorCodes::DuplicateBuildIdException), TEXT("errors.net.accelbyte.platform.buildinfo.duplicate_build_id") },
 		//
-		//Category Error Code List
+		//Catalog Error Code List
 		//
-		{ static_cast<int32>(ErrorCodes::DefaultLanguageRequiredException), TEXT("errors.net.accelbyte.platform.catalog.default_language_required") },
-		{ static_cast<int32>(ErrorCodes::InvalidDiscountValueException), TEXT("errors.net.accelbyte.platform.catalog.invalid_discount_amount") },
-		{ static_cast<int32>(ErrorCodes::ItemBundleException), TEXT("errors.net.accelbyte.platform.catalog.item_bundle") },
-		{ static_cast<int32>(ErrorCodes::InvalidStoreDataException), TEXT("errors.net.accelbyte.platform.catalog.invalid_store_data") },
-		{ static_cast<int32>(ErrorCodes::StoreMetaMismatchException), TEXT("errors.net.accelbyte.platform.catalog.store_meta_mismatch") },
-		//
-		{ static_cast<int32>(ErrorCodes::DefaultRegionRequiredException), TEXT("errors.net.accelbyte.platform.catalog.default_region_required") },
-		//
+		//category
 		{ static_cast<int32>(ErrorCodes::CategoryNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.category_not_found") },
-		{ static_cast<int32>(ErrorCodes::ItemNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.item_not_found") },
-		{ static_cast<int32>(ErrorCodes::StoreNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.store_not_found") },
-		//
-		{ static_cast<int32>(ErrorCodes::PublishedStoreNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.published_store_not_found") },
-		//
 		{ static_cast<int32>(ErrorCodes::CategoryAlreadyExistsException), TEXT("errors.net.accelbyte.platform.catalog.category_already_exists") },
 		{ static_cast<int32>(ErrorCodes::CategoryNotEmptyException), TEXT("errors.net.accelbyte.platform.catalog.category_not_empty") },
-		{ static_cast<int32>(ErrorCodes::ItemAlreadyBundledException), TEXT("errors.net.accelbyte.platform.catalog.item_already_bundled") },
-		{ static_cast<int32>(ErrorCodes::LanguageNotSupportedException), TEXT("errors.net.accelbyte.platform.catalog.store_language_not_supported") },
-		{ static_cast<int32>(ErrorCodes::RegionNotSupportedException), TEXT("errors.net.accelbyte.platform.catalog.store_region_not_supported") },
-		{ static_cast<int32>(ErrorCodes::PublishedStoreNotUpdatableException), TEXT("errors.net.accelbyte.platform.catalog.published_store_not_updatable") },
+		//catalog
+		{ static_cast<int32>(ErrorCodes::DefaultLanguageRequiredException), TEXT("errors.net.accelbyte.platform.catalog.default_language_required") },
+		{ static_cast<int32>(ErrorCodes::DefaultRegionRequiredException), TEXT("errors.net.accelbyte.platform.catalog.default_region_required") },
+		//store
+		{ static_cast<int32>(ErrorCodes::InvalidStoreDataException), TEXT("errors.net.accelbyte.platform.catalog.invalid_store_data") },
+		{ static_cast<int32>(ErrorCodes::StoreMetaMismatchException), TEXT("errors.net.accelbyte.platform.catalog.store_meta_mismatch") },
+		{ static_cast<int32>(ErrorCodes::StoreNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.store_not_found") },
+		{ static_cast<int32>(ErrorCodes::PublishedStoreNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.published_store_not_found") },
+		//item
+		{ static_cast<int32>(ErrorCodes::ItemInvalidDiscountValueException), TEXT("errors.net.accelbyte.platform.catalog.invalid_discount_amount") },
+		{ static_cast<int32>(ErrorCodes::ItemBundleException), TEXT("errors.net.accelbyte.platform.catalog.item_bundle") },
+		{ static_cast<int32>(ErrorCodes::ItemNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.item_not_found") },
+		{ static_cast<int32>(ErrorCodes::ItemAppIdNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.item_appId_not_found") },
+		{ static_cast<int32>(ErrorCodes::ItemSkuNotFoundException), TEXT("errors.net.accelbyte.platform.catalog.item_sku_not_found") },
 		//
 		//Entitlement Error Code List
 		//
 		{ static_cast<int32>(ErrorCodes::EntitlementNotDistributableException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_not_distributable") },
 		{ static_cast<int32>(ErrorCodes::ExceedDistributeQuantityException), TEXT("errors.net.accelbyte.platform.entitlement.exceed_distribute_quantity") },
-		//
 		{ static_cast<int32>(ErrorCodes::PublisherNamespaceNotDistributableException), TEXT("errors.net.accelbyte.platform.entitlement.publisher_namespace_not_distributable") },
 		//
-		{ static_cast<int32>(ErrorCodes::UserEntitlementNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.user_entitlement_not_found") },
-		{ static_cast<int32>(ErrorCodes::EntitlementIdNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_id_not_found") },
+		{ static_cast<int32>(ErrorCodes::EntitlementIdNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.user_entitlement_not_found") },
 		{ static_cast<int32>(ErrorCodes::EntitlementAppIdNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_appid_not_found") },
-		//
-		{ static_cast<int32>(ErrorCodes::DistributionReceiverNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_not_found") },
 		//
 		{ static_cast<int32>(ErrorCodes::EntitlementAlreadyRevokedException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_already_revoked") },
 		{ static_cast<int32>(ErrorCodes::EntitlementNotActiveException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_not_active") },
 		{ static_cast<int32>(ErrorCodes::EntitlementNotConsumableException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_not_consumable") },
-		{ static_cast<int32>(ErrorCodes::EntitlementUsedUpException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_used_up") },
+		{ static_cast<int32>(ErrorCodes::EntitlementAlreadyUsedException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_already_used") },
 		{ static_cast<int32>(ErrorCodes::EntitlementAlreadyDistributedException), TEXT("errors.net.accelbyte.platform.entitlement.entitlement_already_distributed") },
+		{ static_cast<int32>(ErrorCodes::EntitlementUseCountIsInsufficientException), TEXT("errors.net.accelbyte.platform.entitlement.use_count_is_insufficient") },
+		{ static_cast<int32>(ErrorCodes::PermanentItemAlreadyOwned), TEXT("errors.net.accelbyte.platform.entitlement.permanent_item_already_owned") },
+		{ static_cast<int32>(ErrorCodes::EntitlementOutOfTimeRangeException), TEXT("errors.net.accelbyte.platform.entitlement.out_of_time_range") },
+		//
+		{ static_cast<int32>(ErrorCodes::DistributionReceiverNotFoundException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_not_found") },
 		{ static_cast<int32>(ErrorCodes::DistributionReceiverAlreadyExistsException), TEXT("errors.net.accelbyte.platform.entitlement.distribution_receiver_already_exists") },
 		//
 		//Order Error Code List
@@ -174,6 +174,8 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::OrderReceiptNotDownloadableException), TEXT("errors.net.accelbyte.platform.order.order_receipt_not_downloadable") },
 		{ static_cast<int32>(ErrorCodes::OrderTransactionAmountMismatchException), TEXT("errors.net.accelbyte.platform.order.order_transaction_amount_mismatch") },
 		{ static_cast<int32>(ErrorCodes::ExceedItemMaxCountPerUserException), TEXT("errors.net.accelbyte.platform.order.exceed_item_max_count_per_user") },
+		{ static_cast<int32>(ErrorCodes::ExceedItemMaxCountException), TEXT("errors.net.accelbyte.platform.order.exceed_item_max_count") },
+		{ static_cast<int32>(ErrorCodes::OrderNotCancelableException), TEXT("errors.net.accelbyte.platform.order.order_not_cancalable") },
 		//
 		//Payment Error Code List
 		//
@@ -194,7 +196,7 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::PaymentOrderTransactionAmountMismatchException), TEXT("errors.net.accelbyte.platform.payment.payment_order_transaction_amount_mismatch") },
 		{ static_cast<int32>(ErrorCodes::WxPayUnifiedOrderFailedException), TEXT("errors.net.accelbyte.platform.payment.wxpay_unified_order_failed") },
 		{ static_cast<int32>(ErrorCodes::PaymentExtOrderNoAlreadyExistsException), TEXT("errors.net.accelbyte.platform.payment.ext_order_no_already_exists") },
-
+		//
 		//Wallet Error Code List
 		//
 		{ static_cast<int32>(ErrorCodes::WalletExceedMaxTransactionAmountPerDayException), TEXT("errors.net.accelbyte.platform.wallet.exceed_max_transaction_amount_per_day") },
@@ -224,30 +226,70 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::CodeHasBeenRedeemedException), TEXT("errors.net.accelbyte.platform.campaign.code_has_been_redeemed") },
 		//
 		//Social Error Code List
-		//Activity
 		//
-		{ static_cast<int32>(ErrorCodes::ActivityTrackNotFoundException), TEXT("errors.net.accelbyte.platform.activity.activity_track_not_found") },
-		//
-		//Favorite
-		//
-		{ static_cast<int32>(ErrorCodes::FavoriteItemNotFoundException), TEXT("errors.net.accelbyte.platform.favorite.favorite_item_not_found") },
-		{ static_cast<int32>(ErrorCodes::FavoriteUserNotFoundException), TEXT("errors.net.accelbyte.platform.favorite.favorite_user_not_found") },
-		//
-		//Offense report
-		//
-		{ static_cast<int32>(ErrorCodes::OffenseReportNotFoundException), TEXT("errors.net.accelbyte.platform.offensereport.offense_report_not_found") },
-		{ static_cast<int32>(ErrorCodes::OffenseTypeNotFoundException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_not_found") },
-		{ static_cast<int32>(ErrorCodes::OffenseTypeAlreadyExistsException), TEXT("errors.net.accelbyte.platform.offensereport.offense_type_already_exists") },
-		{ static_cast<int32>(ErrorCodes::OffenseReportAssociatedException), TEXT("errors.net.accelbyte.platform.offensereport.offense_report_associated") },
-		//
+		//Game Profile Error Code List
+		{ static_cast<int32>(ErrorCodes::GameProfileAttributeMismatchException), TEXT("errors.net.accelbyte.platform.gameprofile.attribute_mismatch") },
+		{ static_cast<int32>(ErrorCodes::GameProfileIdNotFoundException), TEXT("errors.net.accelbyte.platform.gameprofile.game_profile_id_not_found") },
 		//Statistic Error Code List
-		//
 		{ static_cast<int32>(ErrorCodes::InvalidStatOperatorException), TEXT("errors.net.accelbyte.platform.statistic.invalid_stat_operator") },
-		{ static_cast<int32>(ErrorCodes::StatisticNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.statistic_not_found") },
-		{ static_cast<int32>(ErrorCodes::StatNotDecreasableException), TEXT("errors.net.accelbyte.platform.statistic.stat_not_decreasable") },
+		{ static_cast<int32>(ErrorCodes::StatisticConfigNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.statistic_not_found") },
+		//
+		{ static_cast<int32>(ErrorCodes::StatisticNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.stat_not_found") },
 		{ static_cast<int32>(ErrorCodes::UserStatsNotFoundException), TEXT("errors.net.accelbyte.platform.statistic.user_stat_not_found") },
+		//
+		{ static_cast<int32>(ErrorCodes::StatNotDecreasableException), TEXT("errors.net.accelbyte.platform.statistic.stat_not_decreasable") },
 		{ static_cast<int32>(ErrorCodes::UserStatAlreadyExistException), TEXT("errors.net.accelbyte.platform.statistic.user_stat_already_exist") },
 		{ static_cast<int32>(ErrorCodes::StatValueOutOfRangeException), TEXT("errors.net.accelbyte.platform.statistic.stat_value_out_of_range") },
+		//
+		//SeasonPass Error Code List
+		//
+		{ static_cast<int32>(ErrorCodes::SeasonPassDefaultLanguageRequiredException), TEXT("errors.net.accelbyte.platform.seasonpass.default_language_required") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassInvalidTimeRangeException), TEXT("errors.net.accelbyte.platform.seasonpass.invalid_time_range") },
+		//
+		{ static_cast<int32>(ErrorCodes::SeasonPassTierItemNotFoundException), TEXT("errors.net.accelbyte.platform.seasonpass.tier_item_not_found") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassPassItemNotFoundException), TEXT("errors.net.accelbyte.platform.seasonpass.pass_item_not_found") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassSeasonNotFoundException), TEXT("errors.net.accelbyte.platform.seasonpass.season_not_found") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassRewardNotFoundException), TEXT("errors.net.accelbyte.platform.seasonpass.reward_not_found") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassPassCodeNotFoundException), TEXT("errors.net.accelbyte.platform.seasonpass.passCode_not_found") },
+		//
+		{ static_cast<int32>(ErrorCodes::SeasonPassSeasonInvalidStatusException), TEXT("errors.net.accelbyte.platform.seasonpass.season_invalid_status") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassRewardsNotProvidedException), TEXT("errors.net.accelbyte.platform.seasonpass.rewards_not_provided") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassPassesNotProvidedException), TEXT("errors.net.accelbyte.platform.seasonpass.passes_not_provided") },
+		{ static_cast<int32>(ErrorCodes::SeasonPassTiersNotProvidedException), TEXT("errors.net.accelbyte.platform.seasonpass.tiers_not_provided") },
+		//
+		//LeaderBoard Error Code List
+		//
+		{ static_cast<int32>(ErrorCodes::LeaderBoardUserRankingDataNotFound), TEXT("errors.net.accelbyte.platform.leaderboard.user_ranking_not_found") },
+		//
+		//CloudSave Error Code List
+		//
+		{ static_cast<int32>(ErrorCodes::GameRecordNotFoundException), TEXT("errors.net.accelbyte.platform.cloudsave.game_record_not_found") },
+		{ static_cast<int32>(ErrorCodes::GetGameRecordBadRequestException), TEXT("errors.net.accelbyte.platform.cloudsave.get_game_record_bad_request") },
+		{ static_cast<int32>(ErrorCodes::CreateGameRecordValueTooBigException), TEXT("errors.net.accelbyte.platform.cloudsave.create_game_record_value_too_big") },
+		{ static_cast<int32>(ErrorCodes::PlayerRecordNotFoundException), TEXT("errors.net.accelbyte.platform.cloudsave.player_record_not_found") },
+		{ static_cast<int32>(ErrorCodes::PlayerRecordGetterIsNotOwnerException), TEXT("errors.net.accelbyte.platform.cloudsave.player_record_getter_is_not_owner") },
+		{ static_cast<int32>(ErrorCodes::PlayerRecordEditorIsNotOwnerException), TEXT("errors.net.accelbyte.platform.cloudsave.player_record_editor_is_not_owner") },
+		{ static_cast<int32>(ErrorCodes::GameRecordValidationErrorException), TEXT("errors.net.accelbyte.platform.cloudsave.validation_error") },
+		{ static_cast<int32>(ErrorCodes::GameRecordPreconditionFailedException), TEXT("errors.net.accelbyte.platform.cloudsave.precondition_failed") },
+		{ static_cast<int32>(ErrorCodes::PlayerPublicRecordNotFoundException), TEXT("errors.net.accelbyte.platform.cloudsave.player_public_record_not_found") },
+		{ static_cast<int32>(ErrorCodes::PlayerPublicRecordValidationErrorException), TEXT("errors.net.accelbyte.platform.cloudsave.player_public_validation_error") },
+		{ static_cast<int32>(ErrorCodes::PlayerRecordPreconditionFailedException), TEXT("errors.net.accelbyte.platform.cloudsave.player_record_precondition_failed") },
+		//
+		//UGC Error Code List
+		//
+		{ static_cast<int32>(ErrorCodes::UGCCreateContentBadRequestException), TEXT("errors.net.accelbyte.platform.ugc.create_content_bad_request") },
+		{ static_cast<int32>(ErrorCodes::UGCCreateContentConflictShareCodeErrorException), TEXT("errors.net.accelbyte.platform.ugc.create_content_conflict_share_code") },
+		{ static_cast<int32>(ErrorCodes::UGCGetContentByIDNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.get_content_by_id_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCDownloadContentByShareCodeNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.download_content_by_share_code_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCCreateChannelMalformedRequestException), TEXT("errors.net.accelbyte.platform.ugc.create_channel_malform_request") },
+		{ static_cast<int32>(ErrorCodes::UGCUpdateChannelMalformedRequestException), TEXT("errors.net.accelbyte.platform.ugc.update_channel_malform_request") },
+		{ static_cast<int32>(ErrorCodes::UGCUpdateChannelNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.create_channel_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCGetTagBadRequestException), TEXT("errors.net.accelbyte.platform.ugc.get_tag_bad_request") },
+		{ static_cast<int32>(ErrorCodes::UGCGetTypeBadRequestException), TEXT("errors.net.accelbyte.platform.ugc.get_type_bad_request") },
+		{ static_cast<int32>(ErrorCodes::UGCDeleteChannelNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.delete_channel_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCUpdateContentNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.update_content_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCDeleteContentNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.delete_content_not_found") },
+		{ static_cast<int32>(ErrorCodes::UGCGetContentPreviewNotFoundException), TEXT("errors.net.accelbyte.platform.ugc.get_content_preview_not_found") },
 		//
 		//Client side Error Code List
 		//
@@ -256,8 +298,7 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::NetworkError), TEXT("There is no response.") },
 		{ static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in.") },
 		{ static_cast<int32>(ErrorCodes::WebSocketConnectFailed), TEXT("WebSocket connect failed.") },
-
-
+		
 	};
 
 	void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage)

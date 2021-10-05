@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "EcommerceTestAdmin.h"
 #include "TestUtilities.h"
 #include "SubscriptionTestAdmin.generated.h"
 
