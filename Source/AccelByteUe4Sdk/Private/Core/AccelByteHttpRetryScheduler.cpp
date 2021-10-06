@@ -194,7 +194,7 @@ void FHttpRetryTask::Tick(double CurrentTime)
 		CheckRetry(NextState);
 		break;
 	case EHttpRequestStatus::Failed: //request cancelled
-		NextState = EAccelByteTaskState::Completed;
+		NextState = EAccelByteTaskState::Cancelled;
 	default:
 		break;
 	}
@@ -208,7 +208,7 @@ bool FHttpRetryTask::Finish()
 		Cancel();
 	}
 
-	if (TaskState == EAccelByteTaskState::Completed)
+	if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled)
 	{
 		FReport::LogHttpResponse(Request, Request->GetResponse());
 		CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), IsFinished());
