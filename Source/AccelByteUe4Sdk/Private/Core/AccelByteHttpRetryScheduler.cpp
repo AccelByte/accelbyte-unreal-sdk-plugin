@@ -177,8 +177,8 @@ void FHttpRetryTask::Tick(double CurrentTime)
 				if (Request->GetHeader("Authorization").Contains("Bearer")) 
 				{
 					NextState = Pause();
+					break;
 				}
-				break;
 			default:
 				NextState = EAccelByteTaskState::Completed;
 				break;
