@@ -339,7 +339,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 
 	float SpecifiedDeltaTime = 0.2f;
 	CurrentTime = 10.0;
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+	auto AccelByteTask = Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 
 	while (CurrentTime < 70.3 && !RequestCompleted)
 	{
@@ -351,6 +351,7 @@ bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Pa
 	AB_TEST_TRUE(RequestCompleted);
 	AB_TEST_FALSE(Request->GetResponse().IsValid());
 	AB_TEST_EQUAL(Request->GetStatus(), EHttpRequestStatus::Failed);
+	AB_TEST_EQUAL(AccelByteTask->State(), EAccelByteTaskState::Cancelled);
 
 	FRegistry::Credentials.ForgetAll();
 	Ticker.RemoveTicker(TickerDelegate);
