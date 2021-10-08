@@ -125,9 +125,9 @@ namespace Api
 		const FString UserUnbannedNotification = TEXT("userUnbannedNotification");
 
 		// Matchmaking
-		const FString StartMatchmaking = TEXT("startMatchmakingResponse");
-		const FString CancelMatchmaking = TEXT("cancelMatchmakingResponse");
-		const FString ReadyConsentResponse = TEXT("setReadyConsentResponse");
+		const FString MatchmakingStart = TEXT("startMatchmakingResponse");
+		const FString MatchmakingCancel = TEXT("cancelMatchmakingResponse");
+		const FString ReadyConsent = TEXT("setReadyConsentResponse");
 		const FString MatchmakingNotif = TEXT("matchmakingNotif");
 		const FString ReadyConsentNotif = TEXT("setReadyConsentNotif");
 		const FString RematchmakingNotif = TEXT("rematchmakingNotif");
@@ -166,9 +166,9 @@ namespace Api
 		const FString ErrorNotif = TEXT("errorNotif");
 		
 		//Session Attribute
-		const FString SessionAttributeSet = TEXT("setSessionAttributeResponse");
-		const FString SessionAttributeGet = TEXT("getSessionAttributeResponse");
-		const FString SessionAttributeGetAll = TEXT("getAllSessionAttributeResponse");
+		const FString SetSessionAttribute = TEXT("setSessionAttributeResponse");
+		const FString GetSessionAttribute = TEXT("getSessionAttributeResponse");
+		const FString GetAllSessionAttribute = TEXT("getAllSessionAttributeResponse");
 	}
 
 	namespace Prefix
@@ -182,6 +182,125 @@ namespace Api
 		const FString Signaling = TEXT("signaling");
 		const FString Attribute = TEXT("attribute");
 	}
+
+	namespace Suffix
+	{
+		const FString Response = TEXT("Response");
+		const FString Notif = TEXT("Notif"); // Note: current usage is not yet uniformized -> Notif/Notification
+
+	}
+
+	enum Response : uint8
+	{
+		Invalid_Response,
+
+		// Party
+		PartyInfo,
+		PartyCreate,
+		PartyLeave,
+		PartyInvite,
+		PartyJoin,
+		PartyReject,
+		PartyKick,
+		PartyGenerateCode,
+		PartyGetCode,
+		PartyDeleteCode,
+		PartyJoinViaCode,
+		PartyPromoteLeader,
+
+		// Chat
+		PersonalChat,
+		PartyChat,
+		JoinChannelChat,
+		ChannelChat,
+
+		// Presence
+		SetUserPresence,
+		GetAllFriendsStatus,
+
+		// Matchmaking
+		MatchmakingStart,
+		MatchmakingCancel,
+		ReadyConsent,
+
+		// Friends
+		RequestFriends,
+		Unfriend,
+		ListOutgoingFriends,
+		CancelFriends,
+		ListIncomingFriends,
+		AcceptFriends,
+		RejectFriends,
+		LoadFriendList,
+		GetFriendshipStatus,
+
+		// Block
+		BlockPlayer,
+		UnblockPlayer,
+
+		//Session Attribute
+		SetSessionAttribute,
+		GetSessionAttribute,
+		GetAllSessionAttribute,
+
+		MAX_Response,
+	};
+
+	enum Notif : uint8
+	{
+		Invalid_Notif,
+
+		// default
+		ConnectedNotif,
+		DisconnectNotif,
+
+		// Party
+		PartyLeaveNotif,
+		PartyInviteNotif,
+		PartyGetInvitedNotif,
+		PartyJoinNotif,
+		PartyRejectNotif,
+		PartyKickNotif,
+		PartyDataUpdateNotif,
+
+		// Chat
+		PersonalChatNotif,
+		PartyChatNotif,
+		ChannelChatNotif,
+
+		// Presence
+		FriendStatusNotif,
+
+		// Notification
+		MessageNotif,
+		UserBannedNotification,
+		UserUnbannedNotification,
+
+		// Matchmaking
+		MatchmakingNotif,
+		ReadyConsentNotif,
+		RematchmakingNotif,
+		DsNotif,
+
+		// Friends + Notification
+		AcceptFriendsNotif,
+		RequestFriendsNotif,
+		UnfriendNotif,
+		CancelFriendsNotif,
+		RejectFriendsNotif,
+
+		// Block + Notification
+		BlockPlayerNotif,
+		UnblockPlayerNotif,
+
+		//Signaling
+		SignalingP2PNotif,
+
+		// Error Notif
+		ErrorNotif,
+
+		MAX_Notif,
+	};
 
 void Lobby::Connect()
 {
@@ -1556,9 +1675,9 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse, OnSetUserPresenceError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse, OnGetAllFriendsStatusError);
 	// Matchmaking
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::StartMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse, OnMatchmakingStartError);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::CancelMatchmaking, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse, OnMatchmakingCancelError);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ReadyConsentResponse, FAccelByteModelsReadyConsentRequest, ReadyConsentResponse, OnReadyConsentError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::MatchmakingStart, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse, OnMatchmakingStartError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::MatchmakingCancel, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse, OnMatchmakingCancelError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ReadyConsent, FAccelByteModelsReadyConsentRequest, ReadyConsentResponse, OnReadyConsentError);
 	// Friends
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RequestFriends, FAccelByteModelsRequestFriendsResponse, RequestFriendsResponse, OnRequestFriendsError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::Unfriend, FAccelByteModelsUnfriendResponse, UnfriendResponse, OnUnfriendError);
@@ -1585,9 +1704,9 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::BlockPlayer, FAccelByteModelsBlockPlayerResponse, BlockPlayerResponse, OnBlockPlayerError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::UnblockPlayer, FAccelByteModelsUnblockPlayerResponse, UnblockPlayerResponse, OnUnblockPlayerError);
 	// Session Attribute
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse, OnSetSessionAttributeError);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGet, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse, OnGetSessionAttributeError);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGetAll, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse, OnGetAllSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SetSessionAttribute, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse, OnSetSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::GetSessionAttribute, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse, OnGetSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::GetAllSessionAttribute, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse, OnGetAllSessionAttributeError);
 
 #undef HANDLE_LOBBY_MESSAGE_RESPONSE
 		
