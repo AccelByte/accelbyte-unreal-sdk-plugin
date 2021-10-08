@@ -1553,8 +1553,8 @@ private:
 	void FetchLobbyErrorMessages();
 
 	// Message Handling
-	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, TSharedPtr<FJsonObject> ParsedJsonObj);
-	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, TSharedPtr<FJsonObject> ParsedJsonObj);
+	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
 

@@ -302,6 +302,9 @@ namespace Api
 		MAX_Notif,
 	};
 
+/**
+* Helper macro to enforce uniform naming, easier pair initialization, and readibility
+*/
 #define FORM_STRING_ENUM_PAIR(Type, MessageType) \
     { LobbyResponse::MessageType, Type::MessageType } \
 
@@ -1041,7 +1044,6 @@ void Lobby::WritePartyStorage(const FString & PartyId, TFunction<FJsonObjectWrap
 //-------------------------------------------------------------------------------------------------
 // Block
 //-------------------------------------------------------------------------------------------------
-
 void Lobby::BlockPlayer(const FString& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1562,6 +1564,10 @@ FString Lobby::LobbyMessageToJson(FString Message)
 	return Json;
 }
 
+/**
+* Default Response handler as templated function (compile time checked)
+* @see HandleNotif
+*/
 template <typename DataStruct, typename ResponseCallbackType, typename ErrorCallbackType>
 void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCallback, ErrorCallbackType ErrorCallback
 	, const FString& ParsedJsonString, const FString& ReceivedMessageType, int lobbyResponseCode, const TMap<FString, FString>& LobbyErrorMessages)
@@ -1597,11 +1603,15 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 	}
 }
 
+/**
+* Helper macro for ErrorHandler and SuccessHandler token. Made as separate macro to prevent linux-compiler error
+*/
 #define MESSAGE_ERROR_HANDLER(MessageType) On ## MessageType ## Error
 #define MESSAGE_SUCCESS_HANDLER(MessageType) MessageType ## Response
 
 /**
-* macro for usage as a switch case @TODO DOC
+* Programmer-friendly macro for switch case RESPONSE scenario
+* @see CASE_NOTIF
 **/
 #define CASE_RESPONSE(MessageType, Model) \
 	case (Response::MessageType) : \
@@ -1610,7 +1620,7 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 			break; \
 		} \
 
-void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, TSharedPtr<FJsonObject> ParsedJsonObj)
+void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
 	const int lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
 
@@ -1639,55 +1649,57 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE(PersonalChat, FAccelByteModelsPersonalMessageResponse);
 		CASE_RESPONSE(PartyChat, FAccelByteModelsPartyMessageResponse);
 		CASE_RESPONSE(ChannelChat, FAccelByteModelsChannelMessageResponse);
-	case (Response::JoinChannelChat):
-	{
-		FAccelByteModelsJoinDefaultChannelResponse Result;
-		if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
+		case (Response::JoinChannelChat):
 		{
-			ChannelSlug = Result.ChannelSlug;
-			JoinDefaultChannelResponse.ExecuteIfBound(Result);
+			FAccelByteModelsJoinDefaultChannelResponse Result;
+			if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
+			{
+				ChannelSlug = Result.ChannelSlug;
+				JoinDefaultChannelResponse.ExecuteIfBound(Result);
+			}
+			break;
 		}
-		break;
-	}
-	// Presence
-	CASE_RESPONSE(SetUserPresence, FAccelByteModelsSetOnlineUsersResponse);
-	CASE_RESPONSE(GetAllFriendsStatus, FAccelByteModelsGetOnlineUsersResponse);
-	// Matchmaking
-	CASE_RESPONSE(MatchmakingStart, FAccelByteModelsMatchmakingResponse);
-	CASE_RESPONSE(MatchmakingCancel, FAccelByteModelsMatchmakingResponse);
-	CASE_RESPONSE(ReadyConsent, FAccelByteModelsReadyConsentRequest);
-	// Friends
-	CASE_RESPONSE(RequestFriends, FAccelByteModelsRequestFriendsResponse);
-	CASE_RESPONSE(Unfriend, FAccelByteModelsUnfriendResponse);
-	CASE_RESPONSE(ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse);
-	CASE_RESPONSE(CancelFriends, FAccelByteModelsCancelFriendsResponse);
-	CASE_RESPONSE(ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse);
-	CASE_RESPONSE(AcceptFriends, FAccelByteModelsAcceptFriendsResponse);
-	CASE_RESPONSE(RejectFriends, FAccelByteModelsRejectFriendsResponse);
-	CASE_RESPONSE(LoadFriendList, FAccelByteModelsLoadFriendListResponse);
-	case (Response::GetFriendshipStatus):
-	{
-		FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
-		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &StringResult, 0, 0);
-		if (bParseSuccess)
+		// Presence
+		CASE_RESPONSE(SetUserPresence, FAccelByteModelsSetOnlineUsersResponse);
+		CASE_RESPONSE(GetAllFriendsStatus, FAccelByteModelsGetOnlineUsersResponse);
+		// Matchmaking
+		CASE_RESPONSE(MatchmakingStart, FAccelByteModelsMatchmakingResponse);
+		CASE_RESPONSE(MatchmakingCancel, FAccelByteModelsMatchmakingResponse);
+		CASE_RESPONSE(ReadyConsent, FAccelByteModelsReadyConsentRequest);
+		// Friends
+		CASE_RESPONSE(RequestFriends, FAccelByteModelsRequestFriendsResponse);
+		CASE_RESPONSE(Unfriend, FAccelByteModelsUnfriendResponse);
+		CASE_RESPONSE(ListOutgoingFriends, FAccelByteModelsListOutgoingFriendsResponse);
+		CASE_RESPONSE(CancelFriends, FAccelByteModelsCancelFriendsResponse);
+		CASE_RESPONSE(ListIncomingFriends, FAccelByteModelsListIncomingFriendsResponse);
+		CASE_RESPONSE(AcceptFriends, FAccelByteModelsAcceptFriendsResponse);
+		CASE_RESPONSE(RejectFriends, FAccelByteModelsRejectFriendsResponse);
+		CASE_RESPONSE(LoadFriendList, FAccelByteModelsLoadFriendListResponse);
+		case (Response::GetFriendshipStatus):
 		{
-			FAccelByteModelsGetFriendshipStatusResponse Result;
-			Result.Code = StringResult.Code;
-			Result.friendshipStatus = (ERelationshipStatusCode)FCString::Atoi(*StringResult.friendshipStatus);
-			GetFriendshipStatusResponse.ExecuteIfBound(Result);
+			FAccelByteModelsGetFriendshipStatusStringResponse StringResult;
+			bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &StringResult, 0, 0);
+			if (bParseSuccess)
+			{
+				FAccelByteModelsGetFriendshipStatusResponse Result;
+				Result.Code = StringResult.Code;
+				Result.friendshipStatus = (ERelationshipStatusCode)FCString::Atoi(*StringResult.friendshipStatus);
+				GetFriendshipStatusResponse.ExecuteIfBound(Result);
+			}
+			break;
 		}
-		break;
-	}
-	// Block
-	CASE_RESPONSE(BlockPlayer, FAccelByteModelsBlockPlayerResponse);
-	CASE_RESPONSE(UnblockPlayer, FAccelByteModelsUnblockPlayerResponse);
-	// Session Attribute
-	CASE_RESPONSE(SetSessionAttribute, FAccelByteModelsSetSessionAttributesResponse);
-	CASE_RESPONSE(GetSessionAttribute, FAccelByteModelsGetSessionAttributesResponse);
-	CASE_RESPONSE(GetAllSessionAttribute, FAccelByteModelsGetAllSessionAttributesResponse);
-	default:
-		//@TODO
-		break;
+		// Block
+		CASE_RESPONSE(BlockPlayer, FAccelByteModelsBlockPlayerResponse);
+		CASE_RESPONSE(UnblockPlayer, FAccelByteModelsUnblockPlayerResponse);
+		// Session Attribute
+		CASE_RESPONSE(SetSessionAttribute, FAccelByteModelsSetSessionAttributesResponse);
+		CASE_RESPONSE(GetSessionAttribute, FAccelByteModelsGetSessionAttributesResponse);
+		CASE_RESPONSE(GetAllSessionAttribute, FAccelByteModelsGetAllSessionAttributesResponse);
+		default:
+		{
+			ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type Response but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
+			break;
+		}
 
 	}
 }
@@ -1696,6 +1708,10 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 #undef MESSAGE_ERROR_HANDLER
 #undef CASE_RESPONSE
 
+/**
+* Default Notif handler as templated function (compile time checked)
+* @see HandleResponse
+*/
 template <typename DataStruct, typename ResponseCallbackType>
 void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallback
 	, const FString& ParsedJsonString, const FString& ReceivedMessageType) {
@@ -1708,7 +1724,9 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 };
 
 /**
-* macro for usage as a switch case @TODO DOC
+*  Programmer-friendly macro for switch case NOTIF scenario
+* @see CASE_RESPONSE
+*
 **/
 #define CASE_NOTIF(MessageType, Model) \
 	case (Notif::MessageType) : \
@@ -1717,96 +1735,95 @@ void HandleNotif(const FString& MessageType, ResponseCallbackType ResponseCallba
 			break; \
 		} \
 
-void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, TSharedPtr<FJsonObject> ParsedJsonObj)
+void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
 {
 	Notif NotifEnum = Notif::Invalid_Notif;
-	Notif* NotifEnumPointer = NotifStringEnumMap.Find(ReceivedMessageType);
-	if (NotifEnumPointer) {
+	if (const Notif* NotifEnumPointer = NotifStringEnumMap.Find(ReceivedMessageType)) {
 		NotifEnum = *NotifEnumPointer;
 	}
 
 	switch (NotifEnum)
 	{
 		// Party
-	case (Notif::ConnectedNotif):
-	{
-		FAccelByteModelsLobbySessionId SessionId;
-		bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &SessionId, 0, 0);
-		if (bSuccess)
+		case (Notif::ConnectedNotif):
 		{
-			LobbySessionId = SessionId;
+			FAccelByteModelsLobbySessionId SessionId;
+			bool bSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &SessionId, 0, 0);
+			if (bSuccess)
+			{
+				LobbySessionId = SessionId;
+			}
+			break;
 		}
-		break;
-	}
-	CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
-	CASE_NOTIF(PartyLeaveNotif, FAccelByteModelsLeavePartyNotice);
-	CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
-	CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
-	CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
-	CASE_NOTIF(PartyRejectNotif, FAccelByteModelsPartyRejectNotice);
-	CASE_NOTIF(PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice);
-	CASE_NOTIF(PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif);
-	// Chat
-	CASE_NOTIF(PersonalChatNotif, FAccelByteModelsPersonalMessageNotice);
-	CASE_NOTIF(PartyChatNotif, FAccelByteModelsPartyMessageNotice);
-	CASE_NOTIF(ChannelChatNotif, FAccelByteModelsChannelMessageNotice);
-	// Presence
-	CASE_NOTIF(FriendStatusNotif, FAccelByteModelsUsersPresenceNotice);
-	// Notification
-	CASE_NOTIF(MessageNotif, FAccelByteModelsNotificationMessage);
-	// Matchmaking
-	CASE_NOTIF(MatchmakingNotif, FAccelByteModelsMatchmakingNotice);
-	CASE_NOTIF(ReadyConsentNotif, FAccelByteModelsReadyConsentNotice);
-	CASE_NOTIF(RematchmakingNotif, FAccelByteModelsRematchmakingNotice);
-	CASE_NOTIF(DsNotif, FAccelByteModelsDsNotice);
-	// Friends + Notification
-	CASE_NOTIF(AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif);
-	CASE_NOTIF(RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif);
-	CASE_NOTIF(UnfriendNotif, FAccelByteModelsUnfriendNotif);
-	CASE_NOTIF(CancelFriendsNotif, FAccelByteModelsCancelFriendsNotif);
-	CASE_NOTIF(RejectFriendsNotif, FAccelByteModelsRejectFriendsNotif);
-	// Block + Notification
-	CASE_NOTIF(BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif);
-	CASE_NOTIF(UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif);
-	// Shadow Ban
-	case (Notif::UserBannedNotification): // intended fallthrough
-	case (Notif::UserUnbannedNotification):
-	{
-		BanNotifReceived = true;
-		FAccelByteModelsUserBannedNotification Result;
-		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0);
-		if (bParseSuccess)
+		CASE_NOTIF(DisconnectNotif, FAccelByteModelsDisconnectNotif);
+		CASE_NOTIF(PartyLeaveNotif, FAccelByteModelsLeavePartyNotice);
+		CASE_NOTIF(PartyInviteNotif, FAccelByteModelsInvitationNotice);
+		CASE_NOTIF(PartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice);
+		CASE_NOTIF(PartyJoinNotif, FAccelByteModelsPartyJoinNotice);
+		CASE_NOTIF(PartyRejectNotif, FAccelByteModelsPartyRejectNotice);
+		CASE_NOTIF(PartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice);
+		CASE_NOTIF(PartyDataUpdateNotif, FAccelByteModelsPartyDataNotif);
+		// Chat
+		CASE_NOTIF(PersonalChatNotif, FAccelByteModelsPersonalMessageNotice);
+		CASE_NOTIF(PartyChatNotif, FAccelByteModelsPartyMessageNotice);
+		CASE_NOTIF(ChannelChatNotif, FAccelByteModelsChannelMessageNotice);
+		// Presence
+		CASE_NOTIF(FriendStatusNotif, FAccelByteModelsUsersPresenceNotice);
+		// Notification
+		CASE_NOTIF(MessageNotif, FAccelByteModelsNotificationMessage);
+		// Matchmaking
+		CASE_NOTIF(MatchmakingNotif, FAccelByteModelsMatchmakingNotice);
+		CASE_NOTIF(ReadyConsentNotif, FAccelByteModelsReadyConsentNotice);
+		CASE_NOTIF(RematchmakingNotif, FAccelByteModelsRematchmakingNotice);
+		CASE_NOTIF(DsNotif, FAccelByteModelsDsNotice);
+		// Friends + Notification
+		CASE_NOTIF(AcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif);
+		CASE_NOTIF(RequestFriendsNotif, FAccelByteModelsRequestFriendsNotif);
+		CASE_NOTIF(UnfriendNotif, FAccelByteModelsUnfriendNotif);
+		CASE_NOTIF(CancelFriendsNotif, FAccelByteModelsCancelFriendsNotif);
+		CASE_NOTIF(RejectFriendsNotif, FAccelByteModelsRejectFriendsNotif);
+		// Block + Notification
+		CASE_NOTIF(BlockPlayerNotif, FAccelByteModelsBlockPlayerNotif);
+		CASE_NOTIF(UnblockPlayerNotif, FAccelByteModelsUnblockPlayerNotif);
+		// Shadow Ban
+		case (Notif::UserBannedNotification): // intended fallthrough
+		case (Notif::UserUnbannedNotification):
 		{
-			HttpRef.BearerAuthRejected();
-			if (ReceivedMessageType.Equals(LobbyResponse::UserBannedNotification))
+			BanNotifReceived = true;
+			FAccelByteModelsUserBannedNotification Result;
+			bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0);
+			if (bParseSuccess)
 			{
-				UserBannedNotification.ExecuteIfBound(Result);
+				HttpRef.BearerAuthRejected();
+				if (ReceivedMessageType.Equals(LobbyResponse::UserBannedNotification))
+				{
+					UserBannedNotification.ExecuteIfBound(Result);
+				}
+				else if (ReceivedMessageType.Equals(LobbyResponse::UserUnbannedNotification))
+				{
+					UserUnbannedNotification.ExecuteIfBound(Result);
+				}
 			}
-			else if (ReceivedMessageType.Equals(LobbyResponse::UserUnbannedNotification))
-			{
-				UserUnbannedNotification.ExecuteIfBound(Result);
-			}
+			break;
 		}
-		break;
-			}
-
-	case (Notif::ErrorNotif):
-	{
-		ErrorNotif.ExecuteIfBound(ParsedJsonObj->GetIntegerField(TEXT("code")), ParsedJsonObj->GetStringField(TEXT("message")));
-		break;
-	}
-	case (Notif::SignalingP2PNotif):
-	{
-		SignalingP2P.ExecuteIfBound(ParsedJsonObj->GetStringField(TEXT("destinationId")), ParsedJsonObj->GetStringField(TEXT("message")));
-		break;
-	}
-
-	default:
-		//@TODO
-		break;
+		case (Notif::ErrorNotif):
+		{
+			ErrorNotif.ExecuteIfBound(ParsedJsonObj->GetIntegerField(TEXT("code")), ParsedJsonObj->GetStringField(TEXT("message")));
+			break;
 		}
-
+		case (Notif::SignalingP2PNotif):
+		{
+			SignalingP2P.ExecuteIfBound(ParsedJsonObj->GetStringField(TEXT("destinationId")), ParsedJsonObj->GetStringField(TEXT("message")));
+			break;
+		}
+		default:
+		{
+			ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type notif but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
+			break;
+		}
 	}
+
+}
 #undef CASE_NOTIF
 
 void Lobby::OnMessage(const FString& Message)
@@ -1848,11 +1865,10 @@ void Lobby::OnMessage(const FString& Message)
 	}
 	else // undefined; not Response nor Notif
 	{
-		ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse response %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
+		ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error cannot parse message. Neither a response nor a notif type. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
 	}
 
 }
-
 
 void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
 {
