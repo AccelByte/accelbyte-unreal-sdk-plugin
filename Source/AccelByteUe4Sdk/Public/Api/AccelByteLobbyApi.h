@@ -460,6 +460,8 @@ public:
 	 * @brief Get information about current party.
 	 */
 	FString SendInfoPartyRequest();
+	FString SendInfoPartyRequest(const FPartyInfoResponse& OnInfoPartyResponse, const FErrorHandler& OnError = {});
+
 
 	/**
 	 * @brief Create a party.
@@ -1095,7 +1097,7 @@ public:
 	*/
 	void SetJoinChannelChatResponseDelegate(FJoinDefaultChannelChatResponse OnJoinDefaultChannelResponse, FErrorHandler OnError = {})
 	{
-		JoinDefaultChannelResponse = OnJoinDefaultChannelResponse;
+		JoinDefaultChannelChatResponse = OnJoinDefaultChannelResponse;
 		OnJoinDefaultChannelChatError = OnError;
 	};
 
@@ -1394,7 +1396,7 @@ public:
 	*/
 	void SetSignalingP2PDelegate(FSignalingP2P OnSignalingP2P)
 	{
-		SignalingP2P = OnSignalingP2P;
+		SignalingP2PNotif = OnSignalingP2P;
 	};
 
 	/**
@@ -1546,17 +1548,18 @@ private:
 	void OnMessage(const FString& Message);
 	void OnClosed(int32 StatusCode, const FString& Reason, bool WasClean);
 
-    FString SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload = TEXT(""));
+    FString SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload = TEXT(""));
     bool Tick(float DeltaTime);
-    FString GenerateMessageID(FString Prefix = TEXT(""));
+    FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
 	void CreateWebSocket();
 	void FetchLobbyErrorMessages();
 
-	// Message Handling
+#pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
+#pragma endregion
 
 	TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;
@@ -1583,6 +1586,59 @@ private:
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
 	
+#pragma region Message Id - Response Map
+	TMap<FString, FPartyInfoResponse> MessageIdPartyInfoResponseMap;
+	TMap<FString, FPartyCreateResponse> MessageIdPartyCreateResponseMap;
+	TMap<FString, FPartyLeaveResponse> MessageIdPartyLeaveResponseMap;
+	TMap<FString, FPartyInviteResponse> MessageIdPartyInviteResponseMap;
+	TMap<FString, FPartyJoinResponse> MessageIdPartyJoinResponseMap;
+	TMap<FString, FPartyRejectResponse> MessageIdPartyRejectResponseMap;
+	TMap<FString, FPartyKickResponse> MessageIdPartyKickResponseMap;
+	TMap<FString, FPartyGenerateCodeResponse> MessageIdPartyGenerateCodeResponseMap;
+	TMap<FString, FPartyGetCodeResponse> MessageIdPartyGetCodeResponseMap;
+	TMap<FString, FPartyDeleteCodeResponse> MessageIdPartyDeleteCodeResponseMap;
+	TMap<FString, FPartyJoinViaCodeResponse> MessageIdPartyJoinViaCodeResponseMap;
+	TMap<FString, FPartyPromoteLeaderResponse> MessageIdPartyPromoteLeaderResponseMap;
+
+	// Chat
+	TMap<FString, FPersonalChatResponse> MessageIdPersonalChatResponseMap;
+	TMap<FString, FPartyChatResponse> MessageIdPartyChatResponseMap;
+	TMap<FString, FJoinDefaultChannelChatResponse> MessageIdJoinDefaultChannelChatResponseMap;
+	TMap<FString, FChannelChatResponse> MessageIdChannelChatResponseMap;
+
+	// Presence
+	TMap<FString, FSetUserPresenceResponse> MessageIdSetUserPresenceResponseMap;
+	TMap<FString, FGetAllFriendsStatusResponse> MessageIdGetAllFriendsStatusResponseMap;
+
+	// Matchmaking
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingStartResponseMap;
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
+	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
+
+	// Friends
+	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsResponseMap;
+	TMap<FString, FUnfriendResponse> MessageIdUnfriendResponseMap;
+	TMap<FString, FListOutgoingFriendsResponse> MessageIdListOutgoingFriendsResponseMap;
+	TMap<FString, FCancelFriendsResponse> MessageIdCancelFriendsResponseMap;
+	TMap<FString, FListIncomingFriendsResponse> MessageIdListIncomingFriendsResponseMap;
+	TMap<FString, FAcceptFriendsResponse> MessageIdAcceptFriendsResponseMap;
+	TMap<FString, FRejectFriendsResponse> MessageIdRejectFriendsResponseMap;
+	TMap<FString, FLoadFriendListResponse> MessageIdLoadFriendListResponseMap;
+	TMap<FString, FGetFriendshipStatusResponse> MessageIdGetFriendshipStatusResponseMap;
+
+	// Block
+	TMap<FString, FBlockPlayerResponse> MessageIdBlockPlayerResponseMap;
+	TMap<FString, FUnblockPlayerResponse> MessageIdUnblockPlayerResponseMap;
+	TMap<FString, FListBlockedUserResponse> MessageIdListBlockedUserResponseMap;
+	TMap<FString, FListBlockerResponse> MessageIdListBlockerResponseMap;
+
+	//Session Attribute
+	TMap<FString, FSetSessionAttributeResponse> MessageIdSetSessionAttributeResponseMap;
+	TMap<FString, FGetSessionAttributeResponse> MessageIdGetSessionAttributeResponseMap;
+	TMap<FString, FGetAllSessionAttributeResponse> MessageIdGetAllSessionAttributeResponseMap;
+#pragma endregion
+
+#pragma region Response/Notif Delegates
     // Party 
     FPartyInfoResponse PartyInfoResponse;
     FPartyCreateResponse PartyCreateResponse;
@@ -1609,7 +1665,7 @@ private:
     FPersonalChatNotif PersonalChatNotif;
     FPartyChatResponse PartyChatResponse;
     FPartyChatNotif PartyChatNotif;
-	FJoinDefaultChannelChatResponse JoinDefaultChannelResponse;
+	FJoinDefaultChannelChatResponse JoinDefaultChannelChatResponse;
 	FChannelChatResponse ChannelChatResponse;
 	FChannelChatNotif ChannelChatNotif;
 
@@ -1663,6 +1719,16 @@ private:
 	// Error
 	FErrorNotif ErrorNotif;
 
+	//Signaling P2P
+	FSignalingP2P SignalingP2PNotif;
+
+	//Session Attribute
+	FSetSessionAttributeResponse SetSessionAttributeResponse;
+	FGetSessionAttributeResponse GetSessionAttributeResponse;
+	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
+#pragma endregion
+
+
 	struct PartyStorageWrapper
 	{
 		FString PartyId;
@@ -1675,14 +1741,6 @@ private:
 	void RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted = NULL);
 
 	void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
-
-	//Signaling P2P
-	FSignalingP2P SignalingP2P;
-
-	//Session Attribute
-	FSetSessionAttributeResponse SetSessionAttributeResponse;
-	FGetSessionAttributeResponse GetSessionAttributeResponse;
-	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
 
 	// Error Handler
 	FErrorHandler OnPartyInfoError;
