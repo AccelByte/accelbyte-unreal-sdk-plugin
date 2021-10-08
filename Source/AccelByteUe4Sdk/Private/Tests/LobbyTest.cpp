@@ -1552,6 +1552,111 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(MessageIdCachedResponse, "AccelByte.Tests.Lobby.B.MessageIdCachedResponse", AutomationFlagMaskLobby);
+bool MessageIdCachedResponse::RunTest(const FString& Parameters)
+{
+	// Lobby Prep
+	LobbyConnect(1);
+	TSharedPtr<Lobby> Lobby = Lobbies[0];
+	Lobby->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	Lobby->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	Lobby->SendCreatePartyRequest();
+	WaitUntil(bCreatePartySuccess, "Creating Party...");
+
+	{ // Case 1: No response delegate changes
+		const FString MessageIdA = Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		WaitUntil(bGetInfoPartySuccess, "Waiting for basic delegate response...");
+		AB_TEST_TRUE(bGetInfoPartySuccess);
+		bGetInfoPartySuccess = false;
+	}
+
+	{ // Case 2: 2 different delegates back to back 
+		bool bIsACalled, bIsBCalled;
+		uint8 CallbackCount = 0;
+
+		const auto GetInfoPartyDelegateA = Api::Lobby::FPartyInfoResponse::CreateLambda([&bIsACalled, &CallbackCount](FAccelByteModelsInfoPartyResponse result)
+			{
+				bIsACalled = true;
+				CallbackCount += 1;
+			});
+		const auto GetInfoPartyDelegateB = Api::Lobby::FPartyInfoResponse::CreateLambda([&bIsBCalled, &CallbackCount](FAccelByteModelsInfoPartyResponse result)
+			{
+				bIsBCalled = true;
+				CallbackCount += 1;
+			});
+
+		const FString MessageIdA = Lobby->SendInfoPartyRequest(GetInfoPartyDelegateA);
+		const FString MessageIdB = Lobby->SendInfoPartyRequest(GetInfoPartyDelegateB);
+		WaitUntil([&] { return CallbackCount == 2; }, "Waiting for 2 responses...");
+		UTEST_TRUE("2 different cached callbacks returning 2 different responses", bIsACalled && bIsBCalled);
+	}
+
+	{ // Case 3. unique responses for each requests
+		TArray<uint8> UniqueResponseChecker, Index;
+		TMap<uint8, FString> MessageIdResponseMap;
+
+		// Work Test Item Prep
+		const uint8 MaxRequestCount = 5;
+
+		for (uint8 i = 0; i < MaxRequestCount;i++)
+		{
+			const auto GetInfoPartyDelegate_Unique = Api::Lobby::FPartyInfoResponse::CreateLambda([i, &MessageIdResponseMap, &UniqueResponseChecker](FAccelByteModelsInfoPartyResponse result)
+				{
+					UniqueResponseChecker.Add(i);
+				});
+
+			const FString MessageId = Lobby->SendInfoPartyRequest(GetInfoPartyDelegate_Unique);
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Just sent request with message id [%s] expecting response [%d]"), *MessageId, i);
+
+			Index.Add(i);
+			MessageIdResponseMap.Emplace(i, MessageId);
+		}
+
+
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Expected responses"));
+		for (const TPair<uint8, FString>& MessageIdResponsePair : MessageIdResponseMap) {
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("message id [%s] -> response [%d]"), *MessageIdResponsePair.Value, MessageIdResponsePair.Key);
+		}
+
+		WaitUntil([&] { return UniqueResponseChecker.Num() == Index.Num(); }, "Waiting for all unique responses being called ...", 30);
+		for (uint8 anIndex : Index)
+		{
+			UTEST_TRUE(FString::Printf(TEXT("Response [%d] is called correctly"), anIndex), UniqueResponseChecker.Contains(anIndex));
+		}
+
+	}
+
+	{ // Case 4. New Delegate does not affect request that is still in progress
+		bool bLastAssignedWrongDelegateCalled = false;
+		const auto GetInfoPartyDelegate_ShouldNotBeCalled = Api::Lobby::FPartyInfoResponse::CreateLambda([&bLastAssignedWrongDelegateCalled](FAccelByteModelsInfoPartyResponse result)
+			{
+				bLastAssignedWrongDelegateCalled = true;
+			});
+
+		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		WaitUntil(bGetInfoPartySuccess, "Waiting for cached response ...", 15);
+		UTEST_FALSE("Overriding response will not affect response for request that is already on the way. Single Sequence", bLastAssignedWrongDelegateCalled);
+
+		bLastAssignedWrongDelegateCalled = false;
+		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		UTEST_FALSE("Overriding response will not affect response for request that is already on the way. Pseudo-Random Sequence", bLastAssignedWrongDelegateCalled);
+	}
+
+	//@TODO dummy uncached/unregistered/unknown message id will not call a response
+
+	Lobby->SendLeavePartyRequest();
+	WaitUntil(bLeavePartySuccess, "Leaving Party...");
+	LobbyDisconnect(1);
+	ResetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestGetPartyData_PartyCreated_ReturnOk, "AccelByte.Tests.Lobby.B.GetPartyData", AutomationFlagMaskLobby);
 bool LobbyTestGetPartyData_PartyCreated_ReturnOk::RunTest(const FString& Parameters)
 {
