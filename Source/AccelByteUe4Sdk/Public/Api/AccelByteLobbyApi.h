@@ -42,6 +42,9 @@ enum class EWebSocketEvent : uint8
 
 ENUM_CLASS_FLAGS(EWebSocketEvent);
 	
+enum Response : uint8;
+enum Notif : uint8;
+
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -1548,6 +1551,9 @@ private:
     FString GenerateMessageID(FString Prefix = TEXT(""));
 	void CreateWebSocket();
 	void FetchLobbyErrorMessages();
+
+	static TMap<FString, Response> ResponseStringEnumMap;
+	static TMap<FString, Notif> NotifStringEnumMap;
 
 	TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;

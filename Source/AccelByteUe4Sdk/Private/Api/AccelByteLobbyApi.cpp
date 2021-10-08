@@ -117,7 +117,7 @@ namespace Api
 		// Presence
 		const FString SetUserPresence = TEXT("setUserStatusResponse");
 		const FString FriendStatusNotif = TEXT("userStatusNotif");
-		const FString FriendsPresence = TEXT("friendsStatusResponse");
+		const FString GetAllFriendsStatus = TEXT("friendsStatusResponse");
 
 		// Notification
 		const FString MessageNotif = TEXT("messageNotif");
@@ -282,18 +282,18 @@ namespace Api
 		RematchmakingNotif,
 		DsNotif,
 
-		// Friends + Notification
+		// Friends
 		AcceptFriendsNotif,
 		RequestFriendsNotif,
 		UnfriendNotif,
 		CancelFriendsNotif,
 		RejectFriendsNotif,
 
-		// Block + Notification
+		// Block
 		BlockPlayerNotif,
 		UnblockPlayerNotif,
 
-		//Signaling
+		// Signaling
 		SignalingP2PNotif,
 
 		// Error Notif
@@ -301,6 +301,81 @@ namespace Api
 
 		MAX_Notif,
 	};
+
+#define FORM_STRING_ENUM_PAIR(Type, MessageType) \
+    { LobbyResponse::MessageType, Type::MessageType } \
+
+	TMap<FString, Response> Lobby::ResponseStringEnumMap{
+		FORM_STRING_ENUM_PAIR(Response,PartyInfo),
+		FORM_STRING_ENUM_PAIR(Response,PartyCreate),
+		FORM_STRING_ENUM_PAIR(Response,PartyLeave),
+		FORM_STRING_ENUM_PAIR(Response,PartyInvite),
+		FORM_STRING_ENUM_PAIR(Response,PartyJoin),
+		FORM_STRING_ENUM_PAIR(Response,PartyReject),
+		FORM_STRING_ENUM_PAIR(Response,PartyKick),
+		FORM_STRING_ENUM_PAIR(Response,PartyGenerateCode),
+		FORM_STRING_ENUM_PAIR(Response,PartyGetCode),
+		FORM_STRING_ENUM_PAIR(Response,PartyDeleteCode),
+		FORM_STRING_ENUM_PAIR(Response,PartyJoinViaCode),
+		FORM_STRING_ENUM_PAIR(Response,PartyPromoteLeader),
+		FORM_STRING_ENUM_PAIR(Response,PersonalChat),
+		FORM_STRING_ENUM_PAIR(Response,PartyChat),
+		FORM_STRING_ENUM_PAIR(Response,JoinChannelChat),
+		FORM_STRING_ENUM_PAIR(Response,ChannelChat),
+		FORM_STRING_ENUM_PAIR(Response,SetUserPresence),
+		FORM_STRING_ENUM_PAIR(Response,GetAllFriendsStatus),
+		FORM_STRING_ENUM_PAIR(Response,MatchmakingStart),
+		FORM_STRING_ENUM_PAIR(Response,MatchmakingCancel),
+		FORM_STRING_ENUM_PAIR(Response,ReadyConsent),
+		FORM_STRING_ENUM_PAIR(Response,RequestFriends),
+		FORM_STRING_ENUM_PAIR(Response,Unfriend),
+		FORM_STRING_ENUM_PAIR(Response,ListOutgoingFriends),
+		FORM_STRING_ENUM_PAIR(Response,CancelFriends),
+		FORM_STRING_ENUM_PAIR(Response,ListIncomingFriends),
+		FORM_STRING_ENUM_PAIR(Response,AcceptFriends),
+		FORM_STRING_ENUM_PAIR(Response,RejectFriends),
+		FORM_STRING_ENUM_PAIR(Response,LoadFriendList),
+		FORM_STRING_ENUM_PAIR(Response,GetFriendshipStatus),
+		FORM_STRING_ENUM_PAIR(Response,BlockPlayer),
+		FORM_STRING_ENUM_PAIR(Response,UnblockPlayer),
+		FORM_STRING_ENUM_PAIR(Response,SetSessionAttribute),
+		FORM_STRING_ENUM_PAIR(Response,GetSessionAttribute),
+		FORM_STRING_ENUM_PAIR(Response,GetAllSessionAttribute),
+	};
+
+	TMap<FString, Notif> Lobby::NotifStringEnumMap{
+		FORM_STRING_ENUM_PAIR(Notif,ConnectedNotif),
+		FORM_STRING_ENUM_PAIR(Notif,DisconnectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyLeaveNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyInviteNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyGetInvitedNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyJoinNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyRejectNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyKickNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyDataUpdateNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PersonalChatNotif),
+		FORM_STRING_ENUM_PAIR(Notif,PartyChatNotif),
+		FORM_STRING_ENUM_PAIR(Notif,ChannelChatNotif),
+		FORM_STRING_ENUM_PAIR(Notif,FriendStatusNotif),
+		FORM_STRING_ENUM_PAIR(Notif,MessageNotif),
+		FORM_STRING_ENUM_PAIR(Notif,UserBannedNotification),
+		FORM_STRING_ENUM_PAIR(Notif,UserUnbannedNotification),
+		FORM_STRING_ENUM_PAIR(Notif,MatchmakingNotif),
+		FORM_STRING_ENUM_PAIR(Notif,ReadyConsentNotif),
+		FORM_STRING_ENUM_PAIR(Notif,RematchmakingNotif),
+		FORM_STRING_ENUM_PAIR(Notif,DsNotif),
+		FORM_STRING_ENUM_PAIR(Notif,AcceptFriendsNotif),
+		FORM_STRING_ENUM_PAIR(Notif,RequestFriendsNotif),
+		FORM_STRING_ENUM_PAIR(Notif,UnfriendNotif),
+		FORM_STRING_ENUM_PAIR(Notif,CancelFriendsNotif),
+		FORM_STRING_ENUM_PAIR(Notif,RejectFriendsNotif),
+		FORM_STRING_ENUM_PAIR(Notif,BlockPlayerNotif),
+		FORM_STRING_ENUM_PAIR(Notif,UnblockPlayerNotif),
+		FORM_STRING_ENUM_PAIR(Notif,SignalingP2PNotif),
+		FORM_STRING_ENUM_PAIR(Notif,ErrorNotif),
+	};
+
+#undef FORM_STRING_ENUM_PAIR
 
 void Lobby::Connect()
 {
@@ -1673,7 +1748,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::ChannelChat, FAccelByteModelsChannelMessageResponse, ChannelChatResponse, OnChannelChatError);
 	// Presence
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SetUserPresence, FAccelByteModelsSetOnlineUsersResponse, SetUserPresenceResponse, OnSetUserPresenceError);
-	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::FriendsPresence, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse, OnGetAllFriendsStatusError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::GetAllFriendsStatus, FAccelByteModelsGetOnlineUsersResponse, GetAllFriendsStatusResponse, OnGetAllFriendsStatusError);
 	// Matchmaking
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::MatchmakingStart, FAccelByteModelsMatchmakingResponse, MatchmakingStartResponse, OnMatchmakingStartError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::MatchmakingCancel, FAccelByteModelsMatchmakingResponse, MatchmakingCancelResponse, OnMatchmakingCancelError);
