@@ -662,85 +662,15 @@ void Lobby::GetAllAsyncNotification()
 //-------------------------------------------------------------------------------------------------
 FString Lobby::SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, TArray<FString> ExtraAttributes)
 {
-	FReport::Log(FString(__FUNCTION__));
-	FString Contents = FString::Printf(TEXT("gameMode: %s\n"), *GameMode);
-	if (!ServerName.IsEmpty())
-	{
-		Contents.Append(FString::Printf(TEXT("serverName: %s\n"), *ServerName));
-	}
-	if (!ClientVersion.IsEmpty())
-	{
-		Contents.Append(FString::Printf(TEXT("clientVersion: %s\n"), *ClientVersion));
-	}
+	FMatchmakingOptionalParams Params;
+	Params.ServerName = ServerName;
+	Params.ClientVersion = ClientVersion;
+	Params.Latencies = Latencies;
+	Params.PartyAttributes = PartyAttributes;
+	Params.TempPartyUserIds = TempPartyUserIds;
+	Params.ExtraAttributes = ExtraAttributes;
 
-	if (Latencies.Num() > 0)
-	{
-		FString ServerLatencies = TEXT("{");
-		for (int i = 0; i < Latencies.Num(); i++)
-		{
-			ServerLatencies.Append(FString::Printf(TEXT("\"%s\":%.0f"), *Latencies[i].Key, Latencies[i].Value));
-			if (i + 1 < Latencies.Num())
-			{
-				ServerLatencies.Append(TEXT(","));
-			}
-		}
-		ServerLatencies.Append(TEXT("}"));
-		Contents.Append(FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies));
-	}
-
-	if (PartyAttributes.Num() > 0)
-	{
-		FString partyAttributeSerialized = "";
-		TArray<FString> keys;
-		PartyAttributes.GetKeys(keys);
-		for (int i = 0 ; i < keys.Num() ; i++)
-		{
-			FString key = keys[i];
-			FString value = PartyAttributes[keys[i]];
-			key = key.ReplaceCharWithEscapedChar();
-			value = value.ReplaceCharWithEscapedChar();
-
-			//Convert to this format [ "key":"value" ]
-			partyAttributeSerialized.Append(FString::Printf(TEXT("\"%s\":\"%s\""), *key, *value));
-
-			//If there's more attribute, append a delimiter
-			if (i < keys.Num() - 1)
-			{
-				partyAttributeSerialized.Append(", ");
-			}
-		}
-		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
-	}
-
-	if (TempPartyUserIds.Num() > 0)
-	{
-		FString STempParty = TEXT("");
-		for (int i = 0; i < TempPartyUserIds.Num(); i++)
-		{
-			STempParty.Append(FString::Printf(TEXT("%s"), *TempPartyUserIds[i]));
-			if (i + 1 < TempPartyUserIds.Num())
-			{
-				STempParty.Append(TEXT(","));
-			}
-		}
-		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
-	}
-
-	if (ExtraAttributes.Num() > 0)
-	{
-		FString SExtraAttributes = TEXT("");
-		for (int i = 0; i < ExtraAttributes.Num(); i++)
-		{
-			SExtraAttributes.Append(FString::Printf(TEXT("%s"), *ExtraAttributes[i]));
-			if (i + 1 < ExtraAttributes.Num())
-			{
-				SExtraAttributes.Append(TEXT(","));
-			}
-		}
-		Contents.Append(FString::Printf(TEXT("extraAttributes: %s\n"), *SExtraAttributes));
-	}
-
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(MatchmakingStart, Matchmaking, Contents)
+	return SendStartMatchmaking(GameMode, Params);
 }
 
 FString Lobby::SendStartMatchmaking(FString GameMode, TArray<FString> TempPartyUserIds, FString ServerName, FString ClientVersion, TArray<TPair<FString, float>> Latencies, TMap<FString, FString> PartyAttributes, TArray<FString> ExtraAttributes)
@@ -758,6 +688,98 @@ FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> Par
 	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds, ExtraAttributes);
 }
 
+FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingOptionalParams& OptionalParams)
+{
+	FReport::Log(FString(__FUNCTION__));
+	FString Contents = FString::Printf(TEXT("gameMode: %s\n"), *GameMode);
+		
+	if (!OptionalParams.ServerName.IsEmpty())
+	{
+		Contents.Append(FString::Printf(TEXT("serverName: %s\n"), *OptionalParams.ServerName));
+	}
+		
+	if (!OptionalParams.ClientVersion.IsEmpty())
+	{
+		Contents.Append(FString::Printf(TEXT("clientVersion: %s\n"), *OptionalParams.ClientVersion));
+	}
+		
+	if (OptionalParams.Latencies.Num() > 0)
+	{
+		FString ServerLatencies = TEXT("{");
+		for (int i = 0; i < OptionalParams.Latencies.Num(); i++)
+		{
+			ServerLatencies.Append(FString::Printf(TEXT("\"%s\":%.0f"), *OptionalParams.Latencies[i].Key, OptionalParams.Latencies[i].Value));
+			if (i + 1 < OptionalParams.Latencies.Num())
+			{
+				ServerLatencies.Append(TEXT(","));
+			}
+		}
+		ServerLatencies.Append(TEXT("}"));
+		Contents.Append(FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies));
+	}
+
+	auto PartyAttribute = OptionalParams.PartyAttributes;
+	if(OptionalParams.NewSessionOnly)
+	{
+		PartyAttribute.Add("new_session_only", "true");
+	}
+	
+	if (PartyAttribute.Num() > 0)
+	{
+		FString partyAttributeSerialized = "";
+		TArray<FString> keys;
+		PartyAttribute.GetKeys(keys);
+		for (int i = 0 ; i < keys.Num() ; i++)
+		{
+			FString key = keys[i];
+			FString value = PartyAttribute[keys[i]];
+			key = key.ReplaceCharWithEscapedChar();
+			value = value.ReplaceCharWithEscapedChar();
+
+			//Convert to this format [ "key":"value" ]
+			partyAttributeSerialized.Append(FString::Printf(TEXT("\"%s\":\"%s\""), *key, *value));
+
+			//If there's more attribute, append a delimiter
+			if (i < keys.Num() - 1)
+			{
+				partyAttributeSerialized.Append(", ");
+			}
+		}
+		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
+	}
+
+	if (OptionalParams.TempPartyUserIds.Num() > 0)
+	{
+		FString STempParty = TEXT("");
+		for (int i = 0; i < OptionalParams.TempPartyUserIds.Num(); i++)
+		{
+			STempParty.Append(FString::Printf(TEXT("%s"), *OptionalParams.TempPartyUserIds[i]));
+			if (i + 1 < OptionalParams.TempPartyUserIds.Num())
+			{
+				STempParty.Append(TEXT(","));
+			}
+		}
+		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
+	}
+
+	if (OptionalParams.ExtraAttributes.Num() > 0)
+	{
+		FString SExtraAttributes = TEXT("");
+		for (int i = 0; i < OptionalParams.ExtraAttributes.Num(); i++)
+		{
+			SExtraAttributes.Append(FString::Printf(TEXT("%s"), *OptionalParams.ExtraAttributes[i]));
+			if (i + 1 < OptionalParams.ExtraAttributes.Num())
+			{
+				SExtraAttributes.Append(TEXT(","));
+			}
+		}
+		Contents.Append(FString::Printf(TEXT("extraAttributes: %s\n"), *SExtraAttributes));
+	}
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(MatchmakingStart, Matchmaking, Contents)
+}
+
+
 FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -765,7 +787,7 @@ FString Lobby::SendCancelMatchmaking(FString GameMode, bool IsTempParty)
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(MatchmakingCancel, Matchmaking,
 		FString::Printf(TEXT("gameMode: %s\nisTempParty: %s"), *GameMode, (IsTempParty ? TEXT("true") : TEXT("false"))))
 }
-
+	
 FString Lobby::SendReadyConsentRequest(FString MatchId)
 {
 	FReport::Log(FString(__FUNCTION__));

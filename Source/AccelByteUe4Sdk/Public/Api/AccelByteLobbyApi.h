@@ -21,6 +21,18 @@ class Settings;
 
 namespace Api
 {	
+
+// Start Matchmaking Optional Params
+struct FMatchmakingOptionalParams
+{
+	FString ServerName;
+	FString ClientVersion;
+	TArray<TPair<FString, float>> Latencies;
+	TMap<FString, FString> PartyAttributes;
+	TArray<FString> TempPartyUserIds;
+	TArray<FString> ExtraAttributes;
+	bool NewSessionOnly;
+};
 enum Response : uint8;
 enum Notif : uint8;
 /**
@@ -557,7 +569,7 @@ public:
 	* @param TempPartyUserIds UserIDs to form a temporary party with (include user who started the matchmaking). Temporary party will disband when matchmaking finishes.
 	* @param ExtraAttributes custom attributes defined in game mode's matching/flexing rule.
 	*/
-	FString SendStartMatchmaking(FString GameMode, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> TempPartyUserIds = TArray<FString>(), TArray<FString> ExtraAttributes = TArray<FString>());
+	FString SendStartMatchmaking(FString GameMode, FString ServerName, FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TMap<FString, FString> PartyAttributes = TMap<FString, FString>(), TArray<FString> TempPartyUserIds = TArray<FString>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
 	* @brief start the matchmaking
@@ -599,10 +611,18 @@ public:
 	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
 	/**
+	* @brief start the matchmaking
+	*
+	* @param GameMode The mode that party member want to play.
+	* @param OptionalParams Optional parameters to be considered while matchmaking.
+	*/
+	FString SendStartMatchmaking(const FString& GameMode, const FMatchmakingOptionalParams& OptionalParams = {});
+
+	/**
 	* @brief cancel the currently running matchmaking process
 	*
 	* @param GameMode The mode that party member want to cancel.
-	* @param IsTemParty Is canceling matchmaking that was started using temporary party.
+	* @param IsTempParty Is canceling matchmaking that was started using temporary party.
 	*/
 	FString SendCancelMatchmaking(FString GameMode, bool IsTempParty = false);
 

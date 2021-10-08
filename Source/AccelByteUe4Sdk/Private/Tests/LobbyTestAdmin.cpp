@@ -7,6 +7,7 @@
 #include "TestUtilities.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteRegistry.h"
+#include "Models/AccelByteMatchmakingModels.h"
 
 void AdminGetLobbyConfig(const THandler<FLobbyModelConfig>& OnSuccess, const FErrorHandler& OnError)
 {
@@ -50,4 +51,24 @@ void AdminSetLobbyDSMConfig(const FDsmConfig& Body, const FVoidHandler& OnSucces
 	FJsonObjectConverter::UStructToJsonObjectString(Body, Content);
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminEnqueueSession(const FString& SessionId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/sessions/%s/status"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *SessionId);
+	AB_HTTP_GET(Request, Url, Authorization);
+
+	const THandler<FAccelByteModelsMatchmakingResult> GetSessionStatusSuccessHandler =
+		THandler<FAccelByteModelsMatchmakingResult>::CreateLambda([Authorization, OnSuccess, OnError](const FAccelByteModelsMatchmakingResult& result)
+		{
+			FString UrlEnqueue = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/sessions"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
+			FString Content;
+			FJsonObjectConverter::UStructToJsonObjectString(result, Content);
+			AB_HTTP_POST(Request, UrlEnqueue, Authorization, Content);
+
+			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		});
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(GetSessionStatusSuccessHandler, OnError), FPlatformTime::Seconds());
 }
