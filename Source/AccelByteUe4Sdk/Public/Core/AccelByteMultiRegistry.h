@@ -7,6 +7,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteHttpClient.h"
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteCategoryApi.h"
@@ -42,7 +43,14 @@ namespace AccelByte
 
 class ACCELBYTEUE4SDK_API FApiBase
 {
-
+public:
+	FApiBase(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler & HttpRef);
+	
+protected:
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
+	FHttpRetryScheduler& HttpRef;
+	FHttpClient HttpClient;
 };
 
 class ACCELBYTEUE4SDK_API FApiClient final

@@ -6,6 +6,15 @@
 
 namespace AccelByte
 {
+FApiBase::FApiBase(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef)
+	: CredentialsRef{ CredentialsRef }
+	, SettingsRef{ SettingsRef }
+	, HttpRef{ HttpRef }
+	, HttpClient(CredentialsRef, SettingsRef, HttpRef)
+{
+
+}
+	
 FApiClient::FApiClient()
 	: CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
