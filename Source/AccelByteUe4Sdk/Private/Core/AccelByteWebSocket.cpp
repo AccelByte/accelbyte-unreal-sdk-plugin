@@ -10,6 +10,9 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteWebsocket, Log, All);
+DEFINE_LOG_CATEGORY(LogAccelByteWebsocket);
+
 namespace AccelByte
 {	
 AccelByteWebSocket::AccelByteWebSocket(
@@ -145,24 +148,29 @@ void AccelByteWebSocket::Connect()
 
 void AccelByteWebSocket::Disconnect()
 {
-	FReport::Log(FString(__FUNCTION__));
-	
-	if (TickerDelegateHandle.IsValid())
+	if(bConnectTriggered)
 	{
-		FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
-		TickerDelegateHandle.Reset();
+		bDisconnectOnNextTick = true;
 	}
-
-	if (WebSocket.IsValid())
+	else
 	{
-		WebSocket->OnMessage().Clear();
-		WebSocket->OnConnected().Clear();
-		WebSocket->OnConnectionError().Clear();
-		WebSocket->OnClosed().Clear();
-		WebSocket->Close();
+		if (TickerDelegateHandle.IsValid())
+		{
+			FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
+			TickerDelegateHandle.Reset();
+		}
 
-		WebSocket.Reset();
-	}
+		if (WebSocket.IsValid())
+		{
+			WebSocket->OnMessage().Clear();
+			WebSocket->OnConnected().Clear();
+			WebSocket->OnConnectionError().Clear();
+			WebSocket->OnClosed().Clear();
+			WebSocket->Close();
+
+			WebSocket.Reset();
+		}
+	}	
 }
 
 bool AccelByteWebSocket::IsConnected() const
@@ -187,15 +195,13 @@ void AccelByteWebSocket::Send(const FString& Message) const
 void AccelByteWebSocket::OnConnectionConnected()
 {
 	WsEvents |= EWebSocketEvent::Connected;
-	
-	ConnectTriggered = true;
+	bConnectTriggered = true;
 }
 
 void AccelByteWebSocket::OnConnectionError(const FString& Error)
 {
 	WsEvents |= EWebSocketEvent::ConnectionError;
 	bWasWsConnectionError = true;
-
 	OnConnectionErrorQueue.Enqueue(Error);
 }
 
@@ -206,7 +212,6 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 	{
 		WsEvents |= EWebSocketEvent::Closed;
 	}
-	
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
@@ -217,13 +222,19 @@ void AccelByteWebSocket::OnMessageReceived(const FString& Message)
 
 void AccelByteWebSocket::Reconnect()
 {
-	WsEvents |= EWebSocketEvent::Closed;
+	Connect();
 }
 	
 bool AccelByteWebSocket::Tick(float DeltaTime)
 {
 	StateTick(DeltaTime);
 	MessageTick(DeltaTime);
+
+	if(bDisconnectOnNextTick)
+	{
+		bDisconnectOnNextTick = false;
+		Disconnect();
+	}
 	
 	return true;
 }
@@ -309,8 +320,10 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 			if (bWasWsConnectionError)
 			{
 				// websocket state is error can't be reconnect, need to create a new instance
+				UE_LOG(LogAccelByteWebsocket, Log, TEXT("Connecting from Reconnecting state, setting up websocket"));
 				SetupWebSocket();
 			}
+			UE_LOG(LogAccelByteWebsocket, Log, TEXT("Connecting from Reconnecting state"));
 			Connect();
 			TimeSinceLastReconnect = FPlatformTime::Seconds();
 		}
@@ -330,10 +343,19 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 
 bool AccelByteWebSocket::MessageTick(float DeltaTime)
 {
-	if(ConnectTriggered)
+	if(bConnectTriggered)
 	{
-		ConnectTriggered = false;
+		bConnectTriggered = false;
+		
 		ConnectDelegate.Broadcast();
+	}
+
+	while(!OnConnectionErrorQueue.IsEmpty())
+	{	
+		FString Msg;
+		OnConnectionErrorQueue.Dequeue(Msg);
+
+		ConnectionErrorDelegate.Broadcast(Msg);
 	}
 
 	while(!OnMessageQueue.IsEmpty())
@@ -342,14 +364,6 @@ bool AccelByteWebSocket::MessageTick(float DeltaTime)
 		OnMessageQueue.Dequeue(Msg);
 
 		MessageReceiveDelegate.Broadcast(Msg);
-	}
-
-	while(!OnConnectionErrorQueue.IsEmpty())
-	{
-		FString Msg;
-		OnConnectionErrorQueue.Dequeue(Msg);
-
-		ConnectionErrorDelegate.Broadcast(Msg);
 	}
 
 	while(!OnConnectionClosedQueue.IsEmpty())

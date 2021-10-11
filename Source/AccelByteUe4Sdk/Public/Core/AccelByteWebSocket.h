@@ -64,11 +64,11 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	FConnectionErrorDelegate& OnConnectionError();
 	FConnectionCloseDelegate& OnConnectionClosed();
 
-	bool ConnectTriggered = false;
+	bool bConnectTriggered = false;
 	TQueue<FString> OnMessageQueue;
 	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
 	TQueue<FString> OnConnectionErrorQueue;
-	
+
 	void Reconnect();
 
 	FTickerDelegate TickerDelegate;
@@ -109,6 +109,7 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	double TotalTimeout;
 	int MaxBackoffDelay;
 	bool bWasWsConnectionError = false;
+	bool bDisconnectOnNextTick;
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
 
 	const Credentials& Creds;
