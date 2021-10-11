@@ -6334,6 +6334,9 @@ bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Pa
 	WaitUntil([&]() { return bLoginDone; });
 
 	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	Lobby.Disconnect();
+	WaitUntil(!Lobby.IsConnected(), "Wait make sure initial lobby disconnect");
+	
 	int NumLobbyConnected = 0;
 	Lobby.SetConnectSuccessDelegate(
 		FSimpleDelegate::CreateLambda([&]()

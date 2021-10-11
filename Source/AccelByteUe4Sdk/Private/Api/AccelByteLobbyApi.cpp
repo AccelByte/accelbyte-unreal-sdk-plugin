@@ -412,7 +412,6 @@ void Lobby::Disconnect()
 	if(WebSocket.IsValid())
 	{
 		WebSocket->Disconnect();
-		WebSocket.Reset();
 	}
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));

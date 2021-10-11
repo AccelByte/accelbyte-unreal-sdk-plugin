@@ -7,7 +7,6 @@
 #include "AccelByteCredentials.h"
 #include "IWebSocket.h"
 #include "IWebSocketFactory.h"
-#include "Chaos/AABB.h"
 
 namespace AccelByte
 {
@@ -64,6 +63,12 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	FMessageReceiveDelegate& OnMessageReceived();
 	FConnectionErrorDelegate& OnConnectionError();
 	FConnectionCloseDelegate& OnConnectionClosed();
+
+	bool ConnectTriggered = false;
+	TQueue<FString> OnMessageQueue;
+	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
+	TQueue<FString> OnConnectionErrorQueue;
+	
 	void Reconnect();
 
 	FTickerDelegate TickerDelegate;
@@ -125,7 +130,8 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	TSharedPtr<IWebSocket> WebSocket;
 	
 	bool StateTick(float DeltaTime);
-	
+	bool MessageTick(float DeltaTime);
+
 	AccelByteWebSocket(AccelByteWebSocket const&) = delete; // Copy constructor
 	AccelByteWebSocket(AccelByteWebSocket&&) = delete; // Move constructor
 	AccelByteWebSocket& operator=(AccelByteWebSocket const&) = delete; // Copy assignment operator

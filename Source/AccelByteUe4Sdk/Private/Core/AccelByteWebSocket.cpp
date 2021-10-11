@@ -187,7 +187,8 @@ void AccelByteWebSocket::Send(const FString& Message) const
 void AccelByteWebSocket::OnConnectionConnected()
 {
 	WsEvents |= EWebSocketEvent::Connected;
-	ConnectDelegate.Broadcast();
+	
+	ConnectTriggered = true;
 }
 
 void AccelByteWebSocket::OnConnectionError(const FString& Error)
@@ -195,7 +196,7 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 	WsEvents |= EWebSocketEvent::ConnectionError;
 	bWasWsConnectionError = true;
 
-	ConnectionErrorDelegate.Broadcast(Error);
+	OnConnectionErrorQueue.Enqueue(Error);
 }
 
 void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
@@ -206,24 +207,24 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 		WsEvents |= EWebSocketEvent::Closed;
 	}
 	
-	ConnectionCloseDelegate.Broadcast(StatusCode, Reason, WasClean);
-}
-
-void AccelByte::AccelByteWebSocket::Reconnect()
-{
-	WsEvents |= EWebSocketEvent::Closed;
+	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
 void AccelByteWebSocket::OnMessageReceived(const FString& Message)
 {
-	MessageReceiveDelegate.Broadcast(Message);
+	OnMessageQueue.Enqueue(Message);
 }
 
-
+void AccelByteWebSocket::Reconnect()
+{
+	WsEvents |= EWebSocketEvent::Closed;
+}
+	
 bool AccelByteWebSocket::Tick(float DeltaTime)
 {
 	StateTick(DeltaTime);
-
+	MessageTick(DeltaTime);
+	
 	return true;
 }
 
@@ -323,6 +324,41 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 	}
 
 	WsEvents = EWebSocketEvent::None;
+
+	return true;
+}
+
+bool AccelByteWebSocket::MessageTick(float DeltaTime)
+{
+	if(ConnectTriggered)
+	{
+		ConnectTriggered = false;
+		ConnectDelegate.Broadcast();
+	}
+
+	while(!OnMessageQueue.IsEmpty())
+	{
+		FString Msg;
+		OnMessageQueue.Dequeue(Msg);
+
+		MessageReceiveDelegate.Broadcast(Msg);
+	}
+
+	while(!OnConnectionErrorQueue.IsEmpty())
+	{
+		FString Msg;
+		OnConnectionErrorQueue.Dequeue(Msg);
+
+		ConnectionErrorDelegate.Broadcast(Msg);
+	}
+
+	while(!OnConnectionClosedQueue.IsEmpty())
+	{
+		FConnectionClosedParams Params;
+		OnConnectionClosedQueue.Dequeue(Params);
+
+		ConnectionCloseDelegate.Broadcast(Params.Code, Params.Reason, Params.WasClean);
+	}
 
 	return true;
 }
