@@ -94,6 +94,14 @@ public:
 	void GetSessionId(const THandler<FAccelByteModelsServerSessionResponse>& OnSuccess, const FErrorHandler& OnError);
 
 	/*
+	 * @brief Get Server Info Will return server information.
+	 *
+	 * @param OnSuccess This will be called when the operation succeeded, The result is const FAccelByteModelsServerInfo.
+	 * @param OnError This will be called when the operation failed.
+	*/
+	void GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSuccess, const FErrorHandler& OnError);
+
+	/*
 	 * @brief Configure automatic shutdown, server will send shutdown request to DSM when there is no player on the DS for some periodical time after the DS is claimed. Must be called before calling RegisterServerToDSM or RegisterLocalServerToDSM
 	 *
 	 * @param TickSeconds Tick Second to check the auto shutdown, not bigger than CountdownStart
@@ -150,6 +158,7 @@ private:
 	FTickerDelegate AutoShutdownDelegate;
 	FDelegateHandle AutoShutdownDelegateHandle;
 	THandler<FAccelByteModelsPubIp> GetPubIpDelegate;
+	FAccelByteModelsServerInfo RegisteredServerInfo;
 };
 
 	} // Namespace GameServerApi

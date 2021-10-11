@@ -38,11 +38,13 @@ namespace Api
 	class Agreement;
 	class Achievement;
 	class SessionBrowser;
+	class TurnManager;
 	class UGC;
 	class SeasonPass;
 	class Reporting;
 	class Currency;
 	class Miscellaneous;
+	class Reward;
 }
 
 namespace GameServerApi
@@ -88,11 +90,13 @@ public:
 	static Api::Agreement Agreement;
 	static Api::Achievement Achievement;
 	static Api::SessionBrowser SessionBrowser;
+	static Api::TurnManager TurnManager;
 	static Api::UGC UGC;
 	static Api::SeasonPass SeasonPass;
 	static Api::Reporting Reporting;
 	static Api::Currency Currency;
 	static Api::Miscellaneous Miscellaneous;
+	static Api::Reward Reward;
 	static GameServerApi::ServerOauth2 ServerOauth2;
 	static GameServerApi::ServerDSM ServerDSM;
 	static GameServerApi::ServerStatistic ServerStatistic;

@@ -131,6 +131,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerInfo
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 		int32 Port;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+		TMap<FString, int32> Ports;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 		FString Provider;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 		FString Game_version;

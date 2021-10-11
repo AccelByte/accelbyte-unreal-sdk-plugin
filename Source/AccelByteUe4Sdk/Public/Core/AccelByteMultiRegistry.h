@@ -27,11 +27,13 @@
 #include "Api/AccelByteAgreementApi.h"
 #include "Api/AccelByteAchievementApi.h"
 #include "Api/AccelByteSessionBrowserApi.h"
+#include "Api/AccelByteTurnManagerApi.h"
 #include "Api/AccelByteUGCApi.h"
 #include "Api/AccelByteSeasonPassApi.h"
 #include "Api/AccelByteReportingApi.h"
 #include "Api/AccelByteCurrencyApi.h"
 #include "Api/AccelByteMiscellaneousApi.h"
+#include "Api/AccelByteRewardApi.h"
 
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
 
@@ -78,6 +80,8 @@ public:
 	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
 	Api::Currency Currency{ Credentials, FRegistry::Settings, Http };
 	Api::Miscellaneous Miscellaneous{ Credentials, FRegistry::Settings, Http };
+	Api::Reward Reward{ Credentials, FRegistry::Settings, Http };
+	Api::TurnManager TurnManager{ Credentials, FRegistry::Settings, Http };
 	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)

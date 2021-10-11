@@ -55,27 +55,7 @@ namespace GameServerApi
 		* @param OnError This will be called when the operation failed.
 		*/
 		void GetPartyStorage(const FString& PartyId, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError);
-
-		/**
-		* @brief  Get active parties.
-		*
-		* @param Limit The amount of returned item per page. Set is to 0 to retrieve by maximum limit.
-		* @param Offset Offset of the item (active party). First item is = 0.
-		* @param OnSuccess This will be called when the operation succeeded. Will return an array of FAccelByteModelsActivePartiesData model.
-		* @param OnError This will be called when the operation failed.
-		*/
-		void GetActiveParties(const int32& Limit, const int32& Offset, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError);
-
-		/**
-		* @brief  Get active parties.
-		*
-		* @param Paging The processed paging response.
-		* @param PaginationType Which page that will be opened
-		* @param OnSuccess This will be called when the operation succeeded. Will return an array of FAccelByteModelsActivePartiesData model.
-		* @param OnError This will be called when the operation failed.
-		*/
-		void GetActiveParties(const FAccelByteModelsPaging& Paging, const EAccelBytePaginationType& PaginationType, const THandler<FAccelByteModelsActivePartiesData>& OnSuccess, const FErrorHandler& OnError);
-
+		
 		/**
 		* @brief  Get all session attributes of the user.
 		*

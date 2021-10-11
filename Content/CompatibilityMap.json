@@ -32,8 +32,8 @@
     "maxVersion": "1.8.0"
   },
   "ugc": {
-    "minVersion": "1.6.1",
-    "maxVersion": "1.6.1"
+    "minVersion": "1.6.2",
+    "maxVersion": "1.6.2"
   },
   "lobby": {
     "minVersion": "2.2.0",

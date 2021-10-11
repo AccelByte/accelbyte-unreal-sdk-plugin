@@ -72,6 +72,7 @@ namespace AccelByte
 						FAccelByteModelsServerInfo Result;
 						if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
 						{
+							RegisteredServerInfo = Result;
 							SetServerName(Result.Pod_name);
 						}
 						if (CountdownTimeStart != -1)
@@ -135,6 +136,8 @@ namespace AccelByte
 				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+
+				RegisteredServerInfo = FAccelByteModelsServerInfo();
 			}
 		}
 
@@ -174,7 +177,11 @@ namespace AccelByte
 					if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
 					{
 						FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
-
+						FAccelByteModelsServerInfo Result;
+						if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Result, 0, 0))
+						{
+							RegisteredServerInfo = Result;
+						}
 						if (CountdownTimeStart != -1)
 						{
 							AutoShutdownDelegateHandle = FTicker::GetCoreTicker().AddTicker(AutoShutdownDelegate, ShutdownTickSeconds);
@@ -236,6 +243,20 @@ namespace AccelByte
 				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
 				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+
+				RegisteredServerInfo = FAccelByteModelsServerInfo();
+			}
+		}
+
+		void ServerDSM::GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSuccess, const FErrorHandler& OnError)
+		{
+			if (!RegisteredServerInfo.Pod_name.IsEmpty())
+			{
+				OnSuccess.ExecuteIfBound(RegisteredServerInfo);
+			}
+			else
+			{
+				OnError.ExecuteIfBound(400, TEXT("No Server Registered."));
 			}
 		}
 
