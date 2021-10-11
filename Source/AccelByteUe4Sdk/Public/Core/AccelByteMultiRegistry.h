@@ -91,13 +91,15 @@ public:
 	}
 };
 
+typedef TSharedRef<FApiClient, ESPMode::ThreadSafe> FApiClientRef;
+typedef TSharedPtr<FApiClient, ESPMode::ThreadSafe> FApiClientPtr;
+
 class ACCELBYTEUE4SDK_API FMultiRegistry
 {
 public:
-	static TSharedPtr<FApiClient> GetApiClient(const FString Key = TEXT("default"));
-
+	static FApiClientPtr GetApiClient(FString const Key = TEXT("default"));
 private:
-	static TMap<FString, TSharedPtr<FApiClient>> ApiClientInstances;
+	static TMap<FString, FApiClientPtr> ApiClientInstances;
 
 	FMultiRegistry() = delete;
 	FMultiRegistry(FMultiRegistry const& Other) = delete;

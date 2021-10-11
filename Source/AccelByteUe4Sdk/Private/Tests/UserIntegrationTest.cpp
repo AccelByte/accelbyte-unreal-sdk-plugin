@@ -2339,7 +2339,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 
 	bool bDeviceLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
-	TSharedPtr<FApiClient> User1Registry = FMultiRegistry::GetApiClient(TEXT("User1"));
+	FApiClientPtr User1Registry = FMultiRegistry::GetApiClient(TEXT("User1"));
 	User1Registry->User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
@@ -2417,7 +2417,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 	updatedCustomAttribute.TryGetBoolField("True", updatedBooleanAttribute);
 
 	// New User
-	TSharedPtr<FApiClient> User2Registry = FMultiRegistry::GetApiClient(TEXT("User2"));
+	FApiClientPtr User2Registry = FMultiRegistry::GetApiClient(TEXT("User2"));
 	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
 	EmailAddress.ToLowerInline();

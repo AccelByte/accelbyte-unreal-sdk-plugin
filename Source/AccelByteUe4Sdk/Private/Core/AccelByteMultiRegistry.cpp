@@ -28,11 +28,11 @@ FApiClient::~FApiClient()
 	HttpRef->Shutdown();
 }
 
-TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key)
+FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
-		const TSharedPtr<FApiClient> NewClient = MakeShared<FApiClient>();
+		FApiClientPtr NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
 
 		NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 
@@ -42,5 +42,5 @@ TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key
 	return ApiClientInstances[Key];
 }
 
-TMap<FString, TSharedPtr<FApiClient>> FMultiRegistry::ApiClientInstances;
+TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
 }

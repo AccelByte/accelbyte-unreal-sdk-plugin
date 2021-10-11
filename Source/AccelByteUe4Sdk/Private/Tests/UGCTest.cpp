@@ -42,7 +42,7 @@ FAccelByteModelsUGCRequest UGCModifyContentRequest0 = {
 FAccelByteModelsUGCRequest UGCModifyContentRequest1 = {
 	"png", "MODIFIED-1 Integration Test UE4", "", UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[2]}
 };
-TSharedPtr<FApiClient> UGCUser2Registry;
+FApiClientPtr UGCUser2Registry;
 
 const auto UGCOnError = FErrorHandler::CreateLambda([](int32 Code, const FString& Message)
 {
