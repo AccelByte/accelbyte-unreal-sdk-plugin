@@ -6351,7 +6351,6 @@ bool LobbyTestErrorMessage::RunTest(const FString& Parameters)
 	// ACT
 	// connect lobby
 	LobbyConnect(1);
-
 	
 	// ARRANGE
 	FAccelByteModelsCreatePartyResponse CreatePartyResult;
@@ -6423,6 +6422,91 @@ bool LobbyTestNoErrorHandlerHasResponseCode::RunTest(const FString& Parameters)
 	// ASSERT error create party has message
 	const FString SuccessCode("0");
 	AB_TEST_NOT_EQUAL(CreatePartyResult.Code, SuccessCode);
+
+	// Cleanup
+	LobbyDisconnect(1);
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestErrorMessageEmptyReconnectHasMessage, "AccelByte.Tests.Lobby.E.LobbyTestErrorMessageEmptyReconnectHasMessage", AutomationFlagMaskLobby);
+bool LobbyTestErrorMessageEmptyReconnectHasMessage::RunTest(const FString& Parameters)
+{
+	// ACT
+	// connect lobby
+	LobbyConnect(1);
+	
+	// ARRANGE
+	FAccelByteModelsCreatePartyResponse CreatePartyResult;
+	bool bCreatePartyDone = false;
+	bool bError = false;
+	int32 ErrorCode;
+	FString ErrorMessage = "";
+	
+	auto CreatePartySuccess = THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
+	{
+		CreatePartyResult = result;
+		bCreatePartyDone = true;
+	});
+	
+	auto CreatePartyError = FErrorHandler::CreateLambda([&bCreatePartyDone, &bError, &ErrorCode, &ErrorMessage](const int32 code, const FString& message)
+	{
+		bCreatePartyDone = true;
+		bError = true;
+		ErrorCode = code;
+		ErrorMessage = message;
+	});
+	
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
+	
+	// create party
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party");
+
+	// Clear error message, then test error creating party
+	bCreatePartyDone = false;
+	Lobbies[0]->ClearLobbyErrorMessages();
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party2");
+	bool bIsErrorAfterClear(bError);
+	int32 ErrorCodeAfterClear(ErrorCode);
+	FString ErrorMessageAfterClear(ErrorMessage);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party after clear error message responded with code %d, codename %s"), ErrorCode, *ErrorMessage);
+
+	DelaySeconds(3, "Delaying 3 sec");
+	
+	// Disconnect Lobby, reapply setup then try again.
+	LobbyDisconnect(1);
+	WaitUntil(!Lobbies[0]->IsConnected(), "Waiting lobby disconnect");
+	
+	LobbyConnect(1);
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
+	WaitUntil(Lobbies[0]->IsConnected(), "Wait reconnecting lobby");
+
+	// Create party again after disconnect
+	bCreatePartyDone = false;
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party", 3);
+
+	// Create party again to test error after reconnecting
+	bCreatePartyDone = false;
+	Lobbies[0]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartyDone, "waiting create party2", 3);
+	bool bIsErrorAfterReconnect(bError);
+	int32 ErrorCodeAfterReconnect(ErrorCode);
+	FString ErrorMessaegAfterReconnect(ErrorMessage);
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party after reconnect error message responded with code %d, codename %s"), ErrorCode, *ErrorMessage);
+	
+	// ASSERT error create party has message
+	AB_TEST_TRUE(bIsErrorAfterClear);
+	AB_TEST_NOT_EQUAL(ErrorCodeAfterClear, 0);
+	AB_TEST_FALSE(ErrorMessageAfterClear.IsEmpty());
+
+	AB_TEST_TRUE(bIsErrorAfterReconnect);
+	AB_TEST_NOT_EQUAL(ErrorCodeAfterReconnect, 0);
+	AB_TEST_FALSE(ErrorMessaegAfterReconnect.IsEmpty());
+
+	AB_TEST_NOT_EQUAL(ErrorMessageAfterClear, ErrorMessaegAfterReconnect);
 
 	// Cleanup
 	LobbyDisconnect(1);
