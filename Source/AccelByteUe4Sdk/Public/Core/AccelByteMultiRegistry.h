@@ -89,6 +89,14 @@ public:
 
 		return T(*CredentialsRef, FRegistry::Settings, *HttpRef, Forward<U>(Args)...);
 	}
+
+	template<typename T, typename... U>
+	TSharedPtr<T, ESPMode::ThreadSafe> GetApiPtr(U&&... Args)
+	{
+		static_assert(std::is_base_of<FApiBase, T>::value, "API class must be subclass of FApiBase");
+
+		return MakeShared<T, ESPMode::ThreadSafe>(*CredentialsRef, FRegistry::Settings, *HttpRef, Forward<U>(Args)...);
+	}
 };
 
 typedef TSharedRef<FApiClient, ESPMode::ThreadSafe> FApiClientRef;
