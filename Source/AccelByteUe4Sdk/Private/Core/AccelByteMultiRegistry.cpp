@@ -50,5 +50,19 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 	return ApiClientInstances[Key];
 }
 
+bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClient)
+{
+	bool bResult = false;
+
+	if (!Key.IsEmpty())
+	{
+		ApiClientInstances.Add(Key, ApiClient);
+		bResult = true;
+	}
+
+	return bResult;
+}
+
 TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
+
 }
