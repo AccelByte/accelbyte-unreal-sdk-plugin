@@ -32,9 +32,17 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
-		FApiClientPtr NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
-
-		NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+		FApiClientPtr NewClient = nullptr;
+		
+		if (Key.Compare(TEXT("default")) == 0) 
+		{
+			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(FRegistry::Credentials, FRegistry::HttpRetryScheduler);
+		}
+		else 
+		{
+			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
+			NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+		}
 
 		ApiClientInstances.Add(Key, NewClient);
 	}
