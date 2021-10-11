@@ -425,7 +425,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bDeleteUserSuccess);
 	
 	bool bDeleteUser2Success = false;
-	AdminDeleteUser(UGCUser2Registry->Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUser2Success]()
+	AdminDeleteUser(UGCUser2Registry->CredentialsRef->GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUser2Success]()
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete user2 Success"));
 		bDeleteUser2Success = true;

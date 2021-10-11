@@ -2458,7 +2458,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
 	FJsonObject getCustomAttribute;
-	User2Registry->UserProfile.GetPublicCustomAttributes(User1Registry->Credentials.GetUserId(),
+	User2Registry->UserProfile.GetPublicCustomAttributes(User1Registry->CredentialsRef->GetUserId(),
 		THandler<FJsonObject>::CreateLambda([&getCustomAttribute, &bGetCustomAttributeSuccessful](const FJsonObject& Result)
 			{
 				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
@@ -2479,7 +2479,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 	bool bDeleteProfileDone = false;
 	bool bDeleteProfileSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserProfile"));
-	AdminDeleteUserProfile(User1Registry->Credentials.GetNamespace(), User1Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+	AdminDeleteUserProfile(User1Registry->CredentialsRef->GetNamespace(), User1Registry->CredentialsRef->GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeleteProfileSuccessful = true;
@@ -2494,7 +2494,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 	bool bDeleteDone = false;
 	bool bDeleteSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(User1Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	AdminDeleteUser(User1Registry->CredentialsRef->GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeleteSuccessful = true;
@@ -2506,7 +2506,7 @@ bool FUserProfilePublicCustomAttributesTest::RunTest(const FString& Parameter)
 	bool bDeleteUser2Done = false;
 	bool bDeleteUser2Successful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(User2Registry->Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteUser2Done, &bDeleteUser2Successful]()
+	AdminDeleteUser(User2Registry->CredentialsRef->GetUserId(), FVoidHandler::CreateLambda([&bDeleteUser2Done, &bDeleteUser2Successful]()
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bDeleteUser2Successful = true;

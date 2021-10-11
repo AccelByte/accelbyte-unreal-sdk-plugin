@@ -4,21 +4,28 @@
 
 #include "Core/AccelByteMultiRegistry.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
-FApiClient::FApiClient()
+namespace AccelByte
 {
-	Http.Startup();
-	Credentials.Startup();
+FApiClient::FApiClient()
+	: CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
+	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+{
+	HttpRef->Startup();
+	CredentialsRef->Startup();
 	GameTelemetry.Startup();
+}
+
+FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
+	: CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials))
+	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http))
+{
 }
 
 FApiClient::~FApiClient()
 {
 	GameTelemetry.Shutdown();
-	Credentials.Shutdown();
-	Http.Shutdown();
+	CredentialsRef->Shutdown();
+	HttpRef->Shutdown();
 }
 
 TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key)
@@ -27,7 +34,7 @@ TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key
 	{
 		const TSharedPtr<FApiClient> NewClient = MakeShared<FApiClient>();
 
-		NewClient->Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+		NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 
 		ApiClientInstances.Add(Key, NewClient);
 	}
@@ -36,3 +43,4 @@ TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key
 }
 
 TMap<FString, TSharedPtr<FApiClient>> FMultiRegistry::ApiClientInstances;
+}

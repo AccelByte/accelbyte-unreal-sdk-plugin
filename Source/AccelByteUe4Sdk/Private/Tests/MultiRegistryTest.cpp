@@ -27,7 +27,7 @@ const auto MultiRegistryTestErrorHandler = FErrorHandler::CreateLambda([](int32 
 	});
 
 TArray<FTestUser> MultiRegistryTestUsers;
-TArray<TSharedPtr<Credentials>> MultiRegistryTestCredentials;
+TArray<FCredentialsPtr> MultiRegistryTestCredentials;
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FMultiRegistryTestLogin, "AccelByte.Tests.MultiRegistry.User", AutomationFlagMaskMultiRegistry);
 bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
@@ -69,10 +69,10 @@ bool FMultiRegistryTestLogin::RunTest(const FString& Parameters)
 	for (const auto& User : MultiRegistryTestUsers)
 	{
 		TSharedPtr<FApiClient> ApiClient = FMultiRegistry::GetApiClient(User.Email);
-		FString UserId = ApiClient->Credentials.GetUserId();
+		FString UserId = ApiClient->CredentialsRef->GetUserId();
 		AB_TEST_TRUE(!UserId.IsEmpty());
 		UniqueUserIds.Add(UserId);
-		MultiRegistryTestCredentials.Add(MakeShared<Credentials>(ApiClient->Credentials)); 
+		MultiRegistryTestCredentials.Add(ApiClient->CredentialsRef); 
 	}
 
 	AB_TEST_EQUAL(MultiRegistryTestUsers.Num(), UniqueUserIds.Num());

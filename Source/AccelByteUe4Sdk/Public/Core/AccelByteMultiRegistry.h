@@ -35,8 +35,6 @@
 #include "Api/AccelByteMiscellaneousApi.h"
 #include "Api/AccelByteRewardApi.h"
 
-#include "GameServerApi/AccelByteServerQosManagerApi.h"
-
 using namespace AccelByte;
 
 namespace AccelByte
@@ -51,44 +49,45 @@ class ACCELBYTEUE4SDK_API FApiClient final
 {
 public:
 	FApiClient();
+	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http);
 	~FApiClient();
 
-	Credentials Credentials{};
-	FHttpRetryScheduler Http{};
-	Api::User User{Credentials, FRegistry::Settings, Http};
-	Api::UserProfile UserProfile{Credentials, FRegistry::Settings, Http};
-	Api::Category Category{Credentials, FRegistry::Settings, Http};
-	Api::Entitlement Entitlement{Credentials, FRegistry::Settings, Http};
-	Api::Order Order{Credentials, FRegistry::Settings, Http};
-	Api::Item Item{Credentials, FRegistry::Settings, Http};
-	Api::Wallet Wallet{Credentials, FRegistry::Settings, Http};
-	Api::Fulfillment Fulfillment{Credentials, FRegistry::Settings, Http};
-	Api::CloudStorage CloudStorage{Credentials, FRegistry::Settings};
-	Api::Lobby Lobby{Credentials, FRegistry::Settings, Http};
-	Api::GameProfile GameProfile{Credentials, FRegistry::Settings, Http};
-	Api::Statistic Statistic{Credentials, FRegistry::Settings, Http};
-	Api::QosManager QosManager{Credentials, FRegistry::Settings, Http};
+	FCredentialsRef CredentialsRef{};
+	FHttpRetrySchedulerRef HttpRef{};
+	Api::User User{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::UserProfile UserProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Category Category{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Entitlement Entitlement{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Order Order{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Item Item{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Wallet Wallet{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Fulfillment Fulfillment{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::CloudStorage CloudStorage{*CredentialsRef, FRegistry::Settings};
+	Api::Lobby Lobby{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::GameProfile GameProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Statistic Statistic{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::QosManager QosManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Qos Qos{};
-	Api::Leaderboard Leaderboard{Credentials, FRegistry::Settings, Http};
-	Api::CloudSave CloudSave{Credentials, FRegistry::Settings, Http};
-	Api::GameTelemetry GameTelemetry{Credentials, FRegistry::Settings, Http};
-	Api::Agreement Agreement{Credentials, FRegistry::Settings, Http};
-	Api::Achievement Achievement{Credentials, FRegistry::Settings, Http};
-	Api::SessionBrowser SessionBrowser{Credentials, FRegistry::Settings, Http};
-	Api::UGC UGC{Credentials, FRegistry::Settings, Http};
-	Api::SeasonPass SeasonPass{Credentials, FRegistry::Settings, Http};
-	Api::Reporting Reporting{Credentials, FRegistry::Settings, Http};
-	Api::Currency Currency{ Credentials, FRegistry::Settings, Http };
-	Api::Miscellaneous Miscellaneous{ Credentials, FRegistry::Settings, Http };
-	Api::Reward Reward{ Credentials, FRegistry::Settings, Http };
-	Api::TurnManager TurnManager{ Credentials, FRegistry::Settings, Http };
+	Api::Leaderboard Leaderboard{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::CloudSave CloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::GameTelemetry GameTelemetry{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Agreement Agreement{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Achievement Achievement{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::SessionBrowser SessionBrowser{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::UGC UGC{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::SeasonPass SeasonPass{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Reporting Reporting{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Currency Currency{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Miscellaneous Miscellaneous{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::Reward Reward{*CredentialsRef, FRegistry::Settings, *HttpRef};
+	Api::TurnManager TurnManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	
 	template<typename T, typename... U>
 	T GetApi(U&&... Args)
 	{
 		static_assert(std::is_base_of<FApiBase, T>::value, "API class must be subclass of FApiBase");
 
-		return T(Credentials, FRegistry::Settings, Http, Forward<U>(Args)...);
+		return T(*CredentialsRef, FRegistry::Settings, *HttpRef, Forward<U>(Args)...);
 	}
 };
 

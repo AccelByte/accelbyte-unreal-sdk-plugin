@@ -16,8 +16,8 @@
 namespace AccelByte
 {
 
-	// forward declaration
-	class FHttpRetryScheduler;
+// forward declaration
+class FHttpRetryScheduler;
 	
 /**
  * @brief Singleston class for storing credentials.
@@ -77,6 +77,9 @@ private:
 
 	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
 };
+
+typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;
+typedef TSharedPtr<Credentials, ESPMode::ThreadSafe> FCredentialsPtr;	
 
 } // Namespace AccelByte
 
