@@ -5,13 +5,14 @@
 #include "Api/AccelByteLobbyApi.h"
 #include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
-#include "WebSocketsModule.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/IWebSocketFactory.h"
+#include "Core/FUnrealWebSocketFactory.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
@@ -394,22 +395,7 @@ void Lobby::Connect()
 		return;
 	}
 
-	if (bWasWsConnectionError)
-	{
-		// websocket state is error can't be reconnect, need to create a new instance
-		CreateWebSocket();
-	}
-
-	if (LobbyTickDelegateHandle.IsValid())
-	{
-		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
-		LobbyTickDelegateHandle.Reset();
-	}
-
-	LobbyTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(LobbyTickDelegate, LobbyTickPeriod);
-
 	WebSocket->Connect();
-	WsEvents |= EWebSocketEvent::Connect;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
 	
 	if(LobbyErrorMessages.Num() == 0)
@@ -423,20 +409,9 @@ void Lobby::Disconnect()
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
-	if (LobbyTickDelegateHandle.IsValid())
+	if(WebSocket.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
-		LobbyTickDelegateHandle.Reset();
-	}
-
-	if (WebSocket.IsValid())
-	{
-		WebSocket->OnMessage().Clear();
-		WebSocket->OnConnected().Clear();
-		WebSocket->OnConnectionError().Clear();
-		WebSocket->OnClosed().Clear();
-		WebSocket->Close();
-
+		WebSocket->Disconnect();
 		WebSocket.Reset();
 	}
 
@@ -1308,7 +1283,6 @@ void Lobby::UnbindSessionAttributeEvents()
 
 void Lobby::OnConnected()
 {
-	WsEvents |= EWebSocketEvent::Connected;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
 		
 	ConnectSuccess.ExecuteIfBound();
@@ -1316,22 +1290,18 @@ void Lobby::OnConnected()
 
 void Lobby::OnConnectionError(const FString& Error)
 {
-	WsEvents |= EWebSocketEvent::ConnectionError;
-	bWasWsConnectionError = true;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Error connecting: %s"), *Error);
 	ConnectError.ExecuteIfBound(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed), ErrorMessages::Default.at(static_cast<std::underlying_type<ErrorCodes>::type>(ErrorCodes::WebSocketConnectFailed)) + TEXT(" Reason: ") + Error);
 }
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
-	OnMessage(Reason);
 	if (StatusCode >= 4000 && !BanNotifReceived)
 	{
 		Disconnect();
-	}
-	else
+	}else
 	{
-		WsEvents |= EWebSocketEvent::Closed;
+		WebSocket->Reconnect();
 	}
 
 	BanNotifReceived = false;
@@ -1356,108 +1326,6 @@ FString Lobby::SendRawRequest(const FString& MessageType, const FString& Message
 	return TEXT("");
 }
 
-bool Lobby::Tick(float DeltaTime)
-{
-	switch (WsState)
-	{
-	case EWebSocketState::Closed:
-		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Connected;
-		}
-		else if ((WsEvents & EWebSocketEvent::Connect) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Connecting;
-		}
-		break;
-	case EWebSocketState::Connecting:
-		if ((WsEvents & EWebSocketEvent::ConnectionError) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closed;
-		}
-		else if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
-		{
-			ChannelSlug = "";
-			TimeSinceLastPing = FPlatformTime::Seconds();
-			WsState = EWebSocketState::Connected;
-		}
-		else if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closing;
-		}
-		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closed;
-		}
-		break;
-	case EWebSocketState::Connected:
-
-		if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closing;
-		}
-		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
-		{
-			TimeSinceLastReconnect = FPlatformTime::Seconds();
-			TimeSinceConnectionLost = FPlatformTime::Seconds();
-			BackoffDelay = InitialBackoffDelay;
-			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
-			Connect();
-			WsState = EWebSocketState::Reconnecting;
-		}
-		else if ((FPlatformTime::Seconds() - TimeSinceLastPing) >= PingDelay)
-		{
-			TimeSinceLastPing = FPlatformTime::Seconds();
-			SendPing();
-		}
-		break;
-	case EWebSocketState::Reconnecting:
-		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
-		{
-			TimeSinceLastPing = FPlatformTime::Seconds();
-			WsState = EWebSocketState::Connected;
-		}
-		else if ((WsEvents & EWebSocketEvent::Close) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closing;
-		}
-		else if ((FPlatformTime::Seconds() - TimeSinceConnectionLost) >= TotalTimeout)
-		{
-			TimeSinceLastReconnect = FPlatformTime::Seconds();
-			BackoffDelay = InitialBackoffDelay;
-
-			WsState = EWebSocketState::Closed;
-		}
-		else if ((FPlatformTime::Seconds() - TimeSinceLastReconnect) >= RandomizedBackoffDelay)
-		{
-			if (BackoffDelay < MaxBackoffDelay)
-			{
-				BackoffDelay *= 2;
-			}
-			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-BackoffDelay, BackoffDelay) / 4);
-			if (bWasWsConnectionError)
-			{
-				// websocket state is error can't be reconnect, need to create a new instance
-				CreateWebSocket();
-			}
-
-			WebSocket->Connect();
-			TimeSinceLastReconnect = FPlatformTime::Seconds();
-		}
-		break;
-	case EWebSocketState::Closing:
-		if ((WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
-		{
-			WsState = EWebSocketState::Closed;
-		}
-		break;
-	}
-
-	WsEvents = EWebSocketEvent::None;
-
-	return true;
-}
-
 FString Lobby::GenerateMessageID(const FString& Prefix) const
 {
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
@@ -1465,28 +1333,21 @@ FString Lobby::GenerateMessageID(const FString& Prefix) const
 
 void Lobby::CreateWebSocket()
 {
-	bWasWsConnectionError = false;
-
 	if(WebSocket.IsValid())
 	{
-		WebSocket->OnMessage().Clear();
-		WebSocket->OnConnected().Clear();
-		WebSocket->OnConnectionError().Clear();
-		WebSocket->OnClosed().Clear();
-		WebSocket->Close();
 		WebSocket.Reset();
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("Authorization", "Bearer " + Credentials.GetAccessToken());
 	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
-	WebSocket = FWebSocketsModule::Get().CreateWebSocket(*Settings.LobbyServerUrl, TEXT("wss"), Headers);
 
-	WebSocket->OnMessage().AddRaw(this, &Lobby::OnMessage);
+	WebSocket = AccelByteWebSocket::Create(*Settings.LobbyServerUrl, TEXT("wss"), Credentials, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
+	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage);
 	WebSocket->OnConnectionError().AddRaw(this, &Lobby::OnConnectionError);
-	WebSocket->OnClosed().AddRaw(this, &Lobby::OnClosed);
+	WebSocket->OnConnectionClosed().AddRaw(this, &Lobby::OnClosed);
 }
 
 FString Lobby::LobbyMessageToJson(FString Message)
@@ -2074,13 +1935,9 @@ void Lobby::ClearLobbyErrorMessages()
 		RandomizedBackoffDelay(InitialBackoffDelay),
 		TimeSinceLastPing(0.f),
 		TimeSinceLastReconnect(0.f),
-		WsState(EWebSocketState::Closed),
-		WsEvents(EWebSocketEvent::None),
-		WebSocket(WebSocket)
-{
-	LobbyTickDelegate = FTickerDelegate::CreateRaw(this, &Lobby::Tick);
-	LobbyTickDelegateHandle.Reset();
-}
+		TimeSinceConnectionLost(0)
+	{
+	}
 
 Lobby::~Lobby()
 {

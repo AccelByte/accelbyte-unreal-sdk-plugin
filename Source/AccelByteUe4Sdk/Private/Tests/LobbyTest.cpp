@@ -7021,6 +7021,8 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 	bUsersConnected = false;
 	bUsersConnectionSuccess = false;
 
+	DelaySeconds(10, "Delay 10 sec");
+
 	Lobby.Connect();
 	WaitUntil(bUsersConnectionSuccess, "Wait Lobby Connect");
 	bool bBannedLobbyConnectFailed = !bUsersConnected;

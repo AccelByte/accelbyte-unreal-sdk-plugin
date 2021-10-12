@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
 
 // Forward declarations
@@ -19,32 +20,9 @@ class Credentials;
 class Settings;
 
 namespace Api
-{
-
-enum class EWebSocketState
-{
-	Closed = 0,
-	Connecting = 1,
-	Connected = 2,
-	Closing = 3,
-	Reconnecting = 4
-};
-
-enum class EWebSocketEvent : uint8
-{
-	None = 0,
-	Connect = 1,
-	Connected = 2,
-	Close = 4,
-	Closed = 8,
-	ConnectionError = 16
-};
-
-ENUM_CLASS_FLAGS(EWebSocketEvent);
-	
+{	
 enum Response : uint8;
 enum Notif : uint8;
-
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -1551,7 +1529,6 @@ private:
 	void OnClosed(int32 StatusCode, const FString& Reason, bool WasClean);
 
     FString SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload = TEXT(""));
-    bool Tick(float DeltaTime);
     FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
 	void CreateWebSocket();
 	void FetchLobbyErrorMessages();
@@ -1576,11 +1553,7 @@ private:
 	float TimeSinceLastReconnect;
 	float TimeSinceConnectionLost;
 	FString ChannelSlug;
-	EWebSocketState WsState;
-	EWebSocketEvent WsEvents;
-	FTickerDelegate LobbyTickDelegate;
-    FDelegateHandle LobbyTickDelegateHandle;
-	TSharedPtr<IWebSocket> WebSocket;
+	TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> WebSocket;
 	FAccelByteModelsLobbySessionId LobbySessionId;
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
