@@ -4090,7 +4090,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	WaitUntil([&]()
 	{ 
 		return matchMakingNotifNum >= 2; 
-	}, "Waiting for Matchmaking Notification...", 30);
+	}, "Waiting for Matchmaking Notification...");
 
 	bDsNotifSuccess = false;
 	bDsNotifError = false;
@@ -4362,7 +4362,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return matchMakingNotifNum >= 2;
-	}, "Waiting for Matchmaking Notification...", 60);
+	}, "Waiting for Matchmaking Notification...");
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
@@ -4370,7 +4370,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return bReadyConsentNotifSuccess;
-	}, "Waiting for Ready Consent Notification...", 30);
+	}, "Waiting for Ready Consent Notification...");
 
 	AB_TEST_FALSE(bReadyConsentNotifError);
 	readyConsentNoticeResponse[0] = readyConsentNotice;
@@ -4382,7 +4382,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return bReadyConsentNotifSuccess;
-	}, "Waiting for Ready Consent Notification...", 30);
+	}, "Waiting for Ready Consent Notification...");
 	AB_TEST_FALSE(bReadyConsentNotifError);
 	readyConsentNoticeResponse[1] = readyConsentNotice;
 
@@ -5777,7 +5777,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	WaitUntil([&]()
 	{
 		return (matchMakingNotifNum == 2);
-	}, "Waiting for Matchmaking Notification...", 30);
+	}, "Waiting for Matchmaking Notification...",90);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
 	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
