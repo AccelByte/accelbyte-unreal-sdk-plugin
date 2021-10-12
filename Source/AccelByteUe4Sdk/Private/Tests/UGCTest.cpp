@@ -42,7 +42,7 @@ FAccelByteModelsUGCRequest UGCModifyContentRequest0 = {
 FAccelByteModelsUGCRequest UGCModifyContentRequest1 = {
 	"png", "MODIFIED-1 Integration Test UE4", "", UGCType, UGCSubTypes[0], {UGCTags[0], UGCTags[2]}
 };
-TSharedPtr<FApiClient> UGCUser2Registry;
+FApiClientPtr UGCUser2Registry;
 
 const auto UGCOnError = FErrorHandler::CreateLambda([](int32 Code, const FString& Message)
 {
@@ -425,7 +425,7 @@ bool UGCTeardown::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bDeleteUserSuccess);
 	
 	bool bDeleteUser2Success = false;
-	AdminDeleteUser(UGCUser2Registry->Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUser2Success]()
+	AdminDeleteUser(UGCUser2Registry->CredentialsRef->GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteUser2Success]()
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Delete user2 Success"));
 		bDeleteUser2Success = true;

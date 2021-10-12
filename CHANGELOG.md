@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.0%0D6.1.1) (2021-10-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ServerLobby:** remove GetActiveParties method
+
+### Features
+
+* **DSM:** Save server info when registered into variable and add Getter function ([cccd3b9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cccd3b964eb526863064b2533db8535763821579))
+* **ecommerce:** Add GetUserEntitlementOwnershipByItemId ([395bb97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/395bb97a3953c212a40803c28556467bdd821b74))
+* **ecommerce:** remove returnURL on CreateNewOrder if empty ([d39cfbc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d39cfbcec7b270e49098042f37a42bc5fcbcde95))
+* implement qos turn manager to get the closest TURN server ([eeeab32](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/eeeab32995d95e82a25ccec6a18c5f5536cf7ef3))
+* **reward:** Add new Reward Endpoint and Integration Test ([5ad088f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5ad088f371e1da90f963a2784c718f706eac6e83))
+* **settings:** change ResetSettings param from FString to enum ESettingsEnvironment ([b6f7948](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b6f79489e438c41f1ce47e927d801698bbdf31a6))
+
+
+### Bug Fixes
+
+* **CheckServicesCompatibility:** Only check compatibility for non shipping build ([e2c78c5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e2c78c5c3acfd1d320ffe7aafc0b8edb8d394974))
+* **lobby:** linux build failure due to werror on unreal engine > 4.25 ([fd12ddb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fd12ddb0d6a02f3530a1eeb57bc7f4d1745ad822))
+* **sdkModule:** remove GetDefaultUrl, change it to call from Settings instead ([138acc3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/138acc34c2f91dd3e18b783b97ed16ed53e95a3a))
+* **seasonpass:** season pass tier duplicates when there are more than 1 pass codes ([547b32b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/547b32bc974b859de360d009efd909f6507d51a5))
+* **User:** change UpdateUser verb from PUT to PATCH ([ff6ca90](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ff6ca90c8ea7ce78c390d7233ba2a56aa8de6741))
+
+
+### Tests
+
+* **ParseErrorTest:** add unit test for service error parser ([c53be56](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c53be5697afac1f3e8104ecef3564ea0d01ed589))
+
+
+### Refactors
+
+* **ServerLobby:** remove GetActiveParties method ([4dc4d8f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4dc4d8f304b4d666472086ed2e4425315df6ebba))
+
+### [6.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.1.1%0D6.1.0) (2021-10-01)
+
+
+### Tests
+
+* **Reporting:** add missing include ([326d54e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/326d54e7deea4a57b741c28c70036d70dc259d67))
+
 ## [6.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/6.1.0%0D6.0.1) (2021-09-27)
 
 

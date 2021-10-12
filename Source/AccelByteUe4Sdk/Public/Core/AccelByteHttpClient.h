@@ -7,6 +7,7 @@
 #include "JsonUtilities.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "AccelByteUtilities.h"
 
 using namespace AccelByte;
 
@@ -178,13 +179,19 @@ namespace AccelByte
 		 * @param UStruct HTTP request content from a given UStruct (implies Content-Type application/json header).
 		 * @param OnSuccess Callback when HTTP response is successful.
 		 * @param OnError Callback when HTTP response is error.
+		 * @param bOmitBlankValues Flag that will remove blank string values from the JSON string sent to the server.
+		 * Defaults to false.
 		 *
 		 * @return FAccelByteTaskPtr.
 		 */
 		template<typename T, typename U, typename V>
 		FAccelByteTaskPtr ApiRequest(const FString& Verb, const FString& Url, const TMap<FString, FString>& Params,
-			const T& UStruct, const U& OnSuccess, const V& OnError)
+			const T& UStruct, const U& OnSuccess, const V& OnError, bool bOmitBlankValues = false)
 		{
+			// #NOTE: Just as a general note for the bOmitBlankValues flag, it might be better to make an actual
+			// bitfield flag system at some point for other flags that we may want to toggle for request sending, but for
+			// now I'm just using a bool for simplicity sake.
+
 			FString ApiUrl = FormatApiUrl(Url);
 			TMap<FString, FString> Headers = {
 				{TEXT("Content-Type"), TEXT("application/json")},
@@ -193,14 +200,31 @@ namespace AccelByte
 
 			AddApiAuthorizationIfAvailable(Headers);
 
-			FString Json;
-
-			if (!FJsonObjectConverter::UStructToJsonObjectString(UStruct, Json))
+			TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(UStruct);
+			if (!JsonObject.IsValid())
 			{
-				UE_LOG(LogTemp, Error, TEXT("HttpClient Request UStructToJsonObjectString failed!"));
+				UE_LOG(LogTemp, Error, TEXT("HttpClient Request UStructToJsonObject failed!"));
+
+				return nullptr;
 			}
 
-			return Request(Verb, ApiUrl, Params, Json, Headers, OnSuccess, OnError);
+			// Omit blank JSON string values if opted into by the caller
+			if (bOmitBlankValues)
+			{
+				FAccelByteUtilities::RemoveEmptyStrings(JsonObject);
+			}
+
+			// Finally, write the JSON object to a string
+			FString JSONString;
+			TSharedRef<TJsonWriter<>> const Writer = TJsonWriterFactory<>::Create(&JSONString);
+			if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer))
+			{
+				UE_LOG(LogTemp, Error, TEXT("HttpClient Request FJsonSerializer::Serialize failed!"));
+
+				return nullptr;
+			}
+
+			return Request(Verb, ApiUrl, Params, JSONString, Headers, OnSuccess, OnError);
 		}
 
 	private:
@@ -212,7 +236,7 @@ namespace AccelByte
 
 		void AddApiAuthorizationIfAvailable(TMap<FString, FString>& Headers) const;
 
-	    FString EncodeParamsData(const TMap<FString, FString>& ParamsData) const;
+		FString EncodeParamsData(const TMap<FString, FString>& ParamsData) const;
 
 		template<typename U, typename V>
 		FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr& Request, const FString& Verb, const FString& Url,

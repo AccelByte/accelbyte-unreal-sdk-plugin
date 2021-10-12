@@ -2043,17 +2043,13 @@ void Lobby::FetchLobbyErrorMessages()
 		UE_LOG(LogAccelByteLobby, Warning, TEXT("Error fetching lobby error messages! code %d, message %s"), code, *message);
 		bFetchErrorMessageDone = true;
 	}));
+}
 
-	double LastTime = FPlatformTime::Seconds();
-	double Timeout = LastTime + 3;
-	while (!bFetchErrorMessageDone && (LastTime < Timeout))
+void Lobby::ClearLobbyErrorMessages()
+{
+	if(LobbyErrorMessages.Num() > 0)
 	{
-		const double AppTime = FPlatformTime::Seconds();
-		FHttpModule::Get().GetHttpManager().Tick(AppTime - LastTime);
-		FTicker::GetCoreTicker().Tick(AppTime - LastTime);
-		HttpRef.PollRetry(FPlatformTime::Seconds());
-		LastTime = AppTime;
-		FPlatformProcess::Sleep(0.2f);
+		LobbyErrorMessages.Empty();
 	}
 }
 
