@@ -1,7 +1,6 @@
-export DO_UPDATE=true
 export LEVEL=CRITICAL
 export REPO_NAME=justice-unreal-sdk-plugin
-export WORKDIR=/tmp/pipelines/1666405960/385834505/
+export WORKDIR=/tmp/pipelines/1677795625/387987681/
 export COMMIT_HASH=174eaaf43fd1951aa4dbe2adf704d076281e5284
 export GIT_HASH=174eaaf43fd1951aa4dbe2adf704d076281e5284
 export VERSION=7.0.0
