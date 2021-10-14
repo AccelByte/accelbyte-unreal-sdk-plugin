@@ -50,6 +50,11 @@ void AccelByteWebSocket::SetupWebSocket()
 	
 	bWasWsConnectionError = false;
 
+	bConnectTriggered = false;
+	OnMessageQueue.Empty();
+	OnConnectionClosedQueue.Empty();
+	OnConnectionErrorQueue.Empty();
+
 	if(WebSocket.IsValid())
 	{
 		WebSocket->OnMessage().Clear();
@@ -154,7 +159,7 @@ void AccelByteWebSocket::Disconnect()
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if(bConnectTriggered)
+	if(bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty())
 	{
 		bDisconnectOnNextTick = true;
 	}
