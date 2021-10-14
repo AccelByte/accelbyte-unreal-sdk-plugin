@@ -68,6 +68,7 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	TQueue<FString> OnMessageQueue;
 	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
 	TQueue<FString> OnConnectionErrorQueue;
+	bool bConnectedBroadcasted;
 
 	void Reconnect();
 

@@ -133,6 +133,8 @@ void AccelByteWebSocket::Connect()
 		SetupWebSocket();
 	}
 
+	bConnectedBroadcasted = false;
+
 	if(TickerDelegateHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
@@ -154,6 +156,8 @@ void AccelByteWebSocket::Disconnect()
 	}
 	else
 	{
+		bConnectedBroadcasted = false;
+		
 		if (TickerDelegateHandle.IsValid())
 		{
 			FTicker::GetCoreTicker().RemoveTicker(TickerDelegateHandle);
@@ -175,7 +179,7 @@ void AccelByteWebSocket::Disconnect()
 
 bool AccelByteWebSocket::IsConnected() const
 {
-	return WebSocket.IsValid() && WebSocket->IsConnected();
+	return WebSocket.IsValid() && WebSocket->IsConnected() && bConnectedBroadcasted;
 }
 
 void AccelByteWebSocket::SendPing() const
@@ -346,7 +350,7 @@ bool AccelByteWebSocket::MessageTick(float DeltaTime)
 	if(bConnectTriggered)
 	{
 		bConnectTriggered = false;
-		
+		bConnectedBroadcasted = true;
 		ConnectDelegate.Broadcast();
 	}
 
