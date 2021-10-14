@@ -46,6 +46,8 @@ AccelByteWebSocket::~AccelByteWebSocket()
 
 void AccelByteWebSocket::SetupWebSocket()
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	bWasWsConnectionError = false;
 
 	if(WebSocket.IsValid())
@@ -150,6 +152,8 @@ void AccelByteWebSocket::Connect()
 
 void AccelByteWebSocket::Disconnect()
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	if(bConnectTriggered)
 	{
 		bDisconnectOnNextTick = true;
@@ -198,12 +202,16 @@ void AccelByteWebSocket::Send(const FString& Message) const
 	
 void AccelByteWebSocket::OnConnectionConnected()
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	WsEvents |= EWebSocketEvent::Connected;
 	bConnectTriggered = true;
 }
 
 void AccelByteWebSocket::OnConnectionError(const FString& Error)
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	WsEvents |= EWebSocketEvent::ConnectionError;
 	bWasWsConnectionError = true;
 	OnConnectionErrorQueue.Enqueue(Error);
@@ -211,6 +219,8 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 
 void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	OnMessageReceived(Reason);
 	if(StatusCode < 4000)
 	{
@@ -221,6 +231,8 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 
 void AccelByteWebSocket::OnMessageReceived(const FString& Message)
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	OnMessageQueue.Enqueue(Message);
 }
 
