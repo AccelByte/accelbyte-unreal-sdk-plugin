@@ -554,8 +554,7 @@ FString Lobby::SendLeavePartyRequest()
 FString Lobby::SendInviteToPartyRequest(const FString& UserId)
 {
 	FReport::Log(FString(__FUNCTION__));
-	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInvite, Party
-		, FString::Printf(TEXT("friendID: %s"), *UserId))
+	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(PartyInvite, Party, FString::Printf(TEXT("friendID: %s"), *UserId))
 }
 
 FString Lobby::SendAcceptInvitationRequest(const FString& PartyId, const FString& InvitationToken)
