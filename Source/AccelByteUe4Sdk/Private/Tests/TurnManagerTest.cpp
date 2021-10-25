@@ -115,10 +115,12 @@ bool TurnManagerServerListAndLatencies::RunTest(const FString& Parameters)
 	{
 		bGetListDone = false;
 		bool ClosestError = false;
-		TurnManager.GetClosestTurnServer(THandler<FAccelByteModelsTurnServer>::CreateLambda([&bGetListDone](const FAccelByteModelsTurnServer &Result)
+		int64 CurrentServerTime = 0;
+		TurnManager.GetClosestTurnServer(THandler<FAccelByteModelsTurnServer>::CreateLambda([&bGetListDone, &CurrentServerTime](const FAccelByteModelsTurnServer &Result)
 		{
-			UE_LOG(LogAccelByteTurnManagerTest, Log, TEXT("Closest TURN server REGION: %s, Address: %s:%d"), *Result.Region, *Result.Ip, Result.Port);
+			UE_LOG(LogAccelByteTurnManagerTest, Log, TEXT("Closest TURN server REGION: %s, Address: %s:%d, Server Time: %lld"), *Result.Region, *Result.Ip, Result.Port, Result.Current_time);
 			bGetListDone = true;
+			CurrentServerTime = Result.Current_time;
 		}), FErrorHandler::CreateLambda([&bGetListDone, &ClosestError](int32 ErrorCode, const FString& ErrorMessage)
 		{
 			ClosestError = true;
@@ -126,6 +128,7 @@ bool TurnManagerServerListAndLatencies::RunTest(const FString& Parameters)
 		}));
 		WaitUntil(bGetListDone, "Waiting get closest server...");
 		AB_TEST_TRUE(!ClosestError);
+		AB_TEST_TRUE(CurrentServerTime > 0);
 	}
 	return true;
 }

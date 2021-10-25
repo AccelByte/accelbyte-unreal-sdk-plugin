@@ -23,6 +23,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServer
 		FString Status;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
 		FString Last_update;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
+		int64 Current_time;
 };
 
 USTRUCT(BlueprintType)
