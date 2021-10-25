@@ -4,30 +4,54 @@
 
 #include "Core/AccelByteMultiRegistry.h"
 
-using namespace AccelByte;
-using namespace AccelByte::Api;
-
-FApiClient::FApiClient()
+namespace AccelByte
 {
-	Http.Startup();
-	Credentials.Startup();
+FApiBase::FApiBase(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef)
+	: CredentialsRef{ CredentialsRef }
+	, SettingsRef{ SettingsRef }
+	, HttpRef{ HttpRef }
+	, HttpClient(CredentialsRef, SettingsRef, HttpRef)
+{
+
+}
+	
+FApiClient::FApiClient()
+	: CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
+	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+{
+	HttpRef->Startup();
+	CredentialsRef->Startup();
 	GameTelemetry.Startup();
+}
+
+FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
+	: CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials))
+	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http))
+{
 }
 
 FApiClient::~FApiClient()
 {
 	GameTelemetry.Shutdown();
-	Credentials.Shutdown();
-	Http.Shutdown();
+	CredentialsRef->Shutdown();
+	HttpRef->Shutdown();
 }
 
-TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key)
+FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
-		const TSharedPtr<FApiClient> NewClient = MakeShared<FApiClient>();
-
-		NewClient->Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+		FApiClientPtr NewClient = nullptr;
+		
+		if (Key.Compare(TEXT("default")) == 0) 
+		{
+			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>(FRegistry::Credentials, FRegistry::HttpRetryScheduler);
+		}
+		else 
+		{
+			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
+			NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+		}
 
 		ApiClientInstances.Add(Key, NewClient);
 	}
@@ -35,4 +59,19 @@ TSharedPtr<FApiClient> AccelByte::FMultiRegistry::GetApiClient(const FString Key
 	return ApiClientInstances[Key];
 }
 
-TMap<FString, TSharedPtr<FApiClient>> FMultiRegistry::ApiClientInstances;
+bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClient)
+{
+	bool bResult = false;
+
+	if (!Key.IsEmpty())
+	{
+		ApiClientInstances.Add(Key, ApiClient);
+		bResult = true;
+	}
+
+	return bResult;
+}
+
+TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
+
+}

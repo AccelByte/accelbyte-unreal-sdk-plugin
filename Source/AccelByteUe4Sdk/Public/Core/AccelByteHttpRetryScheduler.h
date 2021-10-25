@@ -59,4 +59,7 @@ protected:
 	EState State{EState::Uninitialized};
 };
 
+typedef TSharedRef<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerRef;	
+typedef TSharedPtr<FHttpRetryScheduler, ESPMode::ThreadSafe> FHttpRetrySchedulerPtr;
+
 }

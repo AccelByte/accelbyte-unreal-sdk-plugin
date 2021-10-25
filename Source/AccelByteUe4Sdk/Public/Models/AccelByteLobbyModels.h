@@ -1033,3 +1033,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserBannedNotification
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 		bool Enable;
 };
+
+// ------------------------------------------------------------------------------------------------
+// Refresh Token
+// ------------------------------------------------------------------------------------------------
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsRefreshTokenResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code;
+};

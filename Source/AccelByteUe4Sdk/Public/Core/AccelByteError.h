@@ -145,107 +145,117 @@ namespace AccelByte
 		UserIsNotLinkedToNamespaceException,
 		BadRequestException,
 		// Namespace Error Code List
-		NamespaceNotFoundException = 2141,
-		NamespaceAlreadyExistsException = 2171,
+		NamespaceAlreadyExistsException = 11336,
+		NamespaceNotFoundException,
+		NamespaceContainsInvalidCharacterException,
+		DisplayNameContainsInvalidCharacterException,
 		// Profile Error Code List
-		UserProfileNotFoundException = 2241,
-		UserProfileAlreadyExistsException = 2271,
+		UserProfileNotFoundException = 11440,
+		UserProfileAlreadyExistsException = 11441,
 		// FileStorage Error Code List
-		FileTypeNotSupportedException = 2321,
-		UserFileStorageExceedLimitException = 2371,
-		// Buildinfo Error Code List
-		EntitlementRequiredException = 2303,
-		EntitlementRequiredException2 = 2304,
-		BlockEmptyException = 2321,
-		BlockUuidRequiredException = 2322,
-		InvalidPlatformIdException = 2323,
-		MaximumDRMActivationLimitExceeded = 2324,
+		FileTypeNotSupportedException = 11131,
+		UserFileStorageExceedLimitException = 11132,
+		// Build info Error Code List
+		EntitlementRequiredException = 12103,
+		BlockEmptyException = 12121,
+		BlockUuidRequiredException = 12122,
+		InvalidPlatformIdException = 12123,
+		MaximumDRMActivationLimitExceeded = 12124,
 		//
-		BlockHashMismatchException = 2325,
+		BlockHashMismatchException = 12125,
 		//
-		BuildNotFoundException = 2341,
-		BlockNotFoundException = 2342,
-		BaseBuildNotFoundException = 2343,
+		BuildNotFoundException = 12141,
+		BlockNotFoundException = 12142,
+		BaseBuildNotFoundException = 12143,
 		//
-		ReleaseBuildNotFoundException = 2344,
+		ReleaseBuildNotFoundException =12144,
 		//
-		BuildAlreadyCommittedException = 2371,
-		BuildIncompleteException = 2372,
-		UploadAlreadyCompleteException = 2373,
-		UploadAlreadyStartedException = 2374,
-		DuplicateBuildIdException = 2375,
+		BuildAlreadyCommittedException = 12171,
+		BuildIncompleteException = 12172,
+		UploadAlreadyCompleteException = 12173,
+		UploadAlreadyStartedException = 12174,
+		DuplicateBuildIdException = 12175,
+		
+		//Catalog error
 		//
 		//Category Error Code List
 		//
-		DefaultLanguageRequiredException = 3021,
-		ItemBundleException = 3023,
-		DefaultRegionRequiredException = 3026,
-		ItemAlreadyBundledException = 3073,
-		LanguageNotSupportedException = 3074,
-		RegionNotSupportedException = 3075,
-		PublishedStoreNotUpdatableException = 3076,
-		//
-		//
-		InvalidStoreDataException = 30121,
-		StoreMetaMismatchException = 30122,
-		InvalidDiscountValueException = 30321,
-		StoreNotFoundException = 30141,
-		PublishedStoreNotFoundException = 30142,
 		CategoryNotFoundException = 30241,
 		CategoryAlreadyExistsException = 30271,
 		CategoryNotEmptyException = 30272,
+		//
+		//Store Error Code List
+		//
+		InvalidStoreDataException = 30121,
+		StoreMetaMismatchException = 30122,
+		StoreNotFoundException = 30141,
+		PublishedStoreNotFoundException = 30142,
+		//
+		//Catalog Error Code List
+		//
+		DefaultLanguageRequiredException = 30021,
+		DefaultRegionRequiredException = 30022,
+		//
+		//Item Error Code List
+		//
+		ItemInvalidDiscountValueException = 30321,
+		ItemBundleException = 30322,
+		//
 		ItemNotFoundException = 30341,
 		ItemAppIdNotFoundException = 30342,
+		ItemSkuNotFoundException = 30343,
 		//
 		//Entitlement Error Code List
 		//
-		UserEntitlementNotFoundException = 3141,
-		EntitlementAlreadyRevokedException = 3171,
-		EntitlementNotActiveException = 3172,
-		EntitlementNotConsumableException = 3173,
-		EntitlementUsedUpException = 3174,
-		EntitlementAlreadyDistributedException = 3175,
-		//
-		//
 		EntitlementNotDistributableException = 31121,
-		ExceedDistributeQuantityException = 31122,
-		PublisherNamespaceNotDistributableException = 31123,
+		ExceedDistributeQuantityException,
+		PublisherNamespaceNotDistributableException,
+		//
 		EntitlementIdNotFoundException = 31141,
-		EntitlementAppIdNotFoundException = 31142,
+		EntitlementAppIdNotFoundException,
+		//
+		EntitlementAlreadyRevokedException = 31171,
+		EntitlementNotActiveException,
+		EntitlementNotConsumableException,
+		EntitlementAlreadyUsedException,
+		EntitlementAlreadyDistributedException,
+		EntitlementUseCountIsInsufficientException,
+		PermanentItemAlreadyOwned,
+		EntitlementOutOfTimeRangeException,
+		//
 		DistributionReceiverNotFoundException = 31241,
 		DistributionReceiverAlreadyExistsException = 31271,
 		//
 		//Order Error Code List
 		//
-		OrderNotRefundableException = 3271,
-		InvalidOrderStatusException = 3272,
-		OrderTransactionAmountMismatchException = 3274,
-		//
-		//
 		OrderPriceMismatchException = 32121,
+		//
 		OrderNotFoundException = 32141,
-		OrderReceiptNotDownloadableException = 32173,
-		ExceedItemMaxCountPerUserException = 32175,
-		ExceedItemMaxCountException = 32176,
-		OrderNotCancelableException = 32177,
+		//
+		OrderNotRefundableException = 32171,
+		InvalidOrderStatusException,
+		OrderReceiptNotDownloadableException,
+		OrderTransactionAmountMismatchException,
+		ExceedItemMaxCountPerUserException,
+		ExceedItemMaxCountException,
+		OrderNotCancelableException,
 		//
 		//Payment Error Code List
 		//
 		InvalidPaymentOrderTransactionStatusException = 3372,
 		InvalidPaymentOrderTransactionTypeException = 3373,
 		PaymentOrderTransactionAmountMismatchException = 3375,
-		WxPayUnifiedOrderFailedException = 3376,
-		PaymentExtOrderNoAlreadyExistsException = 3377,
-		//
 		//
 		PaymentOrderNotFoundException = 33141,
 		PaymentOrderChargeTransactionNotFoundException = 33142,
 		InvalidPaymentOrderStatusException = 33171,
 		PaymentOrderNotRefundableException = 33172,
+		PaymentExtOrderNoAlreadyExistsException = 33173,
 		PaymentCurrencyNotSupportedException = 33321,
 		PaymentProviderNotSupportedException = 33322,
 		AliPayRefundFailedException = 33323,
 		WxPayRefundFailedException = 33324,
+		WxPayUnifiedOrderFailedException = 33327,
 		//
 		//Wallet Error Code List
 		//
@@ -276,35 +286,41 @@ namespace AccelByte
 		MaxRedeemCountPerCodePerCampaignExceededException = 37179,
 		//
 		//Social Error Code List
-		//Activity
 		//
-		ActivityTrackNotFoundException = 4041,
-		//
-		//Favorite
-		//
-		FavoriteItemNotFoundException = 4141,
-		FavoriteUserNotFoundException = 4142,
-		//
-		//Offense report
-		//
-		OffenseReportNotFoundException = 4241,
-		OffenseTypeNotFoundException = 4242,
-		OffenseTypeAlreadyExistsException = 4271,
-		OffenseReportAssociatedException = 4272,
-		//
+		//Game Profile Error Code List
+		GameProfileAttributeMismatchException = 12022,
+		GameProfileIdNotFoundException = 12041,
 		//Statistic Error Code List
-		//
-		StatisticConfigNotFoundException = 12241,
-		StatisticNotFoundException = 12241,
 		InvalidStatOperatorException = 12221,
-		StatNotDecreasableException = 12273,
+		StatisticConfigNotFoundException = 12222,
+		//
+		StatisticNotFoundException = 12241,
 		UserStatsNotFoundException = 12242,
+		//
+		StatNotDecreasableException = 12273,
 		UserStatAlreadyExistException = 12274,
 		StatValueOutOfRangeException = 12275,
+		
 		//
+		//SeasonPass Error Code List
+		//
+		SeasonPassDefaultLanguageRequiredException = 49121,
+		SeasonPassInvalidTimeRangeException,
+		//
+		SeasonPassTierItemNotFoundException = 49141,
+		SeasonPassPassItemNotFoundException,
+		SeasonPassSeasonNotFoundException,
+		SeasonPassRewardNotFoundException,
+		SeasonPassPassCodeNotFoundException,
+		//
+		SeasonPassSeasonInvalidStatusException = 49171,
+		SeasonPassRewardsNotProvidedException,
+		SeasonPassPassesNotProvidedException,
+		SeasonPassTiersNotProvidedException,
 		//Leaderboard Error Code List
 		//
 		LeaderboardConfigAlreadyExist = 71132,
+		LeaderBoardUserRankingDataNotFound = 71233,
 		LeaderboardRankingNotFound = 71235,
 		//
 		//CloudSave Error Code List
@@ -315,9 +331,9 @@ namespace AccelByte
 		PlayerRecordNotFoundException = 18022,
 		PlayerRecordGetterIsNotOwnerException = 18023,
 		PlayerRecordEditorIsNotOwnerException = 18035,
-		PlayerPublicRecordNotFoundException = 18081,
 		GameRecordValidationErrorException = 18055,
 		GameRecordPreconditionFailedException = 18056,
+		PlayerPublicRecordNotFoundException = 18081,
 		PlayerPublicRecordValidationErrorException = 18102,
 		PlayerRecordPreconditionFailedException = 18103,
 		//
@@ -344,6 +360,22 @@ namespace AccelByte
 		// 
 		PartyStorageOutdatedUpdateData = 119017,
 		PartyNotFound = 11901,
+		//
+		//UGC Error Code List
+		//
+		UGCCreateContentBadRequestException = 770100,
+		UGCCreateContentConflictShareCodeErrorException = 770103,
+		UGCGetContentByIDNotFoundException = 770200,
+		UGCDownloadContentByShareCodeNotFoundException = 770300,
+		UGCCreateChannelMalformedRequestException = 770500,
+		UGCUpdateChannelMalformedRequestException = 770600,
+		UGCUpdateChannelNotFoundException = 770603,
+		UGCGetTagBadRequestException = 771501,
+		UGCGetTypeBadRequestException = 771801,
+		UGCDeleteChannelNotFoundException = 772502,
+		UGCUpdateContentNotFoundException = 772603,
+		UGCDeleteContentNotFoundException = 772702,
+		UGCGetContentPreviewNotFoundException = 773702,
 	};
 
 

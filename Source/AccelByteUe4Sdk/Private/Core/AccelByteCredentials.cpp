@@ -135,6 +135,8 @@ void Credentials::PollRefreshToken(double CurrentTime)
 					RefreshTokenAdditionalActions.Broadcast();
 					RefreshTokenAdditionalActions.Clear();
 				}
+					
+				TokenRefreshedEvent.Broadcast();
 			}),
 				FErrorHandler::CreateLambda([this, CurrentTime](int32 ErrorCode, const FString& ErrorMessage)
 			{
@@ -152,6 +154,7 @@ void Credentials::PollRefreshToken(double CurrentTime)
 					RefreshTokenAdditionalActions.Broadcast();
 					RefreshTokenAdditionalActions.Clear();
 				}
+					
 				UserSessionState = ESessionState::Expired;
 			}));
 
@@ -182,6 +185,11 @@ void AccelByte::Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& H
 			{
 				BearerAuthRejectedRefreshToken(HttpRef);
 			}));
+}
+
+Credentials::FTokenRefreshedEvent& Credentials::OnTokenRefreshed()
+{
+	return TokenRefreshedEvent;
 }
 
 void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)

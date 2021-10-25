@@ -75,6 +75,9 @@ namespace Api
 		const FString SetSessionAttribute = TEXT("setSessionAttributeRequest");
 		const FString GetSessionAttribute = TEXT("getSessionAttributeRequest");
 		const FString GetAllSessionAttribute = TEXT("getAllSessionAttributeRequest");
+
+		// Refresh Token
+		const FString RefreshToken = TEXT("refreshTokenRequest");
 	}
 
 	namespace LobbyResponse
@@ -169,6 +172,9 @@ namespace Api
 		const FString SessionAttributeSet = TEXT("setSessionAttributeResponse");
 		const FString SessionAttributeGet = TEXT("getSessionAttributeResponse");
 		const FString SessionAttributeGetAll = TEXT("getAllSessionAttributeResponse");
+
+		// Refresh Token
+		const FString RefreshToken = TEXT("refreshTokenResponse");
 	}
 
 	namespace Prefix
@@ -181,6 +187,7 @@ namespace Api
 		const FString Block = TEXT("blocks");
 		const FString Signaling = TEXT("signaling");
 		const FString Attribute = TEXT("attribute");
+		const FString Token = TEXT("token");
 	}
 
 void Lobby::Connect()
@@ -226,6 +233,8 @@ void Lobby::Disconnect()
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
+	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+		
 	if (LobbyTickDelegateHandle.IsValid())
 	{
 		FTicker::GetCoreTicker().RemoveTicker(LobbyTickDelegateHandle);
@@ -245,6 +254,7 @@ void Lobby::Disconnect()
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
 }
+
 
 bool Lobby::IsConnected() const
 {
@@ -675,6 +685,12 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<F
 {
 	FReport::Log(FString(__FUNCTION__));
 
+	if (UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound((int32)ErrorCodes::InvalidRequest, TEXT("UserIds cannot be empty!"));
+		return;
+	}
+
 	FString Query = TEXT("?userIds=");
 	for (int i = 0; i < UserIds.Num(); i++)
 	{
@@ -896,6 +912,18 @@ FString Lobby::GetAllSessionAttribute()
 		FString::Printf(TEXT("namespace: %s"), *Credentials.GetNamespace()));
 }
 
+//-------------------------------------------------------------------------------------------------
+// Refresh Token
+//-------------------------------------------------------------------------------------------------
+
+FString Lobby::RefreshToken(const FString& AccessToken)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	return SendRawRequest(LobbyRequest::RefreshToken, Prefix::Token,
+		FString::Printf(TEXT("token: %s"), *AccessToken));
+}
+	
 void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1078,6 +1106,8 @@ void Lobby::OnConnected()
 {
 	WsEvents |= EWebSocketEvent::Connected;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
+
+	Credentials.OnTokenRefreshed().Add(RefreshTokenDelegate);
 		
 	ConnectSuccess.ExecuteIfBound();
 }
@@ -1582,6 +1612,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeSet, FAccelByteModelsSetSessionAttributesResponse, SetSessionAttributeResponse, OnSetSessionAttributeError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGet, FAccelByteModelsGetSessionAttributesResponse, GetSessionAttributeResponse, OnGetSessionAttributeError);
 	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::SessionAttributeGetAll, FAccelByteModelsGetAllSessionAttributesResponse, GetAllSessionAttributeResponse, OnGetAllSessionAttributeError);
+	HANDLE_LOBBY_MESSAGE_RESPONSE(LobbyResponse::RefreshToken, FAccelByteModelsRefreshTokenResponse, RefreshTokenResponse, OnRefreshTokenError);
 
 #undef HANDLE_LOBBY_MESSAGE_RESPONSE
 		
@@ -1716,7 +1747,7 @@ void Lobby::ClearLobbyErrorMessages()
 }
 
 	Lobby::Lobby(
-		const AccelByte::Credentials& Credentials,
+		AccelByte::Credentials& Credentials,
 		const AccelByte::Settings& Settings,
 		FHttpRetryScheduler& HttpRef,
 		float PingDelay,
