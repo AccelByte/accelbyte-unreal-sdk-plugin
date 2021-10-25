@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.1%0D7.0.0) (2021-10-25)
+
+
+### Bug Fixes
+
+* **lobby:** return invalidRequest when UserIds empty on bulk user presence ([a09c35f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a09c35f95651086f610dc7aec58c28534ae17578))
+
+
+### Refactors
+
+* **apiclient:** default ApiClient will use Credentials and HttpRetryScheduler instances from FRegistry ([00f73cb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/00f73cb2ebb28c51d50b01a47e237bdb1f49cc53))
+
 ## [7.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.0%0D6.1.1) (2021-10-11)
 
 
