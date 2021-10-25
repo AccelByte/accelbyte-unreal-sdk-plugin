@@ -439,6 +439,7 @@ FString Lobby::SendGetOnlineFriendPresenceRequest()
 //-------------------------------------------------------------------------------------------------
 // Notification
 //-------------------------------------------------------------------------------------------------
+UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void Lobby::GetAllAsyncNotification()
 {
 	FReport::Log(FString(__FUNCTION__));

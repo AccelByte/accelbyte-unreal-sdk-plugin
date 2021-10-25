@@ -2247,39 +2247,6 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetAsyncNotification, "AccelByte.Tests.Lobby.B.NotifAsync", AutomationFlagMaskLobby);
-bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Parameters)
-{
-	bool bSendNotifSucccess = false;
-	FString notification = "this is a notification";
-	UAccelByteBlueprintsTest::SendNotif(UserCreds[0].GetUserId(), notification, true, FVoidHandler::CreateLambda([&]()
-	{
-		bSendNotifSucccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
-	}), LobbyTestErrorHandler);
-
-	WaitUntil(bSendNotifSucccess, "Sending Notification...");
-
-	LobbyConnect(1);
-
-	Lobbies[0]->SetMessageNotifDelegate(GetNotifDelegate);
-
-	Lobbies[0]->GetAllAsyncNotification();
-
-	WaitUntil([&]()
-	{
-		return bGetNotifSuccess;
-	}, "Getting All Notifications...", 30);
-
-	LobbyDisconnect(1);
-	AB_TEST_TRUE(bSendNotifSucccess);
-	AB_TEST_TRUE(bGetNotifSuccess);
-	AB_TEST_EQUAL(getNotifResponse.Payload, notification);
-
-	ResetResponses();
-	return true;
-}
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetSyncNotification, "AccelByte.Tests.Lobby.B.NotifSync", AutomationFlagMaskLobby);
 bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameters)
 {
@@ -2321,44 +2288,6 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 		AB_TEST_TRUE(bGetNotifCheck[i]);
 		AB_TEST_EQUAL(getNotifCheck[i].Payload, payloads[i]);
 	}
-	ResetResponses();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_SendNotifUserToUserAsync, "AccelByte.Tests.Lobby.B.NotifAsyncUserToUser", AutomationFlagMaskLobby);
-bool LobbyTestNotification_SendNotifUserToUserAsync::RunTest(const FString& Parameters)
-{
-	LobbyConnect(1);
-	
-	bool bSendNotifSucccess = false;
-	FAccelByteModelsFreeFormNotificationRequest MessageRequest;
-	MessageRequest.Topic = TEXT("Message");
-	MessageRequest.Message = TEXT("Test from the integration test UE4");
-	Lobbies[0]->SendNotificationToUser(UserCreds[1].GetUserId(), MessageRequest, true, FVoidHandler::CreateLambda([&]()
-	{
-		bSendNotifSucccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
-	}), LobbyTestErrorHandler);
-
-	WaitUntil(bSendNotifSucccess, "Sending Notification...");
-
-	LobbyConnect(2);
-
-	Lobbies[1]->SetMessageNotifDelegate(GetNotifDelegate);
-
-	Lobbies[1]->GetAllAsyncNotification();
-
-	WaitUntil([&]()
-	{
-		return bGetNotifSuccess;
-	}, "Getting All Notifications...", 30);
-
-	LobbyDisconnect(2);
-	AB_TEST_TRUE(bSendNotifSucccess);
-	AB_TEST_TRUE(bGetNotifSuccess);
-	AB_TEST_EQUAL(getNotifResponse.Payload, MessageRequest.Message);
-	AB_TEST_EQUAL(getNotifResponse.Topic, MessageRequest.Topic);
-
 	ResetResponses();
 	return true;
 }
