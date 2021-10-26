@@ -29,15 +29,6 @@ namespace AccelByte
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server already registered."));
 			}
-			else if (DSPubIp.IsEmpty())
-			{
-				GetPubIpDelegate.BindLambda([this, Port, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
-				{
-					DSPubIp = Result.Ip;
-					RegisterServerToDSM(Port, OnSuccess, OnError);
-				});
-				FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
-			}
 			else
 			{
 				ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
@@ -101,15 +92,6 @@ namespace AccelByte
 			if (ServerType == EServerType::LOCALSERVER)
 			{
 				OnError.ExecuteIfBound(409, TEXT("Server not registered as Cloud Server."));
-			}
-			else if (DSPubIp.IsEmpty())
-			{
-				GetPubIpDelegate.BindLambda([this, KillMe, MatchId, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
-				{
-					DSPubIp = Result.Ip;
-					SendShutdownToDSM(KillMe, MatchId, OnSuccess, OnError);
-				});
-				FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
 			}
 			else
 			{

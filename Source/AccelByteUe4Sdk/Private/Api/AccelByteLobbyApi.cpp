@@ -439,6 +439,7 @@ FString Lobby::SendGetOnlineFriendPresenceRequest()
 //-------------------------------------------------------------------------------------------------
 // Notification
 //-------------------------------------------------------------------------------------------------
+UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void Lobby::GetAllAsyncNotification()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1481,6 +1482,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 		BanNotifReceived = true;
 		FAccelByteModelsUserBannedNotification Result;
 		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 		if (bParseSuccess)
 		{
 			HttpRef.BearerAuthRejected();

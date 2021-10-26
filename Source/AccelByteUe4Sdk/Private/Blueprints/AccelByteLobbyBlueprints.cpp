@@ -381,6 +381,7 @@ void UAccelByteBlueprintsLobby::SetPresenceStatus(Availability State, FString Ga
 }
 
 // Notification
+UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void UAccelByteBlueprintsLobby::GetAllAsyncNotification()
 {
 	FRegistry::Lobby.GetAllAsyncNotification();

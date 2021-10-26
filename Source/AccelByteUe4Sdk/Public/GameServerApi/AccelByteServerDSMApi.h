@@ -57,11 +57,13 @@ public:
 
 	/*
 	 * @brief send register local server to DSM using public IP
+	 * this method is using api.ipify.org to get the device's public IP
 	 *
 	 * @param Port the port where your game server run.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
+	UE_DEPRECATED(4.25, "ipify supports will be deprecated in the future releases, please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)")
 	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/*
@@ -128,7 +130,7 @@ public:
 	int32 GetPlayerNum();
 
 	FString DSMServerUrl;
-	FString DSPubIp;
+	FString DSPubIp = "";
 
 	/*
 	* @brief Update values from command line arguments. Used for tests.
