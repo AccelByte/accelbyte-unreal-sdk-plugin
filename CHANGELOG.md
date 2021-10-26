@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.2%0D7.0.1) (2021-10-26)
+
+
+### Tests
+
+* **lobby:** fix matchmaking random timeout after StartMatchmakingAllParameters Test & increase wait matchmaking notif timeout ([bb41277](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bb41277bf0610449c2b4e74aaa1c2a5455f22f68))
+
+
+### Refactors
+
+* **ServerDSM:** Remove fetching public IP when registering cloud server ([988f5c0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/988f5c05ff70d452baa81031605be23b38b0e9fe))
+
 ### [7.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.1%0D7.0.0) (2021-10-25)
 
 
