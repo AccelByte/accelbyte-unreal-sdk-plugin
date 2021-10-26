@@ -1482,6 +1482,7 @@ if (lobbyResponseType.Equals(MessageType)) \
 		BanNotifReceived = true;
 		FAccelByteModelsUserBannedNotification Result;
 		bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJson, &Result, 0, 0);
+		Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 		if (bParseSuccess)
 		{
 			HttpRef.BearerAuthRejected();
