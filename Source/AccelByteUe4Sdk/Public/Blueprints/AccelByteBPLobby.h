@@ -8,11 +8,62 @@
 
 using namespace AccelByte;
 
+USTRUCT(BlueprintType)
+struct FPartyInviteRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString friendID;
+};
+
+USTRUCT(BlueprintType)
+struct FPartyJoinRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString partyID;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString invitationToken;
+};
+
+USTRUCT(BlueprintType)
+struct FPartyRejectRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString partyID;
+
+	UPROPERTY(BlueprintReadWrite)
+	FString invitationToken;
+};
+
+USTRUCT(BlueprintType)
+struct FPartyKickRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString memberID;
+};
+
+USTRUCT(BlueprintType)
+struct FMatchmakingStartRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString gameMode;
+};
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyCreateResponse, FAccelByteModelsCreatePartyResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDInfoPartyResponse, FAccelByteModelsInfoPartyResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDLeavePartyResponse, FAccelByteModelsLeavePartyResponse, Response);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDInviteToPartyResponse, FAccelByteModelsPartyInviteResponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteResponse, FAccelByteModelsPartyInviteResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinResponse, FAccelByteModelsPartyJoinReponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectResponse, FAccelByteModelsPartyRejectResponse, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickResponse, FAccelByteModelsKickPartyMemberResponse, Response);
@@ -22,6 +73,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectNotif, FAccelByteModelsPartyRejec
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyLeaveNotif, FAccelByteModelsLeavePartyNotice, Notif);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, Notif);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteNotif, FAccelByteModelsInvitationNotice, Notif);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDMatchmakingStartResponse, FAccelByteModelsMatchmakingResponse, Response);
 
 UCLASS(Blueprintable, BlueprintType)
 class ULobby : public UObject
@@ -46,67 +98,74 @@ public:
 	void SetConnectSuccessDelegate(FDHandler OnConnectSuccess) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetCreatePartyResponseDelegate(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const;
+	void SetOnCreatePartyResponse(FDPartyCreateResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SendCreatePartyRequest() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const;
+	void SetOnPartyDataUpdateNotif(FDPartyDataUpdateNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetInfoPartyResponseDelegate(FDInfoPartyResponse OnResponse) const;
+	void SetOnPartyInfoResponse(FDInfoPartyResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendInfoPartyRequest() const;
+	void SendPartyInfoRequest() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetLeavePartyResponseDelegate(FDLeavePartyResponse OnResponse) const;
+	void SetOnPartyLeaveResponse(FDLeavePartyResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendLeavePartyRequest() const;
+	void SendPartyLeaveRequest() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetInviteToPartyResponseDelegate(FDInviteToPartyResponse OnResponse) const;
+	void SetOnPartyInviteResponse(FDPartyInviteResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendInviteToPartyRequest(FString const& UserId);
+	void SendPartyInviteRequest(FPartyInviteRequest Request);
 
 	UFUNCTION(BlueprintCallable)
-	void SetInvitePartyJoinResponseDelegate(FDPartyJoinResponse OnResponse) const;
+	void SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendAcceptInvitationRequest(FString const& PartyId, FString const& InvitationToken) const;
+	void SendPartyJoinRequest(FPartyJoinRequest Request) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetRejectInvitationResponseDelegate(FDPartyRejectResponse OnResponse) const;
+	void SetOnPartyRejectResponse(FDPartyRejectResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendRejectInvitationRequest(FString const& PartyId, FString const& InvitationToken) const;
+	void SendPartyRejectRequest(FPartyRejectRequest Request) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetKickPartyMemberResponseDelegate(FDPartyKickResponse OnResponse) const;
+	void SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendKickPartyMemberRequest(FString const& UserId) const;
+	void SendPartyKickRequest(FPartyKickRequest Request) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyGetInvitedNotifDelegate(FDPartyGetInvitedNotif OnNotif) const;
+	void SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyJoinNotifDelegate(FDPartyJoinNotif OnNotif) const;
+	void SetOnPartyJoinNotif(FDPartyJoinNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyInvitationRejectedNotifDelegate(FDPartyRejectNotif OnNotif) const;
+	void SetOnPartyRejectNotif(FDPartyRejectNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyLeaveNotifDelegate(FDPartyLeaveNotif OnNotif) const;
+	void SetOnPartyLeaveNotif(FDPartyLeaveNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyKickNotifDelegate(FDPartyKickNotif OnNotif) const;
+	void SetOnPartyKickNotif(FDPartyKickNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetPartyInviteNotifDelegate(FDPartyInviteNotif OnNotif) const;
+	void SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnMatchmakingStartResponse(FDMatchmakingStartResponse OnResponse) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SendMatchmakingStartRequest(FMatchmakingStartRequest Request) const;
+	
 private:
 	bool bConnected{false};
 	FApiClientPtr ApiClientPtr;

@@ -25,18 +25,13 @@ void ULobby::SetConnectSuccessDelegate(FDHandler OnConnectSuccess) const
 			}));
 }
 
-void ULobby::SetCreatePartyResponseDelegate(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const
+void ULobby::SetOnCreatePartyResponse(FDPartyCreateResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetCreatePartyResponseDelegate(
 		Api::Lobby::FPartyCreateResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsCreatePartyResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
-			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString Message)
-			{
-				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
 }
 
@@ -45,7 +40,7 @@ void ULobby::SendCreatePartyRequest() const
 	ApiClientPtr->Lobby.SendCreatePartyRequest();
 }
 
-void ULobby::SetPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const
+void ULobby::SetOnPartyDataUpdateNotif(FDPartyDataUpdateNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
 		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
@@ -55,7 +50,7 @@ void ULobby::SetPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) con
 			}));
 }
 
-void ULobby::SetInfoPartyResponseDelegate(FDInfoPartyResponse OnResponse) const
+void ULobby::SetOnPartyInfoResponse(FDInfoPartyResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetInfoPartyResponseDelegate(
 		Api::Lobby::FPartyInfoResponse::CreateLambda(
@@ -65,12 +60,12 @@ void ULobby::SetInfoPartyResponseDelegate(FDInfoPartyResponse OnResponse) const
 			}));
 }
 
-void ULobby::SendInfoPartyRequest() const
+void ULobby::SendPartyInfoRequest() const
 {
 	ApiClientPtr->Lobby.SendInfoPartyRequest();
 }
 
-void ULobby::SetLeavePartyResponseDelegate(FDLeavePartyResponse OnResponse) const
+void ULobby::SetOnPartyLeaveResponse(FDLeavePartyResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetLeavePartyResponseDelegate(
 		Api::Lobby::FPartyLeaveResponse::CreateLambda(
@@ -80,12 +75,12 @@ void ULobby::SetLeavePartyResponseDelegate(FDLeavePartyResponse OnResponse) cons
 			}));
 }
 
-void ULobby::SendLeavePartyRequest() const
+void ULobby::SendPartyLeaveRequest() const
 {
 	ApiClientPtr->Lobby.SendLeavePartyRequest();
 }
 
-void ULobby::SetInviteToPartyResponseDelegate(FDInviteToPartyResponse OnResponse) const
+void ULobby::SetOnPartyInviteResponse(FDPartyInviteResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyResponseDelegate(
 		Api::Lobby::FPartyInviteResponse::CreateLambda(
@@ -95,12 +90,12 @@ void ULobby::SetInviteToPartyResponseDelegate(FDInviteToPartyResponse OnResponse
 			}));
 }
 
-auto ULobby::SendInviteToPartyRequest(FString const& UserId) -> void
+auto ULobby::SendPartyInviteRequest(FPartyInviteRequest Request) -> void
 {
-	ApiClientPtr->Lobby.SendInviteToPartyRequest(UserId);
+	ApiClientPtr->Lobby.SendInviteToPartyRequest(Request.friendID);
 }
 
-void ULobby::SetInvitePartyJoinResponseDelegate(FDPartyJoinResponse OnResponse) const
+void ULobby::SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyJoinResponseDelegate(
 		Api::Lobby::FPartyJoinResponse::CreateLambda(
@@ -110,12 +105,12 @@ void ULobby::SetInvitePartyJoinResponseDelegate(FDPartyJoinResponse OnResponse) 
 			}));
 }
 
-void ULobby::SendAcceptInvitationRequest(FString const& PartyId, FString const& InvitationToken) const
+void ULobby::SendPartyJoinRequest(FPartyJoinRequest Request) const
 {
-	ApiClientPtr->Lobby.SendAcceptInvitationRequest(PartyId, InvitationToken);
+	ApiClientPtr->Lobby.SendAcceptInvitationRequest(Request.partyID, Request.invitationToken);
 }
 
-void ULobby::SetRejectInvitationResponseDelegate(FDPartyRejectResponse OnResponse) const
+void ULobby::SetOnPartyRejectResponse(FDPartyRejectResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyRejectResponseDelegate(
 		Api::Lobby::FPartyRejectResponse::CreateLambda(
@@ -125,12 +120,12 @@ void ULobby::SetRejectInvitationResponseDelegate(FDPartyRejectResponse OnRespons
 			}));
 }
 
-void ULobby::SendRejectInvitationRequest(FString const& PartyId, FString const& InvitationToken) const
+void ULobby::SendPartyRejectRequest(FPartyRejectRequest Request) const
 {
-	ApiClientPtr->Lobby.SendRejectInvitationRequest(PartyId, InvitationToken);
+	ApiClientPtr->Lobby.SendRejectInvitationRequest(Request.partyID, Request.invitationToken);
 }
 
-void ULobby::SetKickPartyMemberResponseDelegate(FDPartyKickResponse OnResponse) const
+void ULobby::SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyKickMemberResponseDelegate(
 		Api::Lobby::FPartyKickResponse::CreateLambda(
@@ -140,12 +135,12 @@ void ULobby::SetKickPartyMemberResponseDelegate(FDPartyKickResponse OnResponse) 
 			}));
 }
 
-void ULobby::SendKickPartyMemberRequest(FString const& UserId) const
+void ULobby::SendPartyKickRequest(FPartyKickRequest Request) const
 {
-	ApiClientPtr->Lobby.SendKickPartyMemberRequest(UserId);
+	ApiClientPtr->Lobby.SendKickPartyMemberRequest(Request.memberID);
 }
 
-void ULobby::SetPartyGetInvitedNotifDelegate(FDPartyGetInvitedNotif OnNotif) const
+void ULobby::SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyGetInvitedNotifDelegate(
 		Api::Lobby::FPartyGetInvitedNotif::CreateLambda(
@@ -155,7 +150,7 @@ void ULobby::SetPartyGetInvitedNotifDelegate(FDPartyGetInvitedNotif OnNotif) con
 			}));
 }
 
-void ULobby::SetPartyJoinNotifDelegate(FDPartyJoinNotif OnNotif) const
+void ULobby::SetOnPartyJoinNotif(FDPartyJoinNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyJoinNotifDelegate(
 		Api::Lobby::FPartyJoinNotif::CreateLambda(
@@ -165,7 +160,7 @@ void ULobby::SetPartyJoinNotifDelegate(FDPartyJoinNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetPartyInvitationRejectedNotifDelegate(FDPartyRejectNotif OnNotif) const
+void ULobby::SetOnPartyRejectNotif(FDPartyRejectNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyInvitationRejectedNotifDelegate(
 		Api::Lobby::FPartyRejectNotif::CreateLambda(
@@ -175,7 +170,7 @@ void ULobby::SetPartyInvitationRejectedNotifDelegate(FDPartyRejectNotif OnNotif)
 			}));
 }
 
-void ULobby::SetPartyLeaveNotifDelegate(FDPartyLeaveNotif OnNotif) const
+void ULobby::SetOnPartyLeaveNotif(FDPartyLeaveNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyLeaveNotifDelegate(
 		Api::Lobby::FPartyLeaveNotif::CreateLambda(
@@ -185,7 +180,7 @@ void ULobby::SetPartyLeaveNotifDelegate(FDPartyLeaveNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetPartyKickNotifDelegate(FDPartyKickNotif OnNotif) const
+void ULobby::SetOnPartyKickNotif(FDPartyKickNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyKickNotifDelegate(
 		Api::Lobby::FPartyKickNotif::CreateLambda(
@@ -195,7 +190,7 @@ void ULobby::SetPartyKickNotifDelegate(FDPartyKickNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetPartyInviteNotifDelegate(FDPartyInviteNotif OnNotif) const
+void ULobby::SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyInviteNotifDelegate(
 		Api::Lobby::FPartyInviteNotif::CreateLambda(
@@ -203,6 +198,21 @@ void ULobby::SetPartyInviteNotifDelegate(FDPartyInviteNotif OnNotif) const
 			{
 				auto _ = OnNotif.ExecuteIfBound(Notif);
 			}));
+}
+
+void ULobby::SetOnMatchmakingStartResponse(FDMatchmakingStartResponse OnResponse) const
+{
+	ApiClientPtr->Lobby.SetStartMatchmakingResponseDelegate(
+		Api::Lobby::FMatchmakingResponse::CreateLambda(
+			[OnResponse](FAccelByteModelsMatchmakingResponse Response)
+			{
+				auto _ = OnResponse.ExecuteIfBound(Response);
+			}));
+}
+
+void ULobby::SendMatchmakingStartRequest(FMatchmakingStartRequest Request) const
+{
+	ApiClientPtr->Lobby.SendStartMatchmaking(Request.gameMode);
 }
 
 bool ULobby::IsConnected() const

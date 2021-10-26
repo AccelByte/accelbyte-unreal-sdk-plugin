@@ -34,7 +34,6 @@ class UApiClient final : public UObject
 {
 	GENERATED_BODY()
 public:
-
 	UApiClient();
 
 	void SetApiClient(FApiClientPtr NewApiClientPtr);
