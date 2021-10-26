@@ -76,6 +76,9 @@ namespace Api
 		const FString SetSessionAttribute = TEXT("setSessionAttributeRequest");
 		const FString GetSessionAttribute = TEXT("getSessionAttributeRequest");
 		const FString GetAllSessionAttribute = TEXT("getAllSessionAttributeRequest");
+
+		// Refresh Token
+		const FString RefreshToken = TEXT("refreshTokenRequest");
 	}
 
 	namespace LobbyResponse
@@ -170,6 +173,9 @@ namespace Api
 		const FString SetSessionAttribute = TEXT("setSessionAttributeResponse");
 		const FString GetSessionAttribute = TEXT("getSessionAttributeResponse");
 		const FString GetAllSessionAttribute = TEXT("getAllSessionAttributeResponse");
+		
+		// Refresh Token
+		const FString RefreshToken = TEXT("refreshTokenResponse");
 	}
 
 	namespace Prefix
@@ -182,6 +188,7 @@ namespace Api
 		const FString Block = TEXT("blocks");
 		const FString Signaling = TEXT("signaling");
 		const FString Attribute = TEXT("attribute");
+		const FString Token = TEXT("token");
 	}
 
 	namespace Suffix
@@ -243,6 +250,9 @@ namespace Api
 		SetSessionAttribute,
 		GetSessionAttribute,
 		GetAllSessionAttribute,
+
+		// Refresh Token
+		RefreshToken,
 
 		MAX_Response,
 	};
@@ -345,6 +355,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,SetSessionAttribute),
 		FORM_STRING_ENUM_PAIR(Response,GetSessionAttribute),
 		FORM_STRING_ENUM_PAIR(Response,GetAllSessionAttribute),
+		FORM_STRING_ENUM_PAIR(Response,RefreshToken),
 	};
 
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
@@ -409,6 +420,7 @@ void Lobby::Disconnect()
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
+	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 	if(WebSocket.IsValid())
 	{
 		WebSocket->Disconnect();
@@ -416,6 +428,7 @@ void Lobby::Disconnect()
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
 }
+
 
 bool Lobby::IsConnected() const
 {
@@ -631,6 +644,7 @@ FString Lobby::SendGetOnlineFriendPresenceRequest()
 //-------------------------------------------------------------------------------------------------
 // Notification
 //-------------------------------------------------------------------------------------------------
+UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void Lobby::GetAllAsyncNotification()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1102,6 +1116,18 @@ FString Lobby::GetAllSessionAttribute()
 		FString::Printf(TEXT("namespace: %s"), *Credentials.GetNamespace()));
 }
 
+//-------------------------------------------------------------------------------------------------
+// Refresh Token
+//-------------------------------------------------------------------------------------------------
+
+FString Lobby::RefreshToken(const FString& AccessToken)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(RefreshToken, Token,
+		FString::Printf(TEXT("token: %s"), *AccessToken));
+}
+	
 void Lobby::UnbindEvent()
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -1283,6 +1309,8 @@ void Lobby::UnbindSessionAttributeEvents()
 void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
+
+	Credentials.OnTokenRefreshed().Add(RefreshTokenDelegate);
 		
 	ConnectSuccess.ExecuteIfBound();
 }
@@ -1610,6 +1638,7 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID(SetSessionAttribute	, FAccelByteModelsSetSessionAttributesResponse);
 		CASE_RESPONSE_MESSAGE_ID(GetSessionAttribute	, FAccelByteModelsGetSessionAttributesResponse);
 		CASE_RESPONSE_MESSAGE_ID(GetAllSessionAttribute	, FAccelByteModelsGetAllSessionAttributesResponse);
+		CASE_RESPONSE_MESSAGE_ID(RefreshToken			, FAccelByteModelsRefreshTokenResponse);
 		default:
 		{
 			ParsingError.ExecuteIfBound(-1, FString::Printf(TEXT("Error; Detected of type Response but no specific handler case assigned. %s, Raw: %s"), *ReceivedMessageType, *ParsedJsonString));
@@ -1710,6 +1739,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		{
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
+			Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 			if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
 			{
 				HttpRef.BearerAuthRejected();
@@ -1914,7 +1944,7 @@ void Lobby::ClearLobbyErrorMessages()
 }
 
 	Lobby::Lobby(
-		const AccelByte::Credentials& Credentials,
+		AccelByte::Credentials& Credentials,
 		const AccelByte::Settings& Settings,
 		FHttpRetryScheduler& HttpRef,
 		float PingDelay,

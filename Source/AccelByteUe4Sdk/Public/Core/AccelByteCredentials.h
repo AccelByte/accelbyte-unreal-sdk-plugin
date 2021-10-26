@@ -25,6 +25,7 @@ class FHttpRetryScheduler;
 class ACCELBYTEUE4SDK_API Credentials
 {
 	DECLARE_MULTICAST_DELEGATE(FRefreshTokenAdditionalActions);
+	DECLARE_EVENT(Credentials, FTokenRefreshedEvent);
 
 public:
 	enum class ESessionState
@@ -45,6 +46,8 @@ public:
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef);
+	
+	FTokenRefreshedEvent& OnTokenRefreshed();
 
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
@@ -54,6 +57,7 @@ public:
 	const FString& GetUserDisplayName() const;
 	const FString& GetNamespace() const;
 	const FString& GetUserEmailAddress() const;
+	
 	ESessionState GetSessionState() const;
 
 	void Startup();
@@ -74,6 +78,7 @@ private:
 
 	FDelegateHandle PollRefreshTokenHandle;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
+	FTokenRefreshedEvent TokenRefreshedEvent;
 
 	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
 };

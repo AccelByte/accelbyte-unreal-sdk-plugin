@@ -2352,39 +2352,6 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetAsyncNotification, "AccelByte.Tests.Lobby.B.NotifAsync", AutomationFlagMaskLobby);
-bool LobbyTestNotification_GetAsyncNotification::RunTest(const FString& Parameters)
-{
-	bool bSendNotifSucccess = false;
-	FString notification = "this is a notification";
-	UAccelByteBlueprintsTest::SendNotif(UserCreds[0].GetUserId(), notification, true, FVoidHandler::CreateLambda([&]()
-	{
-		bSendNotifSucccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
-	}), LobbyTestErrorHandler);
-
-	WaitUntil(bSendNotifSucccess, "Sending Notification...");
-
-	LobbyConnect(1);
-
-	Lobbies[0]->SetMessageNotifDelegate(GetNotifDelegate);
-
-	Lobbies[0]->GetAllAsyncNotification();
-
-	WaitUntil([&]()
-	{
-		return bGetNotifSuccess;
-	}, "Getting All Notifications...", 30);
-
-	LobbyDisconnect(1);
-	AB_TEST_TRUE(bSendNotifSucccess);
-	AB_TEST_TRUE(bGetNotifSuccess);
-	AB_TEST_EQUAL(getNotifResponse.Payload, notification);
-
-	ResetResponses();
-	return true;
-}
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_GetSyncNotification, "AccelByte.Tests.Lobby.B.NotifSync", AutomationFlagMaskLobby);
 bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameters)
 {
@@ -2426,44 +2393,6 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 		AB_TEST_TRUE(bGetNotifCheck[i]);
 		AB_TEST_EQUAL(getNotifCheck[i].Payload, payloads[i]);
 	}
-	ResetResponses();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestNotification_SendNotifUserToUserAsync, "AccelByte.Tests.Lobby.B.NotifAsyncUserToUser", AutomationFlagMaskLobby);
-bool LobbyTestNotification_SendNotifUserToUserAsync::RunTest(const FString& Parameters)
-{
-	LobbyConnect(1);
-	
-	bool bSendNotifSucccess = false;
-	FAccelByteModelsFreeFormNotificationRequest MessageRequest;
-	MessageRequest.Topic = TEXT("Message");
-	MessageRequest.Message = TEXT("Test from the integration test UE4");
-	Lobbies[0]->SendNotificationToUser(UserCreds[1].GetUserId(), MessageRequest, true, FVoidHandler::CreateLambda([&]()
-	{
-		bSendNotifSucccess = true;
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
-	}), LobbyTestErrorHandler);
-
-	WaitUntil(bSendNotifSucccess, "Sending Notification...");
-
-	LobbyConnect(2);
-
-	Lobbies[1]->SetMessageNotifDelegate(GetNotifDelegate);
-
-	Lobbies[1]->GetAllAsyncNotification();
-
-	WaitUntil([&]()
-	{
-		return bGetNotifSuccess;
-	}, "Getting All Notifications...", 30);
-
-	LobbyDisconnect(2);
-	AB_TEST_TRUE(bSendNotifSucccess);
-	AB_TEST_TRUE(bGetNotifSuccess);
-	AB_TEST_EQUAL(getNotifResponse.Payload, MessageRequest.Message);
-	AB_TEST_EQUAL(getNotifResponse.Topic, MessageRequest.Topic);
-
 	ResetResponses();
 	return true;
 }
@@ -6374,6 +6303,191 @@ bool LobbyTestReconnect_SameToken_withSessionIdHeader::RunTest(const FString& Pa
 	
 	AB_TEST_TRUE(bIsLobbyConnected);
 	AB_TEST_TRUE(NumLobbyConnected > 1);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestAccessTokenRefreshed_SendNewAccessToken, "AccelByte.Tests.Lobby.C.LobbyTestAccessTokenRefreshed_SendNewAccessToken", AutomationFlagMaskLobby);
+bool LobbyTestAccessTokenRefreshed_SendNewAccessToken::RunTest(const FString& Parameters)
+{
+	AccelByte::Api::User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+
+	bool bRefreshTokenSuccess = false;
+	Lobby.SetRefreshTokenDelegate(Api::Lobby::FRefreshTokenResponse::CreateLambda([&bRefreshTokenSuccess](const FAccelByteModelsRefreshTokenResponse& result)
+	{
+		bRefreshTokenSuccess = true;
+	}));
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 15);
+
+	// set session expired time to 0
+	const FString AccessToken = FRegistry::Credentials.GetAccessToken();
+	const FString RefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FString NewAccessToken = FRegistry::Credentials.GetAccessToken();
+	FString NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FRegistry::Credentials.ScheduleRefreshToken(FPlatformTime::Seconds() + 2.0);
+
+	WaitUntil(
+		[&]()
+		{
+			NewAccessToken = FRegistry::Credentials.GetAccessToken();
+			NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+
+			return AccessToken != NewAccessToken && RefreshToken != NewRefreshToken;
+		},
+		"Wait refresh token",
+		10);
+
+	WaitUntil(bRefreshTokenSuccess, "waiting refresh token to lobby");
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, "", 15);
+
+	bool bDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	{
+		bDeleteDone = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	AB_TEST_TRUE(bRefreshTokenSuccess);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestAccessTokenRefreshed_SendNewAccessTokenMultipleTime, "AccelByte.Tests.Lobby.C.LobbyTestAccessTokenRefreshed_SendNewAccessToken_MultipleTime", AutomationFlagMaskLobby);
+bool LobbyTestAccessTokenRefreshed_SendNewAccessTokenMultipleTime::RunTest(const FString& Parameters)
+{
+	AccelByte::Api::User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+
+	bool bRefreshTokenSuccess = false;
+	int RefreshTokenSuccessCount = 0;
+	Lobby.SetRefreshTokenDelegate(Api::Lobby::FRefreshTokenResponse::CreateLambda([&bRefreshTokenSuccess, &RefreshTokenSuccessCount](const FAccelByteModelsRefreshTokenResponse& result)
+	{
+		bRefreshTokenSuccess = true;
+		RefreshTokenSuccessCount++;
+	}));
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 15);
+
+	// set session expired time to 0
+	const FString AccessToken = FRegistry::Credentials.GetAccessToken();
+	const FString RefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FString NewAccessToken = FRegistry::Credentials.GetAccessToken();
+	FString NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+	FRegistry::Credentials.ScheduleRefreshToken(FPlatformTime::Seconds() + 2.0);
+
+	WaitUntil(
+		[&]()
+		{
+			NewAccessToken = FRegistry::Credentials.GetAccessToken();
+			NewRefreshToken = FRegistry::Credentials.GetRefreshToken();
+
+			return AccessToken != NewAccessToken && RefreshToken != NewRefreshToken;
+		},
+		"Wait refresh token",
+		10);
+
+	WaitUntil(bRefreshTokenSuccess, "waiting refresh token to lobby");
+
+	// set session expired time to 0 again
+	bRefreshTokenSuccess = false;
+	const FString AccessToken1 = FRegistry::Credentials.GetAccessToken();
+	const FString RefreshToken1 = FRegistry::Credentials.GetRefreshToken();
+	FString NewAccessToken1 = FRegistry::Credentials.GetAccessToken();
+	FString NewRefreshToken1 = FRegistry::Credentials.GetRefreshToken();
+	FRegistry::Credentials.ScheduleRefreshToken(FPlatformTime::Seconds() + 2.0);
+
+	WaitUntil(
+		[&]()
+		{
+			NewAccessToken1 = FRegistry::Credentials.GetAccessToken();
+			NewRefreshToken1 = FRegistry::Credentials.GetRefreshToken();
+
+			return AccessToken1 != NewAccessToken1 && RefreshToken1 != NewRefreshToken1;
+		},
+		"Wait refresh token1",
+		10);
+
+	WaitUntil(bRefreshTokenSuccess, "waiting refresh token to lobby1");
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, "", 15);
+
+	bool bDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	{
+		bDeleteDone = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	AB_TEST_EQUAL(RefreshTokenSuccessCount, 2);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestInvalidTokenRefresh_Failed, "AccelByte.Tests.Lobby.C.LobbyTestAccessTokenRefreshInvalid_Failed", AutomationFlagMaskLobby);
+bool LobbyTestInvalidTokenRefresh_Failed::RunTest(const FString& Parameters)
+{
+	AccelByte::Api::User& User = FRegistry::User;
+	bool bLoginDone = false;
+
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+
+	WaitUntil([&]() { return bLoginDone; });
+
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+
+	bool bRefreshTokenSuccess = false;
+	FString RefreshTokenCode = "0";
+	Lobby.SetRefreshTokenDelegate(Api::Lobby::FRefreshTokenResponse::CreateLambda([&bRefreshTokenSuccess, &RefreshTokenCode](const FAccelByteModelsRefreshTokenResponse& result)
+	{
+		bRefreshTokenSuccess = true;
+		RefreshTokenCode = result.Code;
+	}));
+	Lobby.Connect();
+
+	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 15);
+
+	Lobby.RefreshToken("Invalid");
+
+	WaitUntil(bRefreshTokenSuccess, "waiting refresh lobby token");
+
+	Lobby.Disconnect();
+
+	WaitUntil([&]() { return !Lobby.IsConnected(); }, "", 15);
+
+	bool bDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone]()
+	{
+		bDeleteDone = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	AB_TEST_TRUE(bRefreshTokenSuccess);
+	FString NotExpectedCode = "0";
+	AB_TEST_NOT_EQUAL(RefreshTokenCode, NotExpectedCode);
 
 	return true;
 }

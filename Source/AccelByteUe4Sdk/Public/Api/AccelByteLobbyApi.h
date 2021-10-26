@@ -31,7 +31,7 @@ class ACCELBYTEUE4SDK_API Lobby
 {
 public:
 	Lobby(
-		const Credentials& Credentials,
+		Credentials& Credentials,
 		const Settings& Settings,
 		FHttpRetryScheduler& HttpRef,
 		float PingDelay = 30.f,
@@ -42,7 +42,7 @@ public:
 	~Lobby();
 private:
 	FHttpRetryScheduler& HttpRef;
-	const Credentials& Credentials;
+	Credentials& Credentials;
 	const Settings& Settings;
 
 	bool BanNotifReceived = false;
@@ -377,6 +377,11 @@ public:
 	 * @brief delegate for handling response when setting session attribute
 	 */
 	DECLARE_DELEGATE_OneParam(FGetAllSessionAttributeResponse, const FAccelByteModelsGetAllSessionAttributesResponse&);
+
+	/**
+	* @brief delegate for handling response when refreshing lobby token.
+	*/
+	DECLARE_DELEGATE_OneParam(FRefreshTokenResponse, const FAccelByteModelsRefreshTokenResponse&)
 
 	DECLARE_DELEGATE(FConnectSuccess);
 	DECLARE_DELEGATE_OneParam(FDisconnectNotif, const FAccelByteModelsDisconnectNotif&)
@@ -727,6 +732,11 @@ public:
 	 * @brief Get all user attribute from lobby session.
 	 */
 	FString GetAllSessionAttribute();
+
+	/**
+	* @brief Refresh access token used in lobby.
+	*/
+	FString RefreshToken(const FString& AccessToken);
 
 	/**
 	* @brief Unbind all delegates set previously.
@@ -1393,7 +1403,7 @@ public:
 	/**
 	* @brief Set GetSessionAttribute delegate.
 	*
-	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	* @param OnGetSessionAttributeResponse Delegate that will be set.
 	* @param OnError Delegate that will be called when operation failed.
 	*/
 	void SetGetSessionAttributeDelegate(FGetSessionAttributeResponse OnGetSessionAttributeResponse, FErrorHandler OnError = {})
@@ -1405,7 +1415,7 @@ public:
 	/**
 	* @brief Set SetSessionAttribute delegate.
 	*
-	* @param OnSetSessionAttributeResponse Delegate that will be set.
+	* @param OnGetAllSessionAttributeResponse Delegate that will be set.
 	* @param OnError Delegate that will be called when operation failed.
 	*/
 	void SetGetAllSessionAttributeDelegate(FGetAllSessionAttributeResponse OnGetAllSessionAttributeResponse, FErrorHandler OnError = {})
@@ -1413,6 +1423,18 @@ public:
 		GetAllSessionAttributeResponse = OnGetAllSessionAttributeResponse;
 		OnGetAllSessionAttributeError = OnError;
 	};
+
+	/**
+	* @brief Set SetSessionAttribute delegate.
+	*
+	* @param OnRefreshTokenResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
+	*/
+	void SetRefreshTokenDelegate(const FRefreshTokenResponse& OnRefreshTokenResponse, FErrorHandler OnError = {})
+	{
+		RefreshTokenResponse = OnRefreshTokenResponse;
+		OnRefreshTokenError = OnError;
+	}
 
 	/**
 	* @brief Bulk add friend(s), don't need any confirmation from the player.
@@ -1560,6 +1582,11 @@ private:
     FErrorHandler ParsingError;
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
+
+	const FVoidHandler RefreshTokenDelegate = FVoidHandler::CreateLambda([&]()
+	{
+		RefreshToken(Credentials.GetAccessToken());
+	});
 	
 #pragma region Message Id - Response Map
 	TMap<FString, FPartyInfoResponse> MessageIdPartyInfoResponseMap;
@@ -1611,6 +1638,7 @@ private:
 	TMap<FString, FSetSessionAttributeResponse> MessageIdSetSessionAttributeResponseMap;
 	TMap<FString, FGetSessionAttributeResponse> MessageIdGetSessionAttributeResponseMap;
 	TMap<FString, FGetAllSessionAttributeResponse> MessageIdGetAllSessionAttributeResponseMap;
+	TMap<FString, FRefreshTokenResponse> MessageIdRefreshTokenResponseMap;
 #pragma endregion
 
 #pragma region Response/Notif Delegates
@@ -1701,6 +1729,9 @@ private:
 	FSetSessionAttributeResponse SetSessionAttributeResponse;
 	FGetSessionAttributeResponse GetSessionAttributeResponse;
 	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
+	
+	// Refresh Token
+	FRefreshTokenResponse RefreshTokenResponse;
 #pragma endregion
 
 
@@ -1753,6 +1784,7 @@ private:
 	FErrorHandler OnSetSessionAttributeError;
 	FErrorHandler OnGetSessionAttributeError;
 	FErrorHandler OnGetAllSessionAttributeError;
+	FErrorHandler OnRefreshTokenError;
 };
 
 } // Namespace Api
