@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.3%0D7.0.2) (2021-10-27)
+
+
+### Refactors
+
+* **compatibility:** add flag to ignore comparing patch number in the version ([4ea2a02](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4ea2a02abccda60181c4034a69f3ab9aceafa38b))
+* **compatibility:** use LogWarning when version mismatch happened for less disruptive process ([36ce5bd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/36ce5bddab8aead5a1946005d30f95d22ddf5b1c))
+
+
+### Tests
+
+* **compatibility:** add new test cases for ignoring patch number ([d53a905](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d53a9059ee9e8df26666e8cfc8b2120f5ec220d1))
+
 ### [7.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.2%0D7.0.1) (2021-10-26)
 
 
