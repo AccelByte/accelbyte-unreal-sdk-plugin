@@ -36,7 +36,7 @@ struct FVersion
 	FVersion(int32 Major, int32 Minor, int32 Patch, TArray<FString> PreReleaseSegments = TArray<FString>{});
 	FVersion(FString Version);
 	bool IsValid() const;
-	int32 Compare(FVersion const& Other) const;
+	int32 Compare(FVersion const& Other, bool bPatchIgnored = false) const;
 	FString ToString() const;
 };
 
@@ -61,10 +61,10 @@ public:
 	static FServiceCompatibilityMap FromJson(FString JsonString);
 
 	explicit FServiceCompatibilityMap(TMap<FString, FVersionRange> Map);
-	FResult Check(FString const& ServiceName, FString const& VersionStr) const;
+	FResult Check(FString const& ServiceName, FString const& VersionStr, bool bPatchIgnored = false) const;
 	TArray<FString> GetServices() const;
 
 private:
-	static bool IsCompatible(FVersionRange const& Range, FVersion const& Version);
+	static bool IsCompatible(FVersionRange const& Range, FVersion const& Version, bool bPatchIgnored = false);
 	TMap<FString, FVersionRange> const Map;
 };
