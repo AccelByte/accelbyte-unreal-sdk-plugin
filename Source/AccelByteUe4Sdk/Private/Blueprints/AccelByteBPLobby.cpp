@@ -105,7 +105,7 @@ void ULobby::SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const
 			}));
 }
 
-void ULobby::SendPartyJoinRequest(FPartyJoinRequest Request) const
+void ULobby::SendPartyJoinRequest(FPartyJoinRequest const& Request) const
 {
 	ApiClientPtr->Lobby.SendAcceptInvitationRequest(Request.partyID, Request.invitationToken);
 }
@@ -135,7 +135,7 @@ void ULobby::SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const
 			}));
 }
 
-void ULobby::SendPartyKickRequest(FPartyKickRequest Request) const
+void ULobby::SendPartyKickRequest(FPartyKickRequest const& Request) const
 {
 	ApiClientPtr->Lobby.SendKickPartyMemberRequest(Request.memberID);
 }
@@ -200,19 +200,79 @@ void ULobby::SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnMatchmakingStartResponse(FDMatchmakingStartResponse OnResponse) const
+void ULobby::SetOnStartMatchmakingResponse(FDStartMatchmakingResponse OnResponse) const
 {
 	ApiClientPtr->Lobby.SetStartMatchmakingResponseDelegate(
 		Api::Lobby::FMatchmakingResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsMatchmakingResponse Response)
+			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
 			}));
 }
 
-void ULobby::SendMatchmakingStartRequest(FMatchmakingStartRequest Request) const
+void ULobby::SendStartMatchmakingRequest(FStartMatchmakingRequest const& Request) const
 {
 	ApiClientPtr->Lobby.SendStartMatchmaking(Request.gameMode);
+}
+
+void ULobby::SetOnCancelMatchmakingResponse(FDCancelMatchmakingResponse OnResponse) const
+{
+	ApiClientPtr->Lobby.SetCancelMatchmakingResponseDelegate(
+		Api::Lobby::FMatchmakingResponse::CreateLambda(
+			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
+			{
+				auto _ = OnResponse.ExecuteIfBound(Response);
+			}));
+}
+
+void ULobby::SendCancelMatchmakingRequest(FCancelMatchmakingRequest const& Request) const
+{
+	ApiClientPtr->Lobby.SendCancelMatchmaking(Request.gameMode, Request.isTempParty);
+}
+
+void ULobby::SetOnSetReadyConsentResponse(FDSetReadyConsentResponse OnResponse) const
+{
+	ApiClientPtr->Lobby.SetReadyConsentResponseDelegate(
+		Api::Lobby::FReadyConsentResponse::CreateLambda(
+			[OnResponse](FAccelByteModelsReadyConsentRequest const& Response)
+			{
+				auto _ = OnResponse.ExecuteIfBound(Response);
+			}));
+}
+
+void ULobby::SendSetReadyConsentRequest(FSetReadyConsentRequest const& Request) const
+{
+	ApiClientPtr->Lobby.SendReadyConsentRequest(Request.matchId);
+}
+
+void ULobby::SetOnMatchmakingNotif(FDMatchmakingNotif OnNotif)
+{
+	ApiClientPtr->Lobby.SetMatchmakingNotifDelegate(
+		Api::Lobby::FMatchmakingNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsMatchmakingNotice const& Notif)
+			{
+				auto _ = OnNotif.ExecuteIfBound(Notif);
+			}));	
+}
+
+void ULobby::SetOnSetReadyConsentNotif(FDSetReadyConsentNotif OnNotif)
+{
+	ApiClientPtr->Lobby.SetReadyConsentNotifDelegate(
+		Api::Lobby::FReadyConsentNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsReadyConsentNotice const& Notif)
+			{
+				auto _ = OnNotif.ExecuteIfBound(Notif);
+			}));	
+}
+
+void ULobby::SetOnRematchmakingNotif(FDRematchmakingNotif OnNotif)
+{
+	ApiClientPtr->Lobby.SetRematchmakingNotifDelegate(
+		Api::Lobby::FRematchmakingNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsRematchmakingNotice const& Notif)
+			{
+				auto _ = OnNotif.ExecuteIfBound(Notif);
+			}));	
 }
 
 bool ULobby::IsConnected() const

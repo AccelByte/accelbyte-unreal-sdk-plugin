@@ -51,7 +51,7 @@ struct FPartyKickRequest
 };
 
 USTRUCT(BlueprintType)
-struct FMatchmakingStartRequest
+struct FStartMatchmakingRequest
 {
 	GENERATED_BODY()
 
@@ -59,21 +59,67 @@ struct FMatchmakingStartRequest
 	FString gameMode;
 };
 
+USTRUCT(BlueprintType)
+struct FCancelMatchmakingRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString gameMode;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool isTempParty{false};
+};
+
+USTRUCT(BlueprintType)
+struct FSetReadyConsentRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString matchId;
+};
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyCreateResponse, FAccelByteModelsCreatePartyResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDInfoPartyResponse, FAccelByteModelsInfoPartyResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDLeavePartyResponse, FAccelByteModelsLeavePartyResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteResponse, FAccelByteModelsPartyInviteResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinResponse, FAccelByteModelsPartyJoinReponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectResponse, FAccelByteModelsPartyRejectResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickResponse, FAccelByteModelsKickPartyMemberResponse, Response);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinNotif, FAccelByteModelsPartyJoinNotice, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectNotif, FAccelByteModelsPartyRejectNotice, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyLeaveNotif, FAccelByteModelsLeavePartyNotice, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, Notif);
+
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteNotif, FAccelByteModelsInvitationNotice, Notif);
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDMatchmakingStartResponse, FAccelByteModelsMatchmakingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDStartMatchmakingResponse, FAccelByteModelsMatchmakingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDCancelMatchmakingResponse, FAccelByteModelsMatchmakingResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetReadyConsentResponse, FAccelByteModelsReadyConsentRequest, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDMatchmakingNotif, FAccelByteModelsMatchmakingNotice, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDSetReadyConsentNotif, FAccelByteModelsReadyConsentNotice, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDRematchmakingNotif, FAccelByteModelsRematchmakingNotice, Notif);
+
 
 UCLASS(Blueprintable, BlueprintType)
 class ULobby : public UObject
@@ -128,7 +174,7 @@ public:
 	void SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyJoinRequest(FPartyJoinRequest Request) const;
+	void SendPartyJoinRequest(FPartyJoinRequest const& Request) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetOnPartyRejectResponse(FDPartyRejectResponse OnResponse) const;
@@ -140,7 +186,7 @@ public:
 	void SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyKickRequest(FPartyKickRequest Request) const;
+	void SendPartyKickRequest(FPartyKickRequest const& Request) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const;
@@ -161,11 +207,31 @@ public:
 	void SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnMatchmakingStartResponse(FDMatchmakingStartResponse OnResponse) const;
+	void SetOnStartMatchmakingResponse(FDStartMatchmakingResponse OnResponse) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendMatchmakingStartRequest(FMatchmakingStartRequest Request) const;
+	void SendStartMatchmakingRequest(FStartMatchmakingRequest const& Request) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnCancelMatchmakingResponse(FDCancelMatchmakingResponse OnResponse) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SendCancelMatchmakingRequest(FCancelMatchmakingRequest const& Request) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnSetReadyConsentResponse(FDSetReadyConsentResponse OnResponse) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SendSetReadyConsentRequest(FSetReadyConsentRequest const& Request) const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnMatchmakingNotif(FDMatchmakingNotif OnNotif);
+
+	UFUNCTION(BlueprintCallable)
+	void SetOnSetReadyConsentNotif(FDSetReadyConsentNotif OnNotif);
 	
+	UFUNCTION(BlueprintCallable)
+	void SetOnRematchmakingNotif(FDRematchmakingNotif OnNotif);
 private:
 	bool bConnected{false};
 	FApiClientPtr ApiClientPtr;
