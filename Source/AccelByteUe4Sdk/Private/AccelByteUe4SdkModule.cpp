@@ -231,7 +231,10 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
 			{
 				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version);
-				ensureAlwaysMsgf(!Result.bIsError, TEXT("%s"), *Result.Message);
+				if (Result.bIsError)
+				{
+					UE_LOG(LogAccelByte, Warning, TEXT("[Compatibility] %s"), *Result.Message);
+				}
 			});
 	}
 }
