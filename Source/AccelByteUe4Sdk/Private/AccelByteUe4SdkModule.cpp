@@ -230,7 +230,7 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 			FRegistry::Settings.BaseUrl / ServiceName,
 			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
 			{
-				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version);
+				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version, true);
 				if (Result.bIsError)
 				{
 					UE_LOG(LogAccelByte, Warning, TEXT("[Compatibility] %s"), *Result.Message);
