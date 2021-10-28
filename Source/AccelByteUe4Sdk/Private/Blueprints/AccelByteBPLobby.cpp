@@ -15,32 +15,34 @@ void ULobby::UnbindEvent() const
 	ApiClientPtr->Lobby.UnbindEvent();
 }
 
-void ULobby::SetConnectSuccessDelegate(FDHandler OnConnectSuccess) const
+void ULobby::SetOnConnected(FDHandler OnConnected) const
 {
 	ApiClientPtr->Lobby.SetConnectSuccessDelegate(
 		FVoidHandler::CreateLambda(
-			[OnConnectSuccess]()
+			[OnConnected]()
 			{
-				auto _ = OnConnectSuccess.ExecuteIfBound();
+				auto _ = OnConnected.ExecuteIfBound();
 			}));
 }
 
-void ULobby::SetOnCreatePartyResponse(FDPartyCreateResponse OnResponse) const
+void ULobby::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetCreatePartyResponseDelegate(
 		Api::Lobby::FPartyCreateResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsCreatePartyResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
 
-void ULobby::SendCreatePartyRequest() const
-{
 	ApiClientPtr->Lobby.SendCreatePartyRequest();
 }
 
-void ULobby::SetOnPartyDataUpdateNotif(FDPartyDataUpdateNotif OnNotif) const
+void ULobby::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
 		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
@@ -50,97 +52,115 @@ void ULobby::SetOnPartyDataUpdateNotif(FDPartyDataUpdateNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyInfoResponse(FDInfoPartyResponse OnResponse) const
+void ULobby::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetInfoPartyResponseDelegate(
 		Api::Lobby::FPartyInfoResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsInfoPartyResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendPartyInfoRequest() const
-{
 	ApiClientPtr->Lobby.SendInfoPartyRequest();
 }
 
-void ULobby::SetOnPartyLeaveResponse(FDLeavePartyResponse OnResponse) const
+void ULobby::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetLeavePartyResponseDelegate(
 		Api::Lobby::FPartyLeaveResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsLeavePartyResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendPartyLeaveRequest() const
-{
 	ApiClientPtr->Lobby.SendLeavePartyRequest();
 }
 
-void ULobby::SetOnPartyInviteResponse(FDPartyInviteResponse OnResponse) const
+void ULobby::PartyInvite(
+	FPartyInviteRequest Request,
+	FDPartyInviteResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyResponseDelegate(
 		Api::Lobby::FPartyInviteResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyInviteResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-auto ULobby::SendPartyInviteRequest(FPartyInviteRequest Request) -> void
-{
 	ApiClientPtr->Lobby.SendInviteToPartyRequest(Request.friendID);
 }
 
-void ULobby::SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const
+void ULobby::PartyJoin(
+	FPartyJoinRequest const& Request,
+	FDPartyJoinResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyJoinResponseDelegate(
 		Api::Lobby::FPartyJoinResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyJoinReponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendPartyJoinRequest(FPartyJoinRequest const& Request) const
-{
 	ApiClientPtr->Lobby.SendAcceptInvitationRequest(Request.partyID, Request.invitationToken);
 }
 
-void ULobby::SetOnPartyRejectResponse(FDPartyRejectResponse OnResponse) const
+void ULobby::PartyReject(
+	FPartyRejectRequest Request,
+	FDPartyRejectResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyRejectResponseDelegate(
 		Api::Lobby::FPartyRejectResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsPartyRejectResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendPartyRejectRequest(FPartyRejectRequest Request) const
-{
 	ApiClientPtr->Lobby.SendRejectInvitationRequest(Request.partyID, Request.invitationToken);
 }
 
-void ULobby::SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const
+void ULobby::PartyKick(
+	FPartyKickRequest const& Request,
+	FDPartyKickResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetInvitePartyKickMemberResponseDelegate(
 		Api::Lobby::FPartyKickResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsKickPartyMemberResponse Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendPartyKickRequest(FPartyKickRequest const& Request) const
-{
 	ApiClientPtr->Lobby.SendKickPartyMemberRequest(Request.memberID);
 }
 
-void ULobby::SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const
+void ULobby::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyGetInvitedNotifDelegate(
 		Api::Lobby::FPartyGetInvitedNotif::CreateLambda(
@@ -150,7 +170,7 @@ void ULobby::SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyJoinNotif(FDPartyJoinNotif OnNotif) const
+void ULobby::SetOnPartyJoin(FDPartyJoinNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyJoinNotifDelegate(
 		Api::Lobby::FPartyJoinNotif::CreateLambda(
@@ -160,7 +180,7 @@ void ULobby::SetOnPartyJoinNotif(FDPartyJoinNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyRejectNotif(FDPartyRejectNotif OnNotif) const
+void ULobby::SetOnPartyReject(FDPartyRejectNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyInvitationRejectedNotifDelegate(
 		Api::Lobby::FPartyRejectNotif::CreateLambda(
@@ -170,7 +190,7 @@ void ULobby::SetOnPartyRejectNotif(FDPartyRejectNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyLeaveNotif(FDPartyLeaveNotif OnNotif) const
+void ULobby::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyLeaveNotifDelegate(
 		Api::Lobby::FPartyLeaveNotif::CreateLambda(
@@ -180,7 +200,7 @@ void ULobby::SetOnPartyLeaveNotif(FDPartyLeaveNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyKickNotif(FDPartyKickNotif OnNotif) const
+void ULobby::SetOnPartyKick(FDPartyKickNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyKickNotifDelegate(
 		Api::Lobby::FPartyKickNotif::CreateLambda(
@@ -190,7 +210,7 @@ void ULobby::SetOnPartyKickNotif(FDPartyKickNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const
+void ULobby::SetOnPartyInvite(FDPartyInviteNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyInviteNotifDelegate(
 		Api::Lobby::FPartyInviteNotif::CreateLambda(
@@ -200,79 +220,91 @@ void ULobby::SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const
 			}));
 }
 
-void ULobby::SetOnStartMatchmakingResponse(FDStartMatchmakingResponse OnResponse) const
+void ULobby::StartMatchmaking(
+	FStartMatchmakingRequest const& Request,
+	FDStartMatchmakingResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetStartMatchmakingResponseDelegate(
 		Api::Lobby::FMatchmakingResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendStartMatchmakingRequest(FStartMatchmakingRequest const& Request) const
-{
 	ApiClientPtr->Lobby.SendStartMatchmaking(Request.gameMode);
 }
 
-void ULobby::SetOnCancelMatchmakingResponse(FDCancelMatchmakingResponse OnResponse) const
+void ULobby::CancelMatchmaking(
+	FCancelMatchmakingRequest const& Request,
+	FDCancelMatchmakingResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetCancelMatchmakingResponseDelegate(
 		Api::Lobby::FMatchmakingResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsMatchmakingResponse const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendCancelMatchmakingRequest(FCancelMatchmakingRequest const& Request) const
-{
 	ApiClientPtr->Lobby.SendCancelMatchmaking(Request.gameMode, Request.isTempParty);
 }
 
-void ULobby::SetOnSetReadyConsentResponse(FDSetReadyConsentResponse OnResponse) const
+void ULobby::SetReadyConsent(
+	FSetReadyConsentRequest const& Request,
+	FDSetReadyConsentResponse OnResponse,
+	FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetReadyConsentResponseDelegate(
 		Api::Lobby::FReadyConsentResponse::CreateLambda(
 			[OnResponse](FAccelByteModelsReadyConsentRequest const& Response)
 			{
 				auto _ = OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				auto _ = OnError.ExecuteIfBound(Code, Message);
 			}));
-}
-
-void ULobby::SendSetReadyConsentRequest(FSetReadyConsentRequest const& Request) const
-{
 	ApiClientPtr->Lobby.SendReadyConsentRequest(Request.matchId);
 }
 
-void ULobby::SetOnMatchmakingNotif(FDMatchmakingNotif OnNotif)
+void ULobby::SetOnMatchmaking(FDMatchmakingNotif OnNotif)
 {
 	ApiClientPtr->Lobby.SetMatchmakingNotifDelegate(
 		Api::Lobby::FMatchmakingNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsMatchmakingNotice const& Notif)
 			{
 				auto _ = OnNotif.ExecuteIfBound(Notif);
-			}));	
+			}));
 }
 
-void ULobby::SetOnSetReadyConsentNotif(FDSetReadyConsentNotif OnNotif)
+void ULobby::SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif)
 {
 	ApiClientPtr->Lobby.SetReadyConsentNotifDelegate(
 		Api::Lobby::FReadyConsentNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsReadyConsentNotice const& Notif)
 			{
 				auto _ = OnNotif.ExecuteIfBound(Notif);
-			}));	
+			}));
 }
 
-void ULobby::SetOnRematchmakingNotif(FDRematchmakingNotif OnNotif)
+void ULobby::SetOnRematchmaking(FDRematchmakingNotif OnNotif)
 {
 	ApiClientPtr->Lobby.SetRematchmakingNotifDelegate(
 		Api::Lobby::FRematchmakingNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsRematchmakingNotice const& Notif)
 			{
 				auto _ = OnNotif.ExecuteIfBound(Notif);
-			}));	
+			}));
 }
 
 bool ULobby::IsConnected() const

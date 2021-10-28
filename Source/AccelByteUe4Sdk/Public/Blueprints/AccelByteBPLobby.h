@@ -141,97 +141,76 @@ public:
 	void UnbindEvent() const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetConnectSuccessDelegate(FDHandler OnConnectSuccess) const;
+	void SetOnConnected(FDHandler OnConnected) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnCreatePartyResponse(FDPartyCreateResponse OnResponse) const;
+	void CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendCreatePartyRequest() const;
+	void PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyDataUpdateNotif(FDPartyDataUpdateNotif OnNotif) const;
+	void PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyInfoResponse(FDInfoPartyResponse OnResponse) const;
+	void PartyInvite(FPartyInviteRequest Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyInfoRequest() const;
+	void PartyJoin(FPartyJoinRequest const& Request, FDPartyJoinResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyLeaveResponse(FDLeavePartyResponse OnResponse) const;
+	void PartyReject(FPartyRejectRequest Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyLeaveRequest() const;
+	void PartyKick(FPartyKickRequest const& Request, FDPartyKickResponse OnResponse, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyInviteResponse(FDPartyInviteResponse OnResponse) const;
+	void SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyInviteRequest(FPartyInviteRequest Request);
+	void SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyJoinResponse(FDPartyJoinResponse OnResponse) const;
+	void SetOnPartyJoin(FDPartyJoinNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyJoinRequest(FPartyJoinRequest const& Request) const;
+	void SetOnPartyReject(FDPartyRejectNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyRejectResponse(FDPartyRejectResponse OnResponse) const;
+	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyRejectRequest(FPartyRejectRequest Request) const;
+	void SetOnPartyKick(FDPartyKickNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyKickResponse(FDPartyKickResponse OnResponse) const;
+	void SetOnPartyInvite(FDPartyInviteNotif OnNotif) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SendPartyKickRequest(FPartyKickRequest const& Request) const;
+	void StartMatchmaking(
+		FStartMatchmakingRequest const& Request,
+		FDStartMatchmakingResponse OnResponse,
+		FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyGetInvitedNotif(FDPartyGetInvitedNotif OnNotif) const;
+	void CancelMatchmaking(
+		FCancelMatchmakingRequest const& Request,
+		FDCancelMatchmakingResponse OnResponse,
+		FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyJoinNotif(FDPartyJoinNotif OnNotif) const;
+	void SetReadyConsent(
+		FSetReadyConsentRequest const& Request,
+		FDSetReadyConsentResponse OnResponse,
+		FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyRejectNotif(FDPartyRejectNotif OnNotif) const;
+	void SetOnMatchmaking(FDMatchmakingNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyLeaveNotif(FDPartyLeaveNotif OnNotif) const;
+	void SetOnSetReadyConsent(FDSetReadyConsentNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnPartyKickNotif(FDPartyKickNotif OnNotif) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnPartyInviteNotif(FDPartyInviteNotif OnNotif) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnStartMatchmakingResponse(FDStartMatchmakingResponse OnResponse) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SendStartMatchmakingRequest(FStartMatchmakingRequest const& Request) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnCancelMatchmakingResponse(FDCancelMatchmakingResponse OnResponse) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SendCancelMatchmakingRequest(FCancelMatchmakingRequest const& Request) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnSetReadyConsentResponse(FDSetReadyConsentResponse OnResponse) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SendSetReadyConsentRequest(FSetReadyConsentRequest const& Request) const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnMatchmakingNotif(FDMatchmakingNotif OnNotif);
-
-	UFUNCTION(BlueprintCallable)
-	void SetOnSetReadyConsentNotif(FDSetReadyConsentNotif OnNotif);
-	
-	UFUNCTION(BlueprintCallable)
-	void SetOnRematchmakingNotif(FDRematchmakingNotif OnNotif);
+	void SetOnRematchmaking(FDRematchmakingNotif OnNotif);
 private:
 	bool bConnected{false};
 	FApiClientPtr ApiClientPtr;
