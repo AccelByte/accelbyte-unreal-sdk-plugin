@@ -35,6 +35,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRegisterServerRequest
 	int32 Port;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
 	FString Provider;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
+	FString Allocation_id;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
+	FString Public_Ip;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
+	TMap<FString, FString> Ports;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
+	FString Custom_attribute;
 };
 
 USTRUCT(BlueprintType)

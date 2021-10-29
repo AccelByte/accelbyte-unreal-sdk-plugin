@@ -20,7 +20,7 @@ namespace AccelByte
     namespace GameServerApi
     {
 
-		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			ParseCommandParam();
@@ -32,17 +32,42 @@ namespace AccelByte
 			else
 			{
 				ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
+				const FString AllocationId = Environment::GetEnvironmentVariable("NOMAD_ALLOC_ID", 100); 
+				const FString ProviderEnvVar = Environment::GetEnvironmentVariable("PROVIDER", 100);
+				const FString Public_ip = Environment::GetEnvironmentVariable("PUBLIC_IP", 100);
+
+				// Ports from env var is passed as a json object string,
+				// but if we passed it directly to a string type it will be serialized later as a string json field, not a json object.
+				// so we need to manually deserialize it to TMap<FString, FString> to let it be serialized correctly to a json object when sending request.
+				const FString PortsJsonObjectString = Environment::GetEnvironmentVariable("PORTS", 100);
+				TSharedPtr<FJsonObject> JsonObject;
+				TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(PortsJsonObjectString);
+				TMap<FString, FString> Ports;
+				if(FJsonSerializer::Deserialize(Reader, JsonObject))
+				{
+					TArray<FString> Keys;
+					JsonObject->Values.GetKeys(Keys);
+					for (const FString& Key : Keys)
+					{
+						Ports.Add(Key, JsonObject->GetStringField(Key));
+					}
+				}
+
 				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
 				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
 				const FAccelByteModelsRegisterServerRequest Register{
-					Game_version,
-					DSPubIp,
+					Game_version,	// Legacy support
+					DSPubIp,		// Legacy support
 					ServerName,
 					Port,
-					Provider
+					// justice dsm controller version 2.8.0 and up Provider is passed through env var, old version passed it using cmd line args.
+					ProviderEnvVar.IsEmpty()? Provider : ProviderEnvVar,	
+					AllocationId,
+					Public_ip,
+					Ports,
 				};
 				FString Contents;
 				FJsonObjectConverter::UStructToJsonObjectString(Register, Contents);
