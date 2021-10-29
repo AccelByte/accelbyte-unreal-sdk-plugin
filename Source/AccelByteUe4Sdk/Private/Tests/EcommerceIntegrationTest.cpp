@@ -16,6 +16,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "TestUtilities.h"
 #include "EcommerceTestAdmin.h"
+#include "UserTestAdmin.h"
 #include "Api/AccelByteRewardApi.h"
 
 using AccelByte::FErrorHandler;

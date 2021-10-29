@@ -21,6 +21,7 @@ UApiClient::UApiClient()
 	Credentials = NewObject<UCredentials>();
 	User = NewObject<UUser>();
 	Lobby = NewObject<ULobby>();
+	Party = NewObject<UABParty>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -31,6 +32,7 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Credentials->SetApiClient(ApiClientPtr);
 	User->SetApiClient(ApiClientPtr);
 	Lobby->SetApiClient(ApiClientPtr);
+	Party->SetApiClient(ApiClientPtr);
 }
 
 UApiClient* UMultiRegistry::GetApiClient(FString const& Key)
