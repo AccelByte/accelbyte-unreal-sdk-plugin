@@ -86,7 +86,8 @@ void FMultiRegistryTest::Define()
 				FString UserId = ApiClient->CredentialsRef->GetUserId();
 				AB_TEST_TRUE(!UserId.IsEmpty());
 				UniqueUserIds.Add(UserId);
-				MultiRegistryTestCredentials.Add(ApiClient->CredentialsRef); 
+				MultiRegistryTestCredentials.Add(ApiClient->CredentialsRef);
+				
 			}
 
 			AB_TEST_EQUAL(MultiRegistryTestUsers.Num(), UniqueUserIds.Num());

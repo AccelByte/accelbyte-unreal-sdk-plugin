@@ -38,7 +38,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardRankingResult
 		FAccelByteModelsPaging paging;
 };
 
-
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRanking
 {

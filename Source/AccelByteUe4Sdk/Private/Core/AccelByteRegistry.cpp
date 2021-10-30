@@ -9,6 +9,7 @@
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteCategoryApi.h"
 #include "Api/AccelByteEntitlementApi.h"
+#include "Api/AccelByteGroupApi.h"
 #include "Api/AccelByteOrderApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteWalletApi.h"
@@ -53,6 +54,7 @@ FHttpRetryScheduler FRegistry::HttpRetryScheduler;
 Credentials FRegistry::Credentials;
 ServerSettings FRegistry::ServerSettings;
 ServerCredentials FRegistry::ServerCredentials;
+Api::Group FRegistry::Group(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::User FRegistry::User{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
 Api::UserProfile FRegistry::UserProfile{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
 Api::Category FRegistry::Category(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
