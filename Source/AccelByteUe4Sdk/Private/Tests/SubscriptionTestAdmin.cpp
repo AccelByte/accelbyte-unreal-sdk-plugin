@@ -14,3 +14,12 @@ void AdminGrantSubscriptionFree(const FString& UserId, const FFreeSubscriptionRe
 	AB_HTTP_POST(Request, Url, Authorization, Content);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+
+void AdminDeleteItem(const FString& ItemId, const FString& StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/items/%s?storeId=%s"), *GetAdminBaseUrl(), *FRegistry::Settings.PublisherNamespace, *ItemId, *StoreId);
+	AB_HTTP_DELETE(Request, Url, Authorization);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}

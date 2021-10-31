@@ -27,3 +27,4 @@ struct FFreeSubscriptionRequest
 };
 
 void AdminGrantSubscriptionFree(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError);
+void AdminDeleteItem(const FString& ItemId, const FString& StoreId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
