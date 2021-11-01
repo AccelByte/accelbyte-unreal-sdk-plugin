@@ -12,6 +12,8 @@
 using AccelByte::THandler;
 using AccelByte::FErrorHandler;
 
+enum class EAccelBytePlatformType : uint8;
+
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:
@@ -80,6 +82,9 @@ public:
 
 		return static_cast<TEnum>(ValueInt);
 	}
+
+	static FString GetPlatformString(EAccelBytePlatformType Platform);
+	
 };
 
 USTRUCT(BlueprintType)

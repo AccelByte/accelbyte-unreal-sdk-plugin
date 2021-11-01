@@ -11,6 +11,8 @@
 #include "TestModels.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "UserTestAdmin.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
+#include "GameServerApi/AccelByteServerUserApi.h"
 
 using namespace std;
 
@@ -4042,7 +4044,7 @@ bool FBulkUserInfo_GetBulkUserInfoSuccess::RunTest(const FString& Parameter)
 	{
 		return false;
 	}
-
+	
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
@@ -4151,7 +4153,7 @@ bool FBulkUserInfo_EmptyUserIds::RunTest(const FString& Parameter)
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bRegisterDone = true;
 			}));
-
+	
 	FlushHttpRequests();
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
@@ -4167,7 +4169,7 @@ bool FBulkUserInfo_EmptyUserIds::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
 		}), UserTestErrorHandler);
-
+	
 	FlushHttpRequests();
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
@@ -4251,7 +4253,7 @@ bool FBulkUserInfo_InvalidUserIds::RunTest(const FString& Parameter)
 	{
 		return false;
 	}
-
+	
 	bool bLoginSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
 	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
@@ -4296,5 +4298,250 @@ bool FBulkUserInfo_InvalidUserIds::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bDeleteSuccessful);
 	AB_TEST_TRUE(bBulkUserInfoSuccess);
 	AB_TEST_TRUE(BulkUserInfoResult.Data.Num() == 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGameServerSearchUserBySteamAccount, "AccelByte.Tests.AUser.GameServerSearchUserBySteamAccount", AutomationFlagMaskUser);
+bool FGameServerSearchUserBySteamAccount::RunTest(const FString& Parameter)
+{
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginPlatformSuccessful = false;
+	bool bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginPlatformSuccessful = true;
+			bSteamLoginDone = true;
+		}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bSteamLoginDone = true;
+			}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+
+	if (!bLoginPlatformSuccessful)
+	{
+		return false;
+	}
+
+#pragma region DeleteUserSteam
+
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserSteam"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful1 = true;
+			bDeleteDone1 = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserSteam
+
+	FRegistry::User.ForgetAllCredentials();
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	bool bGetUserData = false;
+	FAccountUserData UserData;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
+		{
+			UserData = Result;
+			bGetUserData = true;
+		}), FErrorHandler::CreateLambda([&bGetUserData](int32 Code, const FString& Message)
+			{
+				bGetUserData = true;
+				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
+			}));
+
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
+
+	bool bLinkSteamAcc = false;
+	bool bLinkSteamSuccess = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LinkSteamAcc"));
+	FRegistry::User.LinkOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLinkSteamAcc, &bLinkSteamSuccess]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Link Success"));
+			bLinkSteamSuccess = true;
+			bLinkSteamAcc = true;
+		}), FCustomErrorHandler::CreateLambda([&bLinkSteamAcc](int32 Code, const FString& Message, const FJsonObject& MessageVariables)
+			{
+				UE_LOG(LogAccelByteUserTest, Error, TEXT("Link Account Failed..! Error: %d | Message: %s | MsgVar: %s"), Code, *Message, *MessageVariables.GetStringField("publisherAccounts"));
+				bLinkSteamAcc = true;
+			}));
+
+	WaitUntil(bLinkSteamAcc, "Waiting for Link Account...");
+
+	bool bGetPlatformLinks = false;
+	bool bGetPlatformLinksSuccess = false;
+	FPagedPlatformLinks getUserSteam;
+	FRegistry::User.GetPlatformLinks(THandler<FPagedPlatformLinks>::CreateLambda([&bGetPlatformLinks, &bGetPlatformLinksSuccess, &getUserSteam](const FPagedPlatformLinks& res)
+		{
+			bGetPlatformLinks = true;
+			bGetPlatformLinksSuccess = true;
+			getUserSteam = res;
+		}), FErrorHandler::CreateLambda([&bGetPlatformLinks](int32 Code, const FString& Message)
+			{
+				bGetPlatformLinks = true;
+				UE_LOG(LogAccelByteUserTest, Error, TEXT("GetPlatformLinks..! Error: %d | Message: %s"), Code, *Message);
+			}));
+
+	WaitUntil(bGetPlatformLinks, "Waiting for GetPlatformLinks...");
+
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Logout"));
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginPlatformSuccessful = false;
+	bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginPlatformSuccessful = true;
+			bSteamLoginDone = true;
+		}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bSteamLoginDone = true;
+			}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+
+	if (!bLoginPlatformSuccessful)
+	{
+		return false;
+	}
+
+	bGetUserData = false;
+	FAccountUserData UserData2;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetUserData"));
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData2](const FAccountUserData& Result)
+		{
+			UserData2 = Result;
+			bGetUserData = true;
+		}), FErrorHandler::CreateLambda([&bGetUserData](int32 Code, const FString& Message)
+			{
+				bGetUserData = true;
+				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
+			}));
+
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
+	
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+			{
+				bServerLoginWithClientCredentialsDone = true;
+			}), UserTestErrorHandler);
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+	AB_TEST_TRUE(bServerLoginWithClientCredentialsDone);
+	
+	bool bAdminSearchUserByOtherPlatformDone = false;	
+	bAdminSearchUserByOtherPlatformDone = false;
+	FUserOtherPlatformInfo UserInfoByPlatformId;
+	FRegistry::ServerUser.SearchUserOtherPlatformUserId(getUserSteam.Data[0].PlatformUserId, EAccelBytePlatformType::Steam,
+	THandler<FUserOtherPlatformInfo>::CreateLambda([&bAdminSearchUserByOtherPlatformDone, &UserInfoByPlatformId](const FUserOtherPlatformInfo& Result)
+	{
+		bAdminSearchUserByOtherPlatformDone = true;
+		UserInfoByPlatformId = Result;
+	}), FErrorHandler::CreateLambda([&bAdminSearchUserByOtherPlatformDone](int32 Code, const FString& Message)
+	{
+		bAdminSearchUserByOtherPlatformDone = true;
+		UE_LOG(LogAccelByteUserTest, Error, TEXT("Search User 3rd party by Platform User ID Failed..! Error: %d | Message: %s"), Code, *Message);
+	}));
+	WaitUntil(bAdminSearchUserByOtherPlatformDone, "Admin Search User Third Party by User ID");
+
+	AB_TEST_TRUE(bAdminSearchUserByOtherPlatformDone);
+	AB_TEST_EQUAL(UserData2.UserId, UserInfoByPlatformId.UserId);
+
+	//we don't need to check backend logic, since we can not get 3rd party platformDisplayName in game this function will search user using fuzzy logic
+	FPagedUserOtherPlatformInfo UserInfoByDisplayName;
+	FRegistry::ServerUser.SearchUserOtherPlatformDisplayName("fuzzyDisplayName", EAccelBytePlatformType::Steam, 
+	THandler<FPagedUserOtherPlatformInfo>::CreateLambda([&bAdminSearchUserByOtherPlatformDone, &UserInfoByDisplayName](const FPagedUserOtherPlatformInfo& Result)
+	{
+		bAdminSearchUserByOtherPlatformDone = true;
+		UserInfoByDisplayName = Result;
+	}),  FErrorHandler::CreateLambda([&bAdminSearchUserByOtherPlatformDone](int32 Code, const FString& Message)
+	{
+		bAdminSearchUserByOtherPlatformDone = true;
+		UE_LOG(LogAccelByteUserTest, Error, TEXT("Search User 3rd party by Display Name Failed..! Error: %d | Message: %s"), Code, *Message);
+	}));
+	WaitUntil(bAdminSearchUserByOtherPlatformDone, "Admin Search User Third Party by Display Name");
+
+	AB_TEST_TRUE(bAdminSearchUserByOtherPlatformDone);
+	FRegistry::ServerOauth2.ForgetAllCredentials();
+
+#pragma region DeleteUser
+
+	bDeleteDone1 = false;
+	bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser"));
+	AdminDeleteUser(UserData.UserId, FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful1 = true;
+			bDeleteDone1 = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
+
+#pragma endregion DeleteUser
+
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bLinkSteamSuccess);
+	AB_TEST_TRUE(bGetPlatformLinksSuccess);
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_EQUAL(UserData.UserId, UserData2.UserId);
+	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }

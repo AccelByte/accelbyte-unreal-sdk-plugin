@@ -6,6 +6,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Models/AccelByteUserModels.h"
 
 void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 {
@@ -26,6 +27,50 @@ void FAccelByteUtilities::RemoveEmptyStrings(TSharedPtr<FJsonObject> JsonPtr)
 	for (FString const& Key : KeysToRemove)
 	{
 		JsonPtr->RemoveField(Key);
+	}
+}
+
+FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
+{
+	switch (Platform)
+	{
+	case EAccelBytePlatformType::Steam:
+		return "steam";
+	case EAccelBytePlatformType::PS4:
+		return "ps4";
+	case EAccelBytePlatformType::PS4CrossGen:
+	case EAccelBytePlatformType::PS5:
+		return "ps5";
+	case EAccelBytePlatformType::Live:
+		return "live";
+	case EAccelBytePlatformType::Google:
+		return "google";
+	case EAccelBytePlatformType::Apple:
+		return "apple";	
+	case EAccelBytePlatformType::Facebook:
+		return "facebook";
+	case EAccelBytePlatformType::Android:
+		return "android";
+	case EAccelBytePlatformType::iOS:
+		return "ios";
+	case EAccelBytePlatformType::Device:
+		return "device";
+	case EAccelBytePlatformType::Twitch:
+		return "twitch";
+	case EAccelBytePlatformType::Oculus:
+		return "oculus";
+	case EAccelBytePlatformType::Twitter:
+		return "twitter";
+	case EAccelBytePlatformType::EpicGames:
+		return "epicgames";
+	case EAccelBytePlatformType::Stadia:
+		return "stadia";
+	case EAccelBytePlatformType::AwsCognito:
+		return "awscognito";
+	case EAccelBytePlatformType::Nintendo:
+		return "nintendo";	
+	default:
+		return "unknown";
 	}
 }
 

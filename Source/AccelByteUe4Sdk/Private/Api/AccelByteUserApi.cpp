@@ -13,6 +13,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
 #include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteUtilities.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUser, Log, All);
@@ -42,46 +43,6 @@ static FString SearchStrings[] = {
 	TEXT("username")
 };
 
-static FString GetPlatformString(EAccelBytePlatformType PlatformType)
-{
-	switch (PlatformType)
-	{
-	case EAccelBytePlatformType::Steam:
-		return "steam";
-	case EAccelBytePlatformType::PS4:
-		return "ps4";
-	case EAccelBytePlatformType::PS4CrossGen:
-	case EAccelBytePlatformType::PS5:
-		return "ps5";
-	case EAccelBytePlatformType::Live:
-		return "live";
-	case EAccelBytePlatformType::Google:
-		return "google";
-	case EAccelBytePlatformType::Facebook:
-		return "facebook";
-	case EAccelBytePlatformType::Android:
-		return "android";
-	case EAccelBytePlatformType::iOS:
-		return "ios";
-	case EAccelBytePlatformType::Device:
-		return "device";
-	case EAccelBytePlatformType::Twitch:
-		return "twitch";
-	case EAccelBytePlatformType::Oculus:
-		return "oculus";
-	case EAccelBytePlatformType::Twitter:
-		return "twitter";
-	case EAccelBytePlatformType::EpicGames:
-		return "epicgames";
-	case EAccelBytePlatformType::Stadia:
-		return "stadia";
-	case EAccelBytePlatformType::AwsCognito:
-		return "awscognito";
-	default:
-		return "unknown";
-	}
-}
-
 void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -90,7 +51,7 @@ void User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FSt
 	{
 		CredentialsRef.ForgetAll();
 	}
-	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.ClientId, SettingsRef.ClientSecret, GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Token>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
+	Oauth2::GetTokenWithOtherPlatformToken(SettingsRef.ClientId, SettingsRef.ClientSecret, FAccelByteUtilities::GetPlatformString(PlatformType), PlatformToken, THandler<FOauth2Token>::CreateLambda([this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
 	{
 		CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
 		OnSuccess.ExecuteIfBound();
@@ -374,7 +335,7 @@ void User::BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString PlatformString = GetPlatformString(PlatformType);
+	const FString PlatformString = FAccelByteUtilities::GetPlatformString(PlatformType);
 	const FBulkPlatformUserIdRequest UserIdRequests{ OtherPlatformUserId };
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
@@ -635,7 +596,7 @@ void User::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FString&
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	auto PlatformId = GetPlatformString(PlatformType);
+	auto PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace(), *PlatformId);
@@ -659,7 +620,7 @@ void User::ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, const FS
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	auto PlatformId = GetPlatformString(PlatformType);
+	auto PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	FLinkPlatformAccountRequest linkRequest;
 	linkRequest.PlatformId = PlatformId;
@@ -688,7 +649,7 @@ void User::UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, const FVoidH
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	auto PlatformId = GetPlatformString(PlatformType);
+	auto PlatformId = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/me/platforms/%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace(), *PlatformId);
@@ -792,7 +753,7 @@ void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData
 void User::GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, const FString& OtherPlatformUserId, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	FString PlatformId      = GetPlatformString(PlatformType);
+	FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/platforms/%s/users/%s"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace, *PlatformId, *OtherPlatformUserId);
