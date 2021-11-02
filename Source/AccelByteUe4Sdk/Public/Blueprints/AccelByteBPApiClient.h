@@ -4,6 +4,7 @@
 #include "AccelByteBPUser.h"
 #include "AccelByteBPLobby.h"
 #include "ABParty.h"
+#include "ABMatchmaking.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -50,6 +51,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABParty* Party;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABMatchmaking* Matchmaking;
 
 private:
 	FApiClientPtr ApiClientPtr;
