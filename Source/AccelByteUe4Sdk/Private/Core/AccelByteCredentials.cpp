@@ -17,14 +17,19 @@ namespace AccelByte
 {
 
 Credentials::Credentials()
-	: AuthToken()
+	: ClientId()
+	, ClientSecret()
+	, AuthToken()
 	, UserSessionExpire(0)
+	, UserEmailAddress()
 	, UserSessionState(ESessionState::Invalid)
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
 	, UserRefreshBackoff(0.0)
-{
-}
+{}
+
+Credentials::~Credentials()
+{}
 
 void Credentials::ForgetAll()
 {

@@ -60,6 +60,8 @@ public:
 	FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http);
 	~FApiClient();
 
+	bool bUseSharedCredentials;
+
 	FCredentialsRef CredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
 	Api::User User{*CredentialsRef, FRegistry::Settings, *HttpRef};

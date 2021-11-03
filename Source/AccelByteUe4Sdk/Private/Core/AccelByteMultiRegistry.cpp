@@ -16,7 +16,8 @@ FApiBase::FApiBase(Credentials const& CredentialsRef, Settings const& SettingsRe
 }
 	
 FApiClient::FApiClient()
-	: CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
+	: bUseSharedCredentials(false)
+	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
 	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 {
 	HttpRef->Startup();
@@ -25,16 +26,22 @@ FApiClient::FApiClient()
 }
 
 FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
-	: CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials))
-	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http))
+	: bUseSharedCredentials(true)
+	, CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials, [](AccelByte::Credentials*) {}))
+	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http, [](AccelByte::FHttpRetryScheduler*) {}))
 {
+	GameTelemetry.Startup();
 }
 
 FApiClient::~FApiClient()
 {
 	GameTelemetry.Shutdown();
-	CredentialsRef->Shutdown();
-	HttpRef->Shutdown();
+	
+	if (!bUseSharedCredentials)
+	{
+		CredentialsRef->Shutdown();
+		HttpRef->Shutdown();
+	}
 }
 
 FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)

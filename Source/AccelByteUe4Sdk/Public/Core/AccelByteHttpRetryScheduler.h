@@ -30,6 +30,9 @@ public:
 	static const int MaximumDelay;
 	static const int TotalTimeout;
 
+	FHttpRetryScheduler();
+	~FHttpRetryScheduler();
+
 	FAccelByteTaskPtr ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 
 	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);
