@@ -609,6 +609,32 @@ struct FQueryRewardInfo
 	FQueryRewardPagingInfo Paging;
 };
 
+USTRUCT(BlueprintType)
+struct FAppleIAPConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString BundleId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString Password;
+};
+
+USTRUCT(BlueprintType)
+struct FGoogleIAPConfig
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString ApplicationName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString ServiceAccountId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | IAP")
+	FString P12FileName;
+};
+
 struct EcommerceExpectedVariable
 {
 	FString ExpectedRootCategoryPath;
@@ -685,3 +711,8 @@ void AdminDisableEcommerceCampaignCode(const FString& CampaignCode, const THandl
 void AdminCreateReward(const FRewardCreateRequest& Body, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError);
 void AdminQueryReward(const THandler<FQueryRewardInfo>& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteReward(const FString& RewardId, const THandler<FRewardCreateInfo>& OnSuccess, const FErrorHandler& OnError);
+
+void AdminGetAppleIAPConfig(const FString& Namespace, const THandler<FAppleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
+void AdminGetAppleIAPConfig(const THandler<FAppleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
+void AdminGetGoogleIAPConfig(const FString& Namespace, const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError);
+void AdminGetGoogleIAPConfig(const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError);

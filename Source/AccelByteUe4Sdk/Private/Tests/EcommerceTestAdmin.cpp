@@ -1370,3 +1370,31 @@ void AdminDeleteReward(const FString& RewardId, const THandler<FRewardCreateInfo
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void AdminGetAppleIAPConfig(const FString& Namespace, const THandler<FAppleIAPConfig>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/iap/config/apple"), *GetAdminBaseUrl(), *Namespace);
+	AB_HTTP_GET(Request, Url, Authorization);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminGetAppleIAPConfig(const THandler<FAppleIAPConfig>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	AdminGetAppleIAPConfig(Namespace, OnSuccess, OnError);
+}
+
+void AdminGetGoogleIAPConfig(const FString& Namespace, const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/platform/admin/namespaces/%s/iap/config/google"), *GetAdminBaseUrl(), *Namespace);
+	AB_HTTP_GET(Request, Url, Authorization);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void AdminGetGoogleIAPConfig(const THandler<FGoogleIAPConfig>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Namespace = *FRegistry::Settings.Namespace;
+	AdminGetGoogleIAPConfig(Namespace, OnSuccess, OnError);
+}

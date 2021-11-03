@@ -160,6 +160,24 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Sync (Verify and fulfil) item entitlement from Google Play platform purchase.
+	*
+	* @param SyncRequest That contain of OrderId, PackageName, ProductId, PurchaseTime, and PurchaseToken to verify and sync item user bought from Google Play. 
+	* @param OnSuccess This will be called when the operation success.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Sync (Verify and fulfil) item entitlement from Apple Store platform purchase.
+	*
+	* @param SyncRequest That contain of ProductId, TransactionId, ReceiptData, and ExcludeOldTransactions to verify and sync item user bought from Apple Store. 
+	* @param OnSuccess This will be called when the operation success.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;

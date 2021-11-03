@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -2833,5 +2833,108 @@ bool FEcommerceTestQueryRewards::RunTest(const FString& Parameters)
 	WaitUntil(bQueryRewardsAchievementTopicDone, "Waiting for query achievement topic rewards");
 	AB_TEST_TRUE(bQueryRewardsAchievementTopicDone);
 
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSyncMobilePlatformFailed, "AccelByte.Tests.Ecommerce.J.SyncMobilePlatformFailed", AutomationFlagMaskEcommerce);
+bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
+{
+	bool bMobileIAPConfigAlreadyExist = false;
+	bool bMobileIAPCheckDone = false;
+	FGoogleIAPConfig GoogleConfig;
+	AdminGetGoogleIAPConfig(THandler<FGoogleIAPConfig>::CreateLambda([&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone, &GoogleConfig](const FGoogleIAPConfig& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP config already exits."));
+		bMobileIAPConfigAlreadyExist = true;
+		bMobileIAPCheckDone = true;
+		GoogleConfig = Result;
+		if (GoogleConfig.ApplicationName.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Google IAP not configured properly."));;
+	}), FErrorHandler::CreateLambda(
+	[&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log,TEXT("Google IAP config not exist. Create config from AP first!"));
+		bMobileIAPConfigAlreadyExist = false;
+		bMobileIAPCheckDone = true;
+	}));
+	WaitUntil(bMobileIAPCheckDone, "Waiting for IAP config check...");
+	
+	AB_TEST_TRUE(bMobileIAPCheckDone);
+
+	//This negative test only run to check the endpoint and it's process
+	//because all fields in request body come from Apple Apps or Google Play (mobile)
+
+	bool bSyncDone = false;
+	FAccelByteModelsPlatformSyncMobileGoogle SyncReqGoogle;
+	SyncReqGoogle.OrderId = "test-OrderId";
+	SyncReqGoogle.PackageName = "test-packageName";
+	SyncReqGoogle.ProductId = "testProductId";
+	SyncReqGoogle.PurchaseTime = 0;
+	SyncReqGoogle.PurchaseToken = "test.PurchaseToken";
+	SyncReqGoogle.Region = "ID";
+	SyncReqGoogle.Language = "en";
+	
+	if (!GoogleConfig.ApplicationName.IsEmpty())
+	{
+		FRegistry::Entitlement.SyncMobilePlatformPurchaseGoogle(SyncReqGoogle, FVoidHandler::CreateLambda([&bSyncDone]()
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bSyncDone = true;
+		}), FErrorHandler::CreateLambda([&bSyncDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			bSyncDone = true;
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		}));
+		WaitUntil(bSyncDone, "Waiting for sync...");
+
+		AB_TEST_TRUE(bSyncDone);
+	}
+
+	bMobileIAPConfigAlreadyExist = false;
+	bMobileIAPCheckDone = false;
+	FAppleIAPConfig AppleConfig;
+	AdminGetAppleIAPConfig(THandler<FAppleIAPConfig>::CreateLambda([&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone, &AppleConfig](const FAppleIAPConfig& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP config already exits."));
+		bMobileIAPConfigAlreadyExist = true;
+		bMobileIAPCheckDone = true;
+		AppleConfig = Result;
+		if (AppleConfig.BundleId.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP not configured properly."));;
+	}), FErrorHandler::CreateLambda(
+	[&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log,TEXT("Apple IAP config not exist. Create config from AP first!"));
+		bMobileIAPConfigAlreadyExist = false;
+		bMobileIAPCheckDone = true;
+	}));
+	WaitUntil(bMobileIAPCheckDone, "Waiting for IAP config check...");
+	
+	AB_TEST_TRUE(bMobileIAPCheckDone);
+	
+	bSyncDone = false;
+	FAccelByteModelsPlatformSyncMobileApple SyncReqApple;
+	SyncReqApple.ProductId = "testProductIdInvalid";
+	SyncReqApple.TransactionId = "testTransactionIdInvalid";
+	SyncReqApple.ReceiptData = "testReceiptDataInvalid";
+	SyncReqApple.ExcludeOldTransactions = true;
+	SyncReqApple.Region = "ID";
+	SyncReqApple.Language = "en";
+
+	if (!AppleConfig.BundleId.IsEmpty())
+	{
+		FRegistry::Entitlement.SyncMobilePlatformPurchaseApple(SyncReqApple, FVoidHandler::CreateLambda([&bSyncDone]()
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bSyncDone = true;
+		}), FErrorHandler::CreateLambda([&bSyncDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			bSyncDone = true;
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		
+		}));
+		WaitUntil(bSyncDone, "Waiting for sync...");
+
+		AB_TEST_TRUE(bSyncDone);
+	}
+	
 	return true;
 }
