@@ -302,7 +302,7 @@ void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 	FRegistry::Settings.AppId = AppId;
 }
 
-void UAccelByteBlueprintsSettings::ResetSettings(const TEnumAsByte<ESettingsEnvironment>& Environment)
+void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment& Environment)
 {
 	FRegistry::Settings.Reset(Environment);
 }

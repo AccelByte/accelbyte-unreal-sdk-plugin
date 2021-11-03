@@ -303,6 +303,6 @@ public:
 	static void SetAppId(const FString& AppId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static void ResetSettings(const TEnumAsByte<ESettingsEnvironment>& Environment);
+	static void ResetSettings(const ESettingsEnvironment& Environment);
 };
 
