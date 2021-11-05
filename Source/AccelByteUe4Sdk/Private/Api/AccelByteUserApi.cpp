@@ -853,6 +853,36 @@ void User::GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHa
 	}));
 }
 
+void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListBulkUserInfo>& OnSuccess, const FErrorHandler& OnError) 
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if (UserIds.Num() <= 0)
+	{
+		OnError.ExecuteIfBound((int32)ErrorCodes::InvalidRequest, TEXT("UserIds cannot be empty!"));
+		return;
+	}
+
+	const FListBulkUserInfoRequest UserList{ UserIds };
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/bulk/basic"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb = TEXT("POST");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content = TEXT("");
+	FJsonObjectConverter::UStructToJsonObjectString(UserList, Content);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 
 } // Namespace Api
 } // Namespace AccelByte

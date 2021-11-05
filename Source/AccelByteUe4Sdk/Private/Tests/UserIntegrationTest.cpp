@@ -3964,3 +3964,337 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bDeleteSuccessful);
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkUserInfo_GetBulkUserInfoSuccess, "AccelByte.Tests.AUser.BulkUserInfo_GetBulkUserInfoSuccess", AutomationFlagMaskUser);
+bool FBulkUserInfo_GetBulkUserInfoSuccess::RunTest(const FString& Parameter)
+{
+	//Create some users
+	const int UserCount = 3;
+	TArray<FString> UserIds;
+	TArray<FRegisterResponse> RegisteredUsers;
+	TArray<FAccelByteModelsUserProfileInfo> RegisteredUserProfiles;
+	for (int i = 0; i < UserCount; i++)
+	{
+		FRegistry::User.ForgetAllCredentials();
+		FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+		FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+		EmailAddress.ToLowerInline();
+		FString Password = "123SDKTest123";
+		const FString Country = "US";
+		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+		bool bRegisterSuccessful = false;
+		bool bRegisterDone = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+		FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &UserIds, &RegisteredUsers](const FRegisterResponse& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+				UserIds.Add(Result.UserId);
+				RegisteredUsers.Add(Result);
+				bRegisterSuccessful = true;
+				bRegisterDone = true;
+			}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+				{
+					UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+					bRegisterDone = true;
+				}));
+
+		FlushHttpRequests();
+		WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+		if (!bRegisterSuccessful)
+		{
+			return false;
+		}
+	}
+	
+	//Create Primary User and Login
+	FString PrimaryUserId;
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = ("abBulkUserInfo" + FGuid::NewGuid().ToString(EGuidFormats::Digits)).LeftChop(20);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &PrimaryUserId](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			PrimaryUserId = Result.UserId;
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	bool bBulkUserInfoSuccess = false;
+	FListBulkUserInfo BulkUserInfoResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("BulkUserInfo"));
+	FRegistry::User.BulkGetUserInfo(UserIds, THandler<FListBulkUserInfo>::CreateLambda([&bBulkUserInfoSuccess, &BulkUserInfoResult](const FListBulkUserInfo& Result) 
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			BulkUserInfoResult = Result;
+			bBulkUserInfoSuccess = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bBulkUserInfoSuccess, "Waiting for Bulk UserInfo...");
+
+	bool bIsDisplayNameExpected = true;
+	for (auto UserInfo : BulkUserInfoResult.Data)
+	{
+		for (auto RegisteredUser : RegisteredUsers)
+		{
+			if (UserInfo.UserId == RegisteredUser.UserId)
+			{
+				if (UserInfo.DisplayName != RegisteredUser.DisplayName)
+				{
+					bIsDisplayNameExpected = false;
+					break;
+				}
+				break;
+			}
+		}
+	}
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(PrimaryUserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	for (int i = 0; i < UserCount; i++)
+	{
+		bDeleteDone = false;
+		bDeleteSuccessful = false;
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+		AdminDeleteUser(UserIds[i], FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				bDeleteSuccessful = true;
+				bDeleteDone = true;
+			}), UserTestErrorHandler);
+
+		FlushHttpRequests();
+		WaitUntil(bDeleteDone, "Waiting for Deletion...");
+	}
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_TRUE(BulkUserInfoResult.Data.Num() == UserCount);
+	AB_TEST_TRUE(bIsDisplayNameExpected);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkUserInfo_EmptyUserIds, "AccelByte.Tests.AUser.BulkUserInfo_EmptyUserIds", AutomationFlagMaskUser);
+bool FBulkUserInfo_EmptyUserIds::RunTest(const FString& Parameter)
+{
+	//Create Primary User and Login
+	FString PrimaryUserId;
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = ("abBulkUserInfo" + FGuid::NewGuid().ToString(EGuidFormats::Digits)).LeftChop(20);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &PrimaryUserId](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			PrimaryUserId = Result.UserId;
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	bool bBulkUserInfoSuccess = false;
+	bool bBulkUserInfoDone = false;
+	ErrorCodes BulkUserInfoError;
+	FListBulkUserInfo BulkUserInfoResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("BulkUserInfo"));
+	FRegistry::User.BulkGetUserInfo(TArray<FString>{}, THandler<FListBulkUserInfo>::CreateLambda([&bBulkUserInfoSuccess, &BulkUserInfoResult, &bBulkUserInfoDone](const FListBulkUserInfo& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			BulkUserInfoResult = Result;
+			bBulkUserInfoSuccess = true;
+			bBulkUserInfoDone = true;
+		}), FErrorHandler::CreateLambda([&bBulkUserInfoDone, &BulkUserInfoError](int32 Code, const FString& Message) 
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Failed, Code: %d | Message: %s"), Code, *Message);
+				BulkUserInfoError = (ErrorCodes)Code;
+				bBulkUserInfoDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bBulkUserInfoDone, "Waiting for Bulk UserInfo...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(PrimaryUserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_FALSE(bBulkUserInfoSuccess);
+	AB_TEST_TRUE(BulkUserInfoError == ErrorCodes::InvalidRequest);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBulkUserInfo_InvalidUserIds, "AccelByte.Tests.AUser.BulkUserInfo_InvalidUserIds", AutomationFlagMaskUser);
+bool FBulkUserInfo_InvalidUserIds::RunTest(const FString& Parameter)
+{
+	//Create Primary User and Login
+	FString PrimaryUserId;
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = ("abBulkUserInfo" + FGuid::NewGuid().ToString(EGuidFormats::Digits)).LeftChop(20);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone, &PrimaryUserId](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			PrimaryUserId = Result.UserId;
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	bool bBulkUserInfoSuccess = false;
+	FListBulkUserInfo BulkUserInfoResult;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("BulkUserInfo"));
+	FRegistry::User.BulkGetUserInfo(TArray<FString>{"Invalid"}, THandler<FListBulkUserInfo>::CreateLambda([&bBulkUserInfoSuccess, &BulkUserInfoResult](const FListBulkUserInfo& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			BulkUserInfoResult = Result;
+			bBulkUserInfoSuccess = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bBulkUserInfoSuccess, "Waiting for Bulk UserInfo...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(PrimaryUserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	FlushHttpRequests();
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	AB_TEST_TRUE(bBulkUserInfoSuccess);
+	AB_TEST_TRUE(BulkUserInfoResult.Data.Num() == 0);
+	return true;
+}
