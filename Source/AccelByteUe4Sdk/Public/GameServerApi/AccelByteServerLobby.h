@@ -95,6 +95,24 @@ namespace GameServerApi
 		* @param OnError This will be called when the operation failed.
 		*/
 		void SetSessionAttribute(const FString& UserId, const FString& Key, const FString& Value, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+		/**
+		* @brief Get list of users that is blocking this UserId.
+		*
+		* @param UserId User Id of the Player.
+		* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
+
+		/**
+		* @brief  Get list of users that is blocked by this UserId.
+		*
+		* @param UserId User Id of the Player.
+		* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
+		* @param OnError This will be called when the operation failed.
+		*/
+		void GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError);
 		
 	private:
 

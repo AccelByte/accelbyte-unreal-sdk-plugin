@@ -1980,3 +1980,105 @@ bool ServerLobbyGetSetSessionAttribute_Ok::RunTest(const FString& Parameters)
 
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerLobbyGetBlockedGetBlocker_Ok, "AccelByte.Tests.ServerLobby.C.ServerLobbyGetBlockedGetBlocker_Ok", AutomationFlagMaskServerLobby);
+bool ServerLobbyGetBlockedGetBlocker_Ok::RunTest(const FString& Parameters)
+{
+	// Arrange, set delegates & connect lobby
+	SLobbyConnect(2);
+
+	bool bBlockPlayerDone = false;
+	SLobbies[0]->SetBlockPlayerResponseDelegate(Api::Lobby::FBlockPlayerResponse::CreateLambda(
+		[&bBlockPlayerDone](const FAccelByteModelsBlockPlayerResponse& Response)
+		{
+			bBlockPlayerDone = true;
+		}));
+
+	// Arrange, make sure lobby 0 doesnt have lobby 1 in block list
+	bool bUnblockPlayerDone = false;
+	SLobbies[0]->SetUnblockPlayerResponseDelegate(Api::Lobby::FUnblockPlayerResponse::CreateLambda(
+		[&bUnblockPlayerDone](const FAccelByteModelsUnblockPlayerResponse& Response)
+		{
+			bUnblockPlayerDone = true;
+		}));
+
+	bool bGetUnblockNotif = false;
+	SLobbies[1]->SetUnblockPlayerNotifDelegate(Api::Lobby::FUnblockPlayerNotif::CreateLambda(
+		[&bGetUnblockNotif](const FAccelByteModelsUnblockPlayerNotif& notif)
+		{
+			bGetUnblockNotif = true;
+		}));
+
+	SLobbies[0]->UnblockPlayer(SUserIds[1]);
+	WaitUntil(bUnblockPlayerDone, "Waiting unblock player");
+
+	// Arrange, server login
+	bool bServerLoginDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bServerLoginDone]()
+	{
+		bServerLoginDone = true;
+	}), ServerLobbyErrorHandler);
+
+	WaitUntil(bServerLoginDone, "Waiting server login...");
+
+	// Arrange, lobby 0 block lobby 1
+	SLobbies[0]->BlockPlayer(SUserIds[1]);
+
+	WaitUntil(bBlockPlayerDone, "Waiting block player");
+
+	// Act, server get blocked list lobby 0
+	TArray<FBlockedData> BlockedDatas;
+	bool bGetBlockedDataDone = false;
+	FRegistry::ServerLobby.GetListOfBlockedUsers(SUserIds[0],
+		THandler<FAccelByteModelsListBlockedUserResponse>::CreateLambda(
+			[&BlockedDatas, &bGetBlockedDataDone](const FAccelByteModelsListBlockedUserResponse& Response)
+			{
+				BlockedDatas = Response.Data;
+				bGetBlockedDataDone = true;
+			}), ServerLobbyErrorHandler);
+
+	// Act, server get blocker list lobby 1
+	TArray<FBlockerData> BlockerDatas;
+	bool bGetBlockerDataDone = false;
+	FRegistry::ServerLobby.GetListOfBlockers(SUserIds[1],
+		THandler<FAccelByteModelsListBlockerResponse>::CreateLambda(
+			[&BlockerDatas, &bGetBlockerDataDone](const FAccelByteModelsListBlockerResponse& Response)
+			{
+				BlockerDatas = Response.Data;
+				bGetBlockerDataDone = true;
+			}), ServerLobbyErrorHandler);
+
+	WaitUntil(bGetBlockedDataDone, "Waiting get blocked data");
+	WaitUntil(bGetBlockerDataDone, "Waiting get blocker data");
+	
+	// Assert
+	bool blockedDataFound = false;
+	for(const FBlockedData& data : BlockedDatas)
+	{
+		if(data.BlockedUserId == SUserIds[1])
+		{
+			blockedDataFound = true;
+		}
+	}
+	AB_TEST_TRUE(blockedDataFound);
+
+	bool blockerDataFound = false;
+	for(const FBlockerData& data : BlockerDatas)
+	{
+		if(data.UserId == SUserIds[0])
+		{
+			blockerDataFound = true;
+		}
+	}
+	AB_TEST_TRUE(blockerDataFound);
+	
+	// Cleanup
+	bUnblockPlayerDone = false;
+	bGetUnblockNotif = false;
+	SLobbies[0]->UnblockPlayer(SUserIds[1]);
+
+	WaitUntil(bUnblockPlayerDone, "Wait unblock player cleanup");
+	WaitUntil(bGetUnblockNotif, "wait unblock player notif cleanup");
+
+	return true;
+}

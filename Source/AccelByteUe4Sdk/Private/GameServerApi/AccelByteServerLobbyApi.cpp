@@ -247,5 +247,45 @@ namespace GameServerApi
 		SetSessionAttribute(UserId, Attributes, OnSuccess, OnError);
 	}
 
+	void ServerLobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerLobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Verb = TEXT("GET");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
 } // namespace GameServerApi
 } // namespace AccelByte
