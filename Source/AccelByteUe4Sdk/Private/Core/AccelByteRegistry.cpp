@@ -59,7 +59,6 @@ Api::User FRegistry::User{FRegistry::Credentials, FRegistry::Settings, FRegistry
 Api::UserProfile FRegistry::UserProfile{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};
 Api::Category FRegistry::Category(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Entitlement FRegistry::Entitlement(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Group FRegistry::Group(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Order FRegistry::Order(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Item FRegistry::Item(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Wallet FRegistry::Wallet(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
