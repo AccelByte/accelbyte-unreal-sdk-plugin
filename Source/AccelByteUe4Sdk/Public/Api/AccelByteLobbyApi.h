@@ -48,6 +48,12 @@ private:
 	bool BanNotifReceived = false;
 
 public:
+	
+	// Party 
+	/**
+	 * @brief delegate for handling info party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FBaseResponse, const FAccelByteModelsLobbyBaseResponse&); 
 
     // Party 
     /**
@@ -613,11 +619,23 @@ public:
 	*/
 	FString SendReadyConsentRequest(FString MatchId);
 
+	/**
+	* @brief Request Dedicated custom server
+	*
+	* @param SessionID Session ID of the game session.
+	* @param GameMode The mode that party member want to play.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Region The region where the party member want to play.
+	* @param Deployment The deployment mode where the party member requested
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	*/
+	FString RequestDS(FString const& SessionID, FString const& GameMode, FString const& ClientVersion,  FString const& Region, FString const& Deployment, FString const& ServerName = TEXT(""));
+
 	// Friends
 	/**
 	* @brief Send request friend request.
 	*
-	* @param param UserId Targeted user ID.
+	* @param UserId Targeted user ID.
 	*/
 	void RequestFriend(FString UserId);
 
@@ -667,8 +685,7 @@ public:
 	*/
 	void GetFriendshipStatus(FString UserId);
 
-
-	/*
+	/**
 	 * @brief Block specified player from being able to do certain action against current user
 	 * the specified player will be removed from friend list
 	 * 
@@ -682,7 +699,7 @@ public:
 	 *	Additional Limitation : 
 	 *	Blocked Player can't access blocker/current user's user ID
 	 *  
-	 * @param UserID the specified player's user ID. (Target to block)
+	 * @param UserId the specified player's user ID. (Target to block)
 	 * 
 	 */
 	 void BlockPlayer(const FString& UserId);
@@ -1227,6 +1244,16 @@ public:
 		DsNotif = OnDsNotification;
 	};
 
+	/**
+	 * @brief set create DS response delegate
+	 * *
+	 * */
+	void SetCreateDSDelegate(FBaseResponse OnCreateDSResponse, FErrorHandler OnError = {})
+	{
+		CreateDSResponse = OnCreateDSResponse;
+		OnCreateDSError = OnError;
+	}
+
 	// Friends
 	/**
 	* @brief Set request for friends response.
@@ -1617,6 +1644,9 @@ private:
 	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
 	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
 
+	// Custom Game
+	TMap<FString, FBaseResponse> MessageIdCreateDSResponseMap;
+
 	// Friends
 	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsResponseMap;
 	TMap<FString, FUnfriendResponse> MessageIdUnfriendResponseMap;
@@ -1690,6 +1720,9 @@ private:
 	FReadyConsentNotif ReadyConsentNotif;
 	FRematchmakingNotif RematchmakingNotif;
 	FDsNotif DsNotif;
+
+	// Custom Game
+	FBaseResponse CreateDSResponse;
 
 	// Friends
 	FRequestFriendsResponse RequestFriendsResponse;
@@ -1785,6 +1818,7 @@ private:
 	FErrorHandler OnGetSessionAttributeError;
 	FErrorHandler OnGetAllSessionAttributeError;
 	FErrorHandler OnRefreshTokenError;
+	FErrorHandler OnCreateDSError;
 };
 
 } // Namespace Api
