@@ -43,6 +43,7 @@
 #include "GameServerApi/AccelByteServerLobby.h"
 #include "GameServerApi/AccelByteServerCloudSaveApi.h"
 #include "GameServerApi/AccelByteServerSeasonPassApi.h"
+#include "GameServerApi/AccelByteServerSessionBrowserApi.h"
 
 using namespace AccelByte;
 
@@ -89,3 +90,4 @@ GameServerApi::ServerMatchmaking FRegistry::ServerMatchmaking(FRegistry::ServerC
 GameServerApi::ServerLobby FRegistry::ServerLobby(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerCloudSave FRegistry::ServerCloudSave(FRegistry::ServerCredentials, FRegistry::ServerSettings);
 GameServerApi::ServerSeasonPass FRegistry::ServerSeasonPass(FRegistry::ServerCredentials, FRegistry::ServerSettings);
+GameServerApi::ServerSessionBrowser FRegistry::ServerSessionBrowser(FRegistry::ServerCredentials, FRegistry::ServerSettings, FRegistry::HttpRetryScheduler);

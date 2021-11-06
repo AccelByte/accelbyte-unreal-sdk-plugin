@@ -60,6 +60,7 @@ namespace GameServerApi
 	class ServerLobby;
 	class ServerCloudSave;
 	class ServerSeasonPass;
+	class ServerSessionBrowser;
 }
 
 class ACCELBYTEUE4SDK_API FRegistry
@@ -108,6 +109,7 @@ public:
 	static GameServerApi::ServerLobby ServerLobby;
 	static GameServerApi::ServerCloudSave ServerCloudSave;
 	static GameServerApi::ServerSeasonPass ServerSeasonPass;
+	static GameServerApi::ServerSessionBrowser ServerSessionBrowser;
 
 	//Static class doesn't have constructors or destructor
 	FRegistry() = delete;
