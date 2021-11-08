@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -17,14 +17,19 @@ namespace AccelByte
 {
 
 Credentials::Credentials()
-	: AuthToken()
+	: ClientId()
+	, ClientSecret()
+	, AuthToken()
 	, UserSessionExpire(0)
+	, UserEmailAddress()
 	, UserSessionState(ESessionState::Invalid)
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
 	, UserRefreshBackoff(0.0)
-{
-}
+{}
+
+Credentials::~Credentials()
+{}
 
 void Credentials::ForgetAll()
 {

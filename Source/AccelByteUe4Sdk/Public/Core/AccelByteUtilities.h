@@ -48,6 +48,38 @@ public:
 	}
 
 	static void RemoveEmptyStrings(TSharedPtr<FJsonObject> Json);
+
+	template<typename TEnum>
+	static FString GetUEnumValueAsString(TEnum Value)
+	{
+		FString ValueString = UEnum::GetValueAsString(Value);
+		FString Delimiter = TEXT("::");
+
+		TArray<FString> ParsedStrings;
+
+		ValueString.ParseIntoArray(ParsedStrings, *Delimiter);
+
+		return ParsedStrings.Last();
+	}
+
+	template<typename TEnum>
+	static TEnum GetUEnumValueFromString(FString const& ValueString)
+	{
+		UEnum* EnumPtr = StaticEnum<TEnum>();
+		int64 ValueInt = 0;
+
+		if (EnumPtr != nullptr)
+		{
+			ValueInt = EnumPtr->GetValueByNameString(ValueString);
+
+			if (ValueInt == INDEX_NONE)
+			{
+				ValueInt = 0;
+			}
+		}
+
+		return static_cast<TEnum>(ValueInt);
+	}
 };
 
 USTRUCT(BlueprintType)

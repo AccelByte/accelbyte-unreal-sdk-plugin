@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
 
 // Forward declarations
@@ -19,29 +20,9 @@ class Credentials;
 class Settings;
 
 namespace Api
-{
-
-enum class EWebSocketState
-{
-	Closed = 0,
-	Connecting = 1,
-	Connected = 2,
-	Closing = 3,
-	Reconnecting = 4
-};
-
-enum class EWebSocketEvent : uint8
-{
-	None = 0,
-	Connect = 1,
-	Connected = 2,
-	Close = 4,
-	Closed = 8,
-	ConnectionError = 16
-};
-
-ENUM_CLASS_FLAGS(EWebSocketEvent);
-	
+{	
+enum Response : uint8;
+enum Notif : uint8;
 /**
  * @brief Lobby API for chatting and party management.
  * Unlike other servers which use HTTP, Lobby server uses WebSocket (RFC 6455).
@@ -67,6 +48,12 @@ private:
 	bool BanNotifReceived = false;
 
 public:
+	
+	// Party 
+	/**
+	 * @brief delegate for handling info party response.
+	 */
+	DECLARE_DELEGATE_OneParam(FBaseResponse, const FAccelByteModelsLobbyBaseResponse&); 
 
     // Party 
     /**
@@ -462,6 +449,8 @@ public:
 	 * @brief Get information about current party.
 	 */
 	FString SendInfoPartyRequest();
+	FString SendInfoPartyRequest(const FPartyInfoResponse& OnInfoPartyResponse, const FErrorHandler& OnError = {});
+
 
 	/**
 	 * @brief Create a party.
@@ -630,11 +619,23 @@ public:
 	*/
 	FString SendReadyConsentRequest(FString MatchId);
 
+	/**
+	* @brief Request Dedicated custom server
+	*
+	* @param SessionID Session ID of the game session.
+	* @param GameMode The mode that party member want to play.
+	* @param ClientVersion The version of DS, fill it blank to choose the default version.
+	* @param Region The region where the party member want to play.
+	* @param Deployment The deployment mode where the party member requested
+	* @param ServerName The Local DS name, fill it blank if you don't use Local DS.
+	*/
+	FString RequestDS(FString const& SessionID, FString const& GameMode, FString const& ClientVersion,  FString const& Region, FString const& Deployment, FString const& ServerName = TEXT(""));
+
 	// Friends
 	/**
 	* @brief Send request friend request.
 	*
-	* @param param UserId Targeted user ID.
+	* @param UserId Targeted user ID.
 	*/
 	void RequestFriend(FString UserId);
 
@@ -684,8 +685,7 @@ public:
 	*/
 	void GetFriendshipStatus(FString UserId);
 
-
-	/*
+	/**
 	 * @brief Block specified player from being able to do certain action against current user
 	 * the specified player will be removed from friend list
 	 * 
@@ -699,7 +699,7 @@ public:
 	 *	Additional Limitation : 
 	 *	Blocked Player can't access blocker/current user's user ID
 	 *  
-	 * @param UserID the specified player's user ID. (Target to block)
+	 * @param UserId the specified player's user ID. (Target to block)
 	 * 
 	 */
 	 void BlockPlayer(const FString& UserId);
@@ -1102,7 +1102,7 @@ public:
 	*/
 	void SetJoinChannelChatResponseDelegate(FJoinDefaultChannelChatResponse OnJoinDefaultChannelResponse, FErrorHandler OnError = {})
 	{
-		JoinDefaultChannelResponse = OnJoinDefaultChannelResponse;
+		JoinDefaultChannelChatResponse = OnJoinDefaultChannelResponse;
 		OnJoinDefaultChannelChatError = OnError;
 	};
 
@@ -1243,6 +1243,16 @@ public:
 	{
 		DsNotif = OnDsNotification;
 	};
+
+	/**
+	 * @brief set create DS response delegate
+	 * *
+	 * */
+	void SetCreateDSDelegate(FBaseResponse OnCreateDSResponse, FErrorHandler OnError = {})
+	{
+		CreateDSResponse = OnCreateDSResponse;
+		OnCreateDSError = OnError;
+	}
 
 	// Friends
 	/**
@@ -1401,7 +1411,7 @@ public:
 	*/
 	void SetSignalingP2PDelegate(FSignalingP2P OnSignalingP2P)
 	{
-		SignalingP2P = OnSignalingP2P;
+		SignalingP2PNotif = OnSignalingP2P;
 	};
 
 	/**
@@ -1567,11 +1577,17 @@ private:
 	void OnMessage(const FString& Message);
 	void OnClosed(int32 StatusCode, const FString& Reason, bool WasClean);
 
-    FString SendRawRequest(FString MessageType, FString MessageIDPrefix, FString CustomPayload = TEXT(""));
-    bool Tick(float DeltaTime);
-    FString GenerateMessageID(FString Prefix = TEXT(""));
+    FString SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload = TEXT(""));
+    FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
 	void CreateWebSocket();
 	void FetchLobbyErrorMessages();
+
+#pragma region Message Parsing
+	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	static TMap<FString, Response> ResponseStringEnumMap;
+	static TMap<FString, Notif> NotifStringEnumMap;
+#pragma endregion
 
 	TMap<FString, FString> LobbyErrorMessages;
 	const float LobbyTickPeriod = 0.5;
@@ -1586,11 +1602,7 @@ private:
 	float TimeSinceLastReconnect;
 	float TimeSinceConnectionLost;
 	FString ChannelSlug;
-	EWebSocketState WsState;
-	EWebSocketEvent WsEvents;
-	FTickerDelegate LobbyTickDelegate;
-    FDelegateHandle LobbyTickDelegateHandle;
-	TSharedPtr<IWebSocket> WebSocket;
+	TSharedPtr<AccelByteWebSocket, ESPMode::ThreadSafe> WebSocket;
 	FAccelByteModelsLobbySessionId LobbySessionId;
 	FConnectSuccess ConnectSuccess;
 	FErrorHandler ConnectError;
@@ -1603,6 +1615,63 @@ private:
 		RefreshToken(Credentials.GetAccessToken());
 	});
 	
+#pragma region Message Id - Response Map
+	TMap<FString, FPartyInfoResponse> MessageIdPartyInfoResponseMap;
+	TMap<FString, FPartyCreateResponse> MessageIdPartyCreateResponseMap;
+	TMap<FString, FPartyLeaveResponse> MessageIdPartyLeaveResponseMap;
+	TMap<FString, FPartyInviteResponse> MessageIdPartyInviteResponseMap;
+	TMap<FString, FPartyJoinResponse> MessageIdPartyJoinResponseMap;
+	TMap<FString, FPartyRejectResponse> MessageIdPartyRejectResponseMap;
+	TMap<FString, FPartyKickResponse> MessageIdPartyKickResponseMap;
+	TMap<FString, FPartyGenerateCodeResponse> MessageIdPartyGenerateCodeResponseMap;
+	TMap<FString, FPartyGetCodeResponse> MessageIdPartyGetCodeResponseMap;
+	TMap<FString, FPartyDeleteCodeResponse> MessageIdPartyDeleteCodeResponseMap;
+	TMap<FString, FPartyJoinViaCodeResponse> MessageIdPartyJoinViaCodeResponseMap;
+	TMap<FString, FPartyPromoteLeaderResponse> MessageIdPartyPromoteLeaderResponseMap;
+
+	// Chat
+	TMap<FString, FPersonalChatResponse> MessageIdPersonalChatResponseMap;
+	TMap<FString, FPartyChatResponse> MessageIdPartyChatResponseMap;
+	TMap<FString, FJoinDefaultChannelChatResponse> MessageIdJoinDefaultChannelChatResponseMap;
+	TMap<FString, FChannelChatResponse> MessageIdChannelChatResponseMap;
+
+	// Presence
+	TMap<FString, FSetUserPresenceResponse> MessageIdSetUserPresenceResponseMap;
+	TMap<FString, FGetAllFriendsStatusResponse> MessageIdGetAllFriendsStatusResponseMap;
+
+	// Matchmaking
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingStartResponseMap;
+	TMap<FString, FMatchmakingResponse> MessageIdMatchmakingCancelResponseMap;
+	TMap<FString, FReadyConsentResponse> MessageIdReadyConsentResponseMap;
+
+	// Custom Game
+	TMap<FString, FBaseResponse> MessageIdCreateDSResponseMap;
+
+	// Friends
+	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsResponseMap;
+	TMap<FString, FUnfriendResponse> MessageIdUnfriendResponseMap;
+	TMap<FString, FListOutgoingFriendsResponse> MessageIdListOutgoingFriendsResponseMap;
+	TMap<FString, FCancelFriendsResponse> MessageIdCancelFriendsResponseMap;
+	TMap<FString, FListIncomingFriendsResponse> MessageIdListIncomingFriendsResponseMap;
+	TMap<FString, FAcceptFriendsResponse> MessageIdAcceptFriendsResponseMap;
+	TMap<FString, FRejectFriendsResponse> MessageIdRejectFriendsResponseMap;
+	TMap<FString, FLoadFriendListResponse> MessageIdLoadFriendListResponseMap;
+	TMap<FString, FGetFriendshipStatusResponse> MessageIdGetFriendshipStatusResponseMap;
+
+	// Block
+	TMap<FString, FBlockPlayerResponse> MessageIdBlockPlayerResponseMap;
+	TMap<FString, FUnblockPlayerResponse> MessageIdUnblockPlayerResponseMap;
+	TMap<FString, FListBlockedUserResponse> MessageIdListBlockedUserResponseMap;
+	TMap<FString, FListBlockerResponse> MessageIdListBlockerResponseMap;
+
+	//Session Attribute
+	TMap<FString, FSetSessionAttributeResponse> MessageIdSetSessionAttributeResponseMap;
+	TMap<FString, FGetSessionAttributeResponse> MessageIdGetSessionAttributeResponseMap;
+	TMap<FString, FGetAllSessionAttributeResponse> MessageIdGetAllSessionAttributeResponseMap;
+	TMap<FString, FRefreshTokenResponse> MessageIdRefreshTokenResponseMap;
+#pragma endregion
+
+#pragma region Response/Notif Delegates
     // Party 
     FPartyInfoResponse PartyInfoResponse;
     FPartyCreateResponse PartyCreateResponse;
@@ -1629,7 +1698,7 @@ private:
     FPersonalChatNotif PersonalChatNotif;
     FPartyChatResponse PartyChatResponse;
     FPartyChatNotif PartyChatNotif;
-	FJoinDefaultChannelChatResponse JoinDefaultChannelResponse;
+	FJoinDefaultChannelChatResponse JoinDefaultChannelChatResponse;
 	FChannelChatResponse ChannelChatResponse;
 	FChannelChatNotif ChannelChatNotif;
 
@@ -1651,6 +1720,9 @@ private:
 	FReadyConsentNotif ReadyConsentNotif;
 	FRematchmakingNotif RematchmakingNotif;
 	FDsNotif DsNotif;
+
+	// Custom Game
+	FBaseResponse CreateDSResponse;
 
 	// Friends
 	FRequestFriendsResponse RequestFriendsResponse;
@@ -1683,6 +1755,19 @@ private:
 	// Error
 	FErrorNotif ErrorNotif;
 
+	//Signaling P2P
+	FSignalingP2P SignalingP2PNotif;
+
+	//Session Attribute
+	FSetSessionAttributeResponse SetSessionAttributeResponse;
+	FGetSessionAttributeResponse GetSessionAttributeResponse;
+	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
+	
+	// Refresh Token
+	FRefreshTokenResponse RefreshTokenResponse;
+#pragma endregion
+
+
 	struct PartyStorageWrapper
 	{
 		FString PartyId;
@@ -1695,17 +1780,6 @@ private:
 	void RequestWritePartyStorage(const FString& PartyId, const FAccelByteModelsPartyDataUpdateRequest& Data, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted = NULL);
 
 	void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
-
-	//Signaling P2P
-	FSignalingP2P SignalingP2P;
-
-	//Session Attribute
-	FSetSessionAttributeResponse SetSessionAttributeResponse;
-	FGetSessionAttributeResponse GetSessionAttributeResponse;
-	FGetAllSessionAttributeResponse GetAllSessionAttributeResponse;
-	
-	// Refresh Token
-	FRefreshTokenResponse RefreshTokenResponse;
 
 	// Error Handler
 	FErrorHandler OnPartyInfoError;
@@ -1744,6 +1818,7 @@ private:
 	FErrorHandler OnGetSessionAttributeError;
 	FErrorHandler OnGetAllSessionAttributeError;
 	FErrorHandler OnRefreshTokenError;
+	FErrorHandler OnCreateDSError;
 };
 
 } // Namespace Api

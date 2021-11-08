@@ -1,7 +1,7 @@
 {
   "iam": {
-    "minVersion": "4.6.0",
-    "maxVersion": "4.6.0"
+    "minVersion": "4.6.1",
+    "maxVersion": "4.6.1"
   },
   "agreement": {
     "minVersion": "1.14.0",
@@ -36,8 +36,8 @@
     "maxVersion": "1.8.0"
   },
   "lobby": {
-    "minVersion": "2.4.1",
-    "maxVersion": "2.4.1"
+    "minVersion": "2.4.3",
+    "maxVersion": "2.4.3"
   },
   "group": {
     "minVersion": "2.9.0",

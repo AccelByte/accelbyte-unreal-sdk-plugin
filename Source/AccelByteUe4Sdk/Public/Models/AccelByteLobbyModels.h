@@ -20,6 +20,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyType
     FString Type;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsLobbyBaseResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Code;
+};
+
 // ------------------------------------------------------------------------------------------------
 // Party 
 // ------------------------------------------------------------------------------------------------

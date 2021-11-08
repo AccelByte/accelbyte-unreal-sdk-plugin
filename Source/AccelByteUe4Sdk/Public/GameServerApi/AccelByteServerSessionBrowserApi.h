@@ -1,36 +1,36 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
+
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteSessionBrowserModels.h"
-
-class FJsonObject;
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
-class Credentials;
-class Settings;
-namespace Api
+	
+class ServerCredentials;
+class ServerSettings;
+	
+namespace GameServerApi
 {
-
+	
 /**
-* @brief SessionBrowser API to handle custom game session.
+* @brief CloudSave API for storing records.
 */
-
-class ACCELBYTEUE4SDK_API SessionBrowser 
+class ACCELBYTEUE4SDK_API ServerSessionBrowser
 {
 public:
-	SessionBrowser(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
-	~SessionBrowser();
+	ServerSessionBrowser(const ServerCredentials& InCredentials, const ServerSettings& InSettings, FHttpRetryScheduler& InHttpRef);
+	~ServerSessionBrowser();
 private:
+	const ServerCredentials& CredentialsRef;
+	const ServerSettings& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
-	Credentials const& CredentialsRef;
-	Settings const& SettingsRef;
 
 public:
 	/**
@@ -326,24 +326,10 @@ public:
 		FString const& Password,
 		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, 
 		FErrorHandler const& OnError);
-
-	/**
-	* @brief Get game session data by session ID.
-	*
-	* @param SessionId id of the session
-	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsSessionBrowserData.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void GetGameSession(
-		FString const& SessionId,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError);
-
 private:
-	SessionBrowser() = delete;
-	SessionBrowser(SessionBrowser const&) = delete;
-	SessionBrowser(SessionBrowser&&) = delete;
+	ServerSessionBrowser() = delete;
+	ServerSessionBrowser(ServerSessionBrowser const&) = delete;
+	ServerSessionBrowser(ServerSessionBrowser&&) = delete;
 };
-
-} // Namespace Api
-} // Namespace AccelByte
+}
+}

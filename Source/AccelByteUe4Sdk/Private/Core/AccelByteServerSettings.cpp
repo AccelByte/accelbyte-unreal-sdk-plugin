@@ -86,6 +86,11 @@ FString UAccelByteBlueprintsServerSettings::GetSeasonPassServerUrl()
 	return FRegistry::ServerSettings.SeasonPassServerUrl;
 }
 
+FString UAccelByteBlueprintsServerSettings::GetSessionBrowserServerUrl()
+{
+	return FRegistry::ServerSettings.SessionBrowserServerUrl;
+}
+
 void UAccelByteBlueprintsServerSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::ServerSettings.ClientId = ClientId;
@@ -159,4 +164,9 @@ void UAccelByteBlueprintsServerSettings::SetCloudSaveServerUrl(const FString & C
 void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & SeasonPassServerUrl)
 {
 	FRegistry::ServerSettings.SeasonPassServerUrl = SeasonPassServerUrl;
+}
+
+void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
+{
+	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
 }

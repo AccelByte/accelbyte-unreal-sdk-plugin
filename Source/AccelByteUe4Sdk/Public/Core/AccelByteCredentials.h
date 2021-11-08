@@ -38,6 +38,7 @@ public:
 
 public:
 	Credentials();
+	~Credentials();
 
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);

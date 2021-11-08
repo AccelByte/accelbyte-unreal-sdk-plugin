@@ -44,5 +44,26 @@ namespace AccelByte
 
 			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
+
+		void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+			
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression"), *Settings.SeasonPassServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Verb = TEXT("GET");
+			FString ContentType = TEXT("application/json");
+			FString Accept = TEXT("application/json");
+			
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+			Request->SetURL(Url);
+			Request->SetHeader(TEXT("Authorization"), Authorization);
+			Request->SetVerb(Verb);
+			Request->SetHeader(TEXT("Content-Type"), ContentType);
+			Request->SetHeader(TEXT("Accept"), Accept);
+
+			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		}
+		
 	}
 }
