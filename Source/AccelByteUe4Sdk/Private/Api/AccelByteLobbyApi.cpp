@@ -54,6 +54,9 @@ namespace Api
 		const FString MatchmakingCancel = TEXT("cancelMatchmakingRequest");
 		const FString ReadyConsent = TEXT("setReadyConsentRequest");
 
+		// Custom Game
+		const FString CreateDS = TEXT("createDSRequest");
+
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsRequest");
 		const FString Unfriend = TEXT("unfriendRequest");
@@ -86,7 +89,6 @@ namespace Api
 		// default
 		const FString ConnectedNotif = TEXT("connectNotif");
 		const FString DisconnectNotif = TEXT("disconnectNotif");
-
 
 		// Party
 		const FString PartyInfo = TEXT("partyInfoResponse");
@@ -136,6 +138,9 @@ namespace Api
 		const FString ReadyConsentNotif = TEXT("setReadyConsentNotif");
 		const FString RematchmakingNotif = TEXT("rematchmakingNotif");
 		const FString DsNotif = TEXT("dsNotif");
+
+		// Custom Game
+		const FString CreateDS = TEXT("createDSResponse");
 
 		// Friends
 		const FString RequestFriends = TEXT("requestFriendsResponse");
@@ -230,6 +235,9 @@ namespace Api
 		MatchmakingStart,
 		MatchmakingCancel,
 		ReadyConsent,
+
+		// Custom Game
+		CreateDS,
 
 		// Friends
 		RequestFriends,
@@ -356,6 +364,7 @@ namespace Api
 		FORM_STRING_ENUM_PAIR(Response,GetSessionAttribute),
 		FORM_STRING_ENUM_PAIR(Response,GetAllSessionAttribute),
 		FORM_STRING_ENUM_PAIR(Response,RefreshToken),
+		FORM_STRING_ENUM_PAIR(Response,CreateDS),
 	};
 
 	TMap<FString, Notif> Lobby::NotifStringEnumMap{
@@ -793,6 +802,13 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(ReadyConsent, Matchmaking,
 		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
+}
+
+FString Lobby::RequestDS(FString const& SessionID, FString const& GameMode, FString const& ServerName, FString const& ClientVersion, FString const& Region, FString const& Deployment)
+{
+	FReport::Log(FString(__FUNCTION__));
+	return SendRawRequest(LobbyRequest::CreateDS, Prefix::Matchmaking,
+			FString::Printf(TEXT("matchId: %s\ngameMode: %s\nserverName: %s\nclientVersion: %s\nregion: %s\ndeployment: %s\n"), *SessionID, *GameMode, *ServerName, *ClientVersion, *Region, *Deployment));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1630,6 +1646,8 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingStart	, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
 		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MatchmakingCancel, FAccelByteModelsMatchmakingResponse, FMatchmakingResponse);
 		CASE_RESPONSE_MESSAGE_ID(ReadyConsent, FAccelByteModelsReadyConsentRequest);
+		// Custom Game
+		CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(CreateDS			, FAccelByteModelsLobbyBaseResponse, FBaseResponse);
 		// Friends
 		CASE_RESPONSE_MESSAGE_ID(RequestFriends		, FAccelByteModelsRequestFriendsResponse);
 		CASE_RESPONSE_MESSAGE_ID(Unfriend			, FAccelByteModelsUnfriendResponse);

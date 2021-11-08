@@ -268,8 +268,35 @@ void FVersionSpec::Define()
 
 			It(FString::Printf(TEXT("When compare \"%s\" and \"%s\", Then it's less than 0"), *A, *B), [this, A, B]()
 			{
-				AB_TEST_TRUE(FVersion{A}.Compare(FVersion{B}) < 0);
-				AB_TEST_TRUE(FVersion{B}.Compare(FVersion{A}) > 0);
+				FVersion VerA{ A };
+				FVersion VerB{ B };
+				AB_TEST_TRUE(VerA.Compare(VerB) < 0);
+				AB_TEST_TRUE(VerB.Compare(VerA) > 0);
+
+				return true;
+			});
+		}
+	}); 
+	
+	Describe("Given a list of valid version core strings and patch number is ignored", [this]()
+	{
+		TArray<FString> const OrderedVersions =
+		{
+			"0.0.1",
+			"0.0.10",
+			"0.0.200",
+		};
+
+		for (int i = 0; i < OrderedVersions.Num() - 1; i++)
+		{
+			FString A = OrderedVersions[i];
+			FString B = OrderedVersions[i + 1];
+
+			It(FString::Printf(TEXT("When compare \"%s\" and \"%s\", Then it's equal to 0"), *A, *B), [this, A, B]()
+			{
+				FVersion VerA{ A };
+				FVersion VerB{ B };
+				AB_TEST_TRUE(VerA.Compare(VerB, true) == 0);
 
 				return true;
 			});
@@ -410,13 +437,14 @@ void FVersionSpec::Define()
 
 			It(FString::Printf(TEXT("When compare \"%s\" and \"%s\", Then it's less than 0"), *A, *B), [this, A, B]()
 			{
-				AB_TEST_TRUE(FVersion{A}.Compare(FVersion{B}) < 0);
-				AB_TEST_TRUE(FVersion{B}.Compare(FVersion{A}) > 0);
+				FVersion VerA{ A };
+				FVersion VerB{ B };
+				AB_TEST_TRUE(VerA.Compare(VerB) < 0);
+				AB_TEST_TRUE(VerB.Compare(VerA) > 0);
 
 				return true;
 			});
 		}
-
 	});
 }
 
@@ -503,7 +531,7 @@ void FServiceVersionCompatibilitySpec::Define()
 
 	Describe("Given a valid JSON with 1 service and valid version string", [this]()
 	{
-		FString const Json = "{ \"servicename\": { \"minVersion\": \"1.0.0\", \"maxVersion\": \"2.0.0\" } }";
+		FString const Json = "{ \"servicename\": { \"minVersion\": \"1.0.1\", \"maxVersion\": \"2.0.0\" } }";
 		FServiceCompatibilityMap const Map = FServiceCompatibilityMap::FromJson(Json);
 
 		It("When constructed, Then Map has 1 service", [this, Json, Map]()
@@ -515,9 +543,9 @@ void FServiceVersionCompatibilitySpec::Define()
 			return true;
 		});
 
-		It("When check with version within range, Then result is error", [this, Map]()
+		It("When check with version within range, Then result is not error", [this, Map]()
 		{
-			AB_TEST_FALSE(Map.Check("servicename", "1.0.0").bIsError);
+			AB_TEST_FALSE(Map.Check("servicename", "1.0.1").bIsError);
 			AB_TEST_FALSE(Map.Check("servicename", "1.2.0").bIsError);
 			AB_TEST_FALSE(Map.Check("servicename", "2.0.0-rc.1").bIsError);
 			AB_TEST_FALSE(Map.Check("servicename", "2.0.0").bIsError);
@@ -525,7 +553,7 @@ void FServiceVersionCompatibilitySpec::Define()
 			return true;
 		});
 
-		It("When check with non existent service, Then result is not error", [this, Map]()
+		It("When check with non existent service, Then result is error", [this, Map]()
 		{
 			AB_TEST_TRUE(Map.Check("nothing", "1.0.0").bIsError);
 
@@ -535,7 +563,16 @@ void FServiceVersionCompatibilitySpec::Define()
 		It("When check with version outside range, Then result is error", [this, Map]()
 		{
 			AB_TEST_TRUE(Map.Check("servicename", "1.0.0-rc1").bIsError);
-			AB_TEST_TRUE(Map.Check("servicename", "2.0.1").bIsError);
+			AB_TEST_TRUE(Map.Check("servicename", "1.0.0").bIsError);
+			AB_TEST_TRUE(Map.Check("servicename", "2.1.0").bIsError);
+
+			return true;
+		});
+
+		It("When check with version otuside range but patch number is ignored, Then result is not error", [this, Map]()
+		{
+			AB_TEST_FALSE(Map.Check("servicename", "1.0.0", true).bIsError);
+			AB_TEST_FALSE(Map.Check("servicename", "2.0.4", true).bIsError);
 
 			return true;
 		});

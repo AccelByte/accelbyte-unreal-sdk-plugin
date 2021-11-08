@@ -1013,6 +1013,20 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGrantExpSuccess);
 	AB_TEST_EQUAL(ExpectedExp, UserSeasonAfterGrantedExp.CurrentExp);
 
+	// Get current user progression
+	bool bGetUserProgressionSuccess = false;
+	FAccelByteModelsUserSeasonInfoWithoutReward CurrentUserProgression;
+	FRegistry::ServerSeasonPass.GetCurrentUserSeasonProgression(FRegistry::Credentials.GetUserId(), THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+		[&bGetUserProgressionSuccess, &CurrentUserProgression](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
+	{
+		UE_LOG(LogAccelByteSeasonPassTest, Log,	TEXT("Get user progression success"));
+		bGetUserProgressionSuccess = true;
+		CurrentUserProgression = Result;
+	}), SeasonPassOnError);
+	WaitUntil(bGetUserProgressionSuccess, "waiting to get current user progression");
+	AB_TEST_TRUE(bGetUserProgressionSuccess);
+	AB_TEST_EQUAL(ExpectedExp, CurrentUserProgression.CurrentExp);
+	
 	return true;
 }
 

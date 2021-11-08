@@ -267,6 +267,13 @@ bool FHttpRetryTask::IsFinished()
 		Request->GetStatus() == EHttpRequestStatus::Succeeded;
 }
 
+FHttpRetryScheduler::FHttpRetryScheduler()
+	: TaskQueue()
+{}
+
+FHttpRetryScheduler::~FHttpRetryScheduler()
+{}
+
 FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
 {
 	FAccelByteTaskPtr Task(nullptr);

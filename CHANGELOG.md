@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.1.0%0D7.0.3) (2021-11-08)
+
+
+### Features
+
+* **GetCurrentUserProgression:** add GetCurrentUserProgression ([22b27b9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/22b27b94894da5a66ab6334bcddaac5860063c8f))
+* **lobby:** add API to request DS for custom game session ([d9c0ef3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d9c0ef37fb45a2993dfe110197b53f66b8e60638))
+* **sessionbrowser:** add APIs to manage custom game session ([75d0c64](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/75d0c640316afe7e41a6aa34b7cf5ef8024220c4))
+* **utilities:** add UEnum to FString conversion and vice versa ([7e346d2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7e346d2c1a9f6998d30d58811b39919ba0a6aea5))
+* **websocket:** add scheduler to make sure websocket messages execute in gamethread. ([083545e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/083545ec28071d76356b7e7d0bd119458c2e00c2))
+
+
+### Bug Fixes
+
+* **MultiRegistry:** Fix double Free calls from ApiClient when using shared credential ([83aeddb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/83aeddb2e97687a7852c96bf4f9a4004f1b6a17b))
+* **settings:** Resolve compile warning in AccelByte Setting in ResetSettings ([007b9d2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/007b9d2be12fc49b3656566a27ae36c9f4516be8))
+* **websocket:** attempt to clear all ws event before disconnecting & clear prev ws events on connect ([71211fb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/71211fb96ebad66dc18eb9826427fc8847dfeb11))
+* **websocket:** make sure OnConnect event is called before disconnecting. ([1e05e7c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1e05e7c3b49aab3f8caaddd3f3b71c14bc997274))
+* **websocket:** solve IsConnected returned true before connect event is triggered ([f41e207](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f41e2073807a19adeb2b48eeae426dfc3cb4fec6))
+
+
+### Refactors
+
+* **lobby:** message id is now taken into account when triggering a esponse delegate ([549d7af](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/549d7aff1df1d288a13f3c1171b4afdd38c29f07))
+* **lobby:** moving to switch from if conditionals ([99e8d43](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/99e8d43c336937f60167ee993bea32c4d3c48e5e))
+* **lobby:** Update some LobbyResponse string format, add const string for "suffix" namespace ([906c3d6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/906c3d6666eb0348b09ac43142683dabef12b4b4))
+* **websocket:** extract websocket management from lobby to it's own class ([25348b1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/25348b10a4fde62dfaf3e44658d863a46f1e49d3))
+
+
+### Tests
+
+* **lobby:** add simple test AccelByte.Tests.Lobby.B.MessageIdCachedResponse ([cdc215f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cdc215f629e796c9217078b8010478d661c320fa))
+* **lobby:** fix matchmaking random timeout after StartMatchmakingAllParameters Test & increase wait matchmaking notif timeout ([902bacd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/902bacd540727b2155171dbe62577430e206d277))
+* **lobby:** Increase timeout for Matchmaking and ReadyConsent notif as original value is too low ([791b655](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/791b655d5fe5ed1b5f30a3fa1b017afbc0dc9c11))
+* **sessionbrowser:** add integration tests for custom game session ([4548248](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/454824840e872589eaa880620cea2c48b3225bc3))
+
+### [7.0.3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.3%0D7.0.2) (2021-10-27)
+
+
+### Refactors
+
+* **compatibility:** add flag to ignore comparing patch number in the version ([4ea2a02](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4ea2a02abccda60181c4034a69f3ab9aceafa38b))
+* **compatibility:** use LogWarning when version mismatch happened for less disruptive process ([36ce5bd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/36ce5bddab8aead5a1946005d30f95d22ddf5b1c))
+
+
+### Tests
+
+* **compatibility:** add new test cases for ignoring patch number ([d53a905](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d53a9059ee9e8df26666e8cfc8b2120f5ec220d1))
+
 ### [7.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.0.2%0D7.0.1) (2021-10-26)
 
 

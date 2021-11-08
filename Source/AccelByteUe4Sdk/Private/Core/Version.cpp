@@ -128,6 +128,22 @@ bool TryParseVersionCore(FString const& InVersion, FVersion& OutVersionCore)
 	return true;
 }
 
+int32 CompareVersionNumber(int32 Left, int32 Right)
+{
+	int32 CompareResult = 0;
+	
+	if (Left < Right)
+	{
+		CompareResult = -1;
+	} 
+	else if (Left > Right)
+	{
+		CompareResult = 1;
+	}
+	
+	return CompareResult;
+}
+
 FVersion::FVersion(int32 const Major, int32 const Minor, int32 const Patch, TArray<FString> PreReleaseSegments) :
 	Major{Major},
 	Minor{Minor},
@@ -195,14 +211,10 @@ int32 ComparePreRelease(TArray<FString> const& A, TArray<FString> const& B)
 
 		if (bIsNumericA && bIsNumericB)
 		{
-			if (NumA < NumB)
+			int32 const CompareResult = CompareVersionNumber(NumA, NumB);
+			if (CompareResult != 0)
 			{
-				return -1;
-			}
-		
-			if (NumA > NumB)
-			{
-				return 1;
+				return CompareResult;
 			}
 		}
 
@@ -230,36 +242,32 @@ int32 ComparePreRelease(TArray<FString> const& A, TArray<FString> const& B)
 	return 0;
 }
 
-int32 FVersion::Compare(FVersion const& Other) const
+int32 FVersion::Compare(FVersion const& Other, bool bPatchIgnored) const
 {
-	if (Major < Other.Major)
+	int32 CompareResult = 0;
+
+	CompareResult = CompareVersionNumber(Major, Other.Major);
+	
+	if (CompareResult != 0)
 	{
-		return -1;
+		return CompareResult;
 	}
 
-	if (Major > Other.Major)
+	CompareResult = CompareVersionNumber(Minor, Other.Minor);
+	
+	if (CompareResult != 0)
 	{
-		return 1;
+		return CompareResult;
 	}
-
-	if (Minor < Other.Minor)
+	
+	if (!bPatchIgnored)
 	{
-		return -1;
-	}
+		CompareResult = CompareVersionNumber(Patch, Other.Patch);
 
-	if (Minor > Other.Minor)
-	{
-		return 1;
-	}
-
-	if (Patch < Other.Patch)
-	{
-		return -1;
-	}
-
-	if (Patch > Other.Patch)
-	{
-		return 1;
+		if (CompareResult != 0)
+		{
+			return CompareResult;
+		}
 	}
 
 	return ComparePreRelease(PreReleaseSegments, Other.PreReleaseSegments);
@@ -269,7 +277,6 @@ FString FVersion::ToString() const
 {
 	return FString::Printf(TEXT("%u.%u.%u"), Major, Minor, Patch);
 }
-
 
 FServiceCompatibilityMap FServiceCompatibilityMap::FromJson(FString const JsonString)
 {
@@ -315,7 +322,7 @@ FServiceCompatibilityMap::FServiceCompatibilityMap(TMap<FString, FVersionRange> 
 	:
 	Map{MoveTemp(Map)} {}
 
-FResult FServiceCompatibilityMap::Check(FString const& ServiceName, FString const& VersionStr) const
+FResult FServiceCompatibilityMap::Check(FString const& ServiceName, FString const& VersionStr, bool bPatchIgnored) const
 {
 	if (ServiceName.IsEmpty())
 	{
@@ -335,7 +342,7 @@ FResult FServiceCompatibilityMap::Check(FString const& ServiceName, FString cons
 		return FResult{true, FString::Printf(TEXT("Version name %s not found"), *ServiceName)};
 	}
 
-	if(!IsCompatible(*RangePtr, Version))
+	if(!FServiceCompatibilityMap::IsCompatible(*RangePtr, Version, bPatchIgnored))
 	{
 		return FResult
 		{
@@ -360,7 +367,14 @@ TArray<FString> FServiceCompatibilityMap::GetServices() const
 	return OutKeys;
 }
 
-bool FServiceCompatibilityMap::IsCompatible(FVersionRange const& Range, FVersion const& Version)
+bool FServiceCompatibilityMap::IsCompatible(FVersionRange const& Range, FVersion const& Version, bool bPatchIgnored)
 {
-	return Range.Min.Compare(Version) <= 0 && Range.Max.Compare(Version) >= 0;
+	bool Compatible = true;
+	int32 MinVersionCompare = Range.Min.Compare(Version, bPatchIgnored);
+	Compatible &= (MinVersionCompare <= 0);
+
+	int32 MaxVersionCompare = Range.Max.Compare(Version, bPatchIgnored);
+	Compatible &= (MaxVersionCompare >= 0);
+
+	return Compatible;
 }

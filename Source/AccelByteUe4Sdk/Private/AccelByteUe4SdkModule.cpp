@@ -152,6 +152,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
 	FRegistry::ServerSettings.LobbyServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->LobbyServerUrl, TEXT("lobby"));
 	FRegistry::ServerSettings.CloudSaveServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->CloudSaveServerUrl, TEXT("cloudsave"));
 	FRegistry::ServerSettings.SeasonPassServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->SeasonPassServerUrl, TEXT("seasonpass"));
+	FRegistry::ServerSettings.SessionBrowserServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->SessionBrowserServerUrl, TEXT("sessionbrowser"));
 	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 
 #endif
@@ -230,8 +231,11 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 			FRegistry::Settings.BaseUrl / ServiceName,
 			[CompatibilityMapPtr, ServiceName](FVersionInfo const VersionInfo)
 			{
-				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version);
-				ensureAlwaysMsgf(!Result.bIsError, TEXT("%s"), *Result.Message);
+				FResult const Result = CompatibilityMapPtr->Check(ServiceName, VersionInfo.Version, true);
+				if (Result.bIsError)
+				{
+					UE_LOG(LogAccelByte, Warning, TEXT("[Compatibility] %s"), *Result.Message);
+				}
 			});
 	}
 }
