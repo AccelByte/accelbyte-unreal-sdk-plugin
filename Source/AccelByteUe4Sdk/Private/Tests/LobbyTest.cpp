@@ -43,6 +43,7 @@ const auto LobbyTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCod
 });
 
 const int WaitMatchmakingTime = 120;
+const int DsNotifWaitTime = 60;
 const int TestUserCount = 6;
 FString UserIds[TestUserCount];
 Credentials UserCreds[TestUserCount];
@@ -3635,7 +3636,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -3821,7 +3822,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -4049,7 +4050,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bSessionIdDone = false;
@@ -4319,7 +4320,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -4884,7 +4885,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -5123,13 +5124,13 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	WaitUntil([&]()
 	{
 		return bLatencyDsNotifSuccess[0];
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bLatencyDsNotifError[0]);
 
 	WaitUntil([&]()
 	{
 		return bLatencyDsNotifSuccess[1];
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bLatencyDsNotifError[1]);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -5271,7 +5272,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -5389,7 +5390,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -5803,7 +5804,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeleteMatchmakingChannelSuccess = false;
@@ -6011,7 +6012,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
 
 	bool bDeregisterLocalServerFromDSMDone = false;
@@ -6182,7 +6183,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	WaitUntil([&]()
 	{
 		return bDsNotifSuccess;
-	}, "Waiting for DS Notification...", 30);
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
 
 	AB_TEST_FALSE(bDsNotifError);
 	bool bDeleteMatchmakingChannelSuccess = false;
