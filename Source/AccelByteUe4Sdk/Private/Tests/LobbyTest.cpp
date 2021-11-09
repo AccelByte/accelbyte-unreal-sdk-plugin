@@ -4424,7 +4424,7 @@ bool LobbyTestStartMatchmakingAllParams_ReturnOk::RunTest(const FString& Paramet
 	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies, partyAttribute, TArray<FString>({UserIds[0]}), ExtraAttributes);
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 
-	WaitUntil(bMatchmakingNotifReceived, "Wait Matchmaking notif received", WaitMatchmakingTime); // match timeout in backend is hardcoded to 2 min
+	WaitUntil(bMatchmakingNotifReceived, "Wait Matchmaking notif received", WaitMatchmakingTime + 10); // match timeout in backend is hardcoded to 2 min, added 10 sec to account for transport delay
 
 	// Asserts
 	AB_TEST_FALSE(bStartMatchmakingError);
