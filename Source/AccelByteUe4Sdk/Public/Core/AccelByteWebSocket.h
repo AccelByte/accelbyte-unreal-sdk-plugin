@@ -64,12 +64,6 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	FConnectionErrorDelegate& OnConnectionError();
 	FConnectionCloseDelegate& OnConnectionClosed();
 
-	bool bConnectTriggered = false;
-	TQueue<FString> OnMessageQueue;
-	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
-	TQueue<FString> OnConnectionErrorQueue;
-	bool bConnectedBroadcasted;
-
 	void Reconnect();
 
 	FTickerDelegate TickerDelegate;
@@ -93,24 +87,30 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	void SendPing() const;
 	void Send(const FString& Message) const;
 	
-	private:
+private:
+	bool bConnectTriggered {false};
+	TQueue<FString> OnMessageQueue;
+	TQueue<FConnectionClosedParams> OnConnectionClosedQueue;
+	TQueue<FString> OnConnectionErrorQueue;
+	bool bConnectedBroadcasted {false};
+	
 	FConnectDelegate ConnectDelegate;
 	FMessageReceiveDelegate MessageReceiveDelegate;
 	FConnectionErrorDelegate ConnectionErrorDelegate;
 	FConnectionCloseDelegate ConnectionCloseDelegate;
 
-	const float TickPeriod = 0.5;
-	double TimeSinceLastPing;
-	float TimeSinceLastReconnect;
-	float TimeSinceConnectionLost;
-	int BackoffDelay;
-	int InitialBackoffDelay;
-	int32 RandomizedBackoffDelay;
-	float PingDelay;
-	double TotalTimeout;
-	int MaxBackoffDelay;
-	bool bWasWsConnectionError = false;
-	bool bDisconnectOnNextTick;
+	const float TickPeriod {0.5f};
+	double TimeSinceLastPing {0.0f};
+	float TimeSinceLastReconnect {0.0f};
+	float TimeSinceConnectionLost {0.0f};
+	int BackoffDelay {0};
+	int InitialBackoffDelay {0};
+	int32 RandomizedBackoffDelay {0};
+	float PingDelay {0.0f};
+	double TotalTimeout {0.0f};
+	int MaxBackoffDelay {0};
+	bool bWasWsConnectionError {false};
+	bool bDisconnectOnNextTick {false};
 	TSharedPtr<IWebSocketFactory> WebSocketFactory;
 
 	const Credentials& Creds;
