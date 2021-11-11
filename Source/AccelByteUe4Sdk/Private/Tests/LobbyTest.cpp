@@ -17,10 +17,12 @@
 #include "UserTestAdmin.h"
 #include "LobbyTestAdmin.h"
 #include "MatchmakingTestAdmin.h"
-
-
+#include "EcommerceTestAdmin.h"
+	
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
+
+#include "Core/AccelByteEntitlementTokenGenerator.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -7610,8 +7612,246 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 	return true;
 }
 
-#pragma region LobbyMultithreadTesting
+#if 0 // don't automatically run this tests.
+/***********************************************************************************
+* Setup needed to run test
+* 
+* 1. create an item that have appId in publisher namespace
+* 2. enable the entitlement check in lobby config
+* 3. add item id for entitlement check in lobby config
+* 4. put the appId in SKU var in each test
+* 
+* Don't forget to disable entitlement check in lobby config to test another lobby tests. 
+***********************************************************************************/
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EntitlementNotOwned, "AccelByte.Tests.Lobby.G.EntitlementNotOwned", AutomationFlagMaskLobby);
+bool EntitlementNotOwned::RunTest(const FString& Parameter)
+{
+	// Arrange
+	const FString Sku("sdktestSkuApp001");
 
+	AccelByte::Api::User& User = FRegistry::User;
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	
+	// login user
+	bool bUserLoggedIn = false;
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoggedIn]()
+	{
+		bUserLoggedIn = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bUserLoggedIn, "Waiting user logged in");
+
+	// Set Lobby Delegates
+	bool bLobbyConnected = false;
+	Lobby.SetConnectSuccessDelegate(Api::Lobby::FConnectSuccess::CreateLambda([&bLobbyConnected]()
+	{
+		bLobbyConnected = true;
+	}));
+	
+	bool bLobbyConnectError = false;
+	Lobby.SetConnectFailedDelegate(FErrorHandler::CreateLambda([&bLobbyConnectError](const int code, const FString& Message)
+	{
+		bLobbyConnectError = true;
+	}));
+	
+	// set entitlement ownership token generator
+	FTokenGeneratorParams GeneratorParams;
+	GeneratorParams.Skus = {Sku};
+	Lobby.SetTokenGenerator(MakeShared<FAccelByteEntitlementTokenGenerator>(GeneratorParams));
+	
+	// Act
+	Lobby.Connect();
+	DelaySeconds(10, "Waiting Lobby Connecting");
+
+	Lobby.Disconnect();
+	DelaySeconds(3, "Waiting Lobby Disconnect");
+	
+	bool bUserDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bUserDeleteDone]()
+	{
+		bUserDeleteDone = true;
+	}), LobbyTestErrorHandler);
+	WaitUntil(bUserDeleteDone, "Waiting delete user for cleanup");
+
+	// Assert
+	AB_TEST_FALSE(bLobbyConnected);
+	AB_TEST_TRUE(bLobbyConnectError);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(EntilementOwned, "AccelByte.Tests.Lobby.G.EntilementOwned", AutomationFlagMaskLobby);
+bool EntilementOwned::RunTest(const FString& Parameter)
+{	
+	// Arrange Setup Item
+	//const FString Sku("apiseed1635893021d5ec135");
+	const FString Sku("APPG0101D");
+	const FString PublisherNamespace(GetPublisherNamespace());
+
+	// Arrange Get Publisher Store ID
+	FString StoreId = "";
+	bool bGetPublishedStoreDone = false;
+	AdminGetEcommercePublishedStore(PublisherNamespace,
+		THandler<FStoreInfo>::CreateLambda([&StoreId, &bGetPublishedStoreDone](const FStoreInfo& Result)
+		{
+			StoreId = Result.storeId;
+			bGetPublishedStoreDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bGetPublishedStoreDone, "Waiting get store ID from published store");
+	
+	// Arrange Get itemID from SKU
+	FString ItemId = "";
+	bool bGetItemIdDone = false;
+	AdminGetEcommerceItemBySKU(PublisherNamespace, StoreId, Sku, false,
+		THandler<FItemFullInfo>::CreateLambda([&ItemId, &bGetItemIdDone](const FItemFullInfo& result)
+		{
+			ItemId = result.itemId;
+			bGetItemIdDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bGetItemIdDone, "Waiting get Item Id from SKU");
+	
+	// Arrange
+	AccelByte::Api::User& User = FRegistry::User;
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	AccelByte::Credentials& Credentials = FRegistry::Credentials;
+	
+	// Arrange login user
+	bool bUserLoggedIn = false;
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoggedIn]()
+	{
+		bUserLoggedIn = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bUserLoggedIn, "Waiting user logged in");
+
+	// Arrange Get User Publisher Id
+	FString PublisherUserId = "";
+	bool bGetPublisherUserId = false;
+	AdminGetUserMap(Credentials.GetUserId(),
+		THandler<FUserMapResponse>::CreateLambda([&PublisherUserId, &bGetPublisherUserId](const FUserMapResponse& result)
+		{
+			PublisherUserId = result.userId;
+			bGetPublisherUserId = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bGetPublisherUserId, "Waiting get publisher user id");
+	
+	// Arrange Grant App to user
+	FFulfillmentRequest ToGrant;
+	ToGrant.ItemId = ItemId;
+	ToGrant.Quantity = 1;
+	ToGrant.EndDate = (FDateTime::UtcNow() + FTimespan::FromMinutes(10)).ToIso8601();
+
+	bool bItemGrantDone = false;
+	AdminFulfillItem(PublisherNamespace, PublisherUserId, ToGrant,
+		FVoidHandler::CreateLambda([&bItemGrantDone]()
+		{
+			bItemGrantDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bItemGrantDone, "Waiting granting Item to user");
+
+	// Arrange Set Lobby Delegates
+	bool bLobbyConnected = false;
+	Lobby.SetConnectSuccessDelegate(Api::Lobby::FConnectSuccess::CreateLambda([&bLobbyConnected]()
+	{
+		bLobbyConnected = true;
+	}));
+	
+	bool bLobbyConnectError = false;
+	Lobby.SetConnectFailedDelegate(FErrorHandler::CreateLambda([&bLobbyConnectError](const int code, const FString& Message)
+	{
+		bLobbyConnectError = true;
+	}));
+	
+	// Arrange set entitlement ownership token generator
+	FTokenGeneratorParams GeneratorParams;
+	GeneratorParams.Skus = { Sku };
+	Lobby.SetTokenGenerator(MakeShared<FAccelByteEntitlementTokenGenerator>(GeneratorParams));
+	
+	// Act
+	Lobby.Connect();
+	DelaySeconds(3, "Waiting Lobby Connecting");
+
+	Lobby.Disconnect();
+	DelaySeconds(3, "Waiting Lobby Disconnect");
+
+	bool bUserDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bUserDeleteDone]()
+	{
+		bUserDeleteDone = true;
+	}), LobbyTestErrorHandler);
+	WaitUntil(bUserDeleteDone, "Waiting delete user for cleanup");
+
+	// Assert
+	AB_TEST_TRUE(bLobbyConnected);
+	AB_TEST_FALSE(bLobbyConnectError);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetUnsetTokenGenerator, "AccelByte.Tests.Lobby.G.SetUnsetTokenGenerator", AutomationFlagMaskLobby);
+bool SetUnsetTokenGenerator::RunTest(const FString& Parameter)
+{
+	// Arrange
+	const FString Sku("APPG0101D");
+
+	AccelByte::Api::User& User = FRegistry::User;
+	AccelByte::Api::Lobby& Lobby = FRegistry::Lobby;
+	
+	// login user
+	bool bUserLoggedIn = false;
+	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoggedIn]()
+	{
+		bUserLoggedIn = true;
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bUserLoggedIn, "Waiting user logged in");
+
+	// Set Lobby Delegates
+	bool bLobbyConnected = false;
+	Lobby.SetConnectSuccessDelegate(Api::Lobby::FConnectSuccess::CreateLambda([&bLobbyConnected]()
+	{
+		bLobbyConnected = true;
+	}));
+	
+	bool bLobbyConnectError = false;
+	Lobby.SetConnectFailedDelegate(FErrorHandler::CreateLambda([&bLobbyConnectError](const int code, const FString& Message)
+	{
+		bLobbyConnectError = true;
+	}));
+	
+	// set entitlement ownership token generator
+	FTokenGeneratorParams GeneratorParams;
+	GeneratorParams.Skus = {Sku};
+	Lobby.SetTokenGenerator(MakeShared<FAccelByteEntitlementTokenGenerator>(GeneratorParams));
+	
+	Lobby.SetTokenGenerator(nullptr);
+	
+	// Act
+	Lobby.Connect();
+	DelaySeconds(10, "Waiting Lobby Connecting");
+
+	Lobby.Disconnect();
+	DelaySeconds(3, "Waiting Lobby Disconnect");
+	
+	bool bUserDeleteDone = false;
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bUserDeleteDone]()
+	{
+		bUserDeleteDone = true;
+	}), LobbyTestErrorHandler);
+	WaitUntil(bUserDeleteDone, "Waiting delete user for cleanup");
+
+	// Assert
+	AB_TEST_TRUE(bLobbyConnected);
+
+	return true;
+}
+#endif // lobby connect with entitlement check test
+
+#pragma region LobbyMultithreadTesting
 class FTestLobbyUser : FRunnable
 {
 private:
@@ -7771,5 +8011,4 @@ bool FLobbyTestConcurrency::RunTest(const FString& Parameter)
 	AB_TEST_EQUAL(GetPartyInviteCounter.GetValue(), TestCount);
 	return true;
 }
-
 #pragma endregion LobbyMultithreadTesting
