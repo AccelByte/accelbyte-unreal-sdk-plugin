@@ -1,23 +1,23 @@
 {
   "iam": {
-    "minVersion": "4.6.1",
-    "maxVersion": "4.6.1"
+    "minVersion": "4.7.0",
+    "maxVersion": "4.7.0"
   },
   "agreement": {
     "minVersion": "1.14.0",
     "maxVersion": "1.14.0"
   },
   "basic": {
-    "minVersion": "1.25.0",
-    "maxVersion": "1.25.0"
+    "minVersion": "1.26.0",
+    "maxVersion": "1.26.0"
   },
   "platform": {
-    "minVersion": "3.36.0",
-    "maxVersion": "3.36.0"
+    "minVersion": "3.37.1",
+    "maxVersion": "3.37.1"
   },
   "social": {
-    "minVersion": "1.20.0",
-    "maxVersion": "1.20.0"
+    "minVersion": "1.21.0",
+    "maxVersion": "1.21.0"
   },
   "leaderboard": {
     "minVersion": "2.11.0",
@@ -32,12 +32,12 @@
     "maxVersion": "1.9.0"
   },
   "ugc": {
-    "minVersion": "1.8.0",
-    "maxVersion": "1.8.0"
+    "minVersion": "1.9.0",
+    "maxVersion": "1.9.0"
   },
   "lobby": {
-    "minVersion": "2.4.3",
-    "maxVersion": "2.4.3"
+    "minVersion": "2.4.6",
+    "maxVersion": "2.4.6"
   },
   "group": {
     "minVersion": "2.9.0",
@@ -48,8 +48,8 @@
     "maxVersion": "1.9.0"
   },
   "dsmcontroller": {
-    "minVersion": "2.7.0",
-    "maxVersion": "2.7.0"
+    "minVersion": "2.8.0",
+    "maxVersion": "2.8.0"
   },
   "game-telemetry": {
     "minVersion": "1.1.12",
