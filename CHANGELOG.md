@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.1.1%0D7.1.0) (2021-11-12)
+
+
+### Bug Fixes
+
+* **websocketclient:** uninitialized variables cause undefined behavior ([1bba21f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1bba21f1346e0014105fdaaa19588c6795034c4d))
+
 ## [7.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.1.0%0D7.0.3) (2021-11-08)
 
 
