@@ -42,9 +42,8 @@ public:
 	 * @param Port the port where your game server run.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
-	 * @param CustomAttribute Custom Attribute for this game server.
 	*/
-	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute = TEXT(""));
+	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 
     /*
