@@ -41,6 +41,8 @@ public:
 	*/
 	void LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	void GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler const& OnError) const;
+
 	/**
 	* @brief Remove access tokens, user ID, and other credentials from memory.
 	*/

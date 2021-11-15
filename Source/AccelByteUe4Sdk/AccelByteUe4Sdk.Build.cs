@@ -41,6 +41,7 @@ public class AccelByteUe4Sdk : ModuleRules
         
         PrivateDependencyModuleNames.AddRange(new []
         {
+            "OpenSSL",
             "Projects"
         });
 

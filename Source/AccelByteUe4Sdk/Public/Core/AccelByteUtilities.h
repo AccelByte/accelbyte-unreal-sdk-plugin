@@ -14,6 +14,92 @@ using AccelByte::FErrorHandler;
 
 enum class EAccelBytePlatformType : uint8;
 
+enum class EJwtResult
+{
+	Ok,
+	MalformedJwt,
+	SignatureMismatch,
+	AlgorithmMismatch,
+	MalformedPublicKey
+};
+
+/**
+ * @brief RSA public key with parameters encoded in Base64Url. Only supports 2048 bits modulus and 24 bits exponent
+ */
+class ACCELBYTEUE4SDK_API FRsaPublicKey
+{
+public:
+	
+	/**
+	 * @brief Construct FRsaPublicKey with modulus and exponent
+	 * @param ModulusB64Url RSA modulus (n) in Base64URL format
+	 * @param ExponentB64Url RSA exponent (e) in Base64URL format
+	 */
+	FRsaPublicKey(FString ModulusB64Url, FString ExponentB64Url); 
+
+	/**
+	 * @brief Check if this RSA public key is valid.    
+	 */
+	bool IsValid() const;
+
+	
+	/**
+	 * @brief Convert RSA public key to armored PEM format
+	 * @return PEM format armored with "-----BEGIN PUBLIC KEY-----" and "-----END PUBLIC KEY-----"
+	 */
+	FString ToPem() const;
+
+private:
+	FString const ModulusB64Url;
+	FString const ExponentB64Url;
+};
+
+
+/**
+ * @brief Provide access to verify JWT and extract its content.
+ */
+class ACCELBYTEUE4SDK_API FJwt
+{
+public:
+	/**
+	 * @brief Construct FJwt from JWT string
+	 * @param JwtString JWT encoded as dot separated Base64Url string
+	 */
+	explicit FJwt(FString JwtString);
+
+	/**
+	 * @brief Verify this JWT using RSA public key
+	 * @param Key RSA public key
+	 * @return EJwtResult::Ok if signature match
+	 */
+	EJwtResult VerifyWith(FRsaPublicKey Key) const;
+
+	/**
+	 * @brief Get header content from JWT. Content could be any valid JSON having at least "alg" field
+	 * @return JWT header
+	 */
+	TSharedPtr<FJsonObject> const& Header() const;
+
+	/**
+	 * @brief Get payload content from JWT. Content could be any valid JSON
+	 * @return JWT payload
+	 */
+	TSharedPtr<FJsonObject> const& Payload() const;
+
+	/**
+	 * @brief Check if this JWT format is correct and both and payload are valid JSON encoded as Base64URL
+	 * @return true if  this JWT is valid, false otherwise
+	 */
+	bool IsValid() const;
+
+private:
+	FString const JwtString;
+	int32 const HeaderEnd;
+	int32 const PayloadEnd;
+	TSharedPtr<FJsonObject> const HeaderJsonPtr;
+	TSharedPtr<FJsonObject> const PayloadJsonPtr;
+};
+
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:

@@ -6,6 +6,7 @@
 
 #include "Misc/DateTime.h"
 #include "CoreMinimal.h"
+#include "JsonObjectWrapper.h"
 #include "AccelByteOauth2Models.generated.h"
 
 // Emulate namespace with long class names
@@ -75,3 +76,14 @@ struct ACCELBYTEUE4SDK_API FOauth2Session
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Session")
 	FString Refresh_id;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FJwkSet
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | JWKSet")
+	TArray<FJsonObjectWrapper> keys;
+};
+
+

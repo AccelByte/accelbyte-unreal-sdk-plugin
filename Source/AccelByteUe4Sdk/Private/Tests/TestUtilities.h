@@ -18,7 +18,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteTest, Log, All);
 #define AB_TEST_INVALID(Ptr) UTEST_INVALID(TEXT(#Ptr), Ptr)
 #define AB_TEST_NOT_NULL(Ptr) UTEST_NOT_NULL(TEXT(#Ptr), Ptr)
 #define AB_TEST_NULL(Ptr) UTEST_NULL(TEXT(#Ptr), Ptr)
-#define AB_TEST_EQUAL(Actual, Expected) UTEST_EQUAL(TEXT(#Actual), Actual, Expected)
+#define AB_TEST_EQUAL(Actual, Expected) UTEST_EQUAL(TEXT(#Actual " and " #Expected), Actual, Expected)
 #define AB_TEST_NOT_EQUAL(Actual, Expected) UTEST_NOT_EQUAL(TEXT(#Actual " and " #Expected), Actual, Expected)
 #define AB_TEST_SAME(Actual, Expected) UTEST_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)
 #define AB_TEST_NOT_SAME(Actual, Expected) UTEST_NOT_SAME(TEXT(#Actual " and " #Expected)), Actual, Expected)

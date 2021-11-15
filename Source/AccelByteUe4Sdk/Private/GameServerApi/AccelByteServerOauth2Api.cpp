@@ -50,6 +50,22 @@ void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, con
 	}));
 }
 
+void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler const& OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Url             = FString::Printf(TEXT("%s/v3/oauth/jwks"), *FRegistry::ServerSettings.IamServerUrl);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 void ServerOauth2::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));
