@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteBPUser.h"
+#include "ABUser.h"
 #include "AccelByteBPLobby.h"
 #include "ABParty.h"
 #include "ABMatchmaking.h"
@@ -44,7 +44,7 @@ public:
 	UCredentials* Credentials;
 
 	UPROPERTY(BlueprintReadOnly)
-	UUser* User;
+	UABUser* User;
 
 	UPROPERTY(BlueprintReadOnly)
 	ULobby* Lobby;

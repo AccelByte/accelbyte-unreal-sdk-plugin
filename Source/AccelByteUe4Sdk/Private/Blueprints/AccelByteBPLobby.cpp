@@ -34,3 +34,14 @@ void ULobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }
+
+void ULobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
+{
+	ApiClientPtr->Lobby.SetErrorNotifDelegate(
+		Api::Lobby::FErrorNotif::CreateLambda(
+			[OnErrorNotification](int32 Code, const FString& Message)
+			{
+				OnErrorNotification.ExecuteIfBound(Code, Message);
+			}
+		));
+}

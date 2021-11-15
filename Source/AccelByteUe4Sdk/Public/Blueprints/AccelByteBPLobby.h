@@ -30,6 +30,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetOnConnected(FDHandler OnConnected) const;
 
+	UFUNCTION(BlueprintCallable)
+	void SetOnErrorNotification(FDErrorHandler OnErrorNotification) const;
+
 private:
 	bool bConnected{false};
 	FApiClientPtr ApiClientPtr;

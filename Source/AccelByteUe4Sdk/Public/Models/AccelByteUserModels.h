@@ -36,6 +36,7 @@ enum class EAccelBytePlatformType : uint8
 	Nintendo
 };
 
+UENUM(BlueprintType)
 enum class EAccelByteSearchType : uint8
 {
 	ALL, DISPLAYNAME, USERNAME

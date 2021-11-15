@@ -19,7 +19,7 @@ FString UCredentials::GetUserId() const
 UApiClient::UApiClient()
 {
 	Credentials = NewObject<UCredentials>();
-	User = NewObject<UUser>();
+	User = NewObject<UABUser>();
 	Lobby = NewObject<ULobby>();
 	Party = NewObject<UABParty>();
 	Matchmaking = NewObject<UABMatchmaking>();
