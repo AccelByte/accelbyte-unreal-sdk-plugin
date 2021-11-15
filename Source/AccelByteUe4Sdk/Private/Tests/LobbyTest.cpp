@@ -998,6 +998,9 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 
 	const LobbyMessageTest LobbyMessageArray("type: array\narray: [test, foo, bar]", R"({"type":"array","array":["test","foo","bar"]})");
 	const LobbyMessageTest LobbyMessageArrayWithTrailingComma("type: array\narray: [test, foo, bar,]", R"({"type":"array","array":["test","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayWithCommaInFront("type: array\narray: [, foo, bar,]", R"({"type":"array","array":["","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayWithDoubleCommaInMiddle("type: array\narray: [, test, , foo, bar,]", R"({"type":"array","array":["","test","","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayWithDoubleCommaBeforeTrailingComma("type: array\narray: [, test, , foo, bar, ,]", R"({"type":"array","array":["","test","","foo","bar",""]})");
 	const LobbyMessageTest LobbyMessageArrayQuoteComma("type: array\narray: [\"test,string\", foo, bar,]", R"({"type":"array","array":["test,string","foo","bar"]})");
 	const LobbyMessageTest LobbyMessageArrayQuoteEscape("type: array\narray: [\"test\\\"string\", foo, bar,]", R"({"type":"array","array":["test\"string","foo","bar"]})");
 	const LobbyMessageTest LobbyMessageObject("type: object\nexample: {\"key\":\"value\"}", R"({"type":"object","example":{"key":"value"}})");
@@ -1007,6 +1010,9 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 	TArray<LobbyMessageTest> TestData = {
 		LobbyMessageArray,
 		LobbyMessageArrayWithTrailingComma,
+		LobbyMessageArrayWithCommaInFront,
+		LobbyMessageArrayWithDoubleCommaInMiddle,
+		LobbyMessageArrayWithDoubleCommaBeforeTrailingComma,
 		LobbyMessageArrayQuoteComma,
 		LobbyMessageArrayQuoteEscape,
 		LobbyMessageObject,
