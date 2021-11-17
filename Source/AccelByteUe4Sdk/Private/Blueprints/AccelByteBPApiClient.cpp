@@ -23,6 +23,7 @@ UApiClient::UApiClient()
 	Lobby = NewObject<ULobby>();
 	Party = NewObject<UABParty>();
 	Matchmaking = NewObject<UABMatchmaking>();
+	Friends = NewObject<UABFriends>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -35,6 +36,7 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Lobby->SetApiClient(ApiClientPtr);
 	Party->SetApiClient(ApiClientPtr);
 	Matchmaking->SetApiClient(ApiClientPtr);
+	Friends->SetApiClient(ApiClientPtr);
 }
 
 UApiClient* UMultiRegistry::GetApiClient(FString const& Key)

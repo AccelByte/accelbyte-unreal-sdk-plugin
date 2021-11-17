@@ -1,0 +1,108 @@
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// This is licensed software from AccelByte Inc, for limitations
+// and restrictions contact your company contract manager.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Core/AccelByteError.h"
+#include "Models/AccelByteLobbyModels.h"
+#include "Core/AccelByteMultiRegistry.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "ABFriends.generated.h"
+
+using namespace AccelByte;
+
+#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDRequestFriendsResponse, FAccelByteModelsRequestFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDUnfriendResponse, FAccelByteModelsUnfriendResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDListOutgoingFriendsResponse, FAccelByteModelsListOutgoingFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDCancelFriendsResponse, FAccelByteModelsCancelFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDListIncomingFriendsResponse, FAccelByteModelsListIncomingFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAcceptFriendsResponse, FAccelByteModelsAcceptFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDRejectFriendsResponse, FAccelByteModelsRejectFriendsResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDLoadFriendListResponse, FAccelByteModelsLoadFriendListResponse, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDGetFriendshipStatusResponse, FAccelByteModelsGetFriendshipStatusResponse, Response);
+
+#pragma endregion 
+
+#pragma region MODEL_AND_DELEGATE_FOR_NOTIFICATION
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDAcceptFriendsNotif, FAccelByteModelsAcceptFriendsNotif, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDRequestFriendsNotif, FAccelByteModelsRequestFriendsNotif, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDUnfriendNotif, FAccelByteModelsUnfriendNotif, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDCancelFriendsNotif, FAccelByteModelsCancelFriendsNotif, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDRejectFriendsNotif, FAccelByteModelsRejectFriendsNotif, Notif);
+
+#pragma endregion
+
+//Sub-API from AccelByte Lobby
+UCLASS(Blueprintable, BlueprintType)
+class UABFriends : public UObject
+{
+	GENERATED_BODY()
+public:
+	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
+
+//Request-Response
+public: 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void RequestFriend(FString UserId, FDRequestFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void Unfriend(FString UserId, FDUnfriendResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void ListOutgoingFriends(FDListOutgoingFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void CancelFriendRequest(FString UserId, FDCancelFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void ListIncomingFriends(FDListIncomingFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void AcceptFriend(FString UserId, FDAcceptFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void RejectFriend(FString UserId, FDRejectFriendsResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void LoadFriendsList(FDLoadFriendListResponse OnResponse, FDErrorHandler OnError) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void GetFriendshipStatus(FString UserId, FDGetFriendshipStatusResponse OnResponse, FDErrorHandler OnError) const;
+
+//Notification
+public:
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif) const;
+
+private:
+	FApiClientPtr ApiClientPtr;
+};
