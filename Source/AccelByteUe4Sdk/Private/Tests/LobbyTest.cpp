@@ -1884,6 +1884,7 @@ bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bJoinFailed);
 
 	LobbyDisconnect(1);
+	ResetResponses();
 	
 	return true;
 }
@@ -2017,8 +2018,10 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
 	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
 	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 	Lobbies[1]->SetInvitePartyRejectResponseDelegate(RejectPartyDelegate);
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 	Lobbies[0]->SetPartyInvitationRejectedNotifDelegate(RejectPartyNotifDelegate);
 	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
@@ -2028,6 +2031,7 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 
 	if (!bGetInfoPartyError)
 	{
+		bLeavePartySuccess = false;
 		Lobbies[0]->SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
@@ -2043,6 +2047,7 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 
 	if (!bGetInfoPartyError)
 	{
+		bLeavePartySuccess = false;
 		Lobbies[1]->SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
