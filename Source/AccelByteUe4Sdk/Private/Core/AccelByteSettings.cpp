@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -199,6 +199,11 @@ FString UAccelByteBlueprintsSettings::GetAppId()
 	return FRegistry::Settings.AppId;
 }
 
+bool UAccelByteBlueprintsSettings::IsHttpCacheEnabled()
+{
+	return FRegistry::Settings.bEnableHttpCache;
+}
+
 void UAccelByteBlueprintsSettings::SetClientId(const FString& ClientId)
 {
 	FRegistry::Settings.ClientId = ClientId;
@@ -312,6 +317,11 @@ void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& Reportin
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 {
 	FRegistry::Settings.AppId = AppId;
+}
+
+void UAccelByteBlueprintsSettings::SetIsHttpCacheEnabled(bool bEnable)
+{
+	FRegistry::Settings.bEnableHttpCache = bEnable;
 }
 
 void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)

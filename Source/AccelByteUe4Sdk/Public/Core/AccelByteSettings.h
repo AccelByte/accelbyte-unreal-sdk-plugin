@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -41,6 +41,7 @@ public:
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
 	FString AppId;
+	bool bEnableHttpCache;
 
 	void Reset(ESettingsEnvironment const Environment);
 
@@ -136,6 +137,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId;
+
+	// Enable token for client side http caching
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	bool bEnableHttpCache{ false };
 };
 
 UCLASS(Config = Engine)
@@ -237,6 +242,9 @@ public:
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static bool IsHttpCacheEnabled();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -307,5 +315,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);
+
+	static void SetIsHttpCacheEnabled(bool bEnable);
+
 };
 
