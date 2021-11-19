@@ -1759,7 +1759,45 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		// Presence
 		CASE_NOTIF(FriendStatusNotif	, FAccelByteModelsUsersPresenceNotice);
 		// Notification
-		CASE_NOTIF(MessageNotif			, FAccelByteModelsNotificationMessage);
+		case(Notif::MessageNotif):
+		{
+			FAccelByteModelsNotificationMessage NotificationMessage;
+			FString PayloadKey = "payload";
+			if (ParsedJsonObj->HasTypedField<EJson::Object>(PayloadKey))
+			{
+				TSharedPtr<FJsonObject> PayloadObject = ParsedJsonObj->GetObjectField(PayloadKey);
+				if (PayloadObject == nullptr)
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
+					return;
+				}
+
+				FString PayloadString;
+				TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(&PayloadString);
+				if (FJsonSerializer::Serialize(PayloadObject.ToSharedRef(), JsonWriter) == false)
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot serialize payload field from MessageNotif\nNotification: %s"), *ParsedJsonString);
+					return;
+				}
+				ParsedJsonObj->RemoveField(PayloadKey);
+				ParsedJsonObj->SetStringField(PayloadKey, PayloadString);
+				if (FJsonObjectConverter::JsonObjectToUStruct(ParsedJsonObj.ToSharedRef(), &NotificationMessage, 0, 0) == false)
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
+					return;
+				}
+			}
+			else
+			{
+				if (FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &NotificationMessage, 0, 0) == false)
+				{
+					UE_LOG(LogAccelByteLobby, Log, TEXT("Cannot deserialize the whole MessageNotif to the struct\nNotification: %s"), *ParsedJsonString);
+					return;
+				}
+			}
+			MessageNotif.ExecuteIfBound(NotificationMessage);
+			break;
+		}
 		// Matchmaking
 		CASE_NOTIF(MatchmakingNotif		, FAccelByteModelsMatchmakingNotice);
 		CASE_NOTIF(ReadyConsentNotif	, FAccelByteModelsReadyConsentNotice);
