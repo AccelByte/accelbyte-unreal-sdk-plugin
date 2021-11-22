@@ -154,6 +154,7 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	auto OnSuccess_ = FVoidHandler::CreateLambda([this, OnSuccess]()
 	{
 		ForgetAllCredentials();
+		HttpRef.ClearTaskQueue();
 		OnSuccess.ExecuteIfBound();
 	});
 

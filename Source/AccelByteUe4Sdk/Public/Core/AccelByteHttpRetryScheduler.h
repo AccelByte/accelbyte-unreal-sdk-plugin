@@ -43,6 +43,7 @@ public:
 	void Startup();
 	void Shutdown();
 	bool PollRetry(double Time);
+	void ClearTaskQueue();
 
 protected:
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue;

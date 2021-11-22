@@ -485,4 +485,16 @@ void FHttpRetryScheduler::Shutdown()
 	};
 }
 
+void FHttpRetryScheduler::ClearTaskQueue()
+{
+	FAccelByteTaskPtr TaskPtr;
+	while (!TaskQueue.IsEmpty() && TaskQueue.Peek(TaskPtr))
+	{
+		if (TaskPtr)
+		{
+			TaskQueue.Pop();
+			TaskPtr->Cancel();
+		}
+	}
+}
 }
