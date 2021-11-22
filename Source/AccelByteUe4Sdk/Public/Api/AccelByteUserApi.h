@@ -359,6 +359,15 @@ namespace AccelByte
 			 */
 			void GetUserEligibleToPlay(const THandler<bool>& OnSuccess, const FErrorHandler & OnError);
 
+			/**
+			 * @brief This function will get user(s) information like user's DisplayName.
+			 *
+			 * @param UserIds List UserId(s) to get.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FListBulkUserInfo.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListBulkUserInfo>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			User() = delete;
 			User(User const&) = delete;

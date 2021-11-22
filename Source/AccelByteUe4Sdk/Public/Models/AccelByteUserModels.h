@@ -485,3 +485,31 @@ struct ACCELBYTEUE4SDK_API FJsonWebTokenResponse
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
 		FString Session_id;
 };
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FListBulkUserInfoRequest
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+		TArray<FString> UserIds;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBaseUserInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+		FString AvatarUrl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+		FString UserId;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FListBulkUserInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+		TArray<FBaseUserInfo> Data;
+};

@@ -36,8 +36,8 @@
     "maxVersion": "1.9.0"
   },
   "lobby": {
-    "minVersion": "2.4.6",
-    "maxVersion": "2.4.6"
+    "minVersion": "2.4.7",
+    "maxVersion": "2.4.7"
   },
   "group": {
     "minVersion": "2.9.0",
