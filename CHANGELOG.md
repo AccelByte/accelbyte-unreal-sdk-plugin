@@ -2,12 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [8.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.0.0%0D7.1.1) (2021-11-22)
+## [7.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.2.0%0D7.1.1) (2021-11-22)
 
-
-### ⚠ BREAKING CHANGES
-
-* **serverDSM)!: Revert "feat(serverDSM:** Revert "feat(serverDSM): add support for DSMC Multi Allocation Server Registration."
 
 ### Features
 
@@ -20,15 +16,15 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* **lobby:** fix Uninitialized NewSessionOnly value. ([45dde75](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/45dde75e649ab33ca3f559a36a7f6f0af5a10fe8))
-* **lobby:** Handling ws message parsing if an array value have empty string as element ([f0eac5f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f0eac5f2383322dbf0969796c5e81dcbdc86e47a))
+* **lobby:** fix Uninitialized NewSessionOnly value. ([e7025e9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e7025e96e65de463fafb7add60937cbcc8c2220b))
+* **lobby:** Handling ws message parsing if an array value have empty string as element ([de21aab](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/de21aaba7c9844424428ea7028a602c6d007a1db))
 
 
 ### Refactors
 
 * **Lobby blueprint:** rename functions to resemble their message types ([4ab83d8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4ab83d8f6b39d17507277100384b4cb7e99e0162))
 * **lobby:** refactor lobby API ([43df064](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/43df064c78b594a21ca34d0bb3fb1fd9be36b951))
-* **serverDSM)!: Revert "feat(serverDSM:** add support for DSMC Multi Allocation Server Registration." ([d974a97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d974a97837a74cb5a567c6181528619a54af9d66))
+* **serverDSM): Revert "feat(serverDSM:** add support for DSMC Multi Allocation Server Registration." ([1d48827](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1d4882738efc8e2ab7b2b141ce28739068a7d68f))
 
 ### [7.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.1.1%0D7.1.0) (2021-11-12)
 
