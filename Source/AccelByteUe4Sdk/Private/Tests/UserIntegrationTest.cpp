@@ -4545,3 +4545,55 @@ bool FGameServerSearchUserBySteamAccount::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
+
+#if 0
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLoginWithAppleAccount_ManualTestOnly, "AccelByte.Tests.AUser.LoginWithAppleAccount_ManualTestOnly", AutomationFlagMaskUser);
+bool FLoginWithAppleAccount_ManualTestOnly::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	//TODO, create manual request to Apple server and fill AppleAuthCode with response you get
+	//you must have apple id before you can get your Apple Auth code
+	FString AppleAuthCode = TEXT("");
+
+	bool bLoginPlatformSuccessful = false;
+	bool bAppleLoginDone = false;
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Apple, AppleAuthCode, FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bAppleLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bAppleLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bAppleLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bAppleLoginDone = true;
+	}));
+
+	WaitUntil(bAppleLoginDone, "Waiting for Login with Apple Account...");
+	const FString UserId = FRegistry::Credentials.GetUserId();
+	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
+
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_FALSE(UserId.IsEmpty());
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("-----------------SENT USER ID: %s-----------------"), *FRegistry::Credentials.GetUserId());
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Delete...");
+	AB_TEST_TRUE(bDeleteSuccessful);
+
+#pragma endregion DeleteUserById
+		
+	return true;
+}
+#endif

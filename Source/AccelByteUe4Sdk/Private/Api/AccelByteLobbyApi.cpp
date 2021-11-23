@@ -1466,7 +1466,9 @@ FString Lobby::LobbyMessageToJson(FString Message)
 						Element.TrimEndInline();
 						Json += Element;
 
-						if (!Element.EndsWith("\""))
+						if (!Element.EndsWith("\"") // if element doesn't end with (")
+							|| (Element.Equals("\"") && Element.Len() == 1) // if element only (")
+							|| Element.Equals(",\"")) // if element only (,")
 						{
 							Json.AppendChar('"');
 						}

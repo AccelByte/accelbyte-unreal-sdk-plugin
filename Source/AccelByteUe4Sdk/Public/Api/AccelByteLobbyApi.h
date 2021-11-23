@@ -29,7 +29,7 @@ struct FMatchmakingOptionalParams
 	TMap<FString, FString> PartyAttributes;
 	TArray<FString> TempPartyUserIds;
 	TArray<FString> ExtraAttributes;
-	bool NewSessionOnly;
+	bool NewSessionOnly {false};
 };
 enum Response : uint8;
 enum Notif : uint8;

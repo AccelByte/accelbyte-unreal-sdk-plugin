@@ -21,16 +21,13 @@ AccelByteWebSocket::AccelByteWebSocket(
 	float InitialBackoffDelay,
 	float MaxBackoffDelay,
 	float TotalTimeout)
-	:
-	TimeSinceLastPing(0.f),
-	TimeSinceLastReconnect(0.f),
-	InitialBackoffDelay(InitialBackoffDelay),
-	PingDelay(PingDelay),
-	TotalTimeout(TotalTimeout),
-	MaxBackoffDelay(MaxBackoffDelay),
-	Creds(Credentials),
-	WsState(EWebSocketState::Closed),
-	WsEvents(EWebSocketEvent::None)
+	: InitialBackoffDelay(InitialBackoffDelay)
+	, PingDelay(PingDelay)
+	, TotalTimeout(TotalTimeout)
+	, MaxBackoffDelay(MaxBackoffDelay)
+	, Creds(Credentials)
+	, WsState(EWebSocketState::Closed)
+	, WsEvents(EWebSocketEvent::None)
 {
 	TickerDelegate = FTickerDelegate::CreateRaw(this, &AccelByteWebSocket::Tick);
 	TickerDelegateHandle.Reset();
