@@ -65,8 +65,8 @@ FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpReques
 	, ScheduledRetry(false)
 	, OnBearerAuthRejectDelegate(OnBearerAuthRejectDelegate)
 	, BearerAuthRejectedRefresh(BearerAuthRejectedRefresh)
-	, bIsBeenRunFromPause(false)
 	, BearerAuthRejectedRefreshHandle()
+	, bIsBeenRunFromPause(false)
 {
 
 }
