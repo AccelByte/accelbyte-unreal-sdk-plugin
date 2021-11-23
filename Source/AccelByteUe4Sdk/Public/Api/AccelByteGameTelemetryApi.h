@@ -55,6 +55,11 @@ public:
 	void Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	* @brief Flush pending telemetry events
+	*/
+	void Flush();
+
+	/**
 	* @brief Startup module
 	*/
 	void Startup();
