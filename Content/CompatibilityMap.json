@@ -1,7 +1,7 @@
 {
   "iam": {
-    "minVersion": "4.7.0",
-    "maxVersion": "4.7.0"
+    "minVersion": "4.8.1",
+    "maxVersion": "4.8.1"
   },
   "agreement": {
     "minVersion": "1.14.0",
