@@ -120,3 +120,55 @@ bool ServerGameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& 
 
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerGameTelemetryTestFlushProtectedEvent, "AccelByte.Tests.ServerGameTelemetry.Flush_BatchTelemetryEvent_ReturnsOK", AutomationFlagMaskServerGameTelemetry);
+bool ServerGameTelemetryTestFlushProtectedEvent::RunTest(const FString& Parameters)
+{
+	bool bLoginSuccessful = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bLoginSuccessful]()
+		{
+			bLoginSuccessful = true;
+			UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("\t\tClient Successfully Login."));
+		}), ServerTelemetryErrorHandler);
+	WaitUntil(bLoginSuccessful, "Waiting for Client Login...");
+	
+	FRegistry::ServerGameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(60.0f));
+	FRegistry::ServerGameTelemetry.SetImmediateEventList({});
+	const int EVENT_COUNT = 30;
+	int SuccessResultCount = 0;
+	bool allEventDone = false;
+	
+	for (int i = 0; i < EVENT_COUNT; i++)
+	{
+		FJsonObject Payload;
+		Payload.SetStringField("someString", "someString");
+		Payload.SetNumberField("someInt", i);
+		Payload.SetBoolField("someBool", true);
+		FAccelByteModelsTelemetryBody TelemetryBody;
+		TelemetryBody.EventName = "ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK";
+		TelemetryBody.EventNamespace = "SDKTestUE4";
+		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
+
+		FRegistry::ServerGameTelemetry.Send(
+			TelemetryBody,
+			FVoidHandler::CreateLambda([&SuccessResultCount, &allEventDone, EVENT_COUNT]()
+			{
+				SuccessResultCount++;
+				if (SuccessResultCount == EVENT_COUNT)
+				{
+					allEventDone = true;
+				}
+				UE_LOG(LogAccelByteServerGameTelemetryTest, Log, TEXT("Received %d result count"), SuccessResultCount);
+			}), ServerTelemetryErrorHandler);
+	}
+
+	FRegistry::ServerGameTelemetry.Flush();
+	
+	WaitUntil(allEventDone, "batch telemetry event sent successfully", 100);
+
+	FRegistry::ServerCredentials.ForgetAll();
+	
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
+
+	return true;
+}
