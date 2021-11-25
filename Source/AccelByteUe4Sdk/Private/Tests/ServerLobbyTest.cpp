@@ -459,6 +459,7 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 
 	for (int i = 0; i < SLobbies.Num(); i++)
 	{
+		WaitUntil(SLobbies[i]->IsConnected(), "Waiting for lobby connected");
 		bSCleanupLeaveParty = false;
 		SLobbies[i]->SetLeavePartyResponseDelegate(SCleanupLeavePartyDelegate);
 		SLobbies[i]->SendLeavePartyRequest();
@@ -1599,7 +1600,7 @@ bool PartyStorageTest_ClientWritePartyStorageConcurrent::RunTest(const FString& 
 		}));
 	}
 
-	WaitUntil([&ResultCount] {return ResultCount == 2; }, "Waiting for write result", 2.5);
+	WaitUntil([&ResultCount] {return ResultCount == 2; }, "Waiting for write result", 5);
 
 	// rarely happen
 	bool bWriteSuccessPass = WriteSuccessCount == 1 || WriteSuccessCount == 2;
