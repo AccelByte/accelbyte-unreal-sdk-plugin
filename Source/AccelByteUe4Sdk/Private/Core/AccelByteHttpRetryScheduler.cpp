@@ -173,11 +173,13 @@ void FHttpRetryTask::Tick(double CurrentTime)
 				}
 				break;
 			case EHttpResponseCodes::Denied:
+#if !UE_SERVER
 				if (IsRefreshable())
 				{
 					NextState = Pause();
 					break;
 				}
+#endif
 			default:
 				NextState = EAccelByteTaskState::Completed;
 				break;
