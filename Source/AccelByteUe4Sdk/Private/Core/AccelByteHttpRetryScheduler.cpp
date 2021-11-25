@@ -107,11 +107,11 @@ EAccelByteTaskState FHttpRetryTask::Pause()
 {	
 	if (TaskState != EAccelByteTaskState::Paused)
 	{
-		OnBearerAuthRejectDelegate.ExecuteIfBound();
 		BearerAuthRejectedRefreshHandle = BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
 			{
 				BearerAuthUpdated(AccessToken);
 			}));
+		OnBearerAuthRejectDelegate.ExecuteIfBound();
 	}
 
 	return EAccelByteTaskState::Paused;
