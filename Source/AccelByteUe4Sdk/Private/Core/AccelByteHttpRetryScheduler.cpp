@@ -104,12 +104,7 @@ bool FHttpRetryTask::Cancel()
 }
 
 EAccelByteTaskState FHttpRetryTask::Pause()
-{
-	if (bIsBeenRunFromPause) 
-	{
-		return EAccelByteTaskState::Completed;
-	}
-	
+{	
 	if (TaskState != EAccelByteTaskState::Paused)
 	{
 		OnBearerAuthRejectDelegate.ExecuteIfBound();
@@ -295,7 +290,10 @@ bool FHttpRetryTask::IsRefreshable()
 {
 	bool bIsRefreshable = false;
 	FString Authorization = Request->GetHeader("Authorization");
-	if (Authorization.Contains("Bearer") && !Authorization.Equals("Bearer "))
+	Authorization = Authorization.TrimStartAndEnd();
+	if (Authorization.Contains("Bearer", ESearchCase::IgnoreCase) 
+		&& !Authorization.Equals("Bearer", ESearchCase::IgnoreCase)
+		&& !bIsBeenRunFromPause)
 	{
 		bIsRefreshable = true;
 	}
