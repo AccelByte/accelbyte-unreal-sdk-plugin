@@ -67,6 +67,11 @@ void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, cons
 	}
 }
 
+void ServerGameTelemetry::Flush()
+{
+	PeriodicTelemetry(0);
+}
+
 bool ServerGameTelemetry::PeriodicTelemetry(float DeltaTime)
 {
 	FReport::Log(FString(__FUNCTION__));

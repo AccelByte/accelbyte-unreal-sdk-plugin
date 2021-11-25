@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.2.1%0D7.2.0) (2021-11-24)
+
+
+### Bug Fixes
+
+* **telemetry:** add method to flush pending events without waiting for the next batch in GameTelemetry ([bf69c63](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bf69c63b9797f6785306b680864b3fdd7910f6c9))
+* **telemetry:** add method to flush pending events without waiting for the next batch in ServerGameTelemetry ([a1bfe10](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a1bfe1096802d5460dfb25b7d94cb36bc63d0320))
+
 ## [7.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.2.0%0D7.1.1) (2021-11-22)
 
 

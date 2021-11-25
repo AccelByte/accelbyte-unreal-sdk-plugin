@@ -53,6 +53,11 @@ public:
 	 */
 	void Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	* @brief Flush pending telemetry events
+	*/
+	void Flush();
+
 private:
 	struct FJob
 	{

@@ -119,3 +119,49 @@ bool GameTelemetryTestSendMultipleProtectedEvents::RunTest(const FString& Parame
 
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(GameTelemetryTestFlushProtectedEvent, "AccelByte.Tests.GameTelemetry.Flush_BatchTelemetryEvent_ReturnsOK", AutomationFlagMaskGameTelemetry);
+bool GameTelemetryTestFlushProtectedEvent::RunTest(const FString& Parameters)
+{
+	bool bLoginSuccessful = false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&]() { bLoginSuccessful = true; }), GameTelemetryErrorHandler);
+	WaitUntil(bLoginSuccessful, "LoginWithDeviceId");
+	
+	FRegistry::GameTelemetry.SetBatchFrequency(FTimespan::FromSeconds(60.0f));
+	FRegistry::GameTelemetry.SetImmediateEventList({});
+	const int EVENT_COUNT = 30;
+	int SuccessResultCount = 0;
+	bool allEventDone = false;
+	for (int i = 0; i < EVENT_COUNT; i++)
+	{
+		FJsonObject Payload;
+		Payload.SetStringField("someString", "someString");
+		Payload.SetNumberField("someInt", i);
+		Payload.SetBoolField("someBool", true);
+		FAccelByteModelsTelemetryBody TelemetryBody;
+		TelemetryBody.EventName = "ServerGameTelemetry.Send_BatchTelemetryEvent_ReturnsOK";
+		TelemetryBody.EventNamespace = "SDKTestUE4";
+		TelemetryBody.Payload = MakeShared<FJsonObject>(Payload);
+
+		FRegistry::GameTelemetry.Send(
+			TelemetryBody,
+			FVoidHandler::CreateLambda([&SuccessResultCount, &allEventDone, EVENT_COUNT]()
+				{
+					SuccessResultCount++;
+					if (SuccessResultCount == EVENT_COUNT)
+					{
+						allEventDone = true;
+					}
+				}), GameTelemetryErrorHandler);
+	}
+
+	FRegistry::GameTelemetry.Flush();
+
+	WaitUntil(allEventDone, "Sending batch telemetry event", 100);
+
+	FRegistry::User.ForgetAllCredentials();
+
+	AB_TEST_EQUAL(SuccessResultCount, EVENT_COUNT);
+
+	return true;
+}

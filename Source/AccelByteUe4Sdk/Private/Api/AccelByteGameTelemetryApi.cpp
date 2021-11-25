@@ -74,6 +74,11 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandl
 	}
 }
 
+void GameTelemetry::Flush()
+{
+	PeriodicTelemetry(0);
+}
+
 void GameTelemetry::Startup()
 {
 	ShuttingDown = false;
@@ -90,7 +95,7 @@ void GameTelemetry::Shutdown()
 			GameTelemetryTickDelegateHandle.Reset();
 		}
 		// flush events
-		PeriodicTelemetry(0);
+		Flush();
 	}
 }
 
