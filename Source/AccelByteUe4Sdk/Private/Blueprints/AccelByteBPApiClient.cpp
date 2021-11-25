@@ -24,6 +24,12 @@ UApiClient::UApiClient()
 	Party = NewObject<UABParty>();
 	Matchmaking = NewObject<UABMatchmaking>();
 	Friends = NewObject<UABFriends>();
+	Catalog = NewObject<UABCatalog>();
+	Order = NewObject<UABOrder>();
+	Entitlement = NewObject<UABEntitlement>();
+	Currency = NewObject<UABCurrency>();
+	Wallet = NewObject<UABWallet>();
+	Fulfillment = NewObject<UABFulfillment>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -37,6 +43,12 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Party->SetApiClient(ApiClientPtr);
 	Matchmaking->SetApiClient(ApiClientPtr);
 	Friends->SetApiClient(ApiClientPtr);
+	Catalog->SetApiClient(ApiClientPtr);
+	Order->SetApiClient(ApiClientPtr);
+	Entitlement->SetApiClient(ApiClientPtr);
+	Currency->SetApiClient(ApiClientPtr);
+	Wallet->SetApiClient(ApiClientPtr);
+	Fulfillment->SetApiClient(ApiClientPtr);
 }
 
 UApiClient* UMultiRegistry::GetApiClient(FString const& Key)
