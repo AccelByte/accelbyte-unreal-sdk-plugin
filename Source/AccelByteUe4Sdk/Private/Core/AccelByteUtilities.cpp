@@ -301,18 +301,18 @@ void FAccelByteNetUtilities::DownloadFrom(const FString& Url, const FHttpRequest
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnDownloaded, OnError), FPlatformTime::Seconds());
 }
 
-void FAccelByteNetUtilities::UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress, const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+void FAccelByteNetUtilities::UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress,
+	const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError, FString ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/octet-stream");
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetVerb(Verb);
 	Request->OnRequestProgress() = OnProgress;
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Content-Type"), *ContentType);
 	Request->SetContent(DataUpload);
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
