@@ -55,6 +55,7 @@ public:
 	* @param FileExtension FileExtension of the content.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
+	* @param ContentType The specific type of the content's created, default value is "application/octet-stream".
 	*/
 	void CreateContent(
 		FString const& ChannelId,
@@ -65,7 +66,8 @@ public:
 		TArray<uint8> const& Preview,
 		FString const& FileExtension,
 		THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
-		FErrorHandler const& OnError);
+		FErrorHandler const& OnError,
+		FString ContentType = TEXT("application/octet-stream"));
 
 	/** @brief Modify existing content to update some information with FString preview.
 	*
@@ -89,6 +91,7 @@ public:
 	* @param FileExtension FileExtension of the content.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsUGCResponse.
 	* @param OnError This will be called when the operation failed.
+	* @param ContentType The specific type of the content's modified. Default value is "application/octet-stream".
 	*/
 	void ModifyContent(
 		FString const& ChannelId,
@@ -100,7 +103,8 @@ public:
 		TArray<uint8> const& Preview,
 		FString const& FileExtension,
 		THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
-		FErrorHandler const& OnError);
+		FErrorHandler const& OnError,
+		FString ContentType = TEXT("application/octet-stream"));
 	
 	/** @brief Delete a content based on the its channel id and content id.
 	*

@@ -36,7 +36,14 @@ void UGC::CreateContent(
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(CreateRequest, Content);
+
+	FAccelByteModelsUGCRequest Req = CreateRequest;	
+	if (Req.ContentType.IsEmpty())
+	{
+		Req.ContentType = TEXT("application/octet-stream");
+	}
+
+	FJsonObjectConverter::UStructToJsonObjectString(Req, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -58,7 +65,8 @@ void UGC::CreateContent(
 	TArray<uint8> const& Preview,
 	FString const& FileExtension,
 	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
-	FErrorHandler const& OnError)
+	FErrorHandler const& OnError,
+	FString ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -69,6 +77,7 @@ void UGC::CreateContent(
 	Req.Tags = Tags;
 	Req.Preview = FBase64::Encode(Preview);
 	Req.FileExtension = FileExtension;
+	Req.ContentType = ContentType;
 
 	CreateContent(ChannelId, Req, OnSuccess, OnError);
 }
@@ -88,7 +97,14 @@ void UGC::ModifyContent(
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(ModifyRequest, Content);
+
+	FAccelByteModelsUGCRequest Req = ModifyRequest;	
+	if (Req.ContentType.IsEmpty())
+	{
+		Req.ContentType = TEXT("application/octet-stream");
+	}
+	
+	FJsonObjectConverter::UStructToJsonObjectString(Req, Content);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -111,7 +127,8 @@ void UGC::ModifyContent(
 	TArray<uint8> const& Preview,
 	FString const& FileExtension,
 	THandler<FAccelByteModelsUGCResponse> const& OnSuccess,
-	FErrorHandler const& OnError)
+	FErrorHandler const& OnError,
+	FString ContentType)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
@@ -122,6 +139,7 @@ void UGC::ModifyContent(
 	Req.Tags = Tags;
 	Req.Preview = FBase64::Encode(Preview);
 	Req.FileExtension = FileExtension;
+	Req.ContentType = ContentType;
 
 	ModifyContent(ChannelId, ContentId, Req, OnSuccess, OnError);
 }

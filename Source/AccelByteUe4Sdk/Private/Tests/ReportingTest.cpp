@@ -217,6 +217,36 @@ bool ReportingSetup::RunTest(const FString& Parameters)
 	FString const Country = "US";
 	FDateTime const DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
 	FString const Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	
+	bool bDoneSearchUser = false;
+	FPagedPublicUsersInfo ReceivedUserData;
+	FRegistry::User.SearchUsers(DisplayName, EAccelByteSearchType::DISPLAYNAME, THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+	{
+		bDoneSearchUser = true;
+		ReceivedUserData = Result;
+		UE_LOG(LogAccelByteReportingTest, Log, TEXT("Success Search User"));
+	}),
+	FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteReportingTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
+		bDoneSearchUser = true;
+	}));
+	WaitUntil(bDoneSearchUser, "Waiting for search user");
+	AB_TEST_TRUE(bDoneSearchUser);
+
+	if (ReceivedUserData.Data.Num() > 0)
+	{
+		bool bDeleteUser2 = false; 
+		AdminDeleteUser(ReceivedUserData.Data[0].UserId, FSimpleDelegate::CreateLambda([&bDeleteUser2]()
+		{
+			UE_LOG(LogAccelByteReportingTest, Log, TEXT("Delete user Success"));
+			bDeleteUser2 = true;
+		}), ReportingOnError);
+		FlushHttpRequests();
+		WaitUntil(bDeleteUser2, "Waiting for user deletion...");
+
+		AB_TEST_TRUE(bDeleteUser2);
+	}
 
 	bool bUserCreationSuccess = false;
 	User2->Register(
