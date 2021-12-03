@@ -66,6 +66,28 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 	return ApiClientInstances[Key];
 }
 
+FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString Key)
+{
+	if (!ServerApiClientInstances.Contains(Key))
+	{
+		FServerApiClientPtr NewClient = nullptr;
+		
+		if (Key.Compare(TEXT("default")) == 0) 
+		{
+			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>(FRegistry::ServerCredentials, FRegistry::HttpRetryScheduler);
+		}
+		else 
+		{
+			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>();
+			NewClient->ServerCredentialsRef->SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+		}
+
+		ServerApiClientInstances.Add(Key, NewClient);
+	}
+	
+	return ServerApiClientInstances[Key];
+}
+
 bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClient)
 {
 	bool bResult = false;
@@ -80,5 +102,6 @@ bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClien
 }
 
 TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
+TMap<FString, FServerApiClientPtr> FMultiRegistry::ServerApiClientInstances;
 
 }
