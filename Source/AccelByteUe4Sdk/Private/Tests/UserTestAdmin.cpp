@@ -151,6 +151,16 @@ bool RegisterTestUser(const FTestUser& InTestUser)
 	return bIsOk;
 }
 
+void RegisterTestUserV4(const FTestUserV4& InTestUser, const THandler<FCreateTestUserResponseV4>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/iam/v4/public/namespaces/%s/test_users"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(InTestUser, Content);
+	AB_HTTP_POST(Request, Url, Authorization, Content);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
 bool LoginTestUser(FTestUser& TestUser)
 {
 	AccelByte::Api::User UserApi(
@@ -250,4 +260,22 @@ bool TeardownTestUsers(TArray<FTestUser>& InTestUsers)
 	}
 
 	return bIsOk;
+}
+
+void UUserTestAdminFunctions::RegisterTestUserV4BP(
+	const FTestUserV4& InTestUser,
+	FDCreateTestUserResponseV4 OnSuccess,
+	FDErrorHandler OnError)
+{
+	RegisterTestUserV4(
+		InTestUser,
+		THandler<FCreateTestUserResponseV4>::CreateLambda(
+			[OnSuccess](const FCreateTestUserResponseV4& Response){
+				OnSuccess.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
 }
