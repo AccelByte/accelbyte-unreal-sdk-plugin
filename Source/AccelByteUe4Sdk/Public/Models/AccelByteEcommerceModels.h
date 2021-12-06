@@ -687,6 +687,44 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkRevokeEntitlements
 	int32 Affected;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileApple
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString ProductId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString TransactionId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString ReceiptData;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	bool ExcludeOldTransactions;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString Region; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileApple")
+	FString Language; //optional
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString OrderId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString PackageName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString ProductId;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	int64 PurchaseTime = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString PurchaseToken;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString Region; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	FString Language; //optional
+};
+
 #pragma endregion EntitlementModelsField
 
 #pragma region OrderModelsField

@@ -21,6 +21,7 @@ enum class EAccelBytePlatformType : uint8
 	PS5,
 	Live,
 	Google,
+	Apple,
 	Facebook,
 	Android,
 	iOS,
@@ -30,9 +31,12 @@ enum class EAccelBytePlatformType : uint8
 	Twitter,
 	EpicGames,
 	Stadia,
-	AwsCognito
+	AwsCognito,
+	Discord,
+	Nintendo
 };
 
+UENUM(BlueprintType)
 enum class EAccelByteSearchType : uint8
 {
 	ALL, DISPLAYNAME, USERNAME
@@ -512,4 +516,82 @@ struct ACCELBYTEUE4SDK_API FListBulkUserInfo
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
 		TArray<FBaseUserInfo> Data;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FNamespaceRole
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
+		FString RoleId;
+};	
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUserOtherPlatformInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString AuthType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		TArray<FBan> Bans;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		bool DeletionStatus;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		bool EmailVerified;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		bool Enabled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString LastDateOfBirthChangedTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString LastEnabledChangedTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		TArray<FNamespaceRole> NamespaceRoles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString NewEmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString OldEmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		TArray<FPermission> Permissions;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString PhoneNumber;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		bool PhoneVerified;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString PlatformDisplayName; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString PlatformId; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString PlatformUserId; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		TArray<FString> Roles;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
+		FString Username; //optional
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FPagedUserOtherPlatformInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
+	TArray<FUserOtherPlatformInfo> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
+	FAccelByteModelsPaging Paging;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
+	int32 TotalData;
 };

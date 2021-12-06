@@ -12,6 +12,94 @@
 using AccelByte::THandler;
 using AccelByte::FErrorHandler;
 
+enum class EAccelBytePlatformType : uint8;
+
+enum class EJwtResult
+{
+	Ok,
+	MalformedJwt,
+	SignatureMismatch,
+	AlgorithmMismatch,
+	MalformedPublicKey
+};
+
+/**
+ * @brief RSA public key with parameters encoded in Base64Url. Only supports 2048 bits modulus and 24 bits exponent
+ */
+class ACCELBYTEUE4SDK_API FRsaPublicKey
+{
+public:
+	
+	/**
+	 * @brief Construct FRsaPublicKey with modulus and exponent
+	 * @param ModulusB64Url RSA modulus (n) in Base64URL format
+	 * @param ExponentB64Url RSA exponent (e) in Base64URL format
+	 */
+	FRsaPublicKey(FString ModulusB64Url, FString ExponentB64Url); 
+
+	/**
+	 * @brief Check if this RSA public key is valid.    
+	 */
+	bool IsValid() const;
+
+	
+	/**
+	 * @brief Convert RSA public key to armored PEM format
+	 * @return PEM format armored with "-----BEGIN PUBLIC KEY-----" and "-----END PUBLIC KEY-----"
+	 */
+	FString ToPem() const;
+
+private:
+	FString const ModulusB64Url;
+	FString const ExponentB64Url;
+};
+
+
+/**
+ * @brief Provide access to verify JWT and extract its content.
+ */
+class ACCELBYTEUE4SDK_API FJwt
+{
+public:
+	/**
+	 * @brief Construct FJwt from JWT string
+	 * @param JwtString JWT encoded as dot separated Base64Url string
+	 */
+	explicit FJwt(FString JwtString);
+
+	/**
+	 * @brief Verify this JWT using RSA public key
+	 * @param Key RSA public key
+	 * @return EJwtResult::Ok if signature match
+	 */
+	EJwtResult VerifyWith(FRsaPublicKey Key) const;
+
+	/**
+	 * @brief Get header content from JWT. Content could be any valid JSON having at least "alg" field
+	 * @return JWT header
+	 */
+	TSharedPtr<FJsonObject> const& Header() const;
+
+	/**
+	 * @brief Get payload content from JWT. Content could be any valid JSON
+	 * @return JWT payload
+	 */
+	TSharedPtr<FJsonObject> const& Payload() const;
+
+	/**
+	 * @brief Check if this JWT format is correct and both and payload are valid JSON encoded as Base64URL
+	 * @return true if  this JWT is valid, false otherwise
+	 */
+	bool IsValid() const;
+
+private:
+	FString const JwtString;
+	int32 const HeaderEnd;
+	int32 const PayloadEnd;
+	TSharedPtr<FJsonObject> const HeaderJsonPtr;
+	TSharedPtr<FJsonObject> const PayloadJsonPtr;
+};
+
 class ACCELBYTEUE4SDK_API FAccelByteUtilities
 {
 public:
@@ -80,6 +168,9 @@ public:
 
 		return static_cast<TEnum>(ValueInt);
 	}
+
+	static FString GetPlatformString(EAccelBytePlatformType Platform);
+	
 };
 
 USTRUCT(BlueprintType)
@@ -99,5 +190,6 @@ public:
 	UE_DEPRECATED(4.25, "ipify support will be deprecated in the future releases, please use ISocketSubsystem to get public IP address")
 	static void GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError);
 	static void DownloadFrom(const FString& Url, const FHttpRequestProgressDelegate& OnProgress, const THandler<TArray<uint8>>& OnDownloaded, const FErrorHandler& OnError);
-	static void UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress, const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	static void UploadTo(const FString& Url, const TArray<uint8>& DataUpload, const FHttpRequestProgressDelegate& OnProgress,
+		const AccelByte::FVoidHandler& OnSuccess, const FErrorHandler& OnError, FString ContentType = TEXT("application/octet-stream"));
 };

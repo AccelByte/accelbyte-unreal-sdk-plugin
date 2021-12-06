@@ -109,6 +109,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreatePartyResponse
         TArray<FString> Invitees;
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
         FString InvitationToken;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+        FString PartyCode;
 };
 
 //Leave current party
@@ -194,7 +196,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyJoinNotice
     FString UserId;
 };
 
-// Accept Invitation
+// Reject Invitation
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyRejectResponse
 {
@@ -205,7 +207,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyRejectResponse
 	FString PartyId;
 };
 
-// Invitation being accepted
+// Invitation being rejected
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyRejectNotice
 {

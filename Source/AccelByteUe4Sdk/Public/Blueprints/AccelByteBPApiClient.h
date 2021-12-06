@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteBPUser.h"
+#include "ABUser.h"
 #include "AccelByteBPLobby.h"
 #include "ABParty.h"
+#include "ABMatchmaking.h"
+#include "ABFriends.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -43,13 +45,19 @@ public:
 	UCredentials* Credentials;
 
 	UPROPERTY(BlueprintReadOnly)
-	UUser* User;
+	UABUser* User;
 
 	UPROPERTY(BlueprintReadOnly)
 	ULobby* Lobby;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABParty* Party;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABMatchmaking* Matchmaking;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABFriends* Friends;
 
 private:
 	FApiClientPtr ApiClientPtr;

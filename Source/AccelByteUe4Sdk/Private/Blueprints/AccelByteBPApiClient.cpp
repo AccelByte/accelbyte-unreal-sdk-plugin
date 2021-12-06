@@ -19,9 +19,11 @@ FString UCredentials::GetUserId() const
 UApiClient::UApiClient()
 {
 	Credentials = NewObject<UCredentials>();
-	User = NewObject<UUser>();
+	User = NewObject<UABUser>();
 	Lobby = NewObject<ULobby>();
 	Party = NewObject<UABParty>();
+	Matchmaking = NewObject<UABMatchmaking>();
+	Friends = NewObject<UABFriends>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -33,6 +35,8 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	User->SetApiClient(ApiClientPtr);
 	Lobby->SetApiClient(ApiClientPtr);
 	Party->SetApiClient(ApiClientPtr);
+	Matchmaking->SetApiClient(ApiClientPtr);
+	Friends->SetApiClient(ApiClientPtr);
 }
 
 UApiClient* UMultiRegistry::GetApiClient(FString const& Key)
