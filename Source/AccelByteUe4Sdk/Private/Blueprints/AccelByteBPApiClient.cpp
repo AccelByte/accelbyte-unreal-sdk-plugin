@@ -30,6 +30,7 @@ UApiClient::UApiClient()
 	Currency = NewObject<UABCurrency>();
 	Wallet = NewObject<UABWallet>();
 	Fulfillment = NewObject<UABFulfillment>();
+	CloudSave = NewObject<UABCloudSave>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -49,6 +50,7 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Currency->SetApiClient(ApiClientPtr);
 	Wallet->SetApiClient(ApiClientPtr);
 	Fulfillment->SetApiClient(ApiClientPtr);
+	CloudSave->SetApiClient(ApiClientPtr);
 }
 
 UApiClient* UMultiRegistry::GetApiClient(FString const& Key)

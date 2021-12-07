@@ -12,6 +12,7 @@
 #include "ABCurrency.h"
 #include "ABWallet.h"
 #include "ABFulfillment.h"
+#include "ABCloudSave.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -82,6 +83,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	UABFulfillment* Fulfillment;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABCloudSave* CloudSave;
 
 private:
 	FApiClientPtr ApiClientPtr;
