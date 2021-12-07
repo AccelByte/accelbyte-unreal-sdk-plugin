@@ -1503,7 +1503,7 @@ bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Pa
 			{
 				if (static_cast<ErrorCodes>(ErrorCode) != ErrorCodes::ItemNotFoundException)
 				{
-					UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+					UE_LOG(LogAccelByteEcommerceTest, Error, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				}
 				else
 				{
@@ -2693,7 +2693,7 @@ bool FECommerceTestServerEntitlementFulfillInvalid::RunTest(const FString& Param
 			{
 				if ((ErrorCodes)ErrorCode != ErrorCodes::ItemNotFoundException)
 				{
-					UE_LOG(LogAccelByteEcommerceTest, Fatal, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+					UE_LOG(LogAccelByteEcommerceTest, Error, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				}
 				else
 				{

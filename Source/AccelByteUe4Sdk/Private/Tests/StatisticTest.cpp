@@ -65,7 +65,7 @@ void FStatisticTestSpec::Define()
 		{
 			if (static_cast<ErrorCodes>(ErrorCode) != ErrorCodes::StatisticConfigNotFoundException)
 			{
-				UE_LOG(LogAccelByteStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+				UE_LOG(LogAccelByteStatisticTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 			}
 			else
 			{
@@ -214,7 +214,7 @@ void FStatisticTestSpec::Define()
 
 	Describe("BulkAddUserStatItemValue_Success", [this]()
 	{
-		It("Should get user stat item by tags", [this]()
+		It("Should add User Stat item in bulk", [this]()
 		{
 			Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
 			

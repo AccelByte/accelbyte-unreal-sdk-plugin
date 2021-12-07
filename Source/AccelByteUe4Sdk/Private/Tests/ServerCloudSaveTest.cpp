@@ -228,7 +228,7 @@ bool ServerCloudSaveTestAdminGameRecord::RunTest(const FString& Parameters)
 	}), ServerCloudSaveErrorHandler);
 	WaitUntil(SaveGameRecord, "Waiting for saving game record UnExist key ...");
 
-	check(SaveGameRecord)
+	AB_TEST_TRUE(SaveGameRecord)
 
 	return true;
 }
@@ -248,7 +248,7 @@ bool ServerCloudTestGetAdminGameRecord::RunTest(const FString& Parameters)
 	{
 		bGetGameRecordDone = true;
 
-		UE_LOG(LogAccelByteServerCloudSaveTest, Fatal, TEXT("Failed to GET Game ServerCloudRecord. Error code: %d\nError message:%s"), Code, *Message);
+		UE_LOG(LogAccelByteServerCloudSaveTest, Error, TEXT("Failed to GET Game ServerCloudRecord. Error code: %d\nError message:%s"), Code, *Message);
 	}
 	));
 

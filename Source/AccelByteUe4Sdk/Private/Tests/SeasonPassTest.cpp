@@ -604,7 +604,7 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 		bPublishStoreSuccess = true;
 	}), SeasonPassOnError);
 	WaitUntil(bPublishStoreSuccess, "Waiting for publish Season Pass store...");
-	check(bPublishStoreSuccess);
+	AB_TEST_TRUE(bPublishStoreSuccess);
 
 	bool bPublishSeasonPassSuccess = false;
 	AdminPublishSeason(SeasonResponse.Id, THandler<FSeasonPassCreateSeasonResponse>::CreateLambda([&](const FSeasonPassCreateSeasonResponse& Result)
@@ -675,7 +675,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		bCurrencyDeleted = true;
 	}), SeasonPassOnError);
 	WaitUntil(bCurrencyDeleted, "Waiting for currency deletion...");
-	check(bCurrencyDeleted);
+	AB_TEST_TRUE(bCurrencyDeleted);
 
 	// Delete published testing store
 	bool bPublishedStoreDeleted = false;
@@ -685,7 +685,7 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 		bPublishedStoreDeleted = true;
 	}), nullptr);
 	WaitUntil(bPublishedStoreDeleted, "Waiting for Season pass store deletion...");
-	check(bPublishedStoreDeleted);
+	AB_TEST_TRUE(bPublishedStoreDeleted);
 
 	bool bGetAllStoreSuccess = false;
 	TArray<FStoreInfo> GetAllResult;
@@ -851,6 +851,7 @@ bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
 		bCreditUserWalletSuccess = true;
 	}), SeasonPassOnError);
 	WaitUntil(bCreditUserWalletSuccess, "Waiting to credit user wallet...");
+	AB_TEST_TRUE(bCreditUserWalletSuccess);
 
 	const int32 Quantity = 1;
 	FAccelByteModelsOrderCreate OrderCreate;

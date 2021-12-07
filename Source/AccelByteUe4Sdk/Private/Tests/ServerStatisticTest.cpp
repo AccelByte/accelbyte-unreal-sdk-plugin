@@ -101,7 +101,7 @@ void FServerStatisticTestSpec::Define()
 			{
 				if (ErrorCode != 70131 && ErrorCode != 12241)
 				{
-					UE_LOG(LogAccelByteServerStatisticTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+					UE_LOG(LogAccelByteServerStatisticTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 				}
 				else
 				{

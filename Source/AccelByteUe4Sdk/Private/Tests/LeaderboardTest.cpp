@@ -475,7 +475,7 @@ void FLeaderboardTestSpec::Define()
 						}
 						else
 						{
-							UE_LOG(LogAccelByteLeaderboardTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+							UE_LOG(LogAccelByteLeaderboardTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 						}
 					});
 

@@ -34,7 +34,11 @@ void AdminDeleteUserProfile(const FString& Namespace, const FString& UserId, con
 
 void AdminGetUserMap(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError)
 {
-	check(!userId.IsEmpty());
+	if(userId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(400, TEXT("User email address cannot be empty"));
+		return;
+	}
 	UE_LOG(LogAccelByteTest, Log, TEXT("-----------------USER ID: %s---------------------"), *userId);
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s/platforms/justice/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *GetPublisherNamespace());
