@@ -1,6 +1,6 @@
 # AccelByte Unreal SDK
 
-AccelByte Unreal SDK is a plugin for Unreal Engine.
+AccelByte Unreal SDK is a plugin for Unreal Engine. 
 
 ## Assumptions
 

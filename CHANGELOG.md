@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.0.0%0D7.2.1) (2021-12-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **user:** User Blueprint API modified
+* **serverDSM)!: Revert "feat(serverDSM:** Revert "feat(serverDSM): add support for DSMC Multi Allocation Server Registration."
+
+### Features
+
+* **friends:** add lobby's friend blueprint API ([566fc46](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/566fc46f2a85c49a2b356b3efbb63ab8ab3d220e))
+* **Jwt:** Add Utilities functions to Validate JWT using JWK ([807cc0f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/807cc0f2c25638551b0b85080234f55e48c0c980))
+* **ServerUserApi:** Game Server api to provide DS searchUserOtherPlatform ([ddc0ca3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ddc0ca36b9ce407abc3c2bda169aaebcae9372af))
+* **SyncIOSandApple:** sync purchased item from mobile platform Apple/Google ([2fb4b47](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2fb4b474ad880dfb99350936f7fce2fbe1932a25))
+* **user:** complete user blueprint API & fix missing UENUM ([fa9709b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fa9709b4380b4e3ccc90c84051d2663922947b1f))
+
+
+### Bug Fixes
+
+* change encoding of uplugin file to UTF-8 without BOM ([5e6075e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5e6075e0c202795fffd86587d2b7cde877b6e8aa))
+* **httpscheduler:** cancel request will trigger callback ([8736881](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8736881b8407f3d3d1410faef76a71bff86cc7d1))
+* **httpscheduler:** check empty response when request status succeeded ([6e35d35](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e35d355c15b95a007fb5bbd0f0ee4f9b20b8fca))
+* **httpscheduler:** wrong break placement when getting denied status ([24b4a6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/24b4a6f686bcc70367b11280f419ece7c1d4feed))
+* **lobby:** fix Uninitialized NewSessionOnly value. ([45dde75](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/45dde75e649ab33ca3f559a36a7f6f0af5a10fe8))
+* **lobby:** Handling ws message parsing if an array value have empty string as element ([f0eac5f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f0eac5f2383322dbf0969796c5e81dcbdc86e47a))
+* **UGC:** fix adjustment for backend behavior changes ([394565c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/394565c7690544458074b02ad27cb1f094917c94))
+
+
+### Reverts
+
+* Revert "chore(release): 8.0.0 - commited and tagged by Jenkins" ([55ec3fd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/55ec3fd01a8dcf424356827727120a98fb9bdb38))
+
+
+### Tests
+
+* **httpscheduler:** update http retry tests to check cancelled state ([5bba5c1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5bba5c1b93fb9bfcd5c500eb69aa5f58b76701b9))
+* **lobby:** add wait ds notif to 60 sec ([8650d6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8650d6b568c8e4466dd3b1c32be2e75ecc60b63e))
+* **lobby:** LobbyMatchmakingAllParam case cleanup add wait 10 sec for mmNotif to account for transport delay. ([107ffd9](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/107ffd9f87f01c145972073681f6a2d52d75734e))
+
+
+### Refactors
+
+* **serverDSM)!: Revert "feat(serverDSM:** add support for DSMC Multi Allocation Server Registration." ([d974a97](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d974a97837a74cb5a567c6181528619a54af9d66))
+
 ### [7.2.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/7.2.1%0D7.2.0) (2021-11-24)
 
 
