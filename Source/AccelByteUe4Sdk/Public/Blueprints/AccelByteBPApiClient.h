@@ -12,11 +12,8 @@
 #include "ABCurrency.h"
 #include "ABWallet.h"
 #include "ABFulfillment.h"
-<<<<<<< .merge_file_a07668
 #include "ABCloudSave.h"
-=======
 #include "ABAgreement.h"
->>>>>>> .merge_file_a02516
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -89,11 +86,10 @@ public:
 	UABFulfillment* Fulfillment;
 
 	UPROPERTY(BlueprintReadOnly)
-<<<<<<< .merge_file_a07668
 	UABCloudSave* CloudSave;
-=======
+
+	UPROPERTY(BlueprintReadOnly)
 	UABAgreement* Agreement;
->>>>>>> .merge_file_a02516
 
 private:
 	FApiClientPtr ApiClientPtr;

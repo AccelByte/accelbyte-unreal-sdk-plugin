@@ -155,7 +155,7 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	int TryAttempt,
 	FString const& Key,
 	FJsonObjectWrapper RecordRequest,
-	FDJsonObjectWrapper const& PayloadModifier,
+	FDPayloadJsonObject const& PayloadModifier,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
@@ -315,7 +315,7 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 	int TryAttempt,
 	FString const& Key,
 	FJsonObjectWrapper RecordRequest,
-	FDJsonObjectWrapper const& PayloadModifier,
+	FDPayloadJsonObject const& PayloadModifier,
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {

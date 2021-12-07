@@ -65,7 +65,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Reponse
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FModelsGameRecord, Response);
 
-DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDJsonObjectWrapper, FJsonObjectWrapper, Response);
+DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 
 #pragma endregion
 
@@ -119,7 +119,7 @@ public:
 			int TryAttempt,
 			FString const& Key,
 			FJsonObjectWrapper RecordRequest,
-			FDJsonObjectWrapper const& PayloadModifier,
+			FDPayloadJsonObject const& PayloadModifier,
 			FDHandler const& OnSuccess,
 			FDErrorHandler const& OnError);
 
@@ -162,7 +162,7 @@ public:
 			int TryAttempt,
 			FString const& Key,
 			FJsonObjectWrapper RecordRequest,
-			FDJsonObjectWrapper const& PayloadModifier,
+			FDPayloadJsonObject const& PayloadModifier,
 			FDHandler const& OnSuccess,
 			FDErrorHandler const& OnError);
 
