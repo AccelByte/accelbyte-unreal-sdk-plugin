@@ -20,12 +20,7 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void WaitUntil(const bool& bCondition, const FString Message, const double TimeoutSeconds)
-{
-	WaitUntil([&] { return bCondition; }, Message, TimeoutSeconds);
-}
-
-void WaitUntil(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
+void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
 {
 	const double StartSeconds = FPlatformTime::Seconds();
 	const double LimitSeconds = StartSeconds + TimeoutSeconds;

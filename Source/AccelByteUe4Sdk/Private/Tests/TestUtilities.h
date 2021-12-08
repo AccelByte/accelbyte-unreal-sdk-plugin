@@ -85,8 +85,18 @@ FString GetAdminUserAccessToken();
 
 void FlushHttpRequests();
 
-void WaitUntil(const bool& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0);
+void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds);
 
-void WaitUntil(const TFunction<bool()> Condition, const FString Message = "", const double TimeoutSeconds = 60.0);
+template<class T, typename std::enable_if_t<std::is_integral<T>::value>* = nullptr>
+void WaitUntil(const T& bCondition, const FString Message = "", const double TimeoutSeconds = 60.0)
+{
+	WaitUntilInternal([&](){ return bCondition; }, Message, TimeoutSeconds);
+}
+
+template<typename T, typename = decltype(std::declval<T&>()())>
+void WaitUntil(const T& Condition, const FString Message = "", const double TimeoutSeconds = 60.0)
+{
+	WaitUntilInternal(Condition, Message, TimeoutSeconds);
+}
 
 void DelaySeconds(double Seconds, FString Message = "");
