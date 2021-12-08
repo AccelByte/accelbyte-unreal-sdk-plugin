@@ -1,26 +1,25 @@
 ﻿#include "Blueprints/AccelByteBPApiClient.h"
 
-void UCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
+void UABCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }
 
-FString UCredentials::GetAccessToken() const
+FString UABCredentials::GetAccessToken() const
 {
 	return ApiClientPtr->CredentialsRef->GetAccessToken();
 }
 
-FString UCredentials::GetUserId() const
+FString UABCredentials::GetUserId() const
 {
 	return ApiClientPtr->CredentialsRef->GetUserId();
 }
 
-
-UApiClient::UApiClient()
+UABApiClient::UABApiClient()
 {
-	Credentials = NewObject<UCredentials>();
+	Credentials = NewObject<UABCredentials>();
 	User = NewObject<UABUser>();
-	Lobby = NewObject<ULobby>();
+	Lobby = NewObject<UABLobby>();
 	Party = NewObject<UABParty>();
 	Matchmaking = NewObject<UABMatchmaking>();
 	Friends = NewObject<UABFriends>();
@@ -28,7 +27,7 @@ UApiClient::UApiClient()
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
 
-void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
+void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 	Credentials->SetApiClient(ApiClientPtr);
@@ -39,9 +38,9 @@ void UApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Friends->SetApiClient(ApiClientPtr);
 }
 
-UApiClient* UMultiRegistry::GetApiClient(FString const& Key)
+UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)
 {
-	UApiClient* WrapperPtr = NewObject<UApiClient>();
+	UABApiClient* WrapperPtr = NewObject<UABApiClient>();
 	WrapperPtr->SetApiClient(FMultiRegistry::GetApiClient(Key));
 
 	return WrapperPtr;
