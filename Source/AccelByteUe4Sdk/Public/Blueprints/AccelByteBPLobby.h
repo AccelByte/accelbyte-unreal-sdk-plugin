@@ -9,7 +9,7 @@
 using namespace AccelByte;
 
 UCLASS(Blueprintable, BlueprintType)
-class ULobby : public UObject
+class UABLobby : public UObject
 {
 	GENERATED_BODY()
 public:

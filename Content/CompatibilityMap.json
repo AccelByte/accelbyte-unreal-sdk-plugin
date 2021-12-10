@@ -1,23 +1,23 @@
 {
   "iam": {
-    "minVersion": "4.8.1",
-    "maxVersion": "4.8.1"
+    "minVersion": "4.9.0",
+    "maxVersion": "4.9.0"
   },
   "agreement": {
-    "minVersion": "1.14.0",
-    "maxVersion": "1.14.0"
+    "minVersion": "1.15.0",
+    "maxVersion": "1.15.0"
   },
   "basic": {
-    "minVersion": "1.27.0",
-    "maxVersion": "1.27.0"
+    "minVersion": "1.28.0",
+    "maxVersion": "1.28.0"
   },
   "platform": {
-    "minVersion": "3.38.0",
-    "maxVersion": "3.38.0"
+    "minVersion": "3.39.0",
+    "maxVersion": "3.39.0"
   },
   "social": {
-    "minVersion": "1.21.0",
-    "maxVersion": "1.21.0"
+    "minVersion": "1.22.0",
+    "maxVersion": "1.22.0"
   },
   "leaderboard": {
     "minVersion": "2.11.0",
@@ -32,27 +32,27 @@
     "maxVersion": "1.9.1"
   },
   "ugc": {
-    "minVersion": "1.8.0",
-    "maxVersion": "1.8.0"
+    "minVersion": "1.10.0",
+    "maxVersion": "1.10.0"
   },
   "lobby": {
-    "minVersion": "2.5.0",
-    "maxVersion": "2.5.0"
+    "minVersion": "2.6.0",
+    "maxVersion": "2.6.0"
   },
   "group": {
     "minVersion": "2.9.0",
     "maxVersion": "2.9.0"
   },
   "qosm": {
-    "minVersion": "1.10.0",
-    "maxVersion": "1.10.0"
+    "minVersion": "1.11.0",
+    "maxVersion": "1.11.0"
   },
   "dsmcontroller": {
-    "minVersion": "2.9.0",
-    "maxVersion": "2.9.0"
+    "minVersion": "2.10.0",
+    "maxVersion": "2.10.0"
   },
   "game-telemetry": {
-    "minVersion": "1.2.0",
-    "maxVersion": "1.2.0"
+    "minVersion": "1.3.0",
+    "maxVersion": "1.3.0"
   }
 }

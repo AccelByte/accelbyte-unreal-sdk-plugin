@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [8.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.0.1%0D8.0.0) (2021-12-10)
+
+
+### Bug Fixes
+
+* **blueprint:** rename blueprint classes to have AccelByte prefix to avoid conflicts with other classes ([6417423](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/64174236beb0b182bbab12afd5cbc00a150279c7))
+
 ## [8.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.0.0%0D7.2.1) (2021-12-06)
 
 
