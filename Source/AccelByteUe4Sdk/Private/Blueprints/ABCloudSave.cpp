@@ -16,9 +16,10 @@ void UABCloudSave::SaveUserRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.SaveUserRecord(
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		IsPublic,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -27,12 +28,12 @@ void UABCloudSave::SaveUserRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::GetUserRecord(
@@ -58,12 +59,12 @@ void UABCloudSave::GetUserRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::GetPublicUserRecord(
@@ -91,12 +92,12 @@ void UABCloudSave::GetPublicUserRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceUserRecord(
@@ -106,9 +107,10 @@ void UABCloudSave::ReplaceUserRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceUserRecord(
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		IsPublic,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
@@ -117,12 +119,12 @@ void UABCloudSave::ReplaceUserRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatest(
@@ -132,10 +134,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -143,12 +146,12 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
@@ -159,16 +162,17 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda(
 			[PayloadModifier](FJsonObject const& Response)
 			{
 				FJsonObjectWrapper Result;
 				Result.JsonObject = MakeShared<FJsonObject>(Response);
-				return *PayloadModifier.Execute(Result).JsonObject.Get();
+				return *PayloadModifier.Execute(Result).JsonObject;
 			}
 		),
 		FVoidHandler::CreateLambda(
@@ -177,13 +181,13 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 				OnSuccess.ExecuteIfBound();
 			}
 		),
-				FErrorHandler::CreateLambda(
-					[OnError](int code, FString const& Message)
-					{
-						OnError.ExecuteIfBound(code, Message);
-					}
-				)
-				);
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
 }
 
 void UABCloudSave::DeleteUserRecord(
@@ -200,12 +204,12 @@ void UABCloudSave::DeleteUserRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				/*OnError.ExecuteIfBound(code, Message);*/
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::SaveGameRecord(
@@ -214,9 +218,10 @@ void UABCloudSave::SaveGameRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.SaveGameRecord(
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -224,12 +229,12 @@ void UABCloudSave::SaveGameRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::GetGameRecord(
@@ -253,12 +258,12 @@ void UABCloudSave::GetGameRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceGameRecord(
@@ -267,9 +272,10 @@ void UABCloudSave::ReplaceGameRecord(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceGameRecord(
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -277,12 +283,12 @@ void UABCloudSave::ReplaceGameRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceGameRecordCheckLatest(
@@ -292,10 +298,11 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
 		Key,
 		LastUpdated,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -303,12 +310,12 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
 
 void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
@@ -319,16 +326,17 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 	FDHandler const& OnSuccess,
 	FDErrorHandler const& OnError)
 {
+	RecordRequest.JsonObjectFromString(RecordRequest.JsonString);
 	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
 		TryAttempt,
 		Key,
-		*RecordRequest.JsonObject.Get(),
+		*RecordRequest.JsonObject,
 		THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda(
 			[PayloadModifier](FJsonObject const& Response)
 			{
 				FJsonObjectWrapper Result;
 				Result.JsonObject = MakeShared<FJsonObject>(Response);
-				return *PayloadModifier.Execute(Result).JsonObject.Get();
+				return *PayloadModifier.Execute(Result).JsonObject;
 			}
 		),
 		FVoidHandler::CreateLambda(
@@ -337,13 +345,13 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 				OnSuccess.ExecuteIfBound();
 			}
 		),
-				FErrorHandler::CreateLambda(
-					[OnError](int code, FString const& Message)
-					{
-						OnError.ExecuteIfBound(code, Message);
-					}
-				)
-				);
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}
+		)
+	);
 }
 
 void UABCloudSave::DeleteGameRecord(
@@ -360,10 +368,10 @@ void UABCloudSave::DeleteGameRecord(
 			}
 		),
 		FErrorHandler::CreateLambda(
-			[OnError](int code, FString const& Message)
+			[OnError](int32 Code, FString const& Message)
 			{
-				OnError.ExecuteIfBound(code, Message);
+				OnError.ExecuteIfBound(Code, Message);
 			}
 		)
-				);
+	);
 }
