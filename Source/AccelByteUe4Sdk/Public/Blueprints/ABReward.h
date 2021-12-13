@@ -21,7 +21,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsQueryReward, FAccelByteModelsQueryRewa
 
 #pragma endregion
 
-UCLASS(BlueprintType)
+UCLASS(Blueprintable, BlueprintType)
 class UABReward : public UObject
 {
 	GENERATED_BODY()
