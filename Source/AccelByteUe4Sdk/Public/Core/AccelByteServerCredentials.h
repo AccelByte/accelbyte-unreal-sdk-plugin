@@ -69,6 +69,9 @@ private:
 	void RemoveFromTicker(FDelegateHandle& handle);
 };
 
+typedef TSharedRef<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsRef;
+typedef TSharedPtr<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsPtr;
+
 } // Namespace AccelByte
 
 
