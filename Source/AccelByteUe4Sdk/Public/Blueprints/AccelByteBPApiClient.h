@@ -13,6 +13,7 @@
 #include "ABWallet.h"
 #include "ABFulfillment.h"
 #include "ABAgreement.h"
+#include "ABReward.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -86,6 +87,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABAgreement* Agreement;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABReward* Reward;
 
 private:
 	FApiClientPtr ApiClientPtr;

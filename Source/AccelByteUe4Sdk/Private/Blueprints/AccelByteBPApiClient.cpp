@@ -30,6 +30,7 @@ UABApiClient::UABApiClient()
 	Wallet = NewObject<UABWallet>();
 	Fulfillment = NewObject<UABFulfillment>();
 	Agreement = NewObject<UABAgreement>();
+	Reward = NewObject<UABReward>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -50,6 +51,7 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Wallet->SetApiClient(ApiClientPtr);
 	Fulfillment->SetApiClient(ApiClientPtr);
 	Agreement->SetApiClient(ApiClientPtr);
+	Reward->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)
