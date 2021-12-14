@@ -14,6 +14,7 @@
 #include "ABFulfillment.h"
 #include "ABAgreement.h"
 #include "ABReward.h"
+#include "ABSeasonPass.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -90,6 +91,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABReward* Reward;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABSeasonPass* SeasonPass;
 
 private:
 	FApiClientPtr ApiClientPtr;
