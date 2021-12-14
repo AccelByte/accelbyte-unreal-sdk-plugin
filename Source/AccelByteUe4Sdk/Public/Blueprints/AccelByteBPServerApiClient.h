@@ -7,6 +7,7 @@
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "ABServerDSM.h"
+#include "ABServerLobby.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
 using namespace AccelByte;
@@ -42,6 +43,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerDSM* ServerDSM;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABServerLobby* ServerLobby;
 
 private:
 	FServerApiClientPtr ApiClientPtr;

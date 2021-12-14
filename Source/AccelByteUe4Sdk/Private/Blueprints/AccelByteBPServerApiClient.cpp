@@ -21,12 +21,14 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 	ApiClientPtr = NewApiClientPtr;
 	Credentials->SetServerApiClient(ApiClientPtr);
 	ServerDSM->SetServerApiClient(ApiClientPtr);
+	ServerLobby->SetServerApiClient(ApiClientPtr);
 }
 
 UServerApiClient::UServerApiClient()
 {
 	Credentials = NewObject<UABServerCredentials>();
 	ServerDSM = NewObject<UABServerDSM>();
+	ServerLobby = NewObject<UABServerLobby>();
 
 	SetServerApiClient(FMultiRegistry::GetServerApiClient());
 }
