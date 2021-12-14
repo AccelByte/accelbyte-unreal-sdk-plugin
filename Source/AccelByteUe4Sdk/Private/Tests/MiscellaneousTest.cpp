@@ -21,17 +21,26 @@ const auto MiscellaneousTestErrorHandler = FErrorHandler::CreateLambda([](int32 
 	UE_LOG(LogAccelByteMiscellaneousTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(GetServerCurrentTime, "AccelByte.Tests.Miscellaneous.A.GetServerCurrentTime", AutomationFlagMaskMiscellaneous);
-bool GetServerCurrentTime::RunTest(const FString& Parameters)
+DEFINE_SPEC(FMiscellaneousTestSpec, "AccelByte.Tests.Miscellaneous", EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
+
+void FMiscellaneousTestSpec::Define()
 {
-	bool bGetServerCurrentTimeSuccess = false;
-	FTime CurrentServerTime;
-	FRegistry::Miscellaneous.GetServerCurrentTime(THandler<FTime>::CreateLambda([&bGetServerCurrentTimeSuccess, &CurrentServerTime](const FTime& Result)
+	Describe("Get Server CurrentTime", [this]()
 	{
-		CurrentServerTime = Result;
-		bGetServerCurrentTimeSuccess = true;
-	}), MiscellaneousTestErrorHandler);
-	WaitUntil(bGetServerCurrentTimeSuccess, "Waiting for Server Current Time...");
-	AB_TEST_TRUE(bGetServerCurrentTimeSuccess);
-	return true;
+		It("Should get the server current time", [this]()
+		{
+			bool bGetServerCurrentTimeSuccess = false;
+			FTime CurrentServerTime;
+			FRegistry::Miscellaneous.GetServerCurrentTime(THandler<FTime>::CreateLambda([&bGetServerCurrentTimeSuccess, &CurrentServerTime](const FTime& Result)
+			{
+				CurrentServerTime = Result;
+				bGetServerCurrentTimeSuccess = true;
+			}), MiscellaneousTestErrorHandler);
+
+			WaitUntil(bGetServerCurrentTimeSuccess, "Waiting for Server Current Time...");
+			
+			AB_TEST_TRUE(bGetServerCurrentTimeSuccess);
+			return true;
+		});
+	});
 }

@@ -17,7 +17,7 @@ const int32 AutomationFlagMaskSessionBrowser = (EAutomationTestFlags::EditorCont
 
 const auto SessionBrowserTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, FString const& ErrorMessage)
 {
-    UE_LOG(LogAccelByteSessionBrowserTest, Fatal, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+    UE_LOG(LogAccelByteSessionBrowserTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
 const int SessionBrowserUserCount = 3;

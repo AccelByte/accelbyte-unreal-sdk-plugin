@@ -153,6 +153,68 @@ struct FTestUser
 	{}
 };
 
+USTRUCT(BlueprintType)
+struct FTestAcceptedPolicy
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool IsAccepted;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString LocalizedPolicyVersionId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString PolicyId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString PolicyVersionId;
+};
+
+USTRUCT(BlueprintType)
+struct FTestUserV4
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TArray<FTestAcceptedPolicy> AcceptedPolicies;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString AuthType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Password;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString PasswordMD5Sum;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Username;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool Verified;
+};
+
+USTRUCT(BlueprintType)
+struct FCreateTestUserResponseV4
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString AuthType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Country;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString DateOfBirth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Displayname;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FString Username;
+};
+
 void AdminGetUserMap(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetUserVerificationCode(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetUserByEmailAddress(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError);
@@ -165,8 +227,19 @@ void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool 
 void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 bool RegisterTestUser(const FTestUser& InTestUser);
+void RegisterTestUserV4(const FTestUserV4& InTestUser, const THandler<FCreateTestUserResponseV4>& OnSuccess, const FErrorHandler& OnError);
 bool LoginTestUser(FTestUser& TestUser);
 bool DeleteTestUser(FTestUser& InTestUser);
 
 bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUsers);
 bool TeardownTestUsers(TArray<FTestUser>& InTestUsers);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDCreateTestUserResponseV4, FCreateTestUserResponseV4, Response);
+UCLASS(Blueprintable, BlueprintType)
+class ACCELBYTEUE4SDK_API UUserTestAdminFunctions final : public UObject
+{
+	GENERATED_BODY()
+public:
+	UFUNCTION(BlueprintCallable)
+	void RegisterTestUserV4BP(const FTestUserV4& InTestUser, FDCreateTestUserResponseV4 OnSuccess, FDErrorHandler OnError);
+};

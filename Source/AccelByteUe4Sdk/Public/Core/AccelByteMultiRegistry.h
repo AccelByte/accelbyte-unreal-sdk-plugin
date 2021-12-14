@@ -35,6 +35,7 @@
 #include "Api/AccelByteCurrencyApi.h"
 #include "Api/AccelByteMiscellaneousApi.h"
 #include "Api/AccelByteRewardApi.h"
+#include "AccelByteServerApiClient.h"
 
 using namespace AccelByte;
 
@@ -116,9 +117,11 @@ class ACCELBYTEUE4SDK_API FMultiRegistry
 {
 public:
 	static FApiClientPtr GetApiClient(FString const Key = TEXT("default"));
+	static FServerApiClientPtr GetServerApiClient(FString const Key = TEXT("default"));
 	static bool RegisterApiClient(FString const Key, FApiClientPtr ApiClient);
 private:
 	static TMap<FString, FApiClientPtr> ApiClientInstances;
+	static TMap<FString, FServerApiClientPtr> ServerApiClientInstances;
 
 	FMultiRegistry() = delete;
 	FMultiRegistry(FMultiRegistry const& Other) = delete;

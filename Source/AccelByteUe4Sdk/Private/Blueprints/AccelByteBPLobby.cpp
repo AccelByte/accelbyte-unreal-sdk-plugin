@@ -1,21 +1,21 @@
 ﻿#include "Blueprints/AccelByteBPLobby.h"
 
-void ULobby::Connect() const
+void UABLobby::Connect() const
 {
 	ApiClientPtr->Lobby.Connect();
 }
 
-void ULobby::Disconnect() const
+void UABLobby::Disconnect() const
 {
 	return ApiClientPtr->Lobby.Disconnect();
 }
 
-void ULobby::UnbindEvent() const
+void UABLobby::UnbindEvent() const
 {
 	ApiClientPtr->Lobby.UnbindEvent();
 }
 
-void ULobby::SetOnConnected(FDHandler OnConnected) const
+void UABLobby::SetOnConnected(FDHandler OnConnected) const
 {
 	ApiClientPtr->Lobby.SetConnectSuccessDelegate(
 		FVoidHandler::CreateLambda(
@@ -25,17 +25,17 @@ void ULobby::SetOnConnected(FDHandler OnConnected) const
 			}));
 }
 
-bool ULobby::IsConnected() const
+bool UABLobby::IsConnected() const
 {
 	return ApiClientPtr->Lobby.IsConnected();
 }
 
-void ULobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
+void UABLobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 {
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void ULobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
+void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
 {
 	ApiClientPtr->Lobby.SetErrorNotifDelegate(
 		Api::Lobby::FErrorNotif::CreateLambda(

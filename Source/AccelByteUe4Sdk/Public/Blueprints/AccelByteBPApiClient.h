@@ -14,6 +14,7 @@
 #include "ABFulfillment.h"
 #include "ABCloudSave.h"
 #include "ABAgreement.h"
+#include "ABReward.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -22,7 +23,7 @@ using namespace AccelByte;
 using namespace AccelByte::Api;
 
 UCLASS(Blueprintable, BlueprintType)
-class UCredentials final : public UObject
+class UABCredentials final : public UObject
 {
 	GENERATED_BODY()
 
@@ -41,22 +42,22 @@ private:
 
 
 UCLASS(Blueprintable, BlueprintType)
-class UApiClient final : public UObject
+class UABApiClient final : public UObject
 {
 	GENERATED_BODY()
 public:
-	UApiClient();
+	UABApiClient();
 
 	void SetApiClient(FApiClientPtr NewApiClientPtr);
 
 	UPROPERTY(BlueprintReadOnly)
-	UCredentials* Credentials;
+	UABCredentials* Credentials;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABUser* User;
 
 	UPROPERTY(BlueprintReadOnly)
-	ULobby* Lobby;
+	UABLobby* Lobby;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABParty* Party;
@@ -91,19 +92,22 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UABAgreement* Agreement;
 
+	UPROPERTY(BlueprintReadOnly)
+	UABReward* Reward;
+
 private:
 	FApiClientPtr ApiClientPtr;
 };
 
 
 UCLASS(Blueprintable, BlueprintType)
-class UMultiRegistry final : public UBlueprintFunctionLibrary
+class UABMultiRegistry final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
 
 	UFUNCTION(BlueprintCallable)
-	UApiClient* GetApiClient(FString const& Key);
+	UABApiClient* GetApiClient(FString const& Key);
 };
 
