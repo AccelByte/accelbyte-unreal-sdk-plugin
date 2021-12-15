@@ -731,10 +731,10 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	{
 		PartyAttribute.Add("new_session_only", "true");
 	}
-	
+
+	FString partyAttributeSerialized = "";
 	if (PartyAttribute.Num() > 0)
 	{
-		FString partyAttributeSerialized = "";
 		TArray<FString> keys;
 		PartyAttribute.GetKeys(keys);
 		for (int i = 0 ; i < keys.Num() ; i++)
@@ -753,6 +753,31 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 				partyAttributeSerialized.Append(", ");
 			}
 		}
+	}
+
+	if(OptionalParams.SubGameModes.Num() > 0)
+	{
+		// if there is party attribute already, prepend a comma
+		if(PartyAttribute.Num() > 0)
+		{
+			partyAttributeSerialized.Append(", ");
+		}
+
+		FString SubGameModeValue {"["};
+		for(int i = 0; i < OptionalParams.SubGameModes.Num(); i++)
+		{
+			if(i > 0)
+				SubGameModeValue.Append(", ");
+
+			SubGameModeValue.Append(FString::Printf(TEXT("\"%s\""), *OptionalParams.SubGameModes[i]));
+		}
+		SubGameModeValue.Append("]");
+
+		partyAttributeSerialized.Append(FString::Printf(TEXT("\"sub_game_mode\": %s"), *SubGameModeValue));
+	}
+
+	if(!partyAttributeSerialized.IsEmpty())
+	{
 		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
 	}
 
@@ -767,6 +792,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 				STempParty.Append(TEXT(","));
 			}
 		}
+		
 		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
 	}
 

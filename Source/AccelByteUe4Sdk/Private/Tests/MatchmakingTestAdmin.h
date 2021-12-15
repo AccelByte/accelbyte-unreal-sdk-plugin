@@ -22,6 +22,22 @@ struct FAllianceRule
 };
 
 USTRUCT(BlueprintType)
+struct FAllianceFlexingRule
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceFlexingRule")
+	int duration;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceFlexingRule")
+	int max_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceFlexingRule")
+	int min_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceFlexingRule")
+	int player_max_number;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | AllianceFlexingRule")
+	int player_min_number;
+};
+
+USTRUCT(BlueprintType)
 struct FFlexingRule
 {
 	GENERATED_BODY()
@@ -47,6 +63,20 @@ struct FMatchingRule
 	int reference;
 };
 
+
+
+USTRUCT(BlueprintType)
+struct FSubGameMode
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate | SubGameMode")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate | SubGameMode")
+	FAllianceRule Alliance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate | SubGameMode")
+	TArray<FAllianceFlexingRule> Alliance_flexing_rule;
+};
+
 USTRUCT(BlueprintType)
 struct FMatchmakingRuleSet
 {
@@ -57,6 +87,8 @@ struct FMatchmakingRuleSet
 	TArray<FFlexingRule> flexing_rule;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
 	TArray<FMatchingRule> matching_rule;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | RuleSet")
+	TMap<FString, FSubGameMode> sub_game_modes;
 };
 
 USTRUCT(BlueprintType)
@@ -72,10 +104,12 @@ struct FMatchmakingCreateRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
 	FMatchmakingRuleSet rule_set;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
-	bool joinable;
+	bool joinable {false};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Matchmaking | ChannelCreate")
+	bool use_sub_gamemode {false};
 };
 
 void AdminCreateMatchmakingChannel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable = false);
 void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable = false);
-void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable = false);
+void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable = false, TArray<FSubGameMode> SubGameModes = {});
 void AdminDeleteMatchmakingChannel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);

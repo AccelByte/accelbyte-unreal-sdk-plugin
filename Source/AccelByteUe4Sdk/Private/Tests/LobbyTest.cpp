@@ -1091,7 +1091,7 @@ bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bUsersConnected);
 	AB_TEST_TRUE(bUsersConnectionSuccess);
-
+	
 	LobbyDisconnect(1);
 	ResetResponses();
 	return true;
@@ -3675,6 +3675,217 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_SubGameMode_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStart_TestSubGameMode", AutomationFlagMaskLobby);
+bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Parameters)
+{
+	LobbyConnect(2);
+
+	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+
+	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
+	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+
+	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+
+	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+
+	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+
+	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+
+	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
+	bool bMatchmakingNotifSuccess[2] = { false };
+	bool bMatchmakingNotifError[2] = { false };
+	int matchMakingNotifNum = 0;
+	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[0] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[0] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[0] = true;
+		}
+	}));
+
+	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	{
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
+		matchmakingNotifResponse[1] = result;
+		matchMakingNotifNum++;
+		bMatchmakingNotifSuccess[1] = true;
+		if (result.MatchId.IsEmpty())
+		{
+			bMatchmakingNotifError[1] = true;
+		}
+	}));
+
+	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+
+	Lobbies[0]->SendInfoPartyRequest();
+
+	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
+
+	FString ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+
+	FAllianceRule AllianceRule;
+	AllianceRule.min_number = 3;
+	AllianceRule.max_number = 3;
+	AllianceRule.player_min_number = 1;
+	AllianceRule.player_max_number = 1;
+
+	FAllianceRule AllianceRuleSub;
+	AllianceRuleSub.min_number = 2;
+	AllianceRuleSub.max_number = 2;
+	AllianceRuleSub.player_min_number = 1;
+	AllianceRuleSub.player_max_number = 1;
+
+	FAllianceRule AllianceRuleSub4;
+	AllianceRuleSub4.min_number = 4;
+	AllianceRuleSub4.max_number = 4;
+	AllianceRuleSub4.player_min_number = 1;
+	AllianceRuleSub4.player_max_number = 1;
+
+	TArray<FString> SubGameModeNames {"1v1", "4pffa"};
+	
+	TArray<FSubGameMode> SubGameModes;
+	SubGameModes.Add({SubGameModeNames[0], AllianceRuleSub});
+	SubGameModes.Add({SubGameModeNames[1], AllianceRuleSub4});
+	
+	bool bCreateMatchmakingChannelSuccess = false;
+	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, {}, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+	{
+		bCreateMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler, false, SubGameModes);
+		
+	WaitUntil([&]()
+	{
+		return bCreateMatchmakingChannelSuccess;
+	}, "Waiting for Create Matchmaking channel...", 60);
+
+	if (!bGetInfoPartyError)
+	{
+		Lobbies[0]->SendLeavePartyRequest();
+
+		WaitUntil(bLeavePartySuccess, "Leaving Party...");
+	}
+	Lobbies[0]->SendCreatePartyRequest();
+
+	WaitUntil(bCreatePartySuccess, "Creating Party...");
+
+	AB_TEST_FALSE(bCreatePartyError);
+
+	bGetInfoPartySuccess = false;
+	bGetInfoPartyError = false;
+	Lobbies[1]->SendInfoPartyRequest();
+
+	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
+
+	if (!bGetInfoPartyError)
+	{
+		bLeavePartySuccess = false;
+		bLeavePartyError = false;
+		Lobbies[1]->SendLeavePartyRequest();
+
+		WaitUntil(bLeavePartySuccess, "Leaving Party...");
+	}
+	bCreatePartySuccess = false;
+	bCreatePartyError = false;
+	Lobbies[1]->SendCreatePartyRequest();
+
+	WaitUntil(bCreatePartySuccess, "Creating Party...");
+	AB_TEST_FALSE(bCreatePartyError);
+
+	Api::FMatchmakingOptionalParams MMOptionals;
+	MMOptionals.SubGameModes = SubGameModeNames;
+
+	Api::FMatchmakingOptionalParams MMOptionals2;
+	MMOptionals2.SubGameModes = {SubGameModeNames[0]};
+
+	Lobbies[0]->SendStartMatchmaking(ChannelName, MMOptionals);
+
+	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	AB_TEST_FALSE(bStartMatchmakingError);
+
+	bStartMatchmakingSuccess = false;
+	bStartMatchmakingError = false;
+	Lobbies[1]->SendStartMatchmaking(ChannelName, MMOptionals2);
+
+	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
+	AB_TEST_FALSE(bStartMatchmakingError);
+
+	WaitUntil([&]()
+	{
+		return matchMakingNotifNum >= 2;
+	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
+	
+	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
+	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+
+	WaitUntil([&]()
+	{
+		return bReadyConsentNotifSuccess;
+	}, "Waiting for Ready Consent Notification...", 30);
+	AB_TEST_FALSE(bReadyConsentNotifError);
+	readyConsentNoticeResponse[0] = readyConsentNotice;
+
+	bReadyConsentNotifSuccess = false;
+	bReadyConsentNotifError = false;
+	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+
+	WaitUntil([&]()
+	{
+		return bReadyConsentNotifSuccess;
+	}, "Waiting for Ready Consent Notification...", 30);
+	AB_TEST_FALSE(bReadyConsentNotifError);
+	readyConsentNoticeResponse[1] = readyConsentNotice;
+
+	WaitUntil([&]()
+	{
+		return bDsNotifSuccess;
+	}, "Waiting for DS Notification...", DsNotifWaitTime);
+	AB_TEST_FALSE(bDsNotifError);
+
+	bool bDeleteMatchmakingChannelSuccess = false;
+	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
+	{
+		bDeleteMatchmakingChannelSuccess = true;
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Delete Matchmaking Channel Success..!"));
+	}), LobbyTestErrorHandler);
+
+	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+
+	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
+	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
+	AB_TEST_FALSE(bMatchmakingNotifError[0]);
+	AB_TEST_FALSE(bMatchmakingNotifError[1]);
+	AB_TEST_FALSE(matchmakingNotifResponse[0].MatchId.IsEmpty());
+	AB_TEST_FALSE(matchmakingNotifResponse[1].MatchId.IsEmpty());
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
+	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
+
+	LobbyDisconnect(2);
+	ResetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmakingCheckCustomPort_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartCheckCustomPort", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& Parameters)
 {
@@ -4464,13 +4675,19 @@ bool LobbyTestStartMatchmakingAllParamsStruct_ReturnOk::RunTest(const FString& P
 	TArray<FMatchingRule> MatchingRules;
 	MatchingRules.Add(MmrRule);
 
+	TArray<FSubGameMode> SubGameModes {
+		{"test", AllianceRule},
+		{"sgm", AllianceRule},
+		{"another1", AllianceRule}
+	};
+
 	bool bCreateMatchmakingChannelSuccess = false;
 	AdminCreateMatchmakingChannel(ChannelName, AllianceRule, MatchingRules,
 		FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
 	{
 		bCreateMatchmakingChannelSuccess = true;
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-	}), LobbyTestErrorHandler);
+	}), LobbyTestErrorHandler, true, SubGameModes);
 
 	WaitUntil([&]()
 	{
@@ -4524,6 +4741,7 @@ bool LobbyTestStartMatchmakingAllParamsStruct_ReturnOk::RunTest(const FString& P
 	OptionalParams.TempPartyUserIds.Add(UserIds[0]);
 	OptionalParams.ExtraAttributes = ExtraAttributes;
 	OptionalParams.NewSessionOnly = true;
+	OptionalParams.SubGameModes = {"sgm", "test", "another1"};
 
 	// ACT
 	Lobbies[0]->SendStartMatchmaking(ChannelName, OptionalParams);

@@ -21,7 +21,7 @@ void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule Allianc
 	AdminCreateMatchmakingChannel(channel, AllianceRule, TArray<FMatchingRule>(), OnSuccess, OnError, joinable);
 }
 
-void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
+void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule AllianceRule, TArray<FMatchingRule> MatchingRules, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable, TArray<FSubGameMode> SubGameModes)
 {
 	FMatchmakingCreateRequest RequestBody;
 	RequestBody.description = channel;
@@ -29,11 +29,20 @@ void AdminCreateMatchmakingChannel(const FString& channel, FAllianceRule Allianc
 	RequestBody.game_mode = channel;
 	RequestBody.rule_set.alliance = AllianceRule;
 	RequestBody.rule_set.matching_rule = MatchingRules;
+	for(FSubGameMode gamemode : SubGameModes)
+	{
+		RequestBody.rule_set.sub_game_modes.Add(gamemode.Name, gamemode);
+	}
+	if(SubGameModes.Num() > 0)
+	{
+		RequestBody.use_sub_gamemode = true;
+	}
 	RequestBody.joinable = joinable;
 
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
 	UE_LOG(LogAccelByteTest, Log, TEXT("JSON Content: %s"), *Content);
+	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/matchmaking/namespaces/%s/channels"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace);
 	AB_HTTP_POST(Request, Url, Authorization, Content);

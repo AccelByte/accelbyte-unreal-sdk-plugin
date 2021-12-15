@@ -30,6 +30,7 @@ struct FMatchmakingOptionalParams
 	TArray<FString> TempPartyUserIds;
 	TArray<FString> ExtraAttributes;
 	bool NewSessionOnly {false};
+	TArray<FString> SubGameModes;
 };
 enum Response : uint8;
 enum Notif : uint8;
