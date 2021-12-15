@@ -12,6 +12,7 @@
 #include "ABCurrency.h"
 #include "ABWallet.h"
 #include "ABFulfillment.h"
+#include "ABCloudSave.h"
 #include "ABAgreement.h"
 #include "ABReward.h"
 #include "ABSeasonPass.h"
@@ -85,6 +86,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABFulfillment* Fulfillment;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABCloudSave* CloudSave;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABAgreement* Agreement;
