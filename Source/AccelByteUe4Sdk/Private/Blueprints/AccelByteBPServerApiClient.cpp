@@ -20,6 +20,7 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 {
 	ApiClientPtr = NewApiClientPtr;
 	Credentials->SetServerApiClient(ApiClientPtr);
+	ServerOauth2->SetServerApiClient(ApiClientPtr);
 	ServerDSM->SetServerApiClient(ApiClientPtr);
 	ServerLobby->SetServerApiClient(ApiClientPtr);
 }
@@ -27,6 +28,7 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 UServerApiClient::UServerApiClient()
 {
 	Credentials = NewObject<UABServerCredentials>();
+	ServerOauth2 = NewObject<UABServerOauth2>();
 	ServerDSM = NewObject<UABServerDSM>();
 	ServerLobby = NewObject<UABServerLobby>();
 

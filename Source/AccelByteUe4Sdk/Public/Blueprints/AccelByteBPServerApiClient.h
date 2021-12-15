@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
+#include "ABServerOauth2.h"
 #include "ABServerDSM.h"
 #include "ABServerLobby.h"
 #include "AccelByteBPServerApiClient.generated.h"
@@ -40,6 +41,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerCredentials* Credentials;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABServerOauth2* ServerOauth2;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerDSM* ServerDSM;
