@@ -5,6 +5,7 @@
 #include "Api/AccelByteReportingApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteReport.h"
 #include "Core/AccelByteSettings.h"
 
 namespace AccelByte
@@ -48,6 +49,8 @@ void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportDat
 
 void Reporting::GetReasons(const FString & ReasonGroup, int32 const& Offset, int32 const& Limit, const THandler<FAccelByteModelsReasonsResponse>& OnSuccess, const FErrorHandler & OnError)
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasons"), *SettingsRef.ReportingServerUrl, *SettingsRef.Namespace);
 	FString Verb = TEXT("GET");
@@ -87,6 +90,8 @@ void Reporting::GetReasons(const FString & ReasonGroup, int32 const& Offset, int
 
 void Reporting::GetReasonGroups(int32 const& Offset, int32 const& Limit, const THandler<FAccelByteModelsReasonGroupsResponse>& OnSuccess, const FErrorHandler& OnError)
 {
+	FReport::Log(FString(__FUNCTION__));
+	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/reasonGroups"), *SettingsRef.ReportingServerUrl, *SettingsRef.Namespace);
 	FString Verb = TEXT("GET");
