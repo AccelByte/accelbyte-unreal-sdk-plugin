@@ -42,7 +42,7 @@ const auto LobbyTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCod
 	UE_LOG(LogAccelByteLobbyTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
-const int WaitMatchmakingTime = 120;
+const int WaitMatchmakingTime = 125;
 const int DsNotifWaitTime = 60;
 const int TestUserCount = 6;
 FString UserIds[TestUserCount];
@@ -112,6 +112,8 @@ FAccelByteModelsUserBannedNotification userBanNotifResponse;
 FAccelByteModelsMatchmakingResponse matchmakingResponse;
 FAccelByteModelsReadyConsentNotice readyConsentNotice;
 FAccelByteModelsDsNotice dsNotice;
+
+FLobbyModelConfig OriginalLobbyConfig;
 
 inline static bool LatenciesPredicate(const TPair<FString, float>& left, const TPair<FString, float>& right)
 {
@@ -949,12 +951,34 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		}), LobbyTestErrorHandler);
 		WaitUntil(bSetDsmConfigComplete, "Waiting set dsm config");
 	}
+
+	// update lobby config (set lobby burst limit to 100)
+	bool bGetLobbyConfigDone {false};
+	AdminGetLobbyConfig(THandler<FLobbyModelConfig>::CreateLambda(
+		[&](const FLobbyModelConfig& result)
+		{
+			bGetLobbyConfigDone = true;
+			OriginalLobbyConfig = result;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bGetLobbyConfigDone, "Waiting fetching original lobby config");
+	
+	FLobbyModelConfig NewLobbyConfig {OriginalLobbyConfig};
+	NewLobbyConfig.GeneralRateLimitBurst = 100;
+
+	bool bSetLobbyConfigDone {false};
+	AdminSetLobbyConfig(NewLobbyConfig, THandler<FLobbyModelConfig>::CreateLambda(
+		[&bSetLobbyConfigDone](const FLobbyModelConfig& )
+		{
+			bSetLobbyConfigDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bSetLobbyConfigDone, "Waiting set new lobby config");
 	
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.Tests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
-
 bool LobbyTestTeardown::RunTest(const FString& Parameters)
 {
 	TArray<bool> SuccessfulDeletions;
@@ -980,6 +1004,15 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 			}));
 		WaitUntil([&]() { return SuccessfulDeletions[i]; }, "Waiting for user deletion...", 60.0);
 	}
+
+	bool bSetLobbyConfigDone {false};
+	AdminSetLobbyConfig(OriginalLobbyConfig, THandler<FLobbyModelConfig>::CreateLambda(
+		[&bSetLobbyConfigDone](const FLobbyModelConfig& )
+		{
+			bSetLobbyConfigDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bSetLobbyConfigDone, "Waiting set new lobby config");
 
 	AB_TEST_FALSE(SuccessfulDeletions.ContainsByPredicate([](const bool SuccessfulDeletion){ return !SuccessfulDeletion; }));
 	return true;
@@ -5472,7 +5505,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	WaitUntil([&matchMakingNotifNum]()
 		{ 
 			return matchMakingNotifNum == 2; 
-		}, "Wait matchmaking notifs all arrived", 60);
+		}, "Wait matchmaking notifs all arrived", WaitMatchmakingTime);
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
@@ -7300,6 +7333,9 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	}), LobbyTestErrorHandler);
 	WaitUntil(bSetConfigSuccess, "Waiting Set Back Default Configuration...");
 	AB_TEST_TRUE(bSetConfigSuccess);
+
+	LobbyDisconnect(1);
+	ResetResponses();
 	
 	return true;
 }
