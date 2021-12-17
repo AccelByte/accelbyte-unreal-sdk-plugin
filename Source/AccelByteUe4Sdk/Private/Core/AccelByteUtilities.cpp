@@ -272,6 +272,10 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("ipify support is deprecated. Please use ISocketSubsystem to get public IP address."));
+	
 	FString Url = FString::Printf(TEXT("https://api.ipify.org?format=json"));
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");

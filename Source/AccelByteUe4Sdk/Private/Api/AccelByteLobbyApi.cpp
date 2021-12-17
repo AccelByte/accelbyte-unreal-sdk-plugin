@@ -14,7 +14,6 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
 namespace AccelByte
@@ -652,10 +651,10 @@ FString Lobby::SendGetOnlineFriendPresenceRequest()
 //-------------------------------------------------------------------------------------------------
 // Notification
 //-------------------------------------------------------------------------------------------------
-UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void Lobby::GetAllAsyncNotification()
-{
+{	
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("Lobby version 2.4.0 and above doesn't support this anymore"));
 
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -1009,6 +1008,9 @@ void Lobby::GetPartyStorage(const FString& PartyId, const THandler<FAccelByteMod
 void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("Please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
@@ -1050,6 +1052,9 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);

@@ -63,7 +63,6 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	*/
-	UE_DEPRECATED(4.25, "ipify supports will be deprecated in the future releases, please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)")
 	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/*

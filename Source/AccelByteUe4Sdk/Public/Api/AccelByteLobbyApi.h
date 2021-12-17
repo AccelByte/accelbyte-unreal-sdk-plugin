@@ -9,6 +9,8 @@
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
+
 // Forward declarations
 class IWebSocket;
 
@@ -1527,7 +1529,6 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
 	* @param OnError This will be called when the operation failed.
 	*/
-	UE_DEPRECATED(4.25, "This function is obsolete, please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)")
 	void GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError);
 
 	/*
@@ -1546,7 +1547,6 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
 	* @param OnError This will be called when the operation failed.
 	*/
-	UE_DEPRECATED(4.25, "This function is obsolete, please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)")
 	void GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
 
 	/*

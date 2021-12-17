@@ -149,6 +149,10 @@ namespace Api
 
 	void CloudStorage::UpdateSlotMetadata(const FString& SlotId, const FString& FileName, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError)
 	{
+		FReport::LogDeprecated(
+			FString(__FUNCTION__),
+			TEXT("Use UpdateSlotMetadata(const FString&, const TArray<FString>& Tags, const FString& Label, const FString& CustomAttribute, const THandler<FAccelByteModelsSlot>& OnSuccess, FHttpRequestProgressDelegate OnProgress, const FErrorHandler& OnError) instead."));
+
 		UpdateSlotMetadata(SlotId, Tags, Label, CustomAttribute, OnSuccess, OnProgress, OnError);
 	}
 

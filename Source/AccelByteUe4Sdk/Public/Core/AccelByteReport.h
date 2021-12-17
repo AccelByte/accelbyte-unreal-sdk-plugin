@@ -18,5 +18,6 @@ public:
 	static void LogHttpRequest(const FHttpRequestPtr& Request);
 	static void LogHttpResponse(FHttpRequestPtr Request, FHttpResponsePtr Response);
 	static void Log(FString Message);
+	static void LogDeprecated(FString FunctionName, FString Message = TEXT(""));
 };
 }
