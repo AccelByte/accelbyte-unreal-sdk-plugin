@@ -423,7 +423,7 @@ void Lobby::Connect()
 	}
 }
 
-void Lobby::Disconnect()
+void Lobby::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -431,7 +431,7 @@ void Lobby::Disconnect()
 	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 	if(WebSocket.IsValid())
 	{
-		WebSocket->Disconnect();
+		WebSocket->Disconnect(ForceCleanup);
 	}
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
@@ -2083,7 +2083,7 @@ Lobby::~Lobby()
 	// only disconnect when engine is still valid
 	if(UObjectInitialized())
 	{
-		Disconnect();
+		Disconnect(true);
 	}
 }
 
