@@ -23,6 +23,7 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 	ServerOauth2->SetServerApiClient(ApiClientPtr);
 	ServerDSM->SetServerApiClient(ApiClientPtr);
 	ServerLobby->SetServerApiClient(ApiClientPtr);
+	ServerMatchmaking->SetServerApiClient(ApiClientPtr);
 }
 
 UServerApiClient::UServerApiClient()
@@ -31,6 +32,7 @@ UServerApiClient::UServerApiClient()
 	ServerOauth2 = NewObject<UABServerOauth2>();
 	ServerDSM = NewObject<UABServerDSM>();
 	ServerLobby = NewObject<UABServerLobby>();
+	ServerMatchmaking = NewObject<UABServerMatchmaking>();
 
 	SetServerApiClient(FMultiRegistry::GetServerApiClient());
 }
