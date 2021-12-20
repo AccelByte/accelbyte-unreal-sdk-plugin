@@ -45,7 +45,6 @@ enum class EAccelByteEntitlementClass : uint8
 	NONE = 0,
 	APP,
 	ENTITLEMENT,
-	DISTRIBUTION,
 	CODE,
 	MEDIA
 };
@@ -65,7 +64,6 @@ enum class EAccelByteEntitlementStatus : uint8
 	ACTIVE,
 	INACTIVE,
 	CONSUMED,
-	DISTRIBUTED,
 	REVOKED
 };
 
@@ -514,13 +512,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsEntitlementInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 		int32 UseCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
-		int32 Quantity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 		EAccelByteEntitlementSource Source;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
-		int32 DistributedQuantity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
-		FString TargetNamespace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
 		FAccelByteModelsEntitlementItemSnapshot ItemSnapshot;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Entitlement | Models | EntitlementPagingSlicedResult | EntitlementInfo ")
