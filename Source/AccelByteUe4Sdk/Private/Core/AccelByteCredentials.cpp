@@ -203,6 +203,11 @@ void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
 	{
 		return;
 	}
+	else if (GetSessionState() == ESessionState::Invalid) 
+	{
+		HttpRef.ResumeBearerAuthRequest(GetAccessToken());
+		return;
+	}
 
 	UE_LOG(LogAccelByteCredentials, Verbose, TEXT("BearerAuthRejectedRefreshToken"));
 	HttpRef.PauseBearerAuthRequest();

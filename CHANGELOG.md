@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.1.0%0D8.0.1) (2021-12-20)
+
+
+### Features
+
+* **blueprint:** catalog, order, entitlement, currency, & wallet blueprint API ([2a772b7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a772b78ade5449a84505075e11029452bb655f9))
+* **shadowban:** Add Delegate Handler for task refresh function and delete it to prevent memory leak ([3e829e2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3e829e2f3c6555518aba6961e183de12830a5fdc))
+* **shadowban:** Add Trim and Ignore case on Authorization check, to make sure catch various Bearer typing possibilities. ([fcb942e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/fcb942e9dd292b33e5148531bff1336350ae2643))
+* **shadowban:** exclude shadowban trigger from server build ([78eb173](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/78eb1730e3194d4319a7aa4a499270cd3392569e))
+* **shadowban:** Fix Linux error compile, constructor has wrong order variable definition ([8319fdd](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8319fdd7b6835d075e9becd30344b49d8cdb6c90))
+* **shadowban:** switch order of bearer token refresh handle definition, make sure its assigned before refresh token triggered ([e5894de](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e5894dec66166d2404ee6f80e9dab59b09b53cef))
+
+
+### Bug Fixes
+
+* **lobby:** add missing field to several models, allow lobby MessageNotification handle incoming JSON object (curly bracket) ([42c74d6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/42c74d6603ae4eb4063688769dcf54ceef778aee))
+* Merge back UTF-8 BOM removal and UGC UploadTo ([4800b58](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4800b58e74cf06be7687d52a6705f74221a20ff1))
+* Merge tag 8.0.0 for clean cutoff release ([26b8417](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/26b8417d4f1d9842228a47a800218cf8eacf8c30))
+
+
+### Tests
+
+* **lobby:** fix InviteRejected test case not setting leave party delegate ([e0dde98](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e0dde98bb16fecdc9f78f1a5aa28c2f0068272bc))
+* **serverlobby:** make sure lobby connected before requesting leave party, add more wait time for writing party storage concurrently ([04b9110](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/04b9110e8638be8fc3cd8caf77bdd8dc82d2c736))
+
 ### [8.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.0.1%0D8.0.0) (2021-12-10)
 
 

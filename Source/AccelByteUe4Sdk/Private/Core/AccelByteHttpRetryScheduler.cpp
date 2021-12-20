@@ -44,6 +44,7 @@ private:
 	bool ScheduledRetry;
 	const FVoidHandler OnBearerAuthRejectDelegate;
 	FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh;
+	FDelegateHandle BearerAuthRejectedRefreshHandle;
 	bool bIsBeenRunFromPause;
 
 	void BearerAuthUpdated(const FString& AccessToken);
@@ -51,6 +52,7 @@ private:
 	EAccelByteTaskState Retry();
 	EAccelByteTaskState ScheduleNextRetry();
 	bool IsFinished();
+	bool IsRefreshable();
 };
 
 FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay, const FVoidHandler& OnBearerAuthRejectDelegate, FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh)
@@ -63,6 +65,7 @@ FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpReques
 	, ScheduledRetry(false)
 	, OnBearerAuthRejectDelegate(OnBearerAuthRejectDelegate)
 	, BearerAuthRejectedRefresh(BearerAuthRejectedRefresh)
+	, BearerAuthRejectedRefreshHandle()
 	, bIsBeenRunFromPause(false)
 {
 
@@ -71,6 +74,7 @@ FHttpRetryTask::FHttpRetryTask(const FHttpRequestPtr& Request, const FHttpReques
 FHttpRetryTask::~FHttpRetryTask()
 {
 
+	BearerAuthRejectedRefresh.Remove(BearerAuthRejectedRefreshHandle);
 }
 
 bool FHttpRetryTask::Start()
@@ -100,19 +104,14 @@ bool FHttpRetryTask::Cancel()
 }
 
 EAccelByteTaskState FHttpRetryTask::Pause()
-{
-	if (bIsBeenRunFromPause) 
-	{
-		return EAccelByteTaskState::Completed;
-	}
-	
+{	
 	if (TaskState != EAccelByteTaskState::Paused)
 	{
-		OnBearerAuthRejectDelegate.ExecuteIfBound();
-		BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
+		BearerAuthRejectedRefreshHandle = BearerAuthRejectedRefresh.Add(THandler<FString>::CreateLambda([&](const FString& AccessToken) 
 			{
 				BearerAuthUpdated(AccessToken);
 			}));
+		OnBearerAuthRejectDelegate.ExecuteIfBound();
 	}
 
 	return EAccelByteTaskState::Paused;
@@ -174,11 +173,13 @@ void FHttpRetryTask::Tick(double CurrentTime)
 				}
 				break;
 			case EHttpResponseCodes::Denied:
-				if (Request->GetHeader("Authorization").Contains("Bearer")) 
+#if !UE_SERVER
+				if (IsRefreshable())
 				{
 					NextState = Pause();
 					break;
 				}
+#endif
 			default:
 				NextState = EAccelByteTaskState::Completed;
 				break;
@@ -221,6 +222,12 @@ void FHttpRetryTask::BearerAuthUpdated(const FString& AccessToken)
 	bIsBeenRunFromPause = true;
 
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("BearerAuthUpdated"));
+	if (AccessToken.IsEmpty())
+	{
+		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token is empty, Task is canceled"));
+		Cancel();
+		return;
+	}
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 	Request->SetHeader(TEXT("Authorization"), Authorization);
 	ScheduledRetry = true;
@@ -279,6 +286,20 @@ bool FHttpRetryTask::IsFinished()
 	return Request->GetStatus() == EHttpRequestStatus::Failed ||
 		Request->GetStatus() == EHttpRequestStatus::Failed_ConnectionError ||
 		Request->GetStatus() == EHttpRequestStatus::Succeeded;
+}
+
+bool FHttpRetryTask::IsRefreshable()
+{
+	bool bIsRefreshable = false;
+	FString Authorization = Request->GetHeader("Authorization");
+	Authorization = Authorization.TrimStartAndEnd();
+	if (Authorization.Contains("Bearer", ESearchCase::IgnoreCase) 
+		&& !Authorization.Equals("Bearer", ESearchCase::IgnoreCase)
+		&& !bIsBeenRunFromPause)
+	{
+		bIsRefreshable = true;
+	}
+	return bIsRefreshable;
 }
 
 FHttpRetryScheduler::FHttpRetryScheduler()
@@ -348,11 +369,16 @@ void FHttpRetryScheduler::PauseBearerAuthRequest()
 void FHttpRetryScheduler::ResumeBearerAuthRequest(const FString& AccessToken)
 {
 	UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("HTTP Retry Scheduler RESUME"));
-	if (BearerAuthRejectedRefresh.IsBound()) {
+	if (BearerAuthRejectedRefresh.IsBound()) 
+	{
 		BearerAuthRejectedRefresh.Broadcast(AccessToken);
 		BearerAuthRejectedRefresh.Clear();
 	}
-	State = EState::Initialized;
+
+	if (State == EState::Paused) 
+	{
+		State = EState::Initialized;
+	}
 }
 
 bool FHttpRetryScheduler::PollRetry(double Time)
