@@ -3,6 +3,8 @@
 // and restrictions contact your company contract manager.
 
 #include "AccelByteUe4SdkModule.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteServerSettings.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "CoreUObject.h"
@@ -16,28 +18,28 @@
 #include "ISettingsSection.h"
 #endif
 
-FString GetDefaultServerAPIUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
-{
-	if (SpecificServerUrl.IsEmpty())
-	{
-		return FString::Printf(TEXT("%s/%s"), *FRegistry::ServerSettings.BaseUrl, *DefaultServerPath);
-	}
-
-	return SpecificServerUrl;
-}
-
 class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 {
+public:
     virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	virtual void SetEnvironment(ESettingsEnvironment const Environment) override;
+	virtual AccelByte::Settings const& GetClientSettings() const override;
+	virtual AccelByte::ServerSettings const& GetServerSettings() const override;
+private:
+	AccelByte::Settings ClientSettings;
+	AccelByte::ServerSettings ServerSettings;
+	
 	// For registering settings in UE4 editor
 	void RegisterSettings();
 	void UnregisterSettings();
 
-	bool LoadSettingsFromConfigUobject();
-	bool LoadServerSettingsFromConfigUobject();
-	void NullCheckConfig(FString value, FString configField);
+	bool LoadClientSettings(ESettingsEnvironment const Environment);
+	bool LoadServerSettings(ESettingsEnvironment const Environment);
+	bool LoadSettingsFromConfigUObject();
+	bool LoadServerSettingsFromConfigUObject();
+	bool NullCheckConfig(FString const& Value, FString const& ConfigField);
 	static FVersion GetPluginVersion();
 	void GetVersionInfo(FString const& Url, TFunction<void(FVersionInfo)> Callback) const;
 	void CheckServicesCompatibility() const;
@@ -55,8 +57,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FModuleManager::Get().LoadModuleChecked("Projects");
 
 	RegisterSettings();
-	LoadSettingsFromConfigUobject();
-	LoadServerSettingsFromConfigUobject();
+	LoadSettingsFromConfigUObject();
+	LoadServerSettingsFromConfigUObject();
 
 #if UE_BUILD_DEVELOPMENT
 	CheckServicesCompatibility();
@@ -78,9 +80,24 @@ void FAccelByteUe4SdkModule::ShutdownModule()
 	UnregisterSettings();
 }
 
+void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environment)
+{
+	LoadClientSettings(Environment);
+	LoadServerSettings(Environment);
+}
+
+AccelByte::Settings const& FAccelByteUe4SdkModule::GetClientSettings() const
+{
+	return ClientSettings;
+}
+
+AccelByte::ServerSettings const& FAccelByteUe4SdkModule::GetServerSettings() const
+{
+	return ServerSettings;
+}
+
 void FAccelByteUe4SdkModule::RegisterSettings()
 {
-
 #if WITH_EDITOR
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
@@ -91,7 +108,7 @@ void FAccelByteUe4SdkModule::RegisterSettings()
 		);
 		if (SettingsSection.IsValid())
 		{
-			SettingsSection->OnModified().BindRaw(this, &FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject);
+			SettingsSection->OnModified().BindRaw(this, &FAccelByteUe4SdkModule::LoadSettingsFromConfigUObject);
 		}
 
 		ISettingsSectionPtr ServerSettingsSection = SettingsModule->RegisterSettings(TEXT("Project"), TEXT("Plugins"), TEXT("AccelByte Unreal Engine 4 Server SDK"),
@@ -101,7 +118,7 @@ void FAccelByteUe4SdkModule::RegisterSettings()
 		);
 		if (ServerSettingsSection.IsValid())
 		{
-			ServerSettingsSection->OnModified().BindRaw(this, &FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject);
+			ServerSettingsSection->OnModified().BindRaw(this, &FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject);
 		}
 	}
 #endif
@@ -117,54 +134,82 @@ void FAccelByteUe4SdkModule::UnregisterSettings()
 #endif
 }
 
-bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUobject()
+bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Environment)
 {
-	FRegistry::Settings.Reset(ESettingsEnvironment::Default);
-
-	NullCheckConfig(*FRegistry::Settings.ClientId, "Client ID");
-	NullCheckConfig(*FRegistry::Settings.Namespace, "Namespace");
-	NullCheckConfig(*FRegistry::Settings.BaseUrl, "Base URL");
+	bool bResult = true;
+	ClientSettings.Reset(Environment);
 	
-	return true;
-}
+	bResult &= NullCheckConfig(ClientSettings.ClientId, TEXT("Client ID"));
+	bResult &= NullCheckConfig(ClientSettings.Namespace, TEXT("Namespace"));
+	bResult &= NullCheckConfig(ClientSettings.BaseUrl, TEXT("Base URL"));
 
-bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUobject()
-{
-#if WITH_EDITOR || UE_SERVER
-	FRegistry::ServerSettings.ClientId = GetDefault<UAccelByteServerSettings>()->ClientId;
-	FRegistry::ServerSettings.ClientSecret = GetDefault<UAccelByteServerSettings>()->ClientSecret;
-	FRegistry::ServerSettings.Namespace = GetDefault<UAccelByteServerSettings>()->Namespace;
-	FRegistry::ServerSettings.PublisherNamespace = GetDefault<UAccelByteServerSettings>()->PublisherNamespace;
-	FRegistry::ServerSettings.RedirectURI = GetDefault<UAccelByteServerSettings>()->RedirectURI;
-	FRegistry::ServerSettings.BaseUrl = GetDefault<UAccelByteServerSettings>()->BaseUrl;
-
-	NullCheckConfig(*FRegistry::ServerSettings.ClientId, "Client ID");
-	NullCheckConfig(*FRegistry::ServerSettings.ClientSecret, "Client Secret");
-
-	FRegistry::ServerSettings.IamServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->IamServerUrl, TEXT("iam"));
-	FRegistry::ServerSettings.DSMControllerServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->DSMControllerServerUrl, TEXT("dsmcontroller"));
-	FRegistry::ServerSettings.StatisticServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->StatisticServerUrl, TEXT("social"));
-	FRegistry::ServerSettings.PlatformServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->PlatformServerUrl, TEXT("platform"));
-	FRegistry::ServerSettings.QosManagerServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->QosManagerServerUrl, TEXT("qosm"));
-	FRegistry::ServerSettings.GameTelemetryServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
-	FRegistry::ServerSettings.AchievementServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->AchievementServerUrl, TEXT("achievement"));
-	FRegistry::ServerSettings.MatchmakingServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->MatchmakingServerUrl, TEXT("matchmaking"));
-	FRegistry::ServerSettings.LobbyServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->LobbyServerUrl, TEXT("lobby"));
-	FRegistry::ServerSettings.CloudSaveServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->CloudSaveServerUrl, TEXT("cloudsave"));
-	FRegistry::ServerSettings.SeasonPassServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->SeasonPassServerUrl, TEXT("seasonpass"));
-	FRegistry::ServerSettings.SessionBrowserServerUrl = GetDefaultServerAPIUrl(GetDefault<UAccelByteServerSettings>()->SessionBrowserServerUrl, TEXT("sessionbrowser"));
-	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
-
-#endif
-	return true;
-}
-
-void FAccelByteUe4SdkModule::NullCheckConfig(FString value, FString configField)
-{
-	if (value.IsEmpty())
+	if (!bResult)
 	{
-		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *configField);
+		return bResult;
 	}
+	
+	FRegistry::Settings = ClientSettings;
+	FRegistry::Credentials.SetClientCredentials(ClientSettings.ClientId, ClientSettings.ClientSecret);
+
+	return bResult;
+}
+
+bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Environment)
+{
+	bool bResult = true;
+
+	ServerSettings.Reset(Environment);
+
+	bResult &= NullCheckConfig(ServerSettings.ClientId, TEXT("Client ID"));
+	bResult &= NullCheckConfig(ServerSettings.ClientSecret, TEXT("Client Secret"));
+	bResult &= NullCheckConfig(ServerSettings.BaseUrl, TEXT("Base URL"));
+	
+	if (!bResult)
+	{
+		return bResult;
+	}
+	
+	FRegistry::ServerSettings = ServerSettings;
+	FRegistry::ServerCredentials.SetClientCredentials(ServerSettings.ClientId, ServerSettings.ClientSecret);
+	
+	return bResult;
+}
+
+bool FAccelByteUe4SdkModule::LoadSettingsFromConfigUObject()
+{
+	return LoadClientSettings(ESettingsEnvironment::Default);
+}
+
+bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject()
+{
+	bool bResult = false;
+	bool bEnableSettings = false;
+
+#if UE_BUILD_DEVELOPMENT
+	bEnableSettings = GetDefault<UAccelByteServerSettings>()->ForceEnableSettings;
+#endif
+
+#if WITH_EDITOR || UE_SERVER
+	bEnableSettings = true;
+#endif
+
+	if (bEnableSettings)
+	{
+		bResult = LoadServerSettings(ESettingsEnvironment::Default);
+	}
+		
+	return bResult;
+}
+
+bool FAccelByteUe4SdkModule::NullCheckConfig(FString const& Value, FString const& ConfigField)
+{
+	if (Value.IsEmpty())
+	{
+		UE_LOG(LogAccelByte, Warning, TEXT("\"%s\" is not configured yet.\nCheck DefaultEngine.ini or Edit/ProjectSettings/Plugins/"), *ConfigField);
+		return false;
+	}
+
+	return true;
 }
 
 FVersion FAccelByteUe4SdkModule::GetPluginVersion()

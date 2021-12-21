@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Core/AccelByteEnvironment.h"
 #include "AccelByteServerSettings.generated.h"
 
 namespace AccelByte
@@ -32,7 +33,14 @@ public:
 	FString CloudSaveServerUrl;
 	FString SeasonPassServerUrl;
 	FString SessionBrowserServerUrl;
+	
+	void Reset(ESettingsEnvironment const Environment);
+
+	ServerSettings& operator=(ServerSettings const& Other) = default;
 };
+
+typedef TSharedRef<ServerSettings, ESPMode::ThreadSafe> ServerSettingsRef;
+typedef TSharedPtr<ServerSettings, ESPMode::ThreadSafe> ServerSettingsPtr;
 
 } // Namespace AccelByte
 
@@ -46,6 +54,9 @@ class ACCELBYTEUE4SDK_API UAccelByteServerSettings : public UObject
 public:
 	UAccelByteServerSettings();
 
+	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	bool ForceEnableSettings;
+	
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString ClientId;
 
@@ -100,7 +111,6 @@ public:
 	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
 	FString SessionBrowserServerUrl;
 };
-
 
 /**
  * @brief Get or update settings via blueprint.
@@ -205,4 +215,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
 	static void SetSessionBrowserServerUrl(const FString& CloudServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Server | Settings")
+	static void ResetSettings(const ESettingsEnvironment Environment);
 };
