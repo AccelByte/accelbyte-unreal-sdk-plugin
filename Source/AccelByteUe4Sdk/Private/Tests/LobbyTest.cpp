@@ -4079,6 +4079,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 		return bDsNotifSuccess;
 	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
+	FAccelByteModelsDsNotice DsNotice {dsNotice};
 
 	bool bDeleteMatchmakingChannelSuccess = false;
 	AdminDeleteMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bDeleteMatchmakingChannelSuccess]()
@@ -4088,6 +4089,9 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	}), LobbyTestErrorHandler);
 
 	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
+	
+	LobbyDisconnect(2);
+	ResetResponses();
 
 	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
@@ -4101,19 +4105,16 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
 
 	// Test custom ports names returned from 
-	AB_TEST_FALSE(dsNotice.MatchId.IsEmpty());
+	AB_TEST_FALSE(DsNotice.MatchId.IsEmpty());
 	int customPortFoundCount = 0;
 	for (auto portName : customPortNames)
 	{
-		if (dsNotice.Ports.Contains(portName))
+		if (DsNotice.Ports.Contains(portName))
 		{
 			customPortFoundCount++;
 		}
 	}
 	AB_TEST_EQUAL(customPortFoundCount, customPortNames.Num());
-
-	LobbyDisconnect(2);
-	ResetResponses();
 	return true;
 }
 
@@ -4346,6 +4347,9 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 
+	LobbyDisconnect(2);
+	ResetResponses();
+	
 	AB_TEST_TRUE(bCreateMatchmakingChannelSuccess);
 	AB_TEST_TRUE(bDeleteMatchmakingChannelSuccess);
 	AB_TEST_FALSE(bMatchmakingNotifError[0]);
@@ -4378,9 +4382,6 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			}
 		}
 	}
-
-	LobbyDisconnect(2);
-	ResetResponses();
 	return true;
 }
 
@@ -4494,13 +4495,15 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	{
 		return bCreateMatchmakingChannelSuccess;
 	}, "Create Matchmaking channel...", 60);
-
+	
 	if (!bGetInfoPartyError)
 	{
+		bLeavePartySuccess = false;
 		Lobbies[0]->SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
+	bCreatePartySuccess = false;
 	Lobbies[0]->SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
@@ -4938,6 +4941,7 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 
 	WaitUntil(bDSBusy, "Waiting DS to be busy");
 
+	DelaySeconds(3, "waiting backend to sync");
 	bool bSessionEnqueued;
 	AdminEnqueueSession(Lobby0MatchId, FVoidHandler::CreateLambda([&bSessionEnqueued]()
 	{
