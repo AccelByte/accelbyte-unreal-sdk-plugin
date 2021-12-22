@@ -40,6 +40,7 @@ const auto JoinableSessionTestErrorHandler = FErrorHandler::CreateLambda([](int3
 });
 
 const int ActiveUserCount = 2;
+const float DSNotifWaitTime = 130;
 FString ActiveUserIds[ActiveUserCount];
 Credentials ActiveUserCreds[ActiveUserCount];
 TArray<TSharedPtr<Api::User>> ActiveUsers;
@@ -436,7 +437,7 @@ bool JoinableSessionTestTwoPartyMatchmake::RunTest(const FString& Parameters)
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, "", 15);
+	}, "Waiting receive DS Notif", DSNotifWaitTime);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -568,7 +569,7 @@ bool JoinableSessionTestAddRemovePlayerManual::RunTest(const FString& Parameters
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, "", 15);
+	}, "Waiting for DSNotif", DSNotifWaitTime);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -760,7 +761,7 @@ bool JoinableSessionTestAddRemovePlayerPartyParam::RunTest(const FString& Parame
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, "", 15);
+	}, "Waiting for DSNotif", DSNotifWaitTime);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -992,7 +993,7 @@ bool JoinableSessionTestNonJoinable::RunTest(const FString& Parameters)
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, "", 15);
+	}, "Waiting for DSNotif", DSNotifWaitTime);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
@@ -1108,7 +1109,7 @@ bool JoinableSessionTestAddRemovePlayerNonJoinable::RunTest(const FString& Param
 	WaitUntil([&AMatchId]()
 	{
 		return !AMatchId.IsEmpty();
-	}, "", 15);
+	}, "Waiting for ds notif", DSNotifWaitTime);
 
 	// DS set query session, enqueue joinable session
 	bool bGetMatchDataComplete = false;
