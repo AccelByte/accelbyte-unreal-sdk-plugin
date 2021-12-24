@@ -35,6 +35,7 @@
 #include "Api/AccelByteUserApi.h"
 #include "Api/AccelByteUserProfileApi.h"
 #include "Api/AccelByteWalletApi.h"
+#include "Core/AccelByteApiBase.h"
 
 using namespace AccelByte;
 namespace AccelByte
