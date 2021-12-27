@@ -33,20 +33,6 @@ class UABSessionBrowser : public UObject
 public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
-	/*UFUNCTION(BlueprintCallable, Category = "AccelByte | SessinBrowser")
-	int JsonTest(
-		FJsonObjectWrapper OtherSettings
-	)
-	{
-		auto SettingJson = MakeShared<FJsonObject>();
-		SettingJson->SetStringField(TEXT("CUSTOM1"), TEXT("CUSTOM1 UwU"));
-		SettingJson->SetNumberField(TEXT("CUSTOM2"), 20);
-
-		return (*SettingJson).GetStringField("CUSTOM1");
-		OtherSettings.JsonObjectFromString(OtherSettings.JsonString);
-		return (*SettingJson).GetIntegerField("CUSTOM2");
-	}*/
-
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessinBrowser")
 	void CreateGameSessionPublic(
 		FString const& GameMode,
