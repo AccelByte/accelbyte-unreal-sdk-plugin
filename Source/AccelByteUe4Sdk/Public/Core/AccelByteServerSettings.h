@@ -47,7 +47,7 @@ typedef TSharedPtr<ServerSettings, ESPMode::ThreadSafe> ServerSettingsPtr;
 /**
  * @brief UObject for storing settings into configuration file.
  */
-UCLASS(Config = Engine)
+UCLASS(Config = Engine, defaultConfig)
 class ACCELBYTEUE4SDK_API UAccelByteServerSettings : public UObject
 {
 	GENERATED_BODY()
