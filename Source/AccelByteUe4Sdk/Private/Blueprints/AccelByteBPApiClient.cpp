@@ -33,6 +33,7 @@ UABApiClient::UABApiClient()
 	Agreement = NewObject<UABAgreement>();
 	Reward = NewObject<UABReward>();
 	SeasonPass = NewObject<UABSeasonPass>();
+	Statistic = NewObject<UABStatistic>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -56,6 +57,7 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Agreement->SetApiClient(ApiClientPtr);
 	Reward->SetApiClient(ApiClientPtr);
 	SeasonPass->SetApiClient(ApiClientPtr);
+	Statistic->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)
