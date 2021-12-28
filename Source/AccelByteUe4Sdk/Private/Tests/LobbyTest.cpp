@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -21,7 +21,6 @@
 
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
-#include <IWebSocket.h>
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -7610,3 +7609,167 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 
 	return true;
 }
+
+#pragma region LobbyMultithreadTesting
+
+class FTestLobbyUser : FRunnable
+{
+private:
+	// Thread handle. Control the thread using this, with operators like Kill and Suspend
+	FRunnableThread* Thread;
+
+	// Used to know when the thread should exit, changed in Stop(), read in Run()
+	bool bThreadStopping {false};
+
+	Credentials& TestCredentials;
+	const Settings& TestSetting;
+	FHttpRetryScheduler& HttpRef;
+	const FString& ThreadName;
+	const Lobby::FConnectSuccess& GetConnectSuccessDelegate;
+	const Lobby::FPartyGetInvitedNotif& GetMessageNotifDelegate;
+	float DelayTime {0};
+	
+
+public:
+	virtual uint32 Run() override 
+	{
+		FPlatformProcess::Sleep(DelayTime);
+
+		Lobby TestLobby {TestCredentials, TestSetting, HttpRef};
+
+		bool bLobbyConnected {false};
+		const auto OnLobbyConnected {FVoidHandler::CreateLambda([&]()
+		{
+			GetConnectSuccessDelegate.ExecuteIfBound();
+			bLobbyConnected = true;
+		})};
+
+		TestLobby.SetConnectSuccessDelegate(OnLobbyConnected);
+		TestLobby.SetPartyGetInvitedNotifDelegate(GetMessageNotifDelegate);
+		
+		TestLobby.Connect();
+		while(!bLobbyConnected || !bThreadStopping)
+		{
+			FPlatformProcess::Sleep(0.1f);
+		}
+
+		TestLobby.SendLeavePartyRequest();
+
+		while(!bThreadStopping)
+		{
+			FPlatformProcess::Sleep(0.1f);
+		}
+
+		TestLobby.Disconnect();
+		
+		return 0;
+	}
+
+	void EnsureCompletion()
+	{
+		bThreadStopping = true;
+		Stop();
+		Thread->WaitForCompletion();
+	}
+	
+	FTestLobbyUser(const FString& ThreadName, float DelayTime, const Lobby::FConnectSuccess& ConnectedDelegate, const Lobby::FPartyGetInvitedNotif& GetMessageNotifDelegate, Credentials& TestCredentials, const Settings& TestSetting, FHttpRetryScheduler& HttpRef) :
+	TestCredentials(TestCredentials),
+	TestSetting(TestSetting),
+	HttpRef(HttpRef),
+	ThreadName(ThreadName),
+	GetConnectSuccessDelegate(ConnectedDelegate),
+	GetMessageNotifDelegate(GetMessageNotifDelegate),
+	DelayTime(DelayTime)
+	{
+		Thread = FRunnableThread::Create(this, *ThreadName);
+	}
+	
+	
+	virtual ~FTestLobbyUser() override
+	{
+		if (Thread)
+		{
+			Thread->Kill();
+			delete Thread;
+		}
+	}
+};
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FLobbyTestConcurrency, "AccelByte.Tests.Lobby.F.Concurrent", AutomationFlagMaskLobby);
+bool FLobbyTestConcurrency::RunTest(const FString& Parameter)
+{
+	const int32 TestCount = 4;
+	TArray<TSharedPtr<FTestLobbyUser>> TestLobbyUsers;
+	TArray<FString> TestUserIds;
+
+	// Arrange Inviter
+	TSharedPtr<Lobby> InviterLobby {Lobbies[TestCount]};
+	bool bInviterLeavePartyDone {false};
+	InviterLobby->SetLeavePartyResponseDelegate(Lobby::FPartyLeaveResponse::CreateLambda([&bInviterLeavePartyDone](const FAccelByteModelsLeavePartyResponse&)
+	{
+		bInviterLeavePartyDone = true;
+	}));
+
+	bool bInviterCreatePartyDone {false};
+	InviterLobby->SetCreatePartyResponseDelegate(Lobby::FPartyCreateResponse::CreateLambda([&bInviterCreatePartyDone](const FAccelByteModelsCreatePartyResponse&)
+	{
+		bInviterCreatePartyDone = true;
+	}));
+	
+	InviterLobby->Connect();
+	WaitUntil([&InviterLobby](){ return InviterLobby->IsConnected(); }, "Waiting inviter lobby to connect");
+
+	InviterLobby->SendLeavePartyRequest();
+	WaitUntil(bInviterLeavePartyDone);
+	
+	InviterLobby->SendCreatePartyRequest();
+	WaitUntil(bInviterCreatePartyDone);
+
+	FThreadSafeCounter GetLobbyConnectedCounter;
+	const auto OnLobbyConnected {FVoidHandler::CreateLambda([&GetLobbyConnectedCounter]()
+		{
+			GetLobbyConnectedCounter.Increment();
+		})};
+	
+	FThreadSafeCounter GetPartyInviteCounter;
+	const auto GetMessageNotifDelegateHandler = Lobby::FPartyGetInvitedNotif::CreateLambda([&GetPartyInviteCounter](const FAccelByteModelsPartyGetInvitedNotice&)
+	{
+		GetPartyInviteCounter.Increment();
+	});
+
+	for(int i = 0; i < TestCount; i++)
+	{
+		const int32 Count = i;
+		FString ThreadName = FString::Printf(TEXT("Lobby_Concurrency_%03d"), Count);
+		TSharedPtr<FTestLobbyUser> Task = MakeShared<FTestLobbyUser>(ThreadName, 0.3f, OnLobbyConnected, GetMessageNotifDelegateHandler, UserCreds[Count], FRegistry::Settings, FRegistry::HttpRetryScheduler);
+		TestLobbyUsers.Add(Task);
+		TestUserIds.Add(UserCreds[Count].GetUserId());
+	}
+
+	WaitUntil([&GetLobbyConnectedCounter, &TestCount]()
+	{
+		return GetLobbyConnectedCounter.GetValue() == TestCount;
+	}, "Waiting lobby connected in thread");
+
+	for(const auto& TestUserId : TestUserIds)
+	{
+		InviterLobby->SendInviteToPartyRequest(TestUserId);
+	}
+
+	WaitUntil([&GetPartyInviteCounter, &TestCount]()
+	{
+		return GetPartyInviteCounter.GetValue() == TestCount;
+	}, "Waiting to get all party info response");
+
+	LobbyDisconnect(TestCount+1); // +1 is inviter
+	ResetResponses();
+	for(const auto& Task : TestLobbyUsers)
+	{
+		Task->EnsureCompletion();
+	}
+
+	AB_TEST_EQUAL(GetPartyInviteCounter.GetValue(), TestCount);
+	return true;
+}
+
+#pragma endregion LobbyMultithreadTesting
