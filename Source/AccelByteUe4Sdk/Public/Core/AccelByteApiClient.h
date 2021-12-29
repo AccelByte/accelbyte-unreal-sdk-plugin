@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -17,7 +17,6 @@
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
-// #include "Api/AccelByteGroupApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteLeaderboardApi.h"
 #include "Api/AccelByteLobbyApi.h"
@@ -52,7 +51,6 @@ public:
 	
 	FCredentialsRef CredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
-	// Api::Group Group{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::User User{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::UserProfile UserProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Category Category{*CredentialsRef, FRegistry::Settings, *HttpRef};
