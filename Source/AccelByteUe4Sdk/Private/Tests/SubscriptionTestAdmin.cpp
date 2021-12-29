@@ -4,6 +4,7 @@
 
 #include "SubscriptionTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "TestUtilities.h"
 
 void AdminGrantSubscriptionFree(const FString& UserId, const FFreeSubscriptionRequest& BodyRequest, const THandler<FItemFullInfo>& OnSuccess, const FErrorHandler& OnError)
 {

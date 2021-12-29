@@ -4,6 +4,7 @@
 
 #include "AgreementTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "TestUtilities.h"
 
 void AdminCreateAgreementBasePolicy(const FAgreementBasePolicyCreate& CreateRequest, const THandler<FAgreementBasePolicy>& OnSuccess, const FErrorHandler& OnError)
 {

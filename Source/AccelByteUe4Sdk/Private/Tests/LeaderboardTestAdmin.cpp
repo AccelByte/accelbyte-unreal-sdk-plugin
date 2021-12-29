@@ -4,6 +4,7 @@
 
 #include "LeaderboardTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "TestUtilities.h"
 
 void AdminCreateLeaderboard(const FLeaderboardConfigRequest& request, const THandler<FLeaderboardConfigRequest>& OnSuccess, const FErrorHandler& OnError)
 {
