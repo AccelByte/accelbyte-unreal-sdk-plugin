@@ -9,7 +9,6 @@
 #include "Core/AccelByteCredentials.h"
 #include "UserTestAdmin.h"
 #include "TestUtilities.h"
-#include "UserTestAdmin.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
