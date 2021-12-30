@@ -17,6 +17,7 @@
 #include "ABReward.h"
 #include "ABSeasonPass.h"
 #include "ABStatistic.h"
+#include "ABLeaderboard.h"
 #include "ABUGC.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
@@ -103,6 +104,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABStatistic* Statistic;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABLeaderboard* Leaderboard;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABUGC* UGC;
