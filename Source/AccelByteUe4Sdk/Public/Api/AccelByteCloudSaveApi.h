@@ -55,6 +55,16 @@ public:
 	void GetPublicUserRecord(FString const& Key, FString const& UserId, THandler<FAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	 * @brief Get a public record (arbitrary JSON data) by its key and userId in user-level.
+	 *
+	 * @param Key Key of record.
+	 * @param UserIds List UserId(s) of the record owner.
+	 * @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsUserRecord&.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void BulkGetPublicUserRecord(FString const& Key, const TArray<FString>& UserIds, THandler<FListAccelByteModelsUserRecord> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
 	 *
 	 * @param Key Key of record.
@@ -162,6 +172,8 @@ private:
 	FHttpRetryScheduler& HttpRef;
 	Credentials const& Credentials;
 	Settings const& Settings;
+
+	int32 const UserIdsRequestLimit = 20;
 
 	CloudSave() = delete;
 	CloudSave(CloudSave const&) = delete;
