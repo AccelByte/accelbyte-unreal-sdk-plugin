@@ -61,7 +61,8 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	SeasonPass->SetApiClient(ApiClientPtr);
 	Statistic->SetApiClient(ApiClientPtr);
 	Leaderboard->SetApiClient(ApiClientPtr);
-	SessionBrowser->SetApiClient(ApiClientPtr);}
+	SessionBrowser->SetApiClient(ApiClientPtr);
+}
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)
 {
