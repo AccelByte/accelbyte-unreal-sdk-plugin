@@ -7,6 +7,7 @@
 #include "Api/AccelByteCloudSaveApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
+#include "UserTestAdmin.h"
 #include "TestUtilities.h"
 
 using AccelByte::FVoidHandler;
@@ -443,6 +444,198 @@ bool CloudSaveGetUserRecordInvalidKey::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordDone, "Waiting for get user record invalid key ...");
 
 	AB_TEST_FALSE(bGetUserRecordSuccess);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveBulkGetPublicUserRecord, "AccelByte.Tests.CloudSave.C.BulkGetPublicUserRecord", AutomationFlagMaskCloudSave);
+bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
+{
+	//setup
+	const int UserCount = 3;
+	TArray<FTestUser> TestUsers;
+	TArray<FString> UserIds;
+
+	bool bGetUserRecordSuccess = false;
+	FListAccelByteModelsUserRecord getUserRecordResults;
+
+	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
+	
+	for (int i = 0; i < UserCount; i++)
+	{
+		UserIds.Add(TestUsers[i].Credentials.GetUserId());
+		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
+		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+		bool bSaveUserRecord1Success = false;
+		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			}), CloudSaveErrorHandler);
+		WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
+	}
+	
+	//endpoint test
+	FRegistry::CloudSave.BulkGetPublicUserRecord(KeyPublicUserTest, UserIds, THandler<FListAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResults](FListAccelByteModelsUserRecord userRecord)
+		{
+			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+			getUserRecordResults = userRecord;
+			bGetUserRecordSuccess = true;
+		}), CloudSaveErrorHandler);
+	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
+
+	//checking
+	AB_TEST_TRUE(bGetUserRecordSuccess);
+	int UserChecked = 0;
+	int i = 0;
+	while (UserChecked < UserCount)
+	{
+		if (getUserRecordResults.Data[i].UserId == UserIds[UserChecked])
+		{
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Key, KeyPublicUserTest);
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].UserId, UserIds[UserChecked]);
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+			for (auto buildingResult : getUserRecordResults.Data[i].Value.GetArrayField("buildings"))
+			{
+				bool bItemFound = false;
+				for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
+				{
+					if (buildingResult.Get()->AsString() == buildingRecord.Get()->AsString())
+					{
+						bItemFound = true;
+						break;
+					}
+				}
+				AB_TEST_TRUE(bItemFound);
+			}
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+			AB_TEST_TRUE(getUserRecordResults.Data[i].IsPublic);
+
+			UserChecked++;
+			i = 0;
+		}
+		if (i < UserCount-1)
+		{
+			i++;
+		}
+		else
+		{
+			i = 0;
+		}
+	}
+
+	//teardown
+	AB_TEST_TRUE(TeardownTestUsers(TestUsers));
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveBulkGetPublicUserRecord_SomeUserNotFound, "AccelByte.Tests.CloudSave.C.BulkGetPublicUserRecord_SomeUserNotFound", AutomationFlagMaskCloudSave);
+bool CloudSaveBulkGetPublicUserRecord_SomeUserNotFound::RunTest(const FString& Parameters)
+{
+	//setup
+	const int UserCount = 3;
+	const int ExpectedUserMissing = 2;
+	TArray<FTestUser> TestUsers;
+	TArray<FString> UserIds;
+
+	bool bGetUserRecordSuccess = false;
+	FListAccelByteModelsUserRecord getUserRecordResults;
+
+	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
+
+	for (int i = 0; i < UserCount; i++)
+	{
+		UserIds.Add(TestUsers[i].Credentials.GetUserId());
+		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
+		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+		bool bSaveUserRecord1Success = false;
+		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			}), CloudSaveErrorHandler);
+		WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
+	}
+
+	for (size_t i = 0; i < ExpectedUserMissing; i++)
+	{
+		UserIds.Add("MissingUser");
+	}
+
+	//endpoint test
+	FRegistry::CloudSave.BulkGetPublicUserRecord(KeyPublicUserTest, UserIds, THandler<FListAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResults](FListAccelByteModelsUserRecord userRecord)
+		{
+			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+			getUserRecordResults = userRecord;
+			bGetUserRecordSuccess = true;
+		}), CloudSaveErrorHandler);
+	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
+
+	//checking
+	AB_TEST_TRUE(bGetUserRecordSuccess);
+	AB_TEST_EQUAL(getUserRecordResults.Data.Num(), UserCount);
+
+	//teardown
+	AB_TEST_TRUE(TeardownTestUsers(TestUsers));
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveBulkGetPublicUserRecord_SomeRecordNotFound, "AccelByte.Tests.CloudSave.C.BulkGetPublicUserRecord_SomeRecordNotFound", AutomationFlagMaskCloudSave);
+bool CloudSaveBulkGetPublicUserRecord_SomeRecordNotFound::RunTest(const FString& Parameters)
+{
+	//setup
+	const int UserCount = 3;
+	int ExpectedUserHavingRecord = 0;
+	TArray<FTestUser> TestUsers;
+	TArray<FString> UserIds;
+
+	bool bGetUserRecordSuccess = false;
+	FListAccelByteModelsUserRecord getUserRecordResults;
+
+	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
+
+	for (int i = 0; i < UserCount; i++)
+	{
+		UserIds.Add(TestUsers[i].Credentials.GetUserId());
+		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
+		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+		bool bSaveUserRecord1Success = false;
+		if (i % 2) //not all user saving the record
+		{
+			ExpectedUserHavingRecord++;
+			CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+				{
+					UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+					bSaveUserRecord1Success = true;
+				}), CloudSaveErrorHandler);
+			WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
+		}
+	}
+
+	//endpoint test
+	FRegistry::CloudSave.BulkGetPublicUserRecord(KeyPublicUserTest, UserIds, THandler<FListAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResults](FListAccelByteModelsUserRecord userRecord)
+		{
+			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+			getUserRecordResults = userRecord;
+			bGetUserRecordSuccess = true;
+		}), CloudSaveErrorHandler);
+	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
+
+	//checking
+	AB_TEST_TRUE(bGetUserRecordSuccess);
+	AB_TEST_EQUAL(getUserRecordResults.Data.Num(), ExpectedUserHavingRecord);
+
+	//teardown
+	AB_TEST_TRUE(TeardownTestUsers(TestUsers));
+
 	return true;
 }
 
