@@ -17,6 +17,7 @@
 #include "ABReward.h"
 #include "ABSeasonPass.h"
 #include "ABStatistic.h"
+#include "ABUGC.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -102,6 +103,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABStatistic* Statistic;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABUGC* UGC;
 
 private:
 	FApiClientPtr ApiClientPtr;
