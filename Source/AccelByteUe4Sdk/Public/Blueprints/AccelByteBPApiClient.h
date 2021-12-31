@@ -18,6 +18,7 @@
 #include "ABSeasonPass.h"
 #include "ABStatistic.h"
 #include "ABLeaderboard.h"
+#include "ABAchievement.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -107,6 +108,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UABLeaderboard* Leaderboard;
 
+	UPROPERTY(BlueprintReadOnly)
+	UABAchievement* Achievement;
 private:
 	FApiClientPtr ApiClientPtr;
 };
