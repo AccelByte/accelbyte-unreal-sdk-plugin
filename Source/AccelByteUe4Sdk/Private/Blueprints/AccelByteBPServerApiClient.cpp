@@ -24,6 +24,7 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 	ServerDSM->SetServerApiClient(ApiClientPtr);
 	ServerLobby->SetServerApiClient(ApiClientPtr);
 	ServerMatchmaking->SetServerApiClient(ApiClientPtr);
+	ServerSessionBrowser->SetServerApiClient(ApiClientPtr);
 }
 
 UServerApiClient::UServerApiClient()
@@ -33,6 +34,7 @@ UServerApiClient::UServerApiClient()
 	ServerDSM = NewObject<UABServerDSM>();
 	ServerLobby = NewObject<UABServerLobby>();
 	ServerMatchmaking = NewObject<UABServerMatchmaking>();
+	ServerSessionBrowser = NewObject<UABServerSessionBrowser>();
 
 	SetServerApiClient(FMultiRegistry::GetServerApiClient());
 }

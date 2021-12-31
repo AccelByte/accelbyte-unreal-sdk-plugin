@@ -10,6 +10,7 @@
 #include "ABServerDSM.h"
 #include "ABServerLobby.h"
 #include "ABServerMatchmaking.h"
+#include "ABServerSessionBrowser.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
 using namespace AccelByte;
@@ -54,6 +55,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerMatchmaking* ServerMatchmaking;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABServerSessionBrowser* ServerSessionBrowser;
 
 private:
 	FServerApiClientPtr ApiClientPtr;
