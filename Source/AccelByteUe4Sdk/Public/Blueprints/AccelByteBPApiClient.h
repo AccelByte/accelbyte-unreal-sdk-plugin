@@ -12,6 +12,10 @@
 #include "ABCurrency.h"
 #include "ABWallet.h"
 #include "ABFulfillment.h"
+#include "ABCloudSave.h"
+#include "ABAgreement.h"
+#include "ABReward.h"
+#include "ABSeasonPass.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -64,24 +68,36 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	UABFriends* Friends;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABCatalog* Catalog;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABOrder* Order;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABEntitlement* Entitlement;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABCurrency* Currency;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABWallet* Wallet;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	UABFulfillment* Fulfillment;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABCloudSave* CloudSave;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABAgreement* Agreement;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABReward* Reward;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABSeasonPass* SeasonPass;
 
 private:
 	FApiClientPtr ApiClientPtr;

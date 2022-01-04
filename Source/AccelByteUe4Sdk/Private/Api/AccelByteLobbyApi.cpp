@@ -14,7 +14,6 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
 namespace AccelByte
@@ -424,7 +423,7 @@ void Lobby::Connect()
 	}
 }
 
-void Lobby::Disconnect()
+void Lobby::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -432,7 +431,7 @@ void Lobby::Disconnect()
 	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 	if(WebSocket.IsValid())
 	{
-		WebSocket->Disconnect();
+		WebSocket->Disconnect(ForceCleanup);
 	}
 
 	if (GEngine) UE_LOG(LogAccelByteLobby, Display, TEXT("Disconnected"));
@@ -652,10 +651,10 @@ FString Lobby::SendGetOnlineFriendPresenceRequest()
 //-------------------------------------------------------------------------------------------------
 // Notification
 //-------------------------------------------------------------------------------------------------
-UE_DEPRECATED(4.25, "Lobby version 2.4.0 and above doesn't support this anymore")
 void Lobby::GetAllAsyncNotification()
-{
+{	
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), TEXT("Lobby version 2.4.0 and above doesn't support this anymore"));
 
 	if (WebSocket.IsValid() && WebSocket->IsConnected())
 	{
@@ -731,10 +730,10 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	{
 		PartyAttribute.Add("new_session_only", "true");
 	}
-	
+
+	FString partyAttributeSerialized = "";
 	if (PartyAttribute.Num() > 0)
 	{
-		FString partyAttributeSerialized = "";
 		TArray<FString> keys;
 		PartyAttribute.GetKeys(keys);
 		for (int i = 0 ; i < keys.Num() ; i++)
@@ -753,6 +752,31 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 				partyAttributeSerialized.Append(", ");
 			}
 		}
+	}
+
+	if(OptionalParams.SubGameModes.Num() > 0)
+	{
+		// if there is party attribute already, prepend a comma
+		if(PartyAttribute.Num() > 0)
+		{
+			partyAttributeSerialized.Append(", ");
+		}
+
+		FString SubGameModeValue {"["};
+		for(int i = 0; i < OptionalParams.SubGameModes.Num(); i++)
+		{
+			if(i > 0)
+				SubGameModeValue.Append(", ");
+
+			SubGameModeValue.Append(FString::Printf(TEXT("\"%s\""), *OptionalParams.SubGameModes[i]));
+		}
+		SubGameModeValue.Append("]");
+
+		partyAttributeSerialized.Append(FString::Printf(TEXT("\"sub_game_mode\": %s"), *SubGameModeValue));
+	}
+
+	if(!partyAttributeSerialized.IsEmpty())
+	{
 		Contents.Append(FString::Printf(TEXT("partyAttributes: {%s}\n"), *partyAttributeSerialized));
 	}
 
@@ -767,6 +791,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 				STempParty.Append(TEXT(","));
 			}
 		}
+		
 		Contents.Append(FString::Printf(TEXT("tempParty: %s\n"), *STempParty));
 	}
 
@@ -983,6 +1008,9 @@ void Lobby::GetPartyStorage(const FString& PartyId, const THandler<FAccelByteMod
 void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("Please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
@@ -1024,6 +1052,9 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)"));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
@@ -2052,7 +2083,7 @@ Lobby::~Lobby()
 	// only disconnect when engine is still valid
 	if(UObjectInitialized())
 	{
-		Disconnect();
+		Disconnect(true);
 	}
 }
 

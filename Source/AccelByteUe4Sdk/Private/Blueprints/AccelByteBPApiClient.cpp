@@ -29,6 +29,10 @@ UABApiClient::UABApiClient()
 	Currency = NewObject<UABCurrency>();
 	Wallet = NewObject<UABWallet>();
 	Fulfillment = NewObject<UABFulfillment>();
+	CloudSave = NewObject<UABCloudSave>();
+	Agreement = NewObject<UABAgreement>();
+	Reward = NewObject<UABReward>();
+	SeasonPass = NewObject<UABSeasonPass>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -48,6 +52,10 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Currency->SetApiClient(ApiClientPtr);
 	Wallet->SetApiClient(ApiClientPtr);
 	Fulfillment->SetApiClient(ApiClientPtr);
+	CloudSave->SetApiClient(ApiClientPtr);
+	Agreement->SetApiClient(ApiClientPtr);
+	Reward->SetApiClient(ApiClientPtr);
+	SeasonPass->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)

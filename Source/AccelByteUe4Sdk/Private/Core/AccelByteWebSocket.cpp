@@ -152,11 +152,11 @@ void AccelByteWebSocket::Connect()
 }
 	
 
-void AccelByteWebSocket::Disconnect()
+void AccelByteWebSocket::Disconnect(bool ForceCleanup)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
-	if(bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty())
+	if(!ForceCleanup && (bConnectTriggered || !OnMessageQueue.IsEmpty() || !OnConnectionClosedQueue.IsEmpty() || !OnConnectionErrorQueue.IsEmpty()))
 	{
 		bDisconnectOnNextTick = true;
 	}

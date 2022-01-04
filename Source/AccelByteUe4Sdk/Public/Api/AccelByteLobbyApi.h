@@ -9,6 +9,8 @@
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobby, Log, All);
+
 // Forward declarations
 class IWebSocket;
 
@@ -30,6 +32,7 @@ struct FMatchmakingOptionalParams
 	TArray<FString> TempPartyUserIds;
 	TArray<FString> ExtraAttributes;
 	bool NewSessionOnly {false};
+	TArray<FString> SubGameModes;
 };
 enum Response : uint8;
 enum Notif : uint8;
@@ -412,7 +415,7 @@ public:
 	/**
 	 * @brief Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
 	 */
-	void Disconnect();
+	void Disconnect(bool ForceCleanup = false);
 
 	/**
 	 * @brief Check whether the websocket is currently connected to the Lobby server.
@@ -1526,7 +1529,6 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockedUserResponse model.
 	* @param OnError This will be called when the operation failed.
 	*/
-	UE_DEPRECATED(4.25, "This function is obsolete, please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)")
 	void GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError);
 
 	/*
@@ -1545,7 +1547,6 @@ public:
 	* @param OnSuccess This will be called when the operation succeeded. Will return FAccelByteModelsListBlockerResponse model.
 	* @param OnError This will be called when the operation failed.
 	*/
-	UE_DEPRECATED(4.25, "This function is obsolete, please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)")
 	void GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError);
 
 	/*

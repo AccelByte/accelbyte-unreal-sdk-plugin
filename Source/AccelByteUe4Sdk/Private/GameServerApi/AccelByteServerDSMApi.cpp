@@ -187,6 +187,9 @@ namespace AccelByte
 		void ServerDSM::RegisterLocalServerToDSM(const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
+			FReport::LogDeprecated(
+				FString(__FUNCTION__),
+				TEXT("Please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)"));
 
 			GetPubIpDelegate.BindLambda([this, Port, ServerName_, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
 			{

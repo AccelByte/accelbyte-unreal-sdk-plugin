@@ -318,105 +318,37 @@ void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 con
 void Entitlement::CreateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const Attributes, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ExtUserId);
-
-	FAccelByteModelsDistributionAttributes DistributionAttributes;
-	DistributionAttributes.Attributes = Attributes;
-
-	FString Verb = TEXT("POST");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(DistributionAttributes, Content);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return;
 }
 
 void Entitlement::DeleteDistributionReceiver(FString const& ExtUserId, FString const& UserId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *UserId, *ExtUserId);
-
-	FString Verb = TEXT("DELETE");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return;
 }
 
 void Entitlement::GetDistributionReceiver(FString const& PublisherNamespace, FString const& PublisherUserId, THandler<TArray<FAccelByteModelsDistributionReceiver>> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers"), *SettingsRef.PlatformServerUrl, *PublisherNamespace, *PublisherUserId);
-	
-	FString Query = TEXT("");
-	if (!CredentialsRef.GetNamespace().IsEmpty())
-	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("targetNamespace=%s"), *CredentialsRef.GetNamespace()));
-	}
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
-
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return;
 }
 
 void Entitlement::UpdateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const Attributes, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(FString(__FUNCTION__), "Platform Service version 3.4.0 and above doesn't support this anymore");
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/receivers/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *ExtUserId);
-
-	FAccelByteModelsDistributionAttributes DistributionAttributes;
-	DistributionAttributes.Attributes = Attributes;
-
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(DistributionAttributes, Content);
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	OnError.ExecuteIfBound(410, TEXT("This feature is already removed."));
+	return;
 }
 
 void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)

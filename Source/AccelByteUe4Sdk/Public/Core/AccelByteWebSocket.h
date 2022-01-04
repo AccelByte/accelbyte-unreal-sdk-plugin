@@ -82,7 +82,7 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 	);
 	
 	void Connect();
-	void Disconnect();
+	void Disconnect(bool ForceCleanup = false);
 	bool IsConnected() const;
 	void SendPing() const;
 	void Send(const FString& Message) const;
