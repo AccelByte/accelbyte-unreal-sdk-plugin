@@ -611,6 +611,7 @@ const auto BlockPlayerDelegate = Api::Lobby::FBlockPlayerResponse::CreateLambda(
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Block Player Success!"));
 	bBlockPlayerSuccess = true;
+	blockPlayerResponse = result;
 	if (result.Code != "0")
 	{
 		bBlockPlayerError = true;
@@ -621,6 +622,7 @@ const auto UnblockPlayerDelegate = Api::Lobby::FUnblockPlayerResponse::CreateLam
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Unblock Player Success!"));
 	bUnblockPlayerSuccess = true;
+	unblockPlayerResponse = result;
 	if (result.Code != "0")
 	{
 		bUnblockPlayerError = true;
@@ -1807,6 +1809,8 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	Lobbies[0]->SetPartyDeleteCodeResponseDelegate(DeletePartyCodeDelegate);
 
+	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+
 	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
 	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
@@ -1848,6 +1852,10 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetPartyCodeSuccess);
 	bGetPartyCodeSuccess = false;
 	partyCode = partyCodeResponse.PartyCode;
+
+	bCreatePartySuccess = false;
+	Lobbies[1]->SendCreatePartyRequest();
+	WaitUntil(bCreatePartySuccess, "Creating party...");
 
 	// Join via Party Code
 	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
@@ -3389,6 +3397,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
 	WaitUntil(bBlockPlayerSuccess, "Player 0 Blocks Player 1...");
 	AB_TEST_FALSE(bBlockPlayerError);
+	AB_TEST_EQUAL(blockPlayerResponse.BlockedUserId, UserCreds[1].GetUserId());
 
 	bListBlockedUserListSuccess = false;
 	FBlockedData BlockedUserData;
@@ -3444,6 +3453,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
 	WaitUntil(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
 	AB_TEST_FALSE(bUnblockPlayerError);
+	AB_TEST_EQUAL(unblockPlayerResponse.UnblockedUserId, UserCreds[1].GetUserId());
 
 	LobbyDisconnect(2);
 	ResetResponses();

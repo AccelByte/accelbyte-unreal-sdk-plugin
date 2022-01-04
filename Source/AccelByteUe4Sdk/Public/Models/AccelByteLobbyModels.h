@@ -966,25 +966,29 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsBlockPlayerResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | AcceptFriendsResponse")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerResponse")
 		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerResponse")
+		FString BlockedUserId;
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUnblockPlayerResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RejectFriendsResponse")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerResponse")
 		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerResponse")
+		FString UnblockedUserId;
 };
 
 USTRUCT(BlueprintType)
 struct FAccelByteModelsBlockPlayerNotif
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerNotif")
 		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerNotif")
 		FString BlockedUserId;
 };
 
@@ -992,9 +996,9 @@ USTRUCT(BlueprintType)
 struct FAccelByteModelsUnblockPlayerNotif
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerNotif")
 		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerNotif")
 		FString UnblockedUserId;
 };
 
