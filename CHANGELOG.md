@@ -2,6 +2,46 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.2.0%0D8.1.0) (2022-01-04)
+
+
+### Features
+
+* **blueprint:** agreement blueprint api ([f2f67c8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f2f67c8d58e25bd17d0a687dce2ed84686f24997)), closes [#142](https://accelbyte.atlassian.net/browse/142)
+* **cloudsave:** added cloudsave blueprint from cloudsave api ([2625e87](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2625e879d7e551f206a079f42db6b6a8fdd7e6fe))
+* **lobby:** add sub_game_mode in optional param struct for lobby SendStartMatchmaking. ([f282f9e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f282f9eb204fb94fa035e1c4b934ab757861540f))
+* **reward:** add reward blueprint from reward api ([472d67b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/472d67bc9988937ed4b36bc8be44232af1fc838f))
+* **SeasonPass:** add SeasonPass blueprint from SeasonPass api ([17f730e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/17f730e0796eab0cc861ee67154a7e9a95b1d5f7))
+* **serverDSM:** Add the blueprint API along with the Server BP multiregistry ([5c3a47a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5c3a47a1b004c34aaaed42b72b82f22f899d2b9f))
+* **serverLobby:** add blueprint for serverLobby API ([ff213a8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ff213a8a24c905a45664180dd27ecdfa1dfd47cd))
+* **ServerMatchmaking:** add blueprint class and function for Dedicated Server Matchmaking API ([8d51d14](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d51d140c1b85e730e0923c9edf9bff52d97f0df))
+* **serverOauth:** add blueprint class for ServerOAuth2 API ([0ec04ab](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ec04ab4a9d0105989e507a275bd8849eb4d1dea))
+
+
+### Bug Fixes
+
+* **cloudsave blueprint:** fixed FJsonObjectWrapper not properly converted to FJsonObject ([8274eb6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8274eb66ace0dd6296b9473b70822ab32e512b20))
+* **deprecation:** change deprecation indicator from macro to log warning ([a36e3b4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a36e3b459dd69e43cb40553471dd61fa6f09180c))
+* **lobby:** fix lobby violation error when destroying lobby while websocket still have events in queue. ([7d878dc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7d878dc6666f3ae1b1a3ff824d8bf501242b00e1))
+* **reporting:** missing #include header file ([5d75ebf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5d75ebf32d982c90b902c0175b34cc22b98c735d))
+* **reward blueprint:** add missing macro class specifier ([9c03b87](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9c03b87d25d635fc77e1c2a338db6f9d5f7950d2))
+
+
+### Reverts
+
+* **agreement:** re-add agreement blueprint ([3fe8f3a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3fe8f3a75880e56301fc8c62ef348c21bbaea66e))
+
+
+### Refactors
+
+* **cloudsave blueprint:** rename FDJsonObject to FDPayloadJsonObject to avoid confusion ([de136b7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/de136b75318a0b2d4fc291b2a92aeaaa4f98b076))
+
+
+### Tests
+
+* **lobby:** add set general lobby rate limit in lobby test setup. ([d9536fc](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d9536fc029c2d807de22b0d4d53aabc146f20afc))
+* **user:** add additional admin function to create user for testing purpose ([820b5ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/820b5aed72a9fb2ea8fc58224cbecf3e05d88d6e))
+
 ## [8.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.1.0%0D8.0.1) (2021-12-20)
 
 

@@ -4,6 +4,7 @@
 
 #include "StatisticTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "TestUtilities.h"
 
 void AdminGetStatisticByStatCode(FString statCode, const THandler<FAccelByteModelsStatInfo>& OnSuccess, const FErrorHandler& OnError)
 {

@@ -13,6 +13,7 @@
 #include "UserTestAdmin.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
+#include "ParseErrorTest.h"
 
 using namespace std;
 

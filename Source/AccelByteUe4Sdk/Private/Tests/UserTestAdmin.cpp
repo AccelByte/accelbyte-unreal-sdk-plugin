@@ -5,6 +5,7 @@
 #include "UserTestAdmin.h"
 
 #include "Api/AccelByteUserApi.h"
+#include "TestUtilities.h"
 
 void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
