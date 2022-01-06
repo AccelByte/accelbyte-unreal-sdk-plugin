@@ -3527,7 +3527,7 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStart", AutomationFlagMaskLobby);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestStartMatchmaking_ReturnOk, "AccelByte.Tests.Lobby.B.MatchmakingStartBasic", AutomationFlagMaskLobby);
 bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
@@ -3702,6 +3702,32 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
 	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
 	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
+
+	// check new addition to matchmaking notif fields.
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].GameMode, ChannelName);
+	AB_TEST_EQUAL(matchmakingNotifResponse[0].Joinable, false);
+	AB_TEST_TRUE(matchmakingNotifResponse[0].MatchingAllies.Data.Num() > 0);
+
+	bool bUserFound {false};
+	for(auto Ally : matchmakingNotifResponse[0].MatchingAllies.Data)
+	{
+		for(auto Party : Ally.Matching_parties)
+		{
+			for(auto Member : Party.Party_members)
+			{
+				if(Member.User_id == UserIds[0])
+				{
+					bUserFound = true;
+					break;
+				}
+			}
+			if(bUserFound)
+				break;
+		}
+		if(bUserFound)
+			break;
+	}
+	AB_TEST_TRUE(bUserFound);
 
 	LobbyDisconnect(2);
 	ResetResponses();

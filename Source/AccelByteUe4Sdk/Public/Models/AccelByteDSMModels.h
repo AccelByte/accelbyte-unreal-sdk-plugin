@@ -64,6 +64,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUser
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | User")
 	FString User_id;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | User")
+	FJsonObjectWrapper ExtraAttributes;
 };
 
 USTRUCT(BlueprintType)
