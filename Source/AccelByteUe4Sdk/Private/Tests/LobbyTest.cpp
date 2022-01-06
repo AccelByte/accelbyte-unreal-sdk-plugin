@@ -1037,6 +1037,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 	const LobbyMessageTest LobbyMessageArrayWithDoubleCommaBeforeTrailingComma("type: array\narray: [, test, , foo, bar, ,]", R"({"type":"array","array":["","test","","foo","bar",""]})");
 	const LobbyMessageTest LobbyMessageArrayQuoteComma("type: array\narray: [\"test,string\", foo, bar,]", R"({"type":"array","array":["test,string","foo","bar"]})");
 	const LobbyMessageTest LobbyMessageArrayQuoteEscape("type: array\narray: [\"test\\\"string\", foo, bar,]", R"({"type":"array","array":["test\"string","foo","bar"]})");
+	const LobbyMessageTest LobbyMessageArrayOfJsonObject("type: object\nexample: [{\"key\":\"value\"},{\"key2\":\"value2\"}]", R"({"type":"object","example":[{"key":"value"},{"key2":"value2"}]})");
 	const LobbyMessageTest LobbyMessageObject("type: object\nexample: {\"key\":\"value\"}", R"({"type":"object","example":{"key":"value"}})");
 	const LobbyMessageTest LobbyMessageKeyValue("type: keyval\nkey: value\nkey2: value2", R"({"type":"keyval","key":"value","key2":"value2"})");
 	const LobbyMessageTest LobbyMessageWithBracket("type: test\nmessage: this is message with[] {bracket}", R"({"type":"test","message":"this is message with[] {bracket}"})");
@@ -1052,6 +1053,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 		LobbyMessageObject,
 		LobbyMessageKeyValue,
 		LobbyMessageWithBracket,
+		LobbyMessageArrayOfJsonObject,
 	};
 
 	for (const auto& Data : TestData)
