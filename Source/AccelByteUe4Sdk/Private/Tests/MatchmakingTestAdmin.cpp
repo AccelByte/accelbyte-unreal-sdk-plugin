@@ -4,6 +4,7 @@
 
 #include "MatchmakingTestAdmin.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "TestUtilities.h"
 
 void AdminCreateMatchmakingChannel(const FString& channel, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError, bool joinable)
 {

@@ -19,6 +19,7 @@
 #include "ABStatistic.h"
 #include "ABLeaderboard.h"
 #include "ABAchievement.h"
+#include "ABSessionBrowser.h"
 #include "ABUGC.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
@@ -50,6 +51,7 @@ UCLASS(Blueprintable, BlueprintType)
 class UABApiClient final : public UObject
 {
 	GENERATED_BODY()
+
 public:
 	UABApiClient();
 
@@ -113,7 +115,11 @@ public:
 	UABAchievement* Achievement;
 
 	UPROPERTY(BlueprintReadOnly)
+	UABSessionBrowser* SessionBrowser;
+
+	UPROPERTY(BlueprintReadOnly)
 	UABUGC* UGC;
+
 private:
 	FApiClientPtr ApiClientPtr;
 };
