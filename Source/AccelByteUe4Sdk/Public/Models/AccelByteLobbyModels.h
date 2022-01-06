@@ -6,9 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectWrapper.h"
-#include "Dom/JsonValue.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteUserModels.h"
+#include "Models/AccelByteDSMModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
 // Emulate namespace with long class names
@@ -522,6 +522,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
     FString Code;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingAllies
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FAccelByteModelsMatchingAlly> Data;
+};
+
 // Matchmaking notification
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
@@ -533,6 +541,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     EAccelByteMatchmakingStatus Status{EAccelByteMatchmakingStatus::Unknown};
+    
+   	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+   	FString GameMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Deployment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString ClientVersion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	bool Joinable {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FAccelByteModelsMatchingAllies MatchingAllies;
 };
 
 // DS Notification
