@@ -185,6 +185,7 @@ enum class EAccelByteRewardListSortBy : uint8
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
+
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsItemRegionDataItem
 {
@@ -307,6 +308,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 		FDateTime UpdatedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString LocalExt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TMap<FString, int32> ItemQty;
 };
 
 USTRUCT(BlueprintType)
@@ -387,6 +390,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
 		TArray<FAccelByteModelsItemInfo> Items;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString LocalExt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TMap<FString, int32> ItemQty;
 };
 
 USTRUCT(BlueprintType)

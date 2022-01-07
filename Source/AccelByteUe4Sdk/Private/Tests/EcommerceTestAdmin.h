@@ -236,6 +236,8 @@ struct FItemCreateRequest
 		FString clazz;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FRecurring recurring;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TMap<FString, int32> ItemQty;
 };
 
 USTRUCT(BlueprintType)
@@ -290,6 +292,8 @@ struct FItemFullInfo
 		FString createdAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | Ecommerce | Item")
 		FString updatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		TMap<FString, int32> ItemQty;
 };
 
 USTRUCT(BlueprintType)
