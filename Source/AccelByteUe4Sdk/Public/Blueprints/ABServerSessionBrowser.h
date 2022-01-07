@@ -18,13 +18,13 @@ using namespace AccelByte::GameServerApi;
 
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserDataResponse, FAccelByteModelsSessionBrowserData, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionBrowserDataResponse, FAccelByteModelsSessionBrowserData, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserGetResultResponse, FAccelByteModelsSessionBrowserGetResult, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionBrowserGetResultResponse, FAccelByteModelsSessionBrowserGetResult, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserAddPlayerResponse, FAccelByteModelsSessionBrowserAddPlayerResponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionBrowserAddPlayerResponse, FAccelByteModelsSessionBrowserAddPlayerResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsSessionBrowserRecentPlayerGetResultResponse, FAccelByteModelsSessionBrowserRecentPlayerGetResult, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDServerSessionBrowserRecentPlayerGetResultResponse, FAccelByteModelsSessionBrowserRecentPlayerGetResult, Response);
 
 #pragma endregion
 
@@ -44,7 +44,7 @@ public:
 		int32 BotCount,
 		int32 MaxPlayer,
 		FJsonObjectWrapper OtherSettings,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -58,7 +58,7 @@ public:
 		int32 MaxSpectator,
 		FString const& Password,
 		FJsonObjectWrapper OtherSettings,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -73,7 +73,7 @@ public:
 		int32 MaxSpectator,
 		FString const& Password,
 		FJsonObjectWrapper OtherSettings,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -88,14 +88,14 @@ public:
 		int32 MaxSpectator,
 		FString const& Password,
 		FJsonObjectWrapper OtherSettings,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
 	void CreateGameSessionTypeSpecificByStruct(
 		FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -104,7 +104,7 @@ public:
 		FString const& SessionId,
 		int32 MaxPlayer,
 		int32 CurrentPlayerCount,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -112,14 +112,14 @@ public:
 	void UpdateGameSessionByStruct(
 		FString const& SessionId,
 		FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
 	void RemoveGameSession(
 		FString const& SessionId,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -127,7 +127,7 @@ public:
 	void GetGameSessionsByTypeString(
 		FString const& SessionTypeString,
 		FString const& GameMode,
-		FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+		FDServerSessionBrowserGetResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
@@ -137,7 +137,7 @@ public:
 	void GetGameSessionsByTypeEnum(
 		EAccelByteSessionType SessionType,
 		FString const& GameMode,
-		FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+		FDServerSessionBrowserGetResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
@@ -148,7 +148,7 @@ public:
 		FString const& SessionTypeString,
 		FString const& GameMode,
 		FString const& MatchExist,
-		FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+		FDServerSessionBrowserGetResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
@@ -159,7 +159,7 @@ public:
 		EAccelByteSessionType SessionType,
 		FString const& GameMode,
 		FString const& MatchExist,
-		FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+		FDServerSessionBrowserGetResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
@@ -170,7 +170,7 @@ public:
 		FString const& SessionId,
 		FString const& PlayerToAdd,
 		bool AsSpectator,
-		FDModelsSessionBrowserAddPlayerResponse const& OnSuccess,
+		FDServerSessionBrowserAddPlayerResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
@@ -178,14 +178,14 @@ public:
 	void UnregisterPlayer(
 		FString const& SessionId,
 		FString const& PlayerToRemove,
-		FDModelsSessionBrowserAddPlayerResponse const& OnSuccess,
+		FDServerSessionBrowserAddPlayerResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Server | SessionBrowser")
 	void GetRecentPlayer(
 		FString const& UserId,
-		FDModelsSessionBrowserRecentPlayerGetResultResponse const& OnSuccess,
+		FDServerSessionBrowserRecentPlayerGetResultResponse const& OnSuccess,
 		FDErrorHandler const& OnError,
 		int32 Offset = 0,
 		int32 Limit = 10
@@ -195,7 +195,7 @@ public:
 	void JoinSession(
 		FString const& SessionId,
 		FString const& Password,
-		FDModelsSessionBrowserDataResponse const& OnSuccess,
+		FDServerSessionBrowserDataResponse const& OnSuccess,
 		FDErrorHandler const& OnError
 	);
 

@@ -16,7 +16,7 @@ void UABServerSessionBrowser::CreateGameSessionPublic(
 	int32 BotCount,
 	int32 MaxPlayer,
 	FJsonObjectWrapper OtherSettings,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -52,7 +52,7 @@ void UABServerSessionBrowser::CreateGameSessionPrivate(
 	int32 MaxSpectator,
 	FString const& Password,
 	FJsonObjectWrapper OtherSettings,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -91,7 +91,7 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByString(
 	int32 MaxSpectator,
 	FString const& Password,
 	FJsonObjectWrapper OtherSettings,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -131,7 +131,7 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 	int32 MaxSpectator,
 	FString const& Password,
 	FJsonObjectWrapper OtherSettings,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -163,7 +163,7 @@ void UABServerSessionBrowser::CreateGameSessionTypeSpecifiedByEnum(
 
 void UABServerSessionBrowser::CreateGameSessionTypeSpecificByStruct(
 	FAccelByteModelsSessionBrowserCreateRequest CreateSessionRequest,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -190,7 +190,7 @@ void UABServerSessionBrowser::UpdateGameSession(
 	FString const& SessionId,
 	int32 MaxPlayer,
 	int32 CurrentPlayerCount,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -216,7 +216,7 @@ void UABServerSessionBrowser::UpdateGameSession(
 void UABServerSessionBrowser::UpdateGameSessionByStruct(
 	FString const& SessionId,
 	FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -240,7 +240,7 @@ void UABServerSessionBrowser::UpdateGameSessionByStruct(
 
 void UABServerSessionBrowser::RemoveGameSession(
 	FString const& SessionId,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -264,7 +264,7 @@ void UABServerSessionBrowser::RemoveGameSession(
 void UABServerSessionBrowser::GetGameSessionsByTypeString(
 	FString const& SessionTypeString,
 	FString const& GameMode,
-	FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+	FDServerSessionBrowserGetResultResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Offset,
 	int32 Limit
@@ -293,7 +293,7 @@ void UABServerSessionBrowser::GetGameSessionsByTypeString(
 void UABServerSessionBrowser::GetGameSessionsByTypeEnum(
 	EAccelByteSessionType SessionType,
 	FString const& GameMode,
-	FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+	FDServerSessionBrowserGetResultResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Offset,
 	int32 Limit
@@ -323,7 +323,7 @@ void UABServerSessionBrowser::GetGameSessionsByTypeStringAndMatchExist(
 	FString const& SessionTypeString,
 	FString const& GameMode,
 	FString const& MatchExist,
-	FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+	FDServerSessionBrowserGetResultResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Offset,
 	int32 Limit
@@ -354,7 +354,7 @@ void UABServerSessionBrowser::GetGameSessionsByTypeEnumAndMatchExist(
 	EAccelByteSessionType SessionType,
 	FString const& GameMode,
 	FString const& MatchExist,
-	FDModelsSessionBrowserGetResultResponse const& OnSuccess,
+	FDServerSessionBrowserGetResultResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Offset,
 	int32 Limit
@@ -385,7 +385,7 @@ void UABServerSessionBrowser::RegisterPlayer(
 	FString const& SessionId,
 	FString const& PlayerToAdd,
 	bool AsSpectator,
-	FDModelsSessionBrowserAddPlayerResponse const& OnSuccess,
+	FDServerSessionBrowserAddPlayerResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -411,7 +411,7 @@ void UABServerSessionBrowser::RegisterPlayer(
 void UABServerSessionBrowser::UnregisterPlayer(
 	FString const& SessionId,
 	FString const& PlayerToRemove,
-	FDModelsSessionBrowserAddPlayerResponse const& OnSuccess,
+	FDServerSessionBrowserAddPlayerResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
@@ -435,7 +435,7 @@ void UABServerSessionBrowser::UnregisterPlayer(
 
 void UABServerSessionBrowser::GetRecentPlayer(
 	FString const& UserId,
-	FDModelsSessionBrowserRecentPlayerGetResultResponse const& OnSuccess,
+	FDServerSessionBrowserRecentPlayerGetResultResponse const& OnSuccess,
 	FDErrorHandler const& OnError,
 	int32 Offset,
 	int32 Limit
@@ -463,7 +463,7 @@ void UABServerSessionBrowser::GetRecentPlayer(
 void UABServerSessionBrowser::JoinSession(
 	FString const& SessionId,
 	FString const& Password,
-	FDModelsSessionBrowserDataResponse const& OnSuccess,
+	FDServerSessionBrowserDataResponse const& OnSuccess,
 	FDErrorHandler const& OnError
 )
 {
