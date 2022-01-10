@@ -826,7 +826,6 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListB
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users/bulk/basic"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
@@ -836,7 +835,6 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListB
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
