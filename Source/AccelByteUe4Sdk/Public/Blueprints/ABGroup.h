@@ -13,6 +13,9 @@ using namespace AccelByte;
 using namespace AccelByte::Api;
 using namespace AccelByte::GameServerApi;
 
+
+#pragma region Dynamic Delegates
+// Group (multi-member actions)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateGroupSuccess, const FAccelByteModelsGroupInformation&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FSearchGroupsSuccess, const FAccelByteModelsGetGroupListResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupSuccess, const FAccelByteModelsGroupInformation&, Response);
@@ -22,6 +25,20 @@ DECLARE_DYNAMIC_DELEGATE(FDeleteGroupSuccess);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateGroupCustomRuleSuccess, const FAccelByteModelsGroupInformation&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FUpdateGroupPredefinedRuleSuccess, const FAccelByteModelsGroupInformation&, Response);
 DECLARE_DYNAMIC_DELEGATE(FDeleteGroupPredefinedRuleSuccess);
+
+// Group Member (individuals)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptGroupInvitationSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectGroupInvitationSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FJoinGroupSuccess, const FAccelByteModelsJoinGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FCancelJoinGroupRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FGetGroupMembersListByGroupIdSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FLeaveGroupSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FGetUserGroupInfoByUserIdSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FInviteUserToGroupSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptGroupJoinRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectGroupJoinRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FKickGroupMemberSuccess, const FAccelByteModelsKickGroupMemberResponse&, Response);
+#pragma endregion /Dynamic Delegates
 
 
 /** @brief Provide APIs to access Group [Management] service.
@@ -143,7 +160,6 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	DECLARE_DYNAMIC_DELEGATE(FDeleteGroupSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
 	void DeleteGroup(
 		const FString& GroupId,
@@ -193,6 +209,7 @@ public:
 		const FUpdateGroupCustomRuleSuccess& OnSuccess,
 		const FDErrorHandler& OnError) const;
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
 	/**
 	 * @brief Update predefined group rule.
 	 * - Required valid user authentication.
@@ -210,7 +227,6 @@ public:
 	 * - Result is const FAccelByteModelsGroupInformationResponse&.
 	 * @param OnError Called upon failed op.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
 	void UpdateGroupPredefinedRule(
 		const FString& GroupId,
 		const EAccelByteAllowedAction& AllowedAction,
@@ -234,7 +250,6 @@ public:
 	 * - Void Result
 	 * @param OnError Called upon failed op.
 	 */
-	DECLARE_DYNAMIC_DELEGATE(FDeleteGroupPredefinedRuleSuccess);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
 	void DeleteGroupPredefinedRule(
 		const FString& GroupId,
@@ -242,6 +257,233 @@ public:
 		const FDeleteGroupPredefinedRuleSuccess& OnSuccess,
 		const FDErrorHandler& OnError) const;
 	#pragma endregion /Group (multi-member actions)
+
+
+	
+	#pragma region Group Member (individuals)
+	/**
+	* @brief Accepts an invitation from a 3rd-party group's group member to group up.
+	* - Required valid user authentication.
+	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* - Deletes all requests (invite / join request) for the user who accesses this endpoint.
+	* - Existing members will receive notification of the newly-accepted member.
+	* 
+	* Action code: 73401
+	* 
+	* @param GroupId of the group that invited you, that you are accepting the invite to.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void AcceptGroupInvitation(
+		const FString& GroupId,
+		const FAcceptGroupInvitationSuccess& OnSuccess,
+		const FErrorHandler& OnError) const;
+
+	/**
+	* @brief Rejects an invitation from a 3rd-party group's group member to group up.
+	* - Required valid user authentication.
+	* - If specific user is !invited in the specific group ID, throw errorif the user !invited yet.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* 
+	* Action code: 73402
+	* 
+	* @param GroupId of the group that invited you, that you are rejecting the invite from.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void RejectGroupInvitation(
+		const FString& GroupId,
+		const FRejectGroupInvitationSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Join into specific group and become a group member.
+	* - Required valid user authentication.
+	* - Checks the the the group type based on the groupID.
+	* - Checks if the user who access this endpoint already joined the specific group.
+	* - Returns status field, for whether the user JOINED or REQUESTED to join the specific group.
+	* 
+	* - More Info:
+	*   - User cannot join to the group with PRIVATE type.
+	*   - Joining PUBLIC group type will create join request and need approval.
+	*       from the privileged group member to accept the request to become the member.
+	*   - Joining OPEN group type will make this user become member of that group immediately.
+	* 
+	* Action code: 73403
+	* 
+	* @param GroupId of the group you want to join.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void JoinGroup(
+		const FString& GroupId,
+		const FJoinGroupSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Cancel the Join group request.
+	* - Required valid user authentication.
+	* 
+	* Action code: 73411
+	* 
+	* @param GroupId of the !Open group type you asked to join, but now want to cancel.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void CancelJoinGroupRequest(
+        const FString& GroupId,
+        const FCancelJoinGroupRequestSuccess& OnSuccess,
+        const FErrorHandler& OnError);
+
+	/**
+	* @brief Get list of group members (by GroupId).
+	* - Required valid user authentication.
+	* 
+	* Action code: 73410
+	* 
+	* @param GroupId of the group you want to get a members list from.
+	* @param RequestContent
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void GetGroupMembersListByGroupId(
+		const FString& GroupId,
+		const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
+		const FGetGroupMembersListByGroupIdSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Leave the group you're currently in.
+	* - Required valid user authentication.
+	* - Admin is not allowed to leave the group.
+	* - Will also give response if user does not belong to any group.
+	* - Admin is not allowed to leave the group.
+	*   - If an Admin wants to leave the group, see DeleteGroup.
+	* - Still gives response if the user does not belong to any group.
+	* 
+	* Action code: 73404
+	* 
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void LeaveGroup(
+		const FLeaveGroupSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+	
+	/**
+	 * @brief Get list of group members by group id.
+	 * - Required valid user auth.
+	 * - get user group information by UserId.
+	 * - If user !belongs to any group, a warning will return.
+	 *
+	 * - Group Member Status:
+	 *   - JOIN: status of user requested to join group.
+	 *   - INVITE: status of user invited to a group.
+	 *   - JOINED: status of user already joined to a group.
+	 * 
+	 * Action code:: 73405
+	 *
+	 * @param UserId of the selected user; you want want to get this user's list of group members.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void GetUserGroupInfoByUserId(
+		const FString& UserId,
+		const FGetUserGroupInfoByUserIdSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	 * @brief Invite the other user to your group.
+	 * - Required valid user auth.
+	 * - Required Member Role Permission: "GROUP:INVITE [CREATE]".
+	 * - If specific user already has the join request, response will notify they have a pending accept / reject.
+	 * - Invited user will receive notification through lobby.
+	 * 
+	 * Action code:: 73406
+	 *
+	 * @param UserId of the user you want to invite to your group.
+	 * @param OnSuccess Called upon successful op.
+	 * @param OnError Called upon failed op.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void InviteUserToGroup(
+		const FString UserId,
+		const FInviteUserToGroupSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Accept [other] user's group join request.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	* - If specific user was not asked to join this specific group,
+	*     response will return error that they "need a join request".
+	* - Will also check if specific user *already* joined the specific group.
+	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	*     - Rather than an OPEN group (where players can just join without permission).
+	* 
+	* Action code: 73407
+	*
+	* @param UserId of the user who wants to join your group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, UserId }
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void AcceptGroupJoinRequest(
+		const FString UserId,
+		const FAcceptGroupJoinRequestSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+	
+	/**
+	* @brief Reject [other] user's group join request.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:JOIN [CREATE]".
+	* - If specific user was not asked to join this specific group,
+	*     response will return error that they "need a join request".
+	* - Will also check if specific user *already* joined the specific group.
+	* - This also works when a user invites themselves (JoinGroup) to join a PUBLIC group.
+	*     - Rrather than an OPEN group players can just join.
+	* 
+	* Action code: 73408
+	*
+	* @param UserId of the user you do NOT want to join your group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, UserId }
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void RejectGroupJoinRequest(
+		const FString UserId,
+		const FRejectGroupJoinRequestSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
+	* @brief Kick a group member out of the group.
+	* - Required valid user auth.
+	* - Required Member Role Permission: "GROUP:KICK [CREATE]".
+	* - Validates the kicker's: member, group info and role perms.
+	* 
+	* Action code: 73409
+	*
+	* @param UserId of the user you want to kick from your group.
+	* @param OnSuccess Called upon successful op.
+	* - Returns { GroupId, KickedUserId }
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void KickGroupMember(
+		const FString UserId,
+		const FKickGroupMemberSuccess& OnSuccess,
+		const FErrorHandler& OnError);
+	#pragma endregion /Group Member (individuals)
 
 	
 private:

@@ -5,6 +5,8 @@ void UABGroup::SetApiClient(const FApiClientPtr NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
+
+#pragma region Group (multi-member actions)
 void UABGroup::CreateGroup(
 	const FAccelByteModelsCreateGroupRequest& RequestContent,
 	const FCreateGroupSuccess& OnSuccess,
@@ -150,7 +152,7 @@ void UABGroup::UpdateGroupPredefinedRule(
 		AllowedAction,
 		RequestContent,
 		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
-		[OnSuccess](const FAccelByteModelsGroupInformation Response)
+			[OnSuccess](const FAccelByteModelsGroupInformation Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
 		}),
@@ -178,3 +180,164 @@ void UABGroup::DeleteGroupPredefinedRule(
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
 }
+#pragma endregion /Group (multi-member actions)
+
+
+#pragma region Group Member (individuals)
+void UABGroup::AcceptGroupInvitation(
+	const FString& GroupId, 
+	const FAcceptGroupInvitationSuccess& OnSuccess, 
+	const FErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.AcceptGroupInvitation(
+		GroupId,
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::RejectGroupInvitation(
+	const FString& GroupId, 
+	const FRejectGroupInvitationSuccess& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.RejectGroupInvitation(
+		GroupId,
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::JoinGroup(
+	const FString& GroupId, 
+	const FJoinGroupSuccess& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.JoinGroup(
+		GroupId,
+		THandler<FAccelByteModelsJoinGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsJoinGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::CancelJoinGroupRequest(
+	const FString& GroupId, 
+	const FCancelJoinGroupRequestSuccess& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.CancelJoinGroupRequest(
+		GroupId,
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::GetGroupMembersListByGroupId(
+	const FString& GroupId, 
+	const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
+	const FGetGroupMembersListByGroupIdSuccess& OnSuccess,
+	const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.GetGroupMembersListByGroupId(
+		GroupId,
+		RequestContent,
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::LeaveGroup(
+	const FLeaveGroupSuccess& OnSuccess,
+	 const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.LeaveGroup(
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::GetUserGroupInfoByUserId(
+	const FString& UserId, 
+	const FGetUserGroupInfoByUserIdSuccess& OnSuccess, 
+	const FErrorHandler& OnError)
+{
+	ApiClientPtr->Group.LeaveGroup(
+		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsMemberRequestGroupResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::InviteUserToGroup(
+	const FString UserId, const 
+	FInviteUserToGroupSuccess& OnSuccess,
+	const FErrorHandler& OnError)
+{
+
+}
+
+void UABGroup::AcceptGroupJoinRequest(
+	const FString UserId, const 
+	FAcceptGroupJoinRequestSuccess& OnSuccess,
+	const FErrorHandler& OnError)
+{
+
+}
+
+void UABGroup::RejectGroupJoinRequest(
+	const FString UserId, const 
+	FRejectGroupJoinRequestSuccess& OnSuccess,
+	const FErrorHandler& OnError)
+{
+
+}
+
+void UABGroup::KickGroupMember(
+	const FString UserId, const 
+	FKickGroupMemberSuccess& OnSuccess,
+	const FErrorHandler& OnError)
+{
+
+}
+#pragma endregion /Group Member (individuals)
