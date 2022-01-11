@@ -1,7 +1,7 @@
 // Copyright (c) 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
-// DEPRECATED: Static blueprints will soon be replaced.
+// DEPRECATED: In favor of Blueprints/ABGroup.cpp
 
 #include "Blueprints/AccelByteGroupBlueprints.h"
 #include "Api/AccelByteGroupApi.h"

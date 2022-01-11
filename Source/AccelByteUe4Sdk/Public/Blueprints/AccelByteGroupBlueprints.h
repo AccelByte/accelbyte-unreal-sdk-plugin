@@ -1,21 +1,23 @@
 // Copyright (c) 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
-// DEPRECATED: Static blueprints will soon be replaced.
+// DEPRECATED: In favor of Blueprints/ABGroup.h
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Models/AccelByteGroupModels.h"
-#include "AccelByteGroupBlueprints.generated.h"
+#include "Core/AccelByteMultiRegistry.h"
+
+using namespace AccelByte;
+using namespace AccelByte::Api;
+using namespace AccelByte::GameServerApi;
 
 UCLASS(Blueprintable, BlueprintType)
 class UAccelByteBlueprintsGroup : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateGroupSuccess, const FAccelByteModelsGroupInformation&, Result);
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group | Api")
