@@ -8,7 +8,7 @@ void UABGroup::SetApiClient(const FApiClientPtr NewApiClientPtr)
 void UABGroup::CreateGroup(
 	const FAccelByteModelsCreateGroupRequest& RequestContent,
 	const FCreateGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError)
+	const FDErrorHandler& OnError) const
 {
 	ApiClientPtr->Group.CreateGroup(
 		RequestContent,
@@ -16,6 +16,162 @@ void UABGroup::CreateGroup(
 			[OnSuccess](const FAccelByteModelsGroupInformation Response)
 		{
 			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::GetGroupList(
+	const FAccelByteModelsGetGroupListRequest& RequestContent,
+	const FSearchGroupsSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.GetGroupList(
+		RequestContent,
+		THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGetGroupListResponse Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::GetGroup(
+	const FString& GroupId,
+	const FGetGroupSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.GetGroup(
+		GroupId,
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGroupInformation Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+	}
+
+void UABGroup::UpdateGroup(
+	const FString& GroupId,
+	const bool bCompletelyReplace,
+	const FAccelByteModelsGroupUpdatable RequestContent,
+	const FUpdateGroupSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.UpdateGroup(
+		GroupId,
+		bCompletelyReplace,
+		RequestContent,
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGroupInformation Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+	}
+
+void UABGroup:: UpdateGroupCustomAttributes(
+	const FString& GroupId,
+	const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
+	const FUpdateGroupCustomAttributesSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.UpdateGroupCustomAttributes(
+		GroupId,
+		RequestContent,
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGroupInformation Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::DeleteGroup(
+	const FString& GroupId,
+	const FDeleteGroupSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.DeleteGroup(
+	GroupId,
+	FVoidHandler::CreateLambda([OnSuccess]()
+	{
+		OnSuccess.ExecuteIfBound();
+	}),
+	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}));
+}
+
+void UABGroup::UpdateGroupCustomRule(
+	const FString& GroupId,
+	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
+	const FUpdateGroupCustomRuleSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.UpdateGroupCustomRule(
+		GroupId,
+		RequestContent,
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+			[OnSuccess](const FAccelByteModelsGroupInformation Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::UpdateGroupPredefinedRule(
+	const FString& GroupId,
+	const EAccelByteAllowedAction& AllowedAction,
+	const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent,
+	const FUpdateGroupPredefinedRuleSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.UpdateGroupPredefinedRule(
+		GroupId,
+		AllowedAction,
+		RequestContent,
+		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+		[OnSuccess](const FAccelByteModelsGroupInformation Response)
+		{
+			OnSuccess.ExecuteIfBound(Response);
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+}
+
+void UABGroup::DeleteGroupPredefinedRule(
+	const FString& GroupId,
+	const EAccelByteAllowedAction& AllowedAction,
+	const FDeleteGroupPredefinedRuleSuccess& OnSuccess,
+	const FDErrorHandler& OnError) const
+{
+	ApiClientPtr->Group.DeleteGroupPredefinedRule(
+		GroupId,
+		AllowedAction,
+		FVoidHandler::CreateLambda([OnSuccess]()
+		{
+			OnSuccess.ExecuteIfBound();
 		}),
 		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
 		{
