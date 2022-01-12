@@ -11,6 +11,7 @@
 #include "ABServerLobby.h"
 #include "ABServerMatchmaking.h"
 #include "ABServerSessionBrowser.h"
+#include "ABServerStatistic.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
 using namespace AccelByte;
@@ -59,6 +60,8 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UABServerSessionBrowser* ServerSessionBrowser;
 
+	UPROPERTY(BlueprintReadOnly)
+	UABServerStatistic* ServerStatistic;
 private:
 	FServerApiClientPtr ApiClientPtr;
 };
