@@ -9,6 +9,7 @@
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Models/AccelByteGroupModels.h"
 #include "Core/AccelByteMultiRegistry.h"
+#include "AccelByteGroupBlueprints.generated.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;

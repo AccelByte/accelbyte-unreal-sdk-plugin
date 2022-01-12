@@ -8,6 +8,7 @@
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Models/AccelByteGroupModels.h"
 #include "Core/AccelByteMultiRegistry.h"
+#include "ABGroup.generated.h"
 
 using namespace AccelByte;
 using namespace AccelByte::Api;
@@ -38,6 +39,11 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FInviteUserToGroupSuccess, const FAccelByteMod
 DECLARE_DYNAMIC_DELEGATE_OneParam(FAcceptGroupJoinRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FRejectGroupJoinRequestSuccess, const FAccelByteModelsMemberRequestGroupResponse&, Response);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FKickGroupMemberSuccess, const FAccelByteModelsKickGroupMemberResponse&, Response);
+
+// Group Roles (permissions)
+DECLARE_DYNAMIC_DELEGATE_OneParam(FGetMemberRolesSuccess, const FAccelByteModelsGetMemberRolesListResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FAssignMemberRoleSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDeleteMemberRoleSuccess, const FAccelByteModelsGetUserGroupInfoResponse&, Response);
 #pragma endregion /Dynamic Delegates
 
 
@@ -258,7 +264,6 @@ public:
 		const FDErrorHandler& OnError) const;
 	#pragma endregion /Group (multi-member actions)
 
-
 	
 	#pragma region Group Member (individuals)
 	/**
@@ -279,7 +284,7 @@ public:
 	void AcceptGroupInvitation(
 		const FString& GroupId,
 		const FAcceptGroupInvitationSuccess& OnSuccess,
-		const FErrorHandler& OnError) const;
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Rejects an invitation from a 3rd-party group's group member to group up.
@@ -297,7 +302,7 @@ public:
 	void RejectGroupInvitation(
 		const FString& GroupId,
 		const FRejectGroupInvitationSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Join into specific group and become a group member.
@@ -322,7 +327,7 @@ public:
 	void JoinGroup(
 		const FString& GroupId,
 		const FJoinGroupSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Cancel the Join group request.
@@ -338,7 +343,7 @@ public:
 	void CancelJoinGroupRequest(
         const FString& GroupId,
         const FCancelJoinGroupRequestSuccess& OnSuccess,
-        const FErrorHandler& OnError);
+        const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Get list of group members (by GroupId).
@@ -356,7 +361,7 @@ public:
 		const FString& GroupId,
 		const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
 		const FGetGroupMembersListByGroupIdSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Leave the group you're currently in.
@@ -375,7 +380,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
 	void LeaveGroup(
 		const FLeaveGroupSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 	
 	/**
 	 * @brief Get list of group members by group id.
@@ -398,7 +403,7 @@ public:
 	void GetUserGroupInfoByUserId(
 		const FString& UserId,
 		const FGetUserGroupInfoByUserIdSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	 * @brief Invite the other user to your group.
@@ -417,7 +422,7 @@ public:
 	void InviteUserToGroup(
 		const FString UserId,
 		const FInviteUserToGroupSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Accept [other] user's group join request.
@@ -440,7 +445,7 @@ public:
 	void AcceptGroupJoinRequest(
 		const FString UserId,
 		const FAcceptGroupJoinRequestSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 	
 	/**
 	* @brief Reject [other] user's group join request.
@@ -463,7 +468,7 @@ public:
 	void RejectGroupJoinRequest(
 		const FString UserId,
 		const FRejectGroupJoinRequestSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 
 	/**
 	* @brief Kick a group member out of the group.
@@ -482,8 +487,66 @@ public:
 	void KickGroupMember(
 		const FString UserId,
 		const FKickGroupMemberSuccess& OnSuccess,
-		const FErrorHandler& OnError);
+		const FDErrorHandler& OnError) const;
 	#pragma endregion /Group Member (individuals)
+
+
+	
+#pragma region Group Roles (permissions)
+	/**
+	* @brief Get list of [group] member roles.
+	* - Required Member Role Permission: "GROUP:ROLE [READ]".
+	* 
+	* Action code: 73201
+	*
+	* @param RequestContent { Limit=1, Offset=0 }
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void GetMemberRoles(
+		const FAccelByteModelsLimitOffsetRequest& RequestContent,
+		const FGetMemberRolesSuccess& OnSuccess,
+		const FDErrorHandler& OnError) const;
+	
+	/**
+	* @brief Assign a role to a group member.
+	* - AKA AddMemberRole.
+	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	* 
+	* Action code: 73204
+	*
+	* @param MemberRoleId of the role you want to assign.
+	* @param RequestContent { UserId } of the user you want to assign the role to.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void AssignMemberRole(
+		const FString& MemberRoleId,
+		const FAccelByteModelsUserIdWrapper& RequestContent,
+		const FAssignMemberRoleSuccess& OnSuccess,
+		const FDErrorHandler& OnError) const;
+
+	/**
+	* @brief Remove a role from a group member.
+	* - AKA RevokeMemberRole, RemoveMemberRole.
+	* - Required Member Role Permission: "GROUP:ROLE [UPDATE]".
+	* 
+	* Action code: 73204
+	*
+	* @param MemberRoleId of the role you want to delete.
+	* @param RequestContent { UserId } of the user you want to delete the role from.
+	* @param OnSuccess Called upon successful op.
+	* @param OnError Called upon failed op.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Group")
+	void DeleteMemberRole(
+		const FString& MemberRoleId,
+		const FAccelByteModelsUserIdWrapper& RequestContent,
+		const FDeleteMemberRoleSuccess& OnSuccess,
+		const FDErrorHandler& OnError) const;
+#pragma endregion /Group Roles (permissions)
 
 	
 private:
