@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #pragma once
@@ -11,6 +11,7 @@
 #include "ABServerLobby.h"
 #include "ABServerMatchmaking.h"
 #include "ABServerSessionBrowser.h"
+#include "ABServerAchievement.h"
 #include "ABServerStatistic.h"
 #include "AccelByteBPServerApiClient.generated.h"
 
@@ -59,6 +60,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerSessionBrowser* ServerSessionBrowser;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABServerAchievement* ServerAchievement;
 
 	UPROPERTY(BlueprintReadOnly)
 	UABServerStatistic* ServerStatistic;

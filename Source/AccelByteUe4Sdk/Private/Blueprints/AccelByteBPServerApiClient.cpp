@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -25,6 +25,7 @@ void UServerApiClient::SetServerApiClient(FServerApiClientPtr const& NewApiClien
 	ServerLobby->SetServerApiClient(ApiClientPtr);
 	ServerMatchmaking->SetServerApiClient(ApiClientPtr);
 	ServerSessionBrowser->SetServerApiClient(ApiClientPtr);
+	ServerAchievement->SetServerApiClient(ApiClientPtr);
 	ServerStatistic->SetServerApiClient(ApiClientPtr);
 }
 
@@ -36,6 +37,7 @@ UServerApiClient::UServerApiClient()
 	ServerLobby = NewObject<UABServerLobby>();
 	ServerMatchmaking = NewObject<UABServerMatchmaking>();
 	ServerSessionBrowser = NewObject<UABServerSessionBrowser>();
+	ServerAchievement = NewObject<UABServerAchievement>();
 	ServerStatistic = NewObject<UABServerStatistic>();
 
 
