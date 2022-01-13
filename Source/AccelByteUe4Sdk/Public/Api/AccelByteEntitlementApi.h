@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 #pragma once
@@ -178,6 +178,32 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Synchronize Xbox inventory's DLC items.
+	*
+	* @param XboxDLCSync Contains XSTSToken needed for Xbox DLC sync
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Synchronize Steam DLC.
+	*
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncSteamDLC(FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	* @brief Synchronize with DLC entitlements in PSN Store.
+	*
+	* @param PSSyncModel Contains ServiceLabel needed for PlayStation DLC sync
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;
