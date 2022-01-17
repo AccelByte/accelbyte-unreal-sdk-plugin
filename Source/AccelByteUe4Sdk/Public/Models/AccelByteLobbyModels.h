@@ -141,6 +141,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyInviteResponse
     GENERATED_BODY()
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString InviteeID;
 };
 
 //Invitation notice
@@ -227,6 +229,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickPartyMemberResponse
     GENERATED_BODY()
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString UserId;
 };
 
 // Generate party Code

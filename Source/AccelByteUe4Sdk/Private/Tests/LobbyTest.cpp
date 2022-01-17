@@ -84,6 +84,8 @@ FAccelByteModelsPartyGenerateCodeResponse partyGenerateCodeResponse;
 FAccelByteModelsPartyGetCodeResponse partyCodeResponse;
 FAccelByteModelsPartyRejectResponse rejectPartyResponse;
 FAccelByteModelsPartyDataNotif partyDataNotif;
+FAccelByteModelsKickPartyMemberResponse kickMemberFromPartyResponse;
+FAccelByteModelsPartyInviteResponse partyInviteResponse;
 
 FAccelByteModelsGetOnlineUsersResponse onlineUserResponse;
 FAccelByteModelsGetOnlineUsersResponse onlineFriendResponse;
@@ -517,6 +519,7 @@ const auto InvitePartyDelegate = Api::Lobby::FPartyInviteResponse::CreateLambda(
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Invite Party Success!"));
 	bInvitePartySuccess = true;
+	partyInviteResponse = result;
 });
 
 const auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLambda([](FAccelByteModelsPartyGetInvitedNotice result)
@@ -569,6 +572,7 @@ const auto KickPartyMemberDelegate = Api::Lobby::FPartyKickResponse::CreateLambd
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Kick Party Member Success!"));
 	bKickPartyMemberSuccess = true;
+	kickMemberFromPartyResponse = result;
 	if (result.Code != "0")
 	{
 		bKickPartyMemberError = true;
@@ -2232,6 +2236,8 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	Lobbies[0]->SendInviteToPartyRequest(UserCreds[2].GetUserId());
 
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
+	const FString InvitedUserId {UserCreds[2].GetUserId()};
+	const FAccelByteModelsPartyInviteResponse InviteToPartyResponse {partyInviteResponse};
 
 	bInvitePartySuccess = false;
 
@@ -2260,6 +2266,8 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	Lobbies[0]->SendKickPartyMemberRequest(UserCreds[2].GetUserId());
 
 	WaitUntil(bKickPartyMemberSuccess, "Kicking Party Member...");
+	const FString KickedUserId {UserCreds[2].GetUserId()};
+	const FAccelByteModelsKickPartyMemberResponse KickMemberFromPartyResponse {kickMemberFromPartyResponse};
 
 	WaitUntil(bKickedFromPartySuccess, "Waiting to Get Kicked from Party...");
 
@@ -2281,6 +2289,8 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bKickedFromPartySuccess);
 	AB_TEST_TRUE(joinParty[2].Members.Num() == 3 || joinParty[1].Members.Num() == 3);
 	AB_TEST_EQUAL(infoPartyResponse.Members.Num(), 2);
+	AB_TEST_EQUAL(InviteToPartyResponse.InviteeID, InvitedUserId);
+	AB_TEST_EQUAL(KickMemberFromPartyResponse.UserId, KickedUserId);
 
 	ResetResponses();
 	return true;
