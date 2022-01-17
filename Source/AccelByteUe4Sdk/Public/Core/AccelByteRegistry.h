@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "AccelByteSettings.h"
-#include "AccelByteCredentials.h"
-#include "AccelByteServerSettings.h"
-#include "AccelByteServerCredentials.h"
+#include "Core/AccelByteSettings.h"
+#include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteServerSettings.h"
+#include "Core/AccelByteServerCredentials.h"
 
 using namespace AccelByte;
 
