@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -2683,7 +2683,7 @@ bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 		bMobileIAPConfigAlreadyExist = true;
 		bMobileIAPCheckDone = true;
 		GoogleConfig = Result;
-		if (GoogleConfig.ApplicationName.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Google IAP not configured properly."));;
+		if (GoogleConfig.ApplicationName.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Google IAP not configured properly."));
 	}), FErrorHandler::CreateLambda(
 	[&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone](int32 Code, FString Message)
 	{
@@ -2733,7 +2733,7 @@ bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 		bMobileIAPConfigAlreadyExist = true;
 		bMobileIAPCheckDone = true;
 		AppleConfig = Result;
-		if (AppleConfig.BundleId.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP not configured properly."));;
+		if (AppleConfig.BundleId.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP not configured properly."));
 	}), FErrorHandler::CreateLambda(
 	[&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone](int32 Code, FString Message)
 	{
@@ -2764,7 +2764,6 @@ bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 		{
 			bSyncDone = true;
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-		
 		}));
 		WaitUntil(bSyncDone, "Waiting for sync...");
 
@@ -2773,3 +2772,77 @@ bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 	
 	return true;
 }
+
+#if 0
+/**
+ * This test is disabled since we can not run it on jenkins.
+ * But, prefer to let this test here to make it as an example to use Sync DLC items
+ **/
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSyncDLCItemFailed, "AccelByte.Tests.Ecommerce.J.SyncDLCItemFailed", AutomationFlagMaskEcommerce);
+bool FEcommerceTestSyncDLCItemFailed::RunTest(const FString& Parameters)
+{
+	//This negative test only run to check the endpoint and it's process
+	//because XstsToken come XBox one manager sample apps
+	
+	FRegistry::User.ForgetAllCredentials();
+	
+	FAccelByteModelsXBoxDLCSync XBoxDLCSyncToken;
+	XBoxDLCSyncToken.XstsToken = "XBox Xsts token from XBox One Manager sample apps";
+	
+	bool bXBoxLoginSuccessful = false;
+	bool bXBoxLoginDone = false;
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Live, XBoxDLCSyncToken.XstsToken, FVoidHandler::CreateLambda([&bXBoxLoginSuccessful, &bXBoxLoginDone]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("LoginWithXBoxAccount Success"));
+		bXBoxLoginSuccessful = true;
+		bXBoxLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bXBoxLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bXBoxLoginDone = true;
+	}));
+	WaitUntil(bXBoxLoginDone, "Waiting for Login...");
+
+	AB_TEST_TRUE(bXBoxLoginDone);
+
+	bool bGetDataSuccessful = false;
+	FAccountUserData GetDataResult;
+	FRegistry::User.GetData(
+	THandler<FAccountUserData>::CreateLambda([&GetDataResult, &bGetDataSuccessful](const FAccountUserData& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("   Success"));
+		bGetDataSuccessful = true;
+		GetDataResult = Result;
+	}),
+	FErrorHandler::CreateLambda([&bGetDataSuccessful](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	}));
+
+	WaitUntil(bGetDataSuccessful, "Waiting for Get Data...");
+	AB_TEST_TRUE(bGetDataSuccessful);
+	
+	if (GetDataResult.Username.IsEmpty())
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("User login with headless 3rd party account"));
+		XBoxDLCSyncToken.XstsToken = "";
+	}
+	
+	bool bSyncDone = false;
+	FRegistry::Entitlement.SyncXBoxDLC(XBoxDLCSyncToken, FVoidHandler::CreateLambda([&bSyncDone]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+		bSyncDone = true;
+	}), FErrorHandler::CreateLambda([&bSyncDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		bSyncDone = true;
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	
+	}));
+	WaitUntil(bSyncDone, "Waiting for sync...");
+
+	AB_TEST_TRUE(bSyncDone);
+	
+	return true;
+}
+#endif

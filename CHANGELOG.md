@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.3.0%0D8.2.0) (2022-01-17)
+
+
+### Features
+
+* **Achievement:** add Achievement API Blueprint from Achievement API ([dbce33b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dbce33b802b85ced729e298801ab804c59a5c0f3))
+* **entitlement:** bringback Sync DLC item ([78aa2fa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/78aa2fa3a6acbed3f0170a869e2708042e30c1e1))
+* **Leaderboard:** add Leaderboard API Blueprint from Leaderboard API ([3d87793](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3d87793d1a10427a9dcf4703cbabb397cb7d4958))
+* **Leaderboard:** add Leaderboard API Blueprint from Leaderboard API ([ac4e3f4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ac4e3f4e2714fea3e8aa47880a64a73cd44773b0))
+* **SessionBrowser:** add SessionBrowser blueprint from SessionBrowser api ([c87a141](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c87a1412730da61ec3305999dd75fa94768eb126))
+* **Statistic:** add Statistic blueprint from Statistic api ([e7e6945](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e7e6945676dcab0543532181e054fbc239d66285))
+
+
+### Bug Fixes
+
+* **lobby:** Remove redundant reconnect call on lobby OnClosed function. ([76119f8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/76119f8597588ab5e8d0f5e4657bd1fb40000ccb))
+
+
+### Tests
+
+* **joinable test:** add more delay for waiting for dsNotif ([df9080a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df9080acbeb5c7503650970c34dc2ca22d65f2d5))
+* **lobby:** fix cleanup and makes some tests more isolated. ([f9a0800](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f9a0800118054e1a4e16040055e49c34f6af6895))
+
+
+### Refactors
+
+* **AccelByteBPApiClient.cpp:** add missing line break to a function to match the format of the rest ([dff76ae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/dff76ae14188fbb812dbbead17805bc1403e7b9c))
+* **SessionBrowser:** fix typo on ufunction macro category ([5ce9bdb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5ce9bdb6cb9ef3ac5eaedbdd2d0ea8bedbe1ab1d))
+* **SessionBrowser:** removed testing purpose code ([7f4b31c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7f4b31c0445b8dd922dcae3c45a0faaa79b3f57f))
+* **settings:** move environment settings enumeration to appropriate file ([8d2df0c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d2df0c1e7411074f887edce91a59c028e82fbf7))
+
 ## [8.2.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.2.0%0D8.1.0) (2022-01-04)
 
 
