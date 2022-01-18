@@ -6,6 +6,13 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "Core/AccelByteEnvironment.h"
+
+namespace AccelByte
+{
+	class Settings;
+	class ServerSettings;
+}
 
 class IAccelByteUe4SdkModuleInterface : public IModuleInterface
 {
@@ -19,4 +26,8 @@ public:
 	{
 		return FModuleManager::Get().IsModuleLoaded("AccelByteUe4Sdk");
 	}
+
+	virtual void SetEnvironment(ESettingsEnvironment const Environment) = 0;
+	virtual AccelByte::Settings const& GetClientSettings() const = 0;
+	virtual AccelByte::ServerSettings const& GetServerSettings() const = 0;
 };

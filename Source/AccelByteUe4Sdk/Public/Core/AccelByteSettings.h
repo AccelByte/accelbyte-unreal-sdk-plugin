@@ -6,6 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Core/AccelByteEnvironment.h"
+
 #include "AccelByteSettings.generated.h"
 
 namespace AccelByte
@@ -40,28 +42,20 @@ public:
 	FString ReportingServerUrl;
 	FString AppId;
 
-	void Reset(const ESettingsEnvironment& Environment);
+	void Reset(ESettingsEnvironment const Environment);
+
+	Settings& operator=(Settings const& Other) = default;
 };
+
+typedef TSharedRef<Settings, ESPMode::ThreadSafe> SettingsRef;
+typedef TSharedPtr<Settings, ESPMode::ThreadSafe> SettingsPtr;
 
 } // Namespace AccelByte
-
-UENUM(BlueprintType)
-enum class ESettingsEnvironment : uint8
-{
-	/** Dev environment settings */
-	Development,
-	/** Cert environment settings */
-	Certification,
-	/** Prod environment settings */
-	Production,
-	/** Default environment settings */
-	Default
-};
 
 /**
  * @brief UObject for storing settings into configuration file.
  */
-UCLASS(Config = Engine)
+UCLASS(Config = Engine, defaultConfig)
 class ACCELBYTEUE4SDK_API UAccelByteSettings : public UObject
 {
 	GENERATED_BODY()
@@ -303,6 +297,6 @@ public:
 	static void SetAppId(const FString& AppId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
-	static void ResetSettings(const ESettingsEnvironment& Environment);
+	static void ResetSettings(const ESettingsEnvironment Environment);
 };
 
