@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -455,87 +455,6 @@ void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMo
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
-
-void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FString Content = FString::Printf(TEXT("{\"xstsToken\": \"%s\"}"), *XboxDLCSync.XstsToken);
-	if (XboxDLCSync.XstsToken.IsEmpty())
-	{
-		Content = FString::Printf(TEXT("{}"));
-	}
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/xbl/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FString platformUserId = CredentialsRef.GetPlatformUserId();
-
-	if (platformUserId.IsEmpty()) 
-	{
-		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::IsNotLoggedIn), TEXT("User not logged in with 3rd Party Platform"));
-		return;
-	}
-
-	FString Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": \"%s\"}"), *CredentialsRef.GetPlatformUserId(), *SettingsRef.AppId);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/steam/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	FString Content = FString::Printf(TEXT("{\"serviceLabel\": \"%d\"}"), PSSyncModel.ServiceLabel);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}	
 
 } // Namespace Api
 }

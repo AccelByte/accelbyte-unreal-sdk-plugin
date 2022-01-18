@@ -7,57 +7,6 @@
 
 using namespace AccelByte;
 
-static FString GetDefaultServerAPIUrl(FString const& SpecificServerUrl, FString const& BaseUrl, FString const& DefaultServerPath)
-{
-	if (SpecificServerUrl.IsEmpty())
-	{
-		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultServerPath);
-	}
-
-	return SpecificServerUrl;
-}
-
-template<class T>
-static bool SetServerEnvironment(ServerSettings * InSettings)
-{
-#if WITH_EDITOR || UE_SERVER || UE_BUILD_DEVELOPMENT
-	InSettings->ClientId = GetDefault<T>()->ClientId;
-	InSettings->ClientSecret = GetDefault<T>()->ClientSecret;
-	InSettings->Namespace = GetDefault<T>()->Namespace;
-	InSettings->PublisherNamespace = GetDefault<T>()->PublisherNamespace;
-	InSettings->RedirectURI = GetDefault<T>()->RedirectURI;
-	InSettings->BaseUrl = GetDefault<T>()->BaseUrl;
-	InSettings->IamServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->IamServerUrl, InSettings->BaseUrl, TEXT("iam"));
-	InSettings->DSMControllerServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->DSMControllerServerUrl, InSettings->BaseUrl, TEXT("dsmcontroller"));
-	InSettings->StatisticServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->StatisticServerUrl, InSettings->BaseUrl, TEXT("social"));
-	InSettings->PlatformServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->PlatformServerUrl, InSettings->BaseUrl, TEXT("platform"));
-	InSettings->QosManagerServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->QosManagerServerUrl, InSettings->BaseUrl, TEXT("qosm"));
-	InSettings->GameTelemetryServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->GameTelemetryServerUrl, InSettings->BaseUrl, TEXT("game-telemetry"));
-	InSettings->AchievementServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->AchievementServerUrl, InSettings->BaseUrl, TEXT("achievement"));
-	InSettings->MatchmakingServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->MatchmakingServerUrl, InSettings->BaseUrl, TEXT("matchmaking"));
-	InSettings->LobbyServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->LobbyServerUrl, InSettings->BaseUrl, TEXT("lobby"));
-	InSettings->CloudSaveServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->CloudSaveServerUrl, InSettings->BaseUrl, TEXT("cloudsave"));
-	InSettings->SeasonPassServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->SeasonPassServerUrl, InSettings->BaseUrl, TEXT("seasonpass"));
-	InSettings->SessionBrowserServerUrl = GetDefaultServerAPIUrl(GetDefault<T>()->SessionBrowserServerUrl, InSettings->BaseUrl, TEXT("sessionbrowser"));
-#endif
-
-	return true;
-}
-
-void ServerSettings::Reset(ESettingsEnvironment const Environment)
-{
-	switch (Environment)
-	{
-	case ESettingsEnvironment::Development:
-	case ESettingsEnvironment::Certification:
-	case ESettingsEnvironment::Production:
-	case ESettingsEnvironment::Default:
-	default:
-		SetServerEnvironment<UAccelByteServerSettings>(this);
-		break;
-	}
-}
-
 UAccelByteServerSettings::UAccelByteServerSettings()
 {
 }
@@ -220,10 +169,4 @@ void UAccelByteBlueprintsServerSettings::SetSeasonPassServerUrl(const FString & 
 void UAccelByteBlueprintsServerSettings::SetSessionBrowserServerUrl(const FString & SessionBrowserUrl)
 {
 	FRegistry::ServerSettings.SessionBrowserServerUrl = SessionBrowserUrl;
-}
-
-void UAccelByteBlueprintsServerSettings::ResetSettings(ESettingsEnvironment const Environment)
-{
-	FRegistry::ServerSettings.Reset(Environment);
-	FRegistry::ServerCredentials.SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
 }

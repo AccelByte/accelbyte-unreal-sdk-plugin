@@ -1394,6 +1394,9 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 	if (StatusCode >= 4000 && !BanNotifReceived)
 	{
 		Disconnect();
+	}else
+	{
+		WebSocket->Reconnect();
 	}
 
 	BanNotifReceived = false;

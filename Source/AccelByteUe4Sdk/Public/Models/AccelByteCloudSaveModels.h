@@ -46,8 +46,3 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedRecordsKey
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
 	FAccelByteModelsPaging Paging;
 };
-
-struct ACCELBYTEUE4SDK_API FListAccelByteModelsUserRecord
-{
-	TArray<FAccelByteModelsUserRecord> Data;
-};
