@@ -27,12 +27,16 @@ public:
 	~QosManager();
 
 	/**
-	* @brief Get List of Qos Server(s).
-	*
+	* @brief Get List of Qos Server(s). Returns the processed Request for optional polling later.
 	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
 	* @param OnError This will be called when the operation failed.
 	*/
-	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
+	void GetQosServers(
+		const THandler<FAccelByteModelsQosServerList>& OnSuccess,
+		const FErrorHandler& OnError) const;
+
+	static FHttpRequestPtr GetQosServersRequest();
+	
 private:
 	FHttpRetryScheduler& HttpRef;
 	Credentials const& CredentialsRef;

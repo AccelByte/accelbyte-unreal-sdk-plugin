@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -10,14 +10,23 @@
 void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
 {
 	bool bGetUserMapSuccess = false;
+	bool bIsDone = false;
 	FUserMapResponse userMap;
+	
 	AdminGetUserMap(UserId,
-		THandler<FUserMapResponse>::CreateLambda([&userMap, &bGetUserMapSuccess](const FUserMapResponse& Result)
+		THandler<FUserMapResponse>::CreateLambda(
+			[&userMap, &bGetUserMapSuccess, &bIsDone](const FUserMapResponse& Result)
 			{
 				userMap = Result;
 				bGetUserMapSuccess = true;
-			}), OnError);
-	WaitUntil(bGetUserMapSuccess, "Wait for getting user map data...");
+				bIsDone = true; // Stop waiting
+			}), FErrorHandler::CreateLambda([&OnError, &bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				bIsDone = true;
+				OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			}));
+	
+	WaitUntil(bIsDone, "Wait for getting user map data (AdminDeleteUser)...");
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/namespaces/%s/users/%s"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
@@ -57,7 +66,7 @@ void AdminGetUserVerificationCode(const FString& userId, const THandler<FVerific
 				userMap = Result;
 				bGetUserMapSuccess = true;
 			}), OnError);
-	WaitUntil(bGetUserMapSuccess, "Wait for getting user map data...");
+	WaitUntil(bGetUserMapSuccess, "Wait for getting user map data (AdminGetUserVerification)...");
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/codes"), *GetAdminBaseUrl(), *userMap.Namespace, *userMap.userId);
@@ -98,7 +107,7 @@ void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDel
 				bGetUserDone = true;
 				OnError.Execute(ErrorCode, Message);
 			}));
-	WaitUntil(bGetUserDone, "Wait for getting user map data...");
+	WaitUntil(bGetUserDone, "Wait for getting user map data (AdminDeleteUserByEmailAddress)...");
 
 	if (bGetUserSuccess)
 	{
@@ -189,7 +198,7 @@ bool LoginTestUser(FTestUser& TestUser)
 				bIsDone = true;
 			}));
 
-	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	WaitUntil(bIsDone, TEXT("Waiting (LoginWithUsername) ..."));
 
 	return bIsOk;
 }
@@ -198,8 +207,19 @@ bool DeleteTestUser(FTestUser& TestUser)
 {
 	bool bIsDone = false;
 	bool bIsOk = false;
+
+	// No need to delete, if !valid UserId
+	const FString UserId = TestUser.Credentials.GetUserId();
+	if (UserId.IsEmpty())
+	{
+		// You probably want to know if it's a valid TestUser, but invalid UserId.
+		UE_LOG(LogAccelByteTest, Display, TEXT("[DeleteTestUser] Valid TestUser, but invalid UserId"));
 		
-	AdminDeleteUser(TestUser.Credentials.GetUserId(),
+		TestUser.Credentials.ForgetAll();
+		return true; // Technically, we did what we wanted to do!
+	}	
+	
+	AdminDeleteUser(UserId,
 		FSimpleDelegate::CreateLambda([&]()
 			{
 				bIsOk = true;

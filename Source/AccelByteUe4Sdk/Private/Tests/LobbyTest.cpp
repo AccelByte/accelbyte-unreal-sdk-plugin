@@ -907,7 +907,7 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		WaitUntil([&]()
 		{
 			return bGetServerLatenciesSuccess;
-		}, "Waiting for get server latencies...", 60);
+		}, "Waiting for get server latencies (Lobby.A.Setup)...", 60);
 		AB_TEST_TRUE(bGetServerLatenciesSuccess);
 
 		for (int i = 0; i < PreferedLatencies.Num(); i++)
@@ -5340,7 +5340,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	WaitUntil([&]()
 	{
 		return bGetServerLatenciesSuccess;
-	}, "Waiting for get server latencies...", 60);
+	}, "Waiting for get server latencies (MatchmakingLatenciesStart)...", 60);
 	AB_TEST_TRUE(bGetServerLatenciesSuccess);
 	AB_TEST_TRUE(Latencies.Num() > 0);
 

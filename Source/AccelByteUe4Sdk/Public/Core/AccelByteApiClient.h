@@ -1,4 +1,4 @@
-// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -66,7 +66,7 @@ public:
 	Api::GameProfile GameProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Statistic Statistic{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::QosManager QosManager{*CredentialsRef, FRegistry::Settings, *HttpRef};
-	Api::Qos Qos{};
+	Api::Qos Qos{*CredentialsRef, FRegistry::Settings};
 	Api::Leaderboard Leaderboard{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::CloudSave CloudSave{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::GameTelemetry GameTelemetry{*CredentialsRef, FRegistry::Settings, *HttpRef};

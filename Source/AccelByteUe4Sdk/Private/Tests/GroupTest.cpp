@@ -1214,7 +1214,7 @@ const auto GroupTestPreInitAll = [](
 	FAccelByteModelsGroupInformation& OutGroupTestGroupInfo)
 {
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("\n-------------\n"
-		"[GroupTest] @ OneTimeSetup (%d test users)"), NumTestUsers);
+		"[GroupTest] @ GroupTestPreInitAll (%d test users)"), NumTestUsers);
 
 	// --------------------
 	// 1: Should GET 1st Group Config (or POST init a new Config) for ConfigurationCode"
