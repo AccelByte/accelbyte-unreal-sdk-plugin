@@ -1,4 +1,4 @@
-// Copyright (c) 2019 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2019 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -720,6 +720,22 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
 	FString Region; //optional
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString Language; //optional
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsXBoxDLCSync
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | XboxDLCSync")
+	FString XstsToken;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayStationDLCSync
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlayStationDLCSync")
+	int32 ServiceLabel;
 };
 
 #pragma endregion EntitlementModelsField
