@@ -23,68 +23,70 @@ UAccelByteSettingsProd::UAccelByteSettingsProd()
 {
 }
 
-template< class T >
-static bool SetEnvironment()
+static FString GetDefaultClientAPIUrl(FString const& SpecificServerUrl, FString const& BaseUrl, FString const& DefaultServerPath)
 {
-	FRegistry::Settings.ClientId = GetDefault<T>()->ClientId;
-	FRegistry::Settings.ClientSecret = GetDefault<T>()->ClientSecret;
-	FRegistry::Settings.Namespace = GetDefault<T>()->Namespace;
-	FRegistry::Settings.PublisherNamespace = GetDefault<T>()->PublisherNamespace;
-	FRegistry::Settings.RedirectURI = GetDefault<T>()->RedirectURI;
-	FRegistry::Settings.BaseUrl = GetDefault<T>()->BaseUrl;
-	FRegistry::Settings.IamServerUrl = GetDefaultAPIUrl(GetDefault<T>()->IamServerUrl, TEXT("iam"));
-	FRegistry::Settings.PlatformServerUrl = GetDefaultAPIUrl(GetDefault<T>()->PlatformServerUrl, TEXT("platform"));
-	FRegistry::Settings.LobbyServerUrl = GetDefault<T>()->LobbyServerUrl;
-	if (FRegistry::Settings.LobbyServerUrl.IsEmpty())
+	if (SpecificServerUrl.IsEmpty())
 	{
-		const FString BaseUrl = FRegistry::Settings.BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
-		FRegistry::Settings.LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *BaseUrl, TEXT("lobby/"));
+		return FString::Printf(TEXT("%s/%s"), *BaseUrl, *DefaultServerPath);
 	}
-	FRegistry::Settings.BasicServerUrl = GetDefaultAPIUrl(GetDefault<T>()->BasicServerUrl, TEXT("basic"));
-	FRegistry::Settings.CloudStorageServerUrl = GetDefaultAPIUrl(GetDefault<T>()->CloudStorageServerUrl, TEXT("social"));
-	FRegistry::Settings.GameProfileServerUrl = GetDefaultAPIUrl(GetDefault<T>()->GameProfileServerUrl, TEXT("social"));
-	FRegistry::Settings.StatisticServerUrl = GetDefaultAPIUrl(GetDefault<T>()->StatisticServerUrl, TEXT("social"));
-	FRegistry::Settings.QosManagerServerUrl = GetDefaultAPIUrl(GetDefault<T>()->QosManagerServerUrl, TEXT("qosm"));
-	FRegistry::Settings.LeaderboardServerUrl = GetDefaultAPIUrl(GetDefault<T>()->LeaderboardServerUrl, TEXT("leaderboard"));
-	FRegistry::Settings.GameTelemetryServerUrl = GetDefaultAPIUrl(GetDefault<T>()->GameTelemetryServerUrl, TEXT("game-telemetry"));
-	FRegistry::Settings.AgreementServerUrl = GetDefaultAPIUrl(GetDefault<T>()->AgreementServerUrl, TEXT("agreement"));
-	FRegistry::Settings.CloudSaveServerUrl = GetDefaultAPIUrl(GetDefault<T>()->CloudSaveServerUrl, TEXT("cloudsave"));
-	FRegistry::Settings.AchievementServerUrl = GetDefaultAPIUrl(GetDefault<T>()->AchievementServerUrl, TEXT("achievement"));
-	FRegistry::Settings.SessionBrowserServerUrl = GetDefaultAPIUrl(GetDefault<T>()->SessionBrowserServerUrl, TEXT("sessionbrowser"));
-	FRegistry::Settings.UGCServerUrl = GetDefaultAPIUrl(GetDefault<T>()->UGCServerUrl, TEXT("ugc"));
-	FRegistry::Settings.SeasonPassServerUrl = GetDefaultAPIUrl(GetDefault<T>()->UGCServerUrl, TEXT("seasonpass"));
-	FRegistry::Settings.ReportingServerUrl = GetDefaultAPIUrl(GetDefault<T>()->ReportingServerUrl, TEXT("reporting"));
-	FRegistry::Settings.AppId = GetDefault<T>()->AppId;
-	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+
+	return SpecificServerUrl;
+}
+
+template< class T >
+static bool SetClientEnvironment(Settings * InSettings)
+{
+	InSettings->ClientId = GetDefault<T>()->ClientId;
+	InSettings->ClientSecret = GetDefault<T>()->ClientSecret;
+	InSettings->Namespace = GetDefault<T>()->Namespace;
+	InSettings->PublisherNamespace = GetDefault<T>()->PublisherNamespace;
+	InSettings->RedirectURI = GetDefault<T>()->RedirectURI;
+	InSettings->BaseUrl = GetDefault<T>()->BaseUrl;
+	InSettings->IamServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->IamServerUrl, InSettings->BaseUrl, TEXT("iam"));
+	InSettings->PlatformServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->PlatformServerUrl, InSettings->BaseUrl, TEXT("platform"));
+	InSettings->LobbyServerUrl = GetDefault<T>()->LobbyServerUrl;
+	if (InSettings->LobbyServerUrl.IsEmpty())
+	{
+		const FString BaseUrl = InSettings->BaseUrl.Replace(TEXT("https://"), TEXT("wss://"));
+		InSettings->LobbyServerUrl = FString::Printf(TEXT("%s/%s"), *BaseUrl, TEXT("lobby/"));
+	}
+	InSettings->BasicServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->BasicServerUrl, InSettings->BaseUrl, TEXT("basic"));
+	InSettings->CloudStorageServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->CloudStorageServerUrl, InSettings->BaseUrl, TEXT("social"));
+	InSettings->GameProfileServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->GameProfileServerUrl, InSettings->BaseUrl, TEXT("social"));
+	InSettings->StatisticServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->StatisticServerUrl, InSettings->BaseUrl, TEXT("social"));
+	InSettings->QosManagerServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->QosManagerServerUrl, InSettings->BaseUrl, TEXT("qosm"));
+	InSettings->LeaderboardServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->LeaderboardServerUrl, InSettings->BaseUrl, TEXT("leaderboard"));
+	InSettings->GameTelemetryServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->GameTelemetryServerUrl, InSettings->BaseUrl, TEXT("game-telemetry"));
+	InSettings->AgreementServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->AgreementServerUrl, InSettings->BaseUrl, TEXT("agreement"));
+	InSettings->CloudSaveServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->CloudSaveServerUrl, InSettings->BaseUrl, TEXT("cloudsave"));
+	InSettings->AchievementServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->AchievementServerUrl, InSettings->BaseUrl, TEXT("achievement"));
+	InSettings->SessionBrowserServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->SessionBrowserServerUrl, InSettings->BaseUrl, TEXT("sessionbrowser"));
+	InSettings->UGCServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->UGCServerUrl, InSettings->BaseUrl, TEXT("ugc"));
+	InSettings->SeasonPassServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->UGCServerUrl, InSettings->BaseUrl, TEXT("seasonpass"));
+	InSettings->ReportingServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->ReportingServerUrl, InSettings->BaseUrl, TEXT("reporting"));
+	InSettings->AppId = GetDefault<T>()->AppId;
 
 	return true;
 }
 
-void Settings::Reset(const ESettingsEnvironment& Environment)
+void Settings::Reset(ESettingsEnvironment const Environment)
 {
 	switch (Environment)
 	{
-	case ESettingsEnvironment::Development : SetEnvironment<UAccelByteSettingsDev>();
+	case ESettingsEnvironment::Development :
+		SetClientEnvironment<UAccelByteSettingsDev>(this);
 		break;
-	case ESettingsEnvironment::Certification: SetEnvironment<UAccelByteSettingsCert>();
+	case ESettingsEnvironment::Certification:
+		SetClientEnvironment<UAccelByteSettingsCert>(this);
 		break;
-	case ESettingsEnvironment::Production: SetEnvironment<UAccelByteSettingsProd>();
+	case ESettingsEnvironment::Production:
+		SetClientEnvironment<UAccelByteSettingsProd>(this);
 		break;
 	case ESettingsEnvironment::Default:
 	default:
-		SetEnvironment<UAccelByteSettings>();
+		SetClientEnvironment<UAccelByteSettings>(this);
 		break;
 	}
-}
-
-static FString GetDefaultAPIUrl(const FString& SpecificServerUrl, const FString& DefaultServerPath)
-{
-	if (SpecificServerUrl.IsEmpty())
-	{
-		return FString::Printf(TEXT("%s/%s"), *FRegistry::Settings.BaseUrl, *DefaultServerPath);
-	}
-
-	return SpecificServerUrl;
 }
 
 FString UAccelByteBlueprintsSettings::GetClientId()
@@ -302,7 +304,8 @@ void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 	FRegistry::Settings.AppId = AppId;
 }
 
-void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment& Environment)
+void UAccelByteBlueprintsSettings::ResetSettings(const ESettingsEnvironment Environment)
 {
 	FRegistry::Settings.Reset(Environment);
+	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
 }
