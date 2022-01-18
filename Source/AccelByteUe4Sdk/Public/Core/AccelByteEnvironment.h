@@ -5,25 +5,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteEnvironment.generated.h"
-
-UENUM(BlueprintType)
-enum class ESettingsEnvironment : uint8
-{
-	/** Dev environment settings */
-	Development,
-	/** Cert environment settings */
-	Certification,
-	/** Prod environment settings */
-	Production,
-	/** Default environment settings */
-	Default
-};
+#include "Runtime/Launch/Resources/Version.h"
 
 namespace AccelByte 
-{	
+{
+
 class ACCELBYTEUE4SDK_API Environment
 {
+
 public:
 	/**
 	 * @brief Get environment variable from the platform.
