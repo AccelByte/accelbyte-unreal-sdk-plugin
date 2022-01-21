@@ -148,6 +148,7 @@ void FLeaderboardTestSpec::Define()
 			}
 
 			// LEADERBOARD CONFIG CREATION
+			double DelayedTime = 10.0f;
 			for (size_t i = 0; i < TestStatCodeCount; i++)
 			{
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("LEADERBOARD CONFIG CREATION...%d out of %d"), i + 1, TestStatCodeCount);
@@ -158,7 +159,7 @@ void FLeaderboardTestSpec::Define()
 				createRequest.seasonPeriod = 31 + 5; // minimum is 31 day
 
 				//Intentional: start time supposed to be in the future. 10 seconds added. It will takes effect in 10 seconds.
-				LeaderboardStartTime = FDateTime::UtcNow() + FTimespan::FromSeconds(10);
+				LeaderboardStartTime = FDateTime::UtcNow() + FTimespan::FromSeconds(DelayedTime);
 				createRequest.startTime = LeaderboardStartTime.ToIso8601();
 
 				TestLeaderboardCodes.Add(createRequest.leaderboardCode);
@@ -184,6 +185,7 @@ void FLeaderboardTestSpec::Define()
 				}));
 				WaitUntil(bCreateLeaderboardConfigDone, "Waiting for config leaderboard...");
 			}
+			DelaySeconds(DelayedTime);
 
 			// SERVER LOGIN
 			FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bServerClientLoginSuccess]()
