@@ -19,6 +19,48 @@ static const int32 AutomationFlagMaskCustomization = (EAutomationTestFlags::Edit
 
 TArray<FTestUser> HttpClientTestUsers;
 
+class FThreadCancellationTestWorker : public FRunnable
+{
+public:
+	FThreadCancellationTestWorker(const FString& ThreadName, const TSharedPtr<FAccelByteCancellationToken>& TokenHandler, bool bIsCanceller = false)
+		: TokenHandler(TokenHandler)
+		, bIsCanceller(bIsCanceller)
+	{
+		Thread = FRunnableThread::Create(this, *ThreadName);
+	}
+
+	~FThreadCancellationTestWorker()
+	{
+		delete Thread;
+		Thread = nullptr;
+	}
+
+	virtual uint32 Run() override
+	{
+		uint32 ThreadId = FPlatformTLS::GetCurrentThreadId();
+		FString ThreadName = FThreadManager::Get().GetThreadName(ThreadId);
+		UE_LOG(LogAccelByteHttpClientTest, Log, TEXT("[Async] Start Cancellation Thread=%s"), *ThreadName);
+		if (bIsCanceller)
+		{
+			TokenHandler->Cancel();
+		}
+		return 0;
+	}
+
+	void EnsureCompletion()
+	{
+		Stop();
+		Thread->WaitForCompletion();
+	}
+
+	bool IsCancelled() { return TokenHandler->IsCancelled(); }
+
+private:
+	TSharedPtr<FAccelByteCancellationToken> TokenHandler;
+	bool bIsCanceller;
+	FRunnableThread* Thread;
+};
+
 IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoUStructTest, "AccelByte.Tests.Core.HttpClient.DoUStruct", AutomationFlagMaskCustomization)
 void DoUStructTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
 {
@@ -143,4 +185,266 @@ bool DoFormTest::RunTest(const FString& Method)
 	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
 
 	return bIsSuccess;
+}
+
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoCancelAfterDoneTest, "AccelByte.Tests.Core.HttpClient.DoCancelAfterDone", AutomationFlagMaskCustomization)
+void DoCancelAfterDoneTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
+{
+	OutBeautifiedNames.Add("GET");
+	OutTestCommands.Add("GET");
+	OutBeautifiedNames.Add("POST");
+	OutTestCommands.Add("POST");
+	OutBeautifiedNames.Add("PUT");
+	OutTestCommands.Add("PUT");
+	OutBeautifiedNames.Add("DELETE");
+	OutTestCommands.Add("DELETE");
+}
+
+bool DoCancelAfterDoneTest::RunTest(const FString& Method)
+{
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+
+	FHttpClientTestAnythingResponse Result;
+
+	bool bIsDone = false;
+	bool bIsSuccess = false;
+
+	const FString Query = TEXT("=123");
+
+	const TMap<FString, FString> Content = {
+		{"name", "John Doe"},
+		{"age", "24"},
+	};
+
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+
+	FAccelByteTaskPtr HttpTask = HttpClient.ApiRequest(Method, Url, { { "q", Query } }, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
+			{
+				Result = Response;
+				bIsSuccess = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](const int32 Code, const FString& Message)
+			{
+				bIsDone = true;
+			}));
+
+	WaitUntil(bIsDone, "Waiting ...");
+	FAccelByteCancellationToken CancellationToken = HttpTask->GetCancellationToken();
+	CancellationToken.Cancel();
+
+	AB_TEST_TRUE(bIsDone);
+	AB_TEST_FALSE(CancellationToken.IsCancelled());
+
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+
+	return bIsDone;
+}
+
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoCancelAfterRequestTest, "AccelByte.Tests.Core.HttpClient.DoCancelAfterRequest", AutomationFlagMaskCustomization)
+void DoCancelAfterRequestTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
+{
+	OutBeautifiedNames.Add("GET");
+	OutTestCommands.Add("GET");
+	OutBeautifiedNames.Add("POST");
+	OutTestCommands.Add("POST");
+	OutBeautifiedNames.Add("PUT");
+	OutTestCommands.Add("PUT");
+	OutBeautifiedNames.Add("DELETE");
+	OutTestCommands.Add("DELETE");
+}
+
+bool DoCancelAfterRequestTest::RunTest(const FString& Method)
+{
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+
+	FHttpClientTestAnythingResponse Result;
+
+	bool bIsDone = false;
+	bool bIsSuccess = false;
+
+	const FString Query = TEXT("=123");
+
+	const TMap<FString, FString> Content = {
+		{"name", "John Doe"},
+		{"age", "24"},
+	};
+
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+
+	FAccelByteTaskPtr HttpTask = HttpClient.ApiRequest(Method, Url, { { "q", Query } }, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
+			{
+				Result = Response;
+				bIsSuccess = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](const int32 Code, const FString& Message)
+			{
+				bIsDone = true;
+			}));
+
+	FAccelByteCancellationToken CancellationToken = HttpTask->GetCancellationToken();
+	CancellationToken.Cancel();
+
+	WaitUntil(bIsDone, "Waiting ...");
+
+	AB_TEST_TRUE(bIsDone);
+	AB_TEST_TRUE(CancellationToken.IsCancelled());
+
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+
+	return bIsDone;
+}
+
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoCancelOneofManyThreadRequestTest, "AccelByte.Tests.Core.HttpClient.DoCancelOneofManyThreadRequest", AutomationFlagMaskCustomization)
+void DoCancelOneofManyThreadRequestTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
+{
+	OutBeautifiedNames.Add("GET");
+	OutTestCommands.Add("GET");
+	OutBeautifiedNames.Add("POST");
+	OutTestCommands.Add("POST");
+	OutBeautifiedNames.Add("PUT");
+	OutTestCommands.Add("PUT");
+	OutBeautifiedNames.Add("DELETE");
+	OutTestCommands.Add("DELETE");
+}
+
+bool DoCancelOneofManyThreadRequestTest::RunTest(const FString& Method)
+{
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+
+	const int ThreadCount = 10;
+	TArray<TSharedPtr<FThreadCancellationTestWorker>> Tasks;
+
+	bool bIsDone = false;
+	bool bIsSuccess = false;
+
+	const FString Query = TEXT("=123");
+
+	const TMap<FString, FString> Content = {
+		{"name", "John Doe"},
+		{"age", "24"},
+	};
+
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+
+	FAccelByteCancellationToken CancellationToken = HttpClient.ApiRequest(Method, Url, { { "q", Query } }, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
+			{
+				bIsSuccess = true;
+				bIsDone = true;
+			}),
+		FErrorHandler::CreateLambda([&](const int32 Code, const FString& Message)
+			{
+				bIsDone = true;
+			}))->GetCancellationToken();
+
+	const int Canceller = FMath::RandRange(0, (ThreadCount-1));
+	for (int i = 0; i < ThreadCount; i++)
+	{
+		FString ThreadName = FString::Printf(TEXT("Concurrency_%03d"), i);
+		TSharedPtr<FThreadCancellationTestWorker> Task = MakeShared<FThreadCancellationTestWorker>(ThreadName, MakeShared<FAccelByteCancellationToken>(CancellationToken), i == Canceller ? true : false);
+		Tasks.Add(Task);
+	}
+
+	WaitUntil(bIsDone, "Waiting ...");
+
+	AB_TEST_TRUE(bIsDone);
+	for (auto& Task : Tasks)
+	{
+		AB_TEST_TRUE(Task->IsCancelled());
+	}
+
+	for (auto& Task : Tasks)
+	{
+		Task->EnsureCompletion();
+	}
+
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+
+	return bIsDone;
+}
+
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(DoCancelOneofManyRequestsTest, "AccelByte.Tests.Core.HttpClient.DoCancelOneofManyRequests", AutomationFlagMaskCustomization)
+void DoCancelOneofManyRequestsTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>& OutTestCommands) const
+{
+	OutBeautifiedNames.Add("GET");
+	OutTestCommands.Add("GET");
+	OutBeautifiedNames.Add("POST");
+	OutTestCommands.Add("POST");
+	OutBeautifiedNames.Add("PUT");
+	OutTestCommands.Add("PUT");
+	OutBeautifiedNames.Add("DELETE");
+	OutTestCommands.Add("DELETE");
+}
+
+bool DoCancelOneofManyRequestsTest::RunTest(const FString& Method)
+{
+	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+
+	const int RequestCount = 10;
+	TArray<TSharedPtr<FAccelByteCancellationToken>> CancellationTokens;
+	int CancelledCount = 0;
+
+	int DoneRequestCount = 0;
+	int SuccessRequestCount = 0;
+	bool bAllIsDone = false;
+
+	const FString Query = TEXT("=123");
+
+	const TMap<FString, FString> Content = {
+		{"name", "John Doe"},
+		{"age", "24"},
+	};
+
+	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+
+	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
+
+	const int Canceller = FMath::RandRange(0, (RequestCount-1));
+	for (int i = 0; i < RequestCount; i++)
+	{
+		FAccelByteCancellationToken CancellationToken = HttpClient.ApiRequest(Method, Url, { { "q", Query } }, Content,
+		THandler<FHttpClientTestAnythingResponse>::CreateLambda([&](const FHttpClientTestAnythingResponse& Response)
+			{
+				SuccessRequestCount++;
+				DoneRequestCount++;
+				if (DoneRequestCount == RequestCount)
+				{
+					bAllIsDone = true;
+				}
+			}),
+		FErrorHandler::CreateLambda([&](const int32 Code, const FString& Message)
+			{
+				DoneRequestCount++;
+				CancelledCount++;
+				if (DoneRequestCount == RequestCount)
+				{
+					bAllIsDone = true;
+				}
+			}))->GetCancellationToken();
+		
+		if (i == Canceller)
+		{
+			CancellationToken.Cancel();
+		}
+		CancellationTokens.Add(MakeShared<FAccelByteCancellationToken>(CancellationToken));
+	}
+
+	WaitUntil(bAllIsDone, "Waiting ...");
+
+	AB_TEST_TRUE(bAllIsDone);
+
+	AB_TEST_EQUAL(CancelledCount, 1);
+	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+
+	return bAllIsDone;
 }
