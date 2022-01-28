@@ -14,6 +14,7 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
 #include "ParseErrorTest.h"
+#include "Api/AccelByteOauth2Api.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ using AccelByte::Settings;
 using AccelByte::HandleHttpError;
 using AccelByte::Api::User;
 using AccelByte::Api::UserProfile;
+using AccelByte::Api::Oauth2;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteUserTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteUserTest);
@@ -194,15 +196,15 @@ bool FUserLoginV3Test::RunTest(const FString& Parameter)
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
 	FRegistry::User.Registerv2(EmailAddress, Username, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
-			{
-				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-				bRegisterDone = true;
-			}));
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
 
 	WaitUntil(bRegisterDone, "Waiting for Registered...");
 
@@ -239,6 +241,106 @@ bool FUserLoginV3Test::RunTest(const FString& Parameter)
 
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
 	AB_TEST_TRUE(bLoginSuccessful);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserRevokeTest, "AccelByte.Tests.AUser.RegisterUsername_LoginByUsernameThenRevoke", AutomationFlagMaskUser);
+bool FUserRevokeTest::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	const FString Username = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Registerv2(EmailAddress, Username, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+		bRegisterSuccessful = true;
+		bRegisterDone = true;
+	}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bRegisterDone = true;
+	}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	FRegistry::User.LoginWithUsername(Username, Password, FVoidHandler::CreateLambda([&]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginSuccessful = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+
+	bool bGetDataSuccess = false;
+	FAccountUserData userData;
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetDataSuccess, &userData](const FAccountUserData Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetDataSuccess = true;
+		userData = Result;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bGetDataSuccess, "Waiting for get user data...");
+	AB_TEST_TRUE(bGetDataSuccess);
+
+	bool bRevokeUserSuccess = false;
+	Oauth2::RevokeUserToken(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret, FRegistry::Credentials.GetAccessToken(), FVoidHandler::CreateLambda([&bRevokeUserSuccess]()
+	{
+		bRevokeUserSuccess = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bRevokeUserSuccess, "Waiting for logout...");
+	AB_TEST_TRUE(bRevokeUserSuccess);
+
+	bGetDataSuccess = false;
+	bool bGetDataDone = false;
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetDataSuccess, &bGetDataDone](const FAccountUserData Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bGetDataSuccess = true;
+		bGetDataDone = true;
+	}), FErrorHandler::CreateLambda([&bGetDataDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bGetDataDone = true;
+	}));
+
+	WaitUntil(bGetDataDone, "Waiting for get user data...");
+	AB_TEST_FALSE(bGetDataSuccess);
+
+#pragma region DeleteUserByEmailAddress
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUserByEmailAddress(EmailAddress, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+	
 	return true;
 }
 

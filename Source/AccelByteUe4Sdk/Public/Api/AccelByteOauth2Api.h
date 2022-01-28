@@ -104,14 +104,26 @@ public:
 	static void GetTokenWithRefreshToken(const FString& ClientId, const FString& ClientSecret, const FString& RefreshId, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
+    * @brief Log user out.
+    * Will make user session id invalid.
+    *
+    * @param AccessToken user Access Token or rather, Session Id.
+    * @param OnSuccess This will be called when the operation succeeded.
+    * @param OnError This will be called when the operation failed.
+    */
+    static void RevokeToken(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	* @brief Log user out.
 	* Will make user session id invalid.
 	*
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
 	* @param AccessToken user Access Token or rather, Session Id.
 	* @param OnSuccess This will be called when the operation succeeded.
 	* @param OnError This will be called when the operation failed.
 	*/
-	static void RevokeToken(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	static void RevokeUserToken(const FString& ClientId, const FString& ClientSecret, const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	* @brief Log user in with their username and password using V3 endpoint.

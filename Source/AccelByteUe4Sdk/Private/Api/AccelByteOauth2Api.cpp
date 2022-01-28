@@ -128,6 +128,9 @@ void Oauth2::GetTokenWithRefreshToken(const FString& ClientId, const FString& Cl
 void Oauth2::RevokeToken(const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("This method uses wrong auth type and will be deprecated. Use RevokeUserToken instead!"));
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetVerb(TEXT("POST"));
@@ -140,6 +143,24 @@ void Oauth2::RevokeToken(const FString& AccessToken, const FVoidHandler& OnSucce
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(FVoidHandler::CreateLambda([OnSuccess]() { 
 		FRegistry::Credentials.ForgetAll();
 		OnSuccess.ExecuteIfBound();
+	}), OnError), FPlatformTime::Seconds());
+}
+
+void Oauth2::RevokeUserToken(const FString& ClientId, const FString& ClientSecret, const FString& AccessToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("POST"));
+	Request->SetURL(FString::Printf(TEXT("%s/v3/oauth/revoke"), *FRegistry::Settings.IamServerUrl));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(*AccessToken)));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(FVoidHandler::CreateLambda([OnSuccess]() { 
+	FRegistry::Credentials.ForgetAll();
+	OnSuccess.ExecuteIfBound();
 	}), OnError), FPlatformTime::Seconds());
 }
 
