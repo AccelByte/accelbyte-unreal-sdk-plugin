@@ -6,9 +6,9 @@
 
 #include "CoreMinimal.h"
 #include "JsonObjectWrapper.h"
-#include "Dom/JsonValue.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteUserModels.h"
+#include "Models/AccelByteDSMModels.h"
 #include "AccelByteLobbyModels.generated.h"
 
 // Emulate namespace with long class names
@@ -141,6 +141,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyInviteResponse
     GENERATED_BODY()
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString InviteeID;
 };
 
 //Invitation notice
@@ -227,6 +229,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickPartyMemberResponse
     GENERATED_BODY()
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+    FString UserId;
 };
 
 // Generate party Code
@@ -522,6 +526,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
     FString Code;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchingAllies
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	TArray<FAccelByteModelsMatchingAlly> Data;
+};
+
 // Matchmaking notification
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
@@ -533,6 +545,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     EAccelByteMatchmakingStatus Status{EAccelByteMatchmakingStatus::Unknown};
+    
+   	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+   	FString GameMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString Deployment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString ClientVersion;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	bool Joinable {false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FAccelByteModelsMatchingAllies MatchingAllies;
 };
 
 // DS Notification
@@ -943,25 +970,29 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsBlockPlayerResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | AcceptFriendsResponse")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerResponse")
 		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerResponse")
+		FString BlockedUserId;
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUnblockPlayerResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RejectFriendsResponse")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerResponse")
 		FString Code;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerResponse")
+		FString UnblockedUserId;
 };
 
 USTRUCT(BlueprintType)
 struct FAccelByteModelsBlockPlayerNotif
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerNotif")
 		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | BlockPlayerNotif")
 		FString BlockedUserId;
 };
 
@@ -969,9 +1000,9 @@ USTRUCT(BlueprintType)
 struct FAccelByteModelsUnblockPlayerNotif
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerNotif")
 		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | RequestFriendsNotif")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Lobby | Models | Friends | UnblockPlayerNotif")
 		FString UnblockedUserId;
 };
 

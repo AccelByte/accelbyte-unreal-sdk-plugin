@@ -37,6 +37,7 @@ UABApiClient::UABApiClient()
 	Leaderboard = NewObject<UABLeaderboard>();
 	Achievement = NewObject<UABAchievement>();
 	SessionBrowser = NewObject<UABSessionBrowser>();
+	UGC = NewObject<UABUGC>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -64,6 +65,7 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Leaderboard->SetApiClient(ApiClientPtr);
 	Achievement->SetApiClient(ApiClientPtr);
 	SessionBrowser->SetApiClient(ApiClientPtr);
+	UGC->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)

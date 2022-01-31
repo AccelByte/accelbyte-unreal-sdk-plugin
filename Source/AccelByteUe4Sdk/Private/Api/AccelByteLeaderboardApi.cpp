@@ -1,4 +1,4 @@
-// Copyright (c) 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2020-2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -50,9 +50,7 @@ Leaderboard::Leaderboard(
 		default:
 			break;
 		}
-
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *TimeFrameString);
+			FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/leaderboards/%s/%s"), *SettingsRef.LeaderboardServerUrl, *SettingsRef.Namespace, *LeaderboardCode, *TimeFrameString);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -72,7 +70,6 @@ Leaderboard::Leaderboard(
 
 		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);

@@ -13,12 +13,46 @@
 // enclosing with namespace because of collision with Unreal types
 namespace openssl
 {
+THIRD_PARTY_INCLUDES_START
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
+THIRD_PARTY_INCLUDES_END
 }
 
 using namespace openssl;
+
+class FScopedEVPMDContext
+{
+public:
+	/**
+	 * Creates our OpenSSL Message Digest Context on construction
+	 */
+	FScopedEVPMDContext() :
+		Context(EVP_MD_CTX_create())
+	{
+	}
+
+	/** Disable copying/assigning */
+	FScopedEVPMDContext(FScopedEVPMDContext&) = delete;
+	FScopedEVPMDContext& operator=(FScopedEVPMDContext&) = delete;
+
+	/**
+	 * Free our OpenSSL Message Digest Context
+	 */
+	~FScopedEVPMDContext()
+	{
+		EVP_MD_CTX_destroy(Context);
+	}
+
+	/**
+	 * Get our OpenSSL Message Digest Context
+	 */
+	EVP_MD_CTX* Get() const { return Context; }
+
+private:
+	EVP_MD_CTX* Context;
+};
 
 
 int32 constexpr RS256_SIGNATURE_LENGTH = 342;
@@ -144,20 +178,20 @@ EJwtResult FJwt::VerifyWith(FRsaPublicKey Key) const
 	{
 		return EJwtResult::SignatureMismatch;
 	}
+	
+	FScopedEVPMDContext MDContext;
 
-	std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> const MDContextPtr(EVP_MD_CTX_create(), EVP_MD_CTX_free);
-
-	if (!MDContextPtr)
+	if (MDContext.Get() == nullptr)
 	{
 		return EJwtResult::SignatureMismatch;
 	}
 
-	if (!EVP_VerifyInit(MDContextPtr.get(), EVP_sha256()))
+	if (!EVP_VerifyInit(MDContext.Get(), EVP_sha256()))
 	{
 		return EJwtResult::SignatureMismatch;
 	}
 
-	if (!EVP_VerifyUpdate(MDContextPtr.get(), TCHAR_TO_ANSI(*JwtString), PayloadEnd))
+	if (!EVP_VerifyUpdate(MDContext.Get(), TCHAR_TO_ANSI(*JwtString), PayloadEnd))
 	{
 		return EJwtResult::SignatureMismatch;
 	}
@@ -168,7 +202,7 @@ EJwtResult FJwt::VerifyWith(FRsaPublicKey Key) const
 	FBase64::Decode(SignatureB64, SignatureBytes);
 
 	auto const VerifyResult = EVP_VerifyFinal(
-		MDContextPtr.get(),
+		MDContext.Get(),
 		SignatureBytes.GetData(),
 		SignatureBytes.Num(),
 		PublicKeyPtr.get());

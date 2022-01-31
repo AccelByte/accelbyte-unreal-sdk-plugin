@@ -1460,7 +1460,9 @@ FString Lobby::LobbyMessageToJson(FString Message)
 
 		if (Value.StartsWith("["))
 		{
-			if (Value.Equals("[]"))
+			// if starts with "[{" then it's an array of jsonObject field, pass the value since expected to be valid json field.
+			// "[]" is also a valid empty array json field.
+			if (Value.Equals("[]") || Value.StartsWith("[{")) 
 			{
 				Json += Value;
 			}
