@@ -2,6 +2,8 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#include "Core/AccelByteServerApiClient.h"
+
 namespace AccelByte
 {
 	FServerApiClient::FServerApiClient()

@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "JsonObjectWrapper.h"
 
-#include "AccelByteDSMModels.h"
+#include "Models/AccelByteDSMModels.h"
 #include "AccelByteMatchmakingModels.generated.h"
 
 UENUM(BlueprintType)

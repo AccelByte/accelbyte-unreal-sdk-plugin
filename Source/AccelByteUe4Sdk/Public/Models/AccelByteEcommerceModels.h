@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AccelByteGeneralModels.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteEcommerceModels.generated.h"
 
 #pragma region EnumField

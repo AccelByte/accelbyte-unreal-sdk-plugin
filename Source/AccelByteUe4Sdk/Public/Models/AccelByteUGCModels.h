@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteUGCModels.generated.h"
 
 USTRUCT(BlueprintType)
