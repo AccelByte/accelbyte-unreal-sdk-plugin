@@ -2,6 +2,41 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.4.0%0D8.3.0) (2022-01-31)
+
+
+### Features
+
+* **lobby:** Add blocked & unblocked user ID on respective response ([1caf5f7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1caf5f7ffb300f22efa40920425b57df7b411a1e))
+* **lobby:** add more fields to MatchmakingNotif ([48e76be](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/48e76be199258f72af5316f5e4bcc00f22a6740f))
+* **lobby:** Add support for parsing array of json object field type in lobby ws parser. ([8d17d2c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8d17d2c76d950530616ae61d37519b1730daa434))
+* **lobby:** Add User Id in Invite party and kick response models ([e32b921](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e32b9210c49db9044cbc745875a95da2058f5dc5))
+* **lua:** Add Server Statistic blueprint API ([6997160](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/69971602bbb1772264c75baaa4e2bead19ed6324))
+* **lua:** server Achievement blueprint API ([0ee1e7d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/0ee1e7d7b30904d04e420f26741841240ce3366f))
+* **ServerSessionBrowser:** add Blueprint class from ServerSessionBrowser API ([86e7447](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86e7447183b2a342bbbb18ec67a75b24c4ffcc8b))
+* **UGC:** add UGC API Blueprint from UGC API ([a3f6ad3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a3f6ad3bf0e234a1017d4272bf1935ccb072805c))
+
+
+### Bug Fixes
+
+* **ABServerSessionBrowser:** fix build error due to delegates name already used in other class ([72ffc39](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/72ffc39b5b20320795e46cd8855e3c88089047ac))
+* failed compile on PS5 ([6d29bc3](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6d29bc3cf842bdf977083ebe2c6bd52758111d9f))
+* missing headers that was not detected when unity build is enabled ([38d3bf4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/38d3bf4a89eab79b2693d918ffabda1b6ef00b2d))
+* **missing include:** add missing include on test classes to avoid compile error ([f0e1bb4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f0e1bb4beda6dc9a192ffa43e28eb5387d70c618))
+* remove unnecessary code that causes compile error ([5cbbc08](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5cbbc080e096866846bdeca95676fd92888d460a))
+
+
+### Refactors
+
+* **AccelByteBPApiClient.cpp:** add missing line break before the end of a function ([3f99a92](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3f99a92e0e119edb3746e589a07a07de38b43cef))
+* **CloudSaveTest.cpp:** remove duplicate "include" ([c7cb62a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c7cb62aca9dc90c9ec63d15d293d14a5d0743d7e))
+
+
+### Tests
+
+* **leaderboard:** add delay to make sure leaderboard is active when stat code item is updated ([322916f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/322916fd9fa2674414fc1d2f7e9ee6d55a655f53))
+* **seasonpass:** change season type setup to be durable according to BE validation changes. ([303acd6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/303acd69842c78b25a937f0bfe37203aebfe77b0))
+
 ## [8.3.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.3.0%0D8.2.0) (2022-01-17)
 
 
