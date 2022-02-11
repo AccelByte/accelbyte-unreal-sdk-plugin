@@ -2671,6 +2671,66 @@ bool FEcommerceTestQueryRewards::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSyncMobileGooglePlayFailed, "AccelByte.Tests.Ecommerce.J.SyncMobileGooglePlayFailed", AutomationFlagMaskEcommerce);
+bool FEcommerceTestSyncMobileGooglePlayFailed::RunTest(const FString& Parameters)
+{
+	bool bMobileIAPConfigAlreadyExist = false;
+	bool bMobileIAPCheckDone = false;
+	FGoogleIAPConfig GoogleConfig;
+	AdminGetGoogleIAPConfig(THandler<FGoogleIAPConfig>::CreateLambda([&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone, &GoogleConfig](const FGoogleIAPConfig& Result)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Apple IAP config already exits."));
+		bMobileIAPConfigAlreadyExist = true;
+		bMobileIAPCheckDone = true;
+		GoogleConfig = Result;
+		if (GoogleConfig.ApplicationName.IsEmpty()) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Google IAP not configured properly."));
+	}), FErrorHandler::CreateLambda(
+	[&bMobileIAPConfigAlreadyExist, &bMobileIAPCheckDone](int32 Code, FString Message)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log,TEXT("Google IAP config not exist. Create config from AP first!"));
+		bMobileIAPConfigAlreadyExist = false;
+		bMobileIAPCheckDone = true;
+	}));
+	WaitUntil(bMobileIAPCheckDone, "Waiting for IAP config check...");
+	AB_TEST_TRUE(bMobileIAPCheckDone);
+
+	//This negative test only run to check the endpoint and it's process
+	//because all fields in request body come from Apple Apps or Google Play (mobile)
+
+	bool bSyncDone = false;
+	FAccelByteModelsPlatformSyncMobileGoogle SyncReqGoogle;
+	SyncReqGoogle.OrderId = "test-OrderId";
+	SyncReqGoogle.PackageName = "test-packageName";
+	SyncReqGoogle.ProductId = "testProductId";
+	SyncReqGoogle.PurchaseTime = 0;
+	SyncReqGoogle.PurchaseToken = "test.PurchaseToken";
+	SyncReqGoogle.Region = "ID";
+	SyncReqGoogle.Language = "en";
+	
+	if (!GoogleConfig.ApplicationName.IsEmpty())
+	{
+		FRegistry::Entitlement.SyncMobilePlatformPurchaseGooglePlay(SyncReqGoogle, THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse>::CreateLambda([&bSyncDone](FAccelByteModelsPlatformSyncMobileGoogleResponse const& response)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bSyncDone = true;
+			if (response.NeedConsume) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("The item is consumable"));
+			if (!response.NeedConsume) UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("The item is durable"));
+		}), FErrorHandler::CreateLambda([&bSyncDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			bSyncDone = true;
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		}));
+		WaitUntil(bSyncDone, "Waiting for sync...");
+		AB_TEST_TRUE(bSyncDone);
+	}
+
+	return true;
+}
+
+#if 0
+/**
+* This test is disabled since there is function will be deprecated soon
+**/
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSyncMobilePlatformFailed, "AccelByte.Tests.Ecommerce.J.SyncMobilePlatformFailed", AutomationFlagMaskEcommerce);
 bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 {
@@ -2772,6 +2832,7 @@ bool FEcommerceTestSyncMobilePlatformFailed::RunTest(const FString& Parameters)
 	
 	return true;
 }
+#endif
 
 #if 0
 /**
