@@ -171,6 +171,15 @@ public:
 	void SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	/**
+	* @brief Sync (Verify and fulfil) item entitlement from Google Play item platform purchase.
+	*
+	* @param SyncRequest That contain of OrderId, PackageName, ProductId, PurchaseTime, and PurchaseToken to verify and sync item user bought from Google Play. 
+	* @param OnSuccess This will be called when the operation success. The result is boolean with true value.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse> const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
 	* @brief Sync (Verify and fulfil) item entitlement from Apple Store platform purchase.
 	*
 	* @param SyncRequest That contain of ProductId, TransactionId, ReceiptData, and ExcludeOldTransactions to verify and sync item user bought from Apple Store. 
