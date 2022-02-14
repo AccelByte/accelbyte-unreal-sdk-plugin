@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.5.0%0D8.4.0) (2022-02-14)
+
+
+### Features
+
+* **entitlement:** add new item sync with google play item function ([9bb71b7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9bb71b76c89b4f5824bbe792f60634a476526918))
+* **group:** BP Group Member (individuals) ([db0e6f0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/db0e6f0743ee17456ff5c26fc5f3cc631e839e3a))
+* **group:** BP group member (individuals), WIP ([87637cf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/87637cfd81ad0d8299561ec13ce9c6ead69cb0db))
+* **group:** BP Group Roles (permissions) ([e654ea2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e654ea2fb82303e12033abf6de959bd22dfe9e9b))
+* **group:** BP multi member actions ([3a04c53](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3a04c538a02db1cd710c3a0c95809a146ece48d1))
+* **group:** Implement group mgmt ([6cf1d7f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6cf1d7f6d771b15675c645d432bd4703f87dbab2))
+* **group:** Vanilla BP, WIP ([4021f03](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4021f031641e6491af57c5e110991d03eb2a9669))
+* **httpclient:** adding cancellation token mechanism ([072b0b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/072b0b640e6166f2fd12a2b64e70e448517bda64))
+* **lobby:** Add blocked & unblocked user ID on respective response ([f3d3357](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f3d33574080f74ae369512f4f7712c2ecfe04129))
+* **lobby:** add more fields to MatchmakingNotif ([348689f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/348689f00cc0e680ac299a638202bea2554c7011))
+* **lobby:** Add support for parsing array of json object field type in lobby ws parser. ([8508ce8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8508ce8a50c15cfa9b85d54c89aa1ddfb04a2fad))
+* **lobby:** Add User Id in Invite party and kick response models ([d75e2e8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d75e2e8311e5521cca8848def2d0f03e4e1dec63))
+* UE4 Group Mgmt (WIP); Unity parity ([7d0ac48](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/7d0ac48b054a089294f4d1af7f51ec0b5cbd8a09))
+
 ## [8.4.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.4.0%0D8.3.0) (2022-01-31)
 
 

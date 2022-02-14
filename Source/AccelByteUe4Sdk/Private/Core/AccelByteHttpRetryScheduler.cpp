@@ -119,6 +119,8 @@ EAccelByteTaskState FHttpRetryTask::Pause()
 
 void FHttpRetryTask::Tick(double CurrentTime)
 {
+	FAccelByteTask::Tick(CurrentTime);
+
 	if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
 	{
 		return;

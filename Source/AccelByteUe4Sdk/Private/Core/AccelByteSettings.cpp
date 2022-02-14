@@ -10,7 +10,6 @@ using namespace AccelByte;
 UAccelByteSettings::UAccelByteSettings()
 {
 }
-
 UAccelByteSettingsDev::UAccelByteSettingsDev()
 {
 }
@@ -53,6 +52,7 @@ static bool SetClientEnvironment(Settings * InSettings)
 	InSettings->BasicServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->BasicServerUrl, InSettings->BaseUrl, TEXT("basic"));
 	InSettings->CloudStorageServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->CloudStorageServerUrl, InSettings->BaseUrl, TEXT("social"));
 	InSettings->GameProfileServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->GameProfileServerUrl, InSettings->BaseUrl, TEXT("social"));
+	InSettings->GroupServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->GroupServerUrl, InSettings->BaseUrl, TEXT("group"));
 	InSettings->StatisticServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->StatisticServerUrl, InSettings->BaseUrl, TEXT("social"));
 	InSettings->QosManagerServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->QosManagerServerUrl, InSettings->BaseUrl, TEXT("qosm"));
 	InSettings->LeaderboardServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->LeaderboardServerUrl, InSettings->BaseUrl, TEXT("leaderboard"));
@@ -137,6 +137,11 @@ FString UAccelByteBlueprintsSettings::GetBasicServerUrl()
 FString UAccelByteBlueprintsSettings::GetGameProfileServerUrl()
 {
 	return FRegistry::Settings.GameProfileServerUrl;
+}
+
+FString UAccelByteBlueprintsSettings::GetGroupServerUrl()
+{
+	return FRegistry::Settings.GroupServerUrl;
 }
 
 FString UAccelByteBlueprintsSettings::GetStatisticServerUrl()
@@ -242,6 +247,11 @@ void UAccelByteBlueprintsSettings::SetBasicServerUrl(const FString& BasicServerU
 void UAccelByteBlueprintsSettings::SetGameProfileServerUrl(const FString& GameProfileServerUrl)
 {
 	FRegistry::Settings.GameProfileServerUrl = GameProfileServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetGroupServerUrl(const FString& GroupServerUrl)
+{
+	FRegistry::Settings.GroupServerUrl = GroupServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetStatisticServerUrl(const FString& StatisticServerUrl)

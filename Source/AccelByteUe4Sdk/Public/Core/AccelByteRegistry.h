@@ -18,6 +18,7 @@ class FHttpRetryScheduler;
 
 namespace Api
 {
+	class Group;
 	class User;
 	class UserProfile;
 	class Category;
@@ -76,6 +77,7 @@ public:
 	static Api::UserProfile UserProfile;
 	static Api::Category Category;
 	static Api::Entitlement Entitlement;
+	static Api::Group Group;
 	static Api::Order Order;
 	static Api::Item Item;
 	static Api::Wallet Wallet;

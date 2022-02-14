@@ -8,11 +8,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteEnvironment.h"
 
-#include "AccelByteSettings.generated.h"
+#include "AccelByteSettings.generated.h" 
 
 namespace AccelByte
 {
-
 class ACCELBYTEUE4SDK_API Settings
 {
 public:
@@ -28,6 +27,7 @@ public:
 	FString BasicServerUrl;
 	FString CloudStorageServerUrl;
 	FString GameProfileServerUrl;
+	FString GroupServerUrl;
 	FString StatisticServerUrl;
 	FString QosManagerServerUrl;
 	FString LeaderboardServerUrl;
@@ -97,6 +97,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString GameProfileServerUrl;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	FString GroupServerUrl;
 
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString StatisticServerUrl;
@@ -196,6 +199,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetGameProfileServerUrl();
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static FString GetGroupServerUrl();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static FString GetStatisticServerUrl();
@@ -259,6 +265,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetGameProfileServerUrl(const FString& GameProfileServerUrl);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetGroupServerUrl(const FString& GroupServerUrl);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetStatisticServerUrl(const FString& StatisticServerUrl);

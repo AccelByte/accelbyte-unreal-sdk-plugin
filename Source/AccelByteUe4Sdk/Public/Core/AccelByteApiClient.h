@@ -17,6 +17,7 @@
 #include "Api/AccelByteFulfillmentApi.h"
 #include "Api/AccelByteGameProfileApi.h"
 #include "Api/AccelByteGameTelemetryApi.h"
+#include "Api/AccelByteGroupApi.h"
 #include "Api/AccelByteItemApi.h"
 #include "Api/AccelByteLeaderboardApi.h"
 #include "Api/AccelByteLobbyApi.h"
@@ -48,9 +49,10 @@ public:
 	~FApiClient();
 
 	bool bUseSharedCredentials;
-	
 	FCredentialsRef CredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
+	
+	Api::Group Group{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::User User{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::UserProfile UserProfile{*CredentialsRef, FRegistry::Settings, *HttpRef};
 	Api::Category Category{*CredentialsRef, FRegistry::Settings, *HttpRef};

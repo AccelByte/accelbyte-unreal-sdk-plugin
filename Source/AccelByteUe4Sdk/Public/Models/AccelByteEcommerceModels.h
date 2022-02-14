@@ -723,6 +723,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogleResponse
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
+	bool NeedConsume;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsXBoxDLCSync
 {
 	GENERATED_BODY()
