@@ -2697,6 +2697,23 @@ bool FEcommerceTestSyncMobileGooglePlayFailed::RunTest(const FString& Parameters
 	//This negative test only run to check the endpoint and it's process
 	//because all fields in request body come from Apple Apps or Google Play (mobile)
 
+	bool bGetItemSuccess = false;
+	bool bGetItemDone = false;
+	FAccelByteModelsItemInfo itemInfo;
+	FRegistry::Item.GetItemBySku("sku-number", "en", "us", THandler<FAccelByteModelsItemInfo>::CreateLambda([&bGetItemSuccess, &bGetItemDone, &itemInfo]
+		(const FAccelByteModelsItemInfo& Response)
+	{
+		itemInfo = Response;
+		bGetItemSuccess = true;
+		bGetItemDone = true;
+	}),FErrorHandler::CreateLambda([&bGetItemDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		bGetItemDone = true;
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+	}));
+	WaitUntil(bGetItemDone, "Waiting for sync...");
+	AB_TEST_TRUE(bGetItemDone);
+
 	bool bSyncDone = false;
 	FAccelByteModelsPlatformSyncMobileGoogle SyncReqGoogle;
 	SyncReqGoogle.OrderId = "test-OrderId";
@@ -2704,6 +2721,14 @@ bool FEcommerceTestSyncMobileGooglePlayFailed::RunTest(const FString& Parameters
 	SyncReqGoogle.ProductId = "testProductId";
 	SyncReqGoogle.PurchaseTime = 0;
 	SyncReqGoogle.PurchaseToken = "test.PurchaseToken";
+	if (bGetItemSuccess == true && itemInfo.EntitlementType == EAccelByteEntitlementType::DURABLE)
+	{
+		SyncReqGoogle.autoAck = true;
+	}
+	else
+	{
+		SyncReqGoogle.autoAck = false;
+	}
 	SyncReqGoogle.Region = "ID";
 	SyncReqGoogle.Language = "en";
 	
