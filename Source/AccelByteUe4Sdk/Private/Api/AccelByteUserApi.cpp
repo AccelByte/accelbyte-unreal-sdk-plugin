@@ -28,10 +28,11 @@ namespace Api
 
 User::User(Credentials& CredentialsRef, Settings& SettingsRef, FHttpRetryScheduler& HttpRef)
 	:
+	FApiBase(CredentialsRef, SettingsRef, HttpRef),
 	HttpRef{HttpRef},
 	CredentialsRef{CredentialsRef},
 	SettingsRef{SettingsRef}
-{	
+{
 }
 
 User::~User()
@@ -422,7 +423,7 @@ void User::SendUpgradeVerificationCode(const FString& Username, const FVoidHandl
 
 	FVerificationCodeRequest SendUpgradeVerificationCodeRequest
 	{
-		EVerificationContext::UpgradeHeadlessAccount,
+		EVerificationContext::upgradeHeadlessAccount,
 		TEXT(""),
 		Username
 	};
@@ -459,6 +460,15 @@ void User::UpgradeAndVerify(const FString& Username, const FString& Password, co
 				}),
 			OnError),
 		FPlatformTime::Seconds());
+}
+
+void User::UpgradeAndVerify2(const FUpgradeAndVerifyRequest& UpgradeAndVerifyRequest,  const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	const FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/headless/code/verify"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+	
+	HttpClient.ApiRequest("POST", Url, {}, UpgradeAndVerifyRequest, OnSuccess, OnError);
 }
 
 void User::Upgrade(const FString& Username, const FString& Password, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError)

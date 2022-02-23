@@ -9,6 +9,7 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteSettings.h"
 #include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteApiBase.h"
 
 
 namespace AccelByte
@@ -20,7 +21,7 @@ namespace AccelByte
 		/**
 		 * @brief User management API for creating user, verifying user, and resetting password.
 		 */
-		class ACCELBYTEUE4SDK_API User
+		class ACCELBYTEUE4SDK_API User : public FApiBase
 		{
 		public:
 			User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& HttpRef);
@@ -239,6 +240,15 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void UpgradeAndVerify(const FString& Username, const FString& Password, const FString& VerificationCode, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
+			
+			/**
+			* @brief This function should be called after you call SendUpgradeVerificationCode and obtain verification code.
+			*
+			* @param UpgradeAndVerifyRequest contain user data will be used to upgrade the headless account.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void UpgradeAndVerify2(const FUpgradeAndVerifyRequest& UpgradeAndVerifyRequest, const THandler<FAccountUserData>& OnSuccess, const FErrorHandler& OnError);
 
 			/**
 			 * @brief This function gets user's platform accounts linked to user’s account.

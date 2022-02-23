@@ -1320,6 +1320,151 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeAndVerifyHeadlessSteamAccountSuccess, "AccelByte.Tests.AUser.UpgradeAndVerifyHeadlessSteamAccount", AutomationFlagMaskUser);
+bool FUpgradeAndVerifyHeadlessSteamAccountSuccess::RunTest(const FString& Parameter)
+{
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+
+	FRegistry::User.ForgetAllCredentials();
+	const FString Email = TEXT("test+steam@game.test");
+	const FString Username = TEXT("testSDKsteam");
+	const FString Password = TEXT("123SDKTest123");
+	const FString DisplayName = TEXT("sdkTestDisplayName123");
+
+	//Setup: with deleting any user associated with this steam account
+	bool bLoginPlatformSuccessful = false;
+	bool bSteamLoginDone = false;
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+
+	bool bDeleteDone1 = false;
+	bool bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful1 = true;
+		bDeleteDone1 = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginPlatformSuccessful = false;
+	bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+
+	if (!bLoginPlatformSuccessful)
+	{
+		return false;
+	}
+
+	const FString FirstUserId = FRegistry::Credentials.GetUserId();
+	const FString OldAccessToken = FRegistry::Credentials.GetAccessToken();
+
+	//send upgrade verification code request
+	bool bSuccessSendVerifCode = false;
+	FRegistry::User.SendUpgradeVerificationCode(Email, FVoidHandler::CreateLambda([&bSuccessSendVerifCode]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Success Send Request Verification Code"));
+			bSuccessSendVerifCode = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bSuccessSendVerifCode, "Waiting send verification code");
+	
+	//get verification code by admin
+	const FString VerificationCode = GetVerificationCode(FirstUserId, EVerificationCode::accountUpgrade);
+	
+	//upgrade and verify
+	FUpgradeAndVerifyRequest UpgradeAndVerifyRequest;
+	UpgradeAndVerifyRequest.Code = VerificationCode;
+	UpgradeAndVerifyRequest.Username = Username;
+	UpgradeAndVerifyRequest.EmailAddress = Email;
+	UpgradeAndVerifyRequest.Password = Password;
+	UpgradeAndVerifyRequest.DateOfBirth = "1991-01-01";
+	UpgradeAndVerifyRequest.DisplayName = DisplayName;
+	UpgradeAndVerifyRequest.Country = "US";
+	
+	bool bUpgradeAndVerifySuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
+	FAccountUserData UserDataAfterUpgradeAndVerify;
+	FRegistry::User.UpgradeAndVerify2(UpgradeAndVerifyRequest, THandler<FAccountUserData>::CreateLambda([&bUpgradeAndVerifySuccessful, &UserDataAfterUpgradeAndVerify](const FAccountUserData& Result)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bUpgradeAndVerifySuccessful = true;
+		UserDataAfterUpgradeAndVerify = Result;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bUpgradeAndVerifySuccessful, "Waiting for Upgrade...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bLoginUsernameSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(UserDataAfterUpgradeAndVerify.Username, Password, FVoidHandler::CreateLambda([&bLoginUsernameSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginUsernameSuccessful = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bLoginUsernameSuccessful, "Waiting for Login...");
+
+	const FString RefreshedAccessToken = FRegistry::Credentials.GetAccessToken();
+
+#pragma region DeleteUser1
+
+	bDeleteDone1 = false;
+	bDeleteSuccessful1 = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser1"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone1, &bDeleteSuccessful1]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful1 = true;
+			bDeleteDone1 = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone1, "Waiting for Deletion...");
+
+#pragma endregion DeleteUser1
+
+	AB_TEST_EQUAL(FirstUserId, FRegistry::Credentials.GetUserId());
+	AB_TEST_TRUE(bSuccessSendVerifCode);
+	AB_TEST_FALSE(VerificationCode.IsEmpty());
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_TRUE(bUpgradeAndVerifySuccessful);
+	AB_TEST_TRUE(bLoginUsernameSuccessful);
+	AB_TEST_FALSE(OldAccessToken.IsEmpty());
+	AB_TEST_FALSE(RefreshedAccessToken.IsEmpty());
+	AB_TEST_TRUE(bDeleteSuccessful1);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeSteamAccountv2Success, "AccelByte.Tests.AUser.UpgradeHeadlessSteamAccountv2", AutomationFlagMaskUser);
 bool FUpgradeSteamAccountv2Success::RunTest(const FString& Parameter)
 {
