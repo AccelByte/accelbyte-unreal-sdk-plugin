@@ -6,7 +6,6 @@
 
 #include "AccelByteJwtWrapper.h"
 #include "JsonObjectConverter.h"
-#include "jwt.h"
 #include "Core/AccelByteUtilities.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FLogCategoryLogAccelByteJwtWrapper, Log, All);
