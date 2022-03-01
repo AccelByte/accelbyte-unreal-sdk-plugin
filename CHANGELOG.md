@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [8.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.6.0%0D8.5.0) (2022-03-01)
+
+
+### Features
+
+* **item:** get item by sku ([e14297b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e14297b6639c0f01272896cd4212a2ba81c88480))
+* **sessionbrowser:** adding get session by session id on server API. ([9b21f6d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9b21f6d4ddf7d41c53af6eb33d7e5b9f6eea3d15))
+* sync twitch drop entitlement api function and model ([f83acb5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f83acb5795cd71878b7df56986dc782558af0704))
+* **user:** Login using password grant V3 ([4b3361d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4b3361d0e5d864583c64b165188cce5965ca5678))
+
+
+### Bug Fixes
+
+* **lobby:** fix order of Lobby::RequestDS parameter to be the same as in header ([ec35503](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ec35503564a6fb3af86c20d0cd24f78a5742cd6b))
+* **oauth:** deprecate RevokeToken function and create new RevokeUserToken ([100005e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/100005e1314844de4383443d01321b145d04f85b))
+
 ## [8.5.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.5.0%0D8.4.0) (2022-02-14)
 
 

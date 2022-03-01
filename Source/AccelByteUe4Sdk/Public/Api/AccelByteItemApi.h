@@ -73,6 +73,17 @@ public:
 	 */
 	void SearchItem(FString const& Language, FString const& Keyword, int32 const& Offset, int32 const& Limit, FString const& Region, THandler<FAccelByteModelsItemPagingSlicedResult> const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	* @brief Get Item information by SKU number from an online store.
+	*
+	* @param Sku should contain specific number of item Sku.
+	* @param Language ISO 639-1 language tag, e.g., "en, "zh".
+	* @param Region ISO 3166-1 alpha-2 country tag, e.g., "US", "CN".
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsItemInfo&.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetItemBySku(FString const& Sku, FString const& Language,FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError);
+	
 private:
 	Item() = delete;
 	Item(Item const&) = delete;

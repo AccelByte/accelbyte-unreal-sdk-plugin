@@ -348,15 +348,19 @@ bool SessionBrowserCreateCustomGame::RunTest(const FString& Parameters)
 
 	// Waiting for DS Notif
 	bool bDSReady = false;
+	FAccelByteModelsDsNotice DsNotif;
 	TestSessionBrowserApiClients[0]->Lobby.SetDsNotifDelegate(
-		THandler<const FAccelByteModelsDsNotice>::CreateLambda([&bDSReady](FAccelByteModelsDsNotice const& DsNotif)
+		THandler<const FAccelByteModelsDsNotice>::CreateLambda([&bDSReady, &DsNotif](FAccelByteModelsDsNotice const& result)
 		{
-			UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("[DS Notif] Match Id: %s - Status: %s"), *DsNotif.MatchId, *DsNotif.Status);
+			UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("[DS Notif] Match Id: %s - Status: %s"), *result.MatchId, *result.Status);
 			bDSReady = true;
+			DsNotif = result;
 		}));
 
 	TestSessionBrowserApiClients[0]->Lobby.RequestDS(GameSession.Session_id, GameMode, GameSession.Server.Game_version, GameSession.Server.Region, GameSession.Server.Deployment);
 	WaitUntil(bDSReady, TEXT("Waiting for DS notif..."), 120);
+
+	AB_TEST_EQUAL(DsNotif.MatchId, GameSession.Session_id);
 	
 	return true;
 }
