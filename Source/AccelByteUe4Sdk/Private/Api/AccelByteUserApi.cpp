@@ -57,7 +57,7 @@ void User::LoginWithOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError) const
+	const FCustomErrorHandler& OnError) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -74,9 +74,9 @@ void User::LoginWithOtherPlatform(
 			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
 			OnSuccess.ExecuteIfBound();
 					
-		}), FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		}), FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 		}));
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
@@ -86,7 +86,7 @@ void User::LoginWithUsername(
 	const FString& Username,
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError) const
+	const FCustomErrorHandler& OnError) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -103,9 +103,9 @@ void User::LoginWithUsername(
 		{
 			OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
 		}),
-		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 		{
-			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 		}));
 	
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
@@ -115,7 +115,7 @@ void User::LoginWithUsernameV3(
 	const FString& Username,
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
-	const FErrorHandler& OnError,
+	const FCustomErrorHandler& OnError,
 	const bool RememberMe) const
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -128,9 +128,9 @@ void User::LoginWithUsernameV3(
 	{
 		OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
 	}),
-	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+	FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
 	}), RememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
@@ -153,6 +153,24 @@ void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler&
 		{
 			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 		}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
+void User::VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
+	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice) const
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	Oauth2::VerifyAndRememberNewDevice(SettingsRef.ClientId, SettingsRef.ClientSecret, MfaToken, AuthFactorType, Code,
+	THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
+	{
+		OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+	}),
+	FCustomErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage, ErrorJson);
+	}), RememberDevice);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
@@ -937,7 +955,173 @@ void User::GetInputValidations(const FString& LanguageCode, THandler<FInputValid
 
 	// Api Request 
 	HttpClient.ApiRequest("GET", Url, Params, Content, OnSuccess, OnError); 
-}	
+}
+	
+void User::Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/enable"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("POST");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::Disable2FaBackupCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode/disable"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("DELETE");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GenerateBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("POST");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/backupCode"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::Enable2FaAuthenticator(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/enable"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("POST");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::Disable2FaAuthenticator(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/disable"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("DELETE");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GenerateSecretKeyFor2FaAuthenticator(const THandler<FUser2FaSecretKey>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/authenticator/key"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("POST");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::GetEnabled2FaFactors(const THandler<FUser2FaMethod>& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("GET");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void User::MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType ,const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Factor = FAccelByteUtilities::GetAuthenticatorString(AuthFactorType);
+
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v4/public/namespaces/%s/users/me/mfa/factor"), *SettingsRef.IamServerUrl, *SettingsRef.Namespace);
+	FString Verb            = TEXT("POST");
+	FString Accept          = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetVerb(Verb);
+	Request->SetContentAsString(FString::Printf(TEXT("factor=%s"), *Factor));
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 
 } // Namespace Api
 } // Namespace AccelByte

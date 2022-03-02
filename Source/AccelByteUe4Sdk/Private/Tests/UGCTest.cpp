@@ -384,7 +384,11 @@ bool UGCSetup::RunTest(const FString& Parameters)
 	{
 		UE_LOG(LogAccelByteUGCTest, Log, TEXT("Login user2 Success"));
 		bLoginSuccess = true;
-	}), UGCOnError);
+	}), 
+	FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			UE_LOG(LogAccelByteUGCTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+		}));
 	FlushHttpRequests();
 	WaitUntil(bLoginSuccess, "Waiting for login user2...");
 

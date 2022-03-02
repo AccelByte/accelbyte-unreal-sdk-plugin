@@ -73,7 +73,10 @@ void FServerStatisticTestSpec::Define()
 		{
 			bUserLoggedIn = true;
 			UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("\t\tSuccessfully Login."));
-		}), ServerStatisticTestErrorHandler);
+		}), FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+		{
+			UE_LOG(LogAccelByteServerStatisticTest, Error, TEXT("Login Failed..! Error: %d | Message: %s"), Code, *Message);
+		}));
 		WaitUntil(bUserLoggedIn, "Waiting for Login...");
 		UE_LOG(LogAccelByteServerStatisticTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 

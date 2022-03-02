@@ -882,7 +882,10 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 				UsersLoginSuccess[i] = true;
 				UserIds[i] = UserCreds[i].GetUserId();
 			}), 
-			LobbyTestErrorHandler);
+			FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+			}));
 		
 		WaitUntil(UsersLoginSuccess[i],"Waiting for Login...");
 
@@ -7214,7 +7217,10 @@ bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
-		}), LobbyTestErrorHandler);
+		}), FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+			}));
 
 	FlushHttpRequests();
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
@@ -7425,7 +7431,10 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
-		}), LobbyTestErrorHandler);
+		}), FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+			}));
 
 	FlushHttpRequests();
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
@@ -7525,7 +7534,7 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
 			bLoginDone = true;
-		}), FErrorHandler::CreateLambda([&bLoginError, &bLoginDone](int Code, const FString& Message)
+		}), FCustomErrorHandler::CreateLambda([&bLoginError, &bLoginDone](int Code, const FString& Message, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
 				bLoginError = true;
@@ -7558,7 +7567,7 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
 			bLoginSuccessful = true;
 			bLoginDone = true;
-		}), FErrorHandler::CreateLambda([&bLoginDone](int Code, const FString& Message)
+		}), FCustomErrorHandler::CreateLambda([&bLoginDone](int Code, const FString& Message, const FJsonObject& ErrorJson)
 			{
 				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
 				bLoginDone = true;

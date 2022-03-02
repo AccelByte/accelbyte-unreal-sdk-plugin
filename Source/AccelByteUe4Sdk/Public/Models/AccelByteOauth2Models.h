@@ -6,6 +6,7 @@
 
 #include "Misc/DateTime.h"
 #include "CoreMinimal.h"
+#include "AccelByteGeneralModels.h"
 #include "JsonObjectWrapper.h"
 #include "AccelByteOauth2Models.generated.h"
 
@@ -85,5 +86,3 @@ struct ACCELBYTEUE4SDK_API FJwkSet
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | JWKSet")
 	TArray<FJsonObjectWrapper> keys;
 };
-
-

@@ -191,7 +191,10 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 	{
 		bUser2LoginSuccess = true;
 	}),
-		CloudSaveErrorHandler);
+	FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	{
+		UE_LOG(LogAccelByteCloudSaveTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+	}));
 
 	WaitUntil(bUser2LoginSuccess, "Waiting for Login...");
 

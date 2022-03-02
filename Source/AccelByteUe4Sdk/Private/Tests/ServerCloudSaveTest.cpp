@@ -143,7 +143,10 @@ bool ServerCloudSaveSetup::RunTest(const FString& Parameters)
 	{
 		bUserLoginSuccess = true;
 	}),
-		ServerCloudSaveErrorHandler);
+	FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+	{
+		UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+	}));
 
 	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
 

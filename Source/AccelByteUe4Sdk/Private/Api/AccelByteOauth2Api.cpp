@@ -7,19 +7,59 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
+#include "Core/AccelByteUtilities.h"
 #include "Runtime/Core/Public/Misc/Base64.h"
+
+FString LocalDeviceId()
+{
+	FString NewDeviceId;
+
+	//check then read file
+	FString CurrentDirectory = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+	CurrentDirectory.Append(TEXT("DeviceIdHelper/DeviceId.txt"));
+	CurrentDirectory.ReplaceInline(TEXT("/"), TEXT("\\"));
+	FFileHelper::LoadFileToString(NewDeviceId, *CurrentDirectory);
+
+	//generate one if still empty
+	if(NewDeviceId.IsEmpty())
+	{
+		FString FilePath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*FPaths::ProjectDir());
+		FilePath.Append("DeviceIdHelper/DeviceId.txt");
+
+		TCHAR valid[] = {'0', '1', '2', '3', '4', '5', '6','7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+						'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+		
+		for(int i = 0; i < 30; i++)
+		{
+			NewDeviceId = NewDeviceId + valid[FMath::RandRange(0, 35)];
+		}
+		
+		FFileHelper::SaveStringToFile(NewDeviceId, *FilePath);
+	}
+	return NewDeviceId;
+}
 
 FString GetDeviceId()
 {
-	PRAGMA_DISABLE_DEPRECATION_WARNINGS
-    const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
-	PRAGMA_ENABLE_DEPRECATION_WARNINGS
-    FString MacAddressString;
-	for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
+	FString DeviceId = FPlatformMisc::GetDeviceId();
+	if (DeviceId.IsEmpty())
 	{
-		MacAddressString += FString::Printf(TEXT("%02x"),*it);
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		const TArray<uint8> MacAddr = FPlatformMisc::GetMacAddress();
+		PRAGMA_ENABLE_DEPRECATION_WARNINGS
+		FString MacAddressString;
+		for (TArray<uint8>::TConstIterator it(MacAddr);it;++it)
+		{
+			MacAddressString += FString::Printf(TEXT("%02x"),*it);
+		}
+		DeviceId = FMD5::HashAnsiString(*MacAddressString);
+
+		if(DeviceId.IsEmpty())
+		{
+			DeviceId = *LocalDeviceId();			
+		}
 	}
-	return  FMD5::HashAnsiString(*MacAddressString);
+	return  DeviceId;
 }
 
 namespace AccelByte
@@ -41,7 +81,7 @@ void Oauth2::GetTokenWithAuthorizationCode(const FString& ClientId, const FStrin
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -51,6 +91,8 @@ void Oauth2::GetTokenWithPasswordCredentials(const FString& ClientId, const FStr
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	
 	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&device_id=%s");
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
 	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
@@ -95,7 +137,7 @@ void Oauth2::GetTokenWithDeviceId(const FString& ClientId, const FString& Client
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError)
+void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -105,6 +147,7 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 	Request->SetContentAsString(FString::Printf(TEXT("platform_token=%s"), *FGenericPlatformHttp::UrlEncode(PlatformToken)));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
@@ -164,7 +207,7 @@ void Oauth2::RevokeUserToken(const FString& ClientId, const FString& ClientSecre
 	}), OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool RememberMe)
+void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -174,6 +217,7 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
 
 	const TCHAR Format[] = TEXT("grant_type=password&username=%s&password=%s&namespace=%s&extend_exp=%s");
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
@@ -182,6 +226,26 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	const FString Extend_exp = RememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
 	
 	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *Namespace, *Extend_exp));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId, const FString& ClientSecret, const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, 
+	const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	const FString Factor = FAccelByteUtilities::GetAuthenticatorString(AuthFactorType);
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("POST"));
+	Request->SetURL(FString::Printf(TEXT("%s/v3/oauth/mfa/verify"), *FRegistry::Settings.IamServerUrl));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
+	const FString RememberThisDevice = RememberDevice ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
+	Request->SetContentAsString(FString::Printf(TEXT("mfaToken=%s&factor=%s&code=%s&rememberDevice=%s"), *MfaToken, *Factor, *Code, *RememberThisDevice));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

@@ -11,6 +11,16 @@
 
 UENUM(BlueprintType)
 /**
+*  @brief Supported 2FA Authenticator Type by AccelByte IAM.
+*/
+enum class EAccelByteLoginAuthFactorType : uint8
+{
+	Authenticator,
+	BackupCode
+};
+
+UENUM(BlueprintType)
+/**
  *  @brief Supported platforms by AccelByte IAM.
  */
 enum class EAccelBytePlatformType : uint8
@@ -477,6 +487,18 @@ struct ACCELBYTEUE4SDK_API FAccountLinkConflictMessageVariables
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccountLinkConflictErrorJson
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
+	FString ErrorCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
+	FString ErrorMessage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
+	FAccountLinkConflictMessageVariables MessageVariables;
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FLinkPlatformAccountRequest
 {
 	GENERATED_BODY()
@@ -663,9 +685,9 @@ struct FDataInputValidation
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FString Field;
+	FString Field;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FValidation Validation;
+	FValidation Validation;
 };
 
 USTRUCT(BlueprintType)
@@ -673,7 +695,39 @@ struct FInputValidation
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		TArray<FDataInputValidation> Data;
+	TArray<FDataInputValidation> Data;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 Version;
+	int32 Version;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUser2FaBackupCode
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
+	int64 GeneratedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
+	TArray<FString> InvalidCodes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
+	TArray<FString> ValidCodes;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUser2FaMethod
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaMethod")
+	FString Default;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaMethod")
+	TArray<FString> Enabled;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FUser2FaSecretKey
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaSecretKey")
+	FString SecretKey;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaSecretKey")
+	FString Uri;
 };

@@ -303,6 +303,19 @@ FString FAccelByteUtilities::GetPlatformString(EAccelBytePlatformType Platform)
 	}
 }
 
+FString FAccelByteUtilities::GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator)
+{
+	switch (Authenticator)
+	{
+	case EAccelByteLoginAuthFactorType::Authenticator:
+		return "authenticator";
+	case EAccelByteLoginAuthFactorType::BackupCode:
+		return "backupCode";
+	default:
+		return "unknown";
+	}
+}
+
 void FAccelByteNetUtilities::GetPublicIP(const THandler<FAccelByteModelsPubIp>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

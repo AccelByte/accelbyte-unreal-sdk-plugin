@@ -285,7 +285,10 @@ void FReportingTestSpec::Define()
 					{
 						bUser2LoginSuccess = true;
 					}),
-				ReportingOnError);
+					FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+					{
+						UE_LOG(LogAccelByteReportingTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
+					}));
 
 			WaitUntil(bUser2LoginSuccess, "Waiting for User2 Login...");
 

@@ -99,7 +99,10 @@ bool SessionBrowserSetup::RunTest(const FString& Parameters)
 			{
 				UsersLoginSuccess[index] = true;
 				UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("\t\tSuccessfully Login."));
-			}), SessionBrowserTestErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSessionBrowserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
+			}));
 		WaitUntil(UsersLoginSuccess[index], TEXT("Waiting for User login"));
 		UE_LOG(LogAccelByteSessionBrowserTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 	}
