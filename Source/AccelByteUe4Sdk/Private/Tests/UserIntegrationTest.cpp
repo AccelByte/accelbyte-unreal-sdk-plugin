@@ -1273,10 +1273,10 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 	bool bUpgradeSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UpgradeHeadlessAccount"));
 	FRegistry::User.Upgrade(Email, Password, THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
-		{
-			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
-			bUpgradeSuccessful = true;
-		}), UserTestErrorHandler);
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bUpgradeSuccessful = true;
+	}), UserTestErrorHandler);
 
 	WaitUntil(bUpgradeSuccessful, "Waiting for Upgrade...");
 
@@ -1317,6 +1317,180 @@ bool FUpgradeSteamAccountSuccess::RunTest(const FString& Parameter)
 	AB_TEST_FALSE(OldAccessToken.IsEmpty());
 	AB_TEST_FALSE(RefreshedAccessToken.IsEmpty());
 	AB_TEST_TRUE(bDeleteSuccessful1);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUpgradeHeadlessSteamAccountFail, "AccelByte.Tests.AUser.UpgradeHeadlessSteamAccountFail", AutomationFlagMaskUser);
+bool FUpgradeHeadlessSteamAccountFail::RunTest(const FString& Parameter)
+{
+	//login with steam
+	if (!CheckSteamTicket())
+	{
+		return false;
+	}
+	
+	FRegistry::User.ForgetAllCredentials();
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString Username = "teststeamfail543";
+	FString EmailAddress = "test+u4esdk@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 25));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+	
+	//check test user is available or not
+	bool bGetUSerDone = false;
+	bool bGetUserSuccess = false;
+	FUserResponse UserData;
+	FString FirstUserId;
+	AdminGetUserByEmailAddress(EmailAddress, THandler<FUserResponse>::CreateLambda([&bGetUserSuccess, &bGetUSerDone, &UserData, &FirstUserId](const FUserResponse& Response)
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		UserData = Response;
+		FirstUserId = Response.UserId;
+		bGetUserSuccess = true;
+		bGetUSerDone = true;
+	}), FErrorHandler::CreateLambda([&bGetUSerDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bGetUSerDone = true;
+	}));
+	WaitUntil(bGetUSerDone, "Waiting for get user data");
+
+	if (!bGetUserSuccess)
+	{
+		//create user to make steam user fail upgrade their account
+		FRegisterRequestv3 registerUSerRequest;
+		registerUSerRequest.AuthType = "EMAILPASSWD";
+		registerUSerRequest.Country = Country;
+		registerUSerRequest.DateOfBirth = format;
+		registerUSerRequest.DisplayName = DisplayName;
+		registerUSerRequest.EmailAddress = EmailAddress;
+		registerUSerRequest.Password = Password;
+		registerUSerRequest.Username = Username;
+
+		bool bRegisterSuccess = false;
+		FRegisterResponse registerResponse;
+		FRegistry::User.Registerv3(registerUSerRequest, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccess, &registerResponse, &FirstUserId](const FRegisterResponse& Response)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bRegisterSuccess = true;
+			registerResponse = Response;
+			FirstUserId = Response.UserId;
+		}), UserTestErrorHandler);
+		WaitUntil(bRegisterSuccess, "waiting for create user");
+	}
+
+	FRegistry::User.ForgetAllCredentials();
+
+	//Setup: with deleting any user associated with this steam account
+	bool bLoginPlatformSuccessful = false;
+	bool bSteamLoginDone = false;
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bDeleteSuccessful = true;
+		bDeleteDone = true;
+	}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+	FRegistry::User.ForgetAllCredentials();
+
+	bLoginPlatformSuccessful = false;
+	bSteamLoginDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithSteamAccount"));
+	FRegistry::User.LoginWithOtherPlatform(EAccelBytePlatformType::Steam, GetSteamTicket(), FVoidHandler::CreateLambda([&bLoginPlatformSuccessful, &bSteamLoginDone]()
+	{
+		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+		bLoginPlatformSuccessful = true;
+		bSteamLoginDone = true;
+	}), FErrorHandler::CreateLambda([&bSteamLoginDone](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+		bSteamLoginDone = true;
+	}));
+
+	WaitUntil(bSteamLoginDone, "Waiting for Login...");
+	const FString SecondUserId = FRegistry::Credentials.GetUserId();
+	
+	bool bUpgradeSuccessful = false;
+	bool bUpgradeDone = false;
+
+	for (int i = 0; i < 2; i++)
+	{		
+		FString Email = EmailAddress;
+		FString Uname = "teststeamfail543dif";
+		if (i > 0)
+		{
+			Email = "test+u4esdkdiff@game.test";
+			Uname = Username;
+		}
+		FRegistry::User.Upgradev2(Email, Uname, Password, THandler<FAccountUserData>::CreateLambda([&](const FAccountUserData& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bUpgradeSuccessful = true;
+			bUpgradeDone = true;
+		}), FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("Code=%d"), ErrorCode);
+			switch (static_cast<ErrorCodes>(ErrorCode))
+			{
+				case ErrorCodes::UserEmailAlreadyUsedException :
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("Email already used"));
+					break;
+				case ErrorCodes::UserNameAlreadyUsedException :
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("Username already used"));
+					break;
+				default:
+					UE_LOG(LogAccelByteUserTest, Log, TEXT("User can't upgrade account"));
+			}
+			bUpgradeDone = true;
+		}));
+
+		WaitUntil(bUpgradeDone, "Waiting for Upgrade...");
+	}
+
+#pragma region DeleteUsers
+
+	bDeleteDone = false;
+	bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUser"));
+	for (int i = 0; i < 2; i++)
+	{
+		FString UserId = FirstUserId;
+		if (i > 0) UserId = SecondUserId;
+		AdminDeleteUser(UserId, FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+		WaitUntil(bDeleteDone, "Waiting for Deletion...");
+	}
+
+#pragma endregion DeleteUsers
+
+	AB_TEST_TRUE(bLoginPlatformSuccessful);
+	AB_TEST_FALSE(bUpgradeSuccessful);
+	AB_TEST_TRUE(bDeleteSuccessful);
 	return true;
 }
 
