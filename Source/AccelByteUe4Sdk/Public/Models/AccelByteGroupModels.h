@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Models/AccelByteGeneralModels.h"
 #include "AccelByteGroupModels.generated.h"
 
 #pragma region Shared Models

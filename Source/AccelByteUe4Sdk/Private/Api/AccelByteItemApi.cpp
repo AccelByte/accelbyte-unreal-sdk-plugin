@@ -299,5 +299,40 @@ void Item::SearchItem(FString const& Language, FString const& Keyword, int32 con
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Item::GetItemBySku(FString const& Sku, FString const& Language, FString const& Region, THandler<FAccelByteModelsItemInfo> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	if(Sku.IsEmpty())
+	{
+		OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::StatusBadRequest), TEXT("Bad request, Sku number can not empty"));
+	}
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/items/bySku?sku=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace, *Sku);
+	if (!Language.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&language=%s"), *Language));
+	}
+	if (!Region.IsEmpty())
+	{
+		Url.Append(FString::Printf(TEXT("&region=%s"), *Region));
+	}
+
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+	FString Content;
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+	
 } // Namespace Api
 } // Namespace AccelByte

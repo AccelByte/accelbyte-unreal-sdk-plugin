@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -83,6 +83,27 @@ void User::LoginWithUsername(const FString& Username, const FString& Password, c
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
+
+void User::LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool RememberMe)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	CredentialsRef.SetUserEmailAddress(Username);
+	if (CredentialsRef.GetSessionState() == Credentials::ESessionState::Valid)
+	{
+		CredentialsRef.ForgetAll();
+	}
+	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.ClientId, SettingsRef.ClientSecret, Username, Password, THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
+	{
+		CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
+		OnSuccess.ExecuteIfBound();
+	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}), RememberMe);
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}	
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {

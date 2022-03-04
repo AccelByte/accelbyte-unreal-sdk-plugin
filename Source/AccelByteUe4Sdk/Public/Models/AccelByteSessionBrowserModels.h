@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
+#include "Models/AccelByteMatchmakingModels.h"
 #include "JsonObjectWrapper.h"
 #include "AccelByteSessionBrowserModels.generated.h"
 
@@ -105,6 +106,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSessionBrowserData
 	FAccelByteModelsSessionBrowserGameSetting Game_session_setting;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
 	FAccelByteModelsSessionBrowserServer Server;
+	/** @brief all players including player that leave the session. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	TArray<FString> All_players;
+	/** @brief Current active players */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	TArray<FString> Players;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	TArray<FString> Spectators;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | SessionBrowser | Models | SessionBrowserData")
+	FAccelByteModelsMatchmakingResult Match;
 };
 
 USTRUCT(BlueprintType)

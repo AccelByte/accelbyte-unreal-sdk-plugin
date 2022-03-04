@@ -82,6 +82,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
 	void SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FDHandler OnSuccess, FDErrorHandler OnError) const;
+ 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Entitlement")
+	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FDHandler OnSuccess, FDErrorHandler OnError) const;
 
 private:
 	FApiClientPtr ApiClientPtr;
