@@ -7,7 +7,6 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/AccelByteHttpClient.h"
 #include "JsonUtilities.h"
 #include "EngineMinimal.h"
 #include "Core/AccelByteSettings.h"
@@ -22,7 +21,9 @@ Entitlement::Entitlement(
 	Settings const& SettingsRef,
 	FHttpRetryScheduler& HttpRef)
 	:
-	FApiBase(CredentialsRef, SettingsRef, HttpRef)
+	HttpRef{HttpRef},
+	CredentialsRef{CredentialsRef},
+	SettingsRef{SettingsRef}
 {
 }
 
@@ -561,26 +562,6 @@ void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncMod
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }	
-
-void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel,FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
-{
-	FReport::Log(FString(__FUNCTION__));
-
-	// Url 
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/twitch/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());	 
-	// Content Body 
-	FString Content = TEXT("");
-	FJsonObject DataJson;
-	DataJson.SetStringField("gameId", TwitchDropModel.GameId);
-	DataJson.SetStringField("region", TwitchDropModel.Region);
-	DataJson.SetStringField("language", TwitchDropModel.Language);
-	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
-	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
-	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
- 
-	// Api Request 
-	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
-}
 
 } // Namespace Api
 }

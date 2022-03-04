@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 #pragma once
 
-#include "Core/AccelByteApiBase.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Models/AccelByteEcommerceModels.h"
@@ -18,12 +17,15 @@ namespace Api
 /**
 * @brief Entitlement API for checking user's ownership. User can query a list of item that belongs to him/her.
 */
-class ACCELBYTEUE4SDK_API Entitlement : public FApiBase
+class ACCELBYTEUE4SDK_API Entitlement
 {
 public:
 	Entitlement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~Entitlement();
-
+private:
+	FHttpRetryScheduler& HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	* @brief Get list of user's Entitlement(s).
@@ -211,16 +213,6 @@ public:
 	* @param OnError This will be called when the operation failed.
 	*/
 	void SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
-
-	/**
-	* @brief Synchronize Twitch drop entitlement.
-	* 
-	* @param TwitchDropModel Contains GameId, Region, and Language.
-	* @param OnSuccess This will be called when the operation succeeded.
-	* @param OnError This will be called when the operation failed.
-	*/
-	void SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
-
 private:
 	Entitlement() = delete;
 	Entitlement(Entitlement const&) = delete;

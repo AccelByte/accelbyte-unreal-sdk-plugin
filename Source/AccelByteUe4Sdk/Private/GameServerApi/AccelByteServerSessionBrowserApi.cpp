@@ -285,7 +285,7 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 		
-		if (SessionType == EAccelByteSessionType::NONE)
+		if (SessionType != EAccelByteSessionType::NONE)
 		{
 			OnError.ExecuteIfBound(static_cast<int32>(AccelByte::ErrorCodes::InvalidRequest), TEXT("Wrong session type"));
 			return;
@@ -295,26 +295,6 @@ namespace GameServerApi
 		
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
 		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession?session_type=%s&game_mode=%s&joinable=true&match_exist=%s&limit=%d&offset=%d"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetClientNamespace(), *SessionTypeString, *GameMode, *MatchExist, Limit, Offset);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
-
-	void ServerSessionBrowser::GetGameSessionBySessionId(FString const& SessionId, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
-	{
-		FReport::Log(FString(__FUNCTION__));
-		
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetClientNamespace(), *SessionId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

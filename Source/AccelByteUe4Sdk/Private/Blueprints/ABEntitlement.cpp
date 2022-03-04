@@ -303,21 +303,3 @@ void UABEntitlement::SyncMobilePlatformPurchaseApple(
 				OnError.ExecuteIfBound(Code, Message);
 			}));
 }
-
-void UABEntitlement::SyncTwitchDropEntitlement(
-	FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, 
-	FDHandler OnSuccess, FDErrorHandler OnError) const 
-{
-	ApiClientPtr->Entitlement.SyncTwitchDropEntitlement(
-		TwitchDropModel,
-		FVoidHandler::CreateLambda(
-			[OnSuccess]()
-	{
-		OnSuccess.ExecuteIfBound();
-	}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
-	{
-		OnError.ExecuteIfBound(Code, Message);
-	}));
-}

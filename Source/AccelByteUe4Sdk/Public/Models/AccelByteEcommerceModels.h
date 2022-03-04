@@ -717,8 +717,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlatformSyncMobileGoogle
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString PurchaseToken;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
-	bool AutoAck = false; //should be true for sync DURABLE item entitlement
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString Region; //optional
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlatformSyncMobileGoogle")
 	FString Language; //optional
@@ -746,18 +744,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPlayStationDLCSync
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Entitlements | Models | PlayStationDLCSync")
 	int32 ServiceLabel;
-};
-
-USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsTwitchDropEntitlement
-{
-	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
-	FString GameId;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
-	FString Region;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | Platform")
-	FString Language;
 };
 
 #pragma endregion EntitlementModelsField

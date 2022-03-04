@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2018-2022 AccelByte Inc. All Rights Reserved.
+﻿// Copyright (c) 2018-2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -44,17 +44,6 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-			/**
-			* @brief Log in with email/username account using v3 endpoint.
-			*
-			* @param Username User email address or username.
-			* @param Password Password.
-			* @param OnSuccess This will be called when the operation succeeded.
-			* @param OnError This will be called when the operation failed.
-			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
-			*/
-			void LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool RememberMe = false);
 
 			/**
 			 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -232,7 +221,7 @@ namespace AccelByte
 			/**
 			 * @brief This function should be called after you call SendUserUpgradeVerificationCode and obtain verification code.
 			 *
-			 * @param Username Email or phone number that will be used to upgrade the headless account.
+			 * @param LoginId Email or phone number that will be used to upgrade the headless account.
 			 * @param Password User's password.
 			 * @param VerificationCode User's verification code that obtained from email.
 			 * @param OnSuccess This will be called when the operation succeeded.

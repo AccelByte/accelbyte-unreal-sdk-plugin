@@ -829,7 +829,7 @@ FString Lobby::SendReadyConsentRequest(FString MatchId)
 		FString::Printf(TEXT("matchId: %s\n"), *MatchId));
 }
 
-FString Lobby::RequestDS(FString const& SessionID, FString const& GameMode, FString const& ClientVersion,  FString const& Region, FString const& Deployment, FString const& ServerName)
+FString Lobby::RequestDS(FString const& SessionID, FString const& GameMode, FString const& ServerName, FString const& ClientVersion, FString const& Region, FString const& Deployment)
 {
 	FReport::Log(FString(__FUNCTION__));
 	return SendRawRequest(LobbyRequest::CreateDS, Prefix::Matchmaking,
