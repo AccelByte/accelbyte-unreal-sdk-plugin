@@ -36,9 +36,14 @@ public class AccelByteUe4Sdk : ModuleRules
             "WebSockets",
             "Networking",
             "SSL",
-            "Icmp",
+            "Icmp"
         });
-        
+
+        if (System.Environment.GetEnvironmentVariable("SQLITE3_ENABLED") == "1")
+        {
+            PublicDependencyModuleNames.Add("CISQLite3");
+        }
+
         PrivateDependencyModuleNames.AddRange(new []
         {
             "OpenSSL",
