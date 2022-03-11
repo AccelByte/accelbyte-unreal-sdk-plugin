@@ -17,7 +17,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 	bool IsPublic;
 	FDateTime CreatedAt;
 	FDateTime UpdatedAt;
-	FString SetBy;
 	FJsonObject Value;
 };
 
@@ -27,7 +26,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 	FString Namespace;
 	FDateTime CreatedAt;
 	FDateTime UpdatedAt;
-	FString SetBy;
 	FJsonObject Value;
 };
 

@@ -72,20 +72,8 @@ namespace GameServerApi
 		 * @param OnError This will be called when the operation failed.
 		 */
 		void DeleteGameRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-
-		/**
-		 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
-		 *
-		 * @param Key Key of record.
-		 * @param UserId UserId of the record owner.
-		 * @param RecordRequest The request of the record with JSON formatted. 
-		 * @param OnSuccess This will be called when the operation succeeded.
-		 * @param OnError This will be called when the operation failed.
-		 */
-		void SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 		
 		/**
-		 * @brief This function that contains option adding suffix /public in the Url will be DEPRECATED.
 		 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
 		 *
 		 * @param Key Key of record.
@@ -117,19 +105,7 @@ namespace GameServerApi
 		 */
 		void GetPublicUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError);
 
-		/**         
-		 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
-		 *
-		 * @param Key Key of record.
-		 * @param UserId UserId of the record owner.
-		 * @param RecordRequest The request of the record with JSON formatted. 
-		 * @param OnSuccess This will be called when the operation succeeded.
-		 * @param OnError This will be called when the operation failed.
-		 */
-		void ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
-		
 		/**
-		 * @brief This function that contains option adding suffix /public in the Url will be DEPRECATED.
 		 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
 		 *
 		 * @param Key Key of record.
