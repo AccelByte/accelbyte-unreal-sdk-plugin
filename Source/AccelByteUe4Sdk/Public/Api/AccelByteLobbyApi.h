@@ -29,7 +29,10 @@ struct FMatchmakingOptionalParams
 {
 	FString ServerName;
 	FString ClientVersion;
+
+	/** @brief If !Latencies, we will refresh them from Qos */
 	TArray<TPair<FString, float>> Latencies;
+	
 	TMap<FString, FString> PartyAttributes;
 	TArray<FString> TempPartyUserIds;
 	TArray<FString> ExtraAttributes;
@@ -619,6 +622,19 @@ public:
 	*/
 	FString SendStartMatchmaking(FString GameMode, TMap<FString, FString> PartyAttributes, TArray<FString> TempPartyUserIds, FString ServerName = TEXT(""), FString ClientVersion = TEXT(""), TArray<TPair<FString, float>> Latencies = TArray<TPair<FString, float>>(), TArray<FString> ExtraAttributes = TArray<FString>());
 
+	/**
+	 * @brief Serialize the Qos Latencies obj into a stringified json object.
+	 * - Multiple regions are possible (hence the TArray).
+	 * @param SelectedLatencies 
+	 * @return 
+	 */
+	static FString GetServerLatenciesJsonStr(TArray<TPair<FString, float>> SelectedLatencies);
+
+	/**
+	 * @brief On success, we poll Latencies (if Settings allows us to).
+	 */
+	void SetOnMatchmakingSuccessInitQosScheduler();
+	
 	/**
 	* @brief start the matchmaking
 	*
@@ -1620,7 +1636,7 @@ private:
 #pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
-	static TMap<FString, Response> ResponseStringEnumMap;
+	static TMap<FString, Response> ResponseStringEnumMap; 
 	static TMap<FString, Notif> NotifStringEnumMap;
 #pragma endregion
 

@@ -25,22 +25,31 @@ QosManager::QosManager(
 	QosManager::~QosManager()
 	{}
 
-	void QosManager::GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError)
+	void QosManager::GetQosServers(
+		const THandler<FAccelByteModelsQosServerList>& OnSuccess,
+		const FErrorHandler& OnError) const
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::Settings.QosManagerServerUrl);
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
+		const FHttpRequestPtr Request = QosManager::GetQosServersRequest();
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	FHttpRequestPtr QosManager::GetQosServersRequest()
+	{
+		const FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::Settings.QosManagerServerUrl);
+		const FString Verb = TEXT("GET");
+		const FString ContentType = TEXT("application/json");
+		const FString Accept = TEXT("application/json");
 		
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		const FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 		Request->SetURL(Url);
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
 
+		return Request;
+	}
+	
 } // Namespace Api
 } // Namespace AccelByte
