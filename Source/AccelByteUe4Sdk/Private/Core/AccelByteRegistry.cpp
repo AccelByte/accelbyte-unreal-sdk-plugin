@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -69,7 +69,7 @@ Api::GameProfile FRegistry::GameProfile(FRegistry::Credentials, FRegistry::Setti
 Api::Statistic FRegistry::Statistic(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::QosManager FRegistry::QosManager(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::CloudSave FRegistry::CloudSave(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-Api::Qos FRegistry::Qos(FRegistry::Credentials, FRegistry::Settings);
+Api::Qos FRegistry::Qos;
 Api::Leaderboard FRegistry::Leaderboard(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::GameTelemetry FRegistry::GameTelemetry(FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 Api::Agreement FRegistry::Agreement{FRegistry::Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler};

@@ -2,29 +2,6 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [9.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.0.0%0D8.6.0) (2022-03-14)
-
-
-### ⚠ BREAKING CHANGES
-
-* **user:** change EVerificationContext::UpgradeHeadlessAccount to
-EVerificationContext::upgradeHeadlessAccount
-
-### Features
-
-* **cloudsave:** Server Validation for cloud save ([067d597](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/067d597ce0f2c56d5f1468b30681ead3199dd22e))
-* **HttpCache:** add mechanism to cache http request and response ([e6ac073](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e6ac073a18b46fb95342123a1d5be1f1f6bfba25))
-* **lua:** add lobby Presence blueprint API for lua test purpose ([2a3897c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2a3897c7b8a17979d73b17123da79301e673ab8f))
-* **qos:** Implement Qos Scheduler & Init Trigger ([5a4ab6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/5a4ab6b51fa2a5daa0262aa33797cd17cd2f96e9))
-* **telemetry:** add EventTimestamp automatically inside Send function. ([a3f2296](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a3f22964ce4f272e814187e45b74446df418a5bb))
-* **user:** upgrade and verify headless account ([8cfbdb4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8cfbdb4b08b269fd1f0e838f117baefe84a0c206))
-
-
-### Tests
-
-* **lobby:** add integration test case for lobby usage in multithread scenario ([6f68d68](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6f68d683f221ce3234249413704fce0ad5035c03))
-* **matchmaking:** refactored create matchmaking channel to setup step. ([86d4408](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86d4408f802ff2afdd354b64d4848e2695a221c2))
-
 ## [8.6.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/8.6.0%0D8.5.0) (2022-03-01)
 
 

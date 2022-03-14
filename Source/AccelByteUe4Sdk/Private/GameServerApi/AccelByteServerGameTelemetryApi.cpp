@@ -50,12 +50,7 @@ void ServerGameTelemetry::SetImmediateEventList(const TArray<FString>& EventName
 void ServerGameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	if(TelemetryBody.EventTimestamp.GetTicks() == 0)
-	{
-		TelemetryBody.EventTimestamp = FDateTime::UtcNow();
-	}
-	
+
 	if (ImmediateEvents.Contains(TelemetryBody.EventName))
 	{
 		SendProtectedEvents({TelemetryBody}, OnSuccess, OnError);
@@ -127,7 +122,6 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 		JsonObject->SetStringField("EventNamespace", Event.EventNamespace);
 		JsonObject->SetStringField("EventName", Event.EventName);
 		JsonObject->SetObjectField("Payload", Event.Payload);
-		JsonObject->SetStringField("EventTimestamp", Event.EventTimestamp.ToIso8601());
 
 		JsonArray.Add(MakeShared<FJsonValueObject>(JsonObject));
 	}

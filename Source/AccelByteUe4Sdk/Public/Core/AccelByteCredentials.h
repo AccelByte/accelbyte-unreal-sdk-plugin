@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -8,6 +8,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteCredentials.generated.h"
@@ -23,7 +24,6 @@ class FHttpRetryScheduler;
  */
 class ACCELBYTEUE4SDK_API Credentials
 {
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoginSuccessDelegate, const FOauth2Token& /*Response*/);
 	DECLARE_MULTICAST_DELEGATE(FRefreshTokenAdditionalActions);
 	DECLARE_EVENT(Credentials, FTokenRefreshedEvent);
 
@@ -40,10 +40,6 @@ public:
 	Credentials();
 	~Credentials();
 
-	/** @brief The user was just authed: At this point, Credential auth tokens are already set. */
-	FOnLoginSuccessDelegate& OnLoginSuccess();
-	
-	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
 	void SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime);
@@ -51,7 +47,7 @@ public:
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
 	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef);
-
+	
 	FTokenRefreshedEvent& OnTokenRefreshed();
 
 	const FOauth2Token& GetAuthToken() const;
@@ -84,7 +80,6 @@ private:
 	FDelegateHandle PollRefreshTokenHandle;
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
-	FOnLoginSuccessDelegate LoginSuccessDelegate;
 
 	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
 };
