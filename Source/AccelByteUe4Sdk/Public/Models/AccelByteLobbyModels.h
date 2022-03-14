@@ -522,6 +522,8 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResponse
 {
     GENERATED_BODY()
+	
+    /** @brief Success == "0" */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
     FString Code;
 };
