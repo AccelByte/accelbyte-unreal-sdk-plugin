@@ -65,6 +65,8 @@ static bool SetClientEnvironment(Settings * InSettings)
 	InSettings->SeasonPassServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->UGCServerUrl, InSettings->BaseUrl, TEXT("seasonpass"));
 	InSettings->ReportingServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->ReportingServerUrl, InSettings->BaseUrl, TEXT("reporting"));
 	InSettings->AppId = GetDefault<T>()->AppId;
+	InSettings->QosLatencyPollIntervalSecs = GetDefault<T>()->QosLatencyPollIntervalSecs;
+	InSettings->QosServerLatencyPollIntervalSecs = GetDefault<T>()->QosServerLatencyPollIntervalSecs;
 
 	return true;
 }
@@ -199,6 +201,16 @@ FString UAccelByteBlueprintsSettings::GetAppId()
 	return FRegistry::Settings.AppId;
 }
 
+float UAccelByteBlueprintsSettings::GetQosLatencyPollIntervalSecs()
+{
+	return FRegistry::Settings.QosLatencyPollIntervalSecs;
+}
+
+float UAccelByteBlueprintsSettings::GetQosServerLatencyPollIntervalSecs()
+{
+	return FRegistry::Settings.QosServerLatencyPollIntervalSecs;
+}
+
 bool UAccelByteBlueprintsSettings::IsHttpCacheEnabled()
 {
 	return FRegistry::Settings.bEnableHttpCache;
@@ -319,6 +331,16 @@ void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
 	FRegistry::Settings.AppId = AppId;
 }
 
+void UAccelByteBlueprintsSettings::SetQosLatencyPollIntervalSecs(const float& QosLatencyPollIntervalSecs)
+{
+	FRegistry::Settings.QosLatencyPollIntervalSecs = QosLatencyPollIntervalSecs;
+}
+
+void UAccelByteBlueprintsSettings::SetServerQosLatencyPollIntervalSecs(const float& QosServerLatencyPollIntervalSecs)
+{
+	FRegistry::Settings.QosServerLatencyPollIntervalSecs = QosServerLatencyPollIntervalSecs;
+}
+	
 void UAccelByteBlueprintsSettings::SetIsHttpCacheEnabled(bool bEnable)
 {
 	FRegistry::Settings.bEnableHttpCache = bEnable;

@@ -37,6 +37,14 @@ namespace AccelByte
 			DECLARE_DELEGATE(FUpgradeNotif);
 
 			/**
+			 * @brief These events happen before every login event, such as clearing CredentialRef post-auth info.
+			 * - Call this last, just before the actual login call.
+			 */
+			void FinalPreLoginEvents() const;
+			
+
+			#pragma region Login Methods
+			/**
 			 * @brief Log in with email/username account.
 			 *
 			 * @param Username User email address or username.
@@ -44,7 +52,11 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithUsername(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError) const;
 
 			/**
 			* @brief Log in with email/username account using v3 endpoint.
@@ -55,7 +67,12 @@ namespace AccelByte
 			* @param OnError This will be called when the operation failed.
 			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
 			*/
-			void LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, bool RememberMe = false);
+			void LoginWithUsernameV3(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError,
+				const bool RememberMe = false) const;
 
 			/**
 			 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -65,7 +82,11 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithOtherPlatform(
+				EAccelBytePlatformType PlatformType,
+				const FString& PlatformToken,
+				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError) const;
 
 			/**
 			 * @brief Log in with device ID (anonymous log in).
@@ -73,7 +94,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
 
 			/**
 			 * @brief Log in from Accelbyte Launcher.
@@ -81,7 +102,7 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithLauncher(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
 
 			/**
 			 * @brief login with refresh token
@@ -89,7 +110,18 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+			#pragma endregion /Login Methods
+			
+			
+			/**
+			 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
+			 * - Credentials: Inits Qos Latencies Scheduler.
+			 * - Qos: Sets CredentialsRef Auth Token.
+			 * @param OnSuccess
+			 * @param Response 
+			 */
+			void OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const;
 
 			/**
 			 * @brief Log out current user session. Access tokens, user ID, and other credentials from memory will be removed.
