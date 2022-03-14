@@ -14,4 +14,5 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsTelemetryBody
 	// Only accept input with valid characters. Allowed characters: Aa-Zz0-9_.-
 	FString EventName;
 	TSharedPtr<FJsonObject> Payload;
+	FDateTime EventTimestamp {0};
 };

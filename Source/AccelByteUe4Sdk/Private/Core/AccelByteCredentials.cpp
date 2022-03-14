@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -26,10 +26,12 @@ Credentials::Credentials()
 	, UserRefreshTime(0.0)
 	, UserExpiredTime(0.0)
 	, UserRefreshBackoff(0.0)
-{}
+{
+}
 
 Credentials::~Credentials()
-{}
+{
+}
 
 void Credentials::ForgetAll()
 {
@@ -190,6 +192,11 @@ void AccelByte::Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& H
 			{
 				BearerAuthRejectedRefreshToken(HttpRef);
 			}));
+}
+	
+Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()
+{
+	return LoginSuccessDelegate;
 }
 
 Credentials::FTokenRefreshedEvent& Credentials::OnTokenRefreshed()

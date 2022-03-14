@@ -314,7 +314,7 @@ enum class EVerificationContext : uint8
 {
 	UserAccountRegistration,
 	UpdateEmailAddress,
-	UpgradeHeadlessAccount
+	upgradeHeadlessAccount //this is BE restriction. We should use small `u` in the beginning of this enum value
 };
 
 USTRUCT(BlueprintType)
@@ -336,9 +336,21 @@ struct ACCELBYTEUE4SDK_API FUpgradeAndVerifyRequest
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
 		FString Code;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		FString Country; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		FString DateOfBirth; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		FString DisplayName; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		FString EmailAddress;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
 		FString Password;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString LoginId;
+		bool ReachMinimumAge = true; //optional. If user input DOB, BE will not check this field 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		FString Username;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
+		bool ValidateOnly = false;
 };
 
 USTRUCT(BlueprintType)
