@@ -1,4 +1,4 @@
-// Copyright (c) 2018 - 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -41,6 +41,9 @@ public:
 	FString SeasonPassServerUrl;
 	FString ReportingServerUrl;
 	FString AppId;
+	float QosLatencyPollIntervalSecs{0};
+	float QosServerLatencyPollIntervalSecs{0};
+	bool bEnableHttpCache;
 
 	void Reset(ESettingsEnvironment const Environment);
 
@@ -136,6 +139,16 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
 	FString AppId;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	float QosLatencyPollIntervalSecs;
+
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	float QosServerLatencyPollIntervalSecs;
+	
+	// Enable token for client side http caching
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Client | Settings")
+	bool bEnableHttpCache{ false };
 };
 
 UCLASS(Config = Engine)
@@ -237,6 +250,15 @@ public:
 	static FString GetAppId();
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static float GetQosLatencyPollIntervalSecs();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static float GetQosServerLatencyPollIntervalSecs();	
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static bool IsHttpCacheEnabled();
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetClientId(const FString& ClientId);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
@@ -304,8 +326,17 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetQosLatencyPollIntervalSecs(const float& QosLatencyPollIntervalSecs);
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
+	static void SetServerQosLatencyPollIntervalSecs(const float& QosServerLatencyPollIntervalSecs);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void ResetSettings(const ESettingsEnvironment Environment);
+
+	static void SetIsHttpCacheEnabled(bool bEnable);
+
 };
 

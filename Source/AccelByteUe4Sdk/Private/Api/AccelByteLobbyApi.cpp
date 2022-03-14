@@ -1,10 +1,11 @@
-// Copyright (c) 2018 - 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018 - 2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteLobbyApi.h"
 #include "Modules/ModuleManager.h"
 #include "IWebSocket.h"
+#include "Api/AccelByteQos.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpClient.h"
 #include "Core/AccelByteRegistry.h"
@@ -695,6 +696,21 @@ FString Lobby::SendStartMatchmaking(FString GameMode, TMap<FString, FString> Par
 	return SendStartMatchmaking(GameMode, ServerName, ClientVersion, Latencies, PartyAttributes, TempPartyUserIds, ExtraAttributes);
 }
 
+FString Lobby::GetServerLatenciesJsonStr(TArray<TPair<FString, float>> SelectedLatencies)
+{
+	FString ServerLatencies = TEXT("{");
+	for (int i = 0; i < SelectedLatencies.Num(); i++)
+	{
+		ServerLatencies.Append(FString::Printf(TEXT("\"%s\":%.0f"), *SelectedLatencies[i].Key, SelectedLatencies[i].Value));
+		if (i + 1 < SelectedLatencies.Num())
+		{
+			ServerLatencies.Append(TEXT(","));
+		}
+	}
+	ServerLatencies.Append(TEXT("}"));
+	return FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies);	
+}
+
 FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingOptionalParams& OptionalParams)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -709,27 +725,28 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	{
 		Contents.Append(FString::Printf(TEXT("clientVersion: %s\n"), *OptionalParams.ClientVersion));
 	}
-		
-	if (OptionalParams.Latencies.Num() > 0)
+
+	// Use Qos cached Latencies, or were valid Latencies already provided?
+	const bool bUseCustomLatencies = OptionalParams.Latencies.Num() > 0;
+	const TArray<TPair<FString, float>> SelectedLatencies = bUseCustomLatencies
+		? OptionalParams.Latencies
+		: FRegistry::Qos.GetCachedLatencies();
+
+	// Validate Latencies (now initially set, immediately after login success): Important for multi-regioning.
+	if (SelectedLatencies.Num() == 0)
 	{
-		FString ServerLatencies = TEXT("{");
-		for (int i = 0; i < OptionalParams.Latencies.Num(); i++)
-		{
-			ServerLatencies.Append(FString::Printf(TEXT("\"%s\":%.0f"), *OptionalParams.Latencies[i].Key, OptionalParams.Latencies[i].Value));
-			if (i + 1 < OptionalParams.Latencies.Num())
-			{
-				ServerLatencies.Append(TEXT(","));
-			}
-		}
-		ServerLatencies.Append(TEXT("}"));
-		Contents.Append(FString::Printf(TEXT("latencies: %s\n"), *ServerLatencies));
+		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
+		UE_LOG(LogAccelByteLobby, Error, TEXT("!OptionalParams.Latencies && !Qos.Latencies (cached): "
+			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
 	}
 
+	// Latencies should be set: Convert to json str
+	if (SelectedLatencies.Num() > 0)
+		Contents.Append(GetServerLatenciesJsonStr(SelectedLatencies));
+
 	auto PartyAttribute = OptionalParams.PartyAttributes;
-	if(OptionalParams.NewSessionOnly)
-	{
+	if (OptionalParams.NewSessionOnly)
 		PartyAttribute.Add("new_session_only", "true");
-	}
 
 	FString partyAttributeSerialized = "";
 	if (PartyAttribute.Num() > 0)

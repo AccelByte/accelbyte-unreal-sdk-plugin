@@ -21,6 +21,7 @@
 #include "ABAchievement.h"
 #include "ABSessionBrowser.h"
 #include "ABUGC.h"
+#include "ABPresence.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -119,6 +120,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABUGC* UGC;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABPresence* Presence;
 
 private:
 	FApiClientPtr ApiClientPtr;

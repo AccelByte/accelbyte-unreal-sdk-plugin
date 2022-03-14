@@ -5,15 +5,11 @@
 #pragma once
 
 #include <chrono>
-#include <ctime>
 
-#include "Runtime/Core/Public/Containers/Ticker.h"
-
-#include "HttpModule.h"
 #include "HttpManager.h"
 #include "Core/AccelByteCredentials.h"
-#include "Core/AccelByteError.h"
 #include "Core/AccelByteTask.h"
+#include "Core/AccelByteHttpCache.h"
 
 namespace AccelByte
 {
@@ -33,7 +29,7 @@ public:
 	FHttpRetryScheduler();
 	~FHttpRetryScheduler();
 
-	FAccelByteTaskPtr ProcessRequest(const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
+	FAccelByteTaskPtr ProcessRequest(FHttpRequestPtr Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime);
 
 	void SetBearerAuthRejectedDelegate(FBearerAuthRejected BearerAuthRejected);
 	void BearerAuthRejected();
@@ -45,8 +41,11 @@ public:
 	bool PollRetry(double Time);
 
 protected:
+
 	TQueue<FAccelByteTaskPtr, EQueueMode::Mpsc> TaskQueue;
 	FDelegateHandle PollRetryHandle;
+
+	Core::FAccelByteHttpCache HttpCache;
 
 	FBearerAuthRejected BearerAuthRejectedDelegate;
 	FBearerAuthRejectedRefresh BearerAuthRejectedRefresh;
