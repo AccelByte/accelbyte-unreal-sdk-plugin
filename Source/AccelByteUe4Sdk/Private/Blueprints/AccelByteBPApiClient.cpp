@@ -39,6 +39,10 @@ UABApiClient::UABApiClient()
 	SessionBrowser = NewObject<UABSessionBrowser>();
 	UGC = NewObject<UABUGC>();
 	Presence = NewObject<UABPresence>();
+	Block = NewObject<UABBlock>();
+	Message = NewObject<UABMessage>();
+	SessionAttribute = NewObject<UABSessionAttribute>();
+	Signaling = NewObject<UABSignaling>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -68,6 +72,10 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	SessionBrowser->SetApiClient(ApiClientPtr);
 	UGC->SetApiClient(ApiClientPtr);
 	Presence->SetApiClient(ApiClientPtr);
+	Block->SetApiClient(ApiClientPtr);
+	Message->SetApiClient(ApiClientPtr);
+	SessionAttribute->SetApiClient(ApiClientPtr);
+	Signaling->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)

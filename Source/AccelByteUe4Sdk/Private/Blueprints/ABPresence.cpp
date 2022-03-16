@@ -26,6 +26,22 @@ void UABPresence::GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, 
 	ApiClientPtr->Lobby.SendGetOnlineFriendPresenceRequest();
 }
 
+void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.BulkGetUserPresence(
+		Request.UserIds,
+		THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([OnResponse](FAccelByteModelsBulkUserStatusNotif const& Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}),
+		Request.bCountOnly);
+}
+
 void UABPresence::SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) const
 {
 	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(

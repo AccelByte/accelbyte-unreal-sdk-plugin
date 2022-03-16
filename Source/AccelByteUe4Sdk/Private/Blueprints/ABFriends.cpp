@@ -179,6 +179,25 @@ void UABFriends::GetFriendshipStatus(
 	ApiClientPtr->Lobby.GetFriendshipStatus(UserId);
 }
 
+void UABFriends::BulkFriendRequest(
+	FAccelByteModelsBulkFriendsRequest UserIds,
+	FDHandler OnSuccess,
+	FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.BulkFriendRequest(
+		UserIds,
+		FVoidHandler::CreateLambda(
+			[OnSuccess]()
+			{
+				OnSuccess.ExecuteIfBound();
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
 void UABFriends::SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetOnFriendRequestAcceptedNotifDelegate(
