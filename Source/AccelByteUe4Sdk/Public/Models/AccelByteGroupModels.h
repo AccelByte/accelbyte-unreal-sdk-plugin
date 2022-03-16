@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "JsonUtilities.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteGroupModels.generated.h"
 

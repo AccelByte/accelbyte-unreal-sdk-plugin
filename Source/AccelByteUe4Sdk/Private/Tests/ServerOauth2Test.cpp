@@ -2,8 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#pragma once
-
 #include "Misc/AutomationTest.h"
 #include "Core/AccelByteRegistry.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
