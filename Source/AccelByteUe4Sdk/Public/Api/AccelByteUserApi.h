@@ -424,12 +424,12 @@ namespace AccelByte
 			/**
 			 * @brief This function will get user input validation
 			 * 
-			 * @param  LanguageCode Targeted Language Code. 
+			 * @param  LanguageCode Targeted Language Code, using ISO-639 
 			 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
 			 * @param  OnError This will be called when the operation failed.
 			 * @param  DefaultOnEmpty Targeted DefaultOnEmpty. 
 			 */
-			void User::GetInputValidations(const FString& LanguageCode, THandler<FInputUserValidation> const& OnSuccess, FErrorHandler const& OnError, bool DefaultOnEmpty = true);
+			void GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError, bool DefaultOnEmpty = true);
 			
 		private:
 			User() = delete;

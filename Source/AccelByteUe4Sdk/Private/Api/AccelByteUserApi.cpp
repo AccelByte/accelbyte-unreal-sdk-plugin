@@ -926,19 +926,17 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListB
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::GetInputValidations(const FString& LanguageCode, THandler<FInputUserValidation> const& OnSuccess, FErrorHandler const& OnError,
-	bool DefaultOnEmpty = true)
+void User::GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError,
+	bool DefaultOnEmpty)
 {
 	FReport::Log(FString(__FUNCTION__));
+	
+	FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations"), *SettingsRef.IamServerUrl);	 
+	const TMap<FString, FString> Params ({{"languageCode", *LanguageCode}, {"defaultOnEmpty", DefaultOnEmpty ? TEXT("true") : TEXT("false")}});
+	FString Content = TEXT("");  
 
-	FString Query = FString::Printf((TEXT("?languageCode=%s&defaultOnEmpty=%s"), *LanguageCode, DefaultOnEmpty ? TEXT("true") : TEXT("false")));
-	// Url 
-	FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations/%s"), *SettingsRef.IamServerUrl, *Query);	 
-	// Content Body 
-	FString Content = TEXT(""); 
- 
 	// Api Request 
-	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
+	HttpClient.ApiRequest("GET", Url, Params, Content, OnSuccess, OnError); 
 }	
 
 } // Namespace Api

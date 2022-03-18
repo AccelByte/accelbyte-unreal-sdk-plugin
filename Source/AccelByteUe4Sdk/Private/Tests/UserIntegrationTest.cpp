@@ -5084,3 +5084,428 @@ bool FLoginWithAppleAccount_ManualTestOnly::RunTest(const FString& Parameter)
 	return true;
 }
 #endif
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidation, "AccelByte.Tests.AUser.GetInputValidation", AutomationFlagMaskUser);
+bool FGetInputValidation::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+	
+	// Complete DisplayName.
+	bool bGetInputValidationDone = false;
+	FInputValidation InputValidationData;
+	FRegistry::User.GetInputValidations( TEXT("en-US"),
+		THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData](const FInputValidation& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				InputValidationData = Result; 
+				bGetInputValidationDone = true;
+			}),
+		UserTestErrorHandler);
+
+	WaitUntil(bGetInputValidationDone, "Waiting for Search Users...");
+	AB_TEST_TRUE(bGetInputValidationDone);
+	AB_TEST_TRUE(InputValidationData.Version > 0);
+	AB_TEST_EQUAL(InputValidationData.Data.Num(), 3);
+
+	bool displayNameValidationExist = false;
+	bool usernameValidationExist = false;
+	bool passwordValidationExist = false;
+	FString Language;
+	TArray<FString> Messages;
+	for (auto Data: (InputValidationData.Data))
+	{
+		if (Data.Field.Equals(TEXT("displayName")))
+		{
+			displayNameValidationExist = true;
+			Language = Data.Validation.Description.Language;
+			Messages = Data.Validation.Description.Message;
+		}
+		if (Data.Field.Equals(TEXT("username")))
+			usernameValidationExist = true;
+		if (Data.Field.Equals(TEXT("password")))
+			passwordValidationExist = true;
+	}
+	
+	// default IAM validation 
+	AB_TEST_TRUE(displayNameValidationExist);
+	AB_TEST_TRUE(usernameValidationExist);
+	AB_TEST_TRUE(passwordValidationExist);
+
+	AB_TEST_EQUAL(Language, TEXT("en-US"));
+	AB_TEST_EQUAL(Messages[0], TEXT("Your display name can only contain uppercase and lowercase letters, spaces, special characters"));
+	AB_TEST_EQUAL(Messages[1], TEXT("Should start and end with alphanumeric."));
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidationForNotExistLocalLanguage, "AccelByte.Tests.AUser.GetInputValidationForNotExistLocalLanguage", AutomationFlagMaskUser);
+bool FGetInputValidationForNotExistLocalLanguage::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+	
+	// Complete DisplayName.
+	bool bGetInputValidationDone = false;
+	bool bGetInputValidationSuccess = false;
+	FInputValidation InputValidationData;
+	const FString& LanguageInput = TEXT("id");
+	FRegistry::User.GetInputValidations( LanguageInput,
+		THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
+			{
+				InputValidationData = Result;
+				bGetInputValidationDone = bGetInputValidationSuccess =true;
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			}), FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
+			{
+				bGetInputValidationDone = true;
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Fail get input validation: Error Code : %d, Message: %s"), ErrorCode, *Message);
+			}));
+
+	WaitUntil(bGetInputValidationDone, "Waiting for Search Users...");
+	AB_TEST_TRUE(bGetInputValidationSuccess);
+	AB_TEST_TRUE(InputValidationData.Version > 0);
+	AB_TEST_EQUAL(InputValidationData.Data.Num(), 3);
+	
+	bool bDisplayNameValidationExist = false;
+	FString Language;
+	TArray<FString> Messages;
+	for (auto Data: (InputValidationData.Data))
+	{
+		if (Data.Field.Equals(TEXT("displayName")))
+		{
+			bDisplayNameValidationExist = true;
+			Language = Data.Validation.Description.Language;
+			Messages = Data.Validation.Description.Message;
+			break;
+		}
+	}
+	
+	AB_TEST_TRUE(bDisplayNameValidationExist);
+	// Will return default Language : en 
+	AB_TEST_EQUAL(Language, TEXT("en-US"));
+	AB_TEST_EQUAL(Messages[0], TEXT("Your display name can only contain uppercase and lowercase letters, spaces, special characters"));
+	AB_TEST_EQUAL(Messages[1], TEXT("Should start and end with alphanumeric."));
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}
+
+#if LOCAL_LANGUAGE_AND_REGEX_INPUT_VALIDATION_SET
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidationForLocalLanguage, "AccelByte.Tests.AUser.GetInputValidationForLocalLanguage", AutomationFlagMaskUser);
+bool FGetInputValidationForLocalLanguage::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+	
+	// Complete DisplayName.
+	bool bGetInputValidationDone = false;
+	bool bGetInputValidationSuccess = false;
+	FInputValidation InputValidationData;
+	const FString& LanguageInput = TEXT("es");
+	FRegistry::User.GetInputValidations( LanguageInput,
+		THandler<FInputValidation>::CreateLambda([&bGetInputValidationDone, &InputValidationData, &bGetInputValidationSuccess](const FInputValidation& Result)
+			{
+				InputValidationData = Result;
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));			
+			
+				bGetInputValidationDone = bGetInputValidationSuccess = true;
+			}), FErrorHandler::CreateLambda([&bGetInputValidationDone](int ErrorCode, const FString& Message)
+			{
+				bGetInputValidationDone = true;
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Fail get input validation: Error Code : %d, Message: %s"), ErrorCode, *Message);
+			}));
+
+	WaitUntil(bGetInputValidationDone, "Waiting for Search Users...");
+	AB_TEST_TRUE(bGetInputValidationSuccess);
+
+	AB_TEST_TRUE(InputValidationData.Version > 0);
+	AB_TEST_EQUAL(InputValidationData.Data.Num(), 3);
+	 
+	bool bDisplayNameValidationExist = false;
+	FString Language;
+	TArray<FString> Messages;
+	for (auto Data: InputValidationData.Data)
+	{
+		if (Data.Field.Equals(TEXT("displayName")))
+		{
+			bDisplayNameValidationExist = true;
+			Language = Data.Validation.Description.Language;
+			Messages = Data.Validation.Description.Message;
+			break;
+		}
+	}
+	
+	AB_TEST_TRUE(bDisplayNameValidationExist);
+	AB_TEST_EQUAL(Language, LanguageInput);
+	AB_TEST_EQUAL(Messages[0], TEXT("Su nombre para mostrar solo puede contener letras mayúsculas y minúsculas, espacios, caracteres especiales"));
+	AB_TEST_EQUAL(Messages[1], TEXT("Debe comenzar y terminar con alfanumérico."));
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+	
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidationWhenRegexTrue, "AccelByte.Tests.AUser.GetInputValidationWhenRegexTrue", AutomationFlagMaskUser);
+bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+	AB_TEST_TRUE(bLoginSuccessful);
+	
+	// Complete DisplayName.
+	bool bGetValidationDataDone = false;
+	FInputValidation ReceivedValidationData;
+	FRegistry::User.GetInputValidations( TEXT("es-ES"),
+		THandler<FInputValidation>::CreateLambda([&bGetValidationDataDone, &ReceivedValidationData](const FInputValidation& Result)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+				ReceivedValidationData = Result; 
+				bGetValidationDataDone = true;
+			}),
+		UserTestErrorHandler);
+
+	WaitUntil(bGetValidationDataDone, "Waiting for Search Users...");
+	AB_TEST_TRUE(bGetValidationDataDone);
+	AB_TEST_TRUE(ReceivedValidationData.Version > 0);
+	AB_TEST_EQUAL(ReceivedValidationData.Data.Num(), 3);
+ 
+	bool bUsernameValidationExist = false;
+	bool bIsCustomRegex = false;
+	FString Regex;
+	for (auto Data: (ReceivedValidationData.Data))
+	{ 
+		if (Data.Field.Equals(TEXT("username")))
+		{
+			bUsernameValidationExist = true; 
+			bIsCustomRegex = Data.Validation.IsCustomRegex;
+			Regex = Data.Validation.Regex;
+		}
+	}	
+
+	AB_TEST_TRUE(bUsernameValidationExist);
+	AB_TEST_TRUE(bIsCustomRegex);
+	AB_TEST_EQUAL(Regex, TEXT("^[A-Za-z][A-Za-z0-9_]{7,29}$"));
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	AB_TEST_TRUE(bDeleteSuccessful);
+	return true;
+}
+
+#endif 

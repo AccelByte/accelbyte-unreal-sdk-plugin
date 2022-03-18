@@ -611,3 +611,69 @@ struct ACCELBYTEUE4SDK_API FPagedUserOtherPlatformInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
 	int32 TotalData;
 };
+
+USTRUCT(BlueprintType)
+struct FValidationDescription 
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FString Language;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		TArray<FString> Message;
+};
+
+USTRUCT(BlueprintType)
+struct FValidation
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		bool AllowDigit;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		bool AllowLetter;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		bool AllowSpace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		bool AllowUnicode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FValidationDescription Description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		bool IsCustomRegex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FString LetterCase;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 MaxLength;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 MaxRepeatingAlphaNum;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 MaxRepeatingSpecialCharacter;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 MinCharType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 MinLength;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FString Regex; 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FString SpecialCharacterLocation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		TArray<FString> SpecialCharacters; 	
+};
+
+USTRUCT(BlueprintType)
+struct FDataInputValidation
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FString Field;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		FValidation Validation;
+};
+
+USTRUCT(BlueprintType)
+struct FInputValidation
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		TArray<FDataInputValidation> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
+		int32 Version;
+};
