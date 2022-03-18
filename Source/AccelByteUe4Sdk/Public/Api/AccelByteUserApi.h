@@ -421,6 +421,16 @@ namespace AccelByte
 			 */
 			void BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListBulkUserInfo>& OnSuccess, const FErrorHandler& OnError);
 
+			/**
+			 * @brief This function will get user input validation
+			 * 
+			 * @param  LanguageCode Targeted Language Code. 
+			 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
+			 * @param  OnError This will be called when the operation failed.
+			 * @param  DefaultOnEmpty Targeted DefaultOnEmpty. 
+			 */
+			void User::GetInputValidations(const FString& LanguageCode, THandler<FInputUserValidation> const& OnSuccess, FErrorHandler const& OnError, bool DefaultOnEmpty = true);
+			
 		private:
 			User() = delete;
 			User(User const&) = delete;

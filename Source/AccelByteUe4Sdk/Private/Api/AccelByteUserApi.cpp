@@ -926,5 +926,20 @@ void User::BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListB
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void User::GetInputValidations(const FString& LanguageCode, THandler<FInputUserValidation> const& OnSuccess, FErrorHandler const& OnError,
+	bool DefaultOnEmpty = true)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Query = FString::Printf((TEXT("?languageCode=%s&defaultOnEmpty=%s"), *LanguageCode, DefaultOnEmpty ? TEXT("true") : TEXT("false")));
+	// Url 
+	FString Url = FString::Printf(TEXT("%s/v3/public/inputValidations/%s"), *SettingsRef.IamServerUrl, *Query);	 
+	// Content Body 
+	FString Content = TEXT(""); 
+ 
+	// Api Request 
+	HttpClient.ApiRequest("GET", Url, {}, Content, OnSuccess, OnError); 
+}	
+
 } // Namespace Api
 } // Namespace AccelByte
