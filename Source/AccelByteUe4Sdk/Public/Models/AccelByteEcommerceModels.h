@@ -297,7 +297,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 DisplayOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		FString Ext;
+		FJsonObjectWrapper Ext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Region;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
@@ -307,7 +307,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FDateTime UpdatedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		FString LocalExt;
+		FJsonObjectWrapper LocalExt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TMap<FString, int32> ItemQty;
 };
@@ -377,7 +377,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		int32 DisplayOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		FString Ext;
+		FJsonObjectWrapper Ext;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		FString Region;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
@@ -389,7 +389,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPopulatedItemInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TArray<FAccelByteModelsItemInfo> Items;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
-		FString LocalExt;
+		FJsonObjectWrapper LocalExt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TMap<FString, int32> ItemQty;
 };
