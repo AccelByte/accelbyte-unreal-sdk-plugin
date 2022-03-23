@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteGeneralModels.h"
+#include "JsonObjectWrapper.h"
 #include "AccelByteEcommerceModels.generated.h"
 
 #pragma region EnumField
