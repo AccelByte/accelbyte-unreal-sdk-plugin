@@ -17,7 +17,6 @@
 #include "UserTestAdmin.h"
 #include "LobbyTestAdmin.h"
 #include "MatchmakingTestAdmin.h"
-#include "EcommerceTestAdmin.h"
 	
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
@@ -7868,6 +7867,7 @@ private:
 	const Lobby::FConnectSuccess& GetConnectSuccessDelegate;
 	const Lobby::FPartyGetInvitedNotif& GetMessageNotifDelegate;
 	float DelayTime {0};
+	float WaitTimeOut{30};
 	
 
 public:
@@ -7875,6 +7875,7 @@ public:
 	{
 		FPlatformProcess::Sleep(DelayTime);
 
+		FDateTime TestStartTime {FDateTime::UtcNow()};
 		Lobby TestLobby {TestCredentials, TestSetting, HttpRef};
 
 		bool bLobbyConnected {false};
@@ -7886,21 +7887,32 @@ public:
 
 		TestLobby.SetConnectSuccessDelegate(OnLobbyConnected);
 		TestLobby.SetPartyGetInvitedNotifDelegate(GetMessageNotifDelegate);
-		
+
 		TestLobby.Connect();
-		while(!bLobbyConnected || !bThreadStopping)
+		float testElapsedTime {0};
+		float threadSleepTime {0.1f};
+		UE_LOG(LogAccelByteLobbyTest, Display, TEXT("connecting lobby from thread"));
+		while(!bLobbyConnected || !bThreadStopping || testElapsedTime < WaitTimeOut)
 		{
-			FPlatformProcess::Sleep(0.1f);
+			FPlatformProcess::Sleep(threadSleepTime);
+			testElapsedTime += threadSleepTime;
 		}
 
 		TestLobby.SendLeavePartyRequest();
 
-		while(!bThreadStopping)
+		while(!bThreadStopping || testElapsedTime < WaitTimeOut)
 		{
-			FPlatformProcess::Sleep(0.1f);
+			FPlatformProcess::Sleep(threadSleepTime);
+			testElapsedTime += threadSleepTime;
 		}
 
 		TestLobby.Disconnect();
+
+		UE_LOG(LogAccelByteLobbyTest, Display, TEXT("Disconnected from thread"));
+		if(testElapsedTime < WaitTimeOut)
+		{
+			return 124; // test timed out
+		}
 		
 		return 0;
 	}
@@ -7927,11 +7939,8 @@ public:
 	
 	virtual ~FTestLobbyUser() override
 	{
-		if (Thread)
-		{
-			Thread->Kill();
-			delete Thread;
-		}
+		delete Thread;
+		Thread = nullptr;
 	}
 };
 
