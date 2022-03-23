@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.0.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.0.2%0D9.0.1) (2022-03-23)
+
+
+### Bug Fixes
+
+* missing header file in Commerce models ([78de603](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/78de603f19023308c8f82849ae1c50c2ec19bd0c))
+
 ### [9.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.0.1%0D9.0.0) (2022-03-22)
 
 
