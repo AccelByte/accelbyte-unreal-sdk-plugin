@@ -5084,7 +5084,7 @@ bool FLoginWithAppleAccount_ManualTestOnly::RunTest(const FString& Parameter)
 	return true;
 }
 #endif
-
+ 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidation, "AccelByte.Tests.AUser.GetInputValidation", AutomationFlagMaskUser);
 bool FGetInputValidation::RunTest(const FString& Parameter)
 {
@@ -5301,7 +5301,8 @@ bool FGetInputValidationForNotExistLocalLanguage::RunTest(const FString& Paramet
 	return true;
 }
 
-#if LOCAL_LANGUAGE_AND_REGEX_INPUT_VALIDATION_SET
+// to run this unit tests need set local language and regex in Admin Portal > IAM Input Validation 
+#if 0
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FGetInputValidationForLocalLanguage, "AccelByte.Tests.AUser.GetInputValidationForLocalLanguage", AutomationFlagMaskUser);
 bool FGetInputValidationForLocalLanguage::RunTest(const FString& Parameter)
