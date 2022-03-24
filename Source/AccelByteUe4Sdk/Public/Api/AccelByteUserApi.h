@@ -56,10 +56,40 @@ namespace AccelByte
 				const FString& Username,
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError) const;
+
+			/**
+			* @brief Log in with email/username account with 2FA enable
+			*
+			* @param Username User email address or username.
+			* @param Password Password.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void LoginWithUsername(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
 				const FCustomErrorHandler& OnError) const;
 
 			/**
 			* @brief Log in with email/username account using v3 endpoint.
+			*
+			* @param Username User email address or username.
+			* @param Password Password.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
+			*/
+			void LoginWithUsernameV3(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError,
+				const bool RememberMe = false) const;
+
+			/**
+			* @brief Log in with email/username account using v3 endpoint with 2FA enable
 			*
 			* @param Username User email address or username.
 			* @param Password Password.
@@ -82,6 +112,20 @@ namespace AccelByte
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
+			void LoginWithOtherPlatform(
+				EAccelBytePlatformType PlatformType,
+				const FString& PlatformToken,
+				const FVoidHandler& OnSuccess,
+				const FErrorHandler& OnError) const;
+
+			/**
+			* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc. with 2FA enable
+			*
+			* @param PlatformType Specify platform type that chosen by user to log in.
+			* @param PlatformToken Authentication code that provided by another platform.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
 			void LoginWithOtherPlatform(
 				EAccelBytePlatformType PlatformType,
 				const FString& PlatformToken,

@@ -57,6 +57,38 @@ void User::LoginWithOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	const FString& PlatformToken,
 	const FVoidHandler& OnSuccess,
+	const FErrorHandler& OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("When 2FA enabled This method should change to User::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& PlatformToken,	const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)"));
+
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithOtherPlatformToken(
+		SettingsRef.ClientId,
+		SettingsRef.ClientSecret,
+		FAccelByteUtilities::GetPlatformString(PlatformType),
+		PlatformToken,
+		THandler<FOauth2Token>::CreateLambda(
+			[this, PlatformType, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			CredentialsRef.SetAuthToken(Result, FPlatformTime::Seconds());
+			OnSuccess.ExecuteIfBound();
+					
+		}), FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
+void User::LoginWithOtherPlatform(
+	EAccelBytePlatformType PlatformType,
+	const FString& PlatformToken,
+	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError) const
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -82,6 +114,38 @@ void User::LoginWithOtherPlatform(
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
 }
 	
+void User::LoginWithUsername(
+	const FString& Username,
+	const FString& Password,
+	const FVoidHandler& OnSuccess,
+	const FErrorHandler& OnError) const
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("When 2FA enabled This method should change to User::LoginWithUsername(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError)"));
+
+	CredentialsRef.SetUserEmailAddress(Username);
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithPasswordCredentials(
+		SettingsRef.ClientId,
+		SettingsRef.ClientSecret,
+		Username,
+		Password,
+		THandler<FOauth2Token>::CreateLambda(
+			[this, OnSuccess, OnError](const FOauth2Token& Result)
+		{
+			OnLoginSuccess(OnSuccess, Result); // Curry to general handler					
+		}),
+		FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
+	
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
 void User::LoginWithUsername(
 	const FString& Username,
 	const FString& Password,
@@ -115,6 +179,34 @@ void User::LoginWithUsernameV3(
 	const FString& Username,
 	const FString& Password,
 	const FVoidHandler& OnSuccess,
+	const FErrorHandler& OnError,
+	const bool RememberMe) const
+{
+	FReport::Log(FString(__FUNCTION__));
+	FReport::LogDeprecated(
+		FString(__FUNCTION__),
+		TEXT("When 2FA enabled This method should change to User::LoginWithUsernameV3(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, const bool RememberMe)"));
+
+	CredentialsRef.SetUserEmailAddress(Username);
+	FinalPreLoginEvents(); // Clears CredentialsRef post-auth info, inits schedulers
+	
+	Oauth2::GetTokenWithPasswordCredentialsV3(SettingsRef.ClientId, SettingsRef.ClientSecret, Username, Password,
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess, OnError](const FOauth2Token& Result)
+	{
+		OnLoginSuccess(OnSuccess, Result); // Curry to general handler	
+	}),
+	FErrorHandler::CreateLambda([OnError](const int32 ErrorCode, const FString& ErrorMessage)
+	{
+		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+	}), RememberMe);
+
+	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
+}
+
+void User::LoginWithUsernameV3(
+	const FString& Username,
+	const FString& Password,
+	const FVoidHandler& OnSuccess,
 	const FCustomErrorHandler& OnError,
 	const bool RememberMe) const
 {
@@ -134,7 +226,7 @@ void User::LoginWithUsernameV3(
 	}), RememberMe);
 
 	CredentialsRef.SetBearerAuthRejectedHandler(HttpRef);
-}	
+}
 
 void User::LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const
 {

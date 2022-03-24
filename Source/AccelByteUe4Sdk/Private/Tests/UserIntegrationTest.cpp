@@ -60,8 +60,7 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 	const FString Country = "US";
 	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
 	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
-
-
+	
 	bool bRegisterSuccessful = false;
 	bool bRegisterDone = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
@@ -89,10 +88,7 @@ bool FUserRegisterTest::RunTest(const FString& Parameter)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
-	}), FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& json)
-	{
-		UE_LOG(LogAccelByteUserTest, Error, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
-	}));
+	}), UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
@@ -157,10 +153,7 @@ bool FUserRegisterv2Test::RunTest(const FString& Parameter)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
-	}), FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-	{
-		UE_LOG(LogAccelByteUserTest, Error, TEXT("Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage)
-	}));
+	}), UserTestErrorHandler);
 
 	WaitUntil(bLoginSuccessful, "Waiting for Login...");
 
@@ -225,7 +218,7 @@ bool FUserLoginV3Test::RunTest(const FString& Parameter)
 	{
 		UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 		bLoginSuccessful = true;
-	}), FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+	}), FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("Error. Code: %d, Reason: %s, Description: %s"), ErrorCode, *ErrorMessage);
 	}), true);
@@ -1061,7 +1054,7 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bSteamLoginSuccessful1 = true;
 			bSteamLoginDone1 = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
 				bSteamLoginDone1 = true;
@@ -1085,10 +1078,10 @@ bool FLoginWithSteamSuccess::RunTest(const FString& Parameter)
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
 			bSteamLoginSuccessful2 = true;
 			bSteamLoginDone2 = true;
-		}), FCustomErrorHandler::CreateLambda([&bSteamLoginDone2](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		}), FErrorHandler::CreateLambda([&bSteamLoginDone1](int32 ErrorCode, const FString& ErrorMessage)
 			{
 				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-				bSteamLoginDone2 = true;
+				bSteamLoginDone1 = true;
 			}));
 
 	WaitUntil(bSteamLoginDone2, "Waiting for Login...");
