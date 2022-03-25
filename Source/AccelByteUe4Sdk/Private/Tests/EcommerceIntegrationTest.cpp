@@ -91,6 +91,12 @@ EcommerceExpectedVariable EcommerceTestExpectedVariable{
 	"UE4ChildItem",
 	"UE4GrandChildItem",
 	"UEPurchasingItem",
+	"apiseedGame",
+	"apiseedGame",
+	"apiseedGame",
+	"UE4rootSku",
+	"UE4childSku",
+	"UE4grandchildSku",
 	EcommerceTestArchiveStore,
 	EcommerceTestTemporaryStore,
 	1000, // LootCoin Quantity
@@ -348,6 +354,7 @@ bool FEcommerceTestGetItemsByCriteria::RunTest(const FString& Parameters)
 	ItemCriteria.CategoryPath = EcommerceTestExpectedRootCategoryPath;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedRootItemFound = false;
+	bool bIsPurchasable = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 		{
@@ -357,6 +364,7 @@ bool FEcommerceTestGetItemsByCriteria::RunTest(const FString& Parameters)
 				if (Result.Data[i].Title == EcommerceTestExpectedRootItemTitle)
 				{
 					bExpectedRootItemFound = true;
+					bIsPurchasable = Result.Data[i].Purchasable;
 				}
 			}
 			bGetItemByCriteriaSuccess = true;
@@ -368,6 +376,63 @@ bool FEcommerceTestGetItemsByCriteria::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	AB_TEST_TRUE(bExpectedRootItemFound);
+	AB_TEST_TRUE(bIsPurchasable);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetItemByAppId, "AccelByte.Tests.Ecommerce.C.GetItemByAppId", AutomationFlagMaskEcommerce);
+bool FEcommerceTestGetItemByAppId::RunTest(const FString& Parameters)
+{
+#pragma region GetItemByAppId
+
+	bool bGetItemByAppIdSuccess = false;
+	bool bExpectedRootItemFound = false;
+	bool bIsPurchasable = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
+	FRegistry::Item.GetItemByAppId(EcommerceTestExpectedVariable.ExpectedRootItemAppId, "en", "US", THandler<FAccelByteModelsItemInfo>::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			
+			bExpectedRootItemFound = true;
+			bIsPurchasable = Result.Purchasable;
+			bGetItemByAppIdSuccess = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetItemByAppIdSuccess, "Waiting for get items...");
+
+#pragma endregion GetItemByAppId
+
+	AB_TEST_TRUE(bGetItemByAppIdSuccess);
+	AB_TEST_TRUE(bExpectedRootItemFound);
+	AB_TEST_TRUE(bIsPurchasable);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetItemBySku, "AccelByte.Tests.Ecommerce.C.GetItemBySku", AutomationFlagMaskEcommerce);
+bool FEcommerceTestGetItemBySku::RunTest(const FString& Parameters)
+{
+#pragma region GetItemBySku
+
+	bool bGetItemBySkuSuccess = false;
+	bool bExpectedRootItemFound = false;
+	bool bIsPurchasable = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria"));
+	FRegistry::Item.GetItemBySku(EcommerceTestExpectedVariable.ExpectedRootItemSku, "en", "US", THandler<FAccelByteModelsItemInfo>::CreateLambda([&](const FAccelByteModelsItemInfo& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+
+			bExpectedRootItemFound = true;
+			bIsPurchasable = Result.Purchasable;
+			bGetItemBySkuSuccess = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetItemBySkuSuccess, "Waiting for get items...");
+
+#pragma endregion GetItemBySku
+
+	AB_TEST_TRUE(bGetItemBySkuSuccess);
+	AB_TEST_TRUE(bExpectedRootItemFound);
+	AB_TEST_TRUE(bIsPurchasable);
 	return true;
 }
 
@@ -513,6 +578,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	ItemCriteria.CategoryPath = EcommerceTestExpectedChildCategoryPath;
 	bool bGetItemByCriteriaSuccess = false;
 	bool bExpectedItemFound = false;
+	bool bIsPurchasable = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_VirtualCurrency"));
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 		{
@@ -525,6 +591,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 					Item = Result.Data[i];
 					bExpectedItemFound = true;
 					bGetItemByCriteriaSuccess = true;
+					bIsPurchasable = Result.Data[i].Purchasable;
 				}
 			}
 		}), EcommerceTestErrorHandler);
@@ -564,6 +631,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	ItemCriteria.ItemType = EAccelByteItemType::INGAMEITEM;
 	bool bGetItemByCriteriaSuccess2 = false;
 	bool bExpectedItemFound2 = false;
+	bool bIsPurchasable2 = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_InGameItem"));
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 		{
@@ -577,6 +645,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 					Item = Result.Data[i];
 					bExpectedItemFound2 = true;
 					bGetItemByCriteriaSuccess2 = true;
+					bIsPurchasable2 = Result.Data[i].Purchasable;
 				}
 			}
 		}), EcommerceTestErrorHandler);
@@ -614,6 +683,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	ItemCriteria.ItemType = EAccelByteItemType::MEDIA;
 	bool bGetItemByCriteriaSuccess3 = false;
 	bool bExpectedItemFound3 = false;
+	bool bIsPurchasable3 = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetItemsByCriteria_MediaItem"));
 	FRegistry::Item.GetItemsByCriteria(ItemCriteria, 0, 20, THandler<FAccelByteModelsItemPagingSlicedResult>::CreateLambda([&](const FAccelByteModelsItemPagingSlicedResult& Result)
 		{
@@ -627,6 +697,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 					Item = Result.Data[i];
 					bExpectedItemFound3 = true;
 					bGetItemByCriteriaSuccess3 = true;
+					bIsPurchasable3 = Result.Data[i].Purchasable;
 				}
 			}
 		}), EcommerceTestErrorHandler);
@@ -701,11 +772,14 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess);
 	AB_TEST_TRUE(bExpectedItemFound);
 	AB_TEST_TRUE(bCreateNewOrderSuccess);
+	AB_TEST_TRUE(bIsPurchasable);
 	AB_TEST_TRUE(bGetItemByCriteriaSuccess2);
 	AB_TEST_TRUE(bExpectedItemFound2);
 	AB_TEST_TRUE(bCreateNewOrderSuccess2);
+	AB_TEST_TRUE(bIsPurchasable2);
 	AB_TEST_TRUE(bExpectedItemFound3);
 	AB_TEST_TRUE(bCreateNewOrderSuccess3);
+	AB_TEST_TRUE(bIsPurchasable3);
 	AB_TEST_TRUE(MediaItemEntitlementSuccess);
 	AB_TEST_TRUE(bCreateNewOrderSuccess4);
 	return true;

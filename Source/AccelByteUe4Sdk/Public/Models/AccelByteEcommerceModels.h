@@ -311,6 +311,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemInfo
 		FJsonObjectWrapper LocalExt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
 		TMap<FString, int32> ItemQty;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Item | Models | ItemInfo")
+		bool Purchasable;
 };
 
 USTRUCT(BlueprintType)
