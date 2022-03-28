@@ -157,6 +157,9 @@ enum class EAccelByteTaskState
 
 	/** Task has been canceled. */
 	Cancelled,
+
+	/** Task has been canceled. */
+	Retrying,
 };
 
 class FAccelByteTask;

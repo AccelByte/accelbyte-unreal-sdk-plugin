@@ -261,6 +261,8 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 		FString UserId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 		FString Username; //optional
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
+		FString EmailAddress;
 };
 
 USTRUCT(BlueprintType)

@@ -1950,6 +1950,23 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 
 	WaitUntil(bGetUserData, "Waiting for Get User Data...");
 
+	//STEAM_USER_ID env var is supposed to be the current user logged in to steam
+	const FString SteamUserID = GetSteamUserId();
+	bool bGetPlatformUserData = false;
+	FAccountUserData PlatformUserData;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetPlatformUserData"));
+	FRegistry::User.GetUserByOtherPlatformUserId(EAccelBytePlatformType::Steam, SteamUserID, THandler<FAccountUserData>::CreateLambda([&bGetPlatformUserData, &PlatformUserData](const FAccountUserData& Result)
+		{
+			PlatformUserData = Result;
+			bGetPlatformUserData = true;
+		}), FErrorHandler::CreateLambda([&bGetPlatformUserData](int32 Code, const FString& Message)
+			{
+				bGetPlatformUserData = true;
+				UE_LOG(LogAccelByteUserTest, Error, TEXT("Get User Data Failed..! Error: %d | Message: %s"), Code, *Message);
+			}));
+
+	WaitUntil(bGetPlatformUserData, "Waiting for Get Platform User Data...");
+
 #pragma region DeleteUser
 
 	bDeleteDone1 = false;
@@ -1971,6 +1988,10 @@ bool FLinkSteamAccountSuccess::RunTest(const FString& Parameter)
 	AB_TEST_TRUE(bGetPlatformLinksSuccess);
 	AB_TEST_TRUE(bLoginSuccessful);
 	AB_TEST_EQUAL(UserData.UserId, UserData2.UserId);
+	AB_TEST_EQUAL(UserData.UserId, PlatformUserData.UserId);
+	AB_TEST_EQUAL(UserData.EmailAddress, EmailAddress);
+	AB_TEST_EQUAL(UserData.EmailAddress, UserData2.EmailAddress);
+	AB_TEST_EQUAL(UserData.EmailAddress, PlatformUserData.EmailAddress);
 	AB_TEST_TRUE(bDeleteSuccessful1);
 	return true;
 }
@@ -6205,3 +6226,81 @@ bool FGetInputValidationWhenRegexTrue::RunTest(const FString& Parameter)
 }
 
 #endif 
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FUserGetDataTest, "AccelByte.Tests.AUser.GetData_Email", AutomationFlagMaskUser);
+bool FUserGetDataTest::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 21));
+	const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+
+
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("CreateEmailAccount"));
+	FRegistry::User.Register(EmailAddress, Password, DisplayName, Country, format, THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}), FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				UE_LOG(LogAccelByteUserTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+				bRegisterDone = true;
+			}));
+
+	WaitUntil(bRegisterDone, "Waiting for Registered...");
+
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bool bLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithUsernameAndPassword"));
+	FRegistry::User.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bLoginSuccessful, "Waiting for Login...");
+
+	bool bGetUserData = false;
+	FAccountUserData UserData;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("GetData"));
+	FRegistry::User.GetData(THandler<FAccountUserData>::CreateLambda([&bGetUserData, &UserData](const FAccountUserData& Result)
+		{
+			UserData = Result;
+			bGetUserData = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bGetUserData, "Waiting for Get User Data...");
+
+#pragma region DeleteUserById
+
+	bool bDeleteDone = false;
+	bool bDeleteSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("DeleteUserById"));
+	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FVoidHandler::CreateLambda([&bDeleteDone, &bDeleteSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			bDeleteSuccessful = true;
+			bDeleteDone = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeleteDone, "Waiting for Deletion...");
+
+#pragma endregion DeleteUserById
+
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("Assert.."));
+	AB_TEST_TRUE(bLoginSuccessful);
+	AB_TEST_EQUAL(UserData.EmailAddress, EmailAddress);
+	AB_TEST_EQUAL(UserData.DisplayName, DisplayName);
+	return true;
+}

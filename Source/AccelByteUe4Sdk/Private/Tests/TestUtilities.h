@@ -57,15 +57,15 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_TwoParams(FBlueprintErrorHandler, int32, ErrorCode, const FString&, ErrorMessage);
 
 	DECLARE_DYNAMIC_DELEGATE(FSendNotificationSuccess);
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
+	//UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
 		static void SendNotification(FString Message, bool bAsync, const FSendNotificationSuccess& OnSuccess, const FBlueprintErrorHandler& OnError);
 
 	static void SendNotif(FString UserId, FString Message, bool bAsync, const AccelByte::FVoidHandler & OnSuccess, const FErrorHandler & OnError);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
+	//UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
 		static FString BytesToFString(TArray<uint8> Input);
 
-	UFUNCTION(BlueprintCallable, Category = "AccelByte | Test ")
+	//(BlueprintCallable, Category = "AccelByte | Test ")
 		static TArray<uint8> FStringToBytes(FString Input);
 };
 
