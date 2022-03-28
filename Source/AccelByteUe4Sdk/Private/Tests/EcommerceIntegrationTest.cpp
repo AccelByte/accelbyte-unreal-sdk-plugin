@@ -380,6 +380,7 @@ bool FEcommerceTestGetItemsByCriteria::RunTest(const FString& Parameters)
 	return true;
 }
 
+#if 0 // Disabled because can't automatically tested. Need to create the App on publisher namespace
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetItemByAppId, "AccelByte.Tests.Ecommerce.C.GetItemByAppId", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetItemByAppId::RunTest(const FString& Parameters)
 {
@@ -407,6 +408,7 @@ bool FEcommerceTestGetItemByAppId::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bIsPurchasable);
 	return true;
 }
+#endif
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetItemBySku, "AccelByte.Tests.Ecommerce.C.GetItemBySku", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetItemBySku::RunTest(const FString& Parameters)
