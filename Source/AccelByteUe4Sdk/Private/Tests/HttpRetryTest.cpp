@@ -9,7 +9,7 @@
 #include "HttpModule.h"
 #include "HttpManager.h"
 #include "TestUtilities.h"
-#include "Runtime/Core/Public/Containers/Ticker.h"
+#include "Containers/Ticker.h"
 #include "ParseErrorTest.h"
 #include "GenericPlatform/GenericPlatformProcess.h"
 

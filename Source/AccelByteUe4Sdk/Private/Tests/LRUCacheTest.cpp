@@ -7,7 +7,7 @@
 #include "Core/AccelByteLRUCache.h"
 #include "TestUtilities.h"
 #include "Engine/World.h"
-#include "Runtime/Online/HTTP/Public/HttpManager.h"
+#include "HttpManager.h"
 #include "Core/AccelByteHttpClient.h"
 #include "HttpClientTest.h"
 

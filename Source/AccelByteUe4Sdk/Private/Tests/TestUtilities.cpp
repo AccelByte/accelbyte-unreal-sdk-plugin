@@ -221,7 +221,7 @@ bool CheckSteamTicket() {
 		FPlatformTime::Seconds());
 	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
-};
+}
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {
