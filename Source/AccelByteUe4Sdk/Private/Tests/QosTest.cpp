@@ -2,6 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
+#include "AccelByteUe4SdkModule.h"
 #include "Misc/AutomationTest.h"
 #include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerQosManagerApi.h"
@@ -127,6 +128,11 @@ bool InitTeardown(TArray<FTestUser>& QosTestUsers)
 
 
 #pragma region Utils
+/**
+ * @brief If >0 && <10m, we'll set to interval to 10m.
+ * @param NewQosLatencyPollIntervalSecs 
+ * @param NewQosServerLatencyPollIntervalSecs 
+ */
 void SetQosSchedulerSettings(const float NewQosLatencyPollIntervalSecs, const float NewQosServerLatencyPollIntervalSecs)
 {
 	FRegistry::Settings.QosLatencyPollIntervalSecs = NewQosLatencyPollIntervalSecs;
@@ -142,12 +148,17 @@ void QosTestLogLatencies(const TArray<TPair<FString, float>>& LatenciesResult)
 	}
 }
 
-const auto QosTestGetServerLatencies = [](
+/**
+ * @brief Be sure you set Settings::QosServerLatencyPollIntervalSecs > 0 to have any effect.
+ * - Gets server regions.
+ *   - Pings latencies on success, if bPingRegionsOnSuccess
+ */
+const auto QosTestGetServerLatenciesThenPing = [](
 	const FApiClientPtr& QosTestApiUserPtr,
+	const bool bPingRegionsOnSuccess,
 	TArray<TPair<FString, float>>& OutServerLatencies)
 {
 	const FString FuncName = "QosTestGetServerLatencies";
-	constexpr bool bPingRegionsOnSuccess = false;
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteQosTest, Display, TEXT("%s"), *FuncName);
@@ -184,54 +195,12 @@ void QosTestRemoveLatencyPollers(const FApiClientPtr& ApiUserPtr)
 }
 
 /**
- * @brief Start Latencies scheduler to run every x seconds,
- *   then wait for x ticks before determining success.
- */
-const auto QosTestInitGetLatenciesScheduler = [](
-	const FApiClientPtr& QosTestApiUserPtr,
-	const float& PollIntervalSeconds,
-	const int32 NumTimesToTest,
-	TArray<TPair<FString, float>>& OutLastLatencies)
-{
-	const FString FuncName = "QosTestInitGetLatenciesScheduler";
-	bool bIsOk = false;
-	bool bIsDone = false;
-	int32 Counter{0};
-	UE_LOG(LogAccelByteQosTest, Display, TEXT("%s"), *FuncName);
-
-	QosTestApiUserPtr->Qos.InitGetLatenciesScheduler(
-	PollIntervalSeconds,
-	THandler<TArray<TPair<FString, float>>>::CreateLambda(
-		[&](const TArray<TPair<FString, float>>& OnTickResult)
-	{
-		UE_LOG(LogAccelByteQosTest, Log, TEXT("%s Success (%d/%d)!"),
-			*FuncName, Counter + 1, NumTimesToTest);
-			
-		QosTestLogLatencies(OnTickResult);
-			
-		OutLastLatencies = OnTickResult;
-		bIsOk = true;
-		Counter++;
-		bIsDone = Counter >= NumTimesToTest; // Stops the func immediately, when true
-	}),
-	FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-	{
-		QosAutoTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-		bIsDone = true; // Finish the entire func - stop early instead of wait for full timeout
-	}));
-
-	WaitUntil(bIsDone, FString::Printf(TEXT("Waiting for %s ...)"), *FuncName));
-	return bIsOk;
-};
-
-/**
  * @brief Start Server (target regions) Latencies scheduler to run every x seconds, caching QosServers.
  *   then wait for x ticks before determining success.
  *   - DIRECTLY accesses the scheduler - skips login.
  */
 const auto QosTestInitGetServerLatenciesSchedulerDirectly = [](
 	const FApiClientPtr& QosTestApiUserPtr,
-	const float& PollIntervalSeconds,
 	const int32 NumTimesToTest)
 {
 	const FString FuncName = "QosTestInitGetServerLatenciesScheduler";
@@ -241,7 +210,6 @@ const auto QosTestInitGetServerLatenciesSchedulerDirectly = [](
 	UE_LOG(LogAccelByteQosTest, Display, TEXT("%s"), *FuncName);
 
 	QosTestApiUserPtr->Qos.InitGetServerLatenciesScheduler(
-	PollIntervalSeconds,
 	THandler<TArray<TPair<FString, float>>>::CreateLambda(
 		[&](const TArray<TPair<FString, float>>& OnTickResult)
 	{
@@ -314,54 +282,35 @@ void FQosTestSpec::Define()
 
 		// ===================================================================
 		
-		LatentIt("01: Should get server latencies once",
+		LatentIt("01: Should get server latency regions only (no ping, no polling)",
 			[this](const FDoneDelegate& Done)
 		{
-			// Also caches the QosServers var to cache regions for future GetLatency tickers.
-			const bool bIsSuccess = QosTestGetServerLatencies(QosTestApiUserPtrArr[0], QosTestLatencies);
-
-			Done.Execute();
-			return bIsSuccess;
-		});
-
-		LatentIt("02: Should init the 'get latencies scheduler' (uses cached server regions), called per x seconds",
-			[this](const FDoneDelegate& Done)
-		{
-			const FApiClientPtr& ApiUserPtr = QosTestApiUserPtrArr[0];
-			constexpr float IntervalSecs = 2;
-			constexpr int32 NumTimesToTest = 3;
-				
-			// We first want to update the QosServers var to cache regions.
-			const bool bSetQosServers = QosTestGetServerLatencies(ApiUserPtr, QosTestLatencies);
-			if (!bSetQosServers)
-			{
-				Done.Execute();
-				return false;
-			}
-
-			// -------------
-			// Now that QosServers is cached, we can call the scheduler directly with test intervals.  
-			const bool bIsSuccess = QosTestInitGetLatenciesScheduler(
-				ApiUserPtr,
-				IntervalSecs,
-				NumTimesToTest,
+			constexpr bool bPingRegionsOnSuccess = false;
+			const bool bIsSuccess = QosTestGetServerLatenciesThenPing(
+				QosTestApiUserPtrArr[0],
+				bPingRegionsOnSuccess,
 				QosTestLatencies);
 
 			Done.Execute();
 			return bIsSuccess;
 		});
-		
-		LatentIt("03: Should set Settings::QosServerLatencyPollIntervalSecs > 0, then login "
-			"to trigger init Qos scheduler, then wait 10s for polling logs", [this](const FDoneDelegate& Done)
+
+		LatentIt("02: Should Should set Settings::QosServerLatencyPollIntervalSecs > 0; init the 'get latencies scheduler' (uses cached server regions); "
+			"if Settings::QosServerLatencyPollIntervalSecs < 0, nothing will happen (success)",
+			[this](const FDoneDelegate& Done)
 		{
 			// Logged in: Call the scheduler directly with test intervals, caching AccelByteQos::QosServers (latency region targets).
-			constexpr float NumSecsToWait = 10; // See logs to ensure you see polling success. @todo Explicitly check. 
-			const bool bIsSuccess = QosTestWaitXSeconds(NumSecsToWait);
-					
 			SetQosSchedulerSettings(
 				OrigQosLatencyPollIntervalSecs,
-				OrigQosServerLatencyPollIntervalSecs);			
-					
+				OrigQosServerLatencyPollIntervalSecs);
+
+			// To catch if successful or not, we re-init the scheduler:
+			constexpr bool bPingRegionsOnSuccess = true;
+			const bool bIsSuccess = QosTestGetServerLatenciesThenPing(
+				QosTestApiUserPtrArr[0],
+				bPingRegionsOnSuccess,
+				QosTestLatencies);
+
 			Done.Execute();
 			return bIsSuccess;
 		});

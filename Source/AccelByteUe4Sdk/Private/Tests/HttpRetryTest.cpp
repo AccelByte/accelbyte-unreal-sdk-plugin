@@ -2,8 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#pragma once
-
 #include <chrono>
 #include <vector>
 
@@ -13,6 +11,7 @@
 #include "TestUtilities.h"
 #include "Runtime/Core/Public/Containers/Ticker.h"
 #include "ParseErrorTest.h"
+#include "GenericPlatform/GenericPlatformProcess.h"
 
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Api/AccelByteOrderApi.h"
@@ -30,36 +29,63 @@ using AccelByte::Api::UserProfile;
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetryTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpRetryTest);
 
-static const int32 AutomationFlagMaskHttpRetry = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
-
-using namespace std;
-
-static Settings OriginalSettings;
-void ResetSettings();
-
-class FHttpRetrySchedulerTestingMode: public FHttpRetryScheduler{
+class FHttpRetrySchedulerTestingMode : public FHttpRetryScheduler
+{
 public:
 	FHttpRetrySchedulerTestingMode()
+		: FHttpRetryScheduler()
 	{
 		// Set this state to initialized without Startup() function that make the ticker duplication
+	}
+
+	virtual ~FHttpRetrySchedulerTestingMode()
+	{
+	}
+
+	virtual void Startup() override
+	{
+		FHttpRetryScheduler::Startup();
+	}
+	
+	void Startup(const FDelegateHandle& InTickDelegate)
+	{
+		PollRetryHandle = InTickDelegate;
 		State = EState::Initialized;
-	};
+		UE_LOG(LogAccelByteHttpRetryTest, Verbose, TEXT("HTTP Retry Scheduler Testing Mode has been INITIALIZED"));
+	}
+
+	virtual void Shutdown() override
+	{
+		// flush http requests
+		if (!TaskQueue.IsEmpty())
+		{
+			// cancel unfinished http requests, so don't hinder the shutdown
+			TaskQueue.Empty();
+		}
+
+		FHttpRetryScheduler::Shutdown();
+	}
 };
 
 class FHttpTestWorker : public FRunnable
 {
 public:
-	FHttpTestWorker(const FString& ThreadName, const TSharedRef<FHttpRetryScheduler>& Scheduler, const FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double Delay = 0.0f)
+	FHttpTestWorker(const FString& ThreadName
+		, const TSharedRef<FHttpRetryScheduler>& Scheduler
+		, const FHttpRequestPtr& Request
+		, const FHttpRequestCompleteDelegate& CompleteDelegate
+		, double RequestTime
+		, double Delay = 0.0f)
 		: Scheduler(Scheduler)
 		, Request(Request)
 		, RequestCompleteDelegate(CompleteDelegate)
 		, RequestTime(RequestTime)
 		, DelayTime(Delay)
-	{ 
+	{
 		Thread = FRunnableThread::Create(this, *ThreadName);
 	}
 
-	~FHttpTestWorker()
+	virtual ~FHttpTestWorker()
 	{
 		delete Thread;
 		Thread = nullptr;
@@ -90,705 +116,1108 @@ private:
 	FRunnableThread* Thread;
 };
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(HttpRetryBackupSettings, "AccelByte.Tests.Core.HttpRetry.A.BackupSettings", AutomationFlagMaskHttpRetry);
-bool HttpRetryBackupSettings::RunTest(const FString& Parameter)
-{
-	OriginalSettings = FRegistry::Settings;
-	return true;
-}
+DECLARE_DELEGATE_FiveParams(FHttpRetryTestDelegate, const FString& /*Url*/, bool& /*bRequestCompleted*/, bool& /*bRequestSucceeded*/, int& /*NumRequestRetry*/, FAccelByteTaskPtr& /*AccelByteTask*/);
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_GotError500Twice_RetryTwice, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_GotError500Twice_RetryTwice", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_GotError500Twice_RetryTwice::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-
-	auto Request = FHttpModule::Get().CreateRequest();
-	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-	//Error 503 Service Unavailable, with response content:
-	//{
-	//	"numericErrorCode": 33333,
-	//		"errorCode" : "httpRetryErrorResponse",
-	//		"errorMessage" : "This endpoint will always answer with this exact response"
-	//}
-
-	Request->SetURL("http://www.mocky.io/v2/5d07138a3000001224051d6f");
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	int NumRequestRetry = 0;
-
-	//Hijack OnProcessRequestComplete to peek if it's retried or not
-	Request->OnProcessRequestComplete().BindLambda(
-	[&NumRequestRetry, &CurrentTime]
-	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		NumRequestRetry++;
-		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried %d times"), CurrentTime, NumRequestRetry);
-	});
-	
-	//Official OnProcessRequestComplete
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
-	[&RequestCompleted, &CurrentTime]
-	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed"), CurrentTime);
-		RequestCompleted = true;
-	});
-
-	float SpecifiedDeltaTime = 0.5f;
-	CurrentTime = 10.0;
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-
-	while (CurrentTime < 16)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
-	AB_TEST_FALSE(RequestCompleted);
-	AB_TEST_TRUE(NumRequestRetry >= 2);
-
-	FRegistry::Credentials.ForgetAll();
-	
-	Ticker.RemoveTicker(TickerDelegate);
-	ResetSettings();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NetworkError_Retry, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NetworkError_Retry", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_NetworkError_Retry::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-		Scheduler->PollRetry(CurrentTime);
-
-		return true;
-	}),
-		0.2f);
-
-
-	auto Request = FHttpModule::Get().CreateRequest();
-
-	Request->SetURL("http://localhost:11223/connection_refused");
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	int NumRequestRetry = 0;
-
-	//Hijack OnProcessRequestComplete to peek if it's retried or not
-	Request->OnProcessRequestComplete().BindLambda(
-		[&NumRequestRetry, &CurrentTime]
-	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		NumRequestRetry++;
-		UE_LOG(LogAccelByteHttpRetryTest, Warning, TEXT("%.4f Request Retried %d times"), CurrentTime, NumRequestRetry);
-	});
-
-	//Official OnProcessRequestComplete
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
-		[&RequestCompleted, &CurrentTime]
-	(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed"), CurrentTime);
-		RequestCompleted = true;
-	});
-
-	float SpecifiedDeltaTime = 0.5f;
-	CurrentTime = 10.0;
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-
-	while (CurrentTime < 30 && NumRequestRetry < 2)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f NumRequestRetry=%d"), CurrentTime, NumRequestRetry);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed=%d"), CurrentTime, RequestCompleted);
-	AB_TEST_FALSE(RequestCompleted);
-	AB_TEST_TRUE(NumRequestRetry >= 2);
-
-	FRegistry::Credentials.ForgetAll();
-
-	Ticker.RemoveTicker(TickerDelegate);
-	ResetSettings();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoConnection_RequestImmediatelyCompleted, "AccelByte.DisabledTests.Core.HttpRetry.ProcessRequest_NoConnection_RequestImmediatelyCompleted", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_NoConnection_RequestImmediatelyCompleted::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	auto Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL("http://www.accelbyte.example"); //Address that should not exist forever
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		if (Response.IsValid()) 
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d"), CurrentTime, Response->GetResponseCode());
-		}
-		else
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, NoResponse"), CurrentTime);
-		}
-
-		RequestCompleted = true;
-	});
-
+BEGIN_DEFINE_SPEC(FHttpRetryTestSpec, "AccelByte.Tests.Core.HttpRetry",
+	EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask |
+	EAutomationTestFlags::CriticalPriority)
+	FTicker Ticker = FTicker::GetCoreTicker();
+	FHttpRetrySchedulerTestingMode Scheduler;
+	FDelegateHandle TickDelegate;
+	double CurrentTime = 0.0f;
+	int Timeout = FHttpRetryScheduler::TotalTimeout;
 	float SpecifiedDeltaTime = 0.2f;
-	CurrentTime = 10.0;
-	Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+	FString BaseUrl = TEXT("https://httpbin.org");
+	FHttpRetryTestDelegate TestDelegate;
+END_DEFINE_SPEC(FHttpRetryTestSpec)
 
-	while (CurrentTime < 70.3 && !RequestCompleted)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	AB_TEST_TRUE(RequestCompleted);
-	AB_TEST_FALSE(Request->GetResponse().IsValid());
-	AB_TEST_EQUAL(Request->GetStatus(), EHttpRequestStatus::Failed_ConnectionError);
-
-	Ticker.RemoveTicker(TickerDelegate);
-	FRegistry::Credentials.ForgetAll();
-
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequest_NoResponseFor60s_RequestCancelled, "AccelByte.Tests.Core.HttpRetry.ProcessRequest_NoResponseFor60s_RequestCancelled", AutomationFlagMaskHttpRetry);
-bool ProcessRequest_NoResponseFor60s_RequestCancelled::RunTest(const FString& Parameter)
+void FHttpRetryTestSpec::Define()
 {
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
+	int32 StatusCode = 0;
 
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	auto Request = FHttpModule::Get().CreateRequest();
-	//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-	//Sucess 200, delayed by 60s
-	Request->SetURL("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=60s");
-	Request->SetVerb(TEXT("GET"));
-	Request->SetHeader(TEXT("Content-Type"), TEXT("text/plain; charset=utf-8"));
-	Request->SetHeader(TEXT("Accept"), TEXT("text/html; charset=utf-8"));
-	bool RequestCompleted = false;
-	
-	auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		if (Response.IsValid())
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d"), CurrentTime, Response->GetResponseCode());
-		}
-		else
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, NoResponse"), CurrentTime);
-		}
-
-		RequestCompleted = true;
-	});
-
-	float SpecifiedDeltaTime = 0.2f;
-	CurrentTime = 10.0;
-	auto AccelByteTask = Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-
-	while (CurrentTime < 70.3 && !RequestCompleted)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime / 2); //lying to Scheduler, it's actually 30s instead of 60s. So mocky still hold the response, while Scheduler thinks that it's timeout.
-	}
-
-	AB_TEST_TRUE(RequestCompleted);
-	AB_TEST_FALSE(Request->GetResponse().IsValid());
-	AB_TEST_EQUAL(Request->GetStatus(), EHttpRequestStatus::Failed);
-	AB_TEST_EQUAL(AccelByteTask->State(), EAccelByteTaskState::Cancelled);
-
-	FRegistry::Credentials.ForgetAll();
-	Ticker.RemoveTicker(TickerDelegate);
-	return true;
-}
-
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithValidURL_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithValidURL_AllCompleted", AutomationFlagMaskHttpRetry);
-bool ProcessManyRequests_WithValidURL_AllCompleted::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	int RequestCompleted = 0;
-	int RequestCount = 15;
-
-	for (int i = 0; i < RequestCount; i++)
-	{
-		auto Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(FString::Printf(TEXT("http://www.example.com/?id=%d"), i));
-		Request->SetVerb(TEXT("GET"));
-
-		auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&CurrentTime, &RequestCompleted](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed, Status %d, URL=%s"), CurrentTime, Response->GetResponseCode(), *Request->GetURL());
-			RequestCompleted++;
-
-		});
-
-		Scheduler->ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
-	}
-
-	float SpecifiedDeltaTime = 0.2f;
-	CurrentTime = 10.0;
-
-	while (CurrentTime < 15.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	AB_TEST_EQUAL(RequestCompleted, RequestCount);
-
-	FRegistry::Credentials.ForgetAll();
-	Ticker.RemoveTicker(TickerDelegate);
-
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
-bool ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	int RequestCompleted = 0;
-	int RequestSucceeded = 0;
-	int RequestFailed = 0;
-	TArray<FHttpRequestPtr> CancelledRequests;
-
-	for (int i = 0; i < 12; i++)
-	{
-		auto Request = FHttpModule::Get().CreateRequest();
-
-		switch (i % 4)
-		{
-		case 0:
-			Request->SetURL(FString::Printf(TEXT("http://www.example.com/?id=%d"), i));
-
-			break;
-		case 1:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//BadRequest 400, delayed by 10s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), i));
-
-			break;
-		case 2:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//BadRequest 400, delayed by 10s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), i));
-			CancelledRequests.Add(Request);
-
-			break;
-		case 3:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//Sucess 200, delayed by 20s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=20s&id=%d"), i));
-
-			break;
-		}
-
-		Request->SetVerb(TEXT("GET"));
-
-		auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &RequestSucceeded, &RequestFailed](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-		{
-			RequestCompleted++;
-
-			if (Request->GetStatus() == EHttpRequestStatus::Succeeded)
+	TickDelegate = Ticker.AddTicker(
+		FTickerDelegate::CreateLambda([this](float)->bool
 			{
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus = %s, ResponseCode=%d, URL=%s"), ToString(Request->GetStatus()), Response->GetResponseCode(), *Request->GetURL());
-				RequestSucceeded++;
-			}
-			else
+				CurrentTime = FPlatformTime::Seconds();
+				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Poll Retry"), CurrentTime);
+				Scheduler.PollRetry(CurrentTime);
+
+				return true;
+			}),
+		SpecifiedDeltaTime);
+
+	TestDelegate = FHttpRetryTestDelegate::CreateLambda(
+		[this](const FString& Url, bool& bRequestCompleted, bool& bRequestSucceeded, int& NumRequestRetry, FAccelByteTaskPtr& AccelByteTask)
+		{
+			double Timer = 0.0f;
+
 			{
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus=%s, URL=%s"), ToString(Request->GetStatus()), *Request->GetURL());
-				RequestFailed++;
-			}
+				auto Request = FHttpModule::Get().CreateRequest();
+				Request->SetURL(Url);
+				Request->SetVerb(TEXT("GET"));
 
-		});
-
-		Scheduler->ProcessRequest(Request, RequestCompleteDelegate, 10.01);
-	}
-
-	CurrentTime = 10.0;
-	float SpecifiedDeltaTime = 0.5f;
-
-	while (CurrentTime < 15.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestFailed, 0);
-	AB_TEST_EQUAL(RequestSucceeded, 3);
-
-	for (const auto& request : CancelledRequests)
-	{
-		request->CancelRequest();
-	}
-
-	while (CurrentTime < 25.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestFailed, 3);
-	AB_TEST_EQUAL(RequestSucceeded, 6);
-
-	while (CurrentTime < 35.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestFailed, 3);
-	AB_TEST_EQUAL(RequestSucceeded, 9);
-
-	FRegistry::Credentials.ForgetAll();
-	Ticker.RemoveTicker(TickerDelegate);
-
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ProcessRequestsChain_WithValidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.ProcessRequestsChain_WithValidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
-bool ProcessRequestsChain_WithValidURLs_AllCompleted::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto& Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-
-	auto SendMockyRequest = [&](int Id, const FHttpRequestCompleteDelegate& OnCompleted)
-	{
-		//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-		//Sucess 200, delayed by 2s
-		auto Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c6cc89d370000d808fa2fdd?mocky-delay=1s&id=%d"), Id));
-		Request->SetVerb(TEXT("GET"));
-		Scheduler->ProcessRequest(Request, OnCompleted, CurrentTime);
-		FHttpModule::Get().GetHttpManager().Flush(false);
-	};
-
-	auto TickerDelegate1 = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-			Scheduler->PollRetry(CurrentTime);
-
-			return true;
-		}),
-		0.2f);
-
-	auto TickerDelegate2 = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Http Module"), CurrentTime);
-			FHttpModule::Get().GetHttpManager().Tick(DeltaTime);
-
-			return true;
-		}),
-		0.2f);
-
-	float SpecifiedDeltaTime = 0.5f;
-	CurrentTime = 10.0;
-	int RequestCompleted = 0;
-	using Del = FHttpRequestCompleteDelegate;
-
-	SendMockyRequest(0, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 0"), CurrentTime);
-		RequestCompleted++;
-		SendMockyRequest(1, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-		{
-			UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 1"), CurrentTime);
-			RequestCompleted++;
-			SendMockyRequest(2, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-			{
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 2"), CurrentTime);
-				RequestCompleted++;
-				SendMockyRequest(3, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-				{
-					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 3"), CurrentTime);
-					RequestCompleted++;
-					SendMockyRequest(4, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+				//Hijack OnRequestWillRetry to peek if it's retried or not
+				Request->OnRequestWillRetry().BindLambda(
+					[this, &NumRequestRetry](FHttpRequestPtr, FHttpResponsePtr, float)
 					{
-						UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 4"), CurrentTime);
-						RequestCompleted++;
-					}));
-				}));
-			}));
-		}));
-	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
+						NumRequestRetry++;
+						UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Retried %d times"), CurrentTime, NumRequestRetry);
+					});
 
-	SendMockyRequest(5, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		RequestCompleted++;
-	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
+				const auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+					[this, &bRequestCompleted, &bRequestSucceeded](FHttpRequestPtr, FHttpResponsePtr Response, bool)
+					{
+						UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed"), CurrentTime);
+						bRequestCompleted = true;
+						bRequestSucceeded = (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()));
+					});
 
-	SendMockyRequest(6, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		RequestCompleted++;
-		SendMockyRequest(7, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-		{
-			RequestCompleted++;
-			SendMockyRequest(8, Del::CreateLambda([&](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-			{
-				RequestCompleted++;
-			}));
-		}));
-	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
-
-	SendMockyRequest(9, Del::CreateLambda([&RequestCompleted, &Scheduler, &CurrentTime](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		RequestCompleted++;
-	}));
-	FHttpModule::Get().GetHttpManager().Flush(false);
-
-	while (CurrentTime < 50.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
-
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestCompleted, 10);
-
-	FRegistry::Credentials.ForgetAll();
-	Ticker.RemoveTicker(TickerDelegate1);
-	Ticker.RemoveTicker(TickerDelegate2);
-
-	ResetSettings();
-	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(Concurrency_ProcessManyRequests_WithSomeInvalidURLs_AllCompleted, "AccelByte.Tests.Core.HttpRetry.Concurrency.ProcessManyRequests_WithSomeInvalidURLs_AllCompleted", AutomationFlagMaskHttpRetry);
-bool Concurrency_ProcessManyRequests_WithSomeInvalidURLs_AllCompleted::RunTest(const FString& Parameter)
-{
-	auto Scheduler = MakeShared<FHttpRetrySchedulerTestingMode>();
-	auto Ticker = FTicker::GetCoreTicker();
-	double CurrentTime;
-	TArray<TSharedPtr<FHttpTestWorker>> Tasks;
-
-	auto TickerDelegate = Ticker.AddTicker(
-		FTickerDelegate::CreateLambda([Scheduler, &CurrentTime](float DeltaTime)
-	{
-		UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Poll Retry"), CurrentTime);
-		Scheduler->PollRetry(CurrentTime);
-
-		return true;
-	}),
-		0.2f);
-
-	int TotalRequests = 24;
-	int RequestCompleted = 0;
-	int RequestSucceeded = 0;
-	int RequestFailed = 0;
-	int FirstPass = 0;
-
-	TArray<FHttpRequestPtr> CancelledRequests;
-
-	for (int count = 0; count < TotalRequests; count++)
-	{
-		FString URL = TEXT("");
-		auto Request = FHttpModule::Get().CreateRequest();
-		int modulo = count % 4;
-		double DelayTime = (double)modulo;
-
-		switch (modulo)
-		{
-		case 0:
-			Request->SetURL(FString::Printf(TEXT("http://www.example.com/?id=%d"), count));
-			FirstPass++;
-
-			break;
-		case 1:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//BadRequest 400, delayed by 10s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), count));
-
-			break;
-		case 2:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//BadRequest 400, delayed by 10s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=10s&id=%d"), count));
-			CancelledRequests.Add(Request);
-
-			break;
-		case 3:
-			//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
-			//Sucess 200, delayed by 20s
-			Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=20s&id=%d"), count));
-
-			break;
-		}
-
-		Request->SetVerb(TEXT("GET"));
-
-		auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda([&RequestCompleted, &RequestSucceeded, &RequestFailed](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-		{
-			RequestCompleted++;
-
-			if (Request->GetStatus() == EHttpRequestStatus::Succeeded)
-			{
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus=%s, ResponseCode=%d, URL=%s"), ToString(Request->GetStatus()), Response->GetResponseCode(), *Request->GetURL());
-				RequestSucceeded++;
-			}
-			else
-			{
-				UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("RequestStatus=%s, URL=%s"), ToString(Request->GetStatus()), *Request->GetURL());
-				RequestFailed++;
+				AccelByteTask = Scheduler.ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
 			}
 
+			while (!bRequestCompleted && Timer <= Timeout + 1)
+			{
+				Timer += SpecifiedDeltaTime;
+				Ticker.Tick(SpecifiedDeltaTime);
+				FPlatformProcess::Sleep(SpecifiedDeltaTime);
+			}
 		});
 
-		FString ThreadName = FString::Printf(TEXT("Concurrency_%03d"), count);
-		TSharedPtr<FHttpTestWorker> Task = MakeShared<FHttpTestWorker>(ThreadName, Scheduler, Request, RequestCompleteDelegate, 10.01, DelayTime);
-		Tasks.Add(Task);
-	}
+	Describe("while sending a single request", [this]()
+		{
+			LatentBeforeEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 9;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					CurrentTime = FPlatformTime::Seconds();
+					Scheduler.Startup(TickDelegate);
+					Done.Execute();
+				});
 
-	CurrentTime = 10.0;
-	float SpecifiedDeltaTime = 0.5f; 
-	
-	while (CurrentTime < 15.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
+			LatentIt("should receive successful response when sending request with a valid URL"
+				//, EAsyncExecution::ThreadPool
+				, [this](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
 
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestFailed, 0);
-	AB_TEST_EQUAL(RequestSucceeded, FirstPass);
+					TestDelegate.Execute(FString::Printf(TEXT("%s/get"), *BaseUrl)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
 
-	for (const auto& Request : CancelledRequests)
-	{
-		Request->CancelRequest();
-	}
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
 
-	while (CurrentTime < 40.0)
-	{
-		CurrentTime += SpecifiedDeltaTime;
-		Ticker.Tick(SpecifiedDeltaTime);
-		FPlatformProcess::Sleep(SpecifiedDeltaTime);
-	}
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_TRUE(bRequestSucceeded);
 
-	int FailedNum = CancelledRequests.Num();
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Failed %d"), CurrentTime, RequestFailed);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Succeeded %d"), CurrentTime, RequestSucceeded);
-	UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Request Completed %d"), CurrentTime, RequestCompleted);
-	AB_TEST_EQUAL(RequestFailed, FailedNum);
-	AB_TEST_EQUAL(RequestSucceeded, TotalRequests - FailedNum);
+					return true;
+				});
 
-	FRegistry::Credentials.ForgetAll();
-	Ticker.RemoveTicker(TickerDelegate);
+			// Disabled due to inconsistent behavior from the ISP which will affect the test significantly
+			xLatentIt("should be immediately completed when sending request with an invalid URL"
+				//, EAsyncExecution::ThreadPool
+				, [this](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
 
-	for (auto& Task : Tasks)
-	{
-		Task->EnsureCompletion();
-	}
+					TestDelegate.Execute(TEXT("http://accelbyte.example")
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
 
-	return true;
-}
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
 
-void ResetSettings()
-{
-	FRegistry::Settings = OriginalSettings;
-	FRegistry::Credentials.SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_EQUAL(AccelByteTask->State(), EAccelByteTaskState::Completed);
+
+					return true;
+				});
+
+			LatentIt("should be cancelled when not receiving any response until timed out"
+				//, EAsyncExecution::ThreadPool
+				, [this](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/delay/10"), *BaseUrl)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(AccelByteTask->State(), EAccelByteTaskState::Cancelled);
+
+					return true;
+				});
+
+			LatentIt("should retry sending requests when having network error"
+				//, EAsyncExecution::ThreadPool
+				, [this](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(TEXT("http://localhost:11223/connection_refused")
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			LatentAfterEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 60;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = Timeout;
+					Scheduler.Shutdown();
+					Done.Execute();
+				});
+		});
+
+	Describe("while using default behaviors", [this, &StatusCode]()
+		{
+			LatentBeforeEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 15;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					CurrentTime = FPlatformTime::Seconds();
+					Scheduler.Startup(TickDelegate);
+					Done.Execute();
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::RetryWith);
+			LatentIt(FString::Printf(TEXT("should retry sending requests when receiving status code %d (RetryWith)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::ServerError);
+			LatentIt(FString::Printf(TEXT("should retry sending requests when receiving status code %d (ServerError)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::BadGateway);
+			LatentIt(FString::Printf(TEXT("should retry sending requests when receiving status code %d (BadGateway)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::ServiceUnavail);
+			LatentIt(FString::Printf(TEXT("should retry sending requests when receiving status code %d (ServiceUnavail)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::GatewayTimeout);
+			LatentIt(FString::Printf(TEXT("should retry sending requests when receiving status code %d (GatewayTimeout)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::BadRequest);
+			LatentIt(FString::Printf(TEXT("should not retry sending requests when receiving status code %d (BadRequest)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::NotFound);
+			LatentIt(FString::Printf(TEXT("should not retry sending requests when receiving status code %d (NotFound)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					return true;
+				});
+
+			StatusCode = static_cast<int32>(EHttpResponseCodes::Type::Denied);
+			LatentIt(FString::Printf(TEXT("should not retry sending requests when receiving status code %d (Denied)"), StatusCode)
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					return true;
+				});
+
+			LatentAfterEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 60;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = Timeout;
+					Scheduler.Shutdown();
+					Done.Execute();
+				});
+		});
+
+	StatusCode = static_cast<int32>(EHttpResponseCodes::Type::ServerError);
+	Describe(FString::Printf(TEXT("while using modified behaviors by replacing handler for %d (ServerError)"), StatusCode), [this, StatusCode]()
+		{
+			LatentBeforeEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 15;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					CurrentTime = FPlatformTime::Seconds();
+					Scheduler.Startup(TickDelegate);
+					Done.Execute();
+				});
+
+			LatentIt("should not retry sending requests when handler returns Task Completed"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Completed;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should not retry sending requests when handler returns Task Cancelled"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Cancelled;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should not retry sending requests when handler returns Task Failed"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Failed;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should retry sending requests when handler returns Task Retrying"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Retrying;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should retry sending requests when handler returns Task Running"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Running;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should retry sending requests when handler returns Task Pending"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Retrying;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_TRUE(NumRequestRetry > 0);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentIt("should be paused until timed oud when handler returns Task Paused"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this, StatusCode](const FDoneDelegate& Done)->bool
+				{
+					FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode), FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
+						[this](int32)->EAccelByteTaskState
+						{
+							return EAccelByteTaskState::Paused;
+						}));
+
+					bool bRequestCompleted = false;
+					bool bRequestSucceeded = false;
+					int NumRequestRetry = 0;
+					int ExpectedRetry = 0;
+					FAccelByteTaskPtr AccelByteTask;
+
+					TestDelegate.Execute(FString::Printf(TEXT("%s/status/%d"), *BaseUrl, StatusCode)
+						, bRequestCompleted
+						, bRequestSucceeded
+						, NumRequestRetry
+						, AccelByteTask);
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent a Request and %d Completed"), CurrentTime, bRequestCompleted);
+					Done.Execute();
+
+					AB_TEST_TRUE(bRequestCompleted);
+					AB_TEST_FALSE(bRequestSucceeded);
+					AB_TEST_EQUAL(NumRequestRetry, ExpectedRetry);
+
+					FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(static_cast<EHttpResponseCodes::Type>(StatusCode));
+
+					return true;
+				});
+
+			LatentAfterEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 60;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = Timeout;
+					Scheduler.Shutdown();
+					Done.Execute();
+				});
+		});
+
+	Describe("while sending multiple requests at once", [this]()
+		{
+			LatentBeforeEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 15;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					CurrentTime = FPlatformTime::Seconds();
+					Scheduler.Startup(TickDelegate);
+					Done.Execute();
+				});
+
+			LatentIt("should received successful responses when sending multiple requests with all valid URLs"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this](const FDoneDelegate& Done)
+				{
+					int RequestCompleted = 0;
+					int RequestSucceeded = 0;
+					constexpr int RequestCount = 15;
+
+					for (int index = 0; index < RequestCount; index++)
+					{
+						auto Request = FHttpModule::Get().CreateRequest();
+						Request->SetURL(FString::Printf(TEXT("%s/get?id=%d"), *BaseUrl, index));
+						Request->SetVerb(TEXT("GET"));
+
+						auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+							[this, &RequestCompleted, &RequestSucceeded](FHttpRequestPtr Request, FHttpResponsePtr Response, bool)
+							{
+								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed, URL=%s"), CurrentTime, *Request->GetURL());
+								RequestCompleted++;
+								if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+								{
+									RequestSucceeded++;
+								}
+							});
+
+						Scheduler.ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+					}
+
+					double Timer = 0.0f;
+
+					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
+					{
+						Timer += SpecifiedDeltaTime;
+						Ticker.Tick(SpecifiedDeltaTime);
+						FPlatformProcess::Sleep(SpecifiedDeltaTime);
+					}
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
+					Done.Execute();
+
+					AB_TEST_EQUAL(RequestCompleted, RequestCount);
+					AB_TEST_EQUAL(RequestSucceeded, RequestCount);
+
+					return true;
+				});
+
+			LatentIt("should received some successful responses when sending multiple requests with some invalid URLs"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this](const FDoneDelegate& Done)
+				{
+					int RequestCompleted = 0;
+					int RequestSucceeded = 0;
+					int RequestFailed = 0;
+					constexpr int RequestCount = 12;
+
+					for (int index = 0; index < RequestCount; index++)
+					{
+						auto Request = FHttpModule::Get().CreateRequest();
+						switch (index % 4)
+						{
+						case 0:
+							Request->SetURL(FString::Printf(TEXT("%s/get?id=%d"), *BaseUrl, index));
+
+							break;
+						case 1:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//BadRequest 400, delayed by 4s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=4s&id=%d"), index));
+
+							break;
+						case 2:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//BadRequest 400, delayed by 6s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=6s&id=%d"), index));
+
+							break;
+						case 3:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//Sucess 200, delayed by 8s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=8s&id=%d"), index));
+
+							break;
+						}
+						Request->SetVerb(TEXT("GET"));
+
+						auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+							[this, &RequestCompleted, &RequestSucceeded, &RequestFailed](FHttpRequestPtr Request, FHttpResponsePtr Response, bool)
+							{
+								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed, URL=%s"), CurrentTime, *Request->GetURL());
+								RequestCompleted++;
+								if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+								{
+									RequestSucceeded++;
+								}
+								else
+								{
+									RequestFailed++;
+								}
+							});
+
+						Scheduler.ProcessRequest(Request, RequestCompleteDelegate, CurrentTime);
+					}
+
+					double Timer = 0.0f;
+
+					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
+					{
+						Timer += SpecifiedDeltaTime;
+						Ticker.Tick(SpecifiedDeltaTime);
+						FPlatformProcess::Sleep(SpecifiedDeltaTime);
+					}
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
+					Done.Execute();
+
+					AB_TEST_EQUAL(RequestCompleted, RequestCount);
+					AB_TEST_EQUAL(RequestSucceeded, RequestCount / 2);
+					AB_TEST_EQUAL(RequestFailed, RequestCount / 2);
+
+					return true;
+				});
+
+			LatentIt("should received successful responses when sending multiple requests with all valid URLs and Concurrency"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this](const FDoneDelegate& Done)
+				{
+					int RequestCompleted = 0;
+					int RequestSucceeded = 0;
+					constexpr int RequestCount = 15;
+
+					TArray<TSharedPtr<FHttpTestWorker>> Tasks;
+
+					for (int index = 0; index < RequestCount; index++)
+					{
+						auto Request = FHttpModule::Get().CreateRequest();
+						Request->SetURL(FString::Printf(TEXT("%s/get?id=%d"), *BaseUrl, index));
+						Request->SetVerb(TEXT("GET"));
+
+						auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+							[this, &RequestCompleted, &RequestSucceeded](FHttpRequestPtr Request, FHttpResponsePtr Response, bool)
+							{
+								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed, URL=%s"), CurrentTime, *Request->GetURL());
+								RequestCompleted++;
+								if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+								{
+									RequestSucceeded++;
+								}
+							});
+
+						FString ThreadName = FString::Printf(TEXT("Concurrency_%03d"), index);
+						TSharedPtr<FHttpTestWorker> Task = MakeShared<FHttpTestWorker>(ThreadName
+							, MakeShareable(&Scheduler, [](FHttpRetryScheduler*) {})
+							, Request
+							, RequestCompleteDelegate
+							, CurrentTime
+							, 2.0f);
+						Tasks.Add(Task);
+					}
+
+					double Timer = 0.0f;
+
+					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
+					{
+						Timer += SpecifiedDeltaTime;
+						Ticker.Tick(SpecifiedDeltaTime);
+						FPlatformProcess::Sleep(SpecifiedDeltaTime);
+					}
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
+					Done.Execute();
+
+					AB_TEST_EQUAL(RequestCompleted, RequestCount);
+					AB_TEST_EQUAL(RequestSucceeded, RequestCount);
+
+					for (auto& Task : Tasks)
+					{
+						Task->EnsureCompletion();
+					}
+
+					return true;
+				});
+
+			LatentIt("should received some successful responses when sending multiple requests with some invalid URLs and Concurrency"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this](const FDoneDelegate& Done)
+				{
+					int RequestCompleted = 0;
+					int RequestSucceeded = 0;
+					int RequestFailed = 0;
+					constexpr int RequestCount = 12;
+
+					TArray<TSharedPtr<FHttpTestWorker>> Tasks;
+
+					for (int index = 0; index < RequestCount; index++)
+					{
+						float DelayTime = 0.0f;
+						auto Request = FHttpModule::Get().CreateRequest();
+						switch (index % 4)
+						{
+						case 0:
+							Request->SetURL(FString::Printf(TEXT("%s/get?id=%d"), *BaseUrl, index));
+							DelayTime = 8.0;
+
+							break;
+						case 1:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//BadRequest 400, delayed by 4s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=4s&id=%d"), index));
+							DelayTime = 4.0f;
+
+							break;
+						case 2:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//BadRequest 400, delayed by 6s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c38bc153100006c00a991ed?mocky-delay=6s&id=%d"), index));
+							DelayTime = 1.8f;
+
+							break;
+						case 3:
+							//Mocky is free third party mock HTTP server. If some day, it disappears, we should use mock http request and response
+							//Sucess 200, delayed by 8s
+							Request->SetURL(FString::Printf(TEXT("http://www.mocky.io/v2/5c37fc0330000054001f659d?mocky-delay=8s&id=%d"), index));
+							
+							break;
+						}
+						Request->SetVerb(TEXT("GET"));
+
+						auto RequestCompleteDelegate = FHttpRequestCompleteDelegate::CreateLambda(
+							[this, &RequestCompleted, &RequestSucceeded, &RequestFailed](FHttpRequestPtr Request, FHttpResponsePtr Response, bool)
+							{
+								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed, URL=%s"), CurrentTime, *Request->GetURL());
+								RequestCompleted++;
+								if (Response.IsValid() && EHttpResponseCodes::IsOk(Response->GetResponseCode()))
+								{
+									RequestSucceeded++;
+								}
+								else
+								{
+									RequestFailed++;
+								}
+							});
+
+						FString ThreadName = FString::Printf(TEXT("Concurrency_%03d"), index);
+						TSharedPtr<FHttpTestWorker> Task = MakeShared<FHttpTestWorker>(ThreadName
+							, MakeShareable(&Scheduler, [](FHttpRetryScheduler*) {})
+							, Request
+							, RequestCompleteDelegate
+							, CurrentTime
+							, DelayTime);
+						Tasks.Add(Task);
+					}
+
+					double Timer = 0.0f;
+
+					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
+					{
+						Timer += SpecifiedDeltaTime;
+						Ticker.Tick(SpecifiedDeltaTime);
+						FPlatformProcess::Sleep(SpecifiedDeltaTime);
+					}
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Sent %d Requests and %d Completed"), CurrentTime, RequestCount, RequestCompleted);
+					Done.Execute();
+
+					AB_TEST_EQUAL(RequestCompleted, RequestCount);
+					AB_TEST_EQUAL(RequestSucceeded, RequestCount / 2);
+					AB_TEST_EQUAL(RequestFailed, RequestCount / 2);
+
+					for (auto& Task : Tasks)
+					{
+						Task->EnsureCompletion();
+					}
+
+					return true;
+				});
+
+			LatentIt("should received successful responses when sending multiple chain requests with valid URLs"
+				//, EAsyncExecution::ThreadPool
+				, FTimespan(0, 1, 10)
+				, [this](const FDoneDelegate& Done)
+				{
+					auto SendMockRequest = [this](int Id, const FHttpRequestCompleteDelegate& OnCompleted)
+					{
+						auto Request = FHttpModule::Get().CreateRequest();
+						Request->SetURL(FString::Printf(TEXT("%s/delay/1?id=%d"), *BaseUrl, Id));
+						Request->SetVerb(TEXT("GET"));
+
+						Scheduler.ProcessRequest(Request, OnCompleted, CurrentTime);
+						FHttpModule::Get().GetHttpManager().Flush(false);
+					};
+
+					auto TickerDelegate = Ticker.AddTicker(
+						FTickerDelegate::CreateLambda([this](float DeltaTime)
+							{
+								UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Poll Http Module"), CurrentTime);
+								FHttpModule::Get().GetHttpManager().Tick(DeltaTime);
+
+								return true;
+							}),
+						SpecifiedDeltaTime);
+
+					int RequestCompleted = 0;
+					int RequestCount = 10;
+					using Del = FHttpRequestCompleteDelegate;
+
+					SendMockRequest(0, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+						{
+							UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 0"), CurrentTime);
+							RequestCompleted++;
+							SendMockRequest(1, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+								{
+									UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 1"), CurrentTime);
+									RequestCompleted++;
+									SendMockRequest(2, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+										{
+											UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 2"), CurrentTime);
+											RequestCompleted++;
+											SendMockRequest(3, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+												{
+													UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 3"), CurrentTime);
+													RequestCompleted++;
+													SendMockRequest(4, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+														{
+															UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("%.4f Callback Request 4"), CurrentTime);
+															RequestCompleted++;
+														}));
+												}));
+										}));
+								}));
+						}));
+					FHttpModule::Get().GetHttpManager().Flush(false);
+
+					SendMockRequest(5, Del::CreateLambda([&RequestCompleted](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+						{
+							RequestCompleted++;
+						}));
+					FHttpModule::Get().GetHttpManager().Flush(false);
+
+					SendMockRequest(6, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+						{
+							RequestCompleted++;
+							SendMockRequest(7, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+								{
+									RequestCompleted++;
+									SendMockRequest(8, Del::CreateLambda([this, &RequestCompleted, &SendMockRequest](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+										{
+											RequestCompleted++;
+										}));
+								}));
+						}));
+					FHttpModule::Get().GetHttpManager().Flush(false);
+
+					SendMockRequest(9, Del::CreateLambda([&RequestCompleted](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+						{
+							RequestCompleted++;
+						}));
+					FHttpModule::Get().GetHttpManager().Flush(false);
+
+					double Timer = 0.0f;
+
+					while (RequestCompleted < RequestCount && Timer <= Timeout + 1)
+					{
+						Timer += SpecifiedDeltaTime;
+						Ticker.Tick(SpecifiedDeltaTime);
+						FPlatformProcess::Sleep(SpecifiedDeltaTime);
+					}
+
+					UE_LOG(LogAccelByteHttpRetryTest, Log, TEXT("CurrentTime=%.4f - Request Completed %d"), CurrentTime, RequestCompleted);
+					Done.Execute();
+
+					AB_TEST_EQUAL(RequestCompleted, RequestCount);
+
+					Ticker.RemoveTicker(TickerDelegate);
+
+					return true;
+				});
+
+			LatentAfterEach([this](const FDoneDelegate& Done)
+				{
+					Timeout = 60;
+					FHttpRetryScheduler::MaximumDelay = FGenericPlatformMath::CeilToInt(Timeout / 2.0f);
+					FHttpRetryScheduler::TotalTimeout = Timeout;
+					FHttpRetryScheduler::PauseTimeout = Timeout;
+					Scheduler.Shutdown();
+					Done.Execute();
+				});
+		});
 }

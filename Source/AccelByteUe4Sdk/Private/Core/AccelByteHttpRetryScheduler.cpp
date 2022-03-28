@@ -8,7 +8,6 @@
 #include "Core/AccelByteHttpRetryTask.h"
 #include <algorithm>
 
-DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteHttpRetry, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteHttpRetry);
 
 using namespace std;
@@ -16,9 +15,12 @@ using namespace std;
 namespace AccelByte
 {
 
-const int FHttpRetryScheduler::InitialDelay = 1;
-const int FHttpRetryScheduler::MaximumDelay = 30;
-const int FHttpRetryScheduler::TotalTimeout = 60;
+int FHttpRetryScheduler::InitialDelay = 1;
+int FHttpRetryScheduler::MaximumDelay = 30;
+int FHttpRetryScheduler::TotalTimeout = 60;
+int FHttpRetryScheduler::PauseTimeout = 60;
+
+TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> FHttpRetryScheduler::ResponseCodeDelegates{};
 
 typedef FHttpRetryScheduler::FBearerAuthRejectedRefresh FBearerAuthRejectedRefresh;
 
@@ -27,9 +29,14 @@ FHttpRetryScheduler::FHttpRetryScheduler()
 {}
 
 FHttpRetryScheduler::~FHttpRetryScheduler()
-{}
+{
+	TaskQueue.Empty();
+}
 
-FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(FHttpRequestPtr Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime)
+FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest
+	( FHttpRequestPtr Request
+	, FHttpRequestCompleteDelegate const& CompleteDelegate
+	, double RequestTime )
 {
 	FAccelByteTaskPtr Task(nullptr);
 	if (State == EState::ShuttingDown)
@@ -47,7 +54,14 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(FHttpRequestPtr Request, c
 
 	FVoidHandler OnBearerAuthReject = FVoidHandler::CreateLambda([&]() {BearerAuthRejected(); });
 
-	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>(Request, CompleteDelegate, RequestTime, InitialDelay, OnBearerAuthReject, BearerAuthRejectedRefresh);
+	Task = MakeShared<FHttpRetryTask, ESPMode::ThreadSafe>
+		( Request
+		, CompleteDelegate
+		, RequestTime
+		, InitialDelay
+		, OnBearerAuthReject
+		, BearerAuthRejectedRefresh
+		, FHttpRetryScheduler::ResponseCodeDelegates );
 
 	FAccelByteHttpRetryTaskPtr HttpRetryTaskPtr(StaticCastSharedPtr< FHttpRetryTask >(Task));
 	if (State == EState::Paused && Request->GetHeader("Authorization").Contains("Bearer"))
@@ -56,7 +70,6 @@ FAccelByteTaskPtr FHttpRetryScheduler::ProcessRequest(FHttpRequestPtr Request, c
 	}
 	else
 	{
-
 		FHttpResponsePtr CachedResponse;
 		if (UAccelByteBlueprintsSettings::IsHttpCacheEnabled() && HttpCache.TryRetrieving(Request, CachedResponse))
 		{
@@ -81,6 +94,23 @@ void FHttpRetryScheduler::SetBearerAuthRejectedDelegate(FBearerAuthRejected Bear
 	}
 
 	BearerAuthRejectedDelegate = BearerAuthRejected;
+}
+
+void FHttpRetryScheduler::SetHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode, FHttpResponseCodeHandler const& Handler)
+{
+	FHttpRetryScheduler::ResponseCodeDelegates.Emplace(StatusCode, Handler);
+}
+
+bool FHttpRetryScheduler::RemoveHttpResponseCodeHandlerDelegate(EHttpResponseCodes::Type StatusCode)
+{
+	bool bResult = false;
+
+	if (FHttpRetryScheduler::ResponseCodeDelegates.Contains(StatusCode))
+	{
+		FHttpRetryScheduler::ResponseCodeDelegates.Remove(StatusCode);
+		bResult = true;
+	}
+	return bResult;
 }
 
 void FHttpRetryScheduler::BearerAuthRejected()
@@ -120,7 +150,7 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 		return false;
 	}
 
-	TArray<FAccelByteTaskPtr> CompletedTasks;
+	TArray<FAccelByteTaskPtr> RemovedTasks;
 	bool Loop = true;
 	do
 	{
@@ -140,8 +170,8 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 				{
 				case EAccelByteTaskState::Completed:
 				case EAccelByteTaskState::Cancelled:
-					CompletedTasks.Add(Task);
 				case EAccelByteTaskState::Failed:
+					RemovedTasks.Add(Task);
 					WillBeRemoved = true;
 					break;
 				default:
@@ -165,7 +195,7 @@ bool FHttpRetryScheduler::PollRetry(double Time)
 	} while (Loop);
 
 	const bool bIsHttpCacheEnabled = UAccelByteBlueprintsSettings::IsHttpCacheEnabled();
-	for (auto& Task : CompletedTasks)
+	for (auto& Task : RemovedTasks)
 	{
 		if (bIsHttpCacheEnabled && Task->State() == EAccelByteTaskState::Completed)
 		{
@@ -221,7 +251,7 @@ void FHttpRetryScheduler::Shutdown()
 
 		// cancel unfinished http requests, so don't hinder the shutdown
 		TaskQueue.Empty();
-	};
+	}
 
 	HttpCache.ClearCache();
 }
