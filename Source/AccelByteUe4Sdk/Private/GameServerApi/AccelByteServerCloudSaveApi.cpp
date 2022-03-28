@@ -7,7 +7,7 @@
 #include "Core/AccelByteReport.h" 
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h" 
-#include "Models/AccelByteCloudSaveModels.h"
+#include "Models/AccelByteCloudSaveModels.h" 
 
 namespace AccelByte
 {
@@ -111,6 +111,7 @@ namespace GameServerApi
 			FString UpdatedAt;
 			jsonObject.TryGetStringField("updated_at", UpdatedAt);
 			FDateTime::ParseIso8601(*UpdatedAt, gameRecord.UpdatedAt);
+			jsonObject.TryGetStringField("set_by", gameRecord.SetBy);
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
 			gameRecord.Value = *value->ToSharedRef();
@@ -165,6 +166,32 @@ namespace GameServerApi
 
 		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
+
+	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key );
+		FString Verb            = TEXT("POST");
+		FString ContentType     = TEXT("application/json");
+		FString Accept          = TEXT("application/json");
+		FString Content         = TEXT("");
+		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
+		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+	
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
@@ -224,6 +251,7 @@ namespace GameServerApi
 				FString UpdatedAt;
 				jsonObject.TryGetStringField("updated_at", UpdatedAt);
 				FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+				jsonObject.TryGetStringField("set_by", userRecord.SetBy);
 				const TSharedPtr<FJsonObject> *value;
 				jsonObject.TryGetObjectField("value", value);
 				userRecord.Value = *value->ToSharedRef();
@@ -274,6 +302,31 @@ namespace GameServerApi
 			FPlatformTime::Seconds());
 	}
 
+	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Verb = TEXT("PUT");
+		FString ContentType = TEXT("application/json");
+		FString Accept = TEXT("application/json");
+		FString Content = TEXT("");
+		TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(RecordRequest);
+		TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+		FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+
+		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+		Request->SetURL(Url);
+		Request->SetHeader(TEXT("Authorization"), Authorization);
+		Request->SetVerb(Verb);
+		Request->SetHeader(TEXT("Content-Type"), ContentType);
+		Request->SetHeader(TEXT("Accept"), Accept);
+		Request->SetContentAsString(Content);
+
+		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+	
 	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
