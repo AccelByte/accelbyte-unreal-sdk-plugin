@@ -10,6 +10,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/Version.h"
+#include "AccelByteUe4SdkModule.h"
 
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
@@ -578,3 +579,58 @@ void FServiceVersionCompatibilitySpec::Define()
 		});
 	});
 }
+
+#if 0 //Need to manually tested, please make sure every environment settings have different value
+DEFINE_SPEC(
+	FSDKModuleSetEnvironment,
+	"AccelByte.Tests.Core.SDKModuleSetEnvironment",
+	EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
+
+	void FSDKModuleSetEnvironment::Define()
+{
+	Describe("Change Environment Settings", [this]()
+		{
+			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
+
+			It("Changed to Dev", [this, &ABSDKModule]()
+				{
+					const FString OldClientId = FRegistry::Settings.ClientId;
+					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Development);
+					const FString NewClientId = FRegistry::Settings.ClientId;
+					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
+					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+
+					return true;
+				});
+
+			It("Changed to Cert", [this, &ABSDKModule]()
+				{
+					const FString OldClientId = FRegistry::Settings.ClientId;
+					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Certification);
+					const FString NewClientId = FRegistry::Settings.ClientId;
+					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
+					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+
+					return true;
+				});
+
+			It("Changed to Prod", [this, &ABSDKModule]()
+				{
+					const FString OldClientId = FRegistry::Settings.ClientId;
+					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Production);
+					const FString NewClientId = FRegistry::Settings.ClientId;
+					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
+					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+
+					return true;
+				});
+
+		});
+}
+#endif
