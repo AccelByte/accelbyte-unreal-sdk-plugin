@@ -21,15 +21,18 @@
 class FAccelByteUe4SdkModule : public IAccelByteUe4SdkModuleInterface
 {
 public:
+
     virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
 	virtual void SetEnvironment(ESettingsEnvironment const Environment) override;
 	virtual AccelByte::Settings const& GetClientSettings() const override;
 	virtual AccelByte::ServerSettings const& GetServerSettings() const override;
+	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 private:
 	AccelByte::Settings ClientSettings;
 	AccelByte::ServerSettings ServerSettings;
+	FEnvironmentChangedDelegate EnvironmentChangedDelegate;
 	
 	// For registering settings in UE4 editor
 	void RegisterSettings();
@@ -84,6 +87,10 @@ void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environme
 {
 	LoadClientSettings(Environment);
 	LoadServerSettings(Environment);
+	if (EnvironmentChangedDelegate.IsBound())
+	{
+		EnvironmentChangedDelegate.Broadcast(Environment);
+	}
 }
 
 AccelByte::Settings const& FAccelByteUe4SdkModule::GetClientSettings() const
@@ -287,6 +294,11 @@ void FAccelByteUe4SdkModule::CheckServicesCompatibility() const
 				}
 			});
 	}
+}
+
+FEnvironmentChangedDelegate& FAccelByteUe4SdkModule::OnEnvironmentChanged()
+{
+	return EnvironmentChangedDelegate;
 }
 
 IMPLEMENT_MODULE(FAccelByteUe4SdkModule, AccelByteUe4Sdk)

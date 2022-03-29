@@ -594,40 +594,98 @@ DEFINE_SPEC(
 
 			It("Changed to Dev", [this, &ABSDKModule]()
 				{
+					bool bIsChanged = false;
+					ESettingsEnvironment ExpectedNewEnvironment = ESettingsEnvironment::Development;
+					ESettingsEnvironment NewEnvironment;
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged, &NewEnvironment](const ESettingsEnvironment ChangedTo)
+						{
+							NewEnvironment = ChangedTo;
+							bIsChanged = true;
+						}));
 					const FString OldClientId = FRegistry::Settings.ClientId;
 					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
-					ABSDKModule.SetEnvironment(ESettingsEnvironment::Development);
+					ABSDKModule.SetEnvironment(ExpectedNewEnvironment);
 					const FString NewClientId = FRegistry::Settings.ClientId;
 					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.OnEnvironmentChanged().Clear();
 					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
 					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+					AB_TEST_TRUE(bIsChanged);
+					AB_TEST_EQUAL(ExpectedNewEnvironment, NewEnvironment);
 
 					return true;
 				});
 
 			It("Changed to Cert", [this, &ABSDKModule]()
 				{
+					bool bIsChanged = false;
+					ESettingsEnvironment ExpectedNewEnvironment = ESettingsEnvironment::Certification;
+					ESettingsEnvironment NewEnvironment;
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged, &NewEnvironment](const ESettingsEnvironment ChangedTo)
+						{
+							NewEnvironment = ChangedTo;
+							bIsChanged = true;
+						}));
 					const FString OldClientId = FRegistry::Settings.ClientId;
 					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
-					ABSDKModule.SetEnvironment(ESettingsEnvironment::Certification);
+					ABSDKModule.SetEnvironment(ExpectedNewEnvironment);
 					const FString NewClientId = FRegistry::Settings.ClientId;
 					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.OnEnvironmentChanged().Clear();
 					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
 					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+					AB_TEST_TRUE(bIsChanged);
+					AB_TEST_EQUAL(ExpectedNewEnvironment, NewEnvironment);
 
 					return true;
 				});
 
 			It("Changed to Prod", [this, &ABSDKModule]()
 				{
+					bool bIsChanged = false;
+					ESettingsEnvironment ExpectedNewEnvironment = ESettingsEnvironment::Production;
+					ESettingsEnvironment NewEnvironment;
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged, &NewEnvironment](const ESettingsEnvironment ChangedTo)
+						{
+							NewEnvironment = ChangedTo;
+							bIsChanged = true;
+						}));
 					const FString OldClientId = FRegistry::Settings.ClientId;
 					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
-					ABSDKModule.SetEnvironment(ESettingsEnvironment::Production);
+					ABSDKModule.SetEnvironment(ExpectedNewEnvironment);
 					const FString NewClientId = FRegistry::Settings.ClientId;
 					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.OnEnvironmentChanged().Clear();
 					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
 					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+					AB_TEST_TRUE(bIsChanged);
+					AB_TEST_EQUAL(ExpectedNewEnvironment, NewEnvironment);
 
+					return true;
+				});
+
+			It("Add More than 1 Delegate", [this, &ABSDKModule]()
+				{
+					bool bIsChanged = false;
+					bool bIsChanged2 = false;
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged](const ESettingsEnvironment ChangedTo)
+						{
+							bIsChanged = true;
+						}));
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged2](const ESettingsEnvironment ChangedTo)
+						{
+							bIsChanged2 = true;
+						}));
+					const FString OldClientId = FRegistry::Settings.ClientId;
+					const FString OldServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Development);
+					const FString NewClientId = FRegistry::Settings.ClientId;
+					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.OnEnvironmentChanged().Clear();
+					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
+					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+					AB_TEST_TRUE(bIsChanged);
+					AB_TEST_TRUE(bIsChanged2);
 					return true;
 				});
 
