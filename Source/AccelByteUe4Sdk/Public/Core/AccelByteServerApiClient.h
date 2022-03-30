@@ -41,19 +41,19 @@ public:
 	FServerCredentialsRef ServerCredentialsRef{};
 	FHttpRetrySchedulerRef HttpRef{};
 
-	GameServerApi::ServerAchievement ServerAchievement{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerCloudSave ServerCloudSave{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerDSM ServerDSM{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerEcommerce ServerEcommerce{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerGameTelemetry ServerGameTelemetry{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerLobby ServerLobby{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerMatchmaking ServerMatchmaking{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerOauth2 ServerOauth2{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerQosManager ServerQosManager{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, FRegistry::ServerSettings };
+	GameServerApi::ServerAchievement ServerAchievement{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerCloudSave ServerCloudSave{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerDSM ServerDSM{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerEcommerce ServerEcommerce{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerGameTelemetry ServerGameTelemetry{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerLobby ServerLobby{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerMatchmaking ServerMatchmaking{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerOauth2 ServerOauth2{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerQosManager ServerQosManager{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerSeasonPass ServerSeasonPass{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
-	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings };
-	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings };
+	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
+	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 
 	template<typename T, typename... U>
 	T GetServerApi(U&&... Args)

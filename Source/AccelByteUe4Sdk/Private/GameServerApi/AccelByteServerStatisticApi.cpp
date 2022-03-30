@@ -13,7 +13,7 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerStatistic::ServerStatistic(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+ServerStatistic::ServerStatistic(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
 {}
 
 ServerStatistic::~ServerStatistic()
@@ -55,7 +55,7 @@ void ServerStatistic::CreateUserStatItems(const FString& UserId, const TArray<FS
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerStatistic::GetAllUserStatItems(const FString& UserId, const THandler<FAccelByteModelsUserStatItemPagingSlicedResult>& OnSuccess, const FErrorHandler& OnError)
@@ -94,7 +94,7 @@ void ServerStatistic::GetUserStatItems(const FString& UserId, const TArray<FStri
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsBulkUserStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
@@ -128,7 +128,7 @@ void ServerStatistic::IncrementManyUsersStatItems(const TArray<FAccelByteModelsB
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerStatistic::IncrementUserStatItems(const FString& UserId, const TArray<FAccelByteModelsBulkStatItemInc>& Data, const THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>& OnSuccess, const FErrorHandler& OnError)
@@ -162,7 +162,7 @@ void ServerStatistic::IncrementUserStatItems(const FString& UserId, const TArray
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace Api

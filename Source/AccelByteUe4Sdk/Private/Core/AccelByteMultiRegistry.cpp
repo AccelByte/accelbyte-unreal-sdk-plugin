@@ -6,8 +6,8 @@
 
 namespace AccelByte
 {
-	
-FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
+
+FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
@@ -29,7 +29,7 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 	return ApiClientInstances[Key];
 }
 
-FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString Key)
+FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString &Key)
 {
 	if (!ServerApiClientInstances.Contains(Key))
 	{
@@ -51,7 +51,7 @@ FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString 
 	return ServerApiClientInstances[Key];
 }
 
-bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClient)
+bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClient)
 {
 	bool bResult = false;
 
@@ -62,6 +62,22 @@ bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClien
 	}
 
 	return bResult;
+}
+
+void FMultiRegistry::RemoveApiClient(const FString &Key)
+{
+	if (!Key.IsEmpty())
+	{
+		ApiClientInstances.Remove(Key);
+	}
+}
+
+void FMultiRegistry::RemoveServerApiClient(const FString &Key)
+{
+	if (!Key.IsEmpty())
+	{
+		ServerApiClientInstances.Remove(Key);
+	}
 }
 
 TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;

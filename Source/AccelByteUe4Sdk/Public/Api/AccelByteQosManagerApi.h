@@ -34,8 +34,6 @@ public:
 	void GetQosServers(
 		const THandler<FAccelByteModelsQosServerList>& OnSuccess,
 		const FErrorHandler& OnError) const;
-
-	static FHttpRequestPtr GetQosServersRequest();
 	
 private:
 	FHttpRetryScheduler& HttpRef;

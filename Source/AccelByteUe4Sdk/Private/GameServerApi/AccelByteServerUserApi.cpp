@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -16,7 +16,7 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerUser::ServerUser(const ServerCredentials& Credentials, const ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+		ServerUser::ServerUser(const ServerCredentials& Credentials, const ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
 		{
 		}
 
@@ -51,7 +51,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
 		void ServerUser::SearchUserOtherPlatformUserId(const FString& PlatformUserId, EAccelBytePlatformType PlatformType, const THandler<FUserOtherPlatformInfo>& OnSuccess,
@@ -73,7 +73,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 		
 	}
