@@ -1677,13 +1677,13 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID(PartyCreate		, FAccelByteModelsCreatePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyLeave			, FAccelByteModelsLeavePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyInvite		, FAccelByteModelsPartyInviteResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyReject		, FAccelByteModelsPartyRejectResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyKick			, FAccelByteModelsKickPartyMemberResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGetCode		, FAccelByteModelsPartyGetCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGenerateCode	, FAccelByteModelsPartyGenerateCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyDeleteCode	, FAccelByteModelsPartyDeleteCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyPromoteLeader	, FAccelByteModelsPartyPromoteLeaderResponse);
 		// Chat
 		CASE_RESPONSE_MESSAGE_ID(PersonalChat	, FAccelByteModelsPersonalMessageResponse);

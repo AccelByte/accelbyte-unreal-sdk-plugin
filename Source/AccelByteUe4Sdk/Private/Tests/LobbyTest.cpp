@@ -79,7 +79,7 @@ bool bUserBannedNotif, bUsersUnbannedNotif;
 
 FAccelByteModelsPartyGetInvitedNotice invitedToPartyResponse;
 FAccelByteModelsInfoPartyResponse infoPartyResponse;
-FAccelByteModelsPartyJoinReponse joinPartyResponse;
+FAccelByteModelsPartyJoinResponse joinPartyResponse;
 FAccelByteModelsPartyGenerateCodeResponse partyGenerateCodeResponse;
 FAccelByteModelsPartyGetCodeResponse partyCodeResponse;
 FAccelByteModelsPartyRejectResponse rejectPartyResponse;
@@ -512,7 +512,7 @@ const auto DeletePartyCodeDelegate = Api::Lobby::FPartyDeleteCodeResponse::Creat
 });
 
 
-const auto JoinViaCodeDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
+const auto JoinViaCodeDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Join Party Via Code Success! Member : %d"), result.Members.Num());
 	joinPartyResponse = result;
@@ -541,7 +541,7 @@ const auto InvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLam
 	}
 });
 
-const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
+const auto JoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinResponse result)
 {
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Join Party Success! Member : %d"), result.Members.Num());
 	joinPartyResponse = result;
@@ -2155,7 +2155,7 @@ bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
 	LobbyConnect(1);
 
 	bool bJoinFailed = false;
-	Lobbies[0]->SetPartyJoinViaCodeResponseDelegate(Lobby::FPartyJoinViaCodeResponse::CreateLambda([&](const FAccelByteModelsPartyJoinReponse& Result)
+	Lobbies[0]->SetPartyJoinViaCodeResponseDelegate(Lobby::FPartyJoinViaCodeResponse::CreateLambda([&](const FAccelByteModelsPartyJoinResponse& Result)
 	{
 		if(Result.Code.Equals("11573") || !Result.Code.Equals("0"))
 		{
@@ -2381,7 +2381,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestPartyMember_Kicked, "AccelByte.Tests.L
 bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsPartyGetInvitedNotice invitedToParty[2];
-	FAccelByteModelsPartyJoinReponse joinParty[2];
+	FAccelByteModelsPartyJoinResponse joinParty[2];
 	LobbyConnect(3);
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);

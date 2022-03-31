@@ -35,7 +35,7 @@ bool bSCleanupLeaveParty;
 
 FAccelByteModelsInfoPartyResponse SinfoPartyResponse;
 FAccelByteModelsPartyGetInvitedNotice SinvitedToPartyResponse;
-FAccelByteModelsPartyJoinReponse SjoinPartyResponse;
+FAccelByteModelsPartyJoinResponse SjoinPartyResponse;
 FAccelByteModelsCreatePartyResponse ScreatePartyResponse;
 
 void SLobbyConnect(int userCount)
@@ -181,7 +181,7 @@ const auto SInvitedToPartyDelegate = Api::Lobby::FPartyGetInvitedNotif::CreateLa
 	}
 });
 
-const auto SJoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinReponse result)
+const auto SJoinPartyDelegate = Api::Lobby::FPartyJoinResponse::CreateLambda([](FAccelByteModelsPartyJoinResponse result)
 {
 	UE_LOG(LogAccelByteServerLobbyTest, Log, TEXT("Join Party Success! Member : %d"), result.Members.Num());
 	SjoinPartyResponse = result;

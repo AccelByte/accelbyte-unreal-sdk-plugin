@@ -115,7 +115,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDLeavePartyResponse, FAccelByteModelsLeavePar
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteResponse, FAccelByteModelsPartyInviteResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinResponse, FAccelByteModelsPartyJoinReponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinResponse, FAccelByteModelsPartyJoinResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyRejectResponse, FAccelByteModelsPartyRejectResponse, Response);
 
@@ -127,7 +127,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyGetCodeResponse, FAccelByteModelsPartyG
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDeleteCodeResponse, FAccelByteModelsPartyDeleteCodeResponse, Response);
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinViaCodeResponse, FAccelByteModelsPartyJoinReponse, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinViaCodeResponse, FAccelByteModelsPartyJoinResponse, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyPromoteLeaderResponse, FAccelByteModelsPartyPromoteLeaderResponse, Response);
 
