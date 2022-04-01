@@ -43,28 +43,34 @@ public:
 	 * @param Port the port where your game server run.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+ 	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DSNotice event
 	*/
-	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute = "");
 
 
     /*
 	 * @brief send register local server to DSM
 	 *
+	 * @param IPAddress the machine's IP address this local DS is in.
 	 * @param Port the port where your game server run.
+	 * @param ServerName the server name of this local DS
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DS Notice event
 	*/
-    void RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+    void RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute = "");
 
 	/*
 	 * @brief send register local server to DSM using public IP
 	 * this method is using api.ipify.org to get the device's public IP
 	 *
 	 * @param Port the port where your game server run.
+	 * @param ServerName the server name of this local DS
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DSNotice event
 	*/
-	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute = "");
 
 	/*
 	 * @brief send shutdown request to DSM

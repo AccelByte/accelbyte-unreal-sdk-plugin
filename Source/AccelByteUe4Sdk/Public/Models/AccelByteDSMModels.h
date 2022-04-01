@@ -22,6 +22,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRegisterLocalServerRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterLocalRequest")
 	int32 Port{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterLocalRequest")
+	FString Custom_attribute{};
 };
 
 USTRUCT(BlueprintType)
@@ -43,6 +46,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRegisterServerRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
 	FString Provider{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | RegisterRequest")
+	FString Custom_attribute{};
 };
 
 USTRUCT(BlueprintType)
