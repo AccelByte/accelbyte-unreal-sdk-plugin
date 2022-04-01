@@ -64,20 +64,30 @@ bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClie
 	return bResult;
 }
 
-void FMultiRegistry::RemoveApiClient(const FString &Key)
+bool FMultiRegistry::RemoveApiClient(const FString &Key)
 {
-	if (!Key.IsEmpty())
-	{
-		ApiClientInstances.Remove(Key);
-	}
+	bool bResult = false;
+
+    if (!Key.IsEmpty())
+    {
+        const int32 RemovedNum = ApiClientInstances.Remove(Key);
+        bResult = RemovedNum > 0;
+    }
+
+    return bResult;
 }
 
-void FMultiRegistry::RemoveServerApiClient(const FString &Key)
+bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
 {
+	bool bResult = false;
+	
 	if (!Key.IsEmpty())
 	{
-		ServerApiClientInstances.Remove(Key);
+        const int32 RemovedNum = ServerApiClientInstances.Remove(Key);
+        bResult = RemovedNum > 0;
 	}
+
+	return bResult;
 }
 
 TMap<FString, FApiClientPtr> FMultiRegistry::ApiClientInstances;
