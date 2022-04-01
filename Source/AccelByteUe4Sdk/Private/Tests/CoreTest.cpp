@@ -592,6 +592,11 @@ DEFINE_SPEC(
 		{
 			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 
+			AfterEach([this, &ABSDKModule]() 
+				{
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Default);
+				});
+
 			It("Changed to Dev", [this, &ABSDKModule]()
 				{
 					bool bIsChanged = false;
@@ -658,6 +663,35 @@ DEFINE_SPEC(
 					ABSDKModule.OnEnvironmentChanged().Clear();
 					AB_TEST_NOT_EQUAL(OldClientId, NewClientId);
 					AB_TEST_NOT_EQUAL(OldServerClientId, NewServerClientId);
+					AB_TEST_TRUE(bIsChanged);
+					AB_TEST_EQUAL(ExpectedNewEnvironment, NewEnvironment);
+
+					return true;
+				});
+
+			//Need to tested manually, make sure the expected environment's clientid is null
+			It("FallBack to Default when ClientId is Null", [this, &ABSDKModule]()
+				{
+					ABSDKModule.SetEnvironment(ESettingsEnvironment::Default);
+					bool bIsChanged = false;
+					ESettingsEnvironment ExpectedNewEnvironment = ESettingsEnvironment::Development;
+					ESettingsEnvironment NewEnvironment;
+					ABSDKModule.OnEnvironmentChanged().AddLambda(([&bIsChanged, &NewEnvironment](const ESettingsEnvironment ChangedTo)
+						{
+							NewEnvironment = ChangedTo;
+							bIsChanged = true;
+						}));
+					const FString DefaultClientId = FRegistry::Settings.ClientId;
+					const FString DefaultClientSecret = FRegistry::Settings.ClientSecret;
+					const FString DefaultServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.SetEnvironment(ExpectedNewEnvironment);
+					const FString NewClientId = FRegistry::Settings.ClientId;
+					const FString NewClientSecret = FRegistry::Settings.ClientSecret;
+					const FString NewServerClientId = FRegistry::ServerSettings.ClientId;
+					ABSDKModule.OnEnvironmentChanged().Clear();
+					AB_TEST_EQUAL(DefaultClientId, NewClientId);
+					AB_TEST_EQUAL(DefaultClientSecret, NewClientSecret);
+					AB_TEST_EQUAL(DefaultServerClientId, NewServerClientId);
 					AB_TEST_TRUE(bIsChanged);
 					AB_TEST_EQUAL(ExpectedNewEnvironment, NewEnvironment);
 

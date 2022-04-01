@@ -197,7 +197,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettingsFromConfigUObject()
 	bool bEnableSettings = false;
 
 #if UE_BUILD_DEVELOPMENT
-	bEnableSettings = GetDefault<UAccelByteServerSettings>()->ForceEnableSettings;
+	GConfig->GetBool(TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings"), TEXT("ForceEnableSettings"), bEnableSettings, GEngineIni);
 #endif
 
 #if WITH_EDITOR || UE_SERVER
