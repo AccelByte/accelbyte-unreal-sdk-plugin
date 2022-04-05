@@ -9,6 +9,13 @@
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteCloudSaveModels.generated.h"
 
+UENUM(BlueprintType)
+enum class ESetByMetadataRecord : uint8
+{ 
+	Server, 
+	Client,
+}; 
+
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 {
 	FString Key;
@@ -17,7 +24,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 	bool IsPublic;
 	FDateTime CreatedAt;
 	FDateTime UpdatedAt;
-	FString SetBy;
+	ESetByMetadataRecord SetBy;
 	FJsonObject Value;
 };
 
@@ -27,7 +34,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 	FString Namespace;
 	FDateTime CreatedAt;
 	FDateTime UpdatedAt;
-	FString SetBy;
+	ESetByMetadataRecord SetBy;
 	FJsonObject Value;
 };
 
