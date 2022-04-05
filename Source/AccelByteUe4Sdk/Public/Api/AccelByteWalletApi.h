@@ -39,6 +39,17 @@ public:
 	 */
 	void GetWalletInfoByCurrencyCode(FString const& CurrencyCode, THandler<FAccelByteModelsWalletInfo> const& OnSuccess, FErrorHandler const& OnError);
 
+	/**
+	 * @brief Get user's wallet transactions list for a specific currency code.
+	 * 
+	 * @param CurrencyCode The currency code.
+	 * @param OnSuccess This will be called when operation succeeded. The result is const FAccelByteModelsWalletTransactionPaging&.
+	 * @param OnError This will be called when the operation failed.
+	 * @param Offset Offset of the list that has been sliced based on Limit parameter (optional, default = 0).
+	 * @param Limit The limit of item on page (optional, default = 20).
+	*/
+	void ListWalletTransactionsByCurrencyCode(FString const& CurrencyCode, THandler<FAccelByteModelsWalletTransactionPaging> const& OnSuccess, FErrorHandler const& OnError, int32 Offset = 0, int32 Limit = 20);
+
 private:
 	Wallet() = delete;
 	Wallet(Wallet const&) = delete;
