@@ -23,9 +23,21 @@ class ACCELBYTEUE4SDK_API CloudSave
 public:
 	CloudSave(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
 	~CloudSave();
-
+	
+	/**
+	 * @brief Save a user-level record with Metadata input value
+	 * 
+	 * @param Key Key of record. 
+	 * @param SetPublic Metadata is_public value and set by client 
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void SaveUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	
 	/**
 	 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
+	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future   
 	 *
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
@@ -66,7 +78,17 @@ public:
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
-	 *
+	 * @param Key Key of record. 
+	 * @param SetPublic Metadata is_public value and set by client 
+	 * @param RecordRequest The request of the record with JSON formatted.
+	 * @param OnSuccess This will be called when the operation succeeded.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void ReplaceUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+	/**
+	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
+	 * @brief The end point of this method if bIsPublic is true (using suffix /public) will be deprecated in future   
 	 * @param Key Key of record.
 	 * @param RecordRequest The request of the record with JSON formatted.
 	 * @param IsPublic Save the record as a public/private record.
@@ -106,7 +128,7 @@ public:
 	 * @param OnError This will be called when the operation failed.
 	 */
 	void DeleteUserRecord(FString const& Key, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
-
+ 
 	/**
 	 * @brief Save a namespace-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
 	 *
@@ -181,6 +203,9 @@ private:
 
 	void ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 	void ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	FJsonObject CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest);
+	FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool SetPublic, FJsonObject const& RecordRequest);
 };
 
 } // Namespace Api

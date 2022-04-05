@@ -54,6 +54,14 @@ namespace GameServerApi
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
+	void ServerCloudSave::SaveGameRecord(FString const& Key, ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+	{ 
+		FReport::Log(FString(__FUNCTION__));
+
+		FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, RecordRequest);
+		SaveGameRecord(Key, NewRecordRequest, OnSuccess, OnError );
+	}
+	
 	void ServerCloudSave::SaveGameRecord(const FString& Key, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
@@ -111,13 +119,32 @@ namespace GameServerApi
 			FString UpdatedAt;
 			jsonObject.TryGetStringField("updated_at", UpdatedAt);
 			FDateTime::ParseIso8601(*UpdatedAt, gameRecord.UpdatedAt);
-			jsonObject.TryGetStringField("set_by", gameRecord.SetBy);
+			FString SetByString;
+			jsonObject.TryGetStringField("set_by", SetByString);
+			ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
+			if (SetByString.Equals(TEXT("SERVER")))
+			{
+				SetBy = ESetByMetadataRecord::Server;
+			}
+			else if (SetByString.Equals(TEXT("CLIENT")))
+			{
+				SetBy = ESetByMetadataRecord::Client;
+			}
+			gameRecord.SetBy = SetBy;
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
 			gameRecord.Value = *value->ToSharedRef();
 			OnSuccess.ExecuteIfBound(gameRecord);
 		}), OnError),
 			FPlatformTime::Seconds());
+	}
+
+	void ServerCloudSave::ReplaceGameRecord(const FString& Key, ESetByMetadataRecord SetBy, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__)); 
+
+		FJsonObject NewRecordRequest = CreateGameRecordWithMetadata(SetBy, RecordRequest);
+		ReplaceGameRecord(Key, NewRecordRequest, OnSuccess, OnError);
 	}
 
 	void ServerCloudSave::ReplaceGameRecord(const FString& Key, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -167,6 +194,14 @@ namespace GameServerApi
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
+	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, ESetByMetadataRecord SetBy, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(SetBy, SetPublic, RecordRequest);
+		SaveUserRecord(Key, UserId, NewRecordRequest, OnSuccess, OnError);
+	}
+
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
@@ -190,6 +225,14 @@ namespace GameServerApi
 		Request->SetContentAsString(Content);
 
 		HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	}
+
+	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, ESetByMetadataRecord SetBy, bool SetPublic, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FJsonObject NewRecordRequest = bIsPublic ? RecordRequest : CreatePlayerRecordWithMetadata(SetBy, SetPublic, RecordRequest);
+		SaveUserRecord(Key, UserId, NewRecordRequest, bIsPublic, OnSuccess, OnError);
 	}
 	
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -251,7 +294,18 @@ namespace GameServerApi
 				FString UpdatedAt;
 				jsonObject.TryGetStringField("updated_at", UpdatedAt);
 				FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
-				jsonObject.TryGetStringField("set_by", userRecord.SetBy);
+				FString SetByString;
+				jsonObject.TryGetStringField("set_by", SetByString);
+				ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
+				if (SetByString.Equals(TEXT("SERVER")))
+				{
+					SetBy = ESetByMetadataRecord::Server;
+				}
+				else if (SetByString.Equals(TEXT("CLIENT")))
+				{
+					SetBy = ESetByMetadataRecord::Client;
+				}
+				userRecord.SetBy = SetBy;
 				const TSharedPtr<FJsonObject> *value;
 				jsonObject.TryGetObjectField("value", value);
 				userRecord.Value = *value->ToSharedRef();
@@ -294,12 +348,32 @@ namespace GameServerApi
 			FString UpdatedAt;
 			jsonObject.TryGetStringField("updated_at", UpdatedAt);
 			FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+			FString SetByString;
+			jsonObject.TryGetStringField("set_by", SetByString);
+			ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
+			if (SetByString.Equals(TEXT("SERVER")))
+			{
+				SetBy = ESetByMetadataRecord::Server;
+			}
+			else if (SetByString.Equals(TEXT("CLIENT")))
+			{
+				SetBy = ESetByMetadataRecord::Client;
+			}
+			userRecord.SetBy = SetBy;				
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
 			userRecord.Value = *value->ToSharedRef();
 			OnSuccess.ExecuteIfBound(userRecord);
 		}), OnError),
 			FPlatformTime::Seconds());
+	}
+
+	void ServerCloudSave::ReplaceUserRecord(const FString& Key, ESetByMetadataRecord SetBy, bool SetPublic, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		const FJsonObject& NewRecordRequest = CreatePlayerRecordWithMetadata(SetBy, SetPublic, RecordRequest);
+		ReplaceUserRecord(Key, UserId, NewRecordRequest, OnSuccess, OnError);
 	}
 
 	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -327,6 +401,14 @@ namespace GameServerApi
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 	
+	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, ESetByMetadataRecord SetBy, bool SetPublic, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+	{
+		FReport::Log(FString(__FUNCTION__));
+
+		FJsonObject NewRecordRequest = bIsPublic ? RecordRequest : CreatePlayerRecordWithMetadata(SetBy, SetPublic, RecordRequest);
+		ReplaceUserRecord(Key, UserId, NewRecordRequest, bIsPublic, OnSuccess, OnError);
+	}
+
 	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
@@ -374,5 +456,47 @@ namespace GameServerApi
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
+	FJsonObject ServerCloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool SetPublic, FJsonObject const& RecordRequest)
+	{
+		FJsonObject NewRecordRequest = RecordRequest;
+
+		const auto MetadataJson = MakeShared<FJsonObject>();
+		FString SetByString = TEXT("");
+		switch (SetBy)
+		{
+		case ESetByMetadataRecord::Server:
+			SetByString = TEXT("SERVER");
+			break;
+		case ESetByMetadataRecord::Client:
+			SetByString = TEXT("CLIENT");
+			break;
+		}
+		MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+		MetadataJson->SetBoolField(TEXT("is_public"), SetPublic);
+		NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+		return NewRecordRequest;
+	}
+
+	FJsonObject ServerCloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest)
+	{
+		FJsonObject NewRecordRequest = RecordRequest;
+
+		const auto MetadataJson = MakeShared<FJsonObject>();
+		FString SetByString = TEXT("");
+		switch (SetBy)
+		{
+		case ESetByMetadataRecord::Server:
+			SetByString = TEXT("SERVER");
+			break;
+		case ESetByMetadataRecord::Client:
+			SetByString = TEXT("CLIENT");
+			break;
+		}
+		MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+		NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+		return NewRecordRequest;
+	}
 } // namespace GameServerApi
 } // namespace AccelByte

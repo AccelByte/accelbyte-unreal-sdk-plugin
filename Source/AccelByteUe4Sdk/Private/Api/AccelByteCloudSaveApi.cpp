@@ -27,6 +27,14 @@ CloudSave::CloudSave(
 
 CloudSave::~CloudSave(){}
 
+void CloudSave::SaveUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::Client, SetPublic, RecordRequest);
+	SaveUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+}
+
 void CloudSave::SaveUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -88,6 +96,18 @@ void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserR
 					FString UpdatedAt;
 					jsonObject.TryGetStringField("updated_at", UpdatedAt);
 					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					FString SetByString;
+					jsonObject.TryGetStringField("set_by", SetByString);
+					ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
+					if (SetByString.Equals(TEXT("SERVER")))
+					{
+						SetBy = ESetByMetadataRecord::Server;
+					}
+					else if (SetByString.Equals(TEXT("CLIENT")))
+					{
+						SetBy = ESetByMetadataRecord::Client;
+					}
+					userRecord.SetBy = SetBy;
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
 					userRecord.Value = *value->ToSharedRef();
@@ -133,6 +153,18 @@ void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, T
 					FString UpdatedAt;
 					jsonObject.TryGetStringField("updated_at", UpdatedAt);
 					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					FString SetByString;
+					jsonObject.TryGetStringField("set_by", SetByString);
+					ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
+					if (SetByString.Equals(TEXT("SERVER")))
+					{
+						SetBy = ESetByMetadataRecord::Server;
+					}
+					else if (SetByString.Equals(TEXT("CLIENT")))
+					{
+						SetBy = ESetByMetadataRecord::Client;
+					}
+					userRecord.SetBy = SetBy;
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
 					userRecord.Value = *value->ToSharedRef();
@@ -212,6 +244,14 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 		FPlatformTime::Seconds());
 }
 
+void CloudSave::ReplaceUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::Client, SetPublic, RecordRequest);
+	ReplaceUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+}
+	
 void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
@@ -623,6 +663,49 @@ void CloudSave::DeleteGameRecord(FString const& Key, FVoidHandler const& OnSucce
 	Request->SetContentAsString(Content);
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool SetPublic, FJsonObject const& RecordRequest)
+{
+	FJsonObject NewRecordRequest = RecordRequest;
+
+	const auto MetadataJson = MakeShared<FJsonObject>();
+	FString SetByString = TEXT("");
+	switch (SetBy)
+	{
+	case ESetByMetadataRecord::Server:
+		SetByString = TEXT("SERVER");
+		break;
+	case ESetByMetadataRecord::Client:
+		SetByString = TEXT("CLIENT");
+		break;
+	}
+	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+	MetadataJson->SetBoolField(TEXT("is_public"), SetPublic);
+	NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+	return NewRecordRequest;
+}
+
+FJsonObject CloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest)
+{
+	FJsonObject NewRecordRequest = RecordRequest;
+
+	const auto MetadataJson = MakeShared<FJsonObject>();
+	FString SetByString = TEXT("");
+	switch (SetBy)
+	{
+	case ESetByMetadataRecord::Server:
+		SetByString = TEXT("SERVER");
+		break;
+	case ESetByMetadataRecord::Client:
+		SetByString = TEXT("CLIENT");
+		break;
+	}
+	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+	NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+	return NewRecordRequest;
 }
 
 } // Namespace Api

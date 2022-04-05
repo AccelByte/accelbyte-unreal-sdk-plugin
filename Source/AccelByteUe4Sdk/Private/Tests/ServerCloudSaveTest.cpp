@@ -10,6 +10,7 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
+#include "Api/AccelByteCloudSaveApi.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteServerCloudSaveTest, Log, All);
 
@@ -284,11 +285,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	AB_TEST_TRUE(bClientTokenObtained)
    
 	// Prepare Json Obj for Game Record with META field 
-	FJsonObject DataJson;
-	const auto CandidateJson = MakeShared<FJsonObject>();
-	CandidateJson->SetStringField(TEXT("set_by"), TEXT("SERVER"));
-	CandidateJson->SetBoolField(TEXT("is_public"), true);
-	DataJson.SetObjectField("META", CandidateJson);
+	FJsonObject DataJson; 
 	const FString gameId = FGuid::NewGuid().ToString();
 	DataJson.SetStringField("gameId", gameId);
 	DataJson.SetStringField("region", TEXT("ID"));
@@ -300,7 +297,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Process Save Game Record 
 	bool bSaveGameRecordSuccess = false;
 	bool bSaveGameRecordDone = false;
-	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, DataJson, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess, &bSaveGameRecordDone]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::Server, DataJson, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess, &bSaveGameRecordDone]()
 	{
 	   bSaveGameRecordSuccess = bSaveGameRecordDone =true;
 	   UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Save Game Record success"));
@@ -338,7 +335,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Check the game records values 
 	AB_TEST_TRUE(bGetGameRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, ResultGameRecord.Key);
-	AB_TEST_EQUAL(TEXT("SERVER"), ResultGameRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultGameRecord.SetBy);
 	FString resultGameId;
 	ResultGameRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -346,10 +343,6 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Update game record
 	// prepare the json 
 	FJsonObject UpdatedDataJson;
-	const auto UpdatedCandidateJson = MakeShared<FJsonObject>();
-	UpdatedCandidateJson->SetStringField(TEXT("set_by"), TEXT("SERVER"));
-	UpdatedCandidateJson->SetBoolField(TEXT("is_public"), true);
-	UpdatedDataJson.SetObjectField("META", UpdatedCandidateJson);
 	const FString updatedGameId = FGuid::NewGuid().ToString();
 	// try to change the game id value 
 	UpdatedDataJson.SetStringField("gameId", updatedGameId);
@@ -397,7 +390,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Check the game records values 
 	AB_TEST_TRUE(bRecheckGetGameRecordSuccess)
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckGameRecord.Key);
-	AB_TEST_EQUAL(TEXT("SERVER"), ResultRecheckGameRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultRecheckGameRecord.SetBy);
 	FString resultRecheckGameId;
 	ResultRecheckGameRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)
@@ -424,9 +417,8 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	return true;
 }
 
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetDefaultValueMetadataAdminGameRecord, "AccelByte.Tests.ServerCloudSave.C.GetDefaultValueMetadataGameRecord", AutomationFlagMaskServerCloudSave)
-bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetDefaultValueMetadataAdminGameRecord_NoMetaData, "AccelByte.Tests.ServerCloudSave.C.GetDefaultValueMetadataGameRecord_NoMetaData", AutomationFlagMaskServerCloudSave)
+bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord_NoMetaData::RunTest(const FString& Parameters)
 {
 	// Login First 
 	bool bClientTokenObtained = false;
@@ -498,7 +490,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord::RunTest(const FStrin
 	// Verify the Metadata SetBy Field is 'CLIENT' 
 	AB_TEST_TRUE(bGetGameRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, result.Key);
-	AB_TEST_EQUAL(TEXT("CLIENT"), result.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Client, result.SetBy);
 	FString resultGameId;
 	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -524,8 +516,8 @@ bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord::RunTest(const FStrin
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord, "AccelByte.Tests.ServerCloudSave.C.GetDefaultValueMetadataPlayerRecord", AutomationFlagMaskServerCloudSave)
-bool ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord_NoMetadata, "AccelByte.Tests.ServerCloudSave.C.GetDefaultValueMetadataPlayerRecord_NoMetadata", AutomationFlagMaskServerCloudSave)
+bool ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord_NoMetadata::RunTest(const FString& Parameters)
 {
 	// Login First 
 	bool bClientTokenObtained = false;
@@ -600,7 +592,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord::RunTest(const FStr
 	// Verify the Metadata SetBy Field is 'CLIENT' 
 	AB_TEST_TRUE(bGetPlayerRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, result.Key);
-	AB_TEST_EQUAL(TEXT("CLIENT"), result.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Client, result.SetBy);
 	FString resultGameId;
 	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -651,11 +643,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	FString userId = FGuid::NewGuid().ToString();  
 
 	// Prepare the Content Body for Json Obj of Player Record 
-	FJsonObject dataJson;
-	const auto CandidateJson = MakeShared<FJsonObject>();
-	CandidateJson->SetStringField(TEXT("set_by"), TEXT("SERVER"));
-	CandidateJson->SetBoolField(TEXT("is_public"), true);
-	dataJson.SetObjectField("META", CandidateJson);
+	FJsonObject dataJson; 
 	const FString gameId = FGuid::NewGuid().ToString();
 	dataJson.SetStringField("gameId", gameId);
 	dataJson.SetStringField("region", TEXT("ID"));
@@ -668,7 +656,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	bool bSavePlayerRecordSuccess = false;
 	bool bSavePlayerRecordDone = false;
 	UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Save Player Record"));
-	FRegistry::ServerCloudSave.SaveUserRecord(KeyGameTest, userId, dataJson,
+	FRegistry::ServerCloudSave.SaveUserRecord(KeyGameTest, userId, ESetByMetadataRecord::Server, false, dataJson, 
 		FVoidHandler::CreateLambda([&bSavePlayerRecordSuccess, &bSavePlayerRecordDone]()
 	{
 	   bSavePlayerRecordSuccess = bSavePlayerRecordDone =true;
@@ -707,7 +695,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	// Check the Player records values 
 	AB_TEST_TRUE(bGetPlayerRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, ResultPlayerRecord.Key);
-	AB_TEST_EQUAL(TEXT("SERVER"), ResultPlayerRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultPlayerRecord.SetBy);
 	FString resultGameId;
 	ResultPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -767,7 +755,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	// Check the Player records values 
 	AB_TEST_TRUE(bRecheckGetPlayerRecordSuccess)
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckPlayerRecord.Key);
-	AB_TEST_EQUAL(TEXT("SERVER"), ResultRecheckPlayerRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultRecheckPlayerRecord.SetBy);
 	FString resultRecheckGameId;
 	ResultRecheckPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)
