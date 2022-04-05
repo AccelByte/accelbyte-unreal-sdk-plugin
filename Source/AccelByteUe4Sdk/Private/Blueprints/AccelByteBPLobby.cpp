@@ -45,3 +45,46 @@ void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
 			}
 		));
 }
+
+FString UABLobby::RefreshToken(
+	FRefreshTokenRequest const& Request,
+	FDRefreshTokenResponseDelegate OnResponse,
+	FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.SetRefreshTokenDelegate(
+		Api::Lobby::FRefreshTokenResponse::CreateLambda(
+			[OnResponse](FAccelByteModelsRefreshTokenResponse const& Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+	return ApiClientPtr->Lobby.RefreshToken(Request.AccessToken);
+}
+
+void UABLobby::SetRetryParameters(FSetRetryParametersRequest const& Request) const
+{
+	ApiClientPtr->Lobby.SetRetryParameters(
+		Request.NewTotalTimeout,
+		Request.NewBackoffDelay,
+		Request.NewMaxDelay);
+}
+
+void UABLobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator)
+{
+	ApiClientPtr->Lobby.SetTokenGenerator(TokenGenerator);
+}
+
+FString UABLobby::RequestDS(FRequestDSModel const& Request) const
+{
+	return ApiClientPtr->Lobby.RequestDS(
+		Request.SessionID,
+		Request.GameMode,
+		Request.ClientVersion,
+		Request.Region,
+		Request.Deployment,
+		Request.ServerName);
+}

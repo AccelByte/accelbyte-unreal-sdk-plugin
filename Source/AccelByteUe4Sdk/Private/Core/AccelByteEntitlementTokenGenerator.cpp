@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "AccelByteEntitlementTokenGenerator.h"
+#include "Core/AccelByteEntitlementTokenGenerator.h"
 #include "Api/AccelByteEntitlementApi.h"
 #include "Models/AccelByteEcommerceModels.h"
 #include "Core/AccelByteJwtWrapper.h"

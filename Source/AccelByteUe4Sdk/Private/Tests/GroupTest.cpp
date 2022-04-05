@@ -251,7 +251,7 @@ const auto GroupTestLoginApiClient = [](const FTestUser& User)
 				bIsOk = true;
 				bIsDone = true;
 			}),
-			FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			FCustomErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
 				bIsDone = true;

@@ -59,6 +59,20 @@ namespace AccelByte
 				const FErrorHandler& OnError) const;
 
 			/**
+			* @brief Log in with email/username account with 2FA enable
+			*
+			* @param Username User email address or username.
+			* @param Password Password.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void LoginWithUsername(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
+				const FCustomErrorHandler& OnError) const;
+
+			/**
 			* @brief Log in with email/username account using v3 endpoint.
 			*
 			* @param Username User email address or username.
@@ -72,6 +86,22 @@ namespace AccelByte
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
 				const FErrorHandler& OnError,
+				const bool RememberMe = false) const;
+
+			/**
+			* @brief Log in with email/username account using v3 endpoint with 2FA enable
+			*
+			* @param Username User email address or username.
+			* @param Password Password.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
+			*/
+			void LoginWithUsernameV3(
+				const FString& Username,
+				const FString& Password,
+				const FVoidHandler& OnSuccess,
+				const FCustomErrorHandler& OnError,
 				const bool RememberMe = false) const;
 
 			/**
@@ -89,12 +119,39 @@ namespace AccelByte
 				const FErrorHandler& OnError) const;
 
 			/**
+			* @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc. with 2FA enable
+			*
+			* @param PlatformType Specify platform type that chosen by user to log in.
+			* @param PlatformToken Authentication code that provided by another platform.
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void LoginWithOtherPlatform(
+				EAccelBytePlatformType PlatformType,
+				const FString& PlatformToken,
+				const FVoidHandler& OnSuccess,
+				const FCustomErrorHandler& OnError) const;
+
+			/**
 			 * @brief Log in with device ID (anonymous log in).
 			 *
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithDeviceId(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
+
+			/**
+			 * @brief Verify log in with new device when user enabled 2FA.
+			 *
+			 * @param MfaToken return from BE when user login with new device and 2FA enabled.
+			 * @param AuthFactorType 2FA factor used. Could be "authenticator" or "backupCode". User should make sure what type used
+			 * @param Code auth code from 3rd party authenticator or backupCode. 
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 * @param RememberDevice
+			 */
+			void VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
+				const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice = false) const;
 
 			/**
 			 * @brief Log in from Accelbyte Launcher.
@@ -420,6 +477,89 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void BulkGetUserInfo(const TArray<FString>& UserIds, const THandler<FListBulkUserInfo>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			 * @brief This function will get user input validation
+			 * 
+			 * @param  LanguageCode Targeted Language Code, using ISO-639 
+			 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
+			 * @param  OnError This will be called when the operation failed.
+			 * @param  DefaultOnEmpty Targeted DefaultOnEmpty. 
+			 */
+			void GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError, bool DefaultOnEmpty = true);
+
+			/**
+			* @brief This function will enable 2FA with backupCode.
+			*
+			* @param OnSuccess This will be called when the operation succeeded. The result is FUser2FaBackupCode.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void Enable2FaBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will disable 2FA with backupCode.
+			*
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void Disable2FaBackupCode(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will generate backupCode.
+			*
+			* @param OnSuccess This will be called when the operation succeeded. The result is FUser2FaBackupCode.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void GenerateBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will get backupCode.
+			*
+			* @param OnSuccess This will be called when the operation succeeded. The result is FUser2FaBackupCode.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void GetBackupCode(const THandler<FUser2FaBackupCode>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will enable 3rd party authenticator.
+			*
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void Enable2FaAuthenticator(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will disable 3rd party authenticator.
+			*
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void Disable2FaAuthenticator(const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will generate secret key for linking AB 2fa with 3rd party authenticator apps.
+			*
+			* @param OnSuccess This will be called when the operation succeeded. The result is FUser2FaSecretKey.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void GenerateSecretKeyFor2FaAuthenticator(const THandler<FUser2FaSecretKey>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will get user 2FA factor enabled.
+			*
+			* @param OnSuccess This will be called when the operation succeeded. The result is FUser2FaMethod.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void GetEnabled2FaFactors(const THandler<FUser2FaMethod>& OnSuccess, const FErrorHandler& OnError);
+
+			/**
+			* @brief This function will make default factor for 2FA.
+			*
+			* @param AuthFactorType AuthFactorType user want to set as default factor
+			* @param OnSuccess This will be called when the operation succeeded.
+			* @param OnError This will be called when the operation failed.
+			*/
+			void MakeDefault2FaFactors(EAccelByteLoginAuthFactorType AuthFactorType ,const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 		private:
 			User() = delete;

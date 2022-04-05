@@ -170,7 +170,8 @@ public:
 	}
 
 	static FString GetPlatformString(EAccelBytePlatformType Platform);
-	
+
+	static FString GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator);
 };
 
 USTRUCT(BlueprintType)

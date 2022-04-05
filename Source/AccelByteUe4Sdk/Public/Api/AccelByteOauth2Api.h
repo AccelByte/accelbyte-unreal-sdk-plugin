@@ -52,6 +52,18 @@ public:
 	static void GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	* @brief Log user in with their email account with 2FA enabled
+	* 
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param Username The email address. Dunno why it's called Login ID instead of username or something.
+	* @param Password The password.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void GetTokenWithPasswordCredentials(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
+	
+	/**
 	* @brief Get client token.
 	* he result is FAccelByteModelsOauth2Token.
 	*
@@ -90,7 +102,17 @@ public:
 	*/
 	static void GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-
+	/**
+	* @brief Log user in with their other platform account, e.g., Steam, Google, Facebook, Twitter, Twitch, etc. with 2FA enabled
+	* Will return a "user" session id.
+	* 
+	* @param PlatformId The PlatformId. The platform ID.
+	* @param PlatformToken The Token.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	*/
+	static void GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError);
+	
 	/**
 	* @brief Refresh user session.
 	* he result is FAccelByteModelsOauth2Token.
@@ -138,6 +160,34 @@ public:
 	*/
 	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool RememberMe = false);
 
+	/**
+	* @brief Log user in with their username and password using V3 endpoint with 2FA enabled
+	* 
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param Username The email address. Dunno why it's called Login ID instead of username or something.
+	* @param Password The password.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	* @param RememberMe This will use for refresh token expiration extension, default value is false.
+	*/
+	static void GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberMe = false);
+	
+	/**
+	* @brief Verify and Remember new device when user enabled 2FA.
+	* 
+	* @param ClientId The issued OAuth2 client credentials.
+	* @param ClientSecret The issued OAuth2 client credentials.
+	* @param MfaToken Multi Factor Authentication Code, got error when user login with new device.
+	* @param AuthFactorType Type of authentication factor. Could be "EAccelByteLoginAuthFactorType::Authenticator" or "EAccelByteLoginAuthFactorType::BackupCode".
+	* @param Code Code to verify new device, could be obtain by 3rd party authenticator app or back up code depend on what type of AuthFactor user set as default
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsOauth2Session.
+	* @param OnError This will be called when the operation failed.
+	* @param RememberDevice This will use for refresh token expiration extension, default value is false.
+	*/
+	static void VerifyAndRememberNewDevice(const FString& ClientId, const FString& ClientSecret, const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, 
+		const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice = false);
+	
 private:
 	Oauth2() = delete; // static class can't have instance
 	Oauth2(Oauth2 const&) = delete;

@@ -240,7 +240,10 @@ void FLeaderboardTestSpec::Define()
 						LoginUserIDs.Add(FRegistry::Credentials.GetUserId());
 						UsersLoginSuccess[i] = true;
 						UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("\t\tSuccessfully Login."));
-					}), LeaderboardTestErrorHandler);
+					}), FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+					{
+						UE_LOG(LogAccelByteLeaderboardTest, Error, TEXT("failed to login..! Error: %d | Message: %s"), Code, *Message);
+					}));
 				WaitUntil(UsersLoginSuccess[i], "Waiting for login with user name...");
 				UE_LOG(LogAccelByteLeaderboardTest, Log, TEXT("User creds: %s"), *FRegistry::Credentials.GetUserId());
 

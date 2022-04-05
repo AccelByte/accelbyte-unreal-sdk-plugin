@@ -22,8 +22,8 @@ void UABUser::LoginWithUsername(
 			{
 				OnSuccess.ExecuteIfBound();
 			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
+		FCustomErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FJsonObject& ErrorJson)
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
@@ -43,8 +43,8 @@ void UABUser::LoginWithOtherPlatform(
 			{
 				OnSuccess.ExecuteIfBound();
 			}),
-		FErrorHandler::CreateLambda(
-			[OnError](int Code, FString const& Message)
+		FCustomErrorHandler::CreateLambda(
+			[OnError](int Code, FString const& Message, const FJsonObject& ErrorJson)
 			{
 				OnError.ExecuteIfBound(Code, Message);
 			}));
@@ -458,7 +458,7 @@ void UABUser::LinkOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	FString const& Ticket,
 	FDHandler OnSuccess,
-	FDAccountLinkConflictMessageVariablesResponse OnError) const
+	FDAccountLinkConflictErrorJsonResponse OnError) const
 {
 	ApiClientPtr->User.LinkOtherPlatform(
 		PlatformType,
@@ -471,7 +471,7 @@ void UABUser::LinkOtherPlatform(
 		FCustomErrorHandler::CreateLambda(
 			[OnError](int Code, FString const& Message, FJsonObject const& MessageVariable)
 			{
-				FAccountLinkConflictMessageVariables Result;
+				FAccountLinkConflictErrorJson Result;
 				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(MessageVariable);
 				FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &Result, 0, 0);
 				OnError.ExecuteIfBound(Code, Message, Result);
@@ -482,7 +482,7 @@ void UABUser::ForcedLinkOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	FString const& PlatformUserId,
 	FDHandler OnSuccess,
-	FDAccountLinkConflictMessageVariablesResponse OnError) const
+	FDAccountLinkConflictErrorJsonResponse OnError) const
 {
 	ApiClientPtr->User.ForcedLinkOtherPlatform(
 		PlatformType,
@@ -495,7 +495,7 @@ void UABUser::ForcedLinkOtherPlatform(
 		FCustomErrorHandler::CreateLambda(
 			[OnError](int Code, FString const& Message, FJsonObject const& MessageVariable)
 			{
-				FAccountLinkConflictMessageVariables Result;
+				FAccountLinkConflictErrorJson Result;
 				TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(MessageVariable);
 				FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &Result, 0, 0);
 				OnError.ExecuteIfBound(Code, Message, Result);

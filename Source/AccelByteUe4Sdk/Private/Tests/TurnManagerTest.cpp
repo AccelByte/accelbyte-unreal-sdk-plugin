@@ -85,7 +85,10 @@ bool TurnManagerSetup::RunTest(const FString& Parameters)
 			LoginUserID = FRegistry::Credentials.GetUserId();
 			UsersLoginSuccess = true;
 			UE_LOG(LogAccelByteTurnManagerTest, Log, TEXT("\t\tSuccessfully Login."));
-		}), TurnManagerTestErrorHandler);
+		}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+		{
+			UE_LOG(LogAccelByteTurnManagerTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+		}));
 	WaitUntil(UsersLoginSuccess, "Waiting for login with user name...");
 
 	return true;

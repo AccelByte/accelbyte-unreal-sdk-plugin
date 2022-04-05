@@ -362,7 +362,10 @@ void FSubscriptionTestSpec::Define()
 				{
 					UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 					bLoginSuccess = true;
-				}), SubscriptionErrorHandler);
+				}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+				{
+					UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+				}));
 				WaitUntil(bLoginSuccess, "Waiting for login");
 				AB_TEST_TRUE(bLoginSuccess);
 
@@ -402,7 +405,10 @@ void FSubscriptionTestSpec::Define()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 				bLoginSuccess = true;
-			}), SubscriptionErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 			WaitUntil(bLoginSuccess, "Waiting for login");
 
 			bool doneGetAppEntitlement = false;
@@ -448,7 +454,10 @@ void FSubscriptionTestSpec::Define()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Success Login"));
 				bLoginSuccess = true;
-			}), SubscriptionErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 			WaitUntil(bLoginSuccess, "Waiting for login");
 
 			bool doneGetUserEntitlement = false;
@@ -514,7 +523,10 @@ void FSubscriptionTestSpec::Define()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 				bLoginFinish = true;
-			}), SubscriptionErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 			WaitUntil(bLoginFinish, "Waiting user login...");
 
 			bool bCheckEligibleFinish = false;
@@ -551,7 +563,10 @@ void FSubscriptionTestSpec::Define()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User 2 Login Success"));
 				bLoginFinish = true;
-			}), SubscriptionErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 			WaitUntil(bLoginFinish, "Waiting user login 2...");
 
 			bool bGetSubsOwnership = false;
@@ -594,7 +609,10 @@ void FSubscriptionTestSpec::Define()
 			{
 				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("User Login Success"));
 				bLoginFinish = true;
-			}), SubscriptionErrorHandler);
+			}), FCustomErrorHandler::CreateLambda([&](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteSubscriptionTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 			WaitUntil(bLoginFinish, "Waiting user login...");
 
 			bool bCheckEligibleFinish = false;

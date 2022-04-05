@@ -435,7 +435,10 @@ bool ServerLobbyTestSetup::RunTest(const FString& Parameters)
 			UsersLoginSuccess[i] = true;
 			SUserIds[i] = SUserCreds[i].GetUserId();
 		}),
-			ServerLobbyErrorHandler);
+		FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+		{
+			UE_LOG(LogAccelByteServerLobbyTest, Error, TEXT("Login Failed..! Error: %d | Message: %s"), Code, *Message);
+		}));
 
 		WaitUntil(UsersLoginSuccess[i], "Waiting for Login...");
 

@@ -193,7 +193,7 @@ bool LoginTestUser(FTestUser& TestUser)
 				bIsOk = true;
 				bIsDone = true;
 			}),
-		FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+		FCustomErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				bIsDone = true;
 			}));
