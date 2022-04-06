@@ -252,7 +252,10 @@ bool JoinableSessionTestSetup::RunTest(const FString& Parameters)
 				UsersLoginSuccess[i] = true;
 				ActiveUserIds[i] = ActiveUserCreds[i].GetUserId();
 			}), 
-			JoinableSessionTestErrorHandler);
+			FCustomErrorHandler::CreateLambda([](int32 Code, const FString& Message, const FJsonObject& ErrorJson)
+			{
+				UE_LOG(LogAccelByteJoinableSessionTest, Error, TEXT("Login Failed..! Error: %d | Message: %s"), Code, *Message);
+			}));
 		
 		WaitUntil(UsersLoginSuccess[i],"Waiting for Login...");
 	}

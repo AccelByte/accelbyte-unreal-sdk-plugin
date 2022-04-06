@@ -28,7 +28,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDCountryInfoResponse, FCountryInfo, Response)
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDBooleanResponse, bool, Response);
 
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDAccountLinkConflictMessageVariablesResponse, int32, ErrorCode, const FString&, ErrorMessage, FAccountLinkConflictMessageVariables, Response);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FDAccountLinkConflictErrorJsonResponse, int32, ErrorCode, const FString&, ErrorMessage, FAccountLinkConflictErrorJson, Response);
 
 UCLASS(Blueprintable, BlueprintType)
 class UABUser final : public UObject
@@ -116,10 +116,10 @@ public:
 	void GetPlatformLinks(FDPagedPlatformLinksResponse OnSuccess, FDErrorHandler OnError) const;
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& Ticket, FDHandler OnSuccess, FDAccountLinkConflictMessageVariablesResponse OnError) const;
+	void LinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& Ticket, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError) const;
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformUserId, FDHandler OnSuccess, FDAccountLinkConflictMessageVariablesResponse OnError) const;
+	void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformUserId, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError) const;
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
 	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDErrorHandler OnError) const;

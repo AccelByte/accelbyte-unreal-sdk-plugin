@@ -21,7 +21,7 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FErrorInfo
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		int32 NumericErrorCode = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
 		int32 ErrorCode = -1;
@@ -35,6 +35,28 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 		FString Error;
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FErrorOauthInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	int32 ErrorCode = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString ErrorMessage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString Error;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString Error_description;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString Error_uri;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString Mfa_token;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	TArray<FString> Factors;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString Default_factor;
+};
+
 namespace AccelByte
 {
 #if (ENGINE_MAJOR_VERSION == 5) || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION > 25)
@@ -42,13 +64,13 @@ namespace AccelByte
 	template <typename T1, typename T2> using THandlerPayloadModifier = TDelegate<T1(T2)>;
 	using FVoidHandler = TDelegate<void()>;
 	using FErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */)>;
-	using FCustomErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */)>;
+	using FCustomErrorHandler = TDelegate<void(int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */)>;
 #else
 	template <typename T> using THandler = TBaseDelegate<void, const T&>;
 	template <typename T1, typename T2> using THandlerPayloadModifier = TBaseDelegate<T1, T2>;
 	using FVoidHandler = TBaseDelegate<void>;
 	using FErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */>;
-	using FCustomErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* MessageVariables */>;
+	using FCustomErrorHandler = TBaseDelegate<void, int32 /*ErrorCode*/, const FString& /* ErrorMessage */, const FJsonObject& /* ErrorObject */>;
 #endif
 
 	UENUM(BlueprintType)
@@ -393,39 +415,61 @@ namespace AccelByte
 		const static std::unordered_map<std::underlying_type<ErrorCodes>::type, FString> Default;
 	};
 
-
-
 	ACCELBYTEUE4SDK_API void HandleHttpError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage);
 
-	inline void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutMessageVariables)
+	inline void HandleHttpCustomError(FHttpRequestPtr Request, FHttpResponsePtr Response, int& OutCode, FString& OutMessage, FJsonObject& OutErrorObject)
 	{
-		FErrorInfo Error;
-		Error.NumericErrorCode = -1;
+		FErrorOauthInfo Error;
 		Error.ErrorCode = -1;
-		Error.Code = -1;
 		int32 Code = 0;
 		OutMessage = "";
 		if (Response.IsValid())
 		{
 			if (!Response->GetContentAsString().IsEmpty())
 			{
-				if (FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
+				if(FJsonObjectConverter::JsonObjectStringToUStruct(Response->GetContentAsString(), &Error, 0, 0))
 				{
-					if (Error.NumericErrorCode != -1)
-					{
-						Code = Error.NumericErrorCode;
-					}
-					else if (Error.ErrorCode != -1)
+					if(Error.ErrorCode != -1)
 					{
 						Code = Error.ErrorCode;
-					}
-					else if (Error.Code != -1)
-					{
-						Code = Error.Code;
+						OutErrorObject.SetNumberField("errorCode", Error.ErrorCode);
 					}
 					else
 					{
 						Code = Response->GetResponseCode();
+					}
+					
+					if(!Error.Error_description.IsEmpty())
+					{
+						OutErrorObject.SetStringField("error_description", *Error.Error_description);
+					}
+
+					if(!Error.Error_uri.IsEmpty())
+					{
+						OutErrorObject.SetStringField("error_uri", *Error.Error_uri);
+					}
+						
+					if(!Error.Mfa_token.IsEmpty())
+					{
+						OutErrorObject.SetStringField("mfa_token", *Error.Mfa_token);
+					}
+						
+					if(Error.Factors.Num() > 0)
+					{
+						TArray<TSharedPtr<FJsonValue>> ValueArray;
+												
+						for (int i = 0; i < Error.Factors.Num(); i++)
+						{
+							TSharedPtr<FJsonValue> Value = MakeShareable(new FJsonValueString(Error.Factors[i]));    
+							ValueArray.Add(Value);
+						}
+						
+						OutErrorObject.SetArrayField("factors", ValueArray);
+					}
+						
+					if(!Error.Default_factor.IsEmpty())
+					{
+						OutErrorObject.SetStringField("default_factor", *Error.Default_factor);
 					}
 				}
 			}
@@ -444,10 +488,12 @@ namespace AccelByte
 		if (!Error.ErrorMessage.IsEmpty())
 		{
 			OutMessage = Error.ErrorMessage;
+			OutErrorObject.SetStringField("errorMessage", *Error.ErrorMessage);
 		}
 		else if (!Error.Error.IsEmpty())
 		{
 			OutMessage = Error.Error;
+			OutErrorObject.SetStringField("error", *Error.Error);
 		}
 		else
 		{
@@ -457,15 +503,15 @@ namespace AccelByte
 				OutMessage += ErrorMessages::Default.at(Code);
 			}
 		}
-
+		
 		if (Response.IsValid())
 		{
 			TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);
 			TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
 			FJsonSerializer::Deserialize(Reader, JsonObject);
 			if (JsonObject.Get()->HasField("messageVariables"))
-			{
-				OutMessageVariables = *JsonObject.Get()->TryGetField("messageVariables")->AsObject();
+			{				
+				OutErrorObject.SetObjectField("messageVariables", JsonObject.Get()->TryGetField("messageVariables")->AsObject());
 			}
 		}
 
@@ -607,7 +653,6 @@ namespace AccelByte
 				return;
 			}
 
-
 			if (!bFinished)
 			{
                 OnError.ExecuteIfBound(static_cast<int32>(ErrorCodes::NetworkError), "Request not sent.", FJsonObject{});
@@ -616,9 +661,9 @@ namespace AccelByte
 
 			int32 Code;
 			FString Message;
-			FJsonObject MessageVariables;
-			HandleHttpCustomError(Request, Response, Code, Message, MessageVariables);
-			OnError.ExecuteIfBound(Code, Message, MessageVariables);
+			FJsonObject ErrorObject;
+			HandleHttpCustomError(Request, Response, Code, Message, ErrorObject);
+			OnError.ExecuteIfBound(Code, Message, ErrorObject);
 		});
 	}
 } // Namespace AccelByte

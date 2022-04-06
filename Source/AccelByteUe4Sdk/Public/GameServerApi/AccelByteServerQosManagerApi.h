@@ -10,6 +10,7 @@
 #include "Networking.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteQosModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -24,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerQosManager
 {
 public:
-	ServerQosManager(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerQosManager(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerQosManager();
 
 	/**
@@ -47,6 +48,7 @@ public:
 private:
 	const ServerCredentials& Credentials;
 	const ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
 
 	ServerQosManager() = delete;
 	ServerQosManager(ServerQosManager const&) = delete;

@@ -17,7 +17,7 @@ void UBPUser::LoginWithUsername(const FString& Username, const FString& Password
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -29,7 +29,7 @@ void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const 
 	{
 		OnSuccess.ExecuteIfBound();
 	}),
-		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+	FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
 	}));
@@ -151,7 +151,7 @@ void UBPUser::LinkOtherPlatform(EAccelBytePlatformType PlatformType, const FStri
 	FRegistry::User.LinkOtherPlatform(
 		PlatformType, Ticket,
 		FVoidHandler::CreateLambda([OnSuccess]() { OnSuccess.ExecuteIfBound(); }),
-		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& MessageVariables) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
+		FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson) { OnError.ExecuteIfBound(ErrorCode, ErrorMessage); })
 	);
 }
 	

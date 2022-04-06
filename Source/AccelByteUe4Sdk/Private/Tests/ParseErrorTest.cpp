@@ -217,3 +217,95 @@ bool ParseErrorTestErrorResponseMixedErrorNumericErrorCodeBeforeErrorCode::RunTe
 
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ParseErrorTestErrorResponseOauthErrorIsResponseStatusOnly, "AccelByte.Tests.Core.ParseError.ErrorResponseOauthErrorIsResponseStatusOnly", AutomationFlagMaskParseError)
+bool ParseErrorTestErrorResponseOauthErrorIsResponseStatusOnly::RunTest(const FString& Parameters)
+{
+	int32 Code = 400;
+	FErrorInfo ErrorInfo;
+	
+	int32 OutCode;
+	FString OutMessages;
+	FJsonObject OutMessageVariables;
+	TSharedPtr<FMockResponse, ESPMode::ThreadSafe> TestResponse = MakeShared<FMockResponse, ESPMode::ThreadSafe>();
+	TestResponse->SetMockResponseCode(Code);
+
+	HandleHttpCustomError(nullptr, TestResponse, OutCode, OutMessages, OutMessageVariables);
+
+	AB_TEST_EQUAL(OutCode, Code);
+	AB_TEST_EQUAL(OutMessages, ErrorMessages::Default.at(400));
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ParseErrorTestErrorResponseOauthErrorBodyErrorIsObjectContainObject, "AccelByte.Tests.Core.ParseError.ErrorResponseOauthErrorBodyErrorIsObjectContainObject", AutomationFlagMaskParseError)
+bool ParseErrorTestErrorResponseOauthErrorBodyErrorIsObjectContainObject::RunTest(const FString& Parameters)
+{
+	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject);    
+	JsonObject->SetNumberField("errorCode", 12345);
+	JsonObject->SetStringField("errorMessage", "error_messages");
+
+	TSharedPtr<FJsonObject> JsonMessageVariables = MakeShareable(new FJsonObject);
+	JsonMessageVariables->SetStringField("platformUserID", "uuid12345678fromPlatform");
+
+	JsonObject->SetObjectField("messageVariables", JsonMessageVariables);
+	
+	FString Content;
+	TSharedRef<TJsonWriter<>> JsonStringWriter = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), JsonStringWriter);
+
+	int32 OutCode;
+	FString OutMessages;
+	FJsonObject OutErrorObject;
+	TSharedPtr<FMockResponse, ESPMode::ThreadSafe> newMockResponse = MakeShared<FMockResponse, ESPMode::ThreadSafe>();
+	newMockResponse->SetMockContent(Content);
+
+	HandleHttpCustomError(nullptr, newMockResponse, OutCode, OutMessages, OutErrorObject);
+
+	FJsonObject MessagesVariable = *OutErrorObject.GetObjectField("messageVariables");
+	const FString PlatformUserID = *MessagesVariable.GetStringField("platformUserID");
+	
+	AB_TEST_EQUAL(OutCode, 12345);
+	AB_TEST_EQUAL(OutMessages, "error_messages");
+	AB_TEST_EQUAL(PlatformUserID, "uuid12345678fromPlatform");
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(ParseErrorTestErrorResponseOauthErrorBodyErrorIs2FA, "AccelByte.Tests.Core.ParseError.ErrorResponseOauthErrorBodyErrorIs2FA", AutomationFlagMaskParseError)
+bool ParseErrorTestErrorResponseOauthErrorBodyErrorIs2FA::RunTest(const FString& Parameters)
+{
+	int32 Code = 401;
+	
+	FErrorOauthInfo ErrorOauthInfo;
+	ErrorOauthInfo.Error = "mfa_required";
+	ErrorOauthInfo.Error_description = "mfa verification required";
+	ErrorOauthInfo.Mfa_token = "xxxxxxxxxxxxx";
+	ErrorOauthInfo.Factors = {"authenticator", "backupCode"};
+	ErrorOauthInfo.Default_factor = "backupCode";
+
+	FString Content;
+	FJsonObjectConverter::UStructToJsonObjectString(ErrorOauthInfo, Content, 0, 0);
+
+	int32 OutCode;
+	FString OutMessages;
+	FJsonObject OutErrorObject;
+	TSharedPtr<FMockResponse, ESPMode::ThreadSafe> newMockResponse = MakeShared<FMockResponse, ESPMode::ThreadSafe>();
+	newMockResponse->SetMockResponseCode(Code);
+	newMockResponse->SetMockContent(Content);
+
+	HandleHttpCustomError(nullptr, newMockResponse, OutCode, OutMessages, OutErrorObject);
+
+	const FString MfaToken = *OutErrorObject.GetStringField("mfa_token");
+	TArray<FString> FactorEnabled;
+	OutErrorObject.TryGetStringArrayField("factors", FactorEnabled);
+	const FString DefaultFactor = *OutErrorObject.GetStringField("default_factor");
+
+	AB_TEST_EQUAL(OutCode, Code);
+	AB_TEST_EQUAL(OutMessages, ErrorOauthInfo.Error);
+	AB_TEST_EQUAL(MfaToken, ErrorOauthInfo.Mfa_token);
+	AB_TEST_EQUAL(FactorEnabled, ErrorOauthInfo.Factors);
+	AB_TEST_EQUAL(DefaultFactor, ErrorOauthInfo.Default_factor);
+
+	return true;
+}

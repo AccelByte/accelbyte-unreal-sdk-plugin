@@ -9,6 +9,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 class IWebSocket;
 
@@ -33,7 +34,7 @@ enum class EServerType :uint8
 class ACCELBYTEUE4SDK_API ServerDSM
 {
 public:
-	ServerDSM(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerDSM(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerDSM();
 
 	/*
@@ -137,6 +138,10 @@ public:
 	void ParseCommandParam();
 
 private:
+	const ServerCredentials& Credentials;
+	const ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
+
 	ServerDSM(ServerDSM const&) = delete; // Copy constructor
 	ServerDSM(ServerDSM&&) = delete; // Move constructor
 	ServerDSM& operator=(ServerDSM const&) = delete; // Copy assignment operator

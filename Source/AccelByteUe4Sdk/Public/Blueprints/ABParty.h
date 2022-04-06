@@ -20,8 +20,8 @@ struct FPartyInviteRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString friendID;
+	UPROPERTY(BlueprintReadWrite)
+	FString friendID;
 };
 
 USTRUCT(BlueprintType)
@@ -29,11 +29,11 @@ struct FPartyJoinRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString partyID;
+	UPROPERTY(BlueprintReadWrite)
+	FString partyID;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString invitationToken;
+	FString invitationToken;
 };
 
 USTRUCT(BlueprintType)
@@ -41,11 +41,11 @@ struct FPartyRejectRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString partyID;
+	UPROPERTY(BlueprintReadWrite)
+	FString partyID;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString invitationToken;
+	FString invitationToken;
 };
 
 USTRUCT(BlueprintType)
@@ -53,8 +53,8 @@ struct FPartyKickRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString memberID;
+	UPROPERTY(BlueprintReadWrite)
+	FString memberID;
 };
 
 USTRUCT(BlueprintType)
@@ -62,8 +62,8 @@ struct FPartyJoinViaCodeRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString partyCode;
+	UPROPERTY(BlueprintReadWrite)
+	FString partyCode;
 };
 
 USTRUCT(BlueprintType)
@@ -71,8 +71,40 @@ struct FPartyPromoteLeaderRequest
 {
 	GENERATED_BODY()
 
-		UPROPERTY(BlueprintReadWrite)
-		FString userId;
+	UPROPERTY(BlueprintReadWrite)
+	FString userId;
+};
+
+USTRUCT(BlueprintType)
+struct FGetPartyDataRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString partyId;
+};
+
+USTRUCT(BlueprintType)
+struct FGetPartyStorageRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString partyId;
+};
+
+USTRUCT(BlueprintType)
+struct FWritePartyStorageRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FString partyId;
+	
+	UPROPERTY(BlueprintReadWrite)
+	int32 RetryAttempt;
+
+	TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier;
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDInfoPartyResponse, FAccelByteModelsInfoPartyResponse, Response);
@@ -99,11 +131,15 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyJoinViaCodeResponse, FAccelByteModelsPa
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyPromoteLeaderResponse, FAccelByteModelsPartyPromoteLeaderResponse, Response);
 
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyGetDataResponse, FAccelByteModelsPartyData, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyGetStorageResponse, FAccelByteModelsPartyDataNotif, Response);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyWriteDataResponse, FAccelByteModelsPartyDataNotif, Response);
+
 #pragma endregion 
 
 #pragma region MODEL_AND_DELEGATE_FOR_NOTIFICATION
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyGetInvitedNotif, FAccelByteModelsPartyGetInvitedNotice, Notif);
 
@@ -116,6 +152,8 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyLeaveNotif, FAccelByteModelsLeavePartyN
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyKickNotif, FAccelByteModelsGotKickedFromPartyNotice, Notif);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyInviteNotif, FAccelByteModelsInvitationNotice, Notif);
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDPartyDataUpdateNotif, FAccelByteModelsPartyDataNotif, Notif);
 
 #pragma endregion
 
@@ -165,6 +203,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
 	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError) const;
 
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void GetPartyData(FGetPartyDataRequest const& Request, FDPartyGetDataResponse OnResponse, FDErrorHandler OnError) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void GetPartyStorage(FGetPartyStorageRequest const& Request, FDPartyGetStorageResponse OnResponse, FDErrorHandler OnError) const;
+	
+	//Can not be run at the moment. Need to find a way to expose TFunction Json Modifier to lua
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void WritePartyStorage(FWritePartyStorageRequest const& Request, FDPartyWriteDataResponse OnResponse, FDErrorHandler OnError) const;
+
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
@@ -187,6 +235,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
 	void SetOnPartyInvite(FDPartyInviteNotif OnNotif) const;
+
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
+	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const;
 
 private:
 	FApiClientPtr ApiClientPtr;

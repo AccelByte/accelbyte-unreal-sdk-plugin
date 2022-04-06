@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -15,7 +15,7 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerSeasonPass::ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+		ServerSeasonPass::ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
 		{
 		}
 
@@ -42,7 +42,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Accept"), Accept);
 			Request->SetContentAsString(Content);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
 		void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError)
@@ -62,7 +62,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 		
 	}

@@ -13,7 +13,7 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerEcommerce::ServerEcommerce(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+ServerEcommerce::ServerEcommerce(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
 {}
 
 ServerEcommerce::~ServerEcommerce()
@@ -71,7 +71,7 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
@@ -92,7 +92,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FString& EntitlementId,
@@ -113,7 +113,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
@@ -148,7 +148,7 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
@@ -170,7 +170,7 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& Cur
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray<FString>& EntitlementIds,
@@ -196,7 +196,7 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -216,7 +216,7 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	
 }
 
@@ -239,7 +239,7 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -259,7 +259,7 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FStrin
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -279,7 +279,7 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& WalletId,
@@ -303,7 +303,7 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess, const FErrorHandler& OnError)
@@ -325,7 +325,7 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteMod
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 } // Namespace GameServerApi
 } // Namespace AccelByte

@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -21,7 +22,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerEcommerce
 {
 public:
-	ServerEcommerce(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerEcommerce(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerEcommerce();
 
 	/**
@@ -156,6 +157,7 @@ public:
 private:
 	const ServerCredentials& Credentials;
 	const ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
 
 	ServerEcommerce() = delete;
 	ServerEcommerce(ServerEcommerce const&) = delete;

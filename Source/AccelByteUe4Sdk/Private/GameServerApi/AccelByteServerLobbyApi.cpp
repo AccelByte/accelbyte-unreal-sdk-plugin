@@ -13,7 +13,7 @@ namespace AccelByte
 {
 namespace GameServerApi
 {
-	ServerLobby::ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+	ServerLobby::ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
 	{}
 
 	ServerLobby::~ServerLobby()
@@ -42,7 +42,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::WritePartyStorage(const FString& PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, uint32 RetryAttempt)
@@ -73,7 +73,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::RequestWritePartyStorage(const FString &PartyId, const FAccelByteModelsPartyDataUpdateRequest& PartyDataRequest, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
@@ -112,7 +112,7 @@ namespace GameServerApi
 			}
 		});
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
@@ -168,7 +168,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::GetSessionAttribute(const FString& UserId, const FString& Key, const THandler<FAccelByteModelsGetSessionAttributeResponse>& OnSuccess, const FErrorHandler& OnError)
@@ -200,7 +200,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::SetSessionAttribute(const FString& UserId, const TMap<FString, FString>& Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -238,7 +238,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::SetSessionAttribute(const FString& UserId, const FString& Key, const FString& Value, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -264,7 +264,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
@@ -284,7 +284,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // namespace GameServerApi

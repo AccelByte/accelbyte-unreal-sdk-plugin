@@ -65,7 +65,7 @@ void FMultiRegistryTest::Define()
 							bIsOk = true;
 							bIsDone = true;
 						}),
-					FErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage)
+					FCustomErrorHandler::CreateLambda([&](int32 ErrorCode, FString ErrorMessage, const FJsonObject& ErrorJson)
 						{
 							MultiRegistryTestErrorHandler.ExecuteIfBound(ErrorCode, ErrorMessage);
 							bIsDone = true;

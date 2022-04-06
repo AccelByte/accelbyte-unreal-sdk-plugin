@@ -13,7 +13,7 @@ namespace AccelByte
 {
 namespace GameServerApi
 {
-	ServerCloudSave::ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+	ServerCloudSave::ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
 	{}
 
 	ServerCloudSave::~ServerCloudSave()
@@ -51,7 +51,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::SaveGameRecord(const FString& Key, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -76,7 +76,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::GetGameRecord(const FString& Key, const THandler<FAccelByteModelsGameRecord>& OnSuccess, const FErrorHandler& OnError)
@@ -98,7 +98,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(
+		HttpRef.ProcessRequest(
 			Request,
 			CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
 		{
@@ -142,7 +142,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::DeleteGameRecord(const FString& Key, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -164,7 +164,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -189,7 +189,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 	
 	void ServerCloudSave::SaveUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -214,7 +214,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request,  CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::GetUserRecord(const FString& Key, const FString& UserId, const THandler<FAccelByteModelsUserRecord>& OnSuccess, const FErrorHandler& OnError)
@@ -236,7 +236,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(
+		HttpRef.ProcessRequest(
 			Request,
 			CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
 			{
@@ -279,7 +279,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(
+		HttpRef.ProcessRequest(
 			Request,
 			CreateHttpResultHandler(THandler<FJsonObject>::CreateLambda([OnSuccess](const FJsonObject& jsonObject)
 		{
@@ -324,7 +324,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 	
 	void ServerCloudSave::ReplaceUserRecord(const FString& Key, const FString& UserId, const FJsonObject& RecordRequest, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -349,7 +349,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerCloudSave::DeleteUserRecord(const FString& Key, const FString& UserId, bool bIsPublic, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -371,7 +371,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // namespace GameServerApi

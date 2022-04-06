@@ -7,6 +7,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteError.h"
 #include "Http.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 using AccelByte::THandler;
 using AccelByte::FVoidHandler;
@@ -29,7 +30,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerOauth2
 {
 public:
-	ServerOauth2(ServerCredentials& Credentials, ServerSettings& Settings);
+	ServerOauth2(ServerCredentials& Credentials, ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerOauth2();
 
 	/**
@@ -49,6 +50,7 @@ public:
 	void ForgetAllCredentials();
 
 private:
+	void OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const;
 
 	/**
 	* @brief Get client token.
@@ -63,6 +65,7 @@ private:
 
 	ServerCredentials& Credentials;
 	ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
 	ServerOauth2() = delete; // static class can't have instance
 	ServerOauth2(ServerOauth2 const&) = delete;
 	ServerOauth2(ServerOauth2&&) = delete;

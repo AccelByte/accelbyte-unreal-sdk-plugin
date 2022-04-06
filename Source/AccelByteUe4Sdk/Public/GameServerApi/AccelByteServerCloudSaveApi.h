@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteCloudSaveModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,7 +23,7 @@ namespace GameServerApi
 	class ACCELBYTEUE4SDK_API ServerCloudSave
 	{
 	public:
-		ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings);
+		ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 		~ServerCloudSave();
 
 		/**
@@ -155,6 +156,7 @@ namespace GameServerApi
 	private:
 		const ServerCredentials& Credentials;
 		const ServerSettings& Settings;
+		FHttpRetryScheduler& HttpRef;
 
 		ServerCloudSave() = delete;
 		ServerCloudSave(ServerCloudSave const&) = delete;

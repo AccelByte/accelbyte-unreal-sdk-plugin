@@ -15,9 +15,10 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerGameTelemetry::ServerGameTelemetry(const AccelByte::ServerCredentials & Credentials, const AccelByte::ServerSettings & Settings)
+ServerGameTelemetry::ServerGameTelemetry(const AccelByte::ServerCredentials & Credentials, const AccelByte::ServerSettings & Settings, FHttpRetryScheduler& InHttpRef)
 : Credentials(Credentials)
 , Settings(Settings)
+, HttpRef(InHttpRef)
 {}
 
 ServerGameTelemetry::~ServerGameTelemetry()
@@ -114,7 +115,7 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *FRegistry::ServerSettings.GameTelemetryServerUrl);
+	FString Url = FString::Printf(TEXT("%s/v1/protected/events"), *Settings.GameTelemetryServerUrl);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -142,7 +143,7 @@ void ServerGameTelemetry::SendProtectedEvents(TArray<FAccelByteModelsTelemetryBo
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } 

@@ -7,6 +7,18 @@
 
 using namespace AccelByte;
 
+UAccelByteServerSettings::UAccelByteServerSettings()
+{}
+
+UAccelByteServerSettingsDev::UAccelByteServerSettingsDev()
+{}
+
+UAccelByteServerSettingsCert::UAccelByteServerSettingsCert()
+{}
+
+UAccelByteServerSettingsProd::UAccelByteServerSettingsProd()
+{}
+
 static FString GetDefaultServerAPIUrl(FString const& SpecificServerUrl, FString const& BaseUrl, FString const& DefaultServerPath)
 {
 	if (SpecificServerUrl.IsEmpty())
@@ -49,17 +61,19 @@ void ServerSettings::Reset(ESettingsEnvironment const Environment)
 	switch (Environment)
 	{
 	case ESettingsEnvironment::Development:
+		SetServerEnvironment<UAccelByteServerSettingsDev>(this);
+		break;
 	case ESettingsEnvironment::Certification:
+		SetServerEnvironment<UAccelByteServerSettingsCert>(this);
+		break;
 	case ESettingsEnvironment::Production:
+		SetServerEnvironment<UAccelByteServerSettingsProd>(this);
+		break;
 	case ESettingsEnvironment::Default:
 	default:
 		SetServerEnvironment<UAccelByteServerSettings>(this);
 		break;
 	}
-}
-
-UAccelByteServerSettings::UAccelByteServerSettings()
-{
 }
 
 FString UAccelByteBlueprintsServerSettings::GetClientId()

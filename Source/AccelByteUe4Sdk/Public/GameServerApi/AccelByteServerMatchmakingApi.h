@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteMatchmakingModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,11 +23,12 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerMatchmaking
 {
 public:
-	ServerMatchmaking(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerMatchmaking(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerMatchmaking();
 private:
 	const ServerCredentials& Credentials;
 	const ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
 
 public:
 

@@ -14,7 +14,7 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerMatchmaking::ServerMatchmaking(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+ServerMatchmaking::ServerMatchmaking(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
 {
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);
 	OnStatusPollingResponse.BindLambda([this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
@@ -52,7 +52,7 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId, const  THandle
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -74,7 +74,7 @@ void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmaking
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -95,7 +95,7 @@ void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVo
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& PartyId)
@@ -123,7 +123,7 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FStri
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsMatchmakingResult& Body)
@@ -145,7 +145,7 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::ActivateSessionStatusPolling(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError, uint32 IntervalSec)

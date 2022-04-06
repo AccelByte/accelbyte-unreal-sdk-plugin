@@ -6,6 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -20,7 +21,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerAchievement
 {
 public:
-	ServerAchievement(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerAchievement(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 	~ServerAchievement();
 
 	/**
@@ -36,6 +37,7 @@ public:
 private:
 	const ServerCredentials& Credentials;
 	const ServerSettings& Settings;
+	FHttpRetryScheduler& HttpRef;
 
 	ServerAchievement() = delete;
 	ServerAchievement(ServerAchievement const&) = delete;

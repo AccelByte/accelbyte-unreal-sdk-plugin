@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -8,6 +8,7 @@
 
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,11 +23,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerUser
 		{
 		public:
-			ServerUser(const ServerCredentials& Credentials, const ServerSettings& Settings);
+			ServerUser(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 			~ServerUser();
 		private:
 			const ServerCredentials& Credentials;
 			const ServerSettings& Settings;
+			FHttpRetryScheduler& HttpRef;
 		public:
 			/**
 			* @brief This function will search user by their third party Display Name. The query will be used to find the user with the most approximate display name.

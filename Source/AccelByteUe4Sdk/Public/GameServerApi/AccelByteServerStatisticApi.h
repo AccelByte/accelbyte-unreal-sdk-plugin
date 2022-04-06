@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteStatisticModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 // Forward declarations
 class IWebSocket;
@@ -25,11 +26,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerStatistic
 		{
 		public:
-			ServerStatistic(const ServerCredentials& Credentials, const ServerSettings& Settings);
+			ServerStatistic(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
 			~ServerStatistic();
 		private:
 			const ServerCredentials& Credentials;
 			const ServerSettings& Settings;
+			FHttpRetryScheduler& HttpRef;
 
 		public:
 

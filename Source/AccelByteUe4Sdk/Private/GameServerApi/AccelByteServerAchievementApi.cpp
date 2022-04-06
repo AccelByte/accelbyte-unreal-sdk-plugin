@@ -13,7 +13,7 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerAchievement::ServerAchievement(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+ServerAchievement::ServerAchievement(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
 {}
 
 ServerAchievement::~ServerAchievement()
@@ -47,7 +47,7 @@ void ServerAchievement::UnlockAchievement(const FString& UserId, const FString& 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace GameServerApi
