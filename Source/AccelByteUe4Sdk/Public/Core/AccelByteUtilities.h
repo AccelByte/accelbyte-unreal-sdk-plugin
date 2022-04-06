@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "AccelByteError.h"
-#include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
+#include "Core/AccelByteError.h"
+#include "JsonObjectConverter.h"
 
 #include "AccelByteUtilities.generated.h"
 

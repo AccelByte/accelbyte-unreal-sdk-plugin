@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Runtime/Core/Public/CoreMinimal.h"
+#include "CoreMinimal.h"
 #include "Containers/List.h"
 #include "Core/AccelByteMemoryPool.h"
 
