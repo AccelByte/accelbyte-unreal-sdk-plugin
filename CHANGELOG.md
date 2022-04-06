@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.1%0D9.1.0) (2022-04-06)
+
+
+### Bug Fixes
+
+* **blueprint:** update GetApiClient method to be static so it can be used in the Blueprint ([923bf82](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/923bf82f9c12641d3bfcf94932aa310f92d60caa))
+* disabling getItembyAppId test ([a254c74](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a254c74d3c45e5518411625531281a5937cae5ac))
+* incorrect header path on some files ([4f329c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4f329c4e0fd53ff1ef5750f1fb43a913dfff6d5b))
+
 ## [9.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.0%0D9.0.2) (2022-03-28)
 
 
