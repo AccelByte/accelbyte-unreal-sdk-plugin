@@ -174,7 +174,37 @@ const auto QosTestGetServerLatenciesThenPing = [](
 		OutServerLatencies = Result;
 		bIsOk = true;
 		bIsDone = true;
-		
+	}),
+	FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+	{
+		QosAutoTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+		bIsDone = true; // Stop early instead of wait for full timeout
+	}));
+	
+	WaitUntil(bIsDone, FString::Printf(TEXT("Waiting for %s ...)"), *FuncName));
+	return bIsOk;
+};
+
+// Same as above, just with region that is activated in game's namespace in Admin Portal
+const auto QosTestGetActiveNamespaceServerLatenciesThenPing = [](
+	const FApiClientPtr& QosTestApiUserPtr,
+	TArray<TPair<FString, float>>& OutServerLatencies)
+{
+	const FString FuncName = "QosTestGetActiveNamespaceServerLatencies";
+	bool bIsOk = false;
+	bool bIsDone = false;
+	UE_LOG(LogAccelByteQosTest, Display, TEXT("%s"), *FuncName);
+	
+	QosTestApiUserPtr->Qos.GetActiveServerLatencies(
+		THandler<TArray<TPair<FString, float>>>::CreateLambda(
+		[&FuncName, &OutServerLatencies, &bIsOk, &bIsDone](const TArray<TPair<FString, float>>& Result)
+	{
+		UE_LOG(LogAccelByteQosTest, Log, TEXT("%s Success! Count: %d"), *FuncName, Result.Num());
+		QosTestLogLatencies(Result);
+			
+		OutServerLatencies = Result;
+		bIsOk = true;
+		bIsDone = true;
 	}),
 	FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
 	{
@@ -310,6 +340,27 @@ void FQosTestSpec::Define()
 				QosTestApiUserPtrArr[0],
 				bPingRegionsOnSuccess,
 				QosTestLatencies);
+
+			Done.Execute();
+			return bIsSuccess;
+		});
+
+		LatentIt("03: Should set Settings::QosServerLatencyPollIntervalSecs > 0; init the 'get latencies scheduler' (uses cached server regions); "
+			"if Settings::QosServerLatencyPollIntervalSecs < 0, nothing will happen (success) for activated region in namespace",
+			[this](const FDoneDelegate& Done)
+		{
+			// Logged in: Call the scheduler directly with test intervals, caching AccelByteQos::QosServers (latency region targets).
+			SetQosSchedulerSettings(
+				1,
+				1);
+
+			// To catch if successful or not, we re-init the scheduler:
+			const bool bIsSuccess = QosTestGetActiveNamespaceServerLatenciesThenPing(
+				QosTestApiUserPtrArr[0],
+				QosTestLatencies);
+
+
+			AB_TEST_EQUAL(QosTestLatencies, QosTestApiUserPtrArr[0]->Qos.GetCachedLatencies());
 
 			Done.Execute();
 			return bIsSuccess;
