@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [9.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.2%0D9.1.1) (2022-04-07)
+
+
+### Features
+
+* **qos:** Add get active qos server and latencies ([1901e6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1901e6fa3acc17dfaf2b5e1b355c42dbcec43db8))
+
 ### [9.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.1%0D9.1.0) (2022-04-06)
 
 
