@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2018-2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -6,8 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
-#include "Core/AccelByteHttpRetryScheduler.h"
-#include "Core/IAccelByteTokenGenerator.h"
+#include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteSettings.h"
 #include "Core/AccelByteWebSocket.h"
 #include "Models/AccelByteLobbyModels.h"
 
@@ -415,7 +415,7 @@ public:
     /**
 	 * @brief Connect to the Lobby server via websocket. You must connect to the server before you can start sending/receiving. Also make sure you have logged in first as this operation requires access token.
 	 */
-	void Connect(const FString& Token = "");
+	void Connect();
 
 	/**
 	 * @brief Disconnect from server if and only if the you have connected to server. If not currently connected, then this does nothing.
@@ -1600,14 +1600,7 @@ public:
 	* @param NewMaxDelay new Maximum delay time.
 	*/
 	void SetRetryParameters(int32 NewTotalTimeout = 60000, int32 NewBackoffDelay = 1000, int32 NewMaxDelay = 30000);
-
-	/**
-	* @brief Set token generator to be used when trying to connect to lobby using ownership token.
-	*
-	* @param TokenGenerator The token generator.
-	*/
-	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
-
+	
 	static FString LobbyMessageToJson(FString Message);
 
 	void ClearLobbyErrorMessages();
@@ -1625,18 +1618,13 @@ private:
 
     FString SendRawRequest(const FString& MessageType, const FString& MessageIDPrefix, const FString& CustomPayload = TEXT(""));
     FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
-	void CreateWebSocket(const FString& Token = "");
+	void CreateWebSocket();
 	void FetchLobbyErrorMessages();
-	
-	THandler<const FString&> OnTokenReceived = THandler<const FString&>::CreateLambda([&](const FString& Token)
-	{
-		Connect(Token);
-	});
 
 #pragma region Message Parsing
 	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
-	static TMap<FString, Response> ResponseStringEnumMap; 
+	static TMap<FString, Response> ResponseStringEnumMap;
 	static TMap<FString, Notif> NotifStringEnumMap;
 #pragma endregion
 
@@ -1660,7 +1648,6 @@ private:
     FErrorHandler ParsingError;
 	FDisconnectNotif DisconnectNotif;
 	FConnectionClosed ConnectionClosed;
-	TSharedPtr<IAccelByteTokenGenerator> TokenGenerator;
 
 	const FVoidHandler RefreshTokenDelegate = FVoidHandler::CreateLambda([&]()
 	{

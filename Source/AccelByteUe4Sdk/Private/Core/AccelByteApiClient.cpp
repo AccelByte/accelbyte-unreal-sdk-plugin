@@ -8,9 +8,10 @@ namespace AccelByte
 {
 	
 FApiClient::FApiClient()
-	: bUseSharedCredentials(false)
-	, CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>())
-	, HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
+	:
+	bUseSharedCredentials(false),
+	CredentialsRef(MakeShared<AccelByte::Credentials, ESPMode::ThreadSafe>()),
+	HttpRef(MakeShared<AccelByte::FHttpRetryScheduler, ESPMode::ThreadSafe>())
 {
 	HttpRef->Startup();
 	CredentialsRef->Startup();
@@ -18,10 +19,11 @@ FApiClient::FApiClient()
 }
 
 FApiClient::FApiClient(AccelByte::Credentials& Credentials, AccelByte::FHttpRetryScheduler& Http)
-	: bUseSharedCredentials(true)
-	, CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials,
-		[](AccelByte::Credentials*) {}))
-	, HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
+	:
+	bUseSharedCredentials(true),
+	CredentialsRef(MakeShareable<AccelByte::Credentials>(&Credentials,
+		[](AccelByte::Credentials*) {})),
+	HttpRef(MakeShareable<AccelByte::FHttpRetryScheduler>(&Http,
 		[](AccelByte::FHttpRetryScheduler*) {}))
 {
 	GameTelemetry.Startup();

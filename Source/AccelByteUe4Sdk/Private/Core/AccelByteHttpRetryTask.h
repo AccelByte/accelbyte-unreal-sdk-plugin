@@ -14,15 +14,8 @@ namespace AccelByte
 	class FHttpRetryTask : public FAccelByteTask
 	{
 	public:
-		FHttpRetryTask(
-			FHttpRequestPtr& HttpRequest,
-			const FHttpRequestCompleteDelegate& CompleteDelegate,
-			double RequestTime,
-			double NextDelay,
-			const FVoidHandler& OnBearerAuthRejectDelegate,
-			FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh,
-			TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates = {});
-		virtual ~FHttpRetryTask() override;
+		FHttpRetryTask(FHttpRequestPtr& HttpRequest, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay, const FVoidHandler& OnBearerAuthRejectDelegate, FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh);
+		virtual ~FHttpRetryTask();
 
 		virtual bool Start() override;
 		virtual bool Cancel() override;
@@ -32,31 +25,26 @@ namespace AccelByte
 
 		EAccelByteTaskState Pause();
 
-		FHttpRequestPtr GetHttpRequest() const { return Request; };
+		const FHttpRequestPtr GetHttpRequest() const { return Request; };
 
 	private:
-		FHttpRequestPtr Request{};
-		const FHttpRequestCompleteDelegate CompleteDelegate{};
-		const double RequestTime{};
-		double PauseTime{};
-		double PauseDuration{};
-		double NextRetryTime{};
-		double NextDelay{};
-		const FVoidHandler OnBearerAuthRejectDelegate{};
+		FHttpRequestPtr Request;
+		const FHttpRequestCompleteDelegate CompleteDelegate;
+		const double RequestTime;
+		double NextRetryTime;
+		float NextDelay;
+		bool ScheduledRetry;
+		const FVoidHandler OnBearerAuthRejectDelegate;
 		FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh;
-		FDelegateHandle BearerAuthRejectedRefreshHandle{};
-		bool bIsBeenRunFromPause{};
-		TMap<int32, FHttpRetryScheduler::FHttpResponseCodeHandler> ResponseCodeDelegates{};
+		FDelegateHandle BearerAuthRejectedRefreshHandle;
+		bool bIsBeenRunFromPause;
 
-		void InitializeDefaultDelegates();
 		void BearerAuthUpdated(const FString& AccessToken);
-		EAccelByteTaskState HandleDefaultRetry(int32 StatusCode);
 		bool CheckRetry(EAccelByteTaskState& Out);
 		EAccelByteTaskState Retry();
 		EAccelByteTaskState ScheduleNextRetry();
 		bool IsFinished();
 		bool IsRefreshable();
-		bool IsTimedOut();
 	};
 
 	typedef TSharedPtr<FHttpRetryTask, ESPMode::ThreadSafe> FAccelByteHttpRetryTaskPtr;

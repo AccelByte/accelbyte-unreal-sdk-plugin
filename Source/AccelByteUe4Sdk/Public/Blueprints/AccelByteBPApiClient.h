@@ -137,6 +137,6 @@ class UABMultiRegistry final : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable)
-	static UABApiClient* GetApiClient(FString const& Key);
+	UABApiClient* GetApiClient(FString const& Key);
 };
 

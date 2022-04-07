@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Icmp.h"
+#include "Runtime/Online/ICMP/Public/Icmp.h"
 #include "Networking.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteQosModels.h"

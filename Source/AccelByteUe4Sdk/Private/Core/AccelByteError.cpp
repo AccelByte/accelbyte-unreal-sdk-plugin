@@ -80,12 +80,7 @@ namespace AccelByte
 		{ static_cast<int32>(ErrorCodes::StatusNotExtended), TEXT("StatusNotExtended Reference: RFC 2774, Section 7") },
 		{ static_cast<int32>(ErrorCodes::StatusNetworkAuthenticationRequired), TEXT("StatusNetworkAuthenticationRequired Reference: RFC 6585, Section 6") },
 
-		// User error
-		{ static_cast<int32>(ErrorCodes::UserUnderAgeException), TEXT("errors.net.accelbyte.platform.user_under_age") },
 		{ static_cast<int32>(ErrorCodes::UserEmailAlreadyUsedException), TEXT("errors.net.accelbyte.platform.user_email_already_used") },
-		{ static_cast<int32>(ErrorCodes::UserCountryNotFoundException), TEXT("errors.net.accelbyte.platform.user_country_not_found") },
-		{ static_cast<int32>(ErrorCodes::UserNameAlreadyUsedException), TEXT("errors.net.accelbyte.platform.user_name_already_used") },
-		{ static_cast<int32>(ErrorCodes::UserDisplayNameAlreadyUsedException), TEXT("errors.net.accelbyte.platform.user_display_name_already_used") },
 
 		// Platform error
 		{ static_cast<int32>(ErrorCodes::UnauthorizedException), TEXT("errors.net.accelbyte.platform.unauthorized") },

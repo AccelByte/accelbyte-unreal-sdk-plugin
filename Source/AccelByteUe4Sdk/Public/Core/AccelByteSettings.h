@@ -44,10 +44,7 @@ public:
 	float QosLatencyPollIntervalSecs{0};
 	float QosServerLatencyPollIntervalSecs{0};
 	bool bEnableHttpCache;
-	
-	/** @brief Ensure a minimum # secs for Qos Latency polling */
-	constexpr static float MinNumSecsQosLatencyPolling = {60*10}; // 10m
-	
+
 	void Reset(ESettingsEnvironment const Environment);
 
 	Settings& operator=(Settings const& Other) = default;
@@ -329,18 +326,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetAppId(const FString& AppId);
-
-	/**
-	 * @brief 
-	 * @param QosLatencyPollIntervalSecs If <10 mins, we set val to 10 mins.
-	 */
+	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetQosLatencyPollIntervalSecs(const float& QosLatencyPollIntervalSecs);
 
-	/**
-	 * @brief 
-	 * @param QosServerLatencyPollIntervalSecs If <10 mins, we set val to 10 mins.
-	 */
 	UFUNCTION(BlueprintCallable, Category = "AccelByte Client | Settings")
 	static void SetServerQosLatencyPollIntervalSecs(const float& QosServerLatencyPollIntervalSecs);
 
@@ -348,5 +337,6 @@ public:
 	static void ResetSettings(const ESettingsEnvironment Environment);
 
 	static void SetIsHttpCacheEnabled(bool bEnable);
+
 };
 

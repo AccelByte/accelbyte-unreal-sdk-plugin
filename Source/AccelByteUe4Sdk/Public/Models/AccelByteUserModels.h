@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteUserModels.generated.h"
 
@@ -250,8 +251,6 @@ struct ACCELBYTEUE4SDK_API FAccountUserData
 		FString UserId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
 		FString Username; //optional
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString EmailAddress;
 };
 
 USTRUCT(BlueprintType)

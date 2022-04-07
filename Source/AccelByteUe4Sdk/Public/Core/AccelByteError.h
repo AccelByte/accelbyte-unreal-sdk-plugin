@@ -121,11 +121,7 @@ namespace AccelByte
 		StatusNotExtended = 510, // Reference: RFC 2774, Section 7
 		StatusNetworkAuthenticationRequired = 511, // Reference: RFC 6585, Section 6
 
-		// User Error Code List
-		UserUnderAgeException = 10130,
 		UserEmailAlreadyUsedException = 10133,
-		UserCountryNotFoundException = 10154,
-		UserNameAlreadyUsedException = 10177,
 		UserDisplayNameAlreadyUsedException = 10180,
 
 		// Platform error

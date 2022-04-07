@@ -7,7 +7,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
-#include "Misc/Base64.h"
+#include "Runtime/Core/Public/Misc/Base64.h"
 
 namespace AccelByte
 {

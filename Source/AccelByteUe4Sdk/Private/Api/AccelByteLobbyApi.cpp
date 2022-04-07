@@ -14,7 +14,6 @@
 #include "Core/AccelByteSettings.h"
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
-#include "Core/IAccelByteTokenGenerator.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -402,19 +401,13 @@ namespace Api
 
 #undef FORM_STRING_ENUM_PAIR
 
-void Lobby::Connect(const FString& Token)
+void Lobby::Connect()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	if(TokenGenerator.IsValid() && Token.IsEmpty())
-	{
-		TokenGenerator->RequestToken();
-		return;
-	}
-
 	if (!WebSocket.IsValid())
 	{
-		CreateWebSocket(Token);
+		CreateWebSocket();
 	}
 
 	if (WebSocket->IsConnected())
@@ -1447,7 +1440,7 @@ FString Lobby::GenerateMessageID(const FString& Prefix) const
 	return FString::Printf(TEXT("%s-%d"), *Prefix, FMath::RandRange(1000, 9999));
 }
 
-void Lobby::CreateWebSocket(const FString& Token)
+void Lobby::CreateWebSocket()
 {
 	if(WebSocket.IsValid())
 	{
@@ -1456,10 +1449,6 @@ void Lobby::CreateWebSocket(const FString& Token)
 
 	TMap<FString, FString> Headers;
 	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
-	if(!Token.IsEmpty())
-	{
-		Headers.Add("Entitlement", Token);
-	}
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
 	WebSocket = AccelByteWebSocket::Create(*Settings.LobbyServerUrl, TEXT("wss"), Credentials, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
@@ -2080,23 +2069,7 @@ void Lobby::ClearLobbyErrorMessages()
 	}
 }
 
-void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGeneratorRef)
-{
-	if(IsConnected())
-	{
-		UE_LOG(LogAccelByteLobby, Warning, TEXT("Cannot set token generator, lobby already connected"));
-		return;
-	}
-		
-	Lobby::TokenGenerator = TokenGeneratorRef;
-	
-	if(TokenGeneratorRef.IsValid())
-	{
-		Lobby::TokenGenerator->OnTokenReceived().Add(OnTokenReceived);
-	}
-}
-
-Lobby::Lobby(
+	Lobby::Lobby(
 		AccelByte::Credentials& Credentials,
 		const AccelByte::Settings& Settings,
 		FHttpRetryScheduler& HttpRef,

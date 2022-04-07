@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "HttpManager.h"
-#include "Interfaces/IHttpResponse.h"
+#include "Runtime/Core/Public/CoreMinimal.h"
 
 namespace AccelByte
 {

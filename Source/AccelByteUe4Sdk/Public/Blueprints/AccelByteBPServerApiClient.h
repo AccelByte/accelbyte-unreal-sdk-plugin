@@ -76,5 +76,5 @@ class UServerMultiRegistry final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
-	static UServerApiClient* GetServerApiClient(FString const& Key);
+	UServerApiClient* GetServerApiClient(FString const& Key);
 };

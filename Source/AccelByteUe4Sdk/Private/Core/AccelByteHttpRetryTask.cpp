@@ -9,31 +9,20 @@
 
 namespace AccelByte
 {
-	FHttpRetryTask::FHttpRetryTask(
-		FHttpRequestPtr& Request,
-		const FHttpRequestCompleteDelegate& CompleteDelegate,
-		double RequestTime,
-		double NextDelay,
-		const FVoidHandler& OnBearerAuthRejectDelegate,
-		FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh,
-		TMap<EHttpResponseCodes::Type, FHttpRetryScheduler::FHttpResponseCodeHandler> HandlerDelegates)
-		: FAccelByteTask{}
-		, Request{ Request }
-		, CompleteDelegate{ CompleteDelegate }
-		, RequestTime{ RequestTime }
-		, PauseTime{}
-		, PauseDuration{}
-		, NextRetryTime{ NextDelay }
-		, NextDelay{ NextDelay }
-		, OnBearerAuthRejectDelegate{ OnBearerAuthRejectDelegate }
-		, BearerAuthRejectedRefresh{ BearerAuthRejectedRefresh }
+	FHttpRetryTask::FHttpRetryTask(FHttpRequestPtr& Request, const FHttpRequestCompleteDelegate& CompleteDelegate, double RequestTime, double NextDelay, const FVoidHandler& OnBearerAuthRejectDelegate, FBearerAuthRejectedRefresh& BearerAuthRejectedRefresh)
+		: FAccelByteTask()
+		, Request(Request)
+		, CompleteDelegate(CompleteDelegate)
+		, RequestTime(RequestTime)
+		, NextRetryTime(NextDelay)
+		, NextDelay(NextDelay)
+		, ScheduledRetry(false)
+		, OnBearerAuthRejectDelegate(OnBearerAuthRejectDelegate)
+		, BearerAuthRejectedRefresh(BearerAuthRejectedRefresh)
+		, BearerAuthRejectedRefreshHandle()
+		, bIsBeenRunFromPause(false)
 	{
-		TaskTime = RequestTime;
-		InitializeDefaultDelegates();
-		for (auto& Handler : HandlerDelegates)
-		{
-			ResponseCodeDelegates.Emplace(Handler.Key, Handler.Value);
-		}
+
 	}
 
 	FHttpRetryTask::~FHttpRetryTask()
@@ -64,7 +53,6 @@ namespace AccelByte
 
 		Request->CancelRequest();
 		TaskState = EAccelByteTaskState::Cancelled;
-
 		return FAccelByteTask::Cancel();
 	}
 
@@ -78,7 +66,6 @@ namespace AccelByte
 			}));
 			OnBearerAuthRejectDelegate.ExecuteIfBound();
 		}
-		PauseTime = TaskTime;
 
 		return EAccelByteTaskState::Paused;
 	}
@@ -96,64 +83,66 @@ namespace AccelByte
 	
 		if (!Request.IsValid())
 		{
-			TaskState = EAccelByteTaskState::Failed;
+			NextState = EAccelByteTaskState::Failed;
 			return;
 		}
 
 		TaskTime = CurrentTime;
 
-		if (TaskState == EAccelByteTaskState::Paused)
+		if (ScheduledRetry && TaskState != EAccelByteTaskState::Paused)
 		{
-			double DeltaTime = TaskTime - PauseTime;
-			PauseDuration += DeltaTime;
-			PauseTime = TaskTime;
-
-			if (PauseDuration > FHttpRetryScheduler::PauseTimeout)
+			if (TaskTime >= NextRetryTime)
 			{
-				Cancel();
+				NextState = Retry();
 			}
-			return;
-		}
-		else if (TaskState == EAccelByteTaskState::Retrying)
-		{
-			if (TaskTime < NextRetryTime)
+			else
 			{
 				return;
 			}
-			NextState = Retry();
 		}
 		
-		const EHttpRequestStatus::Type RequestStatus = Request->GetStatus();
+		EHttpRequestStatus::Type RequestStatus = Request->GetStatus();
 		switch (RequestStatus)
 		{
 		case EHttpRequestStatus::Processing:
-			if (IsTimedOut()) 
+			if (TaskTime >= RequestTime + FHttpRetryScheduler::TotalTimeout) 
 			{
 				Cancel();
-				NextState = TaskState;
 			}
 			break;
 		case EHttpRequestStatus::Succeeded: //got response
 		{
-			NextState = EAccelByteTaskState::Completed;
 			const FHttpResponsePtr Response = Request->GetResponse();
 			if (Response.IsValid())
 			{
-				const int32 ResponseCode = Response->GetResponseCode();
-				if (ResponseCodeDelegates.Contains(ResponseCode))
+				int32 ResponseCode = Response->GetResponseCode();
+				switch (ResponseCode)
 				{
-					NextState = ResponseCodeDelegates[ResponseCode].Execute(ResponseCode);
-				}
-
-				if (NextState == EAccelByteTaskState::Pending 
-					|| NextState == EAccelByteTaskState::Running 
-					|| NextState == EAccelByteTaskState::Retrying)
-				{
+				case EHttpResponseCodes::ServerError:
+				case EHttpResponseCodes::BadGateway:
+				case EHttpResponseCodes::ServiceUnavail:
+				case EHttpResponseCodes::GatewayTimeout:
 					if (!CheckRetry(NextState))
 					{
 						NextState = EAccelByteTaskState::Completed;
 					}
+					break;
+				case EHttpResponseCodes::Denied:
+#if !UE_SERVER
+					if (IsRefreshable())
+					{
+						NextState = Pause();
+						break;
+					}
+#endif
+				default:
+					NextState = EAccelByteTaskState::Completed;
+					break;
 				}
+			}
+			else
+			{
+				NextState = EAccelByteTaskState::Completed;
 			}
 			break;
 		}
@@ -161,8 +150,7 @@ namespace AccelByte
 			CheckRetry(NextState);
 			break;
 		case EHttpRequestStatus::Failed: //request cancelled
-			Cancel();
-			NextState = TaskState;
+			NextState = EAccelByteTaskState::Cancelled;
 		default:
 			break;
 		}
@@ -176,7 +164,7 @@ namespace AccelByte
 			Cancel();
 		}
 
-		if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled || TaskState == EAccelByteTaskState::Failed)
+		if (TaskState == EAccelByteTaskState::Completed || TaskState == EAccelByteTaskState::Cancelled)
 		{
 			FReport::LogHttpResponse(Request, Request->GetResponse());
 			CompleteDelegate.ExecuteIfBound(Request, Request->GetResponse(), IsFinished());
@@ -194,46 +182,6 @@ namespace AccelByte
 		return FAccelByteTask::Finish();
 	}
 
-	void FHttpRetryTask::InitializeDefaultDelegates()
-	{
-		ResponseCodeDelegates = {
-			{
-				EHttpResponseCodes::RetryWith,
-				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
-			},
-			{
-				EHttpResponseCodes::ServerError,
-				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
-			},
-			{
-				EHttpResponseCodes::BadGateway,
-				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
-			},
-			{
-				EHttpResponseCodes::ServiceUnavail,
-				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
-			},
-			{
-				EHttpResponseCodes::GatewayTimeout,
-				FHttpRetryScheduler::FHttpResponseCodeHandler::CreateRaw(this, &FHttpRetryTask::HandleDefaultRetry)
-			}
-		};
-
-		ResponseCodeDelegates.Emplace(EHttpResponseCodes::Denied, 
-			FHttpRetryScheduler::FHttpResponseCodeHandler::CreateLambda(
-			[this](int32 StatusCode) -> EAccelByteTaskState {
-				EAccelByteTaskState Result = EAccelByteTaskState::Failed;
-#if !UE_SERVER
-				if (IsRefreshable())
-				{
-					UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Denied and will refresh with Status Code %d"), StatusCode);
-					Result = Pause();
-				}
-#endif
-				return Result;
-			}));
-	}
-
 	void FHttpRetryTask::BearerAuthUpdated(const FString& AccessToken)
 	{
 		bIsBeenRunFromPause = true;
@@ -247,24 +195,18 @@ namespace AccelByte
 		}
 		FString Authorization = FString::Printf(TEXT("Bearer %s"), *AccessToken);
 		Request->SetHeader(TEXT("Authorization"), Authorization);
+		ScheduledRetry = true;
 
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Bearer token is empty, Task is canceled"));
-		TaskState = EAccelByteTaskState::Retrying;
+		TaskState = EAccelByteTaskState::Pending;
 		NextRetryTime = FPlatformTime::Seconds();
-	}
-
-	EAccelByteTaskState FHttpRetryTask::HandleDefaultRetry(int32 StatusCode)
-	{
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Handle Default Retry with Status Code %d"), StatusCode);
-
-		return EAccelByteTaskState::Retrying;
+		ScheduledRetry = true;
 	}
 
 	bool FHttpRetryTask::CheckRetry(EAccelByteTaskState& Out)
 	{
 		bool WillRetry = false;
 
-		if (!IsTimedOut())
+		if (TaskTime < RequestTime + FHttpRetryScheduler::TotalTimeout)
 		{
 			Out = ScheduleNextRetry();
 			WillRetry = true;
@@ -275,6 +217,7 @@ namespace AccelByte
 
 	EAccelByteTaskState FHttpRetryTask::Retry()
 	{
+		ScheduledRetry = false;
 		if (Start())
 		{
 			FReport::LogHttpRequest(Request);
@@ -285,7 +228,7 @@ namespace AccelByte
 	EAccelByteTaskState FHttpRetryTask::ScheduleNextRetry()
 	{
 		NextDelay *= 2;
-		NextDelay += FMath::RandRange((float)-NextDelay, (float)NextDelay) / 4;
+		NextDelay += FMath::RandRange(-NextDelay, NextDelay) / 4;
 
 		if (NextDelay > FHttpRetryScheduler::MaximumDelay)
 		{
@@ -294,14 +237,13 @@ namespace AccelByte
 
 		NextRetryTime = TaskTime + NextDelay;
 
-		if (NextRetryTime > RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout)
+		if (NextRetryTime > RequestTime + FHttpRetryScheduler::TotalTimeout)
 		{
-			NextRetryTime = RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
+			NextRetryTime = RequestTime + FHttpRetryScheduler::TotalTimeout;
 		}
 
-		Request->OnRequestWillRetry().ExecuteIfBound(Request, Request->GetResponse(), NextRetryTime);
-
-		return EAccelByteTaskState::Retrying;
+		ScheduledRetry = true;
+		return EAccelByteTaskState::Pending;
 	}
 
 	bool FHttpRetryTask::IsFinished()
@@ -322,15 +264,7 @@ namespace AccelByte
 		{
 			bIsRefreshable = true;
 		}
-
-		UE_LOG(LogAccelByteHttpRetry, Verbose, TEXT("Is the request refreshable %d"), bIsRefreshable);
 		return bIsRefreshable;
 	}
-
-	bool FHttpRetryTask::IsTimedOut()
-	{
-		return TaskTime >= RequestTime + PauseDuration + FHttpRetryScheduler::TotalTimeout;
-	}
-
 
 }

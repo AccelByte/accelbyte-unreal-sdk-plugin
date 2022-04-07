@@ -1,4 +1,4 @@
-// Copyright (c) 2021 - 2022 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -23,7 +23,6 @@
 #include "GameServerApi/AccelByteServerUserApi.h"
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteServerSettings.h"
-#include "Core/AccelByteServerApiBase.h"
 
 using namespace AccelByte;
 
@@ -54,24 +53,6 @@ public:
 	GameServerApi::ServerSessionBrowser ServerSessionBrowser{ *ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef };
 	GameServerApi::ServerStatistic ServerStatistic{ *ServerCredentialsRef, FRegistry::ServerSettings };
 	GameServerApi::ServerUser ServerUser{ *ServerCredentialsRef, FRegistry::ServerSettings };
-
-	template<typename T, typename... U>
-	T GetServerApi(U&&... Args)
-	{
-		static_assert(std::is_base_of<FServerApiBase, T>::value, "API class must be subclass of FServerApiBase");
-
-		return T(*ServerCredentialsRef, FRegistry::ServerSettings, *HttpRef, Forward<U>(Args)...);
-	}
-
-	template<typename T, typename... U>
-	TSharedPtr<T, ESPMode::ThreadSafe> GetServerApiPtr(U&&... Args)
-	{
-		static_assert(std::is_base_of<FServerApiBase, T>::value, "API class must be subclass of FServerApiBase");
-
-		return MakeShared<T, ESPMode::ThreadSafe>(
-			*ServerCredentialsRef, FRegistry::ServerSettings,
-			*HttpRef, Forward<U>(Args)...);
-	}
 };
 
 typedef TSharedRef<FServerApiClient, ESPMode::ThreadSafe> FServerApiClientRef;

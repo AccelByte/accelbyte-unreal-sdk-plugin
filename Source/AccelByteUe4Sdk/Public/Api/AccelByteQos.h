@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Icmp.h"
+#include "Runtime/Online/ICMP/Public/Icmp.h"
 #include "Networking.h"
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteError.h"
@@ -98,31 +98,35 @@ public:
 
 	/**
 	 * @brief Poll every x second to refresh Latencies (pings) with cached (via QosServers) regions.
-	 * - SecondsPerTick is set from SettingsRef.QosLatencyPollIntervalSecs
+	 * - SecondsPerTick is recommended to use SettingsRef.QosLatencyPollIntervalSecs
 	 * - Only polls when QosLatencyPollIntervalSecs polling Settings > 0.
 	 * - Default Qos polling intervals: 0 (no polling).
 	 * - Explicitly calling this a 2nd+ time will reset the poller without conflict and use the new tick interval.
 	 * - Not to be confused with InitGetServerLatenciesScheduler(), that caches the target server regions for Latencies polling.
 	 * 
+	 * @param SecondsPerTick
 	 * @param OnTick Sets Latencies with refreshed region latencies pings.
 	 * @param OnError For example, if Preferred
 	 */
 	void InitGetLatenciesScheduler(
+		const float& SecondsPerTick,
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError);
 
 	/**
 	 * @brief Poll every x second to refresh target server region Latencies (pings) to later use as cached for Latency pollers/objects.
-	 * - SecondsPerTick is set from SettingsRef.QosServerLatencyPollIntervalSecs
+	 * - SecondsPerTick is recommended to use SettingsRef.QosServerLatencyPollIntervalSecs
 	 * - Only polls when QosServerLatencyPollIntervalSecs polling Settings > 0.
 	 * - Default Qos server polling intervals: 0 (no polling).
 	 * - Explicitly calling this a 2nd+ time will reset the poller without conflict and use the new tick interval.
 	 * - Not to be confused with InitGetLatenciesScheduler(), that uses this func's cached target server regions for Latencies polling.
 	 * 
+	 * @param SecondsPerTick
 	 * @param OnTick Sets Latencies with refreshed region latencies pings.
 	 * @param OnError For example, if Preferred
 	 */
 	void InitGetServerLatenciesScheduler(
+		const float& SecondsPerTick,
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError);
 
@@ -138,8 +142,6 @@ private:
 	// Constructor
 	Credentials& CredentialsRef;
 	const Settings& SettingsRef;
-
-	
 
 	FAccelByteModelsQosServerList QosServers;
 	FTimerHandle InputTimeHandle;

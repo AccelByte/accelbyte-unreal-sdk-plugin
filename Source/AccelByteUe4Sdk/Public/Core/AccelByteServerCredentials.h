@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteOauth2Models.h"
-#include "Containers/Ticker.h"
+#include "Runtime/Core/Public/Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteServerCredentials.generated.h"

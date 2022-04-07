@@ -5,6 +5,7 @@
 #include "Api/AccelByteQos.h"
 #include "Api/AccelByteQosManagerApi.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -44,8 +45,8 @@ namespace Api
 		if (bPlanningToPoll && !bAlreadyPolling)
 		{
 			// Setup polling schedulers that will consistently refresh Latencies.
-			InitGetLatenciesScheduler(OnSuccess, OnError);
-			InitGetServerLatenciesScheduler(OnSuccess, OnError);
+			InitGetLatenciesScheduler(SettingsRef.QosLatencyPollIntervalSecs, OnSuccess, OnError);
+			InitGetServerLatenciesScheduler(SettingsRef.QosServerLatencyPollIntervalSecs, OnSuccess, OnError);
 		}
 		else
 		{
@@ -107,28 +108,37 @@ namespace Api
 					// Add <Region, PingSeconds>
 					Latencies.Add(TPair<FString, float>(Server.Region, PingResult.Time * 1000));
 					if (Count == Latencies.Num())
+					{
 						OnSuccess.ExecuteIfBound(Latencies);
+					}
 				}));
 		}
 	}
 	
 	void Qos::InitGetLatenciesScheduler(
+		const float& SecondsPerTick,
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError)
 	{
-		const float SecondsPerTick = SettingsRef.QosServerLatencyPollIntervalSecs;
-		const bool bActivateScheduler = SecondsPerTick > 0;
+		#pragma region PREFERED_DS_REGION TODO (?)
+		// // @todo This example was found @ LobbyTest.cpp: Should we check for preferredDSRegion?
+		// // Ensure we have regions set to get latencies from
+		// const FString PreferredDSRegion = Environment::GetEnvironmentVariable(
+		// 	"PREFERED_DS_REGION", 1000); // @todo "PREFERED" should be spelled "PREFERRED" (don't change the typo, for now).
+
+		// // @todo If we check for the preferred region, do we abandon the scheduler completely?
+		// if (PreferredDSRegion.IsEmpty())
+		// {
+		// 	OnError.ExecuteIfBound(0, "!PREFERED_DS_REGION (Env Var)");
+		// 	return;
+		// }
+		#pragma endregion /PREFERED_DS_REGION TODO (?)
 		
-		if (!bActivateScheduler)
+		if (SecondsPerTick <= 0)
 		{
 			RemoveFromTicker(PollLatenciesHandle);
 			return;
 		}
-
-		// Active (>0): ensure min value to prevent flooding
-		const float AdjustedSecondsPerTick = SecondsPerTick < Settings::MinNumSecsQosLatencyPolling
-			? Settings::MinNumSecsQosLatencyPolling
-			: SecondsPerTick;
 
 		// -----------------------------------
 		// Schedule a Latencies refresh poller
@@ -141,25 +151,33 @@ namespace Api
 			PingRegionsSetLatencies(QosServers, OnTick);
 			return true;
 				
-		}), AdjustedSecondsPerTick);
+		}), SecondsPerTick);
 	}
 	
 	void Qos::InitGetServerLatenciesScheduler(
+		const float& SecondsPerTick,
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError)
 	{
-		const float SecondsPerTick = SettingsRef.QosLatencyPollIntervalSecs;
+		#pragma region PREFERED_DS_REGION TODO (?)
+		// // @todo This example was found @ LobbyTest.cpp: Should we check for preferredDSRegion?
+		// // Ensure we have regions set to get latencies from
+		// const FString PreferredDSRegion = Environment::GetEnvironmentVariable(
+		// 	"PREFERED_DS_REGION", 1000); // @todo "PREFERED" should be spelled "PREFERRED" (don't change the typo, for now).
+
+		// // @todo If we check for the preferred region, do we abandon the scheduler completely?
+		// if (PreferredDSRegion.IsEmpty())
+		// {
+		// 	OnError.ExecuteIfBound(0, "!PREFERED_DS_REGION (Env Var)");
+		// 	return;
+		// }
+		#pragma endregion /PREFERED_DS_REGION TODO (?)
 		
 		if (SecondsPerTick <= 0)
 		{
 			RemoveFromTicker(PollServerLatenciesHandle);
 			return;
 		}
-
-		// Active (>0): ensure min value to prevent flooding
-		const float AdjustedSecondsPerTick = SettingsRef.QosLatencyPollIntervalSecs < Settings::MinNumSecsQosLatencyPolling
-			? Settings::MinNumSecsQosLatencyPolling
-			: SecondsPerTick;
 
 		// -----------------------------------
 		// Schedule a Latencies refresh poller
@@ -173,7 +191,7 @@ namespace Api
 			CallGetQosServers(bPingRegionsOnSuccess, OnTick, OnError);
 				
 			return true;
-		}), AdjustedSecondsPerTick);
+		}), SecondsPerTick);
 	}
 
 	void Qos::RemoveFromTicker(FDelegateHandle& Handle)
