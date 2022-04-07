@@ -55,6 +55,20 @@ namespace Api
 		}
 	}
 
+	void Qos::GetActiveServerLatencies(
+		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
+		const FErrorHandler& OnError)
+	{
+		FRegistry::QosManager.GetActiveQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
+		[this, OnSuccess](const FAccelByteModelsQosServerList Result)
+		{
+			if(Result.Servers.Num() > 0)
+			{
+				PingRegionsSetLatencies(Result, OnSuccess);
+			}
+		}), OnError);
+	}
+
 	void Qos::CallGetQosServers(
 		const bool bPingRegionsOnSuccess,
 		const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess,
