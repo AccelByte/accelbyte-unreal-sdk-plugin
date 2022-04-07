@@ -12,8 +12,8 @@
 UENUM(BlueprintType)
 enum class ESetByMetadataRecord : uint8
 { 
-	Server, 
-	Client,
+	SERVER, 
+	CLIENT,
 }; 
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord

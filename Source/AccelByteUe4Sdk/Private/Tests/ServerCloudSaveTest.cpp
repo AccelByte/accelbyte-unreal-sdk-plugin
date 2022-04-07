@@ -297,7 +297,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Process Save Game Record 
 	bool bSaveGameRecordSuccess = false;
 	bool bSaveGameRecordDone = false;
-	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::Server, DataJson, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess, &bSaveGameRecordDone]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::SERVER, DataJson, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess, &bSaveGameRecordDone]()
 	{
 	   bSaveGameRecordSuccess = bSaveGameRecordDone =true;
 	   UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Save Game Record success"));
@@ -335,7 +335,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Check the game records values 
 	AB_TEST_TRUE(bGetGameRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, ResultGameRecord.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultGameRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultGameRecord.SetBy);
 	FString resultGameId;
 	ResultGameRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -390,7 +390,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	// Check the game records values 
 	AB_TEST_TRUE(bRecheckGetGameRecordSuccess)
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckGameRecord.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultRecheckGameRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultRecheckGameRecord.SetBy);
 	FString resultRecheckGameId;
 	ResultRecheckGameRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)
@@ -490,7 +490,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord_NoMetaData::RunTest(c
 	// Verify the Metadata SetBy Field is 'CLIENT' 
 	AB_TEST_TRUE(bGetGameRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, result.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Client, result.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::CLIENT, result.SetBy);
 	FString resultGameId;
 	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -592,7 +592,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord_NoMetadata::RunTest
 	// Verify the Metadata SetBy Field is 'CLIENT' 
 	AB_TEST_TRUE(bGetPlayerRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, result.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Client, result.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::CLIENT, result.SetBy);
 	FString resultGameId;
 	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -656,7 +656,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	bool bSavePlayerRecordSuccess = false;
 	bool bSavePlayerRecordDone = false;
 	UE_LOG(LogAccelByteServerCloudSaveTest, Log, TEXT("Save Player Record"));
-	FRegistry::ServerCloudSave.SaveUserRecord(KeyGameTest, userId, ESetByMetadataRecord::Server, false, dataJson, 
+	FRegistry::ServerCloudSave.SaveUserRecord(KeyGameTest, userId, ESetByMetadataRecord::SERVER, false, dataJson, 
 		FVoidHandler::CreateLambda([&bSavePlayerRecordSuccess, &bSavePlayerRecordDone]()
 	{
 	   bSavePlayerRecordSuccess = bSavePlayerRecordDone =true;
@@ -695,7 +695,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	// Check the Player records values 
 	AB_TEST_TRUE(bGetPlayerRecordSuccess)
     AB_TEST_EQUAL(KeyGameTest, ResultPlayerRecord.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultPlayerRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultPlayerRecord.SetBy);
 	FString resultGameId;
 	ResultPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
@@ -755,7 +755,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	// Check the Player records values 
 	AB_TEST_TRUE(bRecheckGetPlayerRecordSuccess)
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckPlayerRecord.Key);
-	AB_TEST_EQUAL(ESetByMetadataRecord::Server, ResultRecheckPlayerRecord.SetBy);
+	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultRecheckPlayerRecord.SetBy);
 	FString resultRecheckGameId;
 	ResultRecheckPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)

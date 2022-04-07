@@ -33,7 +33,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void SaveUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SaveUserRecord(const FString& Key, bool bSetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 	
 	/**
 	 * @brief Save a user-level record. If the record doesn't exist, it will create and save the record, if already exists, it will append to the existing one.
@@ -84,7 +84,7 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
 	 */
-	void ReplaceUserRecord(const FString& Key, bool SetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void ReplaceUserRecord(const FString& Key, bool bSetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
 
 	/**
 	 * @brief Replace a record in user-level. If the record doesn't exist, it will create and save the record. If already exists, it will replace the existing one.
@@ -205,7 +205,7 @@ private:
 	void ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
 
 	FJsonObject CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest);
-	FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool SetPublic, FJsonObject const& RecordRequest);
+	FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool bSetPublic, FJsonObject const& RecordRequest);
 };
 
 } // Namespace Api

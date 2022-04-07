@@ -7,6 +7,7 @@
 #include "Core/AccelByteReport.h" 
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteServerSettings.h" 
+#include "Core/AccelByteUtilities.h"
 #include "Models/AccelByteCloudSaveModels.h" 
 
 namespace AccelByte
@@ -120,17 +121,8 @@ namespace GameServerApi
 			jsonObject.TryGetStringField("updated_at", UpdatedAt);
 			FDateTime::ParseIso8601(*UpdatedAt, gameRecord.UpdatedAt);
 			FString SetByString;
-			jsonObject.TryGetStringField("set_by", SetByString);
-			ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
-			if (SetByString.Equals(TEXT("SERVER")))
-			{
-				SetBy = ESetByMetadataRecord::Server;
-			}
-			else if (SetByString.Equals(TEXT("CLIENT")))
-			{
-				SetBy = ESetByMetadataRecord::Client;
-			}
-			gameRecord.SetBy = SetBy;
+			jsonObject.TryGetStringField("set_by", SetByString); 
+			gameRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
 			gameRecord.Value = *value->ToSharedRef();
@@ -295,17 +287,8 @@ namespace GameServerApi
 				jsonObject.TryGetStringField("updated_at", UpdatedAt);
 				FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
 				FString SetByString;
-				jsonObject.TryGetStringField("set_by", SetByString);
-				ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
-				if (SetByString.Equals(TEXT("SERVER")))
-				{
-					SetBy = ESetByMetadataRecord::Server;
-				}
-				else if (SetByString.Equals(TEXT("CLIENT")))
-				{
-					SetBy = ESetByMetadataRecord::Client;
-				}
-				userRecord.SetBy = SetBy;
+				jsonObject.TryGetStringField("set_by", SetByString); 
+				userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 				const TSharedPtr<FJsonObject> *value;
 				jsonObject.TryGetObjectField("value", value);
 				userRecord.Value = *value->ToSharedRef();
@@ -349,17 +332,8 @@ namespace GameServerApi
 			jsonObject.TryGetStringField("updated_at", UpdatedAt);
 			FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
 			FString SetByString;
-			jsonObject.TryGetStringField("set_by", SetByString);
-			ESetByMetadataRecord SetBy = ESetByMetadataRecord::Client;
-			if (SetByString.Equals(TEXT("SERVER")))
-			{
-				SetBy = ESetByMetadataRecord::Server;
-			}
-			else if (SetByString.Equals(TEXT("CLIENT")))
-			{
-				SetBy = ESetByMetadataRecord::Client;
-			}
-			userRecord.SetBy = SetBy;				
+			jsonObject.TryGetStringField("set_by", SetByString); 
+			userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);			
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
 			userRecord.Value = *value->ToSharedRef();
@@ -461,16 +435,7 @@ namespace GameServerApi
 		FJsonObject NewRecordRequest = RecordRequest;
 
 		const auto MetadataJson = MakeShared<FJsonObject>();
-		FString SetByString = TEXT("");
-		switch (SetBy)
-		{
-		case ESetByMetadataRecord::Server:
-			SetByString = TEXT("SERVER");
-			break;
-		case ESetByMetadataRecord::Client:
-			SetByString = TEXT("CLIENT");
-			break;
-		}
+		FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy);
 		MetadataJson->SetStringField(TEXT("set_by"), SetByString);
 		MetadataJson->SetBoolField(TEXT("is_public"), SetPublic);
 		NewRecordRequest.SetObjectField("__META", MetadataJson);
@@ -483,16 +448,7 @@ namespace GameServerApi
 		FJsonObject NewRecordRequest = RecordRequest;
 
 		const auto MetadataJson = MakeShared<FJsonObject>();
-		FString SetByString = TEXT("");
-		switch (SetBy)
-		{
-		case ESetByMetadataRecord::Server:
-			SetByString = TEXT("SERVER");
-			break;
-		case ESetByMetadataRecord::Client:
-			SetByString = TEXT("CLIENT");
-			break;
-		}
+		FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy);
 		MetadataJson->SetStringField(TEXT("set_by"), SetByString);
 		NewRecordRequest.SetObjectField("__META", MetadataJson);
 

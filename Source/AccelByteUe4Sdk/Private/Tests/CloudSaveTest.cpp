@@ -1162,7 +1162,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveGameRecord, "AccelByte.Tests.Cloud
 bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 {
 	bool bSaveGameRecord1Success = false;
-	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::Client, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecord1Success]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::CLIENT, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecord1Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save Game record1 success"));
 		bSaveGameRecord1Success = true;
@@ -1170,7 +1170,7 @@ bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 	WaitUntil(bSaveGameRecord1Success, "Waiting for saving game record1 ...");
 
 	bool bSaveGameRecord2Success = false;
-	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::Client, Record2Test, FVoidHandler::CreateLambda([&bSaveGameRecord2Success]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::CLIENT, Record2Test, FVoidHandler::CreateLambda([&bSaveGameRecord2Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save game record2 success"));
 		bSaveGameRecord2Success = true;
