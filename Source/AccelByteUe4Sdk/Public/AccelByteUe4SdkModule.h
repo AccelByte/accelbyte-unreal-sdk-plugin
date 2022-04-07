@@ -34,5 +34,6 @@ public:
 	virtual void SetEnvironment(ESettingsEnvironment const Environment) = 0;
 	virtual AccelByte::Settings const& GetClientSettings() const = 0;
 	virtual AccelByte::ServerSettings const& GetServerSettings() const = 0;
+	virtual ESettingsEnvironment const& GetSettingsEnvironment() const = 0;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() = 0;
 };

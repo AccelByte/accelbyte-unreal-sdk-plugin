@@ -591,10 +591,11 @@ DEFINE_SPEC(
 	Describe("Change Environment Settings", [this]()
 		{
 			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
+			const ESettingsEnvironment EnvironmentBeforeTest = ABSDKModule.GetSettingsEnvironment();
 
-			AfterEach([this, &ABSDKModule]() 
+			AfterEach([this, &ABSDKModule, EnvironmentBeforeTest]() 
 				{
-					ABSDKModule.SetEnvironment(ESettingsEnvironment::Default);
+					ABSDKModule.SetEnvironment(EnvironmentBeforeTest);
 				});
 
 			It("Changed to Dev", [this, &ABSDKModule]()

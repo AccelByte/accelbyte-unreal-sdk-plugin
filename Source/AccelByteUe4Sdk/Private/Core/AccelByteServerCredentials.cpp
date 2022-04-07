@@ -24,6 +24,8 @@ ServerCredentials::ServerCredentials()
 {
 }
 
+const FString ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+
 void ServerCredentials::ForgetAll()
 {
 	ClientAccessToken = FString();
@@ -35,6 +37,37 @@ void ServerCredentials::SetClientCredentials(const FString& ClientId_, const FSt
 {
 	ClientId = ClientId_;
 	ClientSecret = ClientSecret_;
+}
+
+void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
+{
+	FString SectionPath;
+	switch (Environment)
+	{
+	case ESettingsEnvironment::Development:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsDev");
+		break;
+	case ESettingsEnvironment::Certification:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsCert");
+		break;
+	case ESettingsEnvironment::Production:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsProd");
+		break;
+	case ESettingsEnvironment::Default:
+	default:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+		break;
+	}
+
+	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	{
+		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+	else
+	{
+		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
 }
 
 void ServerCredentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)

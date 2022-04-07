@@ -28,10 +28,12 @@ public:
 	virtual void SetEnvironment(ESettingsEnvironment const Environment) override;
 	virtual AccelByte::Settings const& GetClientSettings() const override;
 	virtual AccelByte::ServerSettings const& GetServerSettings() const override;
+	virtual ESettingsEnvironment const& GetSettingsEnvironment() const override;
 	virtual FEnvironmentChangedDelegate& OnEnvironmentChanged() override;
 private:
 	AccelByte::Settings ClientSettings;
 	AccelByte::ServerSettings ServerSettings;
+	ESettingsEnvironment SettingsEnvironment;
 	FEnvironmentChangedDelegate EnvironmentChangedDelegate;
 	
 	// For registering settings in UE4 editor
@@ -58,6 +60,8 @@ void FAccelByteUe4SdkModule::StartupModule()
 	FModuleManager::Get().LoadModuleChecked("Json");
 	FModuleManager::Get().LoadModuleChecked("JsonUtilities");
 	FModuleManager::Get().LoadModuleChecked("Projects");
+
+	SettingsEnvironment = ESettingsEnvironment::Default;
 
 	RegisterSettings();
 	LoadSettingsFromConfigUObject();
@@ -89,6 +93,7 @@ void FAccelByteUe4SdkModule::SetEnvironment(ESettingsEnvironment const Environme
 	LoadServerSettings(Environment);
 	if (EnvironmentChangedDelegate.IsBound())
 	{
+		SettingsEnvironment = Environment;
 		EnvironmentChangedDelegate.Broadcast(Environment);
 	}
 }
@@ -101,6 +106,11 @@ AccelByte::Settings const& FAccelByteUe4SdkModule::GetClientSettings() const
 AccelByte::ServerSettings const& FAccelByteUe4SdkModule::GetServerSettings() const
 {
 	return ServerSettings;
+}
+
+ESettingsEnvironment const& FAccelByteUe4SdkModule::GetSettingsEnvironment() const
+{
+	return SettingsEnvironment;
 }
 
 void FAccelByteUe4SdkModule::RegisterSettings()
@@ -160,7 +170,7 @@ bool FAccelByteUe4SdkModule::LoadClientSettings(ESettingsEnvironment const Envir
 	}
 	
 	FRegistry::Settings = ClientSettings;
-	FRegistry::Credentials.SetClientCredentials(ClientSettings.ClientId, ClientSettings.ClientSecret);
+	FRegistry::Credentials.SetClientCredentials(Environment);
 
 	return bResult;
 }
@@ -181,7 +191,7 @@ bool FAccelByteUe4SdkModule::LoadServerSettings(ESettingsEnvironment const Envir
 	}
 	
 	FRegistry::ServerSettings = ServerSettings;
-	FRegistry::ServerCredentials.SetClientCredentials(ServerSettings.ClientId, ServerSettings.ClientSecret);
+	FRegistry::ServerCredentials.SetClientCredentials(Environment);
 	
 	return bResult;
 }
