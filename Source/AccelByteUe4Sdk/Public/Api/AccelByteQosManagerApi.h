@@ -37,6 +37,15 @@ public:
 
 	static FHttpRequestPtr GetQosServersRequest();
 	
+	/**
+	* @brief Get List of Qos Server(s) that have ACTIVE status in the game namespace.
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetActiveQosServers(
+		const THandler<FAccelByteModelsQosServerList>& OnSuccess,
+		const FErrorHandler& OnError) const;
+
 private:
 	FHttpRetryScheduler& HttpRef;
 	Credentials const& CredentialsRef;

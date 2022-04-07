@@ -63,6 +63,15 @@ public:
 		const FErrorHandler& OnError);
 
 	/**
+	* @brief Check server latencies (ping) per-region that have status ACTIVE
+	* @param OnSuccess If polling, this will also call every ping update success.
+	* @param OnError If polling, this will also call every ping update error.
+	*/
+	void GetActiveServerLatencies(
+		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
+		const FErrorHandler& OnError);
+
+	/**
 	 * @brief For each server, ping them and record add to Latency TArray.
 	 * - Then, ping each region and cache returend Latencies.
 	 * @param QosServerList 
