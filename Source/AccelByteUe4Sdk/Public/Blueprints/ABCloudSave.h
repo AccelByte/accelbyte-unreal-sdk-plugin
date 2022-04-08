@@ -8,6 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteError.h"
+#include "Models/AccelByteCloudSaveModels.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectWrapper.h"
 #include "ABCloudSave.generated.h"
@@ -38,6 +39,9 @@ struct FModelsUserRecord
 		FDateTime UpdatedAt;
 
 	UPROPERTY(BlueprintReadWrite)
+		ESetByMetadataRecord SetBy;
+
+	UPROPERTY(BlueprintReadWrite)
 		FJsonObjectWrapper Value;
 };
 
@@ -57,6 +61,9 @@ struct FModelsGameRecord
 	UPROPERTY(BlueprintReadWrite)
 		FDateTime UpdatedAt;
 
+	UPROPERTY(BlueprintReadWrite)
+		ESetByMetadataRecord SetBy;
+	
 	UPROPERTY(BlueprintReadWrite)
 		FJsonObjectWrapper Value;
 };
