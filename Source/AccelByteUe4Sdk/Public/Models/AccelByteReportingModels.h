@@ -18,83 +18,103 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitData
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	TMap<FString, FString> AdditionalInfo;
+	TMap<FString, FString> AdditionalInfo{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	EAccelByteReportingCategory Category;
+	EAccelByteReportingCategory Category{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString Comment;
+	FString Comment{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString ObjectId;
+	FString ObjectId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString ObjectType;
+	FString ObjectType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString Reason;
+	FString Reason{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting")
-	FString UserID;
+	FString UserID{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReportingSubmitResponse
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	EAccelByteReportingCategory Category;
+	EAccelByteReportingCategory Category{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString ObjectID;
+	FString ObjectID{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString ObjectType;
+	FString ObjectType{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString Status;
+	FString Status{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString TicketID;
+	FString TicketID{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString UpdateAt;
+	FString UpdateAt{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting")
-	FString UserID;
+	FString UserID{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReasonItem
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting | Reasons")
-	FString Title;
+	FString Title{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting | Reasons")
-	FString Description;
+	FString Description{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReasonsResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | Reasons")
-	TArray<FAccelByteModelsReasonItem> Data;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | Reasons")
-	FAccelByteModelsPaging Paging;
+	TArray<FAccelByteModelsReasonItem> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | Reasons")
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReasonGroupsItem
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting | ReasonGroups")
-	FString ID;
+	FString ID{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | Reporting | ReasonGroups")
-	FString Title;
+	FString Title{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsReasonGroupsResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | ReasonGroups")
-	TArray<FAccelByteModelsReasonGroupsItem> Data;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | ReasonGroups")
-	FAccelByteModelsPaging Paging;
+	TArray<FAccelByteModelsReasonGroupsItem> Data{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Reporting | ReasonGroups")
+	FAccelByteModelsPaging Paging{};
 };
-

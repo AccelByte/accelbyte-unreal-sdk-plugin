@@ -22,17 +22,17 @@ struct ACCELBYTEUE4SDK_API FErrorInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		int32 NumericErrorCode = -1;
+	int32 NumericErrorCode{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		int32 ErrorCode = -1;
+	int32 ErrorCode{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		int32 Code = -1;
+	int32 Code{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		FString ErrorMessage;
+	FString ErrorMessage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		FString Message;
+	FString Message{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | Error")
-		FString Error;
+	FString Error{};
 };
 
 USTRUCT(BlueprintType)
@@ -40,21 +40,21 @@ struct ACCELBYTEUE4SDK_API FErrorOauthInfo
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	int32 ErrorCode = -1;
+	int32 ErrorCode{-1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString ErrorMessage;
+	FString ErrorMessage{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error;
+	FString Error{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error_description;
+	FString Error_description{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Error_uri;
+	FString Error_uri{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Mfa_token;
+	FString Mfa_token{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	TArray<FString> Factors;
+	TArray<FString> Factors{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
-	FString Default_factor;
+	FString Default_factor{};
 };
 
 namespace AccelByte

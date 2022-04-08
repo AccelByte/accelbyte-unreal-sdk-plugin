@@ -35,241 +35,334 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteSeasonPassExcessStrategy
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | ExcessStrategy")
-	EAccelByteSeasonPassStrategyMethod Method;
+	EAccelByteSeasonPassStrategyMethod Method{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | ExcessStrategy")
-	FString Currency;
+	FString Currency{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | ExcessStrategy")
-	int32 PercentPerExp;
+	int32 PercentPerExp{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPass
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString Title;
+	FString Title{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString Description;
+	FString Description{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString SeasonId;
+	FString SeasonId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString Code;
+	FString Code{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString DisplayOrder;
+	FString DisplayOrder{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	bool AutoEnroll;
+	bool AutoEnroll{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString PassItemId;
+	FString PassItemId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	TArray<FAccelByteModelsItemImage> Images;
+	TArray<FAccelByteModelsItemImage> Images{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FString Language;
+	FString Language{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Passes")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassTierJsonObject
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Tier")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Tier")
-	int32 RequiredExp;
-	/** @brief PassCode as key, RewardCode as Values. This should be TMap<FString, TArray<FString>>, but UHT not supported it.
-	*	See AccelByteSeasonPassApi::GetCurrentSeason for more details how to process it
-	**/
+	int32 RequiredExp{};
+
+	/**
+	 * @brief PassCode as key, RewardCode as Values. This should be TMap<FString, TArray<FString>>, but UHT not supported it.
+	 *	See AccelByteSeasonPassApi::GetCurrentSeason for more details how to process it
+	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Tier")
-	FJsonObjectWrapper Rewards;
+	FJsonObjectWrapper Rewards{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassTier
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Tier")
-	FString Id;
+	FString Id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Tier")
-	int32 RequiredExp;
+	int32 RequiredExp{};
+
 	/** @brief PassCode as key, RewardCode as Values. **/
-	TMap<FString, TArray<FString>> Rewards;
+	TMap<FString, TArray<FString>> Rewards{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassReward
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FString SeasonId;
+	FString SeasonId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FString Code;
+	FString Code{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	EAccelByteSeasonPassRewardType Type;
+	EAccelByteSeasonPassRewardType Type{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FString ItemId;
+	FString ItemId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FString ItemName;
+	FString ItemName{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	int32 Quantity;
+	int32 Quantity{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
-	FAccelByteModelsItemImage Image;
+	FAccelByteModelsItemImage Image{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonTierRewardAsJsonObject
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Title;
+	FString Title{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Description;
+	FString Description{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Name;
+	FString Name{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime Start;
+	FDateTime Start{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime End;
+	FDateTime End{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString TierItemId;
+	FString TierItemId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	bool AutoClaim;
+	bool AutoClaim{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsItemImage> Images;
+	TArray<FAccelByteModelsItemImage> Images{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FString> PassCodes;
+	TArray<FString> PassCodes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	EAccelByteSeasonPassStatus Status;
+	EAccelByteSeasonPassStatus Status{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime PublishedAt;
+	FDateTime PublishedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Language;
+	FString Language{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsSeasonPass> Passes;
+	TArray<FAccelByteModelsSeasonPass> Passes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TMap<FString, FAccelByteModelsSeasonPassReward> Rewards;
+	TMap<FString, FAccelByteModelsSeasonPassReward> Rewards{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsSeasonPassTierJsonObject> Tiers;
+	TArray<FAccelByteModelsSeasonPassTierJsonObject> Tiers{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeason
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Name;
+	FString Name{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime Start;
+	FDateTime Start{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime End;
+	FDateTime End{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	EAccelByteSeasonPassStatus Status;
+	EAccelByteSeasonPassStatus Status{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime PublishedAt;
+	FDateTime PublishedAt{0};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Title;
+	FString Title{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Description;
+	FString Description{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Name;
+	FString Name{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime Start;
+	FDateTime Start{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime End;
+	FDateTime End{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString TierItemId;
+	FString TierItemId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	bool AutoClaim;
+	bool AutoClaim{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsItemImage> Images;
+	TArray<FAccelByteModelsItemImage> Images{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FString> PassCodes;
+	TArray<FString> PassCodes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	EAccelByteSeasonPassStatus Status;
+	EAccelByteSeasonPassStatus Status{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime PublishedAt;
+	FDateTime PublishedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Language;
+	FString Language{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsSeasonPass> Passes;
+	TArray<FAccelByteModelsSeasonPass> Passes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TMap<FString, FAccelByteModelsSeasonPassReward> Rewards;
+	TMap<FString, FAccelByteModelsSeasonPassReward> Rewards{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FAccelByteModelsSeasonPassTier> Tiers;
+	TArray<FAccelByteModelsSeasonPassTier> Tiers{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserSeasonInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString UserId;
+	FString UserId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString SeasonId;
+	FString SeasonId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime EnrolledAt;
+	FDateTime EnrolledAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FString> EnrolledPasses;
+	TArray<FString> EnrolledPasses{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentTierIndex;
+	int32 CurrentTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 LastTierIndex;
+	int32 LastTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 RequiredExp;
+	int32 RequiredExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentExp;
+	int32 CurrentExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	bool Cleared;
+	bool Cleared{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FAccelByteModelsSeason Season;
-	/** @brief Tier Index as key, Passes (include rewards) as Values.
+	FAccelByteModelsSeason Season{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values.
 	 * Values is also a TMap, PassCode as key, RewardCodes as values
 	 ***/
-	TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
-	/** @brief Tier Index as key, Passes (include rewards) as Values.
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
-	TMap<int32, TMap<FString, TArray<FString>>> ClaimingRewards;
+	TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values.
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
+	TMap<int32, TMap<FString, TArray<FString>>> ClaimingRewards{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
 };
 
 
@@ -277,118 +370,161 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserSeasonInfoWithoutReward
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString SeasonId;
+	FString SeasonId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime EnrolledAt;
+	FDateTime EnrolledAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FString> EnrolledPasses;
+	TArray<FString> EnrolledPasses{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentTierIndex;
+	int32 CurrentTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 LastTierIndex;
+	int32 LastTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 RequiredExp;
+	int32 RequiredExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentExp;
+	int32 CurrentExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	bool Cleared;
+	bool Cleared{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FAccelByteModelsSeason Season;
+	FAccelByteModelsSeason Season{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserSeasonInfoClaimRewardAsJsonObject
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Id;
+	FString Id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString UserId;
+	FString UserId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FString SeasonId;
+	FString SeasonId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime EnrolledAt;
+	FDateTime EnrolledAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TArray<FString> EnrolledPasses;
+	TArray<FString> EnrolledPasses{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentTierIndex;
+	int32 CurrentTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 LastTierIndex;
+	int32 LastTierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 RequiredExp;
+	int32 RequiredExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	int32 CurrentExp;
+	int32 CurrentExp{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	bool Cleared;
+	bool Cleared{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FAccelByteModelsSeason Season;
-	/** @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
+	FAccelByteModelsSeason Season{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TMap<int32, FJsonObjectWrapper> ToClaimRewards;
-	/** @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
+	TMap<int32, FJsonObjectWrapper> ToClaimRewards{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	TMap<int32, FJsonObjectWrapper> ClaimingRewards;
+	TMap<int32, FJsonObjectWrapper> ClaimingRewards{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime CreatedAt;
+	FDateTime CreatedAt{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season")
-	FDateTime UpdatedAt;
+	FDateTime UpdatedAt{0};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonClaimRewardRequest
 {
 	GENERATED_BODY()
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season | Reward")
-	FString PassCode;
+	FString PassCode{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season | Reward")
-	int32 TierIndex;
+	int32 TierIndex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season | Reward")
-	FString RewardCode;
+	FString RewardCode{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonClaimRewardResponseJsonWrapper
 {
 	GENERATED_BODY()
-	/** @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<TArray<FString>>>, but UHT not supported it.
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<TArray<FString>>>, but UHT not supported it.
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season | Reward")
-	TMap<int32, FJsonObjectWrapper> ToClaimRewards;
-	/** @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
+	TMap<int32, FJsonObjectWrapper> ToClaimRewards{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values. This should be TMap<int32, TMap<FString, TArray<FString>>>
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Season | Reward")
-	TMap<int32, FJsonObjectWrapper> ClaimingRewards;
+	TMap<int32, FJsonObjectWrapper> ClaimingRewards{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonClaimRewardResponse
 {
 	GENERATED_BODY()
-	/** @brief Tier Index as key, Passes (include rewards) as Values.
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
-	TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards;
-	/** @brief Tier Index as key, Passes (include rewards) as Values.
-	* Values is also a TMap, PassCode as key, RewardCodes as values
-	**/
-	TMap<int32, TMap<FString, TArray<FString>>> ClaimingRewards;
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values.
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
+	TMap<int32, TMap<FString, TArray<FString>>> ToClaimRewards{};
+
+	/**
+	 * @brief Tier Index as key, Passes (include rewards) as Values.
+	 * Values is also a TMap, PassCode as key, RewardCodes as values
+	 **/
+	TMap<int32, TMap<FString, TArray<FString>>> ClaimingRewards{};
 };

@@ -14,7 +14,7 @@
 UENUM(BlueprintType)
 enum class EAccelByteGroupListSortBy : uint8
 {
-	NONE,
+	NONE = 0,
 	LISTORDER,
 	LISTORDER_ASC,
 	LISTORDER_DESC,
@@ -30,7 +30,7 @@ enum class EAccelByteGroupListSortBy : uint8
 UENUM(BlueprintType)
 enum class EAccelByteAllowedAction : uint8
 {
-	None, // TODO: is this intentionally PascalCase instead of camelCase?
+	None = 0, // TODO: is this intentionally PascalCase instead of camelCase?
 	createGroup,
 	joinGroup,
 	inviteUser,
@@ -50,7 +50,7 @@ enum class EAccelByteRuleCriteria : uint8
 UENUM(BlueprintType)
 enum class EAccelByteGroupType : uint8
 {
-	NONE,
+	NONE = 0,
 	OPEN,
 	PUBLIC,
 	PRIVATE,
@@ -68,16 +68,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRequestResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestResponse")
-	FString GroupId;
+	FString GroupId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestResponse")
-	FString UserId;
+	FString UserId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestResponse")
-	FString RequestType;
+	FString RequestType{};
 };
 
-/** @brief Shared request for:
+/**
+ * @brief Shared request for:
  * - AssignRoleToMemberRequest
  * - DeleteRoleRequest
  */
@@ -88,7 +89,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUserIdWrapper
 	
 	/** @brief The UserId you want to assign the role to. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUserIdWrapper")
-	FString UserId;
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
@@ -97,14 +98,14 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRuleInformation
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsRuleInformation")
-	FString RuleAttribute;
+	FString RuleAttribute{};
 	
 	/** @brief The value will be in enum of EQUAL, MINIMUM, MAXIMUM	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsRuleInformation")
-	EAccelByteRuleCriteria RuleCriteria;
+	EAccelByteRuleCriteria RuleCriteria{EAccelByteRuleCriteria::MINIMUM};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsRuleInformation")
-	float RuleValue;
+	float RuleValue{};
 };
 
 USTRUCT(BlueprintType)
@@ -114,10 +115,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsRules
 	
 	/** @brief For CreateGroup request: Only joinGroup || inviteUser are accepted. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsRules")
-	EAccelByteAllowedAction AllowedAction;
+	EAccelByteAllowedAction AllowedAction{EAccelByteAllowedAction::None};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsRules")
-	TArray<FAccelByteModelsRuleInformation> RuleDetail;
+	TArray<FAccelByteModelsRuleInformation> RuleDetail{};
 };
 
 USTRUCT(BlueprintType)
@@ -126,10 +127,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupRules
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupRules")
-	FJsonObjectWrapper GroupCustomRule;
+	FJsonObjectWrapper GroupCustomRule{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupRules")
-	TArray<FAccelByteModelsRules> GroupPredefinedRules;
+	TArray<FAccelByteModelsRules> GroupPredefinedRules{};
 };
 
 USTRUCT(BlueprintType)
@@ -138,10 +139,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupMember
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupMember")
-	FString UserId;
+	FString UserId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupMember")
-	TArray<FString> MemberRoleId;
+	TArray<FString> MemberRoleId{};
 };
 
 /**
@@ -155,19 +156,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetUserGroupInfoResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetUserGroupInfoResponse")
-	FString GroupId;
+	FString GroupId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetUserGroupInfoResponse")
-	TArray<FString> MemberRoleId;
+	TArray<FString> MemberRoleId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetUserGroupInfoResponse")
-	FString Status;
+	FString Status{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetUserGroupInfoResponse")
-	FString UserId;
+	FString UserId{};
 };
 
-/** @brief Shared request for:
+/**
+ * @brief Shared request for:
  * - GetMemberRolesListRequest
  * - GetGroupRequestListRequest
  * - GetGroupMembersListByGroupIdRequest
@@ -179,15 +181,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsLimitOffsetRequest
 	
 	/** @brief Default == 1	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsLimitOffsetRequest")
-	int32 Limit = { 1 };
+	int32 Limit{1};
 
 	/** @brief Default == 0 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsLimitOffsetRequest")
-	int32 Offset = { 0 };
+	int32 Offset{0};
 };
 
 /**
- *@brief Shared GroupResponseV1 for:
+ * @brief Shared GroupResponseV1 for:
  * - CreateGroup,
  * - GetGroupList (partial),
  * - GetGroup
@@ -198,31 +200,31 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInformation
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString ConfigurationCode;
+	FString ConfigurationCode{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FJsonObjectWrapper CustomAttributes;
+	FJsonObjectWrapper CustomAttributes{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString GroupDescription;
+	FString GroupDescription{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString GroupIcon;
+	FString GroupIcon{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString GroupId;
+	FString GroupId{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	int GroupMaxMember;
+	int GroupMaxMember{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	TArray<FAccelByteModelsGroupMember> GroupMembers;
+	TArray<FAccelByteModelsGroupMember> GroupMembers{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString GroupName;
+	FString GroupName{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FString GroupRegion;
+	FString GroupRegion{};
 	
 	/**
 	 * @brief Rules for specific group.
@@ -230,10 +232,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupInformation
 	 * - Consists of GroupPredefinedRules that has similar usage with config, only works in a specific group
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	FAccelByteModelsGroupRules GroupRules;
+	FAccelByteModelsGroupRules GroupRules{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupInformation")
-	EAccelByteGroupType GroupType;
+	EAccelByteGroupType GroupType{EAccelByteGroupType::NONE};
 };
 
 /**
@@ -250,28 +252,29 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGroupUpdatable
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	FString GroupName;
+	FString GroupName{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	FString GroupRegion;
+	FString GroupRegion{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	EAccelByteGroupType GroupType;
+	EAccelByteGroupType GroupType{EAccelByteGroupType::NONE};
 
 	/** @brief Optional */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	FJsonObjectWrapper CustomAttributes;
+	FJsonObjectWrapper CustomAttributes{};
 	
 	/** @brief Optional */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	FString GroupDescription;
+	FString GroupDescription{};
 	
 	/** @brief Optional */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGroupUpdatable")
-	FString GroupIcon;
+	FString GroupIcon{};
 };
 
-/** @brief Shared Model for group member requests for:
+/**
+ * @brief Shared Model for group member requests for:
  * - GetGroupMembersList
  * - AcceptGroupInvitation
  * - RejectGroupInvitation
@@ -286,10 +289,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMemberRequestGroupResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
-	FString GroupId;
+	FString GroupId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
-	FString UserId;
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
@@ -298,7 +301,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsJoinGroupResponse : public FAccelByte
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsMemberRequestGroupResponse")
-	FString Status;
+	FString Status{};
 };
 
 #pragma endregion /Shared Models
@@ -310,10 +313,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsKickGroupMemberResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsKickGroupMemberResponse")
-	FString GroupId;
+	FString GroupId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsKickGroupMemberResponse")
-	FString KickedUserId;
+	FString KickedUserId{};
 };
 
 /** @brief Request data includes UpdateGroupRequest */
@@ -323,13 +326,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreateGroupRequest : public FAccelByt
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsCreateGroupRequest")
-	FString ConfigurationCode;
+	FString ConfigurationCode{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsCreateGroupRequest")
-	int32 GroupMaxMember;
+	int32 GroupMaxMember{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsCreateGroupRequest")
-	FAccelByteModelsGroupRules GroupRules;
+	FAccelByteModelsGroupRules GroupRules{};
 };
 
 USTRUCT(BlueprintType)
@@ -339,11 +342,11 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupListRequest : public FAccelBy
 	
 	/** @brief Default == "" (empty) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupListRequest")
-	FString GroupName;
+	FString GroupName{};
 
 	/** @brief Default == "" (empty) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupListRequest")
-	FString GroupRegion;
+	FString GroupRegion{};
 };
 
 USTRUCT(BlueprintType)
@@ -353,17 +356,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupMembersListByGroupIdRequest :
 	
 	/** @brief Default == ascending. Can change to "desc". Anything != "desc" will remain default */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupMembersListByGroupIdRequest")
-	FString Order;
+	FString Order{};
 };
 
-/** @brief AKA "SearchGroupListResponse"; GroupInformation + Paging */
+/** @brief AKA "SearchGroupListResponse"{}; GroupInformation + Paging */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGetGroupListResponse : public FAccelByteModelsGroupInformation
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetGroupListResponse")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 /** @brief Paginated */
@@ -373,16 +376,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsGetMemberRolesListResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	FString MemberRoleId;
+	FString MemberRoleId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	FString MemberRoleName;
+	FString MemberRoleName{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRolesListResponse")
-	TArray<FString> MemberRolePermissions;
+	TArray<FString> MemberRolePermissions{};
 };
 
 /**
@@ -395,7 +398,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateGroupCustomAttributesRequest
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUpdateGroupCustomAttributesRequest")
-	FJsonObjectWrapper CustomAttributes;
+	FJsonObjectWrapper CustomAttributes{};
 };
 
 /** @brief For creating arbitrary values. */
@@ -406,7 +409,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateCustomRulesRequest
 	
 	/** @brief Completely arbitrary */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUpdateCustomRulesRequest")
-	FJsonObjectWrapper GroupCustomRule;
+	FJsonObjectWrapper GroupCustomRule{};
 };
 
 USTRUCT(BlueprintType)
@@ -415,22 +418,20 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateGroupPredefinedRuleRequest
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsUpdateGroupPredefinedRuleRequest")
-	TArray<FAccelByteModelsRuleInformation> RuleDetail;
+	TArray<FAccelByteModelsRuleInformation> RuleDetail{};
 };
 
-/**
- * @brief Contains paginated list of group member requests.
- */
+/** @brief Contains paginated list of group member requests. */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGetMemberRequestsListResponse
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRequestsListResponse")
-	TArray<FAccelByteModelsRuleInformation> Data;
+	TArray<FAccelByteModelsRuleInformation> Data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Group | Models | FAccelByteModelsGetMemberRequestsListResponse")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 /** @brief For HTTP requests that want empty data, but still want a USTRUCT */

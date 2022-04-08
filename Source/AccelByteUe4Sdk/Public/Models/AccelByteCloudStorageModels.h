@@ -11,46 +11,64 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSlot
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString Checksum;
+	FString Checksum{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString CustomAttribute;
+	FString CustomAttribute{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FDateTime DateAccessed;
+	FDateTime DateAccessed{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FDateTime DateCreated;
+	FDateTime DateCreated{0};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FDateTime DateModified;
+	FDateTime DateModified{0};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString Label;
+	FString Label{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString MimeType;
+	FString MimeType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString OriginalName;
+	FString OriginalName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString SlotId;
+	FString SlotId{};
+
 	UPROPERTY(meta = (DeprecatedNode, DeprecationMessage = "Status member is deprecated on new cloudstorage service."))
-		FString Status_DEPRECATED;
+	FString Status_DEPRECATED{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString StoredName;
+	FString StoredName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		FString UserId;
+	FString UserId{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | CreateSlotResponse")
-		int32 Size;
+	int32 Size{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUpdateMetadataRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
-		FString Label;
+	FString Label{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | CloudStorage | Models | UpdateMetadataRequest")
-		FString CustomAttribute;
+	FString CustomAttribute{};
 };

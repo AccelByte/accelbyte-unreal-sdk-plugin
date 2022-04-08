@@ -21,7 +21,7 @@ struct FPartyInviteRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString friendID;
+	FString friendID{};
 };
 
 USTRUCT(BlueprintType)
@@ -30,10 +30,10 @@ struct FPartyJoinRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyID;
+	FString partyID{};
 
 	UPROPERTY(BlueprintReadWrite)
-	FString invitationToken;
+	FString invitationToken{};
 };
 
 USTRUCT(BlueprintType)
@@ -42,10 +42,10 @@ struct FPartyRejectRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyID;
+	FString partyID{};
 
 	UPROPERTY(BlueprintReadWrite)
-	FString invitationToken;
+	FString invitationToken{};
 };
 
 USTRUCT(BlueprintType)
@@ -54,7 +54,7 @@ struct FPartyKickRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString memberID;
+	FString memberID{};
 };
 
 USTRUCT(BlueprintType)
@@ -63,7 +63,7 @@ struct FPartyJoinViaCodeRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyCode;
+	FString partyCode{};
 };
 
 USTRUCT(BlueprintType)
@@ -72,7 +72,7 @@ struct FPartyPromoteLeaderRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString userId;
+	FString userId{};
 };
 
 USTRUCT(BlueprintType)
@@ -81,7 +81,7 @@ struct FGetPartyDataRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyId;
+	FString partyId{};
 };
 
 USTRUCT(BlueprintType)
@@ -90,7 +90,7 @@ struct FGetPartyStorageRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyId;
+	FString partyId{};
 };
 
 USTRUCT(BlueprintType)
@@ -99,12 +99,12 @@ struct FWritePartyStorageRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	FString partyId;
+	FString partyId{};
 	
 	UPROPERTY(BlueprintReadWrite)
-	int32 RetryAttempt;
+	int32 RetryAttempt{};
 
-	TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier;
+	TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier{};
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDInfoPartyResponse, FAccelByteModelsInfoPartyResponse, Response);
