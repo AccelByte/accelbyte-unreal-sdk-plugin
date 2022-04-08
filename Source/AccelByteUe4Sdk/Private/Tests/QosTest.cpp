@@ -345,6 +345,8 @@ void FQosTestSpec::Define()
 			return bIsSuccess;
 		});
 
+		/* Commented this test because feature still not in release pipeline yet
+		* 
 		LatentIt("03: Should set Settings::QosServerLatencyPollIntervalSecs > 0; init the 'get latencies scheduler' (uses cached server regions); "
 			"if Settings::QosServerLatencyPollIntervalSecs < 0, nothing will happen (success) for activated region in namespace",
 			[this](const FDoneDelegate& Done)
@@ -365,7 +367,7 @@ void FQosTestSpec::Define()
 			Done.Execute();
 			return bIsSuccess;
 		});
-		
+		*/		
 		// ===================================================================		
 
 		LatentAfterEach([this](const FDoneDelegate& Done)
