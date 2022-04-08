@@ -1415,7 +1415,7 @@ void Lobby::OnConnectionError(const FString& Error)
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
-	if (StatusCode >= 4000 && !BanNotifReceived)
+	if (StatusCode > 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}

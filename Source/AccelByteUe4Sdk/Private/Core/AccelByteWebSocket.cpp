@@ -220,15 +220,17 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
-	OnMessageReceived(Reason);
 
-	if(StatusCode < 4000)
+	// Broadcast message DisconnectNotif
+	OnMessageReceived(Reason);
+	
+	// trigger closed event, on prepare to reconnect on next StateTick
+	if(StatusCode <= 4000)
 	{
 		// Add event websocket closed so state tick can reconnect lobby.
 		WsEvents |= EWebSocketEvent::Closed;
 	}
-	
+		
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
