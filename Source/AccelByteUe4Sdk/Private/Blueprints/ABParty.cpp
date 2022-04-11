@@ -86,7 +86,7 @@ void UABParty::PartyJoin(
 {
 	ApiClientPtr->Lobby.SetInvitePartyJoinResponseDelegate(
 		Api::Lobby::FPartyJoinResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsPartyJoinReponse const& Response)
+			[OnResponse](FAccelByteModelsPartyJoinResponse const& Response)
 			{
 				OnResponse.ExecuteIfBound(Response);
 			}),
@@ -198,7 +198,7 @@ void UABParty::PartyJoinViaCode(
 {
 	ApiClientPtr->Lobby.SetPartyJoinViaCodeResponseDelegate(
 		Api::Lobby::FPartyJoinViaCodeResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsPartyJoinReponse Response)
+			[OnResponse](FAccelByteModelsPartyJoinResponse Response)
 			{
 				OnResponse.ExecuteIfBound(Response);
 			}),

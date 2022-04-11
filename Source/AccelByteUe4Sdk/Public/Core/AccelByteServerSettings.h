@@ -37,6 +37,10 @@ public:
 	void Reset(ESettingsEnvironment const Environment);
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
+
+protected:
+	void LoadSettings(const FString& SectionPath);
+	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
 };
 
 typedef TSharedRef<ServerSettings, ESPMode::ThreadSafe> ServerSettingsRef;

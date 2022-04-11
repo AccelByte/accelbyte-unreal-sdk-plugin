@@ -566,7 +566,7 @@ bool FEcommerceTestSearchItem::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCreateNewOrder, "AccelByte.Tests.Ecommerce.D1.CreateNewOrder", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCreateNewOrder, "AccelByte.Tests.Ecommerce.D.1.CreateNewOrder", AutomationFlagMaskEcommerce);
 bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsItemInfo Item;
@@ -787,7 +787,7 @@ bool FEcommerceTestCreateNewOrder::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrder, "AccelByte.Tests.Ecommerce.D2.GetUserOrder", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrder, "AccelByte.Tests.Ecommerce.D.2.GetUserOrder", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetUserOrder::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsItemInfo Item;
@@ -870,7 +870,7 @@ bool FEcommerceTestGetUserOrder::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrderHistory, "AccelByte.Tests.Ecommerce.D3.GetUserOrderHistory", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrderHistory, "AccelByte.Tests.Ecommerce.D.3.GetUserOrderHistory", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetUserOrderHistory::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsItemInfo Item;
@@ -953,7 +953,7 @@ bool FEcommerceTestGetUserOrderHistory::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrders, "AccelByte.Tests.Ecommerce.D4.GetUserOrders", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserOrders, "AccelByte.Tests.Ecommerce.D.4.GetUserOrders", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetUserOrders::RunTest(const FString& Parameters)
 {
 #pragma region GetUserOrders
@@ -974,7 +974,7 @@ bool FEcommerceTestGetUserOrders::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCancelOrder, "AccelByte.Tests.Ecommerce.D5.CancelOrder", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCancelOrder, "AccelByte.Tests.Ecommerce.D.5.CancelOrder", AutomationFlagMaskEcommerce);
 bool FEcommerceTestCancelOrder::RunTest(const FString& Parameters)
 {
 #pragma region LoginWithDevice
@@ -1057,7 +1057,7 @@ bool FEcommerceTestCancelOrder::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E1.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetWalletInfoByCurrencyCode, "AccelByte.Tests.Ecommerce.E.1.GetWalletInfoByCurrencyCode", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetWalletInfoByCurrencyCode::RunTest(const FString& Parameters)
 {
 	bool bGetWalletSuccess = false;
@@ -1074,7 +1074,7 @@ bool FEcommerceTestGetWalletInfoByCurrencyCode::RunTest(const FString& Parameter
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCreditUserWallet, "AccelByte.Tests.Ecommerce.E2.CreditUserWallet", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestCreditUserWallet, "AccelByte.Tests.Ecommerce.E.2.CreditUserWallet", AutomationFlagMaskEcommerce);
 bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 {
 #pragma region GetWalletInfo
@@ -1130,7 +1130,7 @@ bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestDebitUserWallet, "AccelByte.Tests.Ecommerce.E3.DebitUserWallet", AutomationFlagMaskEcommerce)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestDebitUserWallet, "AccelByte.Tests.Ecommerce.E.3.DebitUserWallet", AutomationFlagMaskEcommerce)
 bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 {
 #pragma region GetWalletInfo
@@ -1203,7 +1203,27 @@ bool FEcommerceTestDebitUserWallet::RunTest(const FString& Parameters)
 		return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlements, "AccelByte.Tests.Ecommerce.F1.GrantUserEntitlements", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetListWalletTransactions, "AccelByte.Tests.Ecommerce.E.4.GetListWalletTransactions", AutomationFlagMaskEcommerce)
+bool FEcommerceTestGetListWalletTransactions::RunTest(const FString& Parameters)
+{
+	bool bGetWalletTransactionsSuccess = false;
+	bool bIsNotEmpty = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletTransactionsByCurrencyCode"));
+	FRegistry::Wallet.ListWalletTransactionsByCurrencyCode(EcommerceTestExpectedCurrencyCode, THandler<FAccelByteModelsWalletTransactionPaging>::CreateLambda([&](const FAccelByteModelsWalletTransactionPaging& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			bIsNotEmpty = Result.Data.Num() > 0 ? true : false;
+			bGetWalletTransactionsSuccess = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetWalletTransactionsSuccess, "Waiting for get wallet...");
+
+	AB_TEST_TRUE(bGetWalletTransactionsSuccess);
+	AB_TEST_TRUE(bIsNotEmpty);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlements, "AccelByte.Tests.Ecommerce.F.1.GrantUserEntitlements", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 {
 #pragma region GetItemByCriteria
@@ -1289,7 +1309,7 @@ bool FEcommerceTestGrantUserEntitlements::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsForMedia, "AccelByte.Tests.Ecommerce.F1.GrantUserEntitlementsForMedia", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsForMedia, "AccelByte.Tests.Ecommerce.F.1.GrantUserEntitlementsForMedia", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGrantUserEntitlementsForMedia::RunTest(const FString& Parameters)
 {
 #pragma region GetItemByCriteria
@@ -1375,7 +1395,7 @@ bool FEcommerceTestGrantUserEntitlementsForMedia::RunTest(const FString& Paramet
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsInvalidItemId, "AccelByte.Tests.Ecommerce.F2.GrantUserEntitlementsInvalidItemId", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsInvalidItemId, "AccelByte.Tests.Ecommerce.F.2.GrantUserEntitlementsInvalidItemId", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Parameters)
 {
 
@@ -1454,7 +1474,7 @@ bool FEcommerceTestGrantUserEntitlementsInvalidItemId::RunTest(const FString& Pa
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestQueryUserEntitlements, "AccelByte.Tests.Ecommerce.F3.QueryUserEntitlements", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestQueryUserEntitlements, "AccelByte.Tests.Ecommerce.F.3.QueryUserEntitlements", AutomationFlagMaskEcommerce);
 bool FEcommerceTestQueryUserEntitlements::RunTest(const FString& Parameters)
 {
 	bool bQueryEntitlementSuccess = false;
@@ -1476,7 +1496,7 @@ bool FEcommerceTestQueryUserEntitlements::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestConsumeUserEntitlement, "AccelByte.Tests.Ecommerce.F4.ConsumeUserEntitlement", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestConsumeUserEntitlement, "AccelByte.Tests.Ecommerce.F.4.ConsumeUserEntitlement", AutomationFlagMaskEcommerce);
 bool FEcommerceTestConsumeUserEntitlement::RunTest(const FString& Parameters)
 {
 #pragma region FirstConsumption
@@ -1519,7 +1539,7 @@ bool FEcommerceTestConsumeUserEntitlement::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserEntitlementById, "AccelByte.Tests.Ecommerce.F5.GetUserEntitlementById", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserEntitlementById, "AccelByte.Tests.Ecommerce.F.5.GetUserEntitlementById", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetUserEntitlementById::RunTest(const FString& Parameters)
 {
 	bool bGetEntitlementSuccess = false;
@@ -1540,7 +1560,7 @@ bool FEcommerceTestGetUserEntitlementById::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserEntitlementByIdInvalidId, "AccelByte.Tests.Ecommerce.F6.GetUserEntitlementByIdInvalidId", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetUserEntitlementByIdInvalidId, "AccelByte.Tests.Ecommerce.F.6.GetUserEntitlementByIdInvalidId", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetUserEntitlementByIdInvalidId::RunTest(const FString& Parameters)
 {
 	bool bGetEntitlementDone = false;
@@ -1567,7 +1587,7 @@ bool FEcommerceTestGetUserEntitlementByIdInvalidId::RunTest(const FString& Param
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementById, "AccelByte.Tests.Ecommerce.F7.ServerGetUserEntitlementById", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementById, "AccelByte.Tests.Ecommerce.F.7.ServerGetUserEntitlementById", AutomationFlagMaskEcommerce);
 bool FEcommerceTestServerGetUserEntitlementById::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccess = false;
@@ -1595,7 +1615,7 @@ bool FEcommerceTestServerGetUserEntitlementById::RunTest(const FString& Paramete
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementbyIdUserId, "AccelByte.Tests.Ecommerce.F7.ServerGetUserEntitlementbyIdUserId", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementbyIdUserId, "AccelByte.Tests.Ecommerce.F.7.ServerGetUserEntitlementbyIdUserId", AutomationFlagMaskEcommerce);
 bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccess = false;
@@ -1623,7 +1643,7 @@ bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Pa
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerQueryUserEntitlements, "AccelByte.Tests.Ecommerce.F7.ServerQueryUserEntitlements", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerQueryUserEntitlements, "AccelByte.Tests.Ecommerce.F.7.ServerQueryUserEntitlements", AutomationFlagMaskEcommerce);
 bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccess = false;
@@ -1652,7 +1672,7 @@ bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameter
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementByIdInvalidId, "AccelByte.Tests.Ecommerce.F8.ServerGetUserEntitlementByIdInvalidId", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestServerGetUserEntitlementByIdInvalidId, "AccelByte.Tests.Ecommerce.F.8.ServerGetUserEntitlementByIdInvalidId", AutomationFlagMaskEcommerce);
 bool FEcommerceTestServerGetUserEntitlementByIdInvalidId::RunTest(const FString& Parameters)
 {
 	bool bLoginSuccess = false;
@@ -1687,7 +1707,7 @@ bool FEcommerceTestServerGetUserEntitlementByIdInvalidId::RunTest(const FString&
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsMany, "AccelByte.Tests.Ecommerce.F9.GrantUserEntitlementsMany", AutomationFlagMaskEcommerce);
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGrantUserEntitlementsMany, "AccelByte.Tests.Ecommerce.F.9.GrantUserEntitlementsMany", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGrantUserEntitlementsMany::RunTest(const FString& Parameters)
 {
 	bool bUserLoginSuccess = false;

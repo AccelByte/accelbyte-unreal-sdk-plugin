@@ -184,6 +184,15 @@ enum class EAccelByteRewardListSortBy : uint8
 	REWARDCODE_DESC
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteWalletAction :uint8
+{
+	NONE = 0,
+	CREDIT,
+	PAYMENT,
+	DEBIT
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -1060,6 +1069,44 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDebitUserWalletRequest
 	int32 Amount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
 	FString Reason;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletTransactionInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString WalletId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		int32 Amount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString Reason;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString Namespace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString UserId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString Operator;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		EAccelByteWalletAction WalletAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString CurrencyCode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString BalanceSource;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString CreatedAt;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionInfo")
+		FString UpdatedAt;
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletTransactionPaging
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionPaging")
+		TArray<FAccelByteModelsWalletTransactionInfo> Data;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletTransactionPaging")
+		FAccelByteModelsPaging Paging;
 };
 
 #pragma endregion WalletModelsField

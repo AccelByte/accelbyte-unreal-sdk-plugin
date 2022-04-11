@@ -114,7 +114,7 @@ public:
     /**
      * @brief delegate for handling join party response
      */
-    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinReponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinResponse&); 
 
     /**
      * @brief delegate for handling join party notification
@@ -164,7 +164,7 @@ public:
 	/**
 	 * @brief delegate for handling join party via party code event
 	 */
-	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinReponse&);
+	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinResponse&);
 
 	/**
 	 * @brief delegate for handling promote party leader response
@@ -1017,7 +1017,7 @@ public:
 	};
 
 	/**
-	* @brief set invite party kick member reponse
+	* @brief set invite party kick member response
 	*
 	* @param OnInvitePartyKickMemberResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1049,7 +1049,7 @@ public:
 	};
 
 	/**
-	* @brief generate party code reponse
+	* @brief generate party code response
 	*
 	* @param OnPartyGenerateCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1061,7 +1061,7 @@ public:
 	};
 
 	/**
-	* @brief get party code reponse
+	* @brief get party code response
 	*
 	* @param OnPartyGetCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1073,7 +1073,7 @@ public:
 	};
 
 	/**
-	* @brief delete party code reponse
+	* @brief delete party code response
 	*
 	* @param OnPartyDeleteCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1085,7 +1085,7 @@ public:
 	};
 
 	/**
-	* @brief join party via party code reponse
+	* @brief join party via party code response
 	*
 	* @param OnPartyJoinViaCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1097,7 +1097,7 @@ public:
 	};
 
 	/**
-	* @brief set promote party leader reponse
+	* @brief set promote party leader response
 	*
 	* @param OnPromotePartyLeaderResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.

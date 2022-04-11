@@ -15,7 +15,7 @@ using namespace AccelByte;
 
 #pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultResponse, FAccelByteModelsLeaderboardRankingResult, Reponse);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsLeaderboardRankingResultResponse, FAccelByteModelsLeaderboardRankingResult, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRankingDataResponse, FAccelByteModelsUserRankingData, Response);
 

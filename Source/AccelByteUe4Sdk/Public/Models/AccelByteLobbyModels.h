@@ -172,7 +172,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyGetInvitedNotice
 
 // Accept Invitation
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyJoinReponse
+struct ACCELBYTEUE4SDK_API FAccelByteModelsPartyJoinResponse
 {
     GENERATED_BODY()
         UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")

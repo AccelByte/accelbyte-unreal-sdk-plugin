@@ -68,7 +68,7 @@ struct FModelsGameRecord
 		FJsonObjectWrapper Value;
 };
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Reponse);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FModelsGameRecord, Response);
 
