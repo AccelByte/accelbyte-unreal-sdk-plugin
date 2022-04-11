@@ -1420,6 +1420,8 @@ void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 		Disconnect();
 	}
 
+	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+
 	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
 	ConnectionClosed.ExecuteIfBound(StatusCode, Reason, WasClean);
