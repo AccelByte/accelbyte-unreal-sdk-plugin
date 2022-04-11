@@ -26,37 +26,49 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
 	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
-	
-	FString Query = FString::Printf(TEXT("activeOnly=%s"), bActiveOnly ? TEXT("true") : TEXT("false"));
+
+	TMap<FString, FString> QueryParams = {};
+	QueryParams.Add("activeOnly", bActiveOnly ? TEXT("true") : TEXT("false"));
 	if (!EntitlementName.IsEmpty())
 	{
-		Query.Append(FString::Printf(TEXT("entitlementName=%s"), *EntitlementName));
+		QueryParams.Add("entitlementName", *EntitlementName);
 	}
 	for (const FString& ItemId : ItemIds)
 	{
 		if (!ItemId.IsEmpty())
 		{
-			Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
+			QueryParams.Add("itemId", *ItemId);
 		}
 	}
 	if (Offset>=0)
 	{
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add("offset", FString::FromInt(Offset));
 	}
 	if (Limit>=0)
 	{
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add("limit", FString::FromInt(Limit));
 	}
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		Query.Append(FString::Printf(TEXT("entitlementClazz=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass)));
+		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass);
+		QueryParams.Add("entitlementClazz", stringValue);
 	}
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		Query.Append(FString::Printf(TEXT("appType=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType)));
+		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType);
+		QueryParams.Add("appType", stringValue);
 	}
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	// Converting TMap QueryParams as one line QueryString 
+	FString QueryString;
+	int i = 0;
+	for (const auto& Kvp : QueryParams)
+	{
+		QueryString.Append(FString::Printf(TEXT("%s%s=%s"), (i++ == 0 ? TEXT("?") : TEXT("&")),
+				*FGenericPlatformHttp::UrlEncode(Kvp.Key), *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+	}
+
+	Url.Append(QueryString);
 	
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
