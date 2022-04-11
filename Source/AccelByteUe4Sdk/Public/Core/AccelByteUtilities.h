@@ -1,11 +1,11 @@
-// Copyright (c) 2020 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2020-2022 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
 #pragma once
 
-#include "AccelByteError.h"
-#include "Runtime/JsonUtilities/Public/JsonObjectConverter.h"
+#include "Core/AccelByteError.h"
+#include "JsonObjectConverter.h"
 
 #include "AccelByteUtilities.generated.h"
 
@@ -170,7 +170,8 @@ public:
 	}
 
 	static FString GetPlatformString(EAccelBytePlatformType Platform);
-	
+
+	static FString GetAuthenticatorString(EAccelByteLoginAuthFactorType Authenticator);
 };
 
 USTRUCT(BlueprintType)

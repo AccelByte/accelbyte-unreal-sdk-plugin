@@ -229,6 +229,61 @@ void UABParty::PartyPromoteLeader(
 	ApiClientPtr->Lobby.SendPartyPromoteLeaderRequest(Request.userId);
 }
 
+void UABParty::GetPartyData(
+	FGetPartyDataRequest const& Request,
+	FDPartyGetDataResponse OnResponse,
+	FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.GetPartyData(Request.partyId,
+		THandler<FAccelByteModelsPartyData>::CreateLambda(
+			[OnResponse](FAccelByteModelsPartyData Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
+void UABParty::GetPartyStorage(
+	FGetPartyStorageRequest const& Request,
+	FDPartyGetStorageResponse OnResponse,
+	FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.GetPartyStorage(Request.partyId,
+		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
+			[OnResponse](FAccelByteModelsPartyDataNotif Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));
+}
+
+void UABParty::WritePartyStorage(
+	FWritePartyStorageRequest const& Request,
+	FDPartyWriteDataResponse OnResponse,
+	FDErrorHandler OnError) const
+{
+	ApiClientPtr->Lobby.WritePartyStorage(
+		Request.partyId,
+		Request.PayloadModifier,
+		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
+			[OnResponse](FAccelByteModelsPartyDataNotif Response)
+			{
+				OnResponse.ExecuteIfBound(Response);
+			}),
+		FErrorHandler::CreateLambda(
+			[OnError](int32 Code, FString const& Message)
+			{
+				OnError.ExecuteIfBound(Code, Message);
+			}));}
+
 void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const
 {
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
@@ -294,6 +349,16 @@ void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) const
 	ApiClientPtr->Lobby.SetPartyInviteNotifDelegate(
 		Api::Lobby::FPartyInviteNotif::CreateLambda(
 			[OnNotif](FAccelByteModelsInvitationNotice const& Notif)
+			{
+				OnNotif.ExecuteIfBound(Notif);
+			}));
+}
+
+void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const
+{
+	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
+		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
+			[OnNotif](FAccelByteModelsPartyDataNotif const& Notif)
 			{
 				OnNotif.ExecuteIfBound(Notif);
 			}));

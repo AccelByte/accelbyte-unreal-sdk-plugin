@@ -85,6 +85,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
 	void GetFriendshipStatus(FString UserId, FDGetFriendshipStatusResponse OnResponse, FDErrorHandler OnError) const;
+	
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
+	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FDHandler OnSuccess, FDErrorHandler OnError) const;
 
 //Notification
 public:

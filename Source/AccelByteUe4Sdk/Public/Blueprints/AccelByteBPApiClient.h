@@ -22,6 +22,10 @@
 #include "ABSessionBrowser.h"
 #include "ABUGC.h"
 #include "ABPresence.h"
+#include "ABBlock.h"
+#include "ABMessage.h"
+#include "ABSessionAttribute.h"
+#include "ABSignaling.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -123,6 +127,18 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UABPresence* Presence;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABBlock* Block;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABMessage* Message;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABSessionAttribute* SessionAttribute;
+	
+	UPROPERTY(BlueprintReadOnly)
+	UABSignaling* Signaling;
 
 private:
 	FApiClientPtr ApiClientPtr;
@@ -137,6 +153,6 @@ class UABMultiRegistry final : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable)
-	UABApiClient* GetApiClient(FString const& Key);
+	static UABApiClient* GetApiClient(FString const& Key);
 };
 
