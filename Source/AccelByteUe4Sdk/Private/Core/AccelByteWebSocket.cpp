@@ -71,6 +71,11 @@ void AccelByteWebSocket::SetupWebSocket()
 	WebSocket->OnClosed().AddRaw(this, &AccelByteWebSocket::OnClosed);
 }
 
+void AccelByteWebSocket::UpdateUpgradeHeaders(const FString& Key, const FString& Value)
+{
+	UpgradeHeaders.Emplace(Key, Value);
+}
+
 AccelByteWebSocket::FConnectDelegate& AccelByteWebSocket::OnConnected()
 {
 	return ConnectDelegate;

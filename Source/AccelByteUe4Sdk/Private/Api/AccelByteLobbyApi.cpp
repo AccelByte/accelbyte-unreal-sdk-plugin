@@ -1455,7 +1455,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
+	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 	if(!Token.IsEmpty())
 	{
 		Headers.Add("Entitlement", Token);
@@ -1799,6 +1799,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
+				WebSocket->UpdateUpgradeHeaders(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 			}
 			break;
 		}
