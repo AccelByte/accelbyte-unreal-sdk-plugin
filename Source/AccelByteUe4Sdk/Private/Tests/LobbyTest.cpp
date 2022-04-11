@@ -7919,6 +7919,7 @@ bool SetUnsetTokenGenerator::RunTest(const FString& Parameter)
 #endif // lobby connect with entitlement check test
 
 #pragma region LobbyMultithreadTesting
+/* test is unstable, need to properly debug why test seems to stuck if some lobby is failed connecting or failed to receive invite
 class FTestLobbyUser : FRunnable
 {
 private:
@@ -8088,4 +8089,5 @@ bool FLobbyTestConcurrency::RunTest(const FString& Parameter)
 	AB_TEST_EQUAL(GetPartyInviteCounter.GetValue(), TestCount);
 	return true;
 }
+*/
 #pragma endregion LobbyMultithreadTesting
