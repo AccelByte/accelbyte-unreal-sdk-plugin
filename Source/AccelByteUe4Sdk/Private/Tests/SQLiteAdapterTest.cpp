@@ -7,7 +7,7 @@
 #include "Http.h"
 #include "HttpModule.h"
 #include "HttpManager.h"
-#include "Core/AccelByteSQLite3Adapter.h"
+#include "Core/AccelByteSQLite3.h"
 #include "TestUtilities.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteDBAdapterTest, Log, All);
@@ -43,7 +43,7 @@ FJsonObjectWrapper UpdatedJsonObjectData;
 const FString UpdatedBlobUrl = TEXT("https://via.placeholder.com/200");
 TArray<uint8> UpdatedBlobData;
 #ifdef SQLITE3_ENABLED
-AccelByteSQLite3Adapter Adapter = AccelByteSQLite3Adapter(DBName);
+FAccelByteSQLite3 Adapter{DBName};
 #endif
 END_DEFINE_SPEC(AccelByteDBAdapterTestSpec)
 

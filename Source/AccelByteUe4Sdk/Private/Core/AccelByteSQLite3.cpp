@@ -2,12 +2,12 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Core/AccelByteSQLite3Adapter.h"
+#include "Core/AccelByteSQLite3.h"
 
 #ifdef SQLITE3_ENABLED
 namespace AccelByte
 {
-	bool AccelByteSQLite3Adapter::OpenConnection(const FString& DBFileName)
+	bool FAccelByteSQLite3::OpenConnection(const FString& DBFileName)
 	{
 		if (USQLiteDatabase::IsValidDatabase(DBFileName, true))
 		{
@@ -15,26 +15,22 @@ namespace AccelByte
 			{
 				return true;
 			}
-			else
-			{
-				return USQLiteDatabase::RegisterDatabase(DatabaseName, DBFileName, true);
-			}
 		}
 		else
 		{
 			USQLiteDatabase::CreateDatabase(DBFileName, true);
-			return USQLiteDatabase::RegisterDatabase(DatabaseName, DBFileName, true);
 		}
+		
+		return USQLiteDatabase::RegisterDatabase(DatabaseName, DBFileName, true);
 	}
 
-	AccelByteSQLite3Adapter::AccelByteSQLite3Adapter(const FString& DatabaseName)
-		:IAccelByteDBAdapter(DatabaseName)
-		, DatabaseName{ DatabaseName }
+	FAccelByteSQLite3::FAccelByteSQLite3(const FString& InDatabaseName)
+		: DatabaseName{InDatabaseName}
 	{
 		OpenConnection(FString::Printf(TEXT("%s.db"), *DatabaseName));
 	}
 
-	void AccelByteSQLite3Adapter::CreateTable(const FString& TableName, UScriptStruct* ScriptStruct, const THandler<bool>& Result)
+	void FAccelByteSQLite3::CreateTable(const FString& TableName, UScriptStruct* ScriptStruct, const THandler<bool>& Result)
 	{
 		if (USQLiteDatabase::IsTableExists(DatabaseName, TableName))
 		{
@@ -49,7 +45,7 @@ namespace AccelByte
 			KeyField.ResultStr = FString::Printf(TEXT("'Key' TEXT UNIQUE NOT NULL PRIMARY KEY"));
 
 			TableFields.Add(KeyField);
-			// Get Struct's first member
+			// Get first member in the Struct
 			FField* Field = ScriptStruct->ChildProperties;
 			while (Field)
 			{
@@ -79,7 +75,7 @@ namespace AccelByte
 		}
 	}
 
-	void AccelByteSQLite3Adapter::Reset(const THandler<bool>& Result, const FString& TableName)
+	void FAccelByteSQLite3::Reset(const THandler<bool>& Result, const FString& TableName)
 	{
 		FAutoDeleteAsyncTask<DBQueryTask<bool>>* MyTask = new FAutoDeleteAsyncTask<DBQueryTask<bool>>(MakeShared<bool>(USQLiteDatabase::DropTable(
 			DatabaseName,
@@ -91,14 +87,14 @@ namespace AccelByte
 		MyTask->StartBackgroundTask();
 	}
 
-	void AccelByteSQLite3Adapter::DeleteItem(const FString& Key, const FVoidHandler OnDone, const FString& TableName)
+	void FAccelByteSQLite3::DeleteItem(const FString& Key, const FVoidHandler OnDone, const FString& TableName)
 	{
 		const FString Condition = FString::Printf(TEXT("Key = '\"%s\"'"), *Key);
 		USQLiteDatabase::DeleteRowsInTable(DatabaseName, TableName, FSQLiteQueryFinalizedQuery{ Condition });
 		OnDone.ExecuteIfBound();
 	}
 
-	void AccelByteSQLite3Adapter::CreateKeyValuePairTable(const THandler<bool>& Result, const FString& TableName)
+	void FAccelByteSQLite3::CreateKeyValuePairTable(const THandler<bool>& Result, const FString& TableName)
 	{
 		if (USQLiteDatabase::IsTableExists(DatabaseName, TableName))
 		{
@@ -131,99 +127,77 @@ namespace AccelByte
 		}
 	}
 
-	void AccelByteSQLite3Adapter::SaveItem(const FString& Key, const TArray<uint8>& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
+	void FAccelByteSQLite3::ExecuteSaveCommand(const FString& Key, const FSQLiteTableField& Value, const THandler<bool>& OnDone, const FString& TableName)
 	{
-		CreateKeyValuePairTable(THandler<bool>::CreateLambda([this, OnDone, Key, DataToInsert, TableName](bool Result)
+		CreateKeyValuePairTable(THandler<bool>::CreateLambda([this, OnDone, Key, Value, TableName](bool Result)
 			{
 				if (Result)
 				{
 					FSQLiteTableRowSimulator Row;
 					FSQLiteTableField KeyField;
-					FSQLiteTableField ValueField;
 
 					KeyField.FieldName = TEXT("'Key'");
 					KeyField.FieldValue = FString::Printf(TEXT("\"%s\""), *Key);
 
-					ValueField.FieldName = TEXT("'Value'");
-					ValueField.FieldType = TEXT("BLOB");
-					ValueField.FieldBlobValue = DataToInsert;
-
 					Row.rowsOfFields.Add(KeyField);
-					Row.rowsOfFields.Add(ValueField);
+					Row.rowsOfFields.Add(Value);
 
 					USQLiteDatabase::InsertRowsIntoTableUpsert(DatabaseName, TableName, TArray<FSQLiteTableRowSimulator>{ { Row }}, TEXT("Key"));
-					OnDone.ExecuteIfBound(true);
 				}
-				else
-				{
-					OnDone.ExecuteIfBound(Result);
-				}
+				OnDone.ExecuteIfBound(Result);
 			}), TableName);
 	}
 
-	void AccelByteSQLite3Adapter::SaveItem(const FString& Key, const FString& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
+	void FAccelByteSQLite3::SaveItem(const FString& Key, const TArray<uint8>& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
 	{
-		CreateKeyValuePairTable(THandler<bool>::CreateLambda([this, OnDone, Key, DataToInsert, TableName](bool Result)
+		FSQLiteTableField ValueField;
+		
+		ValueField.FieldName = TEXT("'Value'");
+		ValueField.FieldType = TEXT("BLOB");
+		ValueField.FieldBlobValue = DataToInsert;
+
+		ExecuteSaveCommand(Key, ValueField, OnDone, TableName);
+	}
+
+	void FAccelByteSQLite3::SaveItem(const FString& Key, const FString& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
+	{
+		FSQLiteTableField ValueField;
+
+		ValueField.FieldName = TEXT("'Value'");
+		ValueField.FieldType = TEXT("TEXT");
+		ValueField.FieldValue = DataToInsert;
+
+		ExecuteSaveCommand(Key, ValueField, OnDone, TableName);
+	}
+
+	void FAccelByteSQLite3::SaveItem(const FString& Key, const FJsonObjectWrapper& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
+	{
+		FSQLiteTableField ValueField;
+
+		ValueField.FieldName = TEXT("'Value'");
+		ValueField.FieldType = TEXT("TEXT");
+		DataToInsert.JsonObjectToString(ValueField.FieldValue);
+
+		ExecuteSaveCommand(Key, ValueField, OnDone, TableName);
+	}
+
+	FSQLiteKeyValuePair FAccelByteSQLite3::FindItemWithKey(const FString& Key, const FSQLiteQueryResult& Data)
+	{
+		FSQLiteKeyValuePair Result;
+		
+		for (const auto& Row : Data.ResultRows)
+		{
+			if (Row.Fields[0].Key == TEXT("Key") && Row.Fields[0].Value.TrimQuotes() == Key)
 			{
-				if (Result)
-				{
-					FSQLiteTableRowSimulator Row;
-					FSQLiteTableField KeyField;
-					FSQLiteTableField ValueField;
+				Result = Row.Fields[1];
+				break;
+			}
+		}
 
-					KeyField.FieldName = TEXT("'Key'");
-					KeyField.FieldType = TEXT("TEXT");
-					KeyField.FieldValue = FString::Printf(TEXT("%s"), *Key);
-
-					ValueField.FieldName = TEXT("'Value'");
-					ValueField.FieldType = TEXT("TEXT");
-					ValueField.FieldValue = DataToInsert;
-
-					Row.rowsOfFields.Add(KeyField);
-					Row.rowsOfFields.Add(ValueField);
-
-					USQLiteDatabase::InsertRowsIntoTableUpsert(DatabaseName, TableName, TArray<FSQLiteTableRowSimulator>{ { Row }}, TEXT("Key"));
-					OnDone.ExecuteIfBound(true);
-				}
-				else
-				{
-					OnDone.ExecuteIfBound(Result);
-				}
-			}), TableName);
+		return Result;
 	}
 
-	void AccelByteSQLite3Adapter::SaveItem(const FString& Key, const FJsonObjectWrapper& DataToInsert, const THandler<bool>& OnDone, const FString& TableName)
-	{
-		CreateKeyValuePairTable(THandler<bool>::CreateLambda([this, OnDone, Key, DataToInsert, TableName](bool Result)
-			{
-				if (Result)
-				{
-					FSQLiteTableRowSimulator Row;
-					FSQLiteTableField KeyField;
-					FSQLiteTableField ValueField;
-
-					KeyField.FieldName = TEXT("'Key'");
-					KeyField.FieldType = TEXT("TEXT");
-					KeyField.FieldValue = FString::Printf(TEXT("%s"), *Key);
-
-					ValueField.FieldName = TEXT("'Value'");
-					ValueField.FieldType = TEXT("TEXT");
-					DataToInsert.JsonObjectToString(ValueField.FieldValue);
-
-					Row.rowsOfFields.Add(KeyField);
-					Row.rowsOfFields.Add(ValueField);
-
-					USQLiteDatabase::InsertRowsIntoTableUpsert(DatabaseName, TableName, TArray<FSQLiteTableRowSimulator>{ { Row }}, TEXT("Key"));
-					OnDone.ExecuteIfBound(true);
-				}
-				else
-				{
-					OnDone.ExecuteIfBound(Result);
-				}
-			}), TableName);
-	}
-
-	void AccelByteSQLite3Adapter::GetItem(const FString& Key, const THandler<TPair<FString, TArray<uint8>>>& OnDone, const FString& TableName)
+	void FAccelByteSQLite3::GetItem(const FString& Key, const THandler<TPair<FString, TArray<uint8>>>& OnDone, const FString& TableName)
 	{
 		FSQLiteDatabaseReference DBRef{ DatabaseName, {TableName} };
 		const FString Condition = FString::Printf(TEXT("Key = '%s'"), *Key);
@@ -234,35 +208,18 @@ namespace AccelByte
 			FSQLiteQueryFinalizedQuery{ Condition })),
 			THandler<FSQLiteQueryResult>::CreateLambda([this, Key, OnDone](FSQLiteQueryResult Result)
 				{
-					if (Result.Success)
+					TPair<FString, TArray<uint8>> Data{};
+					if (Result.Success && Result.ResultRows.Num() > 0)
 					{
-						TPair<FString, TArray<uint8>> Data{};
-						for (int i = 0; i < Result.ResultRows.Num(); i++)
-						{
-							if (Result.ResultRows[i].Fields[0].Key == TEXT("Key"))
-							{
-								if (Result.ResultRows[i].Fields[0].Value.TrimQuotes() == Key)
-								{
-									Data = TPair<FString, TArray<uint8>>{ Key, Result.ResultRows[i].Fields[1].ByteValue };
-									break;
-								}
-								else
-								{
-									continue;
-								}
-							}
-						}
-						OnDone.ExecuteIfBound(Data);
+						FSQLiteKeyValuePair Pair = FindItemWithKey(Key, Result);
+						Data = TPair<FString, TArray<uint8>>{ Key, Pair.ByteValue };
 					}
-					else
-					{
-						OnDone.ExecuteIfBound(TPair<FString, TArray<uint8>>{});
-					}
+					OnDone.ExecuteIfBound(Data);
 				}));
 		MyTask->StartBackgroundTask();
 	}
 
-	void AccelByteSQLite3Adapter::GetItem(const FString& Key, const THandler<TPair<FString, FString>>& OnDone, const FString& TableName)
+	void FAccelByteSQLite3::GetItem(const FString& Key, const THandler<TPair<FString, FString>>& OnDone, const FString& TableName)
 	{
 		FSQLiteDatabaseReference DBRef{ DatabaseName, {TableName} };
 		const FString Condition = FString::Printf(TEXT("Key = '%s'"), *Key);
@@ -273,35 +230,18 @@ namespace AccelByte
 			FSQLiteQueryFinalizedQuery{ Condition })),
 			THandler<FSQLiteQueryResult>::CreateLambda([this, Key, OnDone](FSQLiteQueryResult Result)
 				{
-					if (Result.Success)
+					TPair<FString, FString> Data{};
+					if (Result.Success && Result.ResultRows.Num() > 0)
 					{
-						TPair<FString, FString> Data{};
-						for (int i = 0; i < Result.ResultRows.Num(); i++)
-						{
-							if (Result.ResultRows[i].Fields[0].Key == TEXT("Key"))
-							{
-								if (Result.ResultRows[i].Fields[0].Value.TrimQuotes() == Key)
-								{
-									Data = TPair<FString, FString>{ Key, Result.ResultRows[i].Fields[1].Value };
-									break;
-								}
-								else
-								{
-									continue;
-								}
-							}
-						}
-						OnDone.ExecuteIfBound(Data);
+						FSQLiteKeyValuePair Pair = FindItemWithKey(Key, Result);
+						Data = TPair<FString, FString>{ Key, Pair.Value };
 					}
-					else
-					{
-						OnDone.ExecuteIfBound(TPair<FString, FString>{});
-					}
+					OnDone.ExecuteIfBound(Data);
 				}));
 		MyTask->StartBackgroundTask();
 	}
 
-	void AccelByteSQLite3Adapter::GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName)
+	void FAccelByteSQLite3::GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName)
 	{
 		FSQLiteDatabaseReference DBRef{ DatabaseName, {TableName} };
 		const FString Condition = FString::Printf(TEXT("Key = '%s'"), *Key);
@@ -312,41 +252,24 @@ namespace AccelByte
 			FSQLiteQueryFinalizedQuery{ Condition })),
 			THandler<FSQLiteQueryResult>::CreateLambda([this, Key, OnDone](FSQLiteQueryResult Result)
 				{
-					if (Result.Success)
+					TPair<FString, FJsonObjectWrapper> Data{};
+					if (Result.Success && Result.ResultRows.Num() > 0)
 					{
-						TPair<FString, FJsonObjectWrapper> Data{};
-						for (int i = 0; i < Result.ResultRows.Num(); i++)
-						{
-							if (Result.ResultRows[i].Fields[0].Key == TEXT("Key"))
-							{
-								if (Result.ResultRows[i].Fields[0].Value.TrimQuotes() == Key)
-								{
-									const FString JsonString = Result.ResultRows[i].Fields[1].Value; // An FString containing a serialized JSON 
-									FJsonObjectWrapper JsonObjectWrapper;
+						FSQLiteKeyValuePair Pair = FindItemWithKey(Key, Result);
+						const FString JsonString = Pair.Value; // An FString containing a serialized JSON 
+						FJsonObjectWrapper JsonObjectWrapper;
 
-									if (JsonObjectWrapper.JsonObjectFromString(JsonString))
-									{
-										Data = TPair<FString, FJsonObjectWrapper>{ Key, JsonObjectWrapper };
-									}
-									break;
-								}
-								else
-								{
-									continue;
-								}
-							}
+						if (JsonObjectWrapper.JsonObjectFromString(JsonString))
+						{
+							Data = TPair<FString, FJsonObjectWrapper>{ Key, JsonObjectWrapper };
 						}
-						OnDone.ExecuteIfBound(Data);
 					}
-					else
-					{
-						OnDone.ExecuteIfBound(TPair<FString, FJsonObjectWrapper>{});
-					}
+					OnDone.ExecuteIfBound(Data);
 				}));
 		MyTask->StartBackgroundTask();
 	}
 
-	const FString AccelByteSQLite3Adapter::ClassFieldToSQLiteDataStruct(const FName FieldName)
+	const FString FAccelByteSQLite3::ClassFieldToSQLiteDataStruct(const FName& FieldName)
 	{
 		if (FieldName.GetPlainNameString() == TEXT("NumericProperty")) return TEXT("NUMERIC");
 		if (FieldName.GetPlainNameString() == TEXT("Int8Property")) return TEXT("SMALLINT");
@@ -363,7 +286,7 @@ namespace AccelByte
 		return TEXT("TEXT");
 	}
 
-	const FString AccelByteSQLite3Adapter::JsonObjectToSQLiteValue(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, const FString& FieldType)
+	const FString FAccelByteSQLite3::JsonObjectToSQLiteValue(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, const FString& FieldType)
 	{
 		if (FieldType == TEXT("NUMERIC")
 			|| FieldType == TEXT("SMALLINT")
@@ -379,24 +302,16 @@ namespace AccelByte
 			{
 				return FString::Printf(TEXT("%d"), NumValue);
 			}
-			else
-			{
-				return TEXT("0");
-			}
 		}
-		if (FieldType == TEXT("BOOLEAN"))
+		else if (FieldType == TEXT("BOOLEAN"))
 		{
 			bool bValue = false;
 			if (JsonObject->TryGetBoolField(FieldName, bValue))
 			{
 				return FString::Printf(TEXT("%d"), bValue);
 			}
-			else
-			{
-				return TEXT("0");
-			}
 		}
-		if (FieldType == TEXT("FLOAT")
+		else if (FieldType == TEXT("FLOAT")
 			|| FieldType == TEXT("DOUBLE"))
 		{
 			double fValue = 0;
@@ -404,19 +319,16 @@ namespace AccelByte
 			{
 				return FString::Printf(TEXT("%lf"), fValue);
 			}
-			else
-			{
-				return TEXT("0");
-			}
 		}
 		return TEXT("0");
 	}
 
-	const FSQLiteTableField AccelByteSQLite3Adapter::JsonObjectToTableField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, const FString& FieldType)
+	const FSQLiteTableField FAccelByteSQLite3::JsonObjectToTableField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, const FString& FieldType)
 	{
 		FSQLiteTableField Field;
 		Field.FieldName = FString::Printf(TEXT("'%s'"), *FieldName);
 		Field.FieldType = FieldType;
+		
 		FString StringValue;
 		TSharedPtr<FJsonObject> const* ObjectValue;
 		TArray<FString> ArrayStringValue;
@@ -425,7 +337,8 @@ namespace AccelByte
 		{
 			return Field;
 		}
-		else if (JsonObject->HasField(FieldName))
+		
+		if (JsonObject->HasField(FieldName))
 		{
 			if (JsonObject->TryGetStringField(FieldName, StringValue))
 			{

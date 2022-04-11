@@ -19,7 +19,8 @@ enum class EWebSocketState
 	Connecting = 1,
 	Connected = 2,
 	Closing = 3,
-	Reconnecting = 4
+	Reconnecting = 4,
+	WaitingReconnect = 5
 };
 
 enum class EWebSocketEvent : uint8
