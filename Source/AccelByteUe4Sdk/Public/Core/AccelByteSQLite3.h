@@ -4,18 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Class.h"
 #include "JsonUtilities.h"
 #include "JsonObjectConverter.h"
 #include "Core/AccelByteError.h"
-#include "Core/IAccelByteDBAdapter.h"
+#include "Core/IAccelByteDataStorage.h"
 #ifdef SQLITE3_ENABLED
 #include "SQLiteDatabase.h"
 
 template<typename T>
 class DBQueryTask : public FNonAbandonableTask
 {
-
 	friend class FAutoDeleteAsyncTask<DBQueryTask>;
 	const TSharedPtr<T> Result;
 	const AccelByte::THandler<T> OnDone;
@@ -47,11 +45,11 @@ class DBQueryTask : public FNonAbandonableTask
 
 namespace AccelByte
 {
-	class ACCELBYTEUE4SDK_API AccelByteSQLite3Adapter : public IAccelByteDBAdapter
+	class ACCELBYTEUE4SDK_API FAccelByteSQLite3 : public IAccelByteDataStorage
 	{
 	public:
-		AccelByteSQLite3Adapter(const FString& DatabaseName);
-		~AccelByteSQLite3Adapter() {}
+		FAccelByteSQLite3(const FString& InDatabaseName);
+		virtual ~FAccelByteSQLite3() {}
 
 		/**
 		 * @brief Drop an existing table.
@@ -59,7 +57,7 @@ namespace AccelByte
 		 * @param Result This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will drop the default KeyValue table.
 		*/
-		void Reset(const THandler<bool>& Result, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void Reset(const THandler<bool>& Result, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Insert an Item to a table, Override it if already exist.
@@ -79,7 +77,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done.
 		 * @param TableName optional. The name of the table. Default will drop the default KeyValue table.
 		*/
-		void DeleteItem(const FString& Key, const FVoidHandler OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void DeleteItem(const FString& Key, const FVoidHandler OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Get Items from the table.
@@ -110,7 +108,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
 		*/
-		void SaveItem(const FString& Key, const TArray<uint8>& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void SaveItem(const FString& Key, const TArray<uint8>& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Insert Item to the Key Value Table, override it if already exist.
@@ -120,7 +118,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
 		*/
-		void SaveItem(const FString& Key, const FString& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void SaveItem(const FString& Key, const FString& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Insert Item to the Key Value Table, override it if already exist.
@@ -130,7 +128,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will insert an item to the default KeyValue table.
 		*/
-		void SaveItem(const FString& Key, const FJsonObjectWrapper& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void SaveItem(const FString& Key, const FJsonObjectWrapper& DataToInsert, const THandler<bool>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Get an Item from the Key Value Table.
@@ -139,7 +137,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is Pair of a FString Key, and an array of uint8 Value.
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
-		void GetItem(const FString& Key, const THandler<TPair<FString, TArray<uint8>>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void GetItem(const FString& Key, const THandler<TPair<FString, TArray<uint8>>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Get an Item from the Key Value Table.
@@ -148,7 +146,7 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is Pair of a FString Key, and a FString Value.
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
-		void GetItem(const FString& Key, const THandler<TPair<FString, FString>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void GetItem(const FString& Key, const THandler<TPair<FString, FString>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 		/**
 		 * @brief Get an Item from the Key Value Table.
@@ -157,14 +155,13 @@ namespace AccelByte
 		 * @param OnDone This will be called when the operation done. The result is Pair of a FString Key, and a FJsonObjectWrapper Value.
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
-		void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		virtual void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) override;
 
 	private:
-		const FString DatabaseName;
-
+		FString DatabaseName;
 		TArray<FString> RegisteredTable;
 
-		const FString ClassFieldToSQLiteDataStruct(const FName FieldClass);
+		const FString ClassFieldToSQLiteDataStruct(const FName& FieldClass);
 
 		const FString JsonObjectToSQLiteValue(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, const FString& FieldType);
 
@@ -173,7 +170,7 @@ namespace AccelByte
 		/**
 		 * @brief Try to open a connection to the Database, will create the DB if not exist.
 		 *
-		 * @param DBFileName The Relative Path to the DB file, refering to the 'Content' folder
+		 * @param DBFileName The Relative Path to the DB file, referring to the 'Content' folder
 		*/
 		bool OpenConnection(const FString& DBFileName);
 
@@ -192,11 +189,29 @@ namespace AccelByte
 		 * @param Result This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will create the default KeyValue table.
 		*/
-		void CreateKeyValuePairTable(const THandler<bool>& Result, const FString& TableName = TEXT("DefaultKeyValueTable"));
+		void CreateKeyValuePairTable(const THandler<bool>& Result, const FString& TableName);
+
+		/**
+		 * @brief Execute a save item command.
+		 *
+		 * @param Key The Key of the Item.
+		 * @param Value The Value of the Item.
+		 * @param OnDone This will be called when the operation done. The result is Pair of a FString Key, and a FString Value.
+		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
+		 */
+		void ExecuteSaveCommand(const FString& Key, const FSQLiteTableField& Value, const THandler<bool>& OnDone, const FString& TableName);
+
+		/**
+		 * @brief Find an Item with specified Key from the Query Result.
+		 *
+		 * @param Key The Key of the Item.
+		 * @param Data The Query Result data.
+		 */
+		FSQLiteKeyValuePair FindItemWithKey(const FString& Key, const FSQLiteQueryResult& Data);
 	};
 
 	template<typename T>
-	inline void AccelByteSQLite3Adapter::SaveItemToTable(const FString& TableName, const FString& Key, const T& DataToInsert, const THandler<bool>& OnDone)
+	inline void FAccelByteSQLite3::SaveItemToTable(const FString& TableName, const FString& Key, const T& DataToInsert, const THandler<bool>& OnDone)
 	{
 		CreateTable(TableName, DataToInsert.StaticStruct(), THandler<bool>::CreateLambda([this, TableName, Key, DataToInsert, OnDone](bool CreateResult)
 			{
@@ -241,7 +256,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	inline void AccelByteSQLite3Adapter::GetItemsFromTable(const FString& TableName, const THandler<TMap<FString, T>>& OnDone, int Limit, int Offset)
+	inline void FAccelByteSQLite3::GetItemsFromTable(const FString& TableName, const THandler<TMap<FString, T>>& OnDone, int Limit, int Offset)
 	{
 		FSQLiteDatabaseReference DBRef{ DatabaseName, {TableName} };
 
@@ -295,7 +310,7 @@ namespace AccelByte
 	}
 
 	template<typename T>
-	inline void AccelByteSQLite3Adapter::GetItemFromTable(const FString& TableName, const FString& Key, const THandler<TPair<FString, T>>& OnDone)
+	inline void FAccelByteSQLite3::GetItemFromTable(const FString& TableName, const FString& Key, const THandler<TPair<FString, T>>& OnDone)
 	{
 		FSQLiteDatabaseReference DBRef{ DatabaseName, {TableName} };
 		const FString Condition = FString::Printf(TEXT("Key = '\"%s\"'"), *Key);

@@ -6597,6 +6597,8 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 
 	WaitUntil([&]() { return bLobbyDisconnected; }, "", 15);
 
+	DelaySeconds(10, "waiting 10 second");
+
 	AB_TEST_FALSE(Lobby.IsConnected());
 	AB_TEST_TRUE(bLobbyDisconnected);
 	AB_TEST_TRUE(OtherLobby.IsConnected());
@@ -7347,7 +7349,7 @@ bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
 	WaitUntil(bUserBannedNotif, "Waiting Ban Notification...");
 
 	// Wait Lobby connection closed
-	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 65.0);
 	bool bUserBannedLobbyConnectionClosed = bLobbyConnectionClosed && !Lobby.IsConnected();
 
 	// Wait Lobby connection auto reconnect
@@ -7375,7 +7377,7 @@ bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
 	WaitUntil(bUsersUnbannedNotif, "Waiting Unban Notification...");
 
 	// Wait Lobby connection closed
-	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 65.0);
 	bool bUserUnbannedLobbyConnectionClosed = bLobbyConnectionClosed && !Lobby.IsConnected();
 
 	// Wait Lobby connection auto reconnect
@@ -7403,7 +7405,7 @@ bool FLobbyTestFeatureBan::RunTest(const FString& Parameter)
 	WaitUntil(bUserBannedNotif, "Waiting Ban Notification...");
 
 	// Wait Lobby connection closed
-	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 65.0);
 	bool bUserBanEnableLobbyConnectionClosed = bLobbyConnectionClosed && !FRegistry::Lobby.IsConnected();
 
 	// Wait Lobby connection auto reconnect
@@ -7560,8 +7562,8 @@ bool FLobbyTestAccountBan::RunTest(const FString& Parameter)
 	WaitUntil(bBanSuccessful, "Waiting for Ban...");
 
 	// Wait Lobby connection closed
-	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 120.0);
-	WaitUntil(bLobbyDisconnected, "Waiting Lobby Disconnected...", 120.0);
+	WaitUntil(bLobbyConnectionClosed, "Waiting Lobby Connection Closed...", 65.0);
+	WaitUntil(bLobbyDisconnected, "Waiting Lobby Disconnected...", 65.0);
 	bool bUserBannedNotifReceived = bUserBannedNotif;
 	bool bUserBannedLobbyDisconnected = bLobbyConnectionClosed && bLobbyDisconnected && !Lobby.IsConnected();
 

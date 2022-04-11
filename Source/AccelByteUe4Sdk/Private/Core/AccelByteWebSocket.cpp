@@ -222,10 +222,13 @@ void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool 
 	FReport::Log(FString(__FUNCTION__));
 	
 	OnMessageReceived(Reason);
+
 	if(StatusCode < 4000)
 	{
+		// Add event websocket closed so state tick can reconnect lobby.
 		WsEvents |= EWebSocketEvent::Closed;
 	}
+	
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
@@ -296,18 +299,21 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		}
 		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
 		{
-			TimeSinceLastReconnect = FPlatformTime::Seconds();
-			TimeSinceConnectionLost = FPlatformTime::Seconds();
-			BackoffDelay = InitialBackoffDelay;
-			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
-			Connect();
-			WsState = EWebSocketState::Reconnecting;
+			WsState = EWebSocketState::WaitingReconnect;
 		}
 		else if ((FPlatformTime::Seconds() - TimeSinceLastPing) >= PingDelay)
 		{
 			TimeSinceLastPing = FPlatformTime::Seconds();
 			SendPing();
 		}
+		break;
+	case EWebSocketState::WaitingReconnect:
+		TimeSinceLastReconnect = FPlatformTime::Seconds();
+		TimeSinceConnectionLost = FPlatformTime::Seconds();
+		BackoffDelay = InitialBackoffDelay;
+		RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
+		Connect();
+		WsState = EWebSocketState::Reconnecting;
 		break;
 	case EWebSocketState::Reconnecting:
 		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)
