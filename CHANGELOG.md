@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [10.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/10.0.0%0D9.1.2) (2022-04-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **oauth:** Get DeviceId from FPlatformMisc, FCustomErrorHandler
+
+### Features
+
+* **dbAdapter:** add db adapter interface and sqlite adapter implementation ([8b7bd35](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b7bd354859d28957d80780077f0f866dd25f572))
+* IAM Input validation ([beb5947](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/beb5947af586df053549afcdb5dc5c5498052bdd))
+* **lua:** lobby missing blueprint API added along with the functional test ([a1cbcf8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a1cbcf8345f89c88a9f27fb91a0053ba5b4e793a))
+* **oauth:** bring back old login flow ([c90d0aa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c90d0aa436c4f0f649a9d59b6774b48e439102b4))
+* **oauth:** handle verify 2FA code when user enable 2FA from player portal ([a017f07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a017f07be0d472236c2e7329e55a4fd94b25140b))
+* **plugin:** change cisqlite3 plugin to false as default ([ae02242](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ae02242efa1ebaf169aeb710793d224d70f9734d))
+* **test:** create agreement admin blueprint ([8631ff4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8631ff47a34adb0479f0b655af3d9fa3130cb7ad))
+
+
+### Bug Fixes
+
+* disabling getItembyAppId test ([73e3f9d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/73e3f9df83b6091201dc47d100ac4f47ef038965))
+* **lobby:** Fix lobby reconnecting on multiple user connected. ([e0fbfaf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e0fbfafdb916ebf38821ba13334743b97e3368a4))
+* missing header #include "JsonObjectWrapper.h" ([1ffa843](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ffa843803e4122dceef2afda6c55be5d5d95784))
+* **TokenGenerator:** fix header dir ([21e4497](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/21e44978ff9be00ca04ee759bb66aa5d5016b286))
+
+
+### Refactors
+
+* **dbadapter:** Refactor DB adapter and SQLite3 adapter ([53aadae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/53aadae4f76b03d245d03560f755e958bedf44fb))
+
+
+### Tests
+
+* **lobby:** fix concurrent test to be more reliable when failing. ([4d14103](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4d14103d0e316afa606e60eed98d347922fbacd5))
+* **qos:** Commented GetActiveLatencies test ([a2ced73](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a2ced7368a39a0abf8d398433fc66d56b84376ae))
+
 ### [9.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.2%0D9.1.1) (2022-04-07)
 
 
