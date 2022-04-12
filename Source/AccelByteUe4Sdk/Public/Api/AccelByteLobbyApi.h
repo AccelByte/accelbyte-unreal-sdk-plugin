@@ -63,8 +63,9 @@ private:
 	Credentials& Credentials;
 	const Settings& Settings;
 
-	bool BanNotifReceived = false;
+	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
+	bool BanNotifReceived = false;
 public:
 	
 	// Party 

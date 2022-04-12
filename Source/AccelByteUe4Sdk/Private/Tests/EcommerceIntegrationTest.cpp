@@ -124,6 +124,7 @@ FString EcommerceTestExpectedChildItemTitle = EcommerceTestExpectedVariable.Expe
 FString EcommerceTestExpectedMediaItemTitle = EcommerceTestExpectedVariable.mediaItemTitle;// Publisher's Currency, 0 USD, free, auto fulfilled, "COINS", "VIRTUAL", "DOGECOIN"
 FString EcommerceTestExpectedCurrencyCode = EcommerceTestExpectedVariable.ExpectedCurrency.currencyCode;
 FString EcommerceTestExpectedEntitlementId;
+FString EntitlementItemIds; 
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestSetup, "AccelByte.Tests.Ecommerce.A.Setup", AutomationFlagMaskEcommerce);
 bool FEcommerceTestSetup::RunTest(const FString& Parameters)
@@ -1635,6 +1636,7 @@ bool FEcommerceTestServerGetUserEntitlementbyIdUserId::RunTest(const FString& Pa
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 				bGetEntitlementSuccess = true;
 				bGetResultTrue = (Result.Id == EcommerceTestExpectedEntitlementId);
+				EntitlementItemIds = Result.ItemId;  
 			}), EcommerceTestErrorHandler);
 	WaitUntil(bGetEntitlementSuccess, "Waiting for get user entitlement...");
 
@@ -1657,9 +1659,9 @@ bool FEcommerceTestServerQueryUserEntitlements::RunTest(const FString& Parameter
 	bool bGetEntitlementSuccess = false;
 	bool bGetResultTrue = false;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("ServerQueryUserEntitlements"));
-	FRegistry::ServerEcommerce.QueryUserEntitlements(FRegistry::Credentials.GetUserId(), true, "",
-		{ EcommerceTestExpectedEntitlementId }, 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda(
-			[&bGetEntitlementSuccess, &bGetResultTrue](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
+	FRegistry::ServerEcommerce.QueryUserEntitlements(FRegistry::Credentials.GetUserId(), false, "",
+		{ EntitlementItemIds }, 0, 20, THandler<FAccelByteModelsEntitlementPagingSlicedResult>::CreateLambda(
+			[&](const FAccelByteModelsEntitlementPagingSlicedResult& Result)
 			{
 				UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
 				bGetEntitlementSuccess = true;

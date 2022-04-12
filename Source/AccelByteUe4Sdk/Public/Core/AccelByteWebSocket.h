@@ -81,6 +81,8 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 		float MaxBackoffDelay = 30.f,
 		float TotalTimeout = 60.f
 	);
+
+	void UpdateUpgradeHeaders(const FString& Key, const FString& Value);
 	
 	void Connect();
 	void Disconnect(bool ForceCleanup = false);

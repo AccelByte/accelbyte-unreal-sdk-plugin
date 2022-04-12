@@ -1415,10 +1415,12 @@ void Lobby::OnConnectionError(const FString& Error)
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
-	if (StatusCode >= 4000 && !BanNotifReceived)
+	if (StatusCode > 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}
+
+	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 
 	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
@@ -1455,7 +1457,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
+	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 	if(!Token.IsEmpty())
 	{
 		Headers.Add("Entitlement", Token);
@@ -1799,6 +1801,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
+				WebSocket->UpdateUpgradeHeaders(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 			}
 			break;
 		}

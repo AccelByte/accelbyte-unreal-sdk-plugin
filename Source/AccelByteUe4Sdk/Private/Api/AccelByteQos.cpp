@@ -37,22 +37,12 @@ namespace Api
 		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
 		const FErrorHandler& OnError)
 	{
-		// Should we schedule this to repeat?
-		const bool bAlreadyPolling = PollLatenciesHandle.IsValid();
-		const bool bPlanningToPoll =  SettingsRef.QosLatencyPollIntervalSecs > 0;
-		
-		if (bPlanningToPoll && !bAlreadyPolling)
-		{
-			// Setup polling schedulers that will consistently refresh Latencies.
-			InitGetLatenciesScheduler(OnSuccess, OnError);
-			InitGetServerLatenciesScheduler(OnSuccess, OnError);
-		}
-		else
-		{
-			// Call just once.
-			constexpr bool bPingRegionsOnSuccess = true;
-			CallGetQosServers(bPingRegionsOnSuccess, OnSuccess, OnError);
-		}
+		// Setup polling schedulers that will consistently refresh Latencies.
+		InitGetLatenciesScheduler(OnSuccess, OnError);
+		InitGetServerLatenciesScheduler(OnSuccess, OnError);
+
+		bool bPingRegionsOnSuccess = true;
+		CallGetQosServers(bPingRegionsOnSuccess, OnSuccess, OnError);
 	}
 
 	void Qos::GetActiveServerLatencies(
@@ -74,17 +64,20 @@ namespace Api
 		const THandler<TArray<TPair<FString, float>>>& OnPingRegionsSuccess,
 		const FErrorHandler& OnError)
 	{
-		FRegistry::QosManager.GetQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
-		[this, bPingRegionsOnSuccess, OnPingRegionsSuccess](const FAccelByteModelsQosServerList Result)
+		if (!bPingRegionsOnSuccess && Latencies.Num() > 0)
 		{
-			QosServers = Result; // Cache for the session
+			OnPingRegionsSuccess.ExecuteIfBound(Latencies);
+		}
+		else 
+		{
+			FRegistry::QosManager.GetQosServers(THandler<FAccelByteModelsQosServerList>::CreateLambda(
+				[this, OnPingRegionsSuccess](const FAccelByteModelsQosServerList Result)
+				{
+					QosServers = Result; // Cache for the session
 
-			if (bPingRegionsOnSuccess)
-				PingRegionsSetLatencies(QosServers, OnPingRegionsSuccess);
-			else
-				OnPingRegionsSuccess.ExecuteIfBound(Latencies); // Latencies == Nullable until PingRegionsSetLatencies called once+.
-			
-		}), OnError);
+					PingRegionsSetLatencies(QosServers, OnPingRegionsSuccess);
+				}), OnError);
+		}
 	}
 	
 	void Qos::PingRegionsSetLatencies(
@@ -116,12 +109,16 @@ namespace Api
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError)
 	{
-		const float SecondsPerTick = SettingsRef.QosServerLatencyPollIntervalSecs;
+		const float SecondsPerTick = SettingsRef.QosLatencyPollIntervalSecs;
 		const bool bActivateScheduler = SecondsPerTick > 0;
-		
-		if (!bActivateScheduler)
+
+		if (PollLatenciesHandle.IsValid())
 		{
 			RemoveFromTicker(PollLatenciesHandle);
+		}
+
+		if (!bActivateScheduler)
+		{
 			return;
 		}
 
@@ -137,22 +134,27 @@ namespace Api
 		// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
 		PollLatenciesHandle = Ticker.AddTicker(FTickerDelegate::CreateLambda(
 			[this, OnTick](float DeltaTime)
-		{
-			PingRegionsSetLatencies(QosServers, OnTick);
-			return true;
+			{
+				PingRegionsSetLatencies(QosServers, OnTick);
+				return true;
 				
-		}), AdjustedSecondsPerTick);
+			}), AdjustedSecondsPerTick);
 	}
 	
 	void Qos::InitGetServerLatenciesScheduler(
 		const THandler<TArray<TPair<FString, float>>>& OnTick,
 		const FErrorHandler& OnError)
 	{
-		const float SecondsPerTick = SettingsRef.QosLatencyPollIntervalSecs;
+		const float SecondsPerTick = SettingsRef.QosServerLatencyPollIntervalSecs;
+		const bool bActivateScheduler = SecondsPerTick > 0;
 		
-		if (SecondsPerTick <= 0)
+		if (PollServerLatenciesHandle.IsValid())
 		{
 			RemoveFromTicker(PollServerLatenciesHandle);
+		}
+
+		if (!bActivateScheduler)
+		{
 			return;
 		}
 
@@ -168,12 +170,12 @@ namespace Api
 		// Loop infinitely, every x seconds, until we tell the delegate to stop via RemoveFromTicker()
 		PollServerLatenciesHandle = Ticker.AddTicker(FTickerDelegate::CreateLambda(
 			[this, OnTick, OnError](float DeltaTime)
-		{
-			constexpr bool bPingRegionsOnSuccess = true;
-			CallGetQosServers(bPingRegionsOnSuccess, OnTick, OnError);
+			{
+				constexpr bool bPingRegionsOnSuccess = true;
+				CallGetQosServers(bPingRegionsOnSuccess, OnTick, OnError);
 				
-			return true;
-		}), AdjustedSecondsPerTick);
+				return true;
+			}), AdjustedSecondsPerTick);
 	}
 
 	void Qos::RemoveFromTicker(FDelegateHandle& Handle)
