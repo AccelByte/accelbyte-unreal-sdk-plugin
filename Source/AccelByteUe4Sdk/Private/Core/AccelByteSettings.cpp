@@ -121,7 +121,6 @@ void Settings::LoadSettings(const FString& SectionPath)
 	{
 		QosLatencyPollIntervalSecs = 0;
 	}
-	QosLatencyPollIntervalSecs = QosLatencyPollIntervalSecs >= 600 ? QosLatencyPollIntervalSecs : 600;
 
 	FString QosServerLatencyPollIntervalSecsString;
 	LoadFallback(SectionPath, TEXT("QosServerLatencyPollIntervalSecs"), QosServerLatencyPollIntervalSecsString);
@@ -133,7 +132,6 @@ void Settings::LoadSettings(const FString& SectionPath)
 	{
 		QosServerLatencyPollIntervalSecs = 0;
 	}
-	QosServerLatencyPollIntervalSecs = QosServerLatencyPollIntervalSecs >= 600 ? QosServerLatencyPollIntervalSecs : 600;
 }
 
 void Settings::LoadFallback(const FString& SectionPath, const FString& Key, FString& Value)
