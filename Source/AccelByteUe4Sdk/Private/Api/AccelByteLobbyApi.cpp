@@ -424,11 +424,15 @@ void Lobby::Connect(const FString& Token)
 
 	WebSocket->Connect();
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
-	
+
+	// if shipping build, skip fetching lobby error messages.
+	// avoid fetching large json file to store lobby error messages.
+#if !UE_BUILD_SHIPPING
 	if(LobbyErrorMessages.Num() == 0)
 	{
 		FetchLobbyErrorMessages();
 	}
+#endif
 }
 
 void Lobby::Disconnect(bool ForceCleanup)
