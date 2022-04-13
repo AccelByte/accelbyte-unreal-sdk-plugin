@@ -15,8 +15,6 @@
 
 namespace AccelByte
 {
-class Settings;
-	
 namespace Api
 {
 
@@ -28,31 +26,13 @@ class ACCELBYTEUE4SDK_API Qos
 public:
 	Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef);
 	~Qos();
-	
-	/**
-	 * @brief The user was just authed:
-	 * - Init Qos Scheduler, if enabled via Settings.
-	 * @param Response 
-	 */
-	void OnLoginSuccess(const FOauth2Token& Response);
 
 	/**
-	 * @brief [CALLED @ LOGIN SUCCESS] Check server latencies (ping) per-region, with optional polling.
-	 * - This particular overload binds no callbacks.
+	 * @brief Check server latencies (ping) per-region, with optional polling.
 	 * - Optional Pulling (default off), unless .ini polling Settings.QosLatencyPollIntervalSecs > 0.
-	 * - Latencies will be cached, then optionally polled (using cached Latencies).
+	 * - Latencies will be cached, then optionally polled (using cached QoS Servers).
 	 *   - Set @ Settings ini (# seconds) via QosLatencyPollIntervalSecs.
-	 * - Server Latencies will optionally be polled.
-	 *   - Set @ Settings ini (# seconds) via QosServerLatencyPollIntervalSecs.
-	 */
-	void GetServerLatencies();
-
-	/**
-	 * @brief [CALLED @ LOGIN SUCCESS] Check server latencies (ping) per-region, with optional polling.
-	 * - Optional Pulling (default off), unless .ini polling Settings.QosLatencyPollIntervalSecs > 0.
-	 * - Latencies will be cached, then optionally polled (using cached Latencies).
-	 *   - Set @ Settings ini (# seconds) via QosLatencyPollIntervalSecs.
-	 * - Server Latencies will optionally be polled.
+	 * - QoS Servers will optionally be polled.
 	 *   - Set @ Settings ini (# seconds) via QosServerLatencyPollIntervalSecs.
 	 *  
 	 * @param OnSuccess If polling, this will also call every ping update success.
@@ -71,25 +51,69 @@ public:
 		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
 		const FErrorHandler& OnError);
 
+	/** @brief Start the latency polling schedulers */
+	void StartLatencyPollers();
+
+	/** @brief Wrapper for RemoveFromTicker() for PolllatenciesHandle and PollServerLatenciesHandle. */
+	void StopLatencyPollers();
+
+	/** @brief Check whether latency polling schedulers are active */
+	bool AreLatencyPollersActive();
+
+	/** @brief Get cached latencies data */
+	const TArray<TPair<FString, float>>& GetCachedLatencies();
+	
+private:
+	// Constructor
+	Credentials& CredentialsRef;
+	const Settings& SettingsRef;
+
+	static FAccelByteModelsQosServerList QosServers;
+	static TArray<TPair<FString, float>> Latencies;
+	
+	/**
+	 * @brief Get Latencies from cached regions, every x seconds.
+	 * - Default 0 (off).
+	 */
+	static FDelegateHandle PollLatenciesHandle;
+
+	/**
+	 * @brief Get Server region latency targets and cache for Latencies object/handle, every x seconds.
+	 * - Default 0 (off).
+	 */
+	static FDelegateHandle PollServerLatenciesHandle;
+
+	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
+	static void RemoveFromTicker(FDelegateHandle& Handle);
+
+	/**
+	 * @brief The user was just authenticated:
+	 * - Check server latencies (ping) per-region
+	 * - Init Qos Scheduler, if enabled via Settings.
+	 * @param Response
+	 */
+	void OnLoginSuccess(const FOauth2Token& Response);
+
 	/**
 	 * @brief For each server, ping them and record add to Latency TArray.
 	 * - Then, ping each region and cache returend Latencies.
-	 * @param QosServerList 
-	 * @param OnSuccess 
+	 * @param QosServerList
+	 * @param OnSuccess
 	 */
 	void PingRegionsSetLatencies(
 		const FAccelByteModelsQosServerList& QosServerList,
-		const THandler<TArray<TPair<FString, float>>>& OnSuccess);
+		const THandler<TArray<TPair<FString, float>>>& OnSuccess,
+		const FErrorHandler& OnError);
 
 	/**
 	 * @brief Sets QosServers, using this cache for future calls.
 	 * - Optionally (default off), via Settings.QosServerLatencyPollIntervalSecs, a separate
 	 *     polling interval can be set to update QosServers for the regions, themselves.
 	 *  - Not to be confused with Settings.QosLatencyPollIntervalSecs (uses server cached regions).
-	 *  
+	 *
 	 * @param bPingRegionsOnSuccess Upon success, we'll call PingRegionsSetLatencies() from the results.
 	 * @param OnPingRegionsSuccess Only calls back if bPingRegionsOnSuccess
-	 * @param OnError 
+	 * @param OnError
 	 */
 	void CallGetQosServers(
 		const bool bPingRegionsOnSuccess,
@@ -103,13 +127,10 @@ public:
 	 * - Default Qos polling intervals: 0 (no polling).
 	 * - Explicitly calling this a 2nd+ time will reset the poller without conflict and use the new tick interval.
 	 * - Not to be confused with InitGetServerLatenciesScheduler(), that caches the target server regions for Latencies polling.
-	 * 
-	 * @param OnTick Sets Latencies with refreshed region latencies pings.
-	 * @param OnError For example, if Preferred
+	 *
+	 * @param LatencyPollIntervalSecs the interval for polling the latency in seconds
 	 */
-	void InitGetLatenciesScheduler(
-		const THandler<TArray<TPair<FString, float>>>& OnTick,
-		const FErrorHandler& OnError);
+	void InitGetLatenciesScheduler(float LatencyPollIntervalSecs);
 
 	/**
 	 * @brief Poll every x second to refresh target server region Latencies (pings) to later use as cached for Latency pollers/objects.
@@ -118,47 +139,10 @@ public:
 	 * - Default Qos server polling intervals: 0 (no polling).
 	 * - Explicitly calling this a 2nd+ time will reset the poller without conflict and use the new tick interval.
 	 * - Not to be confused with InitGetLatenciesScheduler(), that uses this func's cached target server regions for Latencies polling.
-	 * 
-	 * @param OnTick Sets Latencies with refreshed region latencies pings.
-	 * @param OnError For example, if Preferred
+	 *
+	 * @param QosServerPollIntervalSecs the interval for polling the Qos servers in seconds
 	 */
-	void InitGetServerLatenciesScheduler(
-		const THandler<TArray<TPair<FString, float>>>& OnTick,
-		const FErrorHandler& OnError);
-
-	/** @brief Wrapper for RemoveFromTicker() for PolllatenciesHandle and PollServerLatenciesHandle. */
-	void RemoveLatencyPollers();
-
-	const TArray<TPair<FString, float>>& GetCachedLatencies() const;
-
-	/** @brief Cleanup handler for: PollLatenciesHandle, PollServerLatenciesHandle */
-	void Shutdown();
-	
-private:
-	// Constructor
-	Credentials& CredentialsRef;
-	const Settings& SettingsRef;
-
-	
-
-	FAccelByteModelsQosServerList QosServers;
-	FTimerHandle InputTimeHandle;
-	TArray<TPair<FString, float>> Latencies;
-	
-	/**
-	 * @brief Get Latencies from cached regions, every x seconds.
-	 * - Default 0 (off).
-	 */
-	FDelegateHandle PollLatenciesHandle;
-
-	/**
-	 * @brief Get Server region latency targets and cache for Latencies object/handle, every x seconds.
-	 * - Default 0 (off).
-	 */
-	FDelegateHandle PollServerLatenciesHandle;
-
-	/** @brief Static cleanup handler for Tickers (Latencies Pollers) */
-	static void RemoveFromTicker(FDelegateHandle& Handle);
+	void InitGetServerLatenciesScheduler(float QosServerPollIntervalSecs);
 	
 	Qos(Qos const&) = delete;
 	Qos(Qos&&) = delete;

@@ -743,7 +743,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	if (SelectedLatencies.Num() == 0)
 	{
 		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
-		UE_LOG(LogAccelByteLobby, Error, TEXT("!OptionalParams.Latencies && !Qos.Latencies (cached): "
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("No latencies data provided either from cached latencies or optional params. "
 			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
 	}
 
