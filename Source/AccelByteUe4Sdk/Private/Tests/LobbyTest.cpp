@@ -1412,6 +1412,8 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	return true;
 }
 
+/** NOTE: Disabled because of major changes in the backend to remove Redis pubsub that affecting Channel chat
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived, "AccelByte.Tests.Lobby.B.SendChannelChat", AutomationFlagMaskLobby);
 bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FString& Parameters)
 {
@@ -1464,6 +1466,7 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	ResetResponses();
 	return true;
 }
+*/
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage, "AccelByte.Tests.Lobby.B.SendChannelChatReconnected", AutomationFlagMaskLobby);
 bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FString& Parameters)
