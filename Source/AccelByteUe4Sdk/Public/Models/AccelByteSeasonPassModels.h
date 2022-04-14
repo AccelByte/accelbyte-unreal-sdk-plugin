@@ -123,6 +123,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassTier
 };
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassRewardCurrency
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | RewardCurrency")
+	FString Namespace{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | RewardCurrency")
+	FString CurrencyCode{};
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassReward
 {
 	GENERATED_BODY()
@@ -144,6 +154,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsSeasonPassReward
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
 	FString ItemName{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
+	FString ItemSku{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
+	TArray<FAccelByteModelsSeasonPassRewardCurrency> Currency{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | SeasonPass | Models | Reward")
 	int32 Quantity{};

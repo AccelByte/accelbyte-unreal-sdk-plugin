@@ -30,6 +30,7 @@ FSeasonPassCreateSeasonResponse SeasonResponse;
 FSeasonPassCreatePassResponse FreePassResponse, PremiumPassResponse;
 FString CurrencyRewardCode = "coins-reward", ItemRewardCode = "premium-reward";
 FSeasonPassRewardResponse CurrencyRewardResponse, ItemRewardResponse;
+FAccelByteModelsSeasonPassReward SeasonPassRewardResponse;
 TArray<FAccelByteModelsSeasonPassTierJsonObject> SeasonTiersResponse;
 int32 SeasonTierCount = 6, SeasonTierRequiredExp = 100;
 TArray<TSharedPtr<FJsonObject>> SeasonTierRewards;
@@ -518,9 +519,9 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	}), SeasonPassOnError);
 	WaitUntil(bCreatePremiumPassSuccess, "Waiting to create season pass Premium pass...");
 	AB_TEST_TRUE(bCreatePremiumPassSuccess);
-
+	
 	FSeasonPassCreateReward CoinsReward{
-		CurrencyRewardCode, "ITEM", SeasonCurrencyItemInfo.itemId, CurrencyRewardQuantity,
+		CurrencyRewardCode, "ITEM", SeasonCurrencyItemInfo.itemId,{FAccelByteModelsSeasonPassRewardCurrency{"sdktest",CurrencyCode}}, CurrencyRewardQuantity,
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 	bool bCreateFreeRewardSuccess = false;
@@ -532,9 +533,9 @@ bool SeasonPassSetup::RunTest(const FString& Parameters)
 	}), SeasonPassOnError);
 	WaitUntil(bCreateFreeRewardSuccess, "Waiting to create season pass coins reward to free pass...");
 	AB_TEST_TRUE(bCreateFreeRewardSuccess);
-
+	
 	FSeasonPassCreateReward PremiumReward{
-		ItemRewardCode, "ITEM", SeasonRewardItemInfo.itemId, 1,
+		ItemRewardCode, "ITEM", SeasonRewardItemInfo.itemId,{FAccelByteModelsSeasonPassRewardCurrency{"sdktest",CurrencyCode}}, 1,
 		{FAccelByteModelsItemImage{"image", "seasonImage", 32, 32, "http://example.com", "http://example.com"}}
 	};
 
@@ -720,6 +721,40 @@ bool SeasonPassTeardown::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(GetCurrentRewardSku, "AccelByte.Tests.SeasonPass.B.GetCurrentRewardSku", AutomationFlagMaskSeasonPass)
+bool GetCurrentRewardSku::RunTest(const FString& Parameters)
+{
+	bool bGetSeasonRewardSuccess = false;
+	AdminSearchReward(SeasonResponse.Id, ItemRewardCode, THandler<FAccelByteModelsSeasonPassReward>::CreateLambda(
+	[this, &bGetSeasonRewardSuccess](const FAccelByteModelsSeasonPassReward& Result)
+	{
+		bGetSeasonRewardSuccess = true;
+		SeasonPassRewardResponse = Result;
+	}), SeasonPassOnError);
+	WaitUntil(bGetSeasonRewardSuccess, "Waiting to get SeasonPass Reward...");
+	AB_TEST_TRUE(bGetSeasonRewardSuccess);
+	AB_TEST_EQUAL(SeasonPassRewardResponse.ItemSku, SeasonRewardItemInfo.sku);
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(GetCurrentRewardCurrency, "AccelByte.Tests.SeasonPass.B.GetCurrentRewardCurrency", AutomationFlagMaskSeasonPass)
+bool GetCurrentRewardCurrency::RunTest(const FString& Parameters)
+{
+	bool bGetSeasonRewardCurrencySuccess = false;
+	AdminSearchReward(SeasonResponse.Id, CurrencyRewardCode, THandler<FAccelByteModelsSeasonPassReward>::CreateLambda(
+	[this, &bGetSeasonRewardCurrencySuccess](const FAccelByteModelsSeasonPassReward& Result)
+	{
+		bGetSeasonRewardCurrencySuccess = true;
+		SeasonPassRewardResponse = Result;
+	}), SeasonPassOnError);
+	WaitUntil(bGetSeasonRewardCurrencySuccess, "Waiting to get SeasonPass Reward...");
+	AB_TEST_TRUE(bGetSeasonRewardCurrencySuccess);
+	AB_TEST_EQUAL(SeasonPassRewardResponse.Currency.Num(), 0);
+	
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SeasonGetCurrentSeason, "AccelByte.Tests.SeasonPass.B.GetCurrentSeason", AutomationFlagMaskSeasonPass)
 bool SeasonGetCurrentSeason::RunTest(const FString& Parameters)
 {
@@ -734,7 +769,7 @@ bool SeasonGetCurrentSeason::RunTest(const FString& Parameters)
 	WaitUntil(bGetSeason, "Waiting to get season...");
 	AB_TEST_TRUE(bGetSeason);
 	AB_TEST_EQUAL(GetSeason.Id, SeasonResponse.Id);
-
+	
 	return true;
 }
 

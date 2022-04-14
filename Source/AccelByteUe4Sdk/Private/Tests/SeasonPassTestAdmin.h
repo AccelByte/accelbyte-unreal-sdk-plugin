@@ -145,6 +145,8 @@ struct FSeasonPassCreateReward
 	UPROPERTY()
 	FString ItemId;
 	UPROPERTY()
+	FAccelByteModelsSeasonPassRewardCurrency Currency;
+	UPROPERTY()
 	int32 Quantity;
 	UPROPERTY()
 	FAccelByteModelsItemImage Image;
@@ -209,4 +211,6 @@ void AdminModifySeasonTier(const FString& SeasonId, const FString& TierId, const
 					const THandler<TArray<FAccelByteModelsSeasonPassTierJsonObject>>& OnSuccess,
 					const FErrorHandler& OnError);
 void AdminDeleteSeasonTier(const FString& SeasonId, const FString& TierId, const FSimpleDelegate& OnSuccess,
+					const FErrorHandler& OnError);
+void AdminSearchReward(const FString& SeasonId, const FString& code, const THandler<FAccelByteModelsSeasonPassReward>& OnSuccess,
 					const FErrorHandler& OnError);
