@@ -12,36 +12,39 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPayloadUrl
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Payload")
-	FString Source;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Payload")
-	FString Url;
+	FString Source{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Payload")
+	FString Url{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCCreatorState
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | State")
-	bool State;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | State")
-	FString UserId;
+	bool State{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | State")
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTagResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tag")
-	FString Id;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tag")
-	FString Namespace;
+	FString Id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tag")
+	FString Namespace{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tag")
-	FString Tag;
+	FString Tag{};
 };
 
 
@@ -49,204 +52,222 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCChannelResponse
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCChannelResponse")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCChannelResponse")
-	FString Name;
+	FString Name{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCChannelResponse")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCChannelResponse")
-	FString UserId;
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTypeResponse
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCTypeResponse")
-	FString Id;
+	FString Id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCTypeResponse")
-	FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCTypeResponse")
-	TArray<FString> Subtype;
+	TArray<FString> Subtype{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test | UGC | UGCTypeResponse")
-	FString Type;
+	FString Type{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCRequest
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ContentType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString FileExtension;
+	FString ContentType{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Name;
+	FString FileExtension{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Preview;
+	FString Name{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Type;
+	FString Preview{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString SubType;
+	FString Type{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	TArray<FString> Tags;
+	FString SubType{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
+	TArray<FString> Tags{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ChannelId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ContentType;
+	FString ChannelId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FDateTime CreatedTime;
+	FString ContentType{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString CreatorName;
+	FDateTime CreatedTime{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString FileExtension;
+	FString CreatorName{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Id;
+	FString FileExtension{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	bool IsOfficial;
+	FString Id{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Name;
+	bool IsOfficial{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Namespace;
+	FString Name{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl;
+	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Preview;
+	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ShareCode;
+	FString Preview{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString SubType;
+	FString ShareCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	TArray<FString> Tags;
+	FString SubType{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Type;
+	TArray<FString> Tags{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString UserId;
+	FString Type{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCContentResponse
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ChannelId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FDateTime CreatedTime;
+	FString ChannelId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FAccelByteModelsUGCCreatorState CreatorFollowState;
+	FDateTime CreatedTime{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
+	FAccelByteModelsUGCCreatorState CreatorFollowState{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString CreatorName;
+	FString CreatorName{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	int32 DownloadCount;
+	int32 DownloadCount{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString FileExtension;
+	FString FileExtension{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Id;
+	FString Id{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	bool IsOfficial;
+	bool IsOfficial{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	int32 LikeCount;
+	int32 LikeCount{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FAccelByteModelsUGCCreatorState LikeState;
+	FAccelByteModelsUGCCreatorState LikeState{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Name;
+	FString Name{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Namespace;
+	FString Namespace{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Payload;
+	FString Payload{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl;
+	TArray<FAccelByteModelsUGCPayloadUrl> PayloadUrl{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString ShareCode;
+	FString ShareCode{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString SubType;
+	FString SubType{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	TArray<FString> Tags;
+	TArray<FString> Tags{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString Type;
+	FString Type{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC")
-	FString UserId;
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTagsPagingResponse {
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTagsPagingResponse
+{
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	TArray<FAccelByteModelsUGCTagResponse> Data;
+	TArray<FAccelByteModelsUGCTagResponse> Data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTypesPagingResponse {
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCTypesPagingResponse
+{
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	TArray<FAccelByteModelsUGCTypeResponse> Data;
+	TArray<FAccelByteModelsUGCTypeResponse> Data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCChannelsPagingResponse {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	TArray<FAccelByteModelsUGCChannelResponse> Data;
+	TArray<FAccelByteModelsUGCChannelResponse> Data{};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Tags")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPreview {
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUGCPreview
+{
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Category | Models | UGC | Preview")
-	FString Preview;	
+	FString Preview{};	
 };

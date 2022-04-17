@@ -19,20 +19,25 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaging
 {
 	GENERATED_BODY()
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
-        FString First;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
-        FString Last;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
-		FString Next;
+	FString First{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
-		FString Previous;
+	FString Last{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
+	FString Next{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Paging")
+	FString Previous{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FTime
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | General | Models | Miscellaneous")
-		FDateTime CurrentTime;
+	FDateTime CurrentTime{0};
 };

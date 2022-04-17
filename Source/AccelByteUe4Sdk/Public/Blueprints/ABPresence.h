@@ -19,10 +19,10 @@ struct FPresenceStatus
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	Availability Availability;
+	Availability Availability{};
 
 	UPROPERTY(BlueprintReadWrite)
-	FString Activity;
+	FString Activity{};
 };
 
 USTRUCT(BlueprintType)
@@ -31,10 +31,10 @@ struct FBulkGetUserPresenceRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bCountOnly = false;
+	bool bCountOnly{};
 	
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FString> UserIds;
+	TArray<FString> UserIds{};
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDGetAllFriendsStatusResponse, FAccelByteModelsGetOnlineUsersResponse, Response);

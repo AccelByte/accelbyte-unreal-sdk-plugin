@@ -22,46 +22,58 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserPoint
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPoint")
-		float point;
+	float point{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserPoint")
-		FString userId;
+	FString userId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsLeaderboardRankingResult
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | RankingResult")
-		TArray<FAccelByteModelsUserPoint> data;
+	TArray<FAccelByteModelsUserPoint> data{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | RankingResult")
-		FAccelByteModelsPaging paging;
+	FAccelByteModelsPaging paging{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRanking
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRanking")
-		float point;
+	float point{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRanking")
-		int rank;
+	int rank{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRankingData
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FAccelByteModelsUserRanking allTime;
+	FAccelByteModelsUserRanking allTime{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FAccelByteModelsUserRanking current;
+	FAccelByteModelsUserRanking current{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FAccelByteModelsUserRanking daily;
+	FAccelByteModelsUserRanking daily{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FAccelByteModelsUserRanking monthly;
+	FAccelByteModelsUserRanking monthly{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FAccelByteModelsUserRanking weekly;
+	FAccelByteModelsUserRanking weekly{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Leaderboard | Models | UserRankingData")
-		FString userId;
+	FString userId{};
 };

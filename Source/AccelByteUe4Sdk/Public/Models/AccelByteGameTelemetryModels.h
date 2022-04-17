@@ -5,14 +5,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Dom/JsonObject.h" 
+#include "Dom/JsonObject.h"
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsTelemetryBody
 {
-	// Only accept input with valid characters. Allowed characters: Aa-Zz0-9_.-
-	FString EventNamespace;
-	// Only accept input with valid characters. Allowed characters: Aa-Zz0-9_.-
-	FString EventName;
-	TSharedPtr<FJsonObject> Payload;
+	/** @brief Namespace of the event and it only accepts input with valid characters. Allowed characters: Aa-Zz0-9 */
+	FString EventNamespace{};
+
+	/** @brief Name of the event and it only accepts input with valid characters. Allowed characters: Aa-Zz0-9 */
+	FString EventName{};
+
+	/** @brief Event payload that will be sent as telemetry data */
+	TSharedPtr<FJsonObject> Payload{};
+
+	/** @brief Timestamp when the event is registered */
 	FDateTime EventTimestamp {0};
 };

@@ -424,11 +424,15 @@ void Lobby::Connect(const FString& Token)
 
 	WebSocket->Connect();
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
-	
+
+	// if shipping build, skip fetching lobby error messages.
+	// avoid fetching large json file to store lobby error messages.
+#if !UE_BUILD_SHIPPING
 	if(LobbyErrorMessages.Num() == 0)
 	{
 		FetchLobbyErrorMessages();
 	}
+#endif
 }
 
 void Lobby::Disconnect(bool ForceCleanup)
@@ -743,7 +747,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	if (SelectedLatencies.Num() == 0)
 	{
 		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
-		UE_LOG(LogAccelByteLobby, Error, TEXT("!OptionalParams.Latencies && !Qos.Latencies (cached): "
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("No latencies data provided either from cached latencies or optional params. "
 			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
 	}
 

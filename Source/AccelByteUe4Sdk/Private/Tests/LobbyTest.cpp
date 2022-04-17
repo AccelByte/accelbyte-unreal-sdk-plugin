@@ -6032,6 +6032,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	DelaySeconds(5, TEXT("Wait foir QOS fetch"));
 
 	LobbyConnect(2);
+	FString ExpectedCustomAttribute {"test"};
 
 	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
@@ -6151,7 +6152,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		{
 			bRegisterLocalServerToDSMDone = true;
 		}),
-		LobbyTestErrorHandler);
+		LobbyTestErrorHandler, ExpectedCustomAttribute);
 
 	WaitUntil(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 
@@ -6200,6 +6201,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		return bDsNotifSuccess;
 	}, "Waiting for DS Notification...", DsNotifWaitTime);
 	AB_TEST_FALSE(bDsNotifError);
+	FAccelByteModelsDsNotice ResultDsNotice {dsNotice};
 
 	bool bDeregisterLocalServerFromDSMDone = false;
 	FRegistry::ServerDSM.DeregisterLocalServerFromDSM(
@@ -6228,6 +6230,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	AB_TEST_EQUAL(matchmakingNotifResponse[1].Status, EAccelByteMatchmakingStatus::Done);
 	AB_TEST_EQUAL(readyConsentNoticeResponse[0].MatchId, matchmakingNotifResponse[0].MatchId);
 	AB_TEST_EQUAL(readyConsentNoticeResponse[1].MatchId, matchmakingNotifResponse[1].MatchId);
+	AB_TEST_EQUAL(ResultDsNotice.CustomAttribute, ExpectedCustomAttribute);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -7916,6 +7919,7 @@ bool SetUnsetTokenGenerator::RunTest(const FString& Parameter)
 #endif // lobby connect with entitlement check test
 
 #pragma region LobbyMultithreadTesting
+/* test is unstable, need to properly debug why test seems to stuck if some lobby is failed connecting or failed to receive invite
 class FTestLobbyUser : FRunnable
 {
 private:
@@ -8085,4 +8089,5 @@ bool FLobbyTestConcurrency::RunTest(const FString& Parameter)
 	AB_TEST_EQUAL(GetPartyInviteCounter.GetValue(), TestCount);
 	return true;
 }
+*/
 #pragma endregion LobbyMultithreadTesting
