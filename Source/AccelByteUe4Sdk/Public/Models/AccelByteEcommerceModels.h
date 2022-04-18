@@ -551,9 +551,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetItemsBySkus
 {
 	GENERATED_BODY();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
-	FString Sku;
+	FString Sku{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
-	FString ItemId;
+	FString ItemId{};
 };
 
 #pragma endregion ItemModelsField
