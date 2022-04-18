@@ -439,6 +439,47 @@ bool FEcommerceTestGetItemBySku::RunTest(const FString& Parameters)
 	return true;
 }
 
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestBulkGetItemBySkus, "AccelByte.Tests.Ecommerce.C.ServerBulkGetItemBySkus", AutomationFlagMaskEcommerce);
+bool FEcommerceTestBulkGetItemBySkus::RunTest(const FString& Parameters)
+{
+#pragma region GetItemBySku
+
+	bool bServerLoggedIn = false;
+	bool bServerLoginComplete = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&bServerLoggedIn, &bServerLoginComplete]()
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Server Login Success"));
+		bServerLoginComplete = bServerLoggedIn = true;
+	}), FErrorHandler::CreateLambda([&bServerLoggedIn, &bServerLoginComplete](int32 ErrCode, FString const& ErrMsg)
+	{
+		UE_LOG(LogAccelByteEcommerceTest, Error, TEXT("Server Login Success"));
+		bServerLoginComplete = true;
+	}));
+	WaitUntil(bServerLoginComplete, "Waiting for server logged in...");
+
+	bool bGetItemBySkuSuccess = false;
+	bool bExpectedItemFound = false;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("Get Items by Skus"));
+	FRegistry::ServerEcommerce.BulkGetItemsBySkus(
+		{EcommerceTestExpectedVariable.ExpectedRootItemSku, EcommerceTestExpectedVariable.ExpectedChildItemSku, EcommerceTestExpectedVariable.ExpectedGrandChildItemSku},
+		THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>>::CreateLambda([&](const TArray<FAccelByteModelsBulkGetItemsBySkus>& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+
+			bExpectedItemFound = Result.Num() == 3;
+			bGetItemBySkuSuccess = true;
+		}), EcommerceTestErrorHandler);
+
+	WaitUntil(bGetItemBySkuSuccess, "Waiting for get items...");
+
+#pragma endregion GetItemBySku
+
+	AB_TEST_TRUE(bGetItemBySkuSuccess);
+	AB_TEST_TRUE(bExpectedItemFound);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEcommerceTestGetItemById, "AccelByte.Tests.Ecommerce.C.GetItem", AutomationFlagMaskEcommerce);
 bool FEcommerceTestGetItemById::RunTest(const FString& Parameters)
 {
