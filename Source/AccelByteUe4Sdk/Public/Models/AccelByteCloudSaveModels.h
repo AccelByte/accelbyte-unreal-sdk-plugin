@@ -15,34 +15,66 @@ enum class ESetByMetadataRecord : uint8
 	NONE = 0,
 	SERVER, 
 	CLIENT,
-}; 
-
-struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
-{
-	FString Key{};
-	FString Namespace{};
-	FString UserId{};
-	bool IsPublic{};
-	FDateTime CreatedAt{};
-	FDateTime UpdatedAt{};
-	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
-	FJsonObject Value{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite)
+	FString Key{};
+	
+	UPROPERTY(BlueprintReadWrite)
+	FString Namespace{};
+
+	UPROPERTY(BlueprintReadWrite)
+	FString UserId{};
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsPublic{};
+
+	UPROPERTY(BlueprintReadWrite)
+	FDateTime CreatedAt{};
+
+	UPROPERTY(BlueprintReadWrite)
+	FDateTime UpdatedAt{};
+
+	UPROPERTY(BlueprintReadWrite)
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+
+	UPROPERTY(BlueprintReadWrite)
+	FJsonObjectWrapper Value{}; 
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 {
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite)
 	FString Key{};
+
+	UPROPERTY(BlueprintReadWrite)
 	FString Namespace{};
+
+	UPROPERTY(BlueprintReadWrite)
 	FDateTime CreatedAt{};
+
+	UPROPERTY(BlueprintReadWrite)
 	FDateTime UpdatedAt{};
+
+	UPROPERTY(BlueprintReadWrite)
 	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
-	FJsonObject Value{};
+
+	UPROPERTY(BlueprintReadWrite)
+	FJsonObjectWrapper Value{};
 };
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsConcurrentReplaceRequest
 {
 	FDateTime UpdatedAt{};
-	FJsonObject Value{};
+	FJsonObjectWrapper Value{};
 };
 
 USTRUCT(BlueprintType)

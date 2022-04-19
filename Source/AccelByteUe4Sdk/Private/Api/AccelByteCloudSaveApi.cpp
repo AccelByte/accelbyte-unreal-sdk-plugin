@@ -102,7 +102,8 @@ void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserR
 					userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
-					userRecord.Value = *value->ToSharedRef();
+					userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
+					
 					OnSuccess.ExecuteIfBound(userRecord);
 				}),
 			OnError),
@@ -150,7 +151,7 @@ void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, T
 					userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
-					userRecord.Value = *value->ToSharedRef();
+					userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 					OnSuccess.ExecuteIfBound(userRecord);
 				}),
 			OnError),
@@ -217,8 +218,8 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 						JsonData->TryGetStringField("updated_at", UpdatedAt);
 						FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
 						TSharedPtr<FJsonObject> const* value;
-						JsonData->TryGetObjectField("value", value);
-						userRecord.Value = *value->ToSharedRef();
+						JsonData->TryGetObjectField("value", value); 
+						userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 						userRecords.Data.Add(userRecord);
 					}
 					OnSuccess.ExecuteIfBound(userRecords);
@@ -260,7 +261,7 @@ void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest,
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -272,7 +273,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByte
 	FString Content = TEXT("");
 	FJsonObject DataJson;
 	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", MakeShared<FJsonObject>(Data.Value));
+	DataJson.SetObjectField("value", Data.Value.JsonObject);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -317,7 +318,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByte
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObjectWrapper RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -325,10 +326,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const
 		RecordRequest
 	};
 
-	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObjectWrapper RecordRequest, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -469,7 +470,7 @@ void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameR
 					FDateTime::ParseIso8601(*UpdatedAt, GameRecord.UpdatedAt);
 					TSharedPtr<FJsonObject> const* value;
 					JSONObject.TryGetObjectField("value", value);
-					GameRecord.Value = *value->ToSharedRef();
+					GameRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 					OnSuccess.ExecuteIfBound(GameRecord);
 				}),
 			OnError),
@@ -501,7 +502,7 @@ void CloudSave::ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest,
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -513,7 +514,7 @@ void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByte
 	FString Content = TEXT("");
 	FJsonObject DataJson;
 	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", MakeShared<FJsonObject>(Data.Value));
+	DataJson.SetObjectField("value", Data.Value.JsonObject);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -559,7 +560,7 @@ void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByte
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObjectWrapper RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -567,10 +568,10 @@ void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const
 		RecordRequest
 	};
 
-	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObjectWrapper RecordRequest, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -672,6 +673,17 @@ FJsonObject CloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, 
 	NewRecordRequest.SetObjectField("__META", MetadataJson);
 
 	return NewRecordRequest;
+}
+
+FJsonObjectWrapper CloudSave::ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJsonObject> *& value)
+{
+	FJsonObjectWrapper jsonObjWrapper{};
+	FString OutputString;
+	TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(value->ToSharedRef(), Writer);					
+	jsonObjWrapper.JsonObjectFromString(OutputString);
+	
+	return jsonObjWrapper;
 }
 
 } // Namespace Api

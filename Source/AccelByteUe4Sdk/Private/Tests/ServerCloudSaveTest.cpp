@@ -337,7 +337,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
     AB_TEST_EQUAL(KeyGameTest, ResultGameRecord.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultGameRecord.SetBy);
 	FString resultGameId;
-	ResultGameRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
+	ResultGameRecord.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
 
 	// Update game record
@@ -392,7 +392,7 @@ bool ServerCloudTestCreateAndUpdateAdminGameRecord::RunTest(const FString& Param
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckGameRecord.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultRecheckGameRecord.SetBy);
 	FString resultRecheckGameId;
-	ResultRecheckGameRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
+	ResultRecheckGameRecord.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)
 
 	// Clean Up the Key on AP 
@@ -492,7 +492,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminGameRecord_NoMetaData::RunTest(c
     AB_TEST_EQUAL(KeyGameTest, result.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::CLIENT, result.SetBy);
 	FString resultGameId;
-	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
+	result.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
 
 	// Clean up the key on Service 
@@ -594,7 +594,7 @@ bool ServerCloudTestGetDefaultValueMetadataAdminPlayerRecord_NoMetadata::RunTest
     AB_TEST_EQUAL(KeyGameTest, result.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::CLIENT, result.SetBy);
 	FString resultGameId;
-	result.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
+	result.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
 
 	// Clean up the key on Service 
@@ -697,7 +697,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
     AB_TEST_EQUAL(KeyGameTest, ResultPlayerRecord.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultPlayerRecord.SetBy);
 	FString resultGameId;
-	ResultPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultGameId);  
+	ResultPlayerRecord.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultGameId);  
 	AB_TEST_EQUAL(gameId, resultGameId)
 
 	// Update Player record
@@ -757,7 +757,7 @@ bool ServerCloudTestCreateAndUpdateAdminPlayerRecord::RunTest(const FString& Par
 	AB_TEST_EQUAL(KeyGameTest, ResultRecheckPlayerRecord.Key);
 	AB_TEST_EQUAL(ESetByMetadataRecord::SERVER, ResultRecheckPlayerRecord.SetBy);
 	FString resultRecheckGameId;
-	ResultRecheckPlayerRecord.Value.TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
+	ResultRecheckPlayerRecord.Value.JsonObject->TryGetStringField(TEXT("gameId"), resultRecheckGameId);  
 	AB_TEST_EQUAL(updatedGameId, resultRecheckGameId)
 
 	// Clean Up the Key on Service 
@@ -831,7 +831,7 @@ bool ServerCloudTestReplaceAdminGameRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetGameRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudGameRecordKey);
 
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	return ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord2);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceGameRecordUnexistKey, "AccelByte.Tests.ServerCloudSave.D.ReplaceGameRecordUnexistKey", AutomationFlagMaskServerCloudSave)
@@ -861,7 +861,7 @@ bool ServerCloudTestReplaceGameRecordUnexistKey::RunTest(const FString& Paramete
 	AB_TEST_TRUE(bGetGameRecordUnexistKey)
 
 	AB_TEST_EQUAL(Compare.Key, UnexistKey);
-	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
+	ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord);
 
 	bool bDeleteGameRecordUnexistKey = false;
 	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKey, FVoidHandler::CreateLambda([&bDeleteGameRecordUnexistKey]()
@@ -952,7 +952,7 @@ bool ServerCloudTestGetPlayerRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetPlayerRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKey);
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
+	return ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetPlayerRecordPublic, "AccelByte.Tests.ServerCloudSave.G.GetPlayerRecordPublic", AutomationFlagMaskServerCloudSave)
@@ -970,7 +970,7 @@ bool ServerCloudTestGetPlayerRecordPublic::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetPlayerRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord);
+	return ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestGetPlayerRecordUnexistKey, "AccelByte.Tests.ServerCloudSave.G.GetPlayerRecordUnexistKey", AutomationFlagMaskServerCloudSave)
@@ -1021,7 +1021,7 @@ bool ServerCloudTestReplaceExistingPlayerRecord::RunTest(const FString& Paramete
 	AB_TEST_TRUE(bGetReplacedUserRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKey);
 
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	return ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord2);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceExistingPlayerRecordPublic, "AccelByte.Tests.ServerCloudSave.H.ReplaceExistingUserRecordPublic", AutomationFlagMaskServerCloudSave)
@@ -1050,7 +1050,7 @@ bool ServerCloudTestReplaceExistingPlayerRecordPublic::RunTest(const FString& Pa
 	AB_TEST_TRUE(bGetReplacedUserRecord)
 	AB_TEST_EQUAL(Compare.Key, ServerCloudPlayerRecordKeyPublic);
 
-	return ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	return ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord2);
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(ServerCloudTestReplaceUnExistingPlayerRecord, "AccelByte.Tests.ServerCloudSave.H.ReplaceUnExistingUserRecord", AutomationFlagMaskServerCloudSave)
@@ -1080,7 +1080,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecord::RunTest(const FString& Parame
 	AB_TEST_TRUE(bGetReplacedUserRecord)
 	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
-	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord2);
 
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), false, FVoidHandler::CreateLambda([&bDeleteUserRecord]()
@@ -1122,7 +1122,7 @@ bool ServerCloudTestReplaceUnExistingPlayerRecordPublic::RunTest(const FString& 
 	AB_TEST_TRUE(bGetReplacedUserRecord)
 	AB_TEST_EQUAL(Compare.Key, UnexistKey);
 
-	ServerCloudSaveCompareJsonObject(Compare.Value, ServerCloudRecord2);
+	ServerCloudSaveCompareJsonObject(*Compare.Value.JsonObject, ServerCloudRecord2);
 
 	bool bDeleteUserRecord = false;
 	FRegistry::ServerCloudSave.DeleteUserRecord(UnexistKey, ServerCloudUserCreds.GetUserId(), true, FVoidHandler::CreateLambda([&bDeleteUserRecord]()

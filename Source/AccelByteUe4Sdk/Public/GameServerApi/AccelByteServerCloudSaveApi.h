@@ -239,6 +239,8 @@ namespace GameServerApi
 
 		FJsonObject CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest);
 		FJsonObject CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool SetPublic, FJsonObject const& RecordRequest);
+		static FJsonObjectWrapper ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJsonObject>*& value);
+		
 	};
 } // namespace GameServerApi
 } // namespace AccelByte

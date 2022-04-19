@@ -348,10 +348,10 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -364,13 +364,13 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -383,8 +383,8 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
@@ -405,10 +405,10 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -421,13 +421,13 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -440,8 +440,8 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
@@ -462,10 +462,10 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -478,13 +478,13 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -497,8 +497,8 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
@@ -572,10 +572,10 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 		{
 			AB_TEST_EQUAL(getUserRecordResults.Data[i].Key, KeyPublicUserTest);
 			AB_TEST_EQUAL(getUserRecordResults.Data[i].UserId, UserIds[UserChecked]);
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-			for (auto buildingResult : getUserRecordResults.Data[i].Value.GetArrayField("buildings"))
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+			for (auto buildingResult : getUserRecordResults.Data[i].Value.JsonObject->GetArrayField("buildings"))
 			{
 				bool bItemFound = false;
 				for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -588,9 +588,9 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 				}
 				AB_TEST_TRUE(bItemFound);
 			}
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 			AB_TEST_TRUE(getUserRecordResults.Data[i].IsPublic);
 
 			UserChecked++;
@@ -741,10 +741,10 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -757,9 +757,9 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -787,10 +787,10 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -803,9 +803,9 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -872,10 +872,10 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, UnexistKeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -888,9 +888,9 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	return true;
 }
@@ -929,13 +929,13 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
 	for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
-		for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+		for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 		{
 			if (buildingResult.Get()->AsString() == buildingRecord.Get()->AsString())
 			{
@@ -945,9 +945,9 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	return true;
 }
@@ -1197,10 +1197,10 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1213,13 +1213,13 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -1232,8 +1232,8 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	return true;
 }
 
@@ -1282,10 +1282,10 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -1298,9 +1298,9 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -1571,10 +1571,10 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bReplaceGameRecordSuccess);
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, UnexistKeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1587,9 +1587,9 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
 	return true;
 }
@@ -1627,10 +1627,10 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bSaveGameRecordSuccess);
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1643,9 +1643,9 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
 	return true;
 }
