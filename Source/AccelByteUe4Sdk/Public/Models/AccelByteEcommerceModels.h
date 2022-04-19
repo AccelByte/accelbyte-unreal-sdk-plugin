@@ -546,6 +546,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteria
 	FString SortBy{};
 };
 
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetItemsBySkus
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
+	FString Sku{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
+	FString ItemId{};
+};
+
 #pragma endregion ItemModelsField
 
 #pragma region EntitlementModelsField
