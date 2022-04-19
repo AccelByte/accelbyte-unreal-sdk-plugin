@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteRegistry.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
@@ -115,22 +115,25 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 		case ESessionState::Valid:
 			if (GetRefreshTime() <= CurrentTime)
 			{
-				FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]() 
-					{ 
-						ClientSessionState = ESessionState::Valid; 
-					}),
-					FErrorHandler::CreateLambda([&](int32 Code, const FString& Message) 
-						{ 
-							if (ClientRefreshBackoff <= 0.0)
-							{
-								ClientRefreshBackoff = 10.0;
-							}
+				Oauth2::GetTokenWithClientCredentials(
+					ClientId, ClientSecret,
+					THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
+						{
+							ClientSessionState = ESessionState::Valid;
+							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
+						}),
+						FErrorHandler::CreateLambda([&](int32 Code, const FString& Message) 
+							{ 
+								if (ClientRefreshBackoff <= 0.0)
+								{
+									ClientRefreshBackoff = 10.0;
+								}
 
-							ClientRefreshBackoff *= 2.0;
-							ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-							ScheduleRefreshToken(CurrentTime + ClientRefreshBackoff);
-							ClientSessionState = ESessionState::Expired; 
-						}));
+								ClientRefreshBackoff *= 2.0;
+								ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+								ScheduleRefreshToken(ClientRefreshBackoff);
+								ClientSessionState = ESessionState::Expired; 
+							}));
 
 				ClientSessionState = ESessionState::Refreshing;
 			}
@@ -144,7 +147,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 
 void ServerCredentials::ScheduleRefreshToken(double RefreshTime)
 {
-	ClientRefreshTime = RefreshTime;
+	ClientRefreshTime = FPlatformTime::Seconds() + (RefreshTime * FMath::FRandRange(0.7, 0.9));;
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)

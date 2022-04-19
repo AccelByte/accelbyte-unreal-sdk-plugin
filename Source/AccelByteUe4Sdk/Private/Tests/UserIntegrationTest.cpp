@@ -14,7 +14,7 @@
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "GameServerApi/AccelByteServerUserApi.h"
 #include "ParseErrorTest.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 
 using namespace std;
 
@@ -309,6 +309,7 @@ bool FUserRevokeTest::RunTest(const FString& Parameter)
 	Oauth2::RevokeUserToken(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret, FRegistry::Credentials.GetAccessToken(), FVoidHandler::CreateLambda([&bRevokeUserSuccess]()
 	{
 		bRevokeUserSuccess = true;
+		FRegistry::Credentials.ForgetAll();
 	}), UserTestErrorHandler);
 
 	WaitUntil(bRevokeUserSuccess, "Waiting for logout...");

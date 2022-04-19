@@ -78,7 +78,7 @@ void FServerOauth2Test::Define()
 			// set session expired time to 0
 			const FString ClientAccessToken = FRegistry::ServerCredentials.GetClientAccessToken();
 			const FString ClientNamespace = FRegistry::ServerCredentials.GetClientNamespace();
-			FRegistry::ServerCredentials.SetClientToken(ClientAccessToken, FPlatformTime::Seconds() + 2, ClientNamespace);
+			FRegistry::ServerCredentials.SetClientToken(ClientAccessToken, 2, ClientNamespace);
 			FString NewClientAccessToken;
 
 			WaitUntil(
@@ -93,6 +93,46 @@ void FServerOauth2Test::Define()
 			AB_TEST_NOT_EQUAL(ClientAccessToken, NewClientAccessToken);
 			return true;
 		});
+
+		It("using MultiCreds When token expired, Then automatically refreshed", [this]()
+			{
+				auto ServerApiClient = FMultiRegistry::GetServerApiClient();
+				ServerApiClient->ServerOauth2.ForgetAllCredentials();
+
+				bool bClientTokenObtained = false;
+
+				UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("LoginWithClientCredentials"));
+				ServerApiClient->ServerOauth2.LoginWithClientCredentials(
+					FVoidHandler::CreateLambda(
+						[&]()
+						{
+							UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("    Success"));
+							bClientTokenObtained = true;
+						}),
+					ServerOauthErrorHandler);
+
+				WaitUntil(bClientTokenObtained, "Waiting for Login...");
+
+				// set session expired time to 0
+				const FString ClientAccessToken = ServerApiClient->ServerCredentialsRef->GetClientAccessToken();
+				const FString ClientNamespace = ServerApiClient->ServerCredentialsRef->GetClientNamespace();
+				ServerApiClient->ServerCredentialsRef->SetClientToken(ClientAccessToken, 2, ClientNamespace);
+				FString NewClientAccessToken;
+
+				WaitUntil(
+					[&]()
+					{
+						NewClientAccessToken = ServerApiClient->ServerCredentialsRef->GetClientAccessToken();
+						return ClientAccessToken != NewClientAccessToken;
+					},
+					"Wait refresh token success",
+						10);
+
+				ServerApiClient->ServerCredentialsRef->ForgetAll();
+
+				AB_TEST_NOT_EQUAL(ClientAccessToken, NewClientAccessToken);
+				return true;
+			});
 
 		It("When getting JWKS, Then should be successful", [this]()
 		{
@@ -114,6 +154,12 @@ void FServerOauth2Test::Define()
 			AB_TEST_TRUE(KeySet.keys[0].JsonObject->HasField("n"));
 
 			return true;
+		});
+
+		AfterEach([this]()
+		{
+			FRegistry::ServerOauth2.ForgetAllCredentials();
+			UE_LOG(LogAccelByteServerOauth2Test, Log, TEXT("Remove Credentials."));
 		});
 	});
 }

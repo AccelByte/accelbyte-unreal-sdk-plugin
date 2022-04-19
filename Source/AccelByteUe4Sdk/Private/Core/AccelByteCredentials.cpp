@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
 using namespace AccelByte::Api;

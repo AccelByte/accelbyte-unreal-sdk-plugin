@@ -4,7 +4,6 @@
 
 #include "Misc/AutomationTest.h"
 #include "JsonObjectWrapper.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteEnvironment.h"
@@ -29,7 +28,6 @@ using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 using AccelByte::Api::User;
-using AccelByte::Api::Oauth2;
 using AccelByte::Api::Lobby;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobbyTest, Log, All);

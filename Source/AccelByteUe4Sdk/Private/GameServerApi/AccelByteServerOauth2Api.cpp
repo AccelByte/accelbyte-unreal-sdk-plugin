@@ -75,7 +75,7 @@ void ServerOauth2::ForgetAllCredentials()
 
 void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const
 {
-	Credentials.SetClientToken(Response.Access_token, FPlatformTime::Seconds() + (Response.Expires_in * FMath::FRandRange(0.7, 0.9)), Response.Namespace);
+	Credentials.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
 	OnSuccess.ExecuteIfBound();
 }
 
