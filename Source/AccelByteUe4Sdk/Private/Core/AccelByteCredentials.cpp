@@ -31,6 +31,7 @@ Credentials::Credentials()
 
 Credentials::~Credentials()
 {
+	LoginSuccessDelegate.Clear();
 }
 
 void Credentials::ForgetAll()
