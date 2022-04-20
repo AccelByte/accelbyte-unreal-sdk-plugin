@@ -31,6 +31,7 @@ Credentials::Credentials()
 
 Credentials::~Credentials()
 {
+	LoginSuccessDelegate.Clear();
 }
 
 const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
