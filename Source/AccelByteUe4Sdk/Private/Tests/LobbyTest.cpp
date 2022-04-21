@@ -1571,6 +1571,50 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FriendPresenceWithInvalidChar, "AccelByte.Tests.Lobby.B.FriendPresenceWithInvalidChar", AutomationFlagMaskLobby);
+bool FriendPresenceWithInvalidChar::RunTest(const FString& Parameters)
+{
+	LobbyConnect(2);
+
+	Lobbies[0]->SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
+	Lobbies[0]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+
+	Lobbies[1]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	Lobbies[1]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	
+	Lobbies[1]->RequestFriend(UserCreds[0].GetUserId());
+	FString text = FString::Printf(TEXT("Requesting Friend %d... "), 1);
+	WaitUntil(bRequestFriendSuccess, text);
+
+	Lobbies[0]->AcceptFriend(UserCreds[1].GetUserId());
+	text = FString::Printf(TEXT("Accepting Friend %d... "), 1);
+	WaitUntil(bAcceptFriendSuccess, text);
+
+	Lobbies[1]->SendSetPresenceStatus(Availability::Availabe, "\"acti \" vity\"");
+	bRequestFriendSuccess = false;
+	bAcceptFriendSuccess = false;
+
+	text = FString::Printf(TEXT("Setting presence %d... "), 1);
+	WaitUntil(bUserPresenceSuccess, text);
+
+	Lobbies[0]->SendGetOnlineUsersRequest();
+	WaitUntil([&]()
+	{
+		return bGetAllUserPresenceSuccess;
+	}, "Getting Friend Status...", 30);
+
+	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	WaitUntil(bUnfriendSuccess, "Waiting unfriend...");
+
+	LobbyDisconnect(2);
+
+	AB_TEST_TRUE(bGetAllUserPresenceSuccess);
+	AB_TEST_FALSE(onlineUserResponse.Code == "0");
+	ResetResponses();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends, "AccelByte.Tests.Lobby.B.ListOnlineFriendsNew", AutomationFlagMaskLobby);
 bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends::RunTest(const FString& Parameters)
 {

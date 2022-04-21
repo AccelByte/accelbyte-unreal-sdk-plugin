@@ -15,6 +15,7 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
+#include "Core/AccelByteError.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -1604,8 +1605,23 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 	else
 	{
 		const FString ErrorCodeString = FString::FromInt(lobbyResponseCode);
-		const bool bHasErrorName = LobbyErrorMessages.Contains(ErrorCodeString);
-		const FString ErrorCodeName = bHasErrorName ? LobbyErrorMessages[ErrorCodeString] : TEXT("NO NAME");
+
+		auto it = ErrorMessages::Default.find(lobbyResponseCode);
+
+		FString ErrorCodeName;
+		if(LobbyErrorMessages.Contains(ErrorCodeString))
+		{
+			ErrorCodeName = LobbyErrorMessages[ErrorCodeString];
+		}
+		else if(it != ErrorMessages::Default.cend())
+		{
+			ErrorCodeName = ErrorMessages::Default.at(lobbyResponseCode);
+		}
+		else
+		{
+			ErrorCodeName = TEXT("Error name not defined");
+		}
+		
 		UE_LOG(LogAccelByteLobby, Display, TEXT("%s returned non zero error code, code is %d with codename %s"), *MessageType, lobbyResponseCode, *ErrorCodeName);
 		if (ErrorCallback.IsBound())
 		{
@@ -1665,16 +1681,27 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 //@brief convenient switch case for RESPONSE context; will cache the (MessageId,SuccessDelegate) pair
 #define CASE_RESPONSE_MESSAGE_ID(MessageType, Model) CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MessageType, Model, DELEGATE_TYPE(MessageType))
 
-void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
+void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta = nullptr)
 {
-	const int lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
+	int lobbyResponseCode{0};
+	FString ReceivedMessageId{};
+
+	if(MessageMeta.IsValid())
+	{
+		lobbyResponseCode = FCString::Atoi(*MessageMeta->Code);
+		ReceivedMessageId = MessageMeta->Id;
+	}
+	else
+	{
+		lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
+		ReceivedMessageId = ParsedJsonObj->GetStringField("id");
+	}
 
 	Response ResponseEnum = Response::Invalid_Response;
 	Response* ResponseEnumPointer = ResponseStringEnumMap.Find(ReceivedMessageType);
 	if (ResponseEnumPointer) {
 		ResponseEnum = *ResponseEnumPointer;
 	}
-	const FString ReceivedMessageId = ParsedJsonObj->GetStringField(TEXT("id"));
 
 	switch (ResponseEnum)
 	{
@@ -1918,6 +1945,36 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 }
 #undef CASE_NOTIF
 
+bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData)
+{
+	TArray<FString> MessageLines;
+	InLobbyMessage.ParseIntoArrayLines(MessageLines);
+
+	const FString CodeKey {"code: "};
+	const FString TypeKey {"type: "};
+	const FString IdKey {"id: "};
+	
+	for(const FString& Line : MessageLines)
+	{
+		if(Line.StartsWith(CodeKey))
+		{
+			OutLobbyMessageMetaData->Code = Line.RightChop(CodeKey.Len());
+		}
+		else if(Line.StartsWith(TypeKey))
+		{
+			OutLobbyMessageMetaData->Type = Line.RightChop(TypeKey.Len());
+		}
+		else if(Line.StartsWith(IdKey))
+		{
+			OutLobbyMessageMetaData->Id = Line.RightChop(IdKey.Len());
+		}
+	}
+
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Metadata found type %s, id %s, code %s"), *OutLobbyMessageMetaData->Type, *OutLobbyMessageMetaData->Id, *OutLobbyMessageMetaData->Code);
+
+	return true;
+}
+	
 void Lobby::OnMessage(const FString& Message)
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Raw Lobby Response\n%s"), *Message);
@@ -1929,12 +1986,25 @@ void Lobby::OnMessage(const FString& Message)
 
 	// Conversion : Custom -> Json
 	const FString ParsedJsonString = LobbyMessageToJson(Message);
+	
 	UE_LOG(LogAccelByteLobby, Display, TEXT("JSON Version: %s"), *ParsedJsonString);
+
 	TSharedPtr<FJsonObject> ParsedJsonObj;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParsedJsonString);
 	if (!FJsonSerializer::Deserialize(JsonReader, ParsedJsonObj))
 	{
 		UE_LOG(LogAccelByteLobby, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJsonString);
+
+		TSharedRef<FLobbyMessageMetaData> MetaData = MakeShared<FLobbyMessageMetaData>();
+		ExtractLobbyMessageMetaData(Message, MetaData);
+		MetaData->Code = FString::FromInt(static_cast<int>(ErrorCodes::JsonDeserializationFailed));
+
+		// handle error message if message type is response. if notif then ignore.
+		if (MetaData->Type.Contains(Suffix::Response))
+		{
+			HandleMessageResponse(MetaData->Type, ParsedJsonString, ParsedJsonObj, MetaData);
+		}
+		
 		return;
 	}
 
