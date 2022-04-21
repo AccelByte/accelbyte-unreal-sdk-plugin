@@ -20,6 +20,7 @@ namespace Api
 
 	Qos::~Qos()
 	{
+		CredentialsRef.OnLoginSuccess().RemoveAll(this);
 	}
 	
 	void Qos::OnLoginSuccess(const FOauth2Token& Response)
