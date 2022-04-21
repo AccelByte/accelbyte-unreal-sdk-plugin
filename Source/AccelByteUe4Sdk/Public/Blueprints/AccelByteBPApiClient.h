@@ -26,6 +26,7 @@
 #include "ABMessage.h"
 #include "ABSessionAttribute.h"
 #include "ABSignaling.h"
+#include "ABGroup.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -139,6 +140,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	UABSignaling* Signaling;
+
+	UPROPERTY(BlueprintReadOnly)
+	UABGroup* Group;
 
 private:
 	FApiClientPtr ApiClientPtr;
