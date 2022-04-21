@@ -1190,24 +1190,42 @@ bool FEcommerceTestCreditUserWallet::RunTest(const FString& Parameters)
 #pragma region CreditUserWallet
 
 	bool bCreditWalletSuccess = false;
-	bool bBalanceIncrease = false;
+	
 	FAccelByteModelsCreditUserWalletRequest request;
 	request.Amount = 1000;
 	request.Source = EAccelByteCreditUserWalletSource::PURCHASE;
 	request.Reason = TEXT("GameServer Ecommerce CreditUserWallet test.");
+	request.Origin = EAccelByteWalletTable::System;
 	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("CreditUserWallet"));
-	FRegistry::ServerEcommerce.CreditUserWallet(FRegistry::Credentials.GetUserId(), EcommerceTestSDKCurrencyCode, request, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfo, &bBalanceIncrease, &request, &bCreditWalletSuccess](const FAccelByteModelsWalletInfo& Result)
+	FRegistry::ServerEcommerce.CreditUserWallet(FRegistry::Credentials.GetUserId(), EcommerceTestSDKCurrencyCode, request,
+		THandler<FAccelByteModelsWalletInfo>::CreateLambda([&bCreditWalletSuccess]
+			(const FAccelByteModelsWalletInfo& Result)
 		{
 			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
-			bBalanceIncrease = ((WalletInfo.Balance + request.Amount) == Result.Balance);
 			bCreditWalletSuccess = true;
 		}), EcommerceTestErrorHandler);
 	WaitUntil(bCreditWalletSuccess, "Waiting for get wallet...");
 
 #pragma endregion CreditUserWallet
 
+#pragma region GetUpdatedWalletInfo
+	
+	bool bGetWalletSecondSuccess = false;
+	FAccelByteModelsWalletInfo WalletInfoIncreased;
+	UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("GetWalletInfoByCurrencyCode"));
+	FRegistry::Wallet.GetWalletInfoByCurrencyCode(EcommerceTestExpectedCurrencyCode, THandler<FAccelByteModelsWalletInfo>::CreateLambda([&WalletInfoIncreased, &bGetWalletSecondSuccess](const FAccelByteModelsWalletInfo& Result)
+		{
+			UE_LOG(LogAccelByteEcommerceTest, Log, TEXT("    Success"));
+			WalletInfoIncreased = Result;
+			bGetWalletSecondSuccess = true;
+		}), EcommerceTestErrorHandler);
+	WaitUntil(bGetWalletSecondSuccess, "Waiting for get wallet...");
+
+#pragma endregion GetUpdatedWalletInfo
+	
 	AB_TEST_TRUE(bGetWalletSuccess);
 	AB_TEST_TRUE(bCreditWalletSuccess);
+	bool bBalanceIncrease = WalletInfoIncreased.Balance == WalletInfo.Balance + request.Amount;
 	AB_TEST_TRUE(bBalanceIncrease);
 	return true;
 }
