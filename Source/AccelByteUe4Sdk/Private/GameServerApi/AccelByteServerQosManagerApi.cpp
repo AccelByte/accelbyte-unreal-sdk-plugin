@@ -13,7 +13,7 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-	ServerQosManager::ServerQosManager(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+	ServerQosManager::ServerQosManager(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
 	{}
 
 	ServerQosManager::~ServerQosManager()
@@ -23,7 +23,7 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::ServerSettings.QosManagerServerUrl);
+		FString Url = FString::Printf(TEXT("%s/public/qos"), *Settings.QosManagerServerUrl);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -33,7 +33,7 @@ namespace GameServerApi
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerQosManager::GetActiveQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError)

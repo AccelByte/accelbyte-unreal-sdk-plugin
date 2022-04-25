@@ -9,32 +9,40 @@
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteCloudSaveModels.generated.h"
 
+UENUM(BlueprintType)
+enum class ESetByMetadataRecord : uint8
+{
+	NONE = 0,
+	SERVER, 
+	CLIENT,
+}; 
+
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 {
-	FString Key;
-	FString Namespace;
-	FString UserId;
-	bool IsPublic;
-	FDateTime CreatedAt;
-	FDateTime UpdatedAt;
-	FString SetBy;
-	FJsonObject Value;
+	FString Key{};
+	FString Namespace{};
+	FString UserId{};
+	bool IsPublic{};
+	FDateTime CreatedAt{};
+	FDateTime UpdatedAt{};
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+	FJsonObject Value{};
 };
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 {
-	FString Key;
-	FString Namespace;
-	FDateTime CreatedAt;
-	FDateTime UpdatedAt;
-	FString SetBy;
-	FJsonObject Value;
+	FString Key{};
+	FString Namespace{};
+	FDateTime CreatedAt{};
+	FDateTime UpdatedAt{};
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+	FJsonObject Value{};
 };
 
 struct ACCELBYTEUE4SDK_API FAccelByteModelsConcurrentReplaceRequest
 {
-	FDateTime UpdatedAt;
-	FJsonObject Value;
+	FDateTime UpdatedAt{};
+	FJsonObject Value{};
 };
 
 USTRUCT(BlueprintType)
@@ -43,13 +51,13 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedRecordsKey
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
-	TArray<FString> Data;
+	TArray<FString> Data{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 struct ACCELBYTEUE4SDK_API FListAccelByteModelsUserRecord
 {
-	TArray<FAccelByteModelsUserRecord> Data;
+	TArray<FAccelByteModelsUserRecord> Data{};
 };

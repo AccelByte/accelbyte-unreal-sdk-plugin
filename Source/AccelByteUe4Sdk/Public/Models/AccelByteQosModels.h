@@ -11,22 +11,28 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsQosServer
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServer")
-		FString Ip;
+	FString Ip{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServer")
-		int32 Port;
+	int32 Port{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServer")
-		FString Region;
+	FString Region{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServer")
-		FString Status;
+	FString Status{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServer")
-		FString Last_update;
+	FString Last_update{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsQosServerList
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Qos | Models | QosServerList")
-		TArray<FAccelByteModelsQosServer> Servers;
+	TArray<FAccelByteModelsQosServer> Servers{};
 };

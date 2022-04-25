@@ -10,11 +10,9 @@
 #include "Models/AccelByteDSMModels.h"
 #include "AccelByteMatchmakingModels.generated.h"
 
+/** @brief matchmaking session status enumeration. */
 UENUM(BlueprintType)
-/**
- * @brief matchmaking session status enumeration.
- */
-	enum class EAccelByteMatchmakingSessionStatus : uint8
+enum class EAccelByteMatchmakingSessionStatus : uint8
 {
 	None = 0		UMETA(DisplayName = "none"),
 	Matched	        UMETA(DisplayName = "matched"),
@@ -30,48 +28,64 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResult
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Channel;
+	FString Channel{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Client_version;
+	FString Client_version{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Game_mode;
+	FString Game_mode{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		bool Joinable;
+	bool Joinable{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Match_id;
+	FString Match_id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		TArray<FAccelByteModelsMatchingAlly> Matching_allies;
+	TArray<FAccelByteModelsMatchingAlly> Matching_allies{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FJsonObjectWrapper Party_attributes;
+	FJsonObjectWrapper Party_attributes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Party_id;
+	FString Party_id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		int32 Queued_at;
+	int32 Queued_at{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Region;
+	FString Region{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		FString Server_name;
+	FString Server_name{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
-		EAccelByteMatchmakingSessionStatus Status;
+	EAccelByteMatchmakingSessionStatus Status{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAddUserIntoSessionRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
-		FString User_id;
+	FString User_id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
-		FString Party_id;
+	FString Party_id{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsDequeueRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | DequeueRequest")
-		FString Match_id;
+	FString Match_id{};
 };

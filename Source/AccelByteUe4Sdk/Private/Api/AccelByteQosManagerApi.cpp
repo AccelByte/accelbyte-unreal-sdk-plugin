@@ -31,13 +31,7 @@ QosManager::QosManager(
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		const FHttpRequestPtr Request = QosManager::GetQosServersRequest();
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-	}
-
-	FHttpRequestPtr QosManager::GetQosServersRequest()
-	{
-		const FString Url = FString::Printf(TEXT("%s/public/qos"), *FRegistry::Settings.QosManagerServerUrl);
+		const FString Url = FString::Printf(TEXT("%s/public/qos"), *SettingsRef.QosManagerServerUrl);
 		const FString Verb = TEXT("GET");
 		const FString ContentType = TEXT("application/json");
 		const FString Accept = TEXT("application/json");
@@ -47,8 +41,7 @@ QosManager::QosManager(
 		Request->SetVerb(Verb);
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
-
-		return Request;
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void QosManager::GetActiveQosServers(

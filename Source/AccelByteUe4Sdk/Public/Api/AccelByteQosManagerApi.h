@@ -34,8 +34,6 @@ public:
 	void GetQosServers(
 		const THandler<FAccelByteModelsQosServerList>& OnSuccess,
 		const FErrorHandler& OnError) const;
-
-	static FHttpRequestPtr GetQosServersRequest();
 	
 	/**
 	* @brief Get List of Qos Server(s) that have ACTIVE status in the game namespace.

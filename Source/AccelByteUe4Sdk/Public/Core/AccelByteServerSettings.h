@@ -37,6 +37,10 @@ public:
 	void Reset(ESettingsEnvironment const Environment);
 
 	ServerSettings& operator=(ServerSettings const& Other) = default;
+
+protected:
+	void LoadSettings(const FString& SectionPath);
+	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
 };
 
 typedef TSharedRef<ServerSettings, ESPMode::ThreadSafe> ServerSettingsRef;
@@ -54,62 +58,86 @@ class ACCELBYTEUE4SDK_API UAccelByteServerSettings : public UObject
 public:
 	UAccelByteServerSettings();
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	bool ForceEnableSettings;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString ClientId;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString ClientSecret;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString Namespace;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString PublisherNamespace;
 
-    UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+    UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
     FString RedirectURI;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString BaseUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString IamServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString DSMControllerServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString StatisticServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString PlatformServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString QosManagerServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString GameTelemetryServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString AchievementServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString MatchmakingServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString LobbyServerUrl;
 
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString CloudSaveServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString SeasonPassServerUrl;
 	
-	UPROPERTY(EditAnywhere, GlobalConfig, Category = "AccelByte Server | Settings")
+	UPROPERTY(EditAnywhere, Config, Category = "AccelByte Server | Settings")
 	FString SessionBrowserServerUrl;
+};
+
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteServerSettingsDev : public UAccelByteServerSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteServerSettingsDev();
+};
+
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteServerSettingsCert : public UAccelByteServerSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteServerSettingsCert();
+};
+
+UCLASS(Config = Engine)
+class ACCELBYTEUE4SDK_API UAccelByteServerSettingsProd : public UAccelByteServerSettings
+{
+	GENERATED_BODY()
+public:
+	UAccelByteServerSettingsProd();
 };
 
 /**

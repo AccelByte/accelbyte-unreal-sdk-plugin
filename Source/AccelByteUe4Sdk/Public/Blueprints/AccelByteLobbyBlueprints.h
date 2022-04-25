@@ -80,7 +80,7 @@ public:
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyResponse, const FAccelByteModelsPartyInviteResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyInvitationNotice, const FAccelByteModelsInvitationNotice&, Result);       
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyGetInvitedNotice, const FAccelByteModelsPartyGetInvitedNotice&, Result);  
-    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinReponse&, Result);
+    DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinResponse, const FAccelByteModelsPartyJoinResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyJoinNotice, const FAccelByteModelsPartyJoinNotice&, Result);              
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickMemberResponse, const FAccelByteModelsKickPartyMemberResponse&, Result);
     DECLARE_DYNAMIC_DELEGATE_OneParam(FInvitePartyKickedNotice, const FAccelByteModelsGotKickedFromPartyNotice&, Result);   

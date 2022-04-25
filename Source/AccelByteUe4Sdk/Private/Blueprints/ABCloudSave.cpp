@@ -53,6 +53,7 @@ void UABCloudSave::GetUserRecord(
 				Result.IsPublic = Response.IsPublic;
 				Result.CreatedAt = Response.CreatedAt;
 				Result.UpdatedAt = Response.UpdatedAt;
+				Result.SetBy = Response.SetBy;
 				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
 
 				OnSuccess.ExecuteIfBound(Result);
@@ -86,6 +87,7 @@ void UABCloudSave::GetPublicUserRecord(
 				Result.IsPublic = Response.IsPublic;
 				Result.CreatedAt = Response.CreatedAt;
 				Result.UpdatedAt = Response.UpdatedAt;
+				Result.SetBy = Response.SetBy;
 				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
 
 				OnSuccess.ExecuteIfBound(Result);
@@ -252,6 +254,7 @@ void UABCloudSave::GetGameRecord(
 				Result.Namespace = Response.Namespace;
 				Result.CreatedAt = Response.CreatedAt;
 				Result.UpdatedAt = Response.UpdatedAt;
+				Result.SetBy = Response.SetBy;
 				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
 
 				OnSuccess.ExecuteIfBound(Result);

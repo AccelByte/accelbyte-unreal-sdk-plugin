@@ -322,7 +322,7 @@ void UAccelByteBlueprintsLobby::SetInvitePartyResponseDelegate(FInvitePartyRespo
 void UAccelByteBlueprintsLobby::SetInvitePartyJoinResponseDelegate(FInvitePartyJoinResponse OnInvitePartyJoinResponse)
 {
     AccelByte::Api::Lobby::FPartyJoinResponse OnInfoPartyResponseDelegate =
-        AccelByte::Api::Lobby::FPartyJoinResponse::CreateLambda([OnInvitePartyJoinResponse](const FAccelByteModelsPartyJoinReponse& Result) {
+        AccelByte::Api::Lobby::FPartyJoinResponse::CreateLambda([OnInvitePartyJoinResponse](const FAccelByteModelsPartyJoinResponse& Result) {
         OnInvitePartyJoinResponse.ExecuteIfBound(Result);
     });
     FRegistry::Lobby.SetInvitePartyJoinResponseDelegate(OnInfoPartyResponseDelegate);

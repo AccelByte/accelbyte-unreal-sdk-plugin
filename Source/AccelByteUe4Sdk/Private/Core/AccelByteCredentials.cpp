@@ -88,6 +88,11 @@ Credentials::ESessionState Credentials::GetSessionState() const
 	return UserSessionState;
 }
 
+bool Credentials::IsSessionValid() const
+{
+	return UserSessionState == ESessionState::Valid;
+}
+
 void Credentials::Startup()
 {
 	PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(

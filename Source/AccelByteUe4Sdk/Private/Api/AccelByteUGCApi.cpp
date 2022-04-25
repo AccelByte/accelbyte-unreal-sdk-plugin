@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -53,7 +53,7 @@ void UGC::CreateContent(
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::CreateContent(
@@ -114,7 +114,7 @@ void UGC::ModifyContent(
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::ModifyContent(
@@ -163,7 +163,7 @@ void UGC::DeleteContent(FString const& ChannelId, FString const& ContentId, FVoi
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetContentByContentId(
@@ -194,7 +194,7 @@ void UGC::GetContentByContentId(
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetContentByShareCode(
@@ -219,7 +219,7 @@ void UGC::GetContentByShareCode(
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetContentPreview(FString const& ContentId, THandler<FAccelByteModelsUGCPreview> const& OnSuccess, FErrorHandler const& OnError)
@@ -241,7 +241,7 @@ void UGC::GetContentPreview(FString const& ContentId, THandler<FAccelByteModelsU
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());	
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetContentPreview(
@@ -278,7 +278,7 @@ void UGC::GetTags(THandler<FAccelByteModelsUGCTagsPagingResponse> const& OnSucce
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
@@ -300,7 +300,7 @@ void UGC::GetTypes(THandler<FAccelByteModelsUGCTypesPagingResponse> const& OnSuc
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::CreateChannel(
@@ -325,7 +325,7 @@ void UGC::CreateChannel(
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const& OnSuccess, FErrorHandler const& OnError, int32 Limit, int32 Offset)
@@ -347,7 +347,7 @@ void UGC::GetChannels(THandler<FAccelByteModelsUGCChannelsPagingResponse> const&
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void UGC::DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -369,7 +369,7 @@ void UGC::DeleteChannel(FString const& ChannelId, FVoidHandler const& OnSuccess,
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
 }

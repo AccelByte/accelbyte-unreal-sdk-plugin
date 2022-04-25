@@ -8,6 +8,7 @@
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteAchievementModels.generated.h"
 
+/** @brief Enumeration for Achievement sorting */
 UENUM(BlueprintType)
 enum class EAccelByteAchievementListSortBy : uint8
 {
@@ -23,132 +24,238 @@ enum class EAccelByteAchievementListSortBy : uint8
 	UPDATED_AT_DESC,
 };
 
+/** @brief Data Model for Achievement's Icon */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsAchievementIcon
 {
 	GENERATED_BODY()
+	
+	/** @brief Url where the Icon is located */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | AchievementIcon")
-		FString Url;
+	FString Url{};
+	
+	/** @brief Slug information of the Icon */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | AchievementIcon")
-		FString Slug;
+	FString Slug{};
 };
 
+/** @brief Data Model for Achievement's public information */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPublicAchievement
 {
 	GENERATED_BODY()
+	
+	/** @brief Achievement code */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString AchievementCode;
+	FString AchievementCode{};
+
+	/** @brief Game Namespace where the Achievement is registered */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString Namespace;
+	FString Namespace{};
+
+	/** @brief The name of the Achievement */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString Name;
+	FString Name{};
+
+	/** @brief The description of the Achievement */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString Description;
+	FString Description{};
+
+	/** @brief List of Achievement icons for locked state */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> LockedIcons{};
+
+	/** @brief List of Achievement icons for unlocked state */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> UnlockedIcons{};
+
+	/** @brief A flag to indicate the Achievement is hidden */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		bool Hidden;
+	bool Hidden{};
+
+	/** @brief Order of the Achievement in the list */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		int32 ListOrder;
+	int32 ListOrder{};
+
+	/** @brief Achievement Tags */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
+
+	/** @brief A flag that indicates Achievement is incremental or not */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		bool Incremental;
+	bool Incremental{};
+
+	/** @brief Achievement goal value */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		float GoalValue;
+	float GoalValue{};
+
+	/** @brief Statistic code related to track the Achievement */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString StatCode;
+	FString StatCode{};
+
+	/** @brief Achievement creation time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString CreatedAt;
+	FString CreatedAt{};
+
+	/** @brief Last updated time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PublicAchievement")
-		FString UpdatedAt;
+	FString UpdatedAt{};
 };
 
+/** @brief Pagniated Data Model for Achievement's public information */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedPublicAchievement
 {
 	GENERATED_BODY()
+
+	/** @brief List of Achievement data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedPublicAchievement")
-		TArray<FAccelByteModelsPublicAchievement> Data;
+	TArray<FAccelByteModelsPublicAchievement> Data{};
+
+	/** @brief Paging data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedPublicAchievement")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
+/** @brief Data Model for Achievement's localization */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsMultiLanguageAchievement
 {
 	GENERATED_BODY()
+
+	/** @brief Achievement code */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		FString AchievementCode;
+	FString AchievementCode{};
+
+	/** @brief Game Namespace where the Achievement is registered */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		FString Namespace;
+	FString Namespace{};
+
+	/**
+	 * @brief List of the localized name of the Achievement using KV-pairs.
+	 *        The Key is the language code in ISO 639-1 and the Value is
+	 *        the localized name
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		TMap<FString, FString> Name; // "Language" : "Name"
+	TMap<FString, FString> Name{};
+
+	/**
+	 * @brief List of the localized description of the Achievement using KV-pairs.
+	 *        The Key is the language code in ISO 639-1 and the Value is
+	 *        the localized description
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		TMap<FString, FString> Description; // "Language" : "Description"
+	TMap<FString, FString> Description{};
+
+	/** @brief List of Achievement icons for locked state */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		TArray<FAccelByteModelsAchievementIcon> LockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> LockedIcons{};
+
+	/** @brief List of Achievement icons for unlocked state */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		TArray<FAccelByteModelsAchievementIcon> UnlockedIcons;
+	TArray<FAccelByteModelsAchievementIcon> UnlockedIcons{};
+
+	/** @brief A flag to indicate the Achievement is hidden */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		bool Hidden;
+	bool Hidden{};
+	
+	/** @brief Order of the Achievement in the list */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		int32 ListOrder;
+	int32 ListOrder{};
+
+	/** @brief Achievement Tags */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		TArray<FString> Tags;
+	TArray<FString> Tags{};
+
+	/** @brief A flag that indicates Achievement is incremental or not */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		bool Incremental;
+	bool Incremental{};
+
+	/** @brief Achievement goal value */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		float GoalValue;
+	float GoalValue{};
+
+	/** @brief Statistic code related to track the Achievement */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		FString StatCode;
+	FString StatCode{};
+
+	/** @brief Achievement creation time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		FString CreatedAt;
+	FString CreatedAt{};
+
+	/** @brief Last updated time (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | MultiLanguageAchievemen")
-		FString UpdatedAt;
+	FString UpdatedAt{};
 };
 
+/** @brief Data Model for Achievement collection information */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsCountInfo
 {
 	GENERATED_BODY()
+	/** @brief Total number of Achievements available */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | CountInfo")
-		int32 NumberOfAchievements;
+	int32 NumberOfAchievements{};
+
+	/** @brief Total number of Achievements which are hidden */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | CountInfo")
-		int32 NumberOfHiddenAchievements;
+	int32 NumberOfHiddenAchievements{};
+
+	/** @brief Total number of Achievements which are visible */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | CountInfo")
-		int32 NumberOfVisibleAchievements;
+	int32 NumberOfVisibleAchievements{};
 };
 
+/** @brief Data Model for User Achievement progression */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserAchievement
 {
 	GENERATED_BODY()
+
+	/** @brief Unique Id for User Achievement's identifier */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		FString Id;
+	FString Id{};
+
+	/**
+     * @brief List of the localized name of the Achievement using KV-pairs.
+     *        The Key is the language code in ISO 639-1 and the Value is
+     *        the localized name
+     */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		TMap<FString, FString> Name;
+	TMap<FString, FString> Name{};
+
+	/** @brief Achievement code */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		FString AchievementCode;
+	FString AchievementCode{};
+
+	/** @brief The time when user achieved the Achievement (ISO 8601) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		FString AchievedAt;
+	FString AchievedAt{};
+
+	/** @brief The last updated value of the Achievement  */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		float LatestValue;
+	float LatestValue{};
+
+	/** @brief User Achievement's status. (1: In-Progress, 2: Unlocked) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | UserAchievement")
-		int32 Status; // 1: In-Progress, 2: Unlocked
+	int32 Status{};
 };
 
+/** @brief Data Model for List of User Achievements progression */
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedUserAchievement
 {
 	GENERATED_BODY()
+
+	/** @brief The total number of Achievements for the user */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserAchievement")
-		FAccelByteModelsCountInfo CountInfo;
+	FAccelByteModelsCountInfo CountInfo{};
+
+	/** @brief List of User Achievements data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserAchievement")
-		TArray<FAccelByteModelsUserAchievement> Data;
+	TArray<FAccelByteModelsUserAchievement> Data{};
+
+	/** @brief Paging data */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | Achievements | Models | PaginatedUserAchievement")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };

@@ -743,7 +743,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	if (SelectedLatencies.Num() == 0)
 	{
 		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
-		UE_LOG(LogAccelByteLobby, Error, TEXT("!OptionalParams.Latencies && !Qos.Latencies (cached): "
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("No latencies data provided either from cached latencies or optional params. "
 			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
 	}
 
@@ -1415,10 +1415,12 @@ void Lobby::OnConnectionError(const FString& Error)
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
-	if (StatusCode >= 4000 && !BanNotifReceived)
+	if (StatusCode > 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}
+
+	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 
 	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
@@ -1455,7 +1457,7 @@ void Lobby::CreateWebSocket(const FString& Token)
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
+	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 	if(!Token.IsEmpty())
 	{
 		Headers.Add("Entitlement", Token);
@@ -1677,13 +1679,13 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID(PartyCreate		, FAccelByteModelsCreatePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyLeave			, FAccelByteModelsLeavePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyInvite		, FAccelByteModelsPartyInviteResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyReject		, FAccelByteModelsPartyRejectResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyKick			, FAccelByteModelsKickPartyMemberResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGetCode		, FAccelByteModelsPartyGetCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGenerateCode	, FAccelByteModelsPartyGenerateCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyDeleteCode	, FAccelByteModelsPartyDeleteCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyPromoteLeader	, FAccelByteModelsPartyPromoteLeaderResponse);
 		// Chat
 		CASE_RESPONSE_MESSAGE_ID(PersonalChat	, FAccelByteModelsPersonalMessageResponse);
@@ -1799,6 +1801,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
+				WebSocket->UpdateUpgradeHeaders(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 			}
 			break;
 		}

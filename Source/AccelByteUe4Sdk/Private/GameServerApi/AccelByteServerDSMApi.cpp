@@ -32,8 +32,8 @@ namespace AccelByte
 			else
 			{
 				ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -82,7 +82,7 @@ namespace AccelByte
 
 				});
 
-				FRegistry::HttpRetryScheduler.ProcessRequest(Request, OnRegisterResponse, FPlatformTime::Seconds());
+				HttpRef.ProcessRequest(Request, OnRegisterResponse, FPlatformTime::Seconds());
 			}
 		}
 
@@ -95,8 +95,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -117,7 +117,7 @@ namespace AccelByte
 				FReport::Log(TEXT("Starting DSM Shutdown Request..."));
 				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
-				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+				HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 
 				RegisteredServerInfo = FAccelByteModelsServerInfo();
 			}
@@ -133,8 +133,8 @@ namespace AccelByte
 			else
 			{
 				this->ServerName = ServerName_;
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -180,7 +180,7 @@ namespace AccelByte
 
 				});
 
-				FRegistry::HttpRetryScheduler.ProcessRequest(Request, OnRegisterResponse, FPlatformTime::Seconds());
+				HttpRef.ProcessRequest(Request, OnRegisterResponse, FPlatformTime::Seconds());
 			}
 		}
 
@@ -207,8 +207,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -227,7 +227,7 @@ namespace AccelByte
 				FReport::Log(TEXT("Starting DSM Deregister Request..."));
 				FTicker::GetCoreTicker().RemoveTicker(AutoShutdownDelegateHandle);
 				ServerType = EServerType::NONE;
-				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+				HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 
 				RegisteredServerInfo = FAccelByteModelsServerInfo();
 			}
@@ -255,8 +255,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *FRegistry::ServerCredentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *FRegistry::ServerSettings.DSMControllerServerUrl, *FRegistry::ServerCredentials.GetClientNamespace(), *ServerName);
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace(), *ServerName);
 				FString Verb = TEXT("GET");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -268,7 +268,7 @@ namespace AccelByte
 				Request->SetHeader(TEXT("Content-Type"), ContentType);
 				Request->SetHeader(TEXT("Accept"), Accept);
 
-				FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(THandler<FAccelByteModelsServerSessionResponse>::CreateLambda([OnSuccess, this](const FAccelByteModelsServerSessionResponse& Result)
+				HttpRef.ProcessRequest(Request, CreateHttpResultHandler(THandler<FAccelByteModelsServerSessionResponse>::CreateLambda([OnSuccess, this](const FAccelByteModelsServerSessionResponse& Result)
 					{
 						if (!Result.Session_id.IsEmpty())
 						{
@@ -390,7 +390,7 @@ namespace AccelByte
 			}
 		}
 
-		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings)
+		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& InCredentials, const AccelByte::ServerSettings& InSettings, FHttpRetryScheduler& InHttpRef) : Credentials(InCredentials), Settings(InSettings), HttpRef(InHttpRef)
 		{
 			AutoShutdownDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::ShutdownTick);
 		}

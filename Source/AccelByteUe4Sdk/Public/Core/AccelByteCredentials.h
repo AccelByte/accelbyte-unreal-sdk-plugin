@@ -64,6 +64,7 @@ public:
 	const FString& GetUserEmailAddress() const;
 	
 	ESessionState GetSessionState() const;
+	bool IsSessionValid() const;
 
 	void Startup();
 	void Shutdown();

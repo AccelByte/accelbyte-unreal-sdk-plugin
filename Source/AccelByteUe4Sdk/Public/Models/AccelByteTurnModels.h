@@ -11,26 +11,34 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServer
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Ip;
+	FString Ip{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int32 Port;
+	int32 Port{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int32 Qos_port;
+	int32 Qos_port{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Region;
+	FString Region{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Status;
+	FString Status{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Last_update;
+	FString Last_update{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int64 Current_time;
+	int64 Current_time{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServerList
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | QosServerList")
-		TArray<FAccelByteModelsTurnServer> Servers;
+	TArray<FAccelByteModelsTurnServer> Servers{};
 };

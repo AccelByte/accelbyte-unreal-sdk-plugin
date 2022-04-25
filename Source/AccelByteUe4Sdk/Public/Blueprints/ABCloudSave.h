@@ -8,6 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteError.h"
+#include "Models/AccelByteCloudSaveModels.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectWrapper.h"
 #include "ABCloudSave.generated.h"
@@ -19,49 +20,57 @@ USTRUCT(BlueprintType)
 struct FModelsUserRecord
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		FString Key;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Namespace;
+	FString Key{};
 
 	UPROPERTY(BlueprintReadWrite)
-		FString UserId;
+	FString Namespace{};
 
 	UPROPERTY(BlueprintReadWrite)
-		bool IsPublic;
+	FString UserId{};
 
 	UPROPERTY(BlueprintReadWrite)
-		FDateTime CreatedAt;
+	bool IsPublic{};
 
 	UPROPERTY(BlueprintReadWrite)
-		FDateTime UpdatedAt;
+	FDateTime CreatedAt{0};
 
 	UPROPERTY(BlueprintReadWrite)
-		FJsonObjectWrapper Value;
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(BlueprintReadWrite)
+	ESetByMetadataRecord SetBy{};
+
+	UPROPERTY(BlueprintReadWrite)
+	FJsonObjectWrapper Value{};
 };
 
 USTRUCT(BlueprintType)
 struct FModelsGameRecord
 {
 	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		FString Key;
 
 	UPROPERTY(BlueprintReadWrite)
-		FString Namespace;
+	FString Key{};
 
 	UPROPERTY(BlueprintReadWrite)
-		FDateTime CreatedAt;
+	FString Namespace{};
 
 	UPROPERTY(BlueprintReadWrite)
-		FDateTime UpdatedAt;
+	FDateTime CreatedAt{0};
 
 	UPROPERTY(BlueprintReadWrite)
-		FJsonObjectWrapper Value;
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(BlueprintReadWrite)
+	ESetByMetadataRecord SetBy{};
+	
+	UPROPERTY(BlueprintReadWrite)
+	FJsonObjectWrapper Value{};
 };
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Reponse);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Response);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FModelsGameRecord, Response);
 
