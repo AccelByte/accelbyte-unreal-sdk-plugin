@@ -103,7 +103,7 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDataPartyResponse
 	FString partyId{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
-	FString leaderId{};
+	FString leader{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	TArray<FString> members{};

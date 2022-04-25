@@ -1887,6 +1887,7 @@ bool ServerLobbyQueryPartyByUserId::RunTest(const FString& Parameters)
 		}
 	}
 	AB_TEST_TRUE(user1FoundAfterJoin);
+	AB_TEST_EQUAL(queryAfterInviteToParty0.leader, ScreatePartyResponse.LeaderId);
 	AB_TEST_TRUE(ScreatePartyResponse.PartyId.Equals(queryAfterInviteToParty1.partyId));
 
 	AB_TEST_TRUE(queryAfterLeaveNotFound1);
