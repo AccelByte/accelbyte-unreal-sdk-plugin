@@ -115,17 +115,7 @@ void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDel
 	}
 }
 
-void AdminBanUser(const FString& userId, const FBanRequest& requestBody, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/bans"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId);
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(requestBody, Content);
-	AB_HTTP_POST(Request, Url, Authorization, Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool enabled, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool enabled, const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/bans/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *banId);

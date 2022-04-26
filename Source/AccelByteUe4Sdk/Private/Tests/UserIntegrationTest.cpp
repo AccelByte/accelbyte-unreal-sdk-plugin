@@ -4044,24 +4044,40 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	const FString OldSessionId = FRegistry::Credentials.GetAccessToken();
 
 	//Ban
-	FBanRequest body =
+	FBanUserRequest body =
 	{
 		EBanType::MATCHMAKING,
 		"User Ban Test",
 		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
-		EBanReason::IMPERSONATION
+		EBanReason::IMPERSONATION,
+		false
 	};
 
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+			{
+				bServerLoginWithClientCredentialsDone = true;
+			}), UserTestErrorHandler);
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+	AB_TEST_TRUE(bServerLoginWithClientCredentialsDone);
+	
 	bool bBanSuccessful = false;
 	FString BanId;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("BanUser"));
-	AdminBanUser(FRegistry::Credentials.GetUserId(), body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+	FRegistry::ServerUser.BanSingleUser(FRegistry::Credentials.GetUserId(), body,
+		THandler<FBanUserResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
 			BanId = Result.BanId;
 			bBanSuccessful = true;
-		}), UserTestErrorHandler);
+		}), FErrorHandler::CreateLambda([&](int32 Code, const FString& Message)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("Login Failed. Error Code: %d, Message: %s"), Code, *Message);
+			}));
 
+	
 	FlushHttpRequests();
 	WaitUntil(bBanSuccessful, "Waiting for Ban...");
 
@@ -4106,7 +4122,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	//Unban
 	bool bUnbanSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UnbanUser"));
-	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, false, THandler<FBanUserResponse>::CreateLambda([&bUnbanSuccessful](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
 			bUnbanSuccessful = true;
@@ -4155,7 +4171,7 @@ bool FBan_FeatureBan_TokenRefreshed::RunTest(const FString& Parameter)
 	//Enable Ban
 	bool bEnableBanSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("EnablebanUser"));
-	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, true, THandler<FBanResponse>::CreateLambda([&bEnableBanSuccessful](const FBanResponse& Result)
+	AdminBanUserChangeStatus(FRegistry::Credentials.GetUserId(), BanId, true, THandler<FBanUserResponse>::CreateLambda([&bEnableBanSuccessful](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
 			bEnableBanSuccessful = true;
@@ -4287,18 +4303,31 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	const FString UserId = FRegistry::Credentials.GetUserId();
 
 	//Ban
-	FBanRequest body =
+	FBanUserRequest body =
 	{
 		EBanType::LOGIN,
 		"User Ban Test",
 		(FDateTime::Now() + FTimespan::FromSeconds(180)).ToIso8601(),
-		EBanReason::IMPERSONATION
+		EBanReason::IMPERSONATION,
+		false
 	};
 
 	bool bBanSuccessful = false;
 	FString BanId;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("BanUser"));
-	AdminBanUser(UserId, body, THandler<FBanResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanResponse& Result)
+	bool bServerLoginWithClientCredentialsDone = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(
+		FVoidHandler::CreateLambda([&bServerLoginWithClientCredentialsDone]()
+			{
+				bServerLoginWithClientCredentialsDone = true;
+			}), UserTestErrorHandler);
+	WaitUntil(bServerLoginWithClientCredentialsDone, "Server Login With Client Credentials");
+
+	AB_TEST_TRUE(bServerLoginWithClientCredentialsDone);
+	
+	 
+	FRegistry::ServerUser.BanSingleUser(FRegistry::Credentials.GetUserId(), body, 
+		THandler<FBanUserResponse>::CreateLambda([&bBanSuccessful, &BanId](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
 			BanId = Result.BanId;
@@ -4375,7 +4404,7 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	//Unban
 	bool bUnbanSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("UnbanUser"));
-	AdminBanUserChangeStatus(UserId, BanId, false, THandler<FBanResponse>::CreateLambda([&bUnbanSuccessful](const FBanResponse& Result)
+	AdminBanUserChangeStatus(UserId, BanId, false, THandler<FBanUserResponse>::CreateLambda([&bUnbanSuccessful](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Unbanned: %s"), *Result.UserId);
 			bUnbanSuccessful = true;
@@ -4441,7 +4470,7 @@ bool FBan_AccountBan::RunTest(const FString& Parameter)
 	//Enable Ban
 	bool bEnableBanSuccessful = false;
 	UE_LOG(LogAccelByteUserTest, Log, TEXT("EnablebanUser"));
-	AdminBanUserChangeStatus(UserId, BanId, true, THandler<FBanResponse>::CreateLambda([&bEnableBanSuccessful](const FBanResponse& Result)
+	AdminBanUserChangeStatus(UserId, BanId, true, THandler<FBanUserResponse>::CreateLambda([&bEnableBanSuccessful](const FBanUserResponse& Result)
 		{
 			UE_LOG(LogAccelByteUserTest, Log, TEXT("User Banned: %s"), *Result.UserId);
 			bEnableBanSuccessful = true;
