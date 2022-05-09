@@ -1145,6 +1145,8 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 			return bCreateMatchmakingChannelSuccess;
 		}, "Create Matchmaking channel...", 60);
 	}
+
+	DelaySeconds(60, "Waiting 60s for lobby service to refresh matchmaking game mode cache from MM service");
 	
 	return true;
 }
