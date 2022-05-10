@@ -3201,6 +3201,23 @@ bool FBulkGetUserBySteamUserIDTest::RunTest(const FString& Parameter)
 
 	WaitUntil(bGetUserDone, "Waiting for Login...");
 
+	// Check platformUserIds when get BulkUserInfo
+	bool bGetBulkUserInfoDone = false;
+	FListBulkUserInfo ReceivedBulkUserInfo;
+	FRegistry::User.BulkGetUserInfo( { ABUserId },
+		THandler<FListBulkUserInfo>::CreateLambda([&bGetBulkUserInfoDone, &ReceivedBulkUserInfo](const FListBulkUserInfo& UserData)
+			{
+				UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success ReceivedBulkUserInfo"));
+				bGetBulkUserInfoDone = true;
+				ReceivedBulkUserInfo = UserData; 
+			}),
+		UserTestErrorHandler);
+
+	WaitUntil(bGetBulkUserInfoDone, "Waiting for BulkGetUserInfo...");
+	FString steamId = *ReceivedBulkUserInfo.Data[0].PlatformUserIds.Find(TEXT("steam"));
+	AB_TEST_FALSE(steamId.IsEmpty());
+	AB_TEST_EQUAL(steamId, SteamUserID);
+
 #pragma region DeleteUserById
 
 	bool bDeleteDone = false;

@@ -671,6 +671,9 @@ struct ACCELBYTEUE4SDK_API FBaseUserInfo
 	FString DisplayName{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+	TMap<FString, FString> PlatformUserIds{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
 	FString UserId{};
 };
 
