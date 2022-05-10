@@ -35,7 +35,7 @@ AccelByteWebSocket::~AccelByteWebSocket()
 {
 	if(UObjectInitialized())
 	{
-		Disconnect();
+		Disconnect(true);
 	}
 }
 
