@@ -884,22 +884,43 @@ void User::SendVerificationCode(const FVerificationCodeRequest& VerificationCode
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+void User::SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError,
+	const int32& Offset, const int32& Limit)
 {
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users?query=%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace(), *FGenericPlatformHttp::UrlEncode(Query));
+	FString Url             = FString::Printf(TEXT("%s/v3/public/namespaces/%s/users"), *SettingsRef.IamServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
 	FString Content;
 
+	TMap<FString, FString> QueryParams = {};
+	QueryParams.Add("query", *FGenericPlatformHttp::UrlEncode(Query));
 	if (By != EAccelByteSearchType::ALL)
 	{
 		FString SearchId = SearchStrings[static_cast<std::underlying_type<EAccelByteSearchType>::type>(By)];
-		Url.Append(FString::Printf(TEXT("&by=%s"), *SearchId));
+		QueryParams.Add("by", *SearchId);
 	}
+	if (Limit >= 0)
+	{
+		QueryParams.Add("limit", FString::FromInt(Limit));
+	}
+	if (Offset >= 0)
+	{
+		QueryParams.Add("offset", FString::FromInt(Offset));
+	}
+	
+	// Converting TMap QueryParams as one line QueryString 
+	FString QueryString;
+	int i = 0;
+	for (const auto& Kvp : QueryParams)
+	{
+		QueryString.Append(FString::Printf(TEXT("%s%s=%s"), (i++ == 0 ? TEXT("?") : TEXT("&")),
+				*FGenericPlatformHttp::UrlEncode(Kvp.Key), *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+	}
+	Url.Append(QueryString);
 
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
@@ -917,6 +938,11 @@ void User::SearchUsers(const FString& Query, const THandler<FPagedPublicUsersInf
 	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError);
 }
 
+void User::SearchUsers(const FString& Query, int32 Offset, int32 Limit, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError)
+{
+	SearchUsers(Query, EAccelByteSearchType::ALL, OnSuccess, OnError, Offset, Limit);
+}
+	
 void User::GetUserByUserId(const FString& UserID, const THandler<FSimpleUserData>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));

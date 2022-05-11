@@ -6351,3 +6351,51 @@ bool FUserGetDataTest::RunTest(const FString& Parameter)
 	AB_TEST_EQUAL(UserData.DisplayName, DisplayName);
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FSearchUserWithQueryParam, "AccelByte.Tests.AUser.SearchUserWithQueryParam", AutomationFlagMaskUser);
+bool FSearchUserWithQueryParam::RunTest(const FString& Parameter)
+{
+	FRegistry::User.ForgetAllCredentials();
+
+	bool bDeviceLoginSuccessful = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("LoginWithDeviceId"));
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bDeviceLoginSuccessful]()
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Success"));
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    User ID: %s"), *FRegistry::Credentials.GetUserId());
+
+			bDeviceLoginSuccessful = true;
+		}), UserTestErrorHandler);
+
+	WaitUntil(bDeviceLoginSuccessful, "Waiting for Login...");
+	
+	bool bSearchUserSuccessful = false;
+	bool bSearchUserDone = false;
+	FPagedPublicUsersInfo GetDataResult{};
+	int32 ErrorCode;
+	bool bSearchUserError;
+	int32 Limit = 8;
+	
+	FRegistry::User.SearchUsers(TEXT("test"), EAccelByteSearchType::ALL,
+	THandler<FPagedPublicUsersInfo>::CreateLambda([&](const FPagedPublicUsersInfo& Result)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("   Success"));
+			bSearchUserSuccessful = true;
+			bSearchUserDone = true;
+			GetDataResult = Result;
+		}),
+	FErrorHandler::CreateLambda([&bSearchUserDone, &bSearchUserError, &ErrorCode](int Code, const FString& Message)
+		{
+			UE_LOG(LogAccelByteUserTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+			ErrorCode = Code;
+			bSearchUserError = true;
+			bSearchUserDone = true;
+		}), 0, Limit);
+
+	WaitUntil(bSearchUserDone, "Waiting for Search Users...");
+
+	AB_TEST_TRUE(bDeviceLoginSuccessful);
+	AB_TEST_TRUE(bSearchUserSuccessful);
+	AB_TEST_EQUAL(Limit, GetDataResult.Data.Num());
+	return true;
+}

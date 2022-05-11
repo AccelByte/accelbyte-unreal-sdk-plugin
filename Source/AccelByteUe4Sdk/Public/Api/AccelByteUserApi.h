@@ -395,11 +395,24 @@ namespace AccelByte
 			 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.
 			 *
 			 * @param Query Targeted user's Username or Display Name.
-			 * @param By Filter the responded PagedPublicUsersInfo by SearchType. Choose the SearchType.ALL if you want to be responded with all query type.
+			 * @param Offset Targeted offset query filter.
+			 * @param Limit Targeted limit query filter.
 			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
 			 * @param OnError This will be called when the operation failed.
 			 */
-			void SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
+			void SearchUsers(const FString& Query, int32 Offset, int32 Limit, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError);
+			
+			/**
+			 * @brief This function will search user by their Username or Display Name. The query will be used to find the user with the most approximate username or display name.
+			 *
+			 * @param Query Targeted user's Username or Display Name.
+			 * @param By Filter the responded PagedPublicUsersInfo by SearchType. Choose the SearchType.ALL if you want to be responded with all query type.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FPagedPublicUsersInfo.
+			 * @param OnError This will be called when the operation failed.
+			 * @param Offset Targeted offset query filter.
+			 * @param Limit Targeted limit query filter.
+			 */
+			void SearchUsers(const FString& Query, EAccelByteSearchType By, const THandler<FPagedPublicUsersInfo>& OnSuccess, const FErrorHandler& OnError, const int32& Offset = 0, const int32& Limit = 100);
 
 			/**
 			 * @brief This function will search user by userId.
