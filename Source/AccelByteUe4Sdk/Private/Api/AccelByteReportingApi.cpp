@@ -35,7 +35,20 @@ void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportDat
 	FString Content;
 
 	FJsonObjectConverter::UStructToJsonObjectString(ReportData, Content);
+	
+	if(ReportData.ObjectId.IsEmpty())
+	{
+		OnError.ExecuteIfBound(404, TEXT("ObjectID is Empty, You Should Fill it with UUID v4 without hyphen format"));
+		return;
+	}
 
+	if(ReportData.ObjectId.Contains("-"))
+	{
+		OnError.ExecuteIfBound(404, TEXT("ObjectId doesn't follow the UUID V4 without hyphen format, You Should Fill it with UUID v4 without hyphen format"));
+		ReportData.ObjectId.Replace(TEXT("-"),TEXT(""));
+		return;
+	}
+	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
 	Request->SetURL(Url);
 	Request->SetHeader(TEXT("Authorization"), Authorization);

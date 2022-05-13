@@ -453,7 +453,7 @@ void FReportingTestSpec::Define()
 				SubmitData.AdditionalInfo.Add(TEXT("Prop2"), TEXT("Addditional Property 2"));
 				SubmitData.Category = EAccelByteReportingCategory::UGC;
 				SubmitData.Comment = "AdditionalComment";
-				SubmitData.ObjectId = "";
+				SubmitData.ObjectId = "d2cedbbd8751442bb7077fb5c4940dba"; //picked from UUID Generator Online
 				SubmitData.ObjectType = "";
 				SubmitData.Reason = ReasonsResponse.Data[0].Title;
 				SubmitData.UserID = User2Creds.GetUserId();
