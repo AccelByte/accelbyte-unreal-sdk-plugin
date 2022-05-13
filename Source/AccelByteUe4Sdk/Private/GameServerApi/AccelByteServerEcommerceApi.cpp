@@ -339,5 +339,35 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteMod
 	Request->SetContentAsString(Content);
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+	FString Params;
+	for(FString const& Sku : Skus)
+	{
+		if(!Params.IsEmpty())
+		{
+			Params = FString::Printf(TEXT("%s&"), *Params);
+		}
+		Params = FString::Printf(TEXT("%ssku=%s"), *Params, *Sku);
+	}
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus?%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *Params);
+
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
 } // Namespace GameServerApi
 } // Namespace AccelByte

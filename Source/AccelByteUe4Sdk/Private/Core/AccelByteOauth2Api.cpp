@@ -2,7 +2,7 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
@@ -224,7 +224,6 @@ void Oauth2::RevokeToken(const FString& AccessToken, const FVoidHandler& OnSucce
 	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(*AccessToken)));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(FVoidHandler::CreateLambda([OnSuccess]() { 
-		FRegistry::Credentials.ForgetAll();
 		OnSuccess.ExecuteIfBound();
 	}), OnError), FPlatformTime::Seconds());
 }
@@ -242,7 +241,6 @@ void Oauth2::RevokeUserToken(const FString& ClientId, const FString& ClientSecre
 	Request->SetContentAsString(FString::Printf(TEXT("token=%s"), *FGenericPlatformHttp::UrlEncode(*AccessToken)));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(FVoidHandler::CreateLambda([OnSuccess]() { 
-	FRegistry::Credentials.ForgetAll();
 	OnSuccess.ExecuteIfBound();
 	}), OnError), FPlatformTime::Seconds());
 }

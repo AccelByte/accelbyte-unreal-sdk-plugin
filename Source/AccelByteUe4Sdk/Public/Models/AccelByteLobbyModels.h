@@ -694,6 +694,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDsNotice
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
 	TMap<FString, int32> Ports{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Category | Models | Lobby")
+	FString CustomAttribute{};
 };
 
 // Ready Consent Request

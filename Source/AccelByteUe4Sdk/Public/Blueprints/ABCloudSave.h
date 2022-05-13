@@ -15,64 +15,11 @@
 
 using namespace AccelByte;
 
-#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
-USTRUCT(BlueprintType)
-struct FModelsUserRecord
-{
-	GENERATED_BODY()
+#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE 
 
-	UPROPERTY(BlueprintReadWrite)
-	FString Key{};
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FAccelByteModelsUserRecord, Response);
 
-	UPROPERTY(BlueprintReadWrite)
-	FString Namespace{};
-
-	UPROPERTY(BlueprintReadWrite)
-	FString UserId{};
-
-	UPROPERTY(BlueprintReadWrite)
-	bool IsPublic{};
-
-	UPROPERTY(BlueprintReadWrite)
-	FDateTime CreatedAt{0};
-
-	UPROPERTY(BlueprintReadWrite)
-	FDateTime UpdatedAt{0};
-
-	UPROPERTY(BlueprintReadWrite)
-	ESetByMetadataRecord SetBy{};
-
-	UPROPERTY(BlueprintReadWrite)
-	FJsonObjectWrapper Value{};
-};
-
-USTRUCT(BlueprintType)
-struct FModelsGameRecord
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite)
-	FString Key{};
-
-	UPROPERTY(BlueprintReadWrite)
-	FString Namespace{};
-
-	UPROPERTY(BlueprintReadWrite)
-	FDateTime CreatedAt{0};
-
-	UPROPERTY(BlueprintReadWrite)
-	FDateTime UpdatedAt{0};
-
-	UPROPERTY(BlueprintReadWrite)
-	ESetByMetadataRecord SetBy{};
-	
-	UPROPERTY(BlueprintReadWrite)
-	FJsonObjectWrapper Value{};
-};
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Response);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FModelsGameRecord, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FAccelByteModelsGameRecord, Response);
 
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 

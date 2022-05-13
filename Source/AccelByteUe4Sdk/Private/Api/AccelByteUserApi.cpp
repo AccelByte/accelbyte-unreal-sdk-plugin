@@ -12,7 +12,7 @@
 #include "Core/AccelByteHttpListenerExtension.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Api/AccelByteQos.h"
 #include "Core/AccelByteUtilities.h"
 
@@ -330,7 +330,11 @@ void User::Logout(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 			SettingsRef.ClientId,
 			SettingsRef.ClientSecret,
 			CredentialsRef.GetAccessToken(),
-			OnSuccess,
+			FVoidHandler::CreateLambda([this, OnSuccess]() 
+				{
+					ForgetAllCredentials();
+					OnSuccess.ExecuteIfBound();
+				}),
 			OnError);
 }
 

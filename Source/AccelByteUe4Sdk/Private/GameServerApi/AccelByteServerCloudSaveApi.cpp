@@ -125,7 +125,7 @@ namespace GameServerApi
 			gameRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
-			gameRecord.Value = *value->ToSharedRef();
+			gameRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 			OnSuccess.ExecuteIfBound(gameRecord);
 		}), OnError),
 			FPlatformTime::Seconds());
@@ -291,7 +291,7 @@ namespace GameServerApi
 				userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 				const TSharedPtr<FJsonObject> *value;
 				jsonObject.TryGetObjectField("value", value);
-				userRecord.Value = *value->ToSharedRef();
+				userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 				OnSuccess.ExecuteIfBound(userRecord);
 			}), OnError),
 			FPlatformTime::Seconds());
@@ -336,7 +336,7 @@ namespace GameServerApi
 			userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);			
 			const TSharedPtr<FJsonObject> *value;
 			jsonObject.TryGetObjectField("value", value);
-			userRecord.Value = *value->ToSharedRef();
+			userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 			OnSuccess.ExecuteIfBound(userRecord);
 		}), OnError),
 			FPlatformTime::Seconds());
@@ -453,6 +453,17 @@ namespace GameServerApi
 		NewRecordRequest.SetObjectField("__META", MetadataJson);
 
 		return NewRecordRequest;
+	}
+
+	FJsonObjectWrapper ServerCloudSave::ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJsonObject> *& value)
+	{
+		FJsonObjectWrapper jsonObjWrapper{};
+		FString OutputString;
+		TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+		FJsonSerializer::Serialize(value->ToSharedRef(), Writer);					
+		jsonObjWrapper.JsonObjectFromString(OutputString);
+	
+		return jsonObjWrapper;
 	}
 } // namespace GameServerApi
 } // namespace AccelByte

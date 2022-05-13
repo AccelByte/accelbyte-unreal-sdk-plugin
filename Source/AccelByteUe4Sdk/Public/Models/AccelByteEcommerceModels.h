@@ -194,6 +194,22 @@ enum class EAccelByteWalletAction :uint8
 	DEBIT
 };
 
+UENUM(BlueprintType)
+enum class EAccelByteWalletTable :uint8
+{
+	Playstation = 0,
+	Xbox,
+	Steam,
+	Epic,
+	Stadia,
+	IOS,
+	GooglePlay,
+	Twitch,
+	System,
+	Nintendo,
+	Other
+};
+
 #pragma endregion EnumField
 
 #pragma region ItemModelsField
@@ -544,6 +560,16 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsItemCriteria
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemCriteria")
 	FString SortBy{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsBulkGetItemsBySkus
+{
+	GENERATED_BODY();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
+	FString Sku{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Item | Models | ItemInfo")
+	FString ItemId{};
 };
 
 #pragma endregion ItemModelsField
@@ -1330,6 +1356,21 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCategoryInfo
 #pragma region WalletModelsField
 
 USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsTimeLimitedBalance
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
+	int32 Balance{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
+	FString BalanceSource{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | TimeLimitedBalance")
+	FDateTime ExpiredAt{0};
+	
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 {
 	GENERATED_BODY()
@@ -1353,6 +1394,12 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsWalletInfo
 	int32 Balance{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
+	FString BalanceOrigin{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
+	TArray<FAccelByteModelsTimeLimitedBalance> TimeLimitedBalances{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
 	FDateTime CreatedAt{0};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | WalletInfo")
@@ -1375,6 +1422,9 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsCreditUserWalletRequest
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
 	FString Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Wallet | Models | CreditUserWalletRequest")
+	EAccelByteWalletTable Origin{EAccelByteWalletTable::System};
 };
 
 USTRUCT(BlueprintType)

@@ -8,6 +8,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteCredentials.generated.h"
@@ -46,6 +47,7 @@ public:
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	void ForgetAll();
 	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
+	void SetClientCredentials(const ESettingsEnvironment Environment);
 	void SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void PollRefreshToken(double CurrentTime);
@@ -86,6 +88,8 @@ private:
 	FRefreshTokenAdditionalActions RefreshTokenAdditionalActions;
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
+
+	static const FString DefaultSection;
 
 	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
 };

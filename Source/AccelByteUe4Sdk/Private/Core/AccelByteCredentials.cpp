@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
 using namespace AccelByte::Api;
@@ -34,6 +34,8 @@ Credentials::~Credentials()
 	LoginSuccessDelegate.Clear();
 }
 
+const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
+
 void Credentials::ForgetAll()
 {
 	AuthToken = {};
@@ -48,6 +50,37 @@ void Credentials::SetClientCredentials(const FString& Id, const FString& Secret)
 {
 	ClientId = Id;
 	ClientSecret = Secret;
+}
+
+void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
+{
+	FString SectionPath;
+	switch (Environment)
+	{
+	case ESettingsEnvironment::Development:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsDev");
+		break;
+	case ESettingsEnvironment::Certification:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsCert");
+		break;
+	case ESettingsEnvironment::Production:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsProd");
+		break;
+	case ESettingsEnvironment::Default:
+	default:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
+		break;
+	}
+
+	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	{
+		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+	else
+	{
+		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
 }
 
 void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)

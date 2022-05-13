@@ -20,7 +20,7 @@ namespace AccelByte
     namespace GameServerApi
     {
 
-		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		void ServerDSM::RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			ParseCommandParam();
@@ -42,7 +42,8 @@ namespace AccelByte
 					DSPubIp,
 					ServerName,
 					Port,
-					Provider
+					Provider,
+					CustomAttribute
 				};
 				FString Contents;
 				FJsonObjectConverter::UStructToJsonObjectString(Register, Contents);
@@ -123,7 +124,7 @@ namespace AccelByte
 			}
 		}
 
-		void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		void ServerDSM::RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			if (ServerType != EServerType::NONE)
@@ -141,7 +142,8 @@ namespace AccelByte
 				const FAccelByteModelsRegisterLocalServerRequest Register{
 					IPAddress,
 					ServerName_,
-					Port
+					Port,
+					CustomAttribute
 				};
 				FString Contents;
 				FJsonObjectConverter::UStructToJsonObjectString(Register, Contents);
@@ -184,16 +186,16 @@ namespace AccelByte
 			}
 		}
 
-		void ServerDSM::RegisterLocalServerToDSM(const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+		void ServerDSM::RegisterLocalServerToDSM(const int32 Port, const FString ServerName_, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			FReport::LogDeprecated(
 				FString(__FUNCTION__),
 				TEXT("Please use RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)"));
 
-			GetPubIpDelegate.BindLambda([this, Port, ServerName_, OnSuccess, OnError](const FAccelByteModelsPubIp& Result)
+			GetPubIpDelegate.BindLambda([this, Port, ServerName_, OnSuccess, OnError, CustomAttribute](const FAccelByteModelsPubIp& Result)
 			{
-				RegisterLocalServerToDSM(Result.Ip, Port, ServerName_, OnSuccess, OnError);
+				RegisterLocalServerToDSM(Result.Ip, Port, ServerName_, OnSuccess, OnError, CustomAttribute);
 			});
 			FAccelByteNetUtilities::GetPublicIP(GetPubIpDelegate, OnError);
 		}

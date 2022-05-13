@@ -3,6 +3,7 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteMultiRegistry.h"
+#include "AccelByteUe4SdkModule.h"
 
 namespace AccelByte
 {
@@ -19,8 +20,9 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key)
 		}
 		else 
 		{
+			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
-			NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+			NewClient->CredentialsRef->SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 		}
 
 		ApiClientInstances.Add(Key, NewClient);
@@ -41,8 +43,9 @@ FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString 
 		}
 		else 
 		{
+			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>();
-			NewClient->ServerCredentialsRef->SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+			NewClient->ServerCredentialsRef->SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 		}
 
 		ServerApiClientInstances.Add(Key, NewClient);

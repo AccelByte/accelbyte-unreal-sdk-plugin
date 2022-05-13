@@ -27,18 +27,26 @@ namespace Api
 // Start Matchmaking Optional Params
 struct FMatchmakingOptionalParams
 {
-	FString ServerName;
-	FString ClientVersion;
+	FString ServerName{};
+	FString ClientVersion{};
 
 	/** @brief If !Latencies, we will refresh them from Qos */
-	TArray<TPair<FString, float>> Latencies;
+	TArray<TPair<FString, float>> Latencies{};
 	
-	TMap<FString, FString> PartyAttributes;
-	TArray<FString> TempPartyUserIds;
-	TArray<FString> ExtraAttributes;
+	TMap<FString, FString> PartyAttributes{};
+	TArray<FString> TempPartyUserIds{};
+	TArray<FString> ExtraAttributes{};
 	bool NewSessionOnly {false};
-	TArray<FString> SubGameModes;
+	TArray<FString> SubGameModes{};
 };
+
+struct FLobbyMessageMetaData
+{
+	FString Code{};
+	FString Type{};
+	FString Id{};
+};
+	
 enum Response : uint8;
 enum Notif : uint8;
 /**
@@ -1628,6 +1636,7 @@ private:
     FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
 	void CreateWebSocket(const FString& Token = "");
 	void FetchLobbyErrorMessages();
+	bool ExtractLobbyMessageMetaData(const FString& InLobbyMessage, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData);
 	
 	THandler<const FString&> OnTokenReceived = THandler<const FString&>::CreateLambda([&](const FString& Token)
 	{
@@ -1635,7 +1644,7 @@ private:
 	});
 
 #pragma region Message Parsing
-	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	static TMap<FString, Response> ResponseStringEnumMap; 
 	static TMap<FString, Notif> NotifStringEnumMap;
