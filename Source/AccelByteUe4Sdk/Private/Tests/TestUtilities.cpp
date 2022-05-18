@@ -20,7 +20,10 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
+void WaitUntilInternal(const TFunction<bool()> Condition
+	, const FString Message
+	, const double TimeoutSeconds
+	, const double DeltaTime)
 {
 	const double StartSeconds = FPlatformTime::Seconds();
 	const double LimitSeconds = StartSeconds + TimeoutSeconds;
@@ -30,10 +33,10 @@ void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message,
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
 			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartSeconds);
-		FTicker::GetCoreTicker().Tick(.2f);
-		FHttpModule::Get().GetHttpManager().Tick(.2f);
+		FTicker::GetCoreTicker().Tick(DeltaTime);
+		FHttpModule::Get().GetHttpManager().Tick(DeltaTime);
 		LastTickSeconds = FPlatformTime::Seconds();
-		FPlatformProcess::Sleep(.2f);
+		FPlatformProcess::Sleep(DeltaTime);
 	}
 
 	if (Condition && !Condition() && (FPlatformTime::Seconds() > LimitSeconds))
@@ -42,7 +45,9 @@ void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message,
 	}
 }
 
-void DelaySeconds(double Seconds, const FString Message)
+void DelaySeconds(double Seconds
+	, const FString& Message
+	, const double DeltaTime)
 {
 	const double StartTime = FPlatformTime::Seconds();
 	const double LimitSeconds = StartTime + Seconds;
@@ -55,7 +60,7 @@ void DelaySeconds(double Seconds, const FString Message)
 		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
-		FPlatformProcess::Sleep(.2f);
+		FPlatformProcess::Sleep(DeltaTime);
 	}
 }
 
