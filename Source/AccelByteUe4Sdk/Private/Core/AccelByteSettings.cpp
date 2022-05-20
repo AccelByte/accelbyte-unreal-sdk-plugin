@@ -64,6 +64,7 @@ static bool SetClientEnvironment(Settings * InSettings)
 	InSettings->UGCServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->UGCServerUrl, InSettings->BaseUrl, TEXT("ugc"));
 	InSettings->SeasonPassServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->UGCServerUrl, InSettings->BaseUrl, TEXT("seasonpass"));
 	InSettings->ReportingServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->ReportingServerUrl, InSettings->BaseUrl, TEXT("reporting"));
+	InSettings->SessionServerUrl = GetDefaultClientAPIUrl(GetDefault<T>()->SessionServerUrl, InSettings->BaseUrl, TEXT("session"));
 	InSettings->AppId = GetDefault<T>()->AppId;
 	InSettings->QosLatencyPollIntervalSecs = GetDefault<T>()->QosLatencyPollIntervalSecs;
 	InSettings->QosServerLatencyPollIntervalSecs = GetDefault<T>()->QosServerLatencyPollIntervalSecs;
@@ -196,6 +197,11 @@ FString UAccelByteBlueprintsSettings::GetReportingServerUrl()
 	return FRegistry::Settings.ReportingServerUrl;
 }
 
+FString UAccelByteBlueprintsSettings::GetSessionServerUrl()
+{
+	return FRegistry::Settings.SessionServerUrl;
+}
+
 FString UAccelByteBlueprintsSettings::GetAppId()
 {
 	return FRegistry::Settings.AppId;
@@ -324,6 +330,11 @@ void UAccelByteBlueprintsSettings::SetSeasonPassServerUrl(const FString& SeasonP
 void UAccelByteBlueprintsSettings::SetReportingServerUrl(const FString& ReportingServerUrl)
 {
 	FRegistry::Settings.ReportingServerUrl = ReportingServerUrl;
+}
+
+void UAccelByteBlueprintsSettings::SetSessionServerUrl(const FString& SessionServerUrl)
+{
+	FRegistry::Settings.SessionServerUrl = SessionServerUrl;
 }
 
 void UAccelByteBlueprintsSettings::SetAppId(const FString& AppId)
