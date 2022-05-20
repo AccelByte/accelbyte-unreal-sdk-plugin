@@ -235,6 +235,73 @@ namespace AccelByte
 			}
 		}
 
+    	void ServerDSM::RegisterServerGameSession(const FString& SessionId
+    		, const FString& GameMode
+    		, const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess
+			, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			if(ServerType == EServerType::NONE)
+			{
+				OnError.ExecuteIfBound(400, TEXT("Server not Registered."));
+				return;
+			}
+
+			FAccelByteModelsUser User;
+			User.User_id = "0";
+			FAccelByteModelsMatchingParty Party;
+			Party.Party_id = "0";
+			Party.Party_members = {User};
+			
+			FAccelByteModelsServerCreateSessionRequest Request;
+			Request.Session_id = SessionId;
+			Request.Client_version = RegisteredServerInfo.Game_version;
+			Request.Game_mode = GameMode;
+			Request.Configuration = "";
+			Request.Deployment = RegisteredServerInfo.Deployment;
+			Request.Region = RegisteredServerInfo.Region;
+			Request.Namespace = FRegistry::ServerCredentials.GetClientNamespace();
+			Request.Matching_allies = {{{Party}}};
+			
+			if(ServerType == EServerType::LOCALSERVER)
+			{
+				Request.Pod_name = RegisteredServerInfo.Pod_name;
+			}
+			else if(ServerType == EServerType::CLOUDSERVER)
+			{
+				Request.Pod_name = "";
+			}
+
+			RegisterServerGameSession(Request, OnSuccess, OnError);
+		}
+
+    	void ServerDSM::RegisterServerGameSession( const FAccelByteModelsServerCreateSessionRequest& RequestContent
+    		, const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess
+    		, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace());
+			FString Verb = TEXT("POST");
+			FString ContentType = TEXT("application/json");
+			FString Accept = TEXT("application/json");
+
+			FString Content;
+			FJsonObjectConverter::UStructToJsonObjectString(RequestContent, Content);
+		
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+			Request->SetURL(Url);
+			Request->SetHeader(TEXT("Authorization"), Authorization);
+			Request->SetVerb(Verb);
+			Request->SetHeader(TEXT("Content-Type"), ContentType);
+			Request->SetHeader(TEXT("Accept"), Accept);
+			Request->SetContentAsString(Content);
+
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		}
+
 		void ServerDSM::GetServerInfo(const THandler<FAccelByteModelsServerInfo>& OnSuccess, const FErrorHandler& OnError)
 		{
 			if (!RegisteredServerInfo.Pod_name.IsEmpty())

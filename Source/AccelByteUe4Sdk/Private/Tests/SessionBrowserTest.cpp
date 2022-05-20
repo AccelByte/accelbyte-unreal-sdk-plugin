@@ -367,3 +367,122 @@ bool SessionBrowserCreateCustomGame::RunTest(const FString& Parameters)
 	
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(DSCreateGameSession, "AccelByte.Tests.SessionBrowser.D.DSCreateGameSession", AutomationFlagMaskSessionBrowser);
+bool DSCreateGameSession::RunTest(const FString& Parameters)
+{
+	bool bCreated = false;
+	FString SessionType("dedicated");
+	FString GameMode("FFA");
+	FString GameMap("Karimun Java Island");
+	FString GameVersion("1.0.1");
+	FString ServerName {"TestLocal"};
+	FAccelByteModelsSessionBrowserData GameSession;
+	int UpdatedPlayerCount = 4;
+	int UpdatedMaxPlayer = 8;
+	auto SettingJson = MakeShared<FJsonObject>();
+	SettingJson->SetStringField(TEXT("CUSTOM1"), TEXT("CUSTOM1"));
+	SettingJson->SetNumberField(TEXT("CUSTOM2"), 20);
+
+	// Local DS create server
+	FServerApiClientPtr ServerApiClient = FMultiRegistry::GetServerApiClient();
+	bool ServerLogin {false};
+	ServerApiClient->ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+	{
+		ServerLogin = true;
+	}), SessionBrowserTestErrorHandler);
+
+	WaitUntil(ServerLogin, "Waiting server login");
+
+	bool RegisterSuccess {false};
+	ServerApiClient->ServerDSM.RegisterLocalServerToDSM("127.0.0.1", 7777, ServerName, FVoidHandler::CreateLambda(
+		[&]()
+		{
+			RegisterSuccess = true;
+		}), SessionBrowserTestErrorHandler);
+
+	WaitUntil(RegisterSuccess, "Waiting Register server");
+
+	FAccelByteModelsServerInfo ServerInfo;
+	bool bGetServerInfoDone {false};
+	ServerApiClient->ServerDSM.GetServerInfo(THandler<FAccelByteModelsServerInfo>::CreateLambda(
+		[&](const FAccelByteModelsServerInfo& Result)
+		{
+			ServerInfo = Result;
+			bGetServerInfoDone = true;
+		}), SessionBrowserTestErrorHandler);
+
+	WaitUntil(bGetServerInfoDone, "Waiting get server info");
+	
+	// Create game session
+	ServerApiClient->ServerSessionBrowser.CreateGameSession(EAccelByteSessionType::dedicated, GameMode,
+		GameMap, GameVersion, 1, 8, 4, FString(), SettingJson,
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&bCreated, &GameSession](FAccelByteModelsSessionBrowserData const& Data)
+		{
+			bCreated = true;
+			GameSession = Data;
+		}), SessionBrowserTestErrorHandler);
+	WaitUntil(bCreated, TEXT("Waiting for creating dedicated game session..."));
+	AB_TEST_TRUE(bCreated);
+
+	// DS Register game session
+	FAccelByteModelsUser partyMember;
+	partyMember.User_id = "0";
+
+	FAccelByteModelsMatchingParty party;
+	party.Party_id = "0";
+	party.Party_members = {partyMember};
+
+	bool bRegisterServerSessionDone {false};
+	FAccelByteModelsServerCreateSessionResponse CreateSessionResponse;
+	ServerApiClient->ServerDSM.RegisterServerGameSession(GameSession.Session_id, GameMode,
+		THandler<FAccelByteModelsServerCreateSessionResponse>::CreateLambda(
+		[&](const FAccelByteModelsServerCreateSessionResponse& Result)
+		{
+			bRegisterServerSessionDone = true;
+			CreateSessionResponse = Result;
+		}), SessionBrowserTestErrorHandler);
+	
+	WaitUntil(bRegisterServerSessionDone, "Waiting register server session");
+	DelaySeconds(3, "Waiting 3 sec");
+
+
+	// Client query session from Session browser
+	FAccelByteModelsSessionBrowserGetResult GetResult;
+	bool bGetResultDone {false};
+	TestSessionBrowserApiClients[0]->SessionBrowser.GetGameSessions(EAccelByteSessionType::dedicated, GameMode,
+	THandler<FAccelByteModelsSessionBrowserGetResult>::CreateLambda([&](const FAccelByteModelsSessionBrowserGetResult& Result)
+	{
+		GetResult = Result;
+		bGetResultDone = true;
+	}), SessionBrowserTestErrorHandler);
+
+	WaitUntil(bGetResultDone, "Waiting client get session");
+
+	bool bSessionFound {false};
+	for(auto SessionData : GetResult.Sessions)
+	{
+		if(SessionData.Session_id == GameSession.Session_id)
+		{
+			bSessionFound = true;
+		}
+	}
+
+	AB_TEST_TRUE(bSessionFound);
+
+	// Join the created session
+	bool bJoinDone {false};
+	FAccelByteModelsSessionBrowserData JoinResult;
+	TestSessionBrowserApiClients[0]->SessionBrowser.JoinSession(GameSession.Session_id, "",
+		THandler<FAccelByteModelsSessionBrowserData>::CreateLambda([&](const FAccelByteModelsSessionBrowserData& Result)
+		{
+			bJoinDone = true;
+			JoinResult = Result;
+		}), SessionBrowserTestErrorHandler);
+
+	WaitUntil(bJoinDone, "Waiting join session result");
+
+	AB_TEST_FALSE(JoinResult.Server.Ip.IsEmpty());
+	AB_TEST_FALSE(CreateSessionResponse.Session.Namespace.IsEmpty());
+	return true;
+}

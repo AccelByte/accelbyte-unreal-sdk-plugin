@@ -99,6 +99,27 @@ public:
     	const FErrorHandler& OnError);
 
 	/*
+	* @brief Register server's game session to DSM
+	*
+	* @param Request the request body.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	*/
+	void RegisterServerGameSession(const FAccelByteModelsServerCreateSessionRequest& Request,
+		const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess, const FErrorHandler& OnError);
+	
+	/*
+	* @brief Register server's game session to DSM
+	*
+	* @param SessionId the Session ID of the server.
+	* @param GameMode the matchmaker's game mode the server will use.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	*/
+	void RegisterServerGameSession(const FString& SessionId, const FString& GameMode,
+		const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess, const FErrorHandler& OnError);
+
+	/*
 	 * @brief Get Session ID of a claimed DS. Will return empty string OnSucess if DS is not claimed yet.
 	 *
 	 * @param OnSuccess This will be called when the operation succeeded, The result is const FAccelByteModelsServerSessionResponse.
