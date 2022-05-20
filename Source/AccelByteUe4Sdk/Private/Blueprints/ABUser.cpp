@@ -33,7 +33,8 @@ void UABUser::LoginWithOtherPlatform(
 	EAccelBytePlatformType const PlatformType,
 	FString const& PlatformToken,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError,
+	bool bCreateHeadless) const
 {
 	ApiClientPtr->User.LoginWithOtherPlatform(
 		PlatformType,
@@ -47,7 +48,7 @@ void UABUser::LoginWithOtherPlatform(
 			[OnError](int Code, FString const& Message, const FJsonObject& ErrorJson)
 			{
 				OnError.ExecuteIfBound(Code, Message);
-			}));
+			}), bCreateHeadless);
 }
 
 void UABUser::LoginWithDeviceId(

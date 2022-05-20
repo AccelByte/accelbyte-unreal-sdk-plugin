@@ -79,14 +79,14 @@ namespace AccelByte
 			* @param Password Password.
 			* @param OnSuccess This will be called when the operation succeeded.
 			* @param OnError This will be called when the operation failed.
-			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
+			* @param bRememberMe This will use for refresh token expiration extension, default value is false. 
 			*/
 			void LoginWithUsernameV3(
 				const FString& Username,
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
 				const FErrorHandler& OnError,
-				const bool RememberMe = false) const;
+				const bool bRememberMe = false) const;
 
 			/**
 			* @brief Log in with email/username account using v3 endpoint with 2FA enable
@@ -95,14 +95,14 @@ namespace AccelByte
 			* @param Password Password.
 			* @param OnSuccess This will be called when the operation succeeded.
 			* @param OnError This will be called when the operation failed.
-			* @param RememberMe This will use for refresh token expiration extension, default value is false. 
+			* @param bRememberMe This will use for refresh token expiration extension, default value is false. 
 			*/
 			void LoginWithUsernameV3(
 				const FString& Username,
 				const FString& Password,
 				const FVoidHandler& OnSuccess,
 				const FCustomErrorHandler& OnError,
-				const bool RememberMe = false) const;
+				const bool bRememberMe = false) const;
 
 			/**
 			 * @brief Log in with another platform account e.g. Steam, Google, Facebook, Twitch, etc.
@@ -125,12 +125,14 @@ namespace AccelByte
 			* @param PlatformToken Authentication code that provided by another platform.
 			* @param OnSuccess This will be called when the operation succeeded.
 			* @param OnError This will be called when the operation failed.
+			* @param bCreateHeadless If directly create new account when not linked yet, default value is true 
 			*/
 			void LoginWithOtherPlatform(
 				EAccelBytePlatformType PlatformType,
 				const FString& PlatformToken,
 				const FVoidHandler& OnSuccess,
-				const FCustomErrorHandler& OnError) const;
+				const FCustomErrorHandler& OnError,
+				bool bCreateHeadless = true) const;
 
 			/**
 			 * @brief Log in with device ID (anonymous log in).
@@ -148,10 +150,10 @@ namespace AccelByte
 			 * @param Code auth code from 3rd party authenticator or backupCode. 
 			 * @param OnSuccess This will be called when the operation succeeded.
 			 * @param OnError This will be called when the operation failed.
-			 * @param RememberDevice
+			 * @param bRememberDevice
 			 */
 			void VerifyLoginWithNewDevice2FAEnabled(const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code,
-				const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice = false) const;
+				const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice = false) const;
 
 			/**
 			 * @brief Log in from Accelbyte Launcher.
@@ -168,8 +170,26 @@ namespace AccelByte
 			 * @param OnError This will be called when the operation failed.
 			 */
 			void LoginWithRefreshToken(const FVoidHandler& OnSuccess, const FErrorHandler& OnError) const;
-			#pragma endregion /Login Methods
+
+			/**
+			 * @brief Create Headless Account And Login
+			 *
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void CreateHeadlessAccountAndLogin(const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const;
 			
+			/**
+			 * @brief Authentication With Platform Link And Login
+			 *
+			 * @param Username This is username's account exist
+			 * @param Password This is password's account exist
+			 * @param OnSuccess This will be called when the operation succeeded.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void AuthenticationWithPlatformLinkAndLogin(const FString& Username, const FString& Password, const FVoidHandler& OnSuccess, const FCustomErrorHandler& OnError) const;
+
+			#pragma endregion /Login Methods
 			
 			/**
 			 * @brief General handler for LoginWith* success; mostly a multicast callback handler.
@@ -497,9 +517,9 @@ namespace AccelByte
 			 * @param  LanguageCode Targeted Language Code, using ISO-639 
 			 * @param  OnSuccess This will be called when the operation succeeded. The result is FInputUserValidation.
 			 * @param  OnError This will be called when the operation failed.
-			 * @param  DefaultOnEmpty Targeted DefaultOnEmpty. 
+			 * @param  bDefaultOnEmpty Targeted DefaultOnEmpty. 
 			 */
-			void GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError, bool DefaultOnEmpty = true);
+			void GetInputValidations(const FString& LanguageCode, THandler<FInputValidation> const& OnSuccess, FErrorHandler const& OnError, bool bDefaultOnEmpty = true);
 
 			/**
 			* @brief This function will enable 2FA with backupCode.

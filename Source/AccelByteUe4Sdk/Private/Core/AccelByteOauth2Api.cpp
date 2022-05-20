@@ -177,7 +177,8 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 	
-void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError)
+void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FString& ClientSecret, const FString& PlatformId, const FString& PlatformToken,
+	const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bCreateHeadless )
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -188,7 +189,8 @@ void Oauth2::GetTokenWithOtherPlatformToken(const FString& ClientId, const FStri
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
-	Request->SetContentAsString(FString::Printf(TEXT("platform_token=%s"), *FGenericPlatformHttp::UrlEncode(PlatformToken)));
+	Request->SetContentAsString(FString::Printf(TEXT("platform_token=%s&createHeadless=%s"), *FGenericPlatformHttp::UrlEncode(PlatformToken),
+		bCreateHeadless ? TEXT("true") : TEXT("false")));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
@@ -245,7 +247,7 @@ void Oauth2::RevokeUserToken(const FString& ClientId, const FString& ClientSecre
 	}), OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool RememberMe)
+void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError, bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 	FReport::LogDeprecated(
@@ -263,14 +265,14 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
 	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
 	const FString Namespace =  FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace);
-	const FString Extend_exp = RememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
+	const FString Extend_exp = bRememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
 	
 	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *Namespace, *Extend_exp));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberMe)
+void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberMe)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -286,7 +288,7 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 	const FString EncodedUsername = FGenericPlatformHttp::UrlEncode(Username);
 	const FString EncodedPassword =  FGenericPlatformHttp::UrlEncode(Password);
 	const FString Namespace =  FGenericPlatformHttp::UrlEncode(*FRegistry::Settings.Namespace);
-	const FString Extend_exp = RememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
+	const FString Extend_exp = bRememberMe ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
 	
 	Request->SetContentAsString(FString::Printf(Format, *EncodedUsername, *EncodedPassword, *Namespace, *Extend_exp));
 
@@ -294,7 +296,7 @@ void Oauth2::GetTokenWithPasswordCredentialsV3(const FString& ClientId, const FS
 }
 
 void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId, const FString& ClientSecret, const FString& MfaToken, EAccelByteLoginAuthFactorType AuthFactorType, const FString& Code, 
-	const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool RememberDevice)
+	const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError, bool bRememberDevice)
 {
 	FReport::Log(FString(__FUNCTION__));
 
@@ -307,8 +309,41 @@ void Oauth2::VerifyAndRememberNewDevice(const FString& ClientId, const FString& 
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
 	Request->SetHeader(TEXT("cookie"), TEXT("device_token=" + FGenericPlatformHttp::UrlEncode(GetDeviceId())));
-	const FString RememberThisDevice = RememberDevice ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
+	const FString RememberThisDevice = bRememberDevice ? FString::Printf(TEXT("true")) : FString::Printf(TEXT("false"));
 	Request->SetContentAsString(FString::Printf(TEXT("mfaToken=%s&factor=%s&code=%s&rememberDevice=%s"), *MfaToken, *Factor, *Code, *RememberThisDevice));
+
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void Oauth2::CreateHeadlessAccountAndResponseToken(const FString& ClientId, const FString& ClientSecret, const FString& LinkingToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("POST")); 
+	Request->SetURL(FString::Printf(TEXT("%s/v3/headless/token"), *FRegistry::Settings.IamServerUrl));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetContentAsString(FString::Printf(TEXT("linkingToken=%s&client_id=%s"), *LinkingToken, *ClientId));
+	
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds()); 
+}
+
+void Oauth2::AuthenticationWithPlatformLink(const FString& ClientId, const FString& ClientSecret, const FString& Username, const FString& Password, const FString& LinkingToken, const THandler<FOauth2Token>& OnSuccess, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetVerb(TEXT("POST"));
+	Request->SetURL(FString::Printf(TEXT("%s/v3/authenticateWithLink"), *FRegistry::Settings.IamServerUrl));
+	Request->SetHeader(TEXT("Authorization"), TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret)));
+	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/x-www-form-urlencoded"));
+	Request->SetContentAsString(FString::Printf(TEXT("username=%s&password=%s&linkingToken=%s&client_id=%s"),
+		*FGenericPlatformHttp::UrlEncode(Username),
+		*FGenericPlatformHttp::UrlEncode(Password),
+		*LinkingToken, *ClientId));
 
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }

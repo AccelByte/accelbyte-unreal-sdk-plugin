@@ -25,7 +25,7 @@ public:
 	static void LoginWithUsername(const FString& Username, const FString& Password, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
-	static void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError);
+	static void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError, bool bCreateHeadless = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User | Api ")
 	static void LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError);

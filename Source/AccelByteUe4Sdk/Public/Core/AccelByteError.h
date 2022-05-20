@@ -55,6 +55,12 @@ struct ACCELBYTEUE4SDK_API FErrorOauthInfo
 	TArray<FString> Factors{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
 	FString Default_factor{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString LinkingToken{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString PlatformId{};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Models | OauthError")
+	FString ClientId{};
 };
 
 namespace AccelByte
@@ -471,6 +477,22 @@ namespace AccelByte
 					{
 						OutErrorObject.SetStringField("default_factor", *Error.Default_factor);
 					}
+
+					if(!Error.PlatformId.IsEmpty())
+					{
+						OutErrorObject.SetStringField("platformId", *Error.PlatformId);
+					}
+
+					if(!Error.LinkingToken.IsEmpty())
+					{
+						OutErrorObject.SetStringField("linkingToken", *Error.LinkingToken);
+					}
+
+					if(!Error.ClientId.IsEmpty())
+					{
+						OutErrorObject.SetStringField("clientId", *Error.ClientId);
+					}
+ 
 				}
 			}
 			else
