@@ -19,7 +19,7 @@ void UABEntitlement::QueryUserEntitlements(
 	FDAccelByteModelsEntitlementPagingSlicedResultResponse OnSuccess, 
 	FDErrorHandler const& OnError, 
 	EAccelByteEntitlementClass EntitlementClass, 
-	EAccelByteAppType AppType) const
+	EAccelByteAppType AppType) 
 {
 	ApiClientPtr->Entitlement.QueryUserEntitlements(
 		EntitlementName,
@@ -43,7 +43,7 @@ void UABEntitlement::QueryUserEntitlements(
 void UABEntitlement::GetUserEntitlementById(
 	FString const& Entitlementid, 
 	FDAccelByteModelsEntitlementInfoResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.GetUserEntitlementById(
 		Entitlementid,
@@ -62,7 +62,7 @@ void UABEntitlement::GetUserEntitlementById(
 void UABEntitlement::GetUserEntitlementOwnershipByAppId(
 	FString const& AppId, 
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipByAppId(
 		AppId,
@@ -81,7 +81,7 @@ void UABEntitlement::GetUserEntitlementOwnershipByAppId(
 void UABEntitlement::GetUserEntitlementOwnershipBySku(
 	FString const& Sku, 
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipBySku(
 		Sku,
@@ -100,7 +100,7 @@ void UABEntitlement::GetUserEntitlementOwnershipBySku(
 void UABEntitlement::GetUserEntitlementOwnershipByItemId(
 	FString const& ItemId, 
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipByItemId(
 		ItemId,
@@ -121,7 +121,7 @@ void UABEntitlement::GetUserEntitlementOwnershipAny(
 	TArray<FString> const& AppIds, 
 	TArray<FString> const& Skus, 
 	FDAccelByteModelsEntitlementOwnershipResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.GetUserEntitlementOwnershipAny(
 		ItemIds,
@@ -143,7 +143,7 @@ void UABEntitlement::ConsumeUserEntitlement(
 	FString const& EntitlementId, 
 	int32 const& UseCount, 
 	FDAccelByteModelsEntitlementInfoResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.ConsumeUserEntitlement(
 		EntitlementId,
@@ -164,7 +164,7 @@ void UABEntitlement::CreateDistributionReceiver(
 	FString const& ExtUserId, 
 	FAccelByteModelsAttributes const& Attributes, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.CreateDistributionReceiver(
 		ExtUserId,
@@ -185,7 +185,7 @@ void UABEntitlement::DeleteDistributionReceiver(
 	FString const& ExtUserId, 
 	FString const& UserId, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.DeleteDistributionReceiver(
 		ExtUserId,
@@ -206,7 +206,7 @@ void UABEntitlement::GetDistributionReceiver(
 	FString const& PublisherNamespace, 
 	FString const& PublisherUserId, 
 	FDArrayModelsDistributionReceiverResponse OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 
 {
 	ApiClientPtr->Entitlement.GetDistributionReceiver(
@@ -230,7 +230,7 @@ void UABEntitlement::UpdateDistributionReceiver(
 	FString const& ExtUserId, 
 	FAccelByteModelsAttributes const& Attributes, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.UpdateDistributionReceiver(
 		ExtUserId,
@@ -250,7 +250,7 @@ void UABEntitlement::UpdateDistributionReceiver(
 void UABEntitlement::SyncPlatformPurchase(
 	EAccelBytePlatformSync PlatformType, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.SyncPlatformPurchase(
 		PlatformType,
@@ -269,7 +269,7 @@ void UABEntitlement::SyncPlatformPurchase(
 void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 	FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseGoogle(
 		SyncRequest,
@@ -288,7 +288,7 @@ void UABEntitlement::SyncMobilePlatformPurchaseGoogle(
 void UABEntitlement::SyncMobilePlatformPurchaseApple(
 	FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, 
 	FDHandler OnSuccess, 
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError)
 {
 	ApiClientPtr->Entitlement.SyncMobilePlatformPurchaseApple(
 		SyncRequest,
@@ -306,7 +306,7 @@ void UABEntitlement::SyncMobilePlatformPurchaseApple(
 
 void UABEntitlement::SyncTwitchDropEntitlement(
 	FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel, 
-	FDHandler OnSuccess, FDErrorHandler OnError) const 
+	FDHandler OnSuccess, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Entitlement.SyncTwitchDropEntitlement(
 		TwitchDropModel,

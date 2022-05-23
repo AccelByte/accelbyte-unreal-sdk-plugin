@@ -52,18 +52,18 @@ public:
 	FString SetSessionAttribute(
 		FSetSessionAttributeRequest const& Request,
 		FDSetSessionAttributeResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute")
 	FString GetSessionAttribute(
 		FGetSessionAttributeRequest const& Request,
 		FDGetSessionAttributeResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | SessionAttribute")
 	FString GetAllSessionAttribute(
 		FDGetAllSessionAttributeResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

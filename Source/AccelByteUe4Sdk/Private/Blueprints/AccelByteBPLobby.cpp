@@ -1,21 +1,21 @@
 ﻿#include "Blueprints/AccelByteBPLobby.h"
 
-void UABLobby::Connect() const
+void UABLobby::Connect() 
 {
 	ApiClientPtr->Lobby.Connect();
 }
 
-void UABLobby::Disconnect() const
+void UABLobby::Disconnect() 
 {
 	return ApiClientPtr->Lobby.Disconnect();
 }
 
-void UABLobby::UnbindEvent() const
+void UABLobby::UnbindEvent() 
 {
 	ApiClientPtr->Lobby.UnbindEvent();
 }
 
-void UABLobby::SetOnConnected(FDHandler OnConnected) const
+void UABLobby::SetOnConnected(FDHandler OnConnected) 
 {
 	ApiClientPtr->Lobby.SetConnectSuccessDelegate(
 		FVoidHandler::CreateLambda(
@@ -25,7 +25,7 @@ void UABLobby::SetOnConnected(FDHandler OnConnected) const
 			}));
 }
 
-bool UABLobby::IsConnected() const
+bool UABLobby::IsConnected() 
 {
 	return ApiClientPtr->Lobby.IsConnected();
 }
@@ -35,7 +35,7 @@ void UABLobby::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
+void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) 
 {
 	ApiClientPtr->Lobby.SetErrorNotifDelegate(
 		Api::Lobby::FErrorNotif::CreateLambda(
@@ -49,7 +49,7 @@ void UABLobby::SetOnErrorNotification(FDErrorHandler OnErrorNotification) const
 FString UABLobby::RefreshToken(
 	FRefreshTokenRequest const& Request,
 	FDRefreshTokenResponseDelegate OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetRefreshTokenDelegate(
 		Api::Lobby::FRefreshTokenResponse::CreateLambda(
@@ -65,7 +65,7 @@ FString UABLobby::RefreshToken(
 	return ApiClientPtr->Lobby.RefreshToken(Request.AccessToken);
 }
 
-void UABLobby::SetRetryParameters(FSetRetryParametersRequest const& Request) const
+void UABLobby::SetRetryParameters(FSetRetryParametersRequest const& Request) 
 {
 	ApiClientPtr->Lobby.SetRetryParameters(
 		Request.NewTotalTimeout,
@@ -78,7 +78,7 @@ void UABLobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGener
 	ApiClientPtr->Lobby.SetTokenGenerator(TokenGenerator);
 }
 
-FString UABLobby::RequestDS(FRequestDSModel const& Request) const
+FString UABLobby::RequestDS(FRequestDSModel const& Request) 
 {
 	return ApiClientPtr->Lobby.RequestDS(
 		Request.SessionID,
