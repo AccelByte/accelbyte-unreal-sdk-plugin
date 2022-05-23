@@ -74,18 +74,18 @@ void Session::GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsB
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void Session::SendInvite(FString const& PartyID, FString const& InviteeID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void Session::SendPartyInvite(FString const& PartyID, FString const& InviteeID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/parties/%s/invite"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
+	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/parties/invite"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
 	FString Content         = TEXT("");
-
-	FAccelByteModelsPartyInviteRequest RequestBody = {InviteeID};
+	
+	const FAccelByteModelsPartyInviteRequest RequestBody = {InviteeID};
 	FJsonObjectConverter::UStructToJsonObjectString(RequestBody, Content);
 	
 	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
@@ -99,5 +99,28 @@ void Session::SendInvite(FString const& PartyID, FString const& InviteeID, FVoid
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void Session::JoinParty(FString const& PartyID, THandler<FAccelByteModelsBaseSession> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+	
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/parties/users/me/join"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID);
+	FString Verb            = TEXT("POST");
+	FString ContentType     = TEXT("application/json");
+	FString Accept          = TEXT("application/json");
+	FString Content         = TEXT("");
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+	Request->SetContentAsString(Content);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+	
 }
 }

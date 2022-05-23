@@ -28,8 +28,8 @@ public:
 	 * @brief Create a new party with the calling user as the sole member.
 	 *
 	 * @param CreateRequest The party creation request with attributes, join type, and members.
-	 * @param OnSuccess This will be called when the operation succeeded.
-	 * @param OnError This will be called when the operation failed.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
 	 */
 	void CreateParty(FAccelByteModelsPartyCreateRequest const& CreateRequest, THandler<FAccelByteModelsBaseSession> const& OnSuccess, FErrorHandler const& OnError);
 	
@@ -37,8 +37,8 @@ public:
 	 * @brief Retrieve party details for the given party ID.
 	 *
 	 * @param PartyID The ID of the party session to retrieve.
-	 * @param OnSuccess This will be called when the operation succeeded.
-	 * @param OnError This will be called when the operation failed.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
 	 */
 	void GetPartyDetails(FString const& PartyID, THandler<FAccelByteModelsBaseSession> const& OnSuccess, FErrorHandler const& OnError);
 
@@ -47,10 +47,19 @@ public:
      *
      * @param PartyID The ID of the party session for which the invite will be created.
      * @param UserID The ID of the user to invite.
-     * @param OnSuccess This will be called when the operation succeeded.
-     * @param OnError This will be called when the operation failed.
+     * @param OnSuccess This will be called if the operation succeeded.
+     * @param OnError This will be called if the operation failed.
      */
-	void SendInvite(FString const& PartyID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+	void SendPartyInvite(FString const& PartyID, FString const& UserID, FVoidHandler const& OnSuccess, FErrorHandler const& OnError);
+
+	/**
+	 * @brief Join a party on behalf of the user. 
+	 *
+	 * @param PartyID The ID of the party session which will be joined.
+	 * @param OnSuccess This will be called if the operation succeeded.
+	 * @param OnError This will be called if the operation failed.
+	 */
+	void JoinParty(FString const& PartyID, THandler<FAccelByteModelsBaseSession> const& OnSuccess, FErrorHandler const& OnError);
 	
 private:
 	FHttpRetryScheduler& HttpRef;
