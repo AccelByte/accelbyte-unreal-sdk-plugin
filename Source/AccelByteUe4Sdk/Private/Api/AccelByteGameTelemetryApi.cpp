@@ -72,7 +72,7 @@ void GameTelemetry::Send(FAccelByteModelsTelemetryBody TelemetryBody, FVoidHandl
 		{
 			bTelemetryJobStarted = true;
 			GameTelemetryTickDelegate = FTickerDelegate::CreateRaw(this, &GameTelemetry::PeriodicTelemetry);
-			GameTelemetryTickDelegateHandle = FTicker::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetTotalSeconds()));
+			GameTelemetryTickDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(GameTelemetryTickDelegate, static_cast<float>(TelemetryInterval.GetTotalSeconds()));
 		}
 	}
 }
@@ -94,7 +94,7 @@ void GameTelemetry::Shutdown()
 	{
 		if (GameTelemetryTickDelegateHandle.IsValid())
 		{
-			FTicker::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
+			FTickerAlias::GetCoreTicker().RemoveTicker(GameTelemetryTickDelegateHandle);
 			GameTelemetryTickDelegateHandle.Reset();
 		}
 		// flush events

@@ -8,6 +8,7 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteDefines.h"
 #include "Api/AccelByteUserApi.h"
 #include "Misc/Base64.h"
 
@@ -33,7 +34,7 @@ void WaitUntilInternal(const TFunction<bool()> Condition
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
 			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartSeconds);
-		FTicker::GetCoreTicker().Tick(DeltaTime);
+		FTickerAlias::GetCoreTicker().Tick(DeltaTime);
 		FHttpModule::Get().GetHttpManager().Tick(DeltaTime);
 		LastTickSeconds = FPlatformTime::Seconds();
 		FPlatformProcess::Sleep(DeltaTime);
@@ -57,7 +58,7 @@ void DelaySeconds(double Seconds
 	{
 		UE_LOG(LogAccelByteTest, Log, TEXT("%s\t%s Elapsed %f s"),
 			*Message, *FString(__FUNCTION__), FPlatformTime::Seconds() - StartTime);
-		FTicker::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
+		FTickerAlias::GetCoreTicker().Tick(FPlatformTime::Seconds() - LastTickTime);
 		FHttpModule::Get().GetHttpManager().Tick(FPlatformTime::Seconds() - LastTickTime);
 		LastTickTime = FPlatformTime::Seconds();
 		FPlatformProcess::Sleep(DeltaTime);
@@ -282,6 +283,10 @@ void FlushHttpRequests()
 		FPlatformProcess::Sleep(0.5);
 	};
 
+#if (ENGINE_MAJOR_VERSION==5 && ENGINE_MINOR_VERSION>=0)
+	FHttpModule::Get().GetHttpManager().Flush(EHttpFlushReason::Default);
+#else
 	FHttpModule::Get().GetHttpManager().Flush(false);
+#endif
 }
 

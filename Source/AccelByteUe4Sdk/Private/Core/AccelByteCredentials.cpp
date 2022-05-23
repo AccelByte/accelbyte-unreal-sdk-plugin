@@ -143,7 +143,7 @@ bool Credentials::IsComply() const
 
 void Credentials::Startup()
 {
-	PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(
+	PollRefreshTokenHandle = FTickerAlias::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateLambda([this](float DeltaTime)
         {
             PollRefreshToken(FPlatformTime::Seconds());
@@ -157,7 +157,7 @@ void Credentials::Shutdown()
 {
 	if (PollRefreshTokenHandle.IsValid())
 	{
-		FTicker::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(PollRefreshTokenHandle);
 		PollRefreshTokenHandle.Reset();
 	}
 }

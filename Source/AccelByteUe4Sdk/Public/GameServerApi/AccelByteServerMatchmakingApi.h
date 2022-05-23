@@ -5,10 +5,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
-#include "Models/AccelByteMatchmakingModels.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteDefines.h"
+#include "Models/AccelByteMatchmakingModels.h"
 
 namespace AccelByte
 {
@@ -112,7 +112,7 @@ private:
 	THandler<FAccelByteModelsMatchmakingResult> OnStatusPollingResponseSuccess;
 	FErrorHandler OnStatusPollingResponseError;
 	FTickerDelegate StatusPollingDelegate;
-	FDelegateHandle StatusPollingDelegateHandle;
+	FDelegateHandleAlias StatusPollingDelegateHandle;
 };
 
 } // Namespace Api

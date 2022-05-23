@@ -5,11 +5,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Core/AccelByteError.h"
-#include "Models/AccelByteDSMModels.h"
 #include "Core/AccelByteUtilities.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteDefines.h"
+#include "Models/AccelByteDSMModels.h"
 
 class IWebSocket;
 
@@ -194,7 +194,7 @@ private:
 	int CountdownTimeStart = -1;
 	FErrorHandler OnAutoShutdownError;
 	FTickerDelegate AutoShutdownDelegate;
-	FDelegateHandle AutoShutdownDelegateHandle;
+	FDelegateHandleAlias AutoShutdownDelegateHandle;
 	THandler<FAccelByteModelsPubIp> GetPubIpDelegate;
 	FAccelByteModelsServerInfo RegisteredServerInfo;
 };

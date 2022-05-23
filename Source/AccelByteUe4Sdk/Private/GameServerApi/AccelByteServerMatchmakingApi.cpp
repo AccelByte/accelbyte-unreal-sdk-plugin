@@ -160,7 +160,7 @@ void ServerMatchmaking::ActivateSessionStatusPolling(const FString& MatchId, con
 		StatusPollingMatchId = MatchId;
 		OnStatusPollingResponseSuccess = OnSuccess;
 		OnStatusPollingResponseError = OnError;
-		StatusPollingDelegateHandle = FTicker::GetCoreTicker().AddTicker(StatusPollingDelegate, IntervalSec);
+		StatusPollingDelegateHandle = FTickerAlias::GetCoreTicker().AddTicker(StatusPollingDelegate, IntervalSec);
 		bStatusPollingActive = true;
 	}
 }
@@ -169,7 +169,7 @@ void ServerMatchmaking::DeactivateStatusPolling()
 {
 	if (UObjectInitialized() && (bStatusPollingActive || StatusPollingDelegateHandle.IsValid()))
 	{
-		FTicker::GetCoreTicker().RemoveTicker(StatusPollingDelegateHandle);
+		FTickerAlias::GetCoreTicker().RemoveTicker(StatusPollingDelegateHandle);
 		bStatusPollingActive = false;
 	}
 }
