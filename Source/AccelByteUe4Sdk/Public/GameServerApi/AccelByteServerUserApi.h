@@ -53,7 +53,17 @@ namespace AccelByte
 			*/
 			void SearchUserOtherPlatformUserId(const FString& PlatformUserId, EAccelBytePlatformType PlatformType, const THandler<FUserOtherPlatformInfo>& OnSuccess,
 				const FErrorHandler& OnError);
-			
+
+			/**
+			 * @brief This function will ban a user with specific type of ban. Ban types and reason can be queried.
+			 * @param UserId Id of user that will be banned.
+			 * @param BanUser Information of user that will be banned.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FBanUserInfo.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void BanSingleUser(const FString& UserId, const FBanUserRequest& BanUser,
+							   const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			ServerUser() = delete;
 			ServerUser(const ServerUser&) = delete;

@@ -75,6 +75,31 @@ namespace AccelByte
 
 			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
+
+		void ServerUser::BanSingleUser(const FString& UserId, const FBanUserRequest& BanUser,
+			const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+		
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Verb            = TEXT("POST");
+			FString ContentType     = TEXT("application/json");
+			FString Accept          = TEXT("application/json");
+		
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+			Request->SetURL(Url);
+			Request->SetHeader(TEXT("Authorization"), Authorization);
+			Request->SetVerb(Verb);
+			Request->SetHeader(TEXT("Content-Type"), ContentType);
+			Request->SetHeader(TEXT("Accept"), Accept);
+		
+			FString Content{}; 
+			FJsonObjectConverter::UStructToJsonObjectString(BanUser, Content);
+			Request->SetContentAsString(Content);
+		
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		}
 		
 	}
 }
