@@ -2078,6 +2078,7 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 	if (DataWrapper->RemainingAttempt <= 0)
 	{
 		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
+		return;
 	}
 
 	GetPartyStorage(

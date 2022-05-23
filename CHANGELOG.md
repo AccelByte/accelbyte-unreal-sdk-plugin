@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [12.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.0%0D12.0.0) (2022-05-23)
+
+
+### Features
+
+* **iam:** Expose the Admin Ban User endpoint ([1dd1db2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1dd1db2cda2095be7b3f82b014a82a696a9c2444))
+
+
+### Bug Fixes
+
+* **lobby:** fix sdk still retry update party storage after retry limit is reached. ([df9d2c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df9d2c4ccb7a762abb12fdc5e2df179357e41e0a))
+* **test:** add wait 60s for lobby to refresh mm game mode cache ([9920a6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9920a6be70cda355e0fec166fd660078fc409e7a))
+* **websocket:** properly clean up websocket object on destroy ([82d6f54](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/82d6f54ee46b0bac3a56f9c7c702afbf5539866e))
+
+
+### Tests
+
+* **lobby:** commented lobby channel chat tests ([8617606](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/861760663069db715bddc107fde5d80af7f4f094))
+
 ## [12.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.0.0%0D11.0.0) (2022-05-09)
 
 
