@@ -72,19 +72,19 @@ public:
 	void StartMatchmaking(
 		FStartMatchmakingRequest const& Request,
 		FDStartMatchmakingResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking")
 	void CancelMatchmaking(
 		FCancelMatchmakingRequest const& Request,
 		FDCancelMatchmakingResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Matchmaking")
 	void SetReadyConsent(
 		FSetReadyConsentRequest const& Request,
 		FDSetReadyConsentResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	//Notification
 public:

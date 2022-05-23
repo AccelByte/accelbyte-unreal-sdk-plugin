@@ -27,7 +27,7 @@ public:
 	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable)
-	FString GetAccessToken() const;
+	FString GetAccessToken();
 
 private:
 	FServerApiClientPtr ApiClientPtr;

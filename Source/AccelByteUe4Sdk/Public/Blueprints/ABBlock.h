@@ -54,23 +54,23 @@ public:
 	void BlockPlayer(
 		FBlockPlayerRequest const& Request,
 		FDBlockPlayerResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
 	void UnblockPlayer(
 		FUnblockPlayerRequest const& Request,
 		FDUnblockPlayerResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
 	void GetListOfBlockedUsers(
 		FDListOfBlockedUserResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Block")
 	void GetListOfBlockers(
 		FDListOfBlockersResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 //Notification
 public:

@@ -9,7 +9,7 @@ void UABPresence::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABPresence::GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError) const
+void UABPresence::GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetGetOnlineFriendsPresenceResponseDelegate(
 	Api::Lobby::FGetAllFriendsStatusResponse::CreateLambda(
@@ -26,7 +26,7 @@ void UABPresence::GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, 
 	ApiClientPtr->Lobby.SendGetOnlineFriendPresenceRequest();
 }
 
-void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) const
+void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.BulkGetUserPresence(
 		Request.UserIds,
@@ -42,7 +42,7 @@ void UABPresence::BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request
 		Request.bCountOnly);
 }
 
-void UABPresence::SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) const
+void UABPresence::SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetUserPresenceResponseDelegate(
 	Api::Lobby::FSetUserPresenceResponse::CreateLambda(
@@ -60,7 +60,7 @@ void UABPresence::SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserP
 }
 
 
-void UABPresence::SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) const
+void UABPresence::SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetUserPresenceNotifDelegate(
 	Api::Lobby::FFriendStatusNotif::CreateLambda(

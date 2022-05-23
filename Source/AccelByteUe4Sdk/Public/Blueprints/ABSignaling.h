@@ -38,12 +38,12 @@ public:
 //Request-Response
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling")
-	FString SendSignalingMessage(FSendSignalingMessageRequest const& Request) const;
+	FString SendSignalingMessage(FSendSignalingMessageRequest const& Request);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Signaling")
-	void SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif) const;
+	void SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

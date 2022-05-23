@@ -12,7 +12,7 @@ void UABUser::LoginWithUsername(
 	FString const& Username,
 	FString const& Password,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.LoginWithUsername(
 		Username,
@@ -33,7 +33,7 @@ void UABUser::LoginWithOtherPlatform(
 	EAccelBytePlatformType const PlatformType,
 	FString const& PlatformToken,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.LoginWithOtherPlatform(
 		PlatformType,
@@ -52,7 +52,7 @@ void UABUser::LoginWithOtherPlatform(
 
 void UABUser::LoginWithDeviceId(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.LoginWithDeviceId(
 		FVoidHandler::CreateLambda(
@@ -69,7 +69,7 @@ void UABUser::LoginWithDeviceId(
 
 void UABUser::LoginWithLauncher(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.LoginWithLauncher(
 		FVoidHandler::CreateLambda(
@@ -86,7 +86,7 @@ void UABUser::LoginWithLauncher(
 
 void UABUser::LoginWithRefreshToken(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.LoginWithRefreshToken(
 		FVoidHandler::CreateLambda(
@@ -103,7 +103,7 @@ void UABUser::LoginWithRefreshToken(
 
 void UABUser::Logout(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Logout(
 		FVoidHandler::CreateLambda(
@@ -118,7 +118,7 @@ void UABUser::Logout(
 			}));
 }
 
-void UABUser::ForgetAllCredentials() const
+void UABUser::ForgetAllCredentials() 
 {
 	ApiClientPtr->User.ForgetAllCredentials();
 }
@@ -134,7 +134,7 @@ void UABUser::Register(
 	FString const& Country,
 	FString const& DateOfBirth,
 	FDRegisterResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Register(
 		Username,
@@ -162,7 +162,7 @@ void UABUser::Registerv2(
 	FString const& Country,
 	FString const& DateOfBirth,
 	FDRegisterResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Registerv2(
 		EmailAddress,
@@ -186,7 +186,7 @@ void UABUser::Registerv2(
 void UABUser::Registerv3(
 	FRegisterRequestv3 const& RegisterRequest,
 	FDRegisterResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Registerv3(
 		RegisterRequest,
@@ -210,7 +210,7 @@ void UABUser::Upgrade(
 	FString const& Username,
 	FString const& Password,
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Upgrade(
 		Username,
@@ -232,7 +232,7 @@ void UABUser::Upgradev2(
 	FString const& Username,
 	FString const& Password,
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Upgradev2(
 		EmailAddress,
@@ -252,7 +252,7 @@ void UABUser::Upgradev2(
 
 void UABUser::SendVerificationCode(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendVerificationCode(
 		FVoidHandler::CreateLambda(
@@ -270,7 +270,7 @@ void UABUser::SendVerificationCode(
 void UABUser::Verify(
 	FString const& VerificationCode,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.Verify(
 		VerificationCode,
@@ -289,7 +289,7 @@ void UABUser::Verify(
 void UABUser::SendUpgradeVerificationCode(
 	FString const& Username,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendUpgradeVerificationCode(
 		Username,
@@ -310,7 +310,7 @@ void UABUser::UpgradeAndVerify(
 	FString const& Password,
 	FString const& VerificationCode,
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.UpgradeAndVerify(
 		Username,
@@ -335,7 +335,7 @@ void UABUser::UpgradeAndVerify(
 void UABUser::SendResetPasswordCode(
 	FString const& Username,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendResetPasswordCode(
 		Username,
@@ -356,7 +356,7 @@ void UABUser::ResetPassword(
 	FString const& Username,
 	FString const& NewPassword,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.ResetPassword(
 		VerificationCode,
@@ -380,7 +380,7 @@ void UABUser::ResetPassword(
 
 void UABUser::SendUpdateEmailVerificationCode(
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SendUpdateEmailVerificationCode(
 		FVoidHandler::CreateLambda(
@@ -398,7 +398,7 @@ void UABUser::SendUpdateEmailVerificationCode(
 void UABUser::UpdateEmail(
 	FUpdateEmailRequest UpdateEmailRequest,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.UpdateEmail(
 		UpdateEmailRequest,
@@ -417,7 +417,7 @@ void UABUser::UpdateEmail(
 void UABUser::UpdateUser(
 	FUserUpdateRequest UpdateRequest,
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.UpdateUser(
 		UpdateRequest,
@@ -439,7 +439,7 @@ void UABUser::UpdateUser(
 
 void UABUser::GetPlatformLinks(
 	FDPagedPlatformLinksResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetPlatformLinks(
 		THandler<FPagedPlatformLinks>::CreateLambda(
@@ -458,7 +458,7 @@ void UABUser::LinkOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	FString const& Ticket,
 	FDHandler OnSuccess,
-	FDAccountLinkConflictErrorJsonResponse OnError) const
+	FDAccountLinkConflictErrorJsonResponse OnError) 
 {
 	ApiClientPtr->User.LinkOtherPlatform(
 		PlatformType,
@@ -482,7 +482,7 @@ void UABUser::ForcedLinkOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	FString const& PlatformUserId,
 	FDHandler OnSuccess,
-	FDAccountLinkConflictErrorJsonResponse OnError) const
+	FDAccountLinkConflictErrorJsonResponse OnError) 
 {
 	ApiClientPtr->User.ForcedLinkOtherPlatform(
 		PlatformType,
@@ -505,7 +505,7 @@ void UABUser::ForcedLinkOtherPlatform(
 void UABUser::UnlinkOtherPlatform(
 	EAccelBytePlatformType PlatformType,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.UnlinkOtherPlatform(
 		PlatformType,
@@ -528,7 +528,7 @@ void UABUser::UnlinkOtherPlatform(
 void UABUser::SearchUsers(
 	FString const& Query,
 	FDPagedPublicUsersInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SearchUsers(
 		Query,
@@ -548,7 +548,7 @@ void UABUser::SearchUsersByType(
 	FString const& Query,
 	EAccelByteSearchType By,
 	FDPagedPublicUsersInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.SearchUsers(
 		Query,
@@ -569,7 +569,7 @@ void UABUser::SearchUsersByType(
 void UABUser::GetUserByUserId(
 	FString const& UserId,
 	FDSimpleUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetUserByUserId(
 		UserId,
@@ -589,7 +589,7 @@ void UABUser::GetUserByOtherPlatformUserId(
 	EAccelBytePlatformType PlatformType,
 	FString const& OtherPlatformUserId,
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetUserByOtherPlatformUserId(
 		PlatformType,
@@ -610,7 +610,7 @@ void UABUser::BulkGetUserByOtherPlatformUserIds(
 	EAccelBytePlatformType PlatformType,
 	TArray<FString> const& OtherPlatformUserId,
 	FDBulkPlatformUserIdResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.BulkGetUserByOtherPlatformUserIds(
 		PlatformType,
@@ -630,7 +630,7 @@ void UABUser::BulkGetUserByOtherPlatformUserIds(
 void UABUser::BulkGetUserInfo(
 	TArray<FString> const& UserIds,
 	FDListBulkUserInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.BulkGetUserInfo(
 		UserIds,
@@ -652,7 +652,7 @@ void UABUser::BulkGetUserInfo(
 
 void UABUser::GetCountryFromIP(
 	FDCountryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetCountryFromIP(
 		THandler<FCountryInfo>::CreateLambda(
@@ -669,7 +669,7 @@ void UABUser::GetCountryFromIP(
 
 void UABUser::GetUserEligibleToPlay(
 	FDBooleanResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetUserEligibleToPlay(
 		THandler<bool>::CreateLambda(
@@ -686,7 +686,7 @@ void UABUser::GetUserEligibleToPlay(
 
 void UABUser::GetData(
 	FDAccountUserDataResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->User.GetData(
 		THandler<FAccountUserData>::CreateLambda(

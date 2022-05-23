@@ -12,7 +12,7 @@ void UABSessionAttribute::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 FString UABSessionAttribute::SetSessionAttribute(
 	FSetSessionAttributeRequest const& Request,
 	FDSetSessionAttributeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetSetSessionAttributeDelegate(
 		Api::Lobby::FSetSessionAttributeResponse::CreateLambda(
@@ -32,7 +32,7 @@ FString UABSessionAttribute::SetSessionAttribute(
 FString UABSessionAttribute::GetSessionAttribute(
 	FGetSessionAttributeRequest const& Request,
 	FDGetSessionAttributeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetGetSessionAttributeDelegate(
 		Api::Lobby::FGetSessionAttributeResponse::CreateLambda(
@@ -51,7 +51,7 @@ FString UABSessionAttribute::GetSessionAttribute(
 
 FString UABSessionAttribute::GetAllSessionAttribute(
 	FDGetAllSessionAttributeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetGetAllSessionAttributeDelegate(
 		Api::Lobby::FGetAllSessionAttributeResponse::CreateLambda(

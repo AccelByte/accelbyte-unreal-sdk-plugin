@@ -56,18 +56,18 @@ public:
 //Request-Response
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError) const;
+	void GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) const;
+	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) const;
+	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) const;
+	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;
