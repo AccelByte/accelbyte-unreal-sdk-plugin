@@ -72,7 +72,7 @@ void ActiveLobbyConnect(int UserCount)
 			FPlatformProcess::Sleep(.5f);
 			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("LobbyConnect: Wait user %s to connect")
 				, *ApiClient->CredentialsRef->GetUserId());
-			FTicker::GetCoreTicker().Tick(.5f);
+			FTickerAlias::GetCoreTicker().Tick(.5f);
 		}
 	}
 }
@@ -97,7 +97,7 @@ void ActiveLobbyDisconnect(int UserCount)
 			FPlatformProcess::Sleep(.5f);
 			UE_LOG(LogAccelByteJoinableSessionTest, Log, TEXT("Lobby Disconnect: Waiting user %s to disconnect")
 				, *ApiClient->CredentialsRef->GetUserId());
-			FTicker::GetCoreTicker().Tick(.5f);
+			FTickerAlias::GetCoreTicker().Tick(.5f);
 		}
 	}
 }

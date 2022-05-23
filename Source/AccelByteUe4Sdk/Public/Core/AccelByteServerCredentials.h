@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteDefines.h"
 #include "Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
@@ -71,8 +72,8 @@ private:
 	ESessionState ClientSessionState;
 	static const FString DefaultSection;
 
-	FDelegateHandle PollRefreshTokenHandle;
-	void RemoveFromTicker(FDelegateHandle& handle);
+	FDelegateHandleAlias PollRefreshTokenHandle;
+	void RemoveFromTicker(FDelegateHandleAlias& handle);
 };
 
 typedef TSharedRef<ServerCredentials, ESPMode::ThreadSafe> FServerCredentialsRef;

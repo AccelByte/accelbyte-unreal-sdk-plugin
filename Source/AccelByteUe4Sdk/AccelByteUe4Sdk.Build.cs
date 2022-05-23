@@ -14,7 +14,7 @@ public class AccelByteUe4Sdk : ModuleRules
 {
     public AccelByteUe4Sdk(ReadOnlyTargetRules Target) : base(Target)
     {
-#if UE_4_24_OR_LATER
+#if UE_4_24_OR_LATER || UE_5_0_OR_LATER
         bLegacyPublicIncludePaths = false;
         DefaultBuildSettings = BuildSettingsVersion.V2;
 #else
