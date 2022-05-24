@@ -32,7 +32,7 @@ public class AccelByteUe4Sdk : ModuleRules
             "Sockets",
             "Json",
             "JsonUtilities",
-            "Http",
+            "HTTP",
             "WebSockets",
             "Networking",
             "SSL",
