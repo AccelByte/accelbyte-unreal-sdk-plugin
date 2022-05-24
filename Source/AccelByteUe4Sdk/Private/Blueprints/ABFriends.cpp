@@ -14,7 +14,7 @@ void UABFriends::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABFriends::RequestFriend(
 	FString UserId,
 	FDRequestFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetRequestFriendsResponseDelegate(
 		Api::Lobby::FRequestFriendsResponse::CreateLambda(
@@ -33,7 +33,7 @@ void UABFriends::RequestFriend(
 void UABFriends::Unfriend(
 	FString UserId,
 	FDUnfriendResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetUnfriendResponseDelegate(
 		Api::Lobby::FUnfriendResponse::CreateLambda(
@@ -51,7 +51,7 @@ void UABFriends::Unfriend(
 
 void UABFriends::ListOutgoingFriends(
 	FDListOutgoingFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetListOutgoingFriendsResponseDelegate(
 		Api::Lobby::FListOutgoingFriendsResponse::CreateLambda(
@@ -70,7 +70,7 @@ void UABFriends::ListOutgoingFriends(
 void UABFriends::CancelFriendRequest(
 	FString UserId,
 	FDCancelFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetCancelFriendsResponseDelegate(
 		Api::Lobby::FCancelFriendsResponse::CreateLambda(
@@ -88,7 +88,7 @@ void UABFriends::CancelFriendRequest(
 
 void UABFriends::ListIncomingFriends(
 	FDListIncomingFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetListIncomingFriendsResponseDelegate(
 		Api::Lobby::FListIncomingFriendsResponse::CreateLambda(
@@ -107,7 +107,7 @@ void UABFriends::ListIncomingFriends(
 void UABFriends::AcceptFriend(
 	FString UserId,
 	FDAcceptFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetAcceptFriendsResponseDelegate(
 		Api::Lobby::FAcceptFriendsResponse::CreateLambda(
@@ -126,7 +126,7 @@ void UABFriends::AcceptFriend(
 void UABFriends::RejectFriend(
 	FString UserId,
 	FDRejectFriendsResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetRejectFriendsResponseDelegate(
 		Api::Lobby::FRejectFriendsResponse::CreateLambda(
@@ -144,7 +144,7 @@ void UABFriends::RejectFriend(
 
 void UABFriends::LoadFriendsList(
 	FDLoadFriendListResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetLoadFriendListResponseDelegate(
 		Api::Lobby::FLoadFriendListResponse::CreateLambda(
@@ -163,7 +163,7 @@ void UABFriends::LoadFriendsList(
 void UABFriends::GetFriendshipStatus(
 	FString UserId,
 	FDGetFriendshipStatusResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetGetFriendshipStatusResponseDelegate(
 		Api::Lobby::FGetFriendshipStatusResponse::CreateLambda(
@@ -182,7 +182,7 @@ void UABFriends::GetFriendshipStatus(
 void UABFriends::BulkFriendRequest(
 	FAccelByteModelsBulkFriendsRequest UserIds,
 	FDHandler OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.BulkFriendRequest(
 		UserIds,
@@ -198,7 +198,7 @@ void UABFriends::BulkFriendRequest(
 			}));
 }
 
-void UABFriends::SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) const
+void UABFriends::SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetOnFriendRequestAcceptedNotifDelegate(
 		Api::Lobby::FAcceptFriendsNotif::CreateLambda(
@@ -208,7 +208,7 @@ void UABFriends::SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif On
 			}));
 }
 
-void UABFriends::SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif) const
+void UABFriends::SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetOnIncomingRequestFriendsNotifDelegate(
 		Api::Lobby::FRequestFriendsNotif::CreateLambda(
@@ -218,7 +218,7 @@ void UABFriends::SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif 
 			}));
 }
 
-void UABFriends::SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) const
+void UABFriends::SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetOnUnfriendNotifDelegate(
 		Api::Lobby::FUnfriendNotif::CreateLambda(
@@ -228,7 +228,7 @@ void UABFriends::SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) const
 			}));
 }
 
-void UABFriends::SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) const
+void UABFriends::SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetOnCancelFriendsNotifDelegate(
 		Api::Lobby::FCancelFriendsNotif::CreateLambda(
@@ -238,7 +238,7 @@ void UABFriends::SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) c
 			}));
 }
 
-void UABFriends::SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif) const
+void UABFriends::SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetOnRejectFriendsNotifDelegate(
 		Api::Lobby::FRejectFriendsNotif::CreateLambda(

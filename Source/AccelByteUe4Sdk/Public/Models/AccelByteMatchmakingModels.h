@@ -29,43 +29,43 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsMatchmakingResult
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Channel{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Client_version{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Game_mode{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	bool Joinable{};
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Match_id{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	TArray<FAccelByteModelsMatchingAlly> Matching_allies{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Namespace{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FJsonObjectWrapper Party_attributes{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Party_id{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	int32 Queued_at{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Region{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	FString Server_name{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | MatchmakingResult")
 	EAccelByteMatchmakingSessionStatus Status{};
 };
 
@@ -74,10 +74,10 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsAddUserIntoSessionRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
 	FString User_id{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | AddUserIntoSessionRequest")
 	FString Party_id{};
 };
 
@@ -86,6 +86,6 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsDequeueRequest
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Matchmaking | Models | DequeueRequest")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Matchmaking | Models | DequeueRequest")
 	FString Match_id{};
 };

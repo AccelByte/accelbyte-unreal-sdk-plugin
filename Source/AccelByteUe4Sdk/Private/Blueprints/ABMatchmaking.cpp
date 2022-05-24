@@ -14,7 +14,7 @@ void UABMatchmaking::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABMatchmaking::StartMatchmaking(
 	FStartMatchmakingRequest const& Request,
 	FDStartMatchmakingResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetStartMatchmakingResponseDelegate(
 		Api::Lobby::FMatchmakingResponse::CreateLambda(
@@ -33,7 +33,7 @@ void UABMatchmaking::StartMatchmaking(
 void UABMatchmaking::CancelMatchmaking(
 	FCancelMatchmakingRequest const& Request,
 	FDCancelMatchmakingResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetCancelMatchmakingResponseDelegate(
 		Api::Lobby::FMatchmakingResponse::CreateLambda(
@@ -52,7 +52,7 @@ void UABMatchmaking::CancelMatchmaking(
 void UABMatchmaking::SetReadyConsent(
 	FSetReadyConsentRequest const& Request,
 	FDSetReadyConsentResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetReadyConsentResponseDelegate(
 		Api::Lobby::FReadyConsentResponse::CreateLambda(
