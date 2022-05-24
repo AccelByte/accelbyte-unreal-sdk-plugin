@@ -71,41 +71,41 @@ public:
 //Request-Response
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
-	void SendPing() const;
+	void SendPing();
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
 	FString SendPrivateMessage(
 		FSendPrivateMessageRequest const& Request,
 		FDPersonalChatResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
 	FString SendPartyMessage(
 		FSendPartyMessageRequest const& Request,
 		FDPartyChatResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
 	FString SendJoinDefaultChannelChatRequest(
 		FDJoinDefaultChannelChatResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
 	FString SendChannelMessage(
 		FSendChannelMessageRequest const& Request,
 		FDChannelChatResponse OnResponse,
-		FDErrorHandler OnError) const;
+		FDErrorHandler OnError);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
-	void SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif) const;
+	void SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
-	void SetMessageNotifDelegate(FDMessageNotif OnNotif) const;
+	void SetMessageNotifDelegate(FDMessageNotif OnNotif);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Message")
-	void SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif) const;
+	void SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

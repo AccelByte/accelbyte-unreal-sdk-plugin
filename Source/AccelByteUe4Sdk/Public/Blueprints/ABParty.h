@@ -168,76 +168,76 @@ public:
 //Request-Response
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const;
+	void CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyInvite(FPartyInviteRequest Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyInvite(FPartyInviteRequest Request, FDPartyInviteResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyJoin(FPartyJoinRequest const& Request, FDPartyJoinResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyJoin(FPartyJoinRequest const& Request, FDPartyJoinResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyReject(FPartyRejectRequest Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyReject(FPartyRejectRequest Request, FDPartyRejectResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyKick(FPartyKickRequest const& Request, FDPartyKickResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyKick(FPartyKickRequest const& Request, FDPartyKickResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyGenerateCode(FDPartyGenerateCodeResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyGenerateCode(FDPartyGenerateCodeResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyGetCode(FDPartyGetCodeResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyGetCode(FDPartyGetCodeResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyDeleteCode(FDPartyDeleteCodeResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyDeleteCode(FDPartyDeleteCodeResponse OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyJoinViaCode(FPartyJoinViaCodeRequest const& Request, FDPartyJoinViaCodeResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyJoinViaCode(FPartyJoinViaCodeRequest const& Request, FDPartyJoinViaCodeResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError) const;
+	void PartyPromoteLeader(FPartyPromoteLeaderRequest const& Request, FDPartyPromoteLeaderResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void GetPartyData(FGetPartyDataRequest const& Request, FDPartyGetDataResponse OnResponse, FDErrorHandler OnError) const;
+	void GetPartyData(FGetPartyDataRequest const& Request, FDPartyGetDataResponse OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void GetPartyStorage(FGetPartyStorageRequest const& Request, FDPartyGetStorageResponse OnResponse, FDErrorHandler OnError) const;
+	void GetPartyStorage(FGetPartyStorageRequest const& Request, FDPartyGetStorageResponse OnResponse, FDErrorHandler OnError);
 	
 	//Can not be run at the moment. Need to find a way to expose TFunction Json Modifier to lua
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void WritePartyStorage(FWritePartyStorageRequest const& Request, FDPartyWriteDataResponse OnResponse, FDErrorHandler OnError) const;
+	void WritePartyStorage(FWritePartyStorageRequest const& Request, FDPartyWriteDataResponse OnResponse, FDErrorHandler OnError);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const;
+	void SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) const;
+	void SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyJoin(FDPartyJoinNotif OnNotif) const;
+	void SetOnPartyJoin(FDPartyJoinNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyReject(FDPartyRejectNotif OnNotif) const;
+	void SetOnPartyReject(FDPartyRejectNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif) const;
+	void SetOnPartyLeave(FDPartyLeaveNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyKick(FDPartyKickNotif OnNotif) const;
+	void SetOnPartyKick(FDPartyKickNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyInvite(FDPartyInviteNotif OnNotif) const;
+	void SetOnPartyInvite(FDPartyInviteNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Party")
-	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const;
+	void SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

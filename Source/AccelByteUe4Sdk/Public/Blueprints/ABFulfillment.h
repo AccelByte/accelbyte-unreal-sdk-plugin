@@ -28,7 +28,7 @@ public:
 
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Fulfillment")
-	void GetWalletInfoByCurrencyCode(FString const& Code, FString const& Region, FString const& Language, FDAccelByteModelsFulfillmentResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetWalletInfoByCurrencyCode(FString const& Code, FString const& Region, FString const& Language, FDAccelByteModelsFulfillmentResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

@@ -15,7 +15,7 @@ void UABCatalog::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABCatalog::GetRootCategories(
 	FString const& Language,
 	FDArrayModelsCategoryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Category.GetRootCategories(
 		Language,
@@ -37,7 +37,7 @@ void UABCatalog::GetCategory(
 	FString const& CategoryPath,
 	FString const& Language,
 	FDModelsCategoryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Category.GetCategory(
 		CategoryPath,
@@ -58,7 +58,7 @@ void UABCatalog::GetChildCategories(
 	FString const& CategoryPath,
 	FString const& Language,
 	FDArrayModelsCategoryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Category.GetChildCategories(
 		Language,
@@ -81,7 +81,7 @@ void UABCatalog::GetDescendantCategories(
 	FString const& CategoryPath,
 	FString const& Language,
 	FDArrayModelsCategoryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Category.GetDescendantCategories(
 		Language,
@@ -105,7 +105,7 @@ void UABCatalog::GetItemById(
 	FString const& Language,
 	FString const& Region,
 	FDModelsPopulatedItemInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Item.GetItemById(
 		ItemId,
@@ -128,7 +128,7 @@ void UABCatalog::GetItemByAppId(
 	FString const& Language,
 	FString const& Region,
 	FDModelsItemInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Item.GetItemByAppId(
 		AppId,
@@ -151,7 +151,7 @@ void UABCatalog::GetItemsByCriteria(
 	int32 const& Offset,
 	int32 const& Limit,
 	FDModelsItemPagingSlicedResultResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Item.GetItemsByCriteria(
 		ItemCriteria,
@@ -176,7 +176,7 @@ void UABCatalog::SearchItem(
 	int32 const& Limit,
 	FString const& Region,
 	FDModelsItemPagingSlicedResultResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Item.SearchItem(
 		Language,

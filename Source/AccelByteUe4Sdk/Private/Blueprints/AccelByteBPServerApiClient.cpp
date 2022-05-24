@@ -6,7 +6,7 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteServerCredentials.h"
 
-FString UABServerCredentials::GetAccessToken() const
+FString UABServerCredentials::GetAccessToken() 
 {
 	return ApiClientPtr->ServerCredentialsRef->GetClientAccessToken();
 }

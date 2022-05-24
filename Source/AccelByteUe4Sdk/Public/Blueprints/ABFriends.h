@@ -60,51 +60,51 @@ public:
 //Request-Response
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void RequestFriend(FString UserId, FDRequestFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void RequestFriend(FString UserId, FDRequestFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void Unfriend(FString UserId, FDUnfriendResponse OnResponse, FDErrorHandler OnError) const;
+	void Unfriend(FString UserId, FDUnfriendResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void ListOutgoingFriends(FDListOutgoingFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void ListOutgoingFriends(FDListOutgoingFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void CancelFriendRequest(FString UserId, FDCancelFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void CancelFriendRequest(FString UserId, FDCancelFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void ListIncomingFriends(FDListIncomingFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void ListIncomingFriends(FDListIncomingFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void AcceptFriend(FString UserId, FDAcceptFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void AcceptFriend(FString UserId, FDAcceptFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void RejectFriend(FString UserId, FDRejectFriendsResponse OnResponse, FDErrorHandler OnError) const;
+	void RejectFriend(FString UserId, FDRejectFriendsResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void LoadFriendsList(FDLoadFriendListResponse OnResponse, FDErrorHandler OnError) const;
+	void LoadFriendsList(FDLoadFriendListResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void GetFriendshipStatus(FString UserId, FDGetFriendshipStatusResponse OnResponse, FDErrorHandler OnError) const;
+	void GetFriendshipStatus(FString UserId, FDGetFriendshipStatusResponse OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FDHandler OnSuccess, FDErrorHandler OnError);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif) const;
+	void SetOnFriendRequestAcceptedNotifDelegate(FDAcceptFriendsNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif) const;
+	void SetOnIncomingRequestFriendsNotifDelegate(FDRequestFriendsNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif) const;
+	void SetOnUnfriendNotifDelegate(FDUnfriendNotif OnNotif);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif) const;
+	void SetOnCancelFriendsNotifDelegate(FDCancelFriendsNotif OnNotif);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Friends")
-	void SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif) const;
+	void SetOnRejectFriendsNotifDelegate(FDRejectFriendsNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

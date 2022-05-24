@@ -43,10 +43,10 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable)
-	FString GetAccessToken() const;
+	FString GetAccessToken();
 
 	UFUNCTION(BlueprintCallable)
-	FString GetUserId() const;
+	FString GetUserId();
 
 private:
 	FApiClientPtr ApiClientPtr;

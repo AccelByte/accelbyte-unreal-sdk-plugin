@@ -16,7 +16,7 @@ void UABFulfillment::GetWalletInfoByCurrencyCode(
 	FString const& Region,
 	FString const& Language,
 	FDAccelByteModelsFulfillmentResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Fulfillment.RedeemCode(
 		Code,

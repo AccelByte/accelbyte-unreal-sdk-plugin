@@ -10,7 +10,7 @@ void UABGroup::SetApiClient(const FApiClientPtr NewApiClientPtr)
 void UABGroup::CreateGroup(
 	const FAccelByteModelsCreateGroupRequest& RequestContent,
 	const FCreateGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.CreateGroup(
 		RequestContent,
@@ -28,7 +28,7 @@ void UABGroup::CreateGroup(
 void UABGroup::GetGroupList(
 	const FAccelByteModelsGetGroupListRequest& RequestContent,
 	const FSearchGroupsSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.GetGroupList(
 		RequestContent,
@@ -46,7 +46,7 @@ void UABGroup::GetGroupList(
 void UABGroup::GetGroup(
 	const FString& GroupId,
 	const FGetGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.GetGroup(
 		GroupId,
@@ -66,7 +66,7 @@ void UABGroup::UpdateGroup(
 	const bool bCompletelyReplace,
 	const FAccelByteModelsGroupUpdatable RequestContent,
 	const FUpdateGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.UpdateGroup(
 		GroupId,
@@ -87,7 +87,7 @@ void UABGroup:: UpdateGroupCustomAttributes(
 	const FString& GroupId,
 	const FAccelByteModelsUpdateGroupCustomAttributesRequest& RequestContent,
 	const FUpdateGroupCustomAttributesSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.UpdateGroupCustomAttributes(
 		GroupId,
@@ -106,7 +106,7 @@ void UABGroup:: UpdateGroupCustomAttributes(
 void UABGroup::DeleteGroup(
 	const FString& GroupId,
 	const FDeleteGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.DeleteGroup(
 	GroupId,
@@ -124,7 +124,7 @@ void UABGroup::UpdateGroupCustomRule(
 	const FString& GroupId,
 	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent,
 	const FUpdateGroupCustomRuleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.UpdateGroupCustomRule(
 		GroupId,
@@ -145,7 +145,7 @@ void UABGroup::UpdateGroupPredefinedRule(
 	const EAccelByteAllowedAction& AllowedAction,
 	const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent,
 	const FUpdateGroupPredefinedRuleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.UpdateGroupPredefinedRule(
 		GroupId,
@@ -166,7 +166,7 @@ void UABGroup::DeleteGroupPredefinedRule(
 	const FString& GroupId,
 	const EAccelByteAllowedAction& AllowedAction,
 	const FDeleteGroupPredefinedRuleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.DeleteGroupPredefinedRule(
 		GroupId,
@@ -187,7 +187,7 @@ void UABGroup::DeleteGroupPredefinedRule(
 void UABGroup::AcceptGroupInvitation(
 	const FString& GroupId, 
 	const FAcceptGroupInvitationSuccess& OnSuccess, 
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.AcceptGroupInvitation(
 		GroupId,
@@ -205,7 +205,7 @@ void UABGroup::AcceptGroupInvitation(
 void UABGroup::RejectGroupInvitation(
 	const FString& GroupId, 
 	const FRejectGroupInvitationSuccess& OnSuccess, 
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.RejectGroupInvitation(
 		GroupId,
@@ -223,7 +223,7 @@ void UABGroup::RejectGroupInvitation(
 void UABGroup::JoinGroup(
 	const FString& GroupId, 
 	const FJoinGroupSuccess& OnSuccess, 
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.JoinGroup(
 		GroupId,
@@ -241,7 +241,7 @@ void UABGroup::JoinGroup(
 void UABGroup::CancelJoinGroupRequest(
 	const FString& GroupId, 
 	const FCancelJoinGroupRequestSuccess& OnSuccess, 
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.CancelJoinGroupRequest(
 		GroupId,
@@ -260,7 +260,7 @@ void UABGroup::GetGroupMembersListByGroupId(
 	const FString& GroupId, 
 	const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent,
 	const FGetGroupMembersListByGroupIdSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.GetGroupMembersListByGroupId(
 		GroupId,
@@ -276,7 +276,7 @@ void UABGroup::GetGroupMembersListByGroupId(
 		}));
 }
 
-void UABGroup::LeaveGroup(const FLeaveGroupSuccess& OnSuccess, const FDErrorHandler& OnError) const
+void UABGroup::LeaveGroup(const FLeaveGroupSuccess& OnSuccess, const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.LeaveGroup(
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
@@ -293,7 +293,7 @@ void UABGroup::LeaveGroup(const FLeaveGroupSuccess& OnSuccess, const FDErrorHand
 void UABGroup::GetUserGroupInfoByUserId(
 	const FString& UserId,
 	const FGetUserGroupInfoByUserIdSuccess& OnSuccess, 
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.GetUserGroupInfoByUserId(
 		UserId,
@@ -311,7 +311,7 @@ void UABGroup::GetUserGroupInfoByUserId(
 void UABGroup::InviteUserToGroup(
 	const FString UserId,
 	const FInviteUserToGroupSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.InviteUserToGroup(
 		UserId,
@@ -329,7 +329,7 @@ void UABGroup::InviteUserToGroup(
 void UABGroup::AcceptGroupJoinRequest(
 	const FString UserId,
 	const FAcceptGroupJoinRequestSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.AcceptGroupJoinRequest(
 		UserId,
@@ -347,7 +347,7 @@ void UABGroup::AcceptGroupJoinRequest(
 void UABGroup::RejectGroupJoinRequest(
 	const FString UserId,
 	const FRejectGroupJoinRequestSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.RejectGroupJoinRequest(
 		UserId,
@@ -365,7 +365,7 @@ void UABGroup::RejectGroupJoinRequest(
 void UABGroup::KickGroupMember(
 	const FString UserId,
 	const FKickGroupMemberSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.KickGroupMember(
 		UserId,
@@ -386,7 +386,7 @@ void UABGroup::KickGroupMember(
 void UABGroup::GetMemberRoles(
 	const FAccelByteModelsLimitOffsetRequest& RequestContent,
 	const FGetMemberRolesSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.GetMemberRoles(
 		RequestContent,
@@ -405,7 +405,7 @@ void UABGroup::AssignMemberRole(
 	const FString& MemberRoleId,
 	const FAccelByteModelsUserIdWrapper& RequestContent,
 	const FAssignMemberRoleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.AssignMemberRole(
 	MemberRoleId,
@@ -425,7 +425,7 @@ void UABGroup::DeleteMemberRole(
 	const FString& MemberRoleId,
 	const FAccelByteModelsUserIdWrapper& RequestContent,
 	const FDeleteMemberRoleSuccess& OnSuccess,
-	const FDErrorHandler& OnError) const
+	const FDErrorHandler& OnError) 
 {
 	ApiClientPtr->Group.DeleteMemberRole(
 		MemberRoleId,

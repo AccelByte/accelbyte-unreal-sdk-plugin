@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [12.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.1%0D12.1.0) (2022-05-23)
+
+
+### Bug Fixes
+
+* **blueprints:** remove const from functions, change blueprintreadonly to blueprintreadwrite ([d6e85b4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d6e85b4e483c458d11a4694fb407aae8d48de0a9))
+
 ## [12.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.0%0D12.0.0) (2022-05-23)
 
 
