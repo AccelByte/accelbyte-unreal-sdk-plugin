@@ -12,7 +12,7 @@ void UABBlock::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABBlock::BlockPlayer(
 	FBlockPlayerRequest const& Request,
 	FDBlockPlayerResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetBlockPlayerResponseDelegate(
 	Api::Lobby::FBlockPlayerResponse::CreateLambda(
@@ -32,7 +32,7 @@ void UABBlock::BlockPlayer(
 void UABBlock::UnblockPlayer(
 	FUnblockPlayerRequest const& Request,
 	FDUnblockPlayerResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetUnblockPlayerResponseDelegate(
 	Api::Lobby::FUnblockPlayerResponse::CreateLambda(
@@ -51,7 +51,7 @@ void UABBlock::UnblockPlayer(
 
 void UABBlock::GetListOfBlockedUsers(
 	FDListOfBlockedUserResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.GetListOfBlockedUsers(
 		THandler<FAccelByteModelsListBlockedUserResponse>::CreateLambda(
@@ -66,7 +66,7 @@ void UABBlock::GetListOfBlockedUsers(
 			}));
 }
 
-void UABBlock::GetListOfBlockers(FDListOfBlockersResponse OnResponse, FDErrorHandler OnError) const
+void UABBlock::GetListOfBlockers(FDListOfBlockersResponse OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.GetListOfBlockers(
 		THandler<FAccelByteModelsListBlockerResponse>::CreateLambda(

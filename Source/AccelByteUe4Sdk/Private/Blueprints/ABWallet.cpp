@@ -14,7 +14,7 @@ void UABWallet::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABWallet::GetWalletInfoByCurrencyCode(
 	FString const& CurrencyCode,
 	FDAccelByteModelsWalletInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Wallet.GetWalletInfoByCurrencyCode(
 		CurrencyCode,

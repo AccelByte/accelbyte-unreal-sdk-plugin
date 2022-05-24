@@ -9,7 +9,7 @@ void UABMessage::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABMessage::SendPing() const
+void UABMessage::SendPing() 
 {
 	ApiClientPtr->Lobby.SendPing();
 }
@@ -17,7 +17,7 @@ void UABMessage::SendPing() const
 FString UABMessage::SendPrivateMessage(
 	FSendPrivateMessageRequest const& Request,
 	FDPersonalChatResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPrivateMessageResponseDelegate(
 	Api::Lobby::FPersonalChatResponse::CreateLambda(
@@ -37,7 +37,7 @@ FString UABMessage::SendPrivateMessage(
 FString UABMessage::SendPartyMessage(
 	FSendPartyMessageRequest const& Request,
 	FDPartyChatResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyMessageResponseDelegate(
 	Api::Lobby::FPartyChatResponse::CreateLambda(
@@ -56,7 +56,7 @@ FString UABMessage::SendPartyMessage(
 
 FString UABMessage::SendJoinDefaultChannelChatRequest(
 	FDJoinDefaultChannelChatResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetJoinChannelChatResponseDelegate(
 		Api::Lobby::FJoinDefaultChannelChatResponse::CreateLambda(
@@ -76,7 +76,7 @@ FString UABMessage::SendJoinDefaultChannelChatRequest(
 FString UABMessage::SendChannelMessage(
 	FSendChannelMessageRequest const& Request,
 	FDChannelChatResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetChannelMessageResponseDelegate(
 		Api::Lobby::FChannelChatResponse::CreateLambda(
@@ -93,7 +93,7 @@ FString UABMessage::SendChannelMessage(
 	return ApiClientPtr->Lobby.SendChannelMessage(Request.Message);
 }
 
-void UABMessage::SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif) const
+void UABMessage::SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPrivateMessageNotifDelegate(
 		Api::Lobby::FPersonalChatNotif::CreateLambda(
@@ -103,7 +103,7 @@ void UABMessage::SetPrivateMessageNotifDelegate(FDPersonalChatNotif OnNotif) con
 			}));
 }
 
-void UABMessage::SetMessageNotifDelegate(FDMessageNotif OnNotif) const
+void UABMessage::SetMessageNotifDelegate(FDMessageNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetMessageNotifDelegate(
 		Api::Lobby::FMessageNotif::CreateLambda(
@@ -113,7 +113,7 @@ void UABMessage::SetMessageNotifDelegate(FDMessageNotif OnNotif) const
 			}));
 }
 
-void UABMessage::SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif) const
+void UABMessage::SetChannelMessageNotifDelegate(FDChannelChatNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetChannelMessageNotifDelegate(
 		Api::Lobby::FChannelChatNotif::CreateLambda(

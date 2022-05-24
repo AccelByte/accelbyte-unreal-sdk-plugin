@@ -5,12 +5,12 @@ void UABCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-FString UABCredentials::GetAccessToken() const
+FString UABCredentials::GetAccessToken() 
 {
 	return ApiClientPtr->CredentialsRef->GetAccessToken();
 }
 
-FString UABCredentials::GetUserId() const
+FString UABCredentials::GetUserId() 
 {
 	return ApiClientPtr->CredentialsRef->GetUserId();
 }

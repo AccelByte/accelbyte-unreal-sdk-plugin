@@ -10,12 +10,12 @@ void UABSignaling::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 }
 
 
-FString UABSignaling::SendSignalingMessage(FSendSignalingMessageRequest const& Request) const
+FString UABSignaling::SendSignalingMessage(FSendSignalingMessageRequest const& Request) 
 {
 	return ApiClientPtr->Lobby.SendSignalingMessage(Request.UserID, Request.Message);
 }
 
-void UABSignaling::SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif) const
+void UABSignaling::SetSignalingP2PNotif(FDSignalingP2PNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetSignalingP2PDelegate(
 	Api::Lobby::FSignalingP2P::CreateLambda(
