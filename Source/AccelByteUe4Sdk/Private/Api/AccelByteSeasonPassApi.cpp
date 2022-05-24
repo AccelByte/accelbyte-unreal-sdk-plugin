@@ -343,7 +343,7 @@ namespace AccelByte
 		TMap<FString, TArray<FString>> SeasonPass::FJsonObjectToPassRewards(TSharedPtr<FJsonObject> JsonObject)
 		{
 			TMap<FString, TArray<FString>> PassAndRewardCode;
-			for (TTuple<FString, TSharedPtr<FJsonValue, ESPMode::Fast>> const& PassReward : JsonObject->Values)
+			for (TTuple<FString, TSharedPtr<FJsonValue>> const& PassReward : JsonObject->Values)
 			{
 				TArray<FString> ClaimRewardCode;
 
