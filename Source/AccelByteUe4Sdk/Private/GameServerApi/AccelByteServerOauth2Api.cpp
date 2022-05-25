@@ -41,13 +41,17 @@ void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, con
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetAccessTokenWithClientCredentialsGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([this, OnSuccess](const FOauth2Token& Result)
-	{
-		OnLoginSuccess(OnSuccess, Result);
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	GetAccessTokenWithClientCredentialsGrant(
+		Credentials.GetOAuthClientId(),
+		Credentials.GetOAuthClientSecret(),
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess](const FOauth2Token& Result)
+		{
+			OnLoginSuccess(OnSuccess, Result);
+		}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
 }
 
 void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler const& OnError) const

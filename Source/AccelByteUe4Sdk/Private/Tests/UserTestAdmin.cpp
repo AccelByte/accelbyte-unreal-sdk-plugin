@@ -4,6 +4,7 @@
 
 #include "UserTestAdmin.h"
 
+#include "AccelByteUe4SdkModule.h"
 #include "Api/AccelByteUserApi.h"
 #include "TestUtilities.h"
 
@@ -167,6 +168,7 @@ void RegisterTestUserV4(const FTestUserV4& InTestUser, const THandler<FCreateTes
 
 bool LoginTestUser(FTestUser& TestUser)
 {
+	TestUser.Credentials.SetClientCredentials(IAccelByteUe4SdkModuleInterface::Get().GetSettingsEnvironment());
 	AccelByte::Api::User UserApi(
 		TestUser.Credentials,
 		FRegistry::Settings,

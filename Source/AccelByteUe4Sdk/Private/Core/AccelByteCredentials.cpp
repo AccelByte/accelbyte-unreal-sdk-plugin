@@ -46,10 +46,10 @@ void Credentials::ForgetAll()
 	UserSessionState = ESessionState::Invalid;
 }
 
-void Credentials::SetClientCredentials(const FString& Id, const FString& Secret)
+void Credentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 {
-	ClientId = Id;
-	ClientSecret = Secret;
+	ClientId = InClientId;
+	ClientSecret = InClientSecret;
 }
 
 void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -81,6 +81,16 @@ void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
 		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
 		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
 	}
+}
+
+const FString& Credentials::GetOAuthClientId() const
+{
+	return ClientId;
+}
+
+const FString& Credentials::GetOAuthClientSecret() const
+{
+	return ClientSecret;
 }
 
 void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
@@ -268,6 +278,16 @@ void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
 } // Namespace AccelByte
 
 #include "Core/AccelByteRegistry.h"
+
+FString UAccelByteBlueprintsCredentials::GetOAuthClientId()
+{
+	return FRegistry::Credentials.GetOAuthClientId();
+}
+
+FString UAccelByteBlueprintsCredentials::GetOAuthClientSecret()
+{
+	return FRegistry::Credentials.GetOAuthClientSecret();
+}
 
 FString UAccelByteBlueprintsCredentials::GetUserSessionId()
 {
