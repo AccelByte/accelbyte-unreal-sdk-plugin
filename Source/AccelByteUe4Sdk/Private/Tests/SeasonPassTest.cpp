@@ -837,6 +837,45 @@ bool SeasonGetInvalidUserSeason::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(SeasonGetUserSeasonData, "AccelByte.Tests.SeasonPass.B.GetUserSeasonData", AutomationFlagMaskSeasonPass)
+bool SeasonGetUserSeasonData::RunTest(const FString& Parameters)
+{
+	bool bGetUserSeasonInfo = false;
+	FAccelByteModelsUserSeasonInfo GetUserSeason;
+	FRegistry::SeasonPass.GetCurrentUserSeason(THandler<FAccelByteModelsUserSeasonInfo>::CreateLambda([&](const FAccelByteModelsUserSeasonInfo& Result)
+		{
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Get user season succeed"));
+			GetUserSeason = Result;
+			bGetUserSeasonInfo = true;
+		}), SeasonPassOnError);
+	WaitUntil(bGetUserSeasonInfo, "Waiting to get current user season ...");
+	AB_TEST_TRUE(bGetUserSeasonInfo);
+
+	// grant exp to levelup
+	bool bLoginClientSuccess = false;
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+		{
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Login with server creds success"));
+			bLoginClientSuccess = true;
+		}), SeasonPassOnError);
+	WaitUntil(bLoginClientSuccess, "Waiting to login with server creds...");
+	AB_TEST_TRUE(bLoginClientSuccess);
+	 
+	bool bGetSeason = false;
+	FAccelByteModelsUserSeasonInfo GetSeason;
+	FRegistry::ServerSeasonPass.GetUserSeasonData(FRegistry::Credentials.GetUserId(), GetUserSeason.SeasonId, THandler<FAccelByteModelsUserSeasonInfo>::CreateLambda([&](const FAccelByteModelsUserSeasonInfo& Result)
+		{
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Get season succeed"));
+			GetSeason = Result; 
+			bGetSeason = true;
+		}), SeasonPassOnError);
+	WaitUntil(bGetSeason, "Waiting to get user season...");
+	AB_TEST_TRUE(bGetSeason);
+	AB_TEST_EQUAL(GetUserSeason.Id, GetSeason.Id);
+	 
+	return true;
+}
+
 // Test C is about enroll pass
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(SeasonEnrollPremiumPass, "AccelByte.Tests.SeasonPass.C.EnrollPremiumPass",	AutomationFlagMaskSeasonPass)
 bool SeasonEnrollPremiumPass::RunTest(const FString& Parameters)
@@ -977,8 +1016,9 @@ bool SeasonGainExp::RunTest(const FString& Parameters)
 	// Gain exp by one level
 	// Using the ServerApi
 	bool bGrantExpSuccess = false;
-	FAccelByteModelsUserSeasonInfoWithoutReward UserSeasonAfterGrantedExp;
-	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * 0.5,THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+	FAccelByteModelsUserSeasonInfoWithoutReward UserSeasonAfterGrantedExp; 
+	TArray<FString> Tags = { "Game 1"};
+	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * 0.5, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 	[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
@@ -1036,9 +1076,10 @@ bool SeasonGainExpLevelUp::RunTest(const FString& Parameters)
 	const int32 ExpectedExp = (LastExp + SeasonTierRequiredExp) % SeasonTierRequiredExp;
 	// Gain exp by one level
 	// Using the ServerApi
-	bool bGrantExpSuccess = false;
+	bool bGrantExpSuccess = false; 
+	TArray<FString> Tags{};
 	FAccelByteModelsUserSeasonInfoWithoutReward UserSeasonAfterGrantedExp;
-	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp,THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+	FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 	[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 	{
 		UE_LOG(LogAccelByteSeasonPassTest, Log,	TEXT("Grant exp to user"));
@@ -1207,15 +1248,16 @@ bool SeasonClaimTierReward::RunTest(const FString& Parameters)
 
 		// Gain exp by one level
 		// Using the ServerApi
-		bool bGrantExpSuccess = false;
-		FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp,THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+		bool bGrantTierSuccess = false; 
+		TArray<FString> Tags{};
+		FRegistry::ServerSeasonPass.GrantTierToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 		[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 		{
-			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
-			bGrantExpSuccess = true;
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant tier to user"));
+			bGrantTierSuccess = true;
 		}), SeasonPassOnError);
-		WaitUntil(bGrantExpSuccess, "Waiting to grant exp using server api...");
-		AB_TEST_TRUE(bGrantExpSuccess);
+		WaitUntil(bGrantTierSuccess, "Waiting to grant tier using server api...");
+		AB_TEST_TRUE(bGrantTierSuccess);
 
 		bGetUserSeasonInfo = false;
 		FRegistry::SeasonPass.GetUserSeason(SeasonResponse.Id, THandler<FAccelByteModelsUserSeasonInfo>::CreateLambda(
@@ -1387,7 +1429,8 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 		// Gain exp by one level
 		// Using the ServerApi
 		bool bGrantExpSuccess = false;
-		FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * LevelUp,THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
+		TArray<FString> Tags{};
+		FRegistry::ServerSeasonPass.GrantExpToUser(FRegistry::Credentials.GetUserId(), SeasonTierRequiredExp * LevelUp, EAccelByteSeasonPassSource::SWEAT, Tags, THandler<FAccelByteModelsUserSeasonInfoWithoutReward>::CreateLambda(
 		[&](const FAccelByteModelsUserSeasonInfoWithoutReward& Result)
 		{
 			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Grant exp to user"));
@@ -1483,5 +1526,48 @@ bool SeasonBulkClaimTierReward::RunTest(const FString& Parameters)
 	WaitUntil(bGetEntitlementSuccess, "Waiting to get entitlement");
 	AB_TEST_EQUAL(EntitlementInfo.UseCount, ExpectedItemUseCount);
 	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(SessionHistory, "AccelByte.Tests.SeasonPass.F.SessionHistory", AutomationFlagMaskSeasonPass)
+bool SessionHistory::RunTest(const FString& Parameters)
+{ 
+	FAccelByteModelsUserSeasonExpHistory UserSeasonHistory{};
+	// Using the ServerApi
+	bool bGetCurrentUserSeasonHistory = false;
+	FRegistry::ServerSeasonPass.GetCurrentUserSeasonHistory(FRegistry::Credentials.GetUserId(), THandler<FAccelByteModelsUserSeasonExpHistory>::CreateLambda(
+		[&](const FAccelByteModelsUserSeasonExpHistory& Result)
+		{
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Get current user season history  success"));
+			UserSeasonHistory = Result;
+			bGetCurrentUserSeasonHistory = true;
+		}), SeasonPassOnError);
+	WaitUntil(bGetCurrentUserSeasonHistory, "Waiting to get current user season history ...");
+	AB_TEST_TRUE(bGetCurrentUserSeasonHistory);
+	AB_TEST_TRUE(UserSeasonHistory.Data.Num() > 0);
+	AB_TEST_FALSE(UserSeasonHistory.Data[0].SeasonId.IsEmpty());
+	AB_TEST_TRUE(UserSeasonHistory.Data[0].GrantExp > 0);
+
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(QueryUserSeasonExp, "AccelByte.Tests.SeasonPass.F.QueryUserSeasonExp", AutomationFlagMaskSeasonPass)
+bool QueryUserSeasonExp::RunTest(const FString& Parameters)
+{
+	FAccelByteModelsQueryUserSeasonExp QueryUserSeasonExp{};
+	// Using the ServerApi
+	bool bQueryUserSeasonExpSuccces = false;
+	FRegistry::ServerSeasonPass.QueryUserSeasonExp(FRegistry::Credentials.GetUserId(), THandler<FAccelByteModelsQueryUserSeasonExp>::CreateLambda(
+		[&](const FAccelByteModelsQueryUserSeasonExp& Result)
+		{
+			UE_LOG(LogAccelByteSeasonPassTest, Log, TEXT("Query user exp success "));
+			QueryUserSeasonExp = Result;
+			bQueryUserSeasonExpSuccces = true;
+		}), SeasonPassOnError);
+	WaitUntil(bQueryUserSeasonExpSuccces, "Waiting to Query user exp ...");
+	AB_TEST_TRUE(bQueryUserSeasonExpSuccces);
+	AB_TEST_TRUE(QueryUserSeasonExp.Tags.Num() > 0);
+
 	return true;
 }
