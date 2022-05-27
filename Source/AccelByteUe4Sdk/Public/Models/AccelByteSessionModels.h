@@ -59,6 +59,8 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsV2PartySession
 		FDateTime UpdatedAt;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySession")
 		FAccelByteModelsV2SessionConfig Config;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Session | Models | PartySession")
+		int64 Version;
 };
 
 USTRUCT(BlueprintType)

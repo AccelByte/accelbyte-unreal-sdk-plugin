@@ -195,7 +195,7 @@ void Session::KickUserFromParty(FString const& PartyID, FString const& UserID, T
 	FReport::Log(FString(__FUNCTION__));
 	
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/%s/leave"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID, *UserID);
+	FString Url           = FString::Printf(TEXT("%s/v1/public/namespaces/%s/parties/%s/users/%s/kick"), *Settings.SessionServerUrl, *Credentials.GetNamespace(), *PartyID, *UserID);
 	FString Verb          = TEXT("DELETE");
 	FString ContentType   = TEXT("application/json");
 	FString Accept        = TEXT("application/json");

@@ -20,7 +20,9 @@ using AccelByte::HandleHttpError;
 using Api::User;
 using Api::Session;
 
-FString PartyID;
+FAccelByteModelsV2PartySession Party;
+FString InviteeUserID;
+Credentials InviteeCredentials;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelBytePartyTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelBytePartyTest);
@@ -48,22 +50,22 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyCreate, "AccelByte.Tests.Party.B.Create", 
 bool PartyCreate::RunTest(const FString& Parameters)
 {
 	bool bCreatePartySuccess = false;
-	FAccelByteModelsV2PartyCreateRequest Request;
-	Request.JoinType = FString(TEXT("open"));
 	FAccelByteModelsV2PartySession Response;
-	FRegistry::Session.CreateParty(Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bCreatePartySuccess, &Response](FAccelByteModelsV2PartySession const Party)
+	FAccelByteModelsV2PartyCreateRequest Request;
+	Request.JoinType = TEXT("inviteOnly");
+	FRegistry::Session.CreateParty(Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bCreatePartySuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
 	{
 		bCreatePartySuccess = true;
-		Response = Party;
+		Response = PartyResponse;
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Create party success"));
 	}), PartyErrorHandler);
 	WaitUntil(bCreatePartySuccess, "Waiting for party creation...");
 
+	Party = Response;
+	
 	AB_TEST_TRUE(bCreatePartySuccess);
-	AB_TEST_EQUAL(Response.JoinType, Request.JoinType);
+	AB_TEST_EQUAL(Party.JoinType, Request.JoinType);
 	// TODO: Test other fields
-
-	PartyID = Response.ID;
 	
 	return true;
 }
@@ -73,26 +75,51 @@ bool PartyGetPartyDetails::RunTest(const FString& Parameters)
 {
 	bool bGetDetailsSuccess = false;
 	FAccelByteModelsV2PartySession Response;
-	FRegistry::Session.GetPartyDetails(PartyID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bGetDetailsSuccess, &Response](FAccelByteModelsV2PartySession const Party)
+	FRegistry::Session.GetPartyDetails(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bGetDetailsSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
 	{
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Get party details success"));
 		bGetDetailsSuccess = true;
-		Response = Party;
+		Response = PartyResponse;
 	}), PartyErrorHandler);
 	WaitUntil(bGetDetailsSuccess, "Waiting for get party details...");
 	
 	AB_TEST_TRUE(bGetDetailsSuccess);
-	AB_TEST_EQUAL(Response.ID, PartyID);
+	AB_TEST_EQUAL(Response.ID, Party.ID);
 	
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartySendInvite, "AccelByte.Tests.Party.C.SendInvite", AutomationFlagMaskParty);
-bool PartySendInvite::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyUpdate, "AccelByte.Tests.Party.C.Update", AutomationFlagMaskParty);
+bool PartyUpdate::RunTest(const FString& Parameters)
 {
-	Credentials InviteeCredentials;
+	bool bUpdateSuccess = false;
+	FAccelByteModelsV2PartySession Response;
+	FAccelByteModelsV2PartyUpdateRequest Request;
+
+	Request.JoinType = TEXT("open");
+	Request.Version = Party.Version;
+	
+	FRegistry::Session.UpdateParty(Party.ID, Request, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bUpdateSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Party update success"));
+		bUpdateSuccess = true;
+		Response = PartyResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bUpdateSuccess, "Waiting for party update...");
+	
+	AB_TEST_TRUE(bUpdateSuccess);
+	AB_TEST_EQUAL(Response.ID, Party.ID);
+	AB_TEST_EQUAL(Request.JoinType, TEXT("open"));
+
+	Party = Response;
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteJoinFlow, "AccelByte.Tests.Party.C.InviteJoinFlow", AutomationFlagMaskParty);
+bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
+{
 	User Invitee(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	FString InviteeUserID;
 	
 	// Create test user and log in
 	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
@@ -149,7 +176,7 @@ bool PartySendInvite::RunTest(const FString& Parameters)
 
 	FAccelByteModelsV2PartyUserInvitedEvent InvitePayload;
 	
-	// TODO: probably need to have a delegate for v2 party invite.  backend will need to be reworked to not use freeform notifs
+	// TODO: probably need to have a delegate for v2 party invite. backend will need to be reworked to not use freeform notifs
 	bool bGetInviteSuccess = false;
 	const auto MessageNotifDelegate = Api::Lobby::FMessageNotif::CreateLambda([&bGetInviteSuccess, &InvitePayload](FAccelByteModelsNotificationMessage Message)
 	{
@@ -163,27 +190,29 @@ bool PartySendInvite::RunTest(const FString& Parameters)
 	Lobby.SetMessageNotifDelegate(MessageNotifDelegate);
 	
 	bool bSendInviteSuccess = false;
-	FRegistry::Session.SendPartyInvite(PartyID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
+	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
 	{
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Send party invite success"));
 		bSendInviteSuccess = true;
 	}), PartyErrorHandler);
 	WaitUntil(bGetInviteSuccess, "Waiting for party invite notif...", 30);
 	
-	AB_TEST_TRUE(InvitePayload.PartyID.Equals(PartyID));
+	AB_TEST_TRUE(InvitePayload.PartyID.Equals(Party.ID));
 	AB_TEST_TRUE(InvitePayload.SenderID.Equals(FRegistry::Credentials.GetUserId()));
 
 	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	
 	bool bJoinPartySuccess = false;
 	FAccelByteModelsV2PartySession JoinedParty;
-	InviteeSession.JoinParty(PartyID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bJoinPartySuccess, &JoinedParty](FAccelByteModelsV2PartySession const Party)
+	InviteeSession.JoinParty(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bJoinPartySuccess, &JoinedParty](FAccelByteModelsV2PartySession const PartyResponse)
 	{
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Join party success"));
 		bJoinPartySuccess = true;
-		JoinedParty = Party;
+		JoinedParty = PartyResponse;
 	}), PartyErrorHandler);
 	WaitUntil(bJoinPartySuccess, "Waiting for party join...");
+
+	Party = JoinedParty;
 	
 	// Ensure that the new user is an active party member for the joined party
 	bool bInParty = false;
@@ -201,6 +230,84 @@ bool PartySendInvite::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetInviteSuccess);
 	AB_TEST_TRUE(bJoinPartySuccess);
 	AB_TEST_TRUE(bInParty);
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyLeave, "AccelByte.Tests.Party.D.Leave", AutomationFlagMaskParty);
+bool PartyLeave::RunTest(const FString& Parameters)
+{
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+	
+	bool bLeaveSuccess = false;
+	InviteeSession.LeaveParty(Party.ID, FVoidHandler::CreateLambda([&bLeaveSuccess]
+	{
+		bLeaveSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bLeaveSuccess, "Waiting for party leave...");
+	
+	AB_TEST_TRUE(bLeaveSuccess);
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyKickPlayer, "AccelByte.Tests.Party.E.KickPlayer", AutomationFlagMaskParty);
+bool PartyKickPlayer::RunTest(const FString& Parameters)
+{
+	bool bInviteSuccess = false;
+	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bInviteSuccess]
+	{
+		bInviteSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bInviteSuccess, "Waiting for party invite...");
+	
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+
+	// rejoin the party after leaving in the last test
+	bool bJoinPartySuccess = false;
+	InviteeSession.JoinParty(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bJoinPartySuccess](FAccelByteModelsV2PartySession const)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Join party success"));
+		bJoinPartySuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bJoinPartySuccess, "Waiting for party join...");
+	
+	bool bKickSuccess = false;
+	FRegistry::Session.KickUserFromParty(Party.ID, InviteeUserID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bKickSuccess](FAccelByteModelsV2PartySession const)
+	{
+		bKickSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bKickSuccess, "Waiting for party kick...");
+	
+	AB_TEST_TRUE(bKickSuccess);
+	
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteReject, "AccelByte.Tests.Party.F.InviteReject", AutomationFlagMaskParty);
+bool PartyInviteReject::RunTest(const FString& Parameters)
+{	
+	bool bSendInviteSuccess = false;
+	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Send party invite success"));
+		bSendInviteSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bSendInviteSuccess, "Waiting for party invite notif...", 30);
+
+	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+	
+	bool bRejectInviteSuccess = false;
+	FAccelByteModelsV2PartySession JoinedParty;
+	InviteeSession.RejectPartyInvite(Party.ID, FVoidHandler::CreateLambda([&bRejectInviteSuccess]
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Reject invite success"));
+		bRejectInviteSuccess = true;
+	}), PartyErrorHandler);
+	WaitUntil(bRejectInviteSuccess, "Waiting for invite rejection...");
+
+	AB_TEST_TRUE(bSendInviteSuccess);
+	AB_TEST_TRUE(bRejectInviteSuccess);
 	
 	return true;
 }
