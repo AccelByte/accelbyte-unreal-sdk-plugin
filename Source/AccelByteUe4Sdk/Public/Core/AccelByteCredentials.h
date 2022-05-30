@@ -72,6 +72,7 @@ public:
 	
 	ESessionState GetSessionState() const;
 	bool IsSessionValid() const;
+	bool IsComply() const;
 
 	void Startup();
 	void Shutdown();
