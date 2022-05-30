@@ -44,6 +44,68 @@ enum class EVerificationCode : uint8
 
 FString GetVerificationCode(const FString& userId, EVerificationCode code);
 
+bool CreateUserProfileTest(const FTestUser& InUser)
+{
+	bool bIsDone = false;
+	bool bIsOk = false;
+	FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
+	UserProfileCreateRequest.FirstName = InUser.FirstName;
+	UserProfileCreateRequest.LastName = InUser.LastName;
+	UserProfileCreateRequest.Language = InUser.Language;
+	UserProfileCreateRequest.Timezone = InUser.Timezone;
+	UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
+	UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
+	UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
+	UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
+	FAccelByteModelsUserProfileInfo UserProfileInfo;
+	
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(InUser.Email);
+	ApiClient->UserProfile.CreateUserProfile(UserProfileCreateRequest
+		, THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
+			{
+				bIsOk = true;
+				bIsDone = true;
+				UserProfileInfo = Result;
+			})
+		, FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+			{
+				if (Code == 11441) // Unable to createUserProfile: User profile already exists
+				{
+					bIsOk = true;
+				}
+				bIsDone = true;
+			})
+		);
+
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	return bIsOk;
+}
+
+bool BatchGetPublicUserProfileInfos(const FTestUser & InUser
+	, const FString& InUserIds
+	, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult)
+{
+	bool bIsDone = false;
+	bool bIsOk = false;
+	UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(InUser.Email);
+	ApiClient->UserProfile.BatchGetPublicUserProfileInfos(InUserIds
+		, THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
+			{
+				OutResult = Result;
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
+			{
+				bIsDone = true;
+			})
+		);
+	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	return bIsOk;
+}
+
 const auto UserTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage)
 	{
 		UE_LOG(LogAccelByteUserTest, Error, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
@@ -2508,66 +2570,6 @@ bool FGetOtherPublicUserProfileTest::RunTest(const FString& Parameter)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBatchGetPublicUserProfileInfos, "AccelByte.Tests.AUserProfile.BatchGetPublicUserProfileInfos", AutomationFlagMaskUser);
 bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 {
-#pragma region Test definitions
-
-	const auto CreateUserProfile = [this](const FTestUser& InUser, const Credentials& InCredentials)
-	{
-		bool bIsDone = false;
-		bool bIsOk = false;
-		FAccelByteModelsUserProfileCreateRequest UserProfileCreateRequest;
-		UserProfileCreateRequest.FirstName = InUser.FirstName;
-		UserProfileCreateRequest.LastName = InUser.LastName;
-		UserProfileCreateRequest.Language = InUser.Language;
-		UserProfileCreateRequest.Timezone = InUser.Timezone;
-		UserProfileCreateRequest.DateOfBirth = InUser.DateOfBirth;
-		UserProfileCreateRequest.AvatarSmallUrl = InUser.AvatarSmallUrl;
-		UserProfileCreateRequest.AvatarUrl = InUser.AvatarUrl;
-		UserProfileCreateRequest.AvatarLargeUrl = InUser.AvatarLargeUrl;
-		FAccelByteModelsUserProfileInfo UserProfileInfo;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Creating user profile"), *InUser.Email);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.CreateUserProfile(UserProfileCreateRequest,
-			THandler<FAccelByteModelsUserProfileInfo>::CreateLambda([&](const FAccelByteModelsUserProfileInfo& Result)
-				{
-					bIsOk = true;
-					bIsDone = true;
-					UserProfileInfo = Result;
-				}),
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-				{
-					if (Code == 11441) // Unable to createUserProfile: User profile already exists
-					{
-						bIsOk = true;
-					}
-					bIsDone = true;
-				}));
-
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-	const auto BatchGetPublicUserProfileInfos = [this](const Credentials& InCredentials, const FString& InUserIds, TArray<FAccelByteModelsPublicUserProfileInfo>& OutResult) {
-		bool bIsDone = false;
-		bool bIsOk = false;
-		UE_LOG(LogAccelByteUserTest, Log, TEXT("%s: %s"), TEXT("Batch get user profiles"), *InUserIds);
-		Api::UserProfile UserProfileApi(InCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-		UserProfileApi.BatchGetPublicUserProfileInfos(InUserIds,
-			THandler<TArray<FAccelByteModelsPublicUserProfileInfo>>::CreateLambda([&](const TArray<FAccelByteModelsPublicUserProfileInfo>& Result)
-				{
-					OutResult = Result;
-					bIsOk = true;
-					bIsDone = true;
-				}),
-			FErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage)
-				{
-					bIsDone = true;
-				}));
-		WaitUntil(bIsDone, TEXT("Waiting ..."));
-		return bIsOk;
-	};
-
-#pragma endregion
-	
 	TArray<FTestUser> TestUsers;
 
 	// Setup
@@ -2576,9 +2578,9 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	// Create user profiles
 
-	for (int i = 0; i < TestUsers.Num(); i++)
+	for (auto& TestUser : TestUsers)
 	{
-		AB_TEST_TRUE(CreateUserProfile(TestUsers[i], TestUsers[i].Credentials));
+		AB_TEST_TRUE(CreateUserProfileTest(TestUser));
 	}
 
 	// Batch get public user profile infos
@@ -2587,12 +2589,12 @@ bool FBatchGetPublicUserProfileInfos::RunTest(const FString& Parameter)
 
 	for (const auto& TestUser : TestUsers)
 	{
-		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.Credentials.GetUserId()));
+		UserIdsCsv.Append(FString::Printf(TEXT("%s%s"), UserIdsCsv.IsEmpty() ? TEXT("") : TEXT(","), *TestUser.UserId));
 	}
 
 	TArray<FAccelByteModelsPublicUserProfileInfo> UserPublicProfiles;
 
-	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0].Credentials, UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
+	AB_TEST_TRUE(BatchGetPublicUserProfileInfos(TestUsers[0], UserIdsCsv, UserPublicProfiles)); // Using the first user credentials
 	AB_TEST_EQUAL(UserPublicProfiles.Num(), TestUsers.Num());
 
 	// Tear down
