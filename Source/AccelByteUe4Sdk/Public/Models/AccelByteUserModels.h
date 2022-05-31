@@ -5,24 +5,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Runtime/Launch/Resources/Version.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteUserModels.generated.h"
 
+/** @brief Supported 2FA Authenticator Type by AccelByte IAM. */
 UENUM(BlueprintType)
-/**
-*  @brief Supported 2FA Authenticator Type by AccelByte IAM.
-*/
 enum class EAccelByteLoginAuthFactorType : uint8
 {
 	Authenticator,
 	BackupCode
 };
 
+/** @brief Supported platforms by AccelByte IAM. */
 UENUM(BlueprintType)
-/**
- *  @brief Supported platforms by AccelByte IAM.
- */
 enum class EAccelBytePlatformType : uint8
 {
 	Steam,
@@ -86,14 +81,18 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAcceptedPolicies
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementRequest")
-		bool IsAccepted;
+	bool IsAccepted{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementRequest")
-		FString LocalizedPolicyVersionId;
+	FString LocalizedPolicyVersionId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementRequest")
-		FString PolicyVersionId;
+	FString PolicyVersionId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Agreement | Models | AcceptAgreementRequest")
-		FString PolicyId;
+	FString PolicyId{};
 	
 };
 
@@ -101,224 +100,300 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Password;
+	FString Password{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Country;
+	FString Country{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DateOfBirth;
+	FString DateOfBirth{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterRequestv2
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Password;
+	FString Password{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Country;
+	FString Country{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DateOfBirth;
+	FString DateOfBirth{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Username;
+	FString Username{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterRequestv3
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		TArray<FAcceptedPolicies> AcceptedPolicies;
+	TArray<FAcceptedPolicies> AcceptedPolicies{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Username;
+	FString Username{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Password;
+	FString Password{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString Country;
+	FString Country{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateRequest")
-		FString DateOfBirth;
+	FString DateOfBirth{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FRegisterResponse
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString Country;
+	FString Country{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString DateOfBirth;
+	FString DateOfBirth{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserCreateResponse")
-		FString Username;
+	FString Username{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUserUpdateRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString Country; // Optional
+	FString Country{}; // Optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString DateOfBirth;
+	FString DateOfBirth{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString DisplayName; // Optional
+	FString DisplayName{}; // Optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString EmailAddress; // Optional
+	FString EmailAddress{}; // Optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString LanguageTag; // Optional
+	FString LanguageTag{}; // Optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | UserUpdateRequest")
-		FString Username; // Optional
+	FString Username{}; // Optional
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FBan
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Ban")
-		FString Ban;
+	FString Ban{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Ban")
-		FString BanId;
+	FString BanId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Ban")
-		FString EndDate;
+	FString EndDate{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPermission
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Permission")
-		int32 Action;
+	int32 Action{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Permission")
-		FString Resource;
+	FString Resource{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Permission")
-		int32 SchedAction;
+	int32 SchedAction{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Permission")
-		FString SchedCron;
+	FString SchedCron{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | Permission")
-		TArray<FString> SchedRange;
+	TArray<FString> SchedRange{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountUserData
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		TArray<FBan> Bans;
+	TArray<FBan> Bans{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString CreatedAt;
+	FString CreatedAt{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		bool EmailVerified;
+	bool EmailVerified{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		bool Enabled;
+	bool Enabled{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString LastEnabledChangedTime;
+	FString LastEnabledChangedTime{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString LoginId;
+	FString LoginId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		TArray<FPermission> Permissions;
+	TArray<FPermission> Permissions{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		bool PhoneVerified;
+	bool PhoneVerified{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString PlatformId; //optional
+	FString PlatformId{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString PlatformUserId; //optional
+	FString PlatformUserId{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		TArray<FString> Roles;
+	TArray<FString> Roles{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString Username; //optional
+	FString Username{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString EmailAddress;
+	FString EmailAddress;
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FSimpleUserData
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserProfile | Models | AccountUserData")
-		FString Username; //optional
+	FString Username{}; //optional
 };
 
 // backward compatibility with previous AccelByte SDK codes
 // remove this if you are using FUserData from Unreal PhysicsCore
 #if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
-using FUserData = FAccountUserData;
+using FUserData = FAccountUserData{};
 #endif
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FResetPasswordRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ResetPasswordRequest")
-		FString Code;
+	FString Code{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ResetPasswordRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | ResetPasswordRequest")
-		FString NewPassword;
+	FString NewPassword{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPlatformLink
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString LinkedAt;
+	FString LinkedAt{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString OriginNamespace;
+	FString OriginNamespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString PlatformId;
+	FString PlatformId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString PlatformUserId;
+	FString PlatformUserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkedPlatform")
-		FString AccountGroup;
+	FString AccountGroup{};
 };
 
 UENUM(BlueprintType)
@@ -333,100 +408,126 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FVerificationCodeRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
-		EVerificationContext Context;
+	EVerificationContext Context{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
-		FString LanguageTag;
+	FString LanguageTag{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | SendVerificationCodeRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUpgradeAndVerifyRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString Code;
+	FString Code{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString Country; //optional
+	FString Country{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString DateOfBirth; //optional
+	FString DateOfBirth{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString DisplayName; //optional
+	FString DisplayName{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString Password;
+	FString Password{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		bool ReachMinimumAge = true; //optional. If user input DOB, BE will not check this field 
+	bool ReachMinimumAge{ true }; //optional. If user input DOB, BE will not check this field 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		FString Username;
+	FString Username{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeHeadlessAccountWithVerificationCodeRequest")
-		bool ValidateOnly = false;
+	bool ValidateOnly{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPublicUserInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-		FString CreatedAt;
+	FString CreatedAt{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | GetPublicUserInfoRequest")
-		FString UserName;
+	FString UserName{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPagedPublicUsersInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | PagedPublicUsersInfoRequest")
-		TArray<FPublicUserInfo> Data;
+	TArray<FPublicUserInfo> Data{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | PagedPublicUsersInfoRequest")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPagedPlatformLinks
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PagedLinkedPlatform")
-		TArray<FPlatformLink> Data;
+	TArray<FPlatformLink> Data{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PagedLinkedPlatform")
-		FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdRequest")
-		TArray<FString> PlatformUserIDs;
+	TArray<FString> PlatformUserIDs{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPlatformUserIdMap
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformUserIdMap")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformUserIdMap")
-		FString PlatformUserId;
+	FString PlatformUserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | PlatformUserIdMap")
-		FString PlatformId;
+	FString PlatformId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FBulkPlatformUserIdResponse
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkPlatformUserIdResponse")
-		TArray<FPlatformUserIdMap> UserIdPlatforms;
+	TArray<FPlatformUserIdMap> UserIdPlatforms{};
 };
 
 USTRUCT(BlueprintType)
@@ -435,13 +536,16 @@ struct ACCELBYTEUE4SDK_API FCountryInfo
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
-        FString CountryCode;
+	FString CountryCode{};
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
-        FString CountryName;
+	FString CountryName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
-        FString State;
+	FString State{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | CountryInfo")
-        FString City;
+	FString City{};
 };
 
 USTRUCT(BlueprintType)
@@ -450,52 +554,62 @@ struct ACCELBYTEUE4SDK_API FUpgradeUserRequest
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
-		FString Temporary_session_id;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
-		int32 Expires_in;
+	FString Temporary_session_id{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpgradeUserRequest")
+	int32 Expires_in{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountLinkedPlatform
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkedPlatform")
-		FString PlatformUserId;
+	FString PlatformUserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountLinkPublisherAccount
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
-		FString UserId;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
-		FString Namespace;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
-		TArray<FAccountLinkedPlatform> LinkedPlatforms;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkPublisherAccount")
+	TArray<FAccountLinkedPlatform> LinkedPlatforms{};	
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountLinkConflictMessageVariables
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConfictMessageVariables")
-		FString PlatformUserID;
+	FString PlatformUserID{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConfictMessageVariables")
-		TArray<FAccountLinkPublisherAccount> PublisherAccounts;
+	TArray<FAccountLinkPublisherAccount> PublisherAccounts{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccountLinkConflictErrorJson
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
 	FString ErrorCode;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
 	FString ErrorMessage;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | AccountLinkConflictErrorJson")
 	FAccountLinkConflictMessageVariables MessageVariables;
 };
@@ -504,232 +618,377 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FLinkPlatformAccountRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkPlatformAccountRequest")
-		FString PlatformId;
+	FString PlatformId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | LinkPlatformAccountRequest")
-		FString PlatformUserId;
+	FString PlatformUserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUpdateEmailRequest
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
-		FString Code;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
-		FString EmailAddress;
+	FString Code{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+	FString EmailAddress{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FJsonWebTokenResponse
 {
 	GENERATED_BODY()
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
-		FString Jwt_token;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
-		FString Session_id;
+	FString Jwt_token{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UpdateEmailRequest")
+	FString Session_id{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FListBulkUserInfoRequest
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
-		TArray<FString> UserIds;
+	TArray<FString> UserIds{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FBaseUserInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
-		FString AvatarUrl;
+	FString AvatarUrl{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
-		FString UserId;
+	TMap<FString, FString> PlatformUserIds{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
+	FString UserId{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FListBulkUserInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BulkUserInfo")
-		TArray<FBaseUserInfo> Data;
+	TArray<FBaseUserInfo> Data{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FNamespaceRole
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | NamespaceRole")
-		FString RoleId;
-};	
+	FString RoleId{};
+};
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUserOtherPlatformInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString AuthType;
+	FString AuthType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		TArray<FBan> Bans;
+	TArray<FBan> Bans{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString Country;
+	FString Country{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString CreatedAt;
+	FString CreatedAt{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString DateOfBirth;
+	FString DateOfBirth{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		bool DeletionStatus;
+	bool DeletionStatus{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString DisplayName;
+	FString DisplayName{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString EmailAddress;
+	FString EmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		bool EmailVerified;
+	bool EmailVerified{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		bool Enabled;
+	bool Enabled{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString LastDateOfBirthChangedTime;
+	FString LastDateOfBirthChangedTime{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString LastEnabledChangedTime;
+	FString LastEnabledChangedTime{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString Namespace;
+	FString Namespace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		TArray<FNamespaceRole> NamespaceRoles;
+	TArray<FNamespaceRole> NamespaceRoles{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString NewEmailAddress;
+	FString NewEmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString OldEmailAddress;
+	FString OldEmailAddress{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		TArray<FPermission> Permissions;
+	TArray<FPermission> Permissions{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString PhoneNumber;
+	FString PhoneNumber{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		bool PhoneVerified;
+	bool PhoneVerified{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString PlatformDisplayName; //optional
+	FString PlatformDisplayName{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString PlatformId; //optional
+	FString PlatformId{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString PlatformUserId; //optional
+	FString PlatformUserId{}; //optional
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		TArray<FString> Roles;
+	TArray<FString> Roles{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString UserId;
+	FString UserId{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | GetUserOtherPlatform")
-		FString Username; //optional
+	FString Username{}; //optional
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FPagedUserOtherPlatformInfo
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
-	TArray<FUserOtherPlatformInfo> Data;
+	TArray<FUserOtherPlatformInfo> Data{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | UserOtherPlatformData")
-	int32 TotalData;
+	int32 TotalData{};
 };
 
 USTRUCT(BlueprintType)
 struct FValidationDescription 
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FString Language;
+	FString Language{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		TArray<FString> Message;
+	TArray<FString> Message{};
 };
 
 USTRUCT(BlueprintType)
 struct FValidation
 {
 	GENERATED_BODY()
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		bool AllowDigit;
+	bool AllowDigit{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		bool AllowLetter;
+	bool AllowLetter{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		bool AllowSpace;
+	bool AllowSpace{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		bool AllowUnicode;
+	bool AllowUnicode{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FValidationDescription Description;
+	FValidationDescription Description{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		bool IsCustomRegex;
+	bool IsCustomRegex{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FString LetterCase;	
+	FString LetterCase{};	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 MaxLength;
+	int32 MaxLength{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 MaxRepeatingAlphaNum;	
+	int32 MaxRepeatingAlphaNum{};	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 MaxRepeatingSpecialCharacter;
+	int32 MaxRepeatingSpecialCharacter{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 MinCharType;
+	int32 MinCharType{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		int32 MinLength;
+	int32 MinLength{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FString Regex; 
+	FString Regex{}; 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		FString SpecialCharacterLocation;
+	FString SpecialCharacterLocation{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-		TArray<FString> SpecialCharacters; 	
+	TArray<FString> SpecialCharacters{}; 	
 };
 
 USTRUCT(BlueprintType)
 struct FDataInputValidation
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-	FString Field;
+	FString Field{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-	FValidation Validation;
+	FValidation Validation{};
 };
 
 USTRUCT(BlueprintType)
 struct FInputValidation
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-	TArray<FDataInputValidation> Data;
+	TArray<FDataInputValidation> Data{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | InputValidation")
-	int32 Version;
+	int32 Version{};
 };
+
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUser2FaBackupCode
 {
 	GENERATED_BODY();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
-	int64 GeneratedAt;
+	int64 GeneratedAt{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
-	TArray<FString> InvalidCodes;
+	TArray<FString> InvalidCodes{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaBackupCode")
-	TArray<FString> ValidCodes;
+	TArray<FString> ValidCodes{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUser2FaMethod
 {
 	GENERATED_BODY();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaMethod")
-	FString Default;
+	FString Default{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaMethod")
-	TArray<FString> Enabled;
+	TArray<FString> Enabled{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FUser2FaSecretKey
 {
 	GENERATED_BODY();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaSecretKey")
-	FString SecretKey;
+	FString SecretKey{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | User2FaSecretKey")
-	FString Uri;
+	FString Uri{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBanUserRequest
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUser")
+	EBanType Ban{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUser")
+	FString Comment{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUser")
+	FString EndDate{}; // ISO 8601 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUser")
+	EBanReason Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUser")
+	bool SkipNotif{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBannedBy
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BannedBy")
+	FString DisplayName{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BannedBy")
+	FString UserId{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FBanUserResponse 
+{
+	GENERATED_BODY();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString Ban{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString BanId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FBannedBy BannedBy{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString Comment{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString CreatedAt{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString DisableDate{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	bool Enabled{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString EndDate{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	EBanReason Reason{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | UserManagement | Models | BanUserInfo")
+	FString UserId{};
 };

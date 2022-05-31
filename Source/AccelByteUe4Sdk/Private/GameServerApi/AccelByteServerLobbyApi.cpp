@@ -13,7 +13,12 @@ namespace AccelByte
 {
 namespace GameServerApi
 {
-	ServerLobby::ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+	ServerLobby::ServerLobby(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+		, HttpRef{InHttpRef}
 	{}
 
 	ServerLobby::~ServerLobby()
@@ -29,8 +34,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -42,7 +47,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::WritePartyStorage(const FString& PartyId, TFunction<FJsonObjectWrapper(FJsonObjectWrapper)> PayloadModifier, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, uint32 RetryAttempt)
@@ -60,8 +65,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *PartyId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -73,15 +78,15 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::RequestWritePartyStorage(const FString &PartyId, const FAccelByteModelsPartyDataUpdateRequest& PartyDataRequest, const THandler<FAccelByteModelsPartyDataNotif>& OnSuccess, const FErrorHandler& OnError, FSimpleDelegate OnConflicted)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *PartyId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -112,7 +117,7 @@ namespace GameServerApi
 			}
 		});
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, ErrorHandler), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper)
@@ -120,6 +125,7 @@ namespace GameServerApi
 		if (DataWrapper->RemainingAttempt <= 0)
 		{
 			DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
+			return;
 		}
 
 
@@ -155,8 +161,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -168,7 +174,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::GetSessionAttribute(const FString& UserId, const FString& Key, const THandler<FAccelByteModelsGetSessionAttributeResponse>& OnSuccess, const FErrorHandler& OnError)
@@ -187,8 +193,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -200,7 +206,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::SetSessionAttribute(const FString& UserId, const TMap<FString, FString>& Attributes, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -222,8 +228,8 @@ namespace GameServerApi
 		FAccelByteModelsSetSessionAttributeRequest Body;
 		Body.Attributes = Attributes;
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -238,7 +244,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::SetSessionAttribute(const FString& UserId, const FString& Key, const FString& Value, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
@@ -251,8 +257,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked"), *SettingsRef.BaseUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -264,15 +270,15 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 	void ServerLobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by"), *SettingsRef.BaseUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -284,7 +290,7 @@ namespace GameServerApi
 		Request->SetHeader(TEXT("Content-Type"), ContentType);
 		Request->SetHeader(TEXT("Accept"), Accept);
 
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
 } // namespace GameServerApi

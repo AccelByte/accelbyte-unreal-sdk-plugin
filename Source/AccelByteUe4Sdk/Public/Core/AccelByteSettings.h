@@ -52,6 +52,10 @@ public:
 	void Reset(ESettingsEnvironment const Environment);
 
 	Settings& operator=(Settings const& Other) = default;
+
+protected:
+	void LoadSettings(const FString& SectionPath);
+	void LoadFallback(const FString& SectionPath, const FString& Key, FString& Value);
 };
 
 typedef TSharedRef<Settings, ESPMode::ThreadSafe> SettingsRef;

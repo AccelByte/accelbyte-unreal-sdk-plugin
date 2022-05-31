@@ -19,7 +19,8 @@ enum class EWebSocketState
 	Connecting = 1,
 	Connected = 2,
 	Closing = 3,
-	Reconnecting = 4
+	Reconnecting = 4,
+	WaitingReconnect = 5
 };
 
 enum class EWebSocketEvent : uint8
@@ -80,6 +81,8 @@ class ACCELBYTEUE4SDK_API AccelByteWebSocket
 		float MaxBackoffDelay = 30.f,
 		float TotalTimeout = 60.f
 	);
+
+	void UpdateUpgradeHeaders(const FString& Key, const FString& Value);
 	
 	void Connect();
 	void Disconnect(bool ForceCleanup = false);

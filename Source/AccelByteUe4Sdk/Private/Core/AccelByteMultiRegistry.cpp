@@ -3,11 +3,12 @@
 // and restrictions contact your company contract manager.
 
 #include "Core/AccelByteMultiRegistry.h"
+#include "AccelByteUe4SdkModule.h"
 
 namespace AccelByte
 {
-	
-FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
+
+FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString &Key)
 {
 	if (!ApiClientInstances.Contains(Key))
 	{
@@ -19,8 +20,9 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 		}
 		else 
 		{
+			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 			NewClient = MakeShared<FApiClient, ESPMode::ThreadSafe>();
-			NewClient->CredentialsRef->SetClientCredentials(FRegistry::Settings.ClientId, FRegistry::Settings.ClientSecret);
+			NewClient->CredentialsRef->SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 		}
 
 		ApiClientInstances.Add(Key, NewClient);
@@ -29,7 +31,7 @@ FApiClientPtr AccelByte::FMultiRegistry::GetApiClient(const FString Key)
 	return ApiClientInstances[Key];
 }
 
-FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString Key)
+FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString &Key)
 {
 	if (!ServerApiClientInstances.Contains(Key))
 	{
@@ -41,8 +43,9 @@ FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString 
 		}
 		else 
 		{
+			IAccelByteUe4SdkModuleInterface& ABSDKModule = IAccelByteUe4SdkModuleInterface::Get();
 			NewClient = MakeShared<FServerApiClient, ESPMode::ThreadSafe>();
-			NewClient->ServerCredentialsRef->SetClientCredentials(FRegistry::ServerSettings.ClientId, FRegistry::ServerSettings.ClientSecret);
+			NewClient->ServerCredentialsRef->SetClientCredentials(ABSDKModule.GetSettingsEnvironment());
 		}
 
 		ServerApiClientInstances.Add(Key, NewClient);
@@ -51,7 +54,7 @@ FServerApiClientPtr AccelByte::FMultiRegistry::GetServerApiClient(const FString 
 	return ServerApiClientInstances[Key];
 }
 
-bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClient)
+bool FMultiRegistry::RegisterApiClient(FString const &Key, FApiClientPtr ApiClient)
 {
 	bool bResult = false;
 
@@ -59,6 +62,32 @@ bool FMultiRegistry::RegisterApiClient(FString const Key, FApiClientPtr ApiClien
 	{
 		ApiClientInstances.Add(Key, ApiClient);
 		bResult = true;
+	}
+
+	return bResult;
+}
+
+bool FMultiRegistry::RemoveApiClient(const FString &Key)
+{
+	bool bResult = false;
+
+    if (!Key.IsEmpty())
+    {
+        const int32 RemovedNum = ApiClientInstances.Remove(Key);
+        bResult = RemovedNum > 0;
+    }
+
+    return bResult;
+}
+
+bool FMultiRegistry::RemoveServerApiClient(const FString &Key)
+{
+	bool bResult = false;
+	
+	if (!Key.IsEmpty())
+	{
+        const int32 RemovedNum = ServerApiClientInstances.Remove(Key);
+        bResult = RemovedNum > 0;
 	}
 
 	return bResult;

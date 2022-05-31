@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Runtime/Core/Public/CoreMinimal.h"
-#include "Runtime/Online/HTTP/Public/HttpManager.h"
+#include "CoreMinimal.h"
+#include "HttpManager.h"
 #include "Core/AccelByteLRUCache.h"
 
 namespace AccelByte

@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteUserProfileApi.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
@@ -16,14 +15,12 @@ namespace AccelByte
 namespace Api
 {
 
-UserProfile::UserProfile(
-	const Credentials& Credentials,
-	const AccelByte::Settings& Setting,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{Credentials},
-	Settings(Setting)
+UserProfile::UserProfile(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
 {
 }
 
@@ -34,7 +31,7 @@ void UserProfile::GetUserProfile(const THandler<FAccelByteModelsUserProfileInfo>
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -54,7 +51,7 @@ void UserProfile::GetPublicUserProfileInfo(FString UserID, const THandler<FAccel
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public"), *Settings.BasicServerUrl, *Settings.Namespace, *UserID);
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/public"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *UserID);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -73,7 +70,7 @@ void UserProfile::BatchGetPublicUserProfileInfos(const FString UserIds, const TH
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public"), *Settings.BasicServerUrl, *CredentialsRef.GetNamespace());
+	const FString Url = FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace());
 	const FString UrlEncodedUserIds = FGenericPlatformHttp::UrlEncode(UserIds);
 	const FString QueryString = FString::Printf(TEXT("userIds=%s"), *UrlEncodedUserIds);
 	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
@@ -94,7 +91,7 @@ void UserProfile::GetCustomAttributes(const THandler<FJsonObject>& OnSuccess, co
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *CredentialsRef.GetUserId());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -114,7 +111,7 @@ void UserProfile::GetPublicCustomAttributes(const FString& UserId, const THandle
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *UserId);
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *UserId);
 	FString Verb			= TEXT("GET");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -134,7 +131,7 @@ void UserProfile::UpdateUserProfile(const FAccelByteModelsUserProfileUpdateReque
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb			= TEXT("PUT");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -157,7 +154,7 @@ void UserProfile::UpdateCustomAttributes(const FJsonObject& CustomAttributesUpda
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *Settings.BasicServerUrl, *Settings.Namespace, *CredentialsRef.GetUserId());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/%s/profiles/customAttributes"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb			= TEXT("PUT");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -182,7 +179,7 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *Settings.BasicServerUrl, *Settings.Namespace);
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/users/me/profiles"), *SettingsRef.BasicServerUrl, *CredentialsRef.GetNamespace());
 	FString Verb			= TEXT("POST");
 	FString ContentType		= TEXT("application/json");
 	FString Accept			= TEXT("application/json");
@@ -203,5 +200,27 @@ void UserProfile::CreateUserProfile(const FAccelByteModelsUserProfileCreateReque
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
+void UserProfile::GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization	= FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url				= FString::Printf(TEXT("%s/v1/public/namespaces/%s/profiles/public/byPublicId"), *SettingsRef.BasicServerUrl, *SettingsRef.Namespace);
+	FString Verb			= TEXT("GET");
+	FString ContentType		= TEXT("application/json");
+	FString Accept			= TEXT("application/json");
+
+	Url.Append(FString::Printf(TEXT("?publicId=%s"), *PublicId));
+	
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+  
 } // Namespace Api
 } // Namespace AccelByte

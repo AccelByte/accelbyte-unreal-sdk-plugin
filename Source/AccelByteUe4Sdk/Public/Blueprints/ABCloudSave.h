@@ -8,62 +8,18 @@
 #include "UObject/NoExportTypes.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "Core/AccelByteError.h"
+#include "Models/AccelByteCloudSaveModels.h"
 #include "Dom/JsonObject.h"
 #include "JsonObjectWrapper.h"
 #include "ABCloudSave.generated.h"
 
 using namespace AccelByte;
 
-#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE
-USTRUCT(BlueprintType)
-struct FModelsUserRecord
-{
-	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		FString Key;
+#pragma region MODEL_AND_DELEGATE_FOR_REQUEST_RESPONSE 
 
-	UPROPERTY(BlueprintReadWrite)
-		FString Namespace;
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FAccelByteModelsUserRecord, Response);
 
-	UPROPERTY(BlueprintReadWrite)
-		FString UserId;
-
-	UPROPERTY(BlueprintReadWrite)
-		bool IsPublic;
-
-	UPROPERTY(BlueprintReadWrite)
-		FDateTime CreatedAt;
-
-	UPROPERTY(BlueprintReadWrite)
-		FDateTime UpdatedAt;
-
-	UPROPERTY(BlueprintReadWrite)
-		FJsonObjectWrapper Value;
-};
-
-USTRUCT(BlueprintType)
-struct FModelsGameRecord
-{
-	GENERATED_BODY()
-		UPROPERTY(BlueprintReadWrite)
-		FString Key;
-
-	UPROPERTY(BlueprintReadWrite)
-		FString Namespace;
-
-	UPROPERTY(BlueprintReadWrite)
-		FDateTime CreatedAt;
-
-	UPROPERTY(BlueprintReadWrite)
-		FDateTime UpdatedAt;
-
-	UPROPERTY(BlueprintReadWrite)
-		FJsonObjectWrapper Value;
-};
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsUserRecord, FModelsUserRecord, Reponse);
-
-DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FModelsGameRecord, Response);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FDModelsGameRecord, FAccelByteModelsGameRecord, Response);
 
 DECLARE_DYNAMIC_DELEGATE_RetVal_OneParam(FJsonObjectWrapper, FDPayloadJsonObject, FJsonObjectWrapper, Response);
 

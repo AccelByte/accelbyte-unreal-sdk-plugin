@@ -35,7 +35,7 @@ AccelByteWebSocket::~AccelByteWebSocket()
 {
 	if(UObjectInitialized())
 	{
-		Disconnect();
+		Disconnect(true);
 	}
 }
 
@@ -69,6 +69,11 @@ void AccelByteWebSocket::SetupWebSocket()
 	WebSocket->OnConnected().AddRaw(this, &AccelByteWebSocket::OnConnectionConnected);
 	WebSocket->OnConnectionError().AddRaw(this, &AccelByteWebSocket::OnConnectionError);
 	WebSocket->OnClosed().AddRaw(this, &AccelByteWebSocket::OnClosed);
+}
+
+void AccelByteWebSocket::UpdateUpgradeHeaders(const FString& Key, const FString& Value)
+{
+	UpgradeHeaders.Emplace(Key, Value);
 }
 
 AccelByteWebSocket::FConnectDelegate& AccelByteWebSocket::OnConnected()
@@ -220,12 +225,17 @@ void AccelByteWebSocket::OnConnectionError(const FString& Error)
 void AccelByteWebSocket::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
 	FReport::Log(FString(__FUNCTION__));
-	
+
+	// Broadcast message DisconnectNotif
 	OnMessageReceived(Reason);
-	if(StatusCode < 4000)
+	
+	// trigger closed event, on prepare to reconnect on next StateTick
+	if(StatusCode <= 4000)
 	{
+		// Add event websocket closed so state tick can reconnect lobby.
 		WsEvents |= EWebSocketEvent::Closed;
 	}
+		
 	OnConnectionClosedQueue.Enqueue(FConnectionClosedParams({StatusCode, Reason, WasClean}));
 }
 
@@ -296,18 +306,21 @@ bool AccelByteWebSocket::StateTick(float DeltaTime)
 		}
 		else if (!WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Closed) != EWebSocketEvent::None)
 		{
-			TimeSinceLastReconnect = FPlatformTime::Seconds();
-			TimeSinceConnectionLost = FPlatformTime::Seconds();
-			BackoffDelay = InitialBackoffDelay;
-			RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
-			Connect();
-			WsState = EWebSocketState::Reconnecting;
+			WsState = EWebSocketState::WaitingReconnect;
 		}
 		else if ((FPlatformTime::Seconds() - TimeSinceLastPing) >= PingDelay)
 		{
 			TimeSinceLastPing = FPlatformTime::Seconds();
 			SendPing();
 		}
+		break;
+	case EWebSocketState::WaitingReconnect:
+		TimeSinceLastReconnect = FPlatformTime::Seconds();
+		TimeSinceConnectionLost = FPlatformTime::Seconds();
+		BackoffDelay = InitialBackoffDelay;
+		RandomizedBackoffDelay = BackoffDelay + (FMath::RandRange(-InitialBackoffDelay, InitialBackoffDelay) / 4);
+		Connect();
+		WsState = EWebSocketState::Reconnecting;
 		break;
 	case EWebSocketState::Reconnecting:
 		if (WebSocket->IsConnected() || (WsEvents & EWebSocketEvent::Connected) != EWebSocketEvent::None)

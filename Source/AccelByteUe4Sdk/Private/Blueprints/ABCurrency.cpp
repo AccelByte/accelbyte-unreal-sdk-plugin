@@ -13,7 +13,7 @@ void UABCurrency::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 
 void UABCurrency::GetCurrencyList(
 	FDArrayModelsCurrencyListResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Currency.GetCurrencyList(
 		FRegistry::Settings.Namespace,

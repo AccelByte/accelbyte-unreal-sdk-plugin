@@ -13,7 +13,12 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerAchievement::ServerAchievement(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+ServerAchievement::ServerAchievement(ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {}
 
 ServerAchievement::~ServerAchievement()
@@ -34,8 +39,8 @@ void ServerAchievement::UnlockAchievement(const FString& UserId, const FString& 
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/%s/unlock"), *Settings.AchievementServerUrl, *Credentials.GetClientNamespace(), *UserId, *AchievementCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/achievements/%s/unlock"), *SettingsRef.AchievementServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *AchievementCode);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -47,7 +52,7 @@ void ServerAchievement::UnlockAchievement(const FString& UserId, const FString& 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 } // Namespace GameServerApi

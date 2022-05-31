@@ -12,6 +12,7 @@
 #include "TestUtilities.h"
 #include "NVIDIA/CUDA/cuda.h"
 #include "Api/AccelByteQos.h"
+#include "Core/AccelByteReport.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
@@ -36,74 +37,76 @@ const auto PartyErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, F
 
 static bool TestPartyMembership(const FAccelByteModelsV2PartySession& TestParty, const FString& MemberID, const FString& Status=TEXT("active"))
 {
-    for(auto& Member : TestParty.Members)
-    {
-        if(Member.ID.Equals(MemberID))
-        {
-            return Member.Status.Equals(Status);
-        }
-    }
+	for(auto& Member : TestParty.Members)
+	{
+		if(Member.ID.Equals(MemberID))
+		{
+			return Member.Status.Equals(Status);
+		}
+	}
 
-    return false;
+	return false;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartySetup, "AccelByte.Tests.Party.A.Setup", AutomationFlagMaskParty);
 bool PartySetup::RunTest(const FString& Parameters)
 {
-    bool bLoginDone = false;
-    FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone] { bLoginDone = true; }), PartyErrorHandler);	
-    WaitUntil(bLoginDone, "Waiting for LoginWithDeviceId...");
+	bool bLoginDone = false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone] { bLoginDone = true; }), PartyErrorHandler);	
+	WaitUntil(bLoginDone, "Waiting for LoginWithDeviceId...");
 
 	User Invitee(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-    	
-    // Create test user and log in
-    const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
-    FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
-    EmailAddress.ToLowerInline();
-    const FString Password = "123SDKTest123";
-    const FString Country = "US";
-    const FDateTime BirthDateTime = FDateTime::Now() - FTimespan::FromDays(365 * 25);
-    const FString DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), BirthDateTime.GetYear(), BirthDateTime.GetMonth(), BirthDateTime.GetDay());
 
-    bool bRegisterSuccessful = false;
-    bool bRegisterDone = false;
-    UE_LOG(LogAccelBytePartyTest, Log, TEXT("Creating test user..."));
-    Invitee.Register(EmailAddress, Password, DisplayName, Country, DateOfBirth,
-    	THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse&)
-    	{
-    		UE_LOG(LogAccelBytePartyTest, Log, TEXT("   Success"));
-    		bRegisterSuccessful = true;
-    		bRegisterDone = true;
-    	}),
-    	FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
-    	{
-    		UE_LOG(LogAccelBytePartyTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-    		bRegisterDone = true;
-    	}));
+	InviteeCredentials.SetClientCredentials(FRegistry::Credentials.GetOAuthClientId(), FRegistry::Credentials.GetOAuthClientSecret());
 
-    FlushHttpRequests();
-    WaitUntil(bRegisterDone, "Waiting for registration...");
+	// Create test user and log in
+	const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+	EmailAddress.ToLowerInline();
+	const FString Password = "123SDKTest123";
+	const FString Country = "US";
+	const FDateTime BirthDateTime = FDateTime::Now() - FTimespan::FromDays(365 * 25);
+	const FString DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), BirthDateTime.GetYear(), BirthDateTime.GetMonth(), BirthDateTime.GetDay());
 
-    if (!bRegisterSuccessful)
-    {
-    	return false;
-    }
+	bool bRegisterSuccessful = false;
+	bool bRegisterDone = false;
+	UE_LOG(LogAccelBytePartyTest, Log, TEXT("Creating test user..."));
+	Invitee.Register(EmailAddress, Password, DisplayName, Country, DateOfBirth,
+		THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse&)
+		{
+			UE_LOG(LogAccelBytePartyTest, Log, TEXT("   Success"));
+			bRegisterSuccessful = true;
+			bRegisterDone = true;
+		}),
+		FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			UE_LOG(LogAccelBytePartyTest, Warning, TEXT("	Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+			bRegisterDone = true;
+		}));
 
-    bLoginDone = false;
-    UE_LOG(LogAccelBytePartyTest, Log, TEXT("Logging in test user..."));
-    Invitee.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-    {
-    	InviteeUserID = InviteeCredentials.GetUserId();
-    	UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Success"));
-    	bLoginDone = true;
-    }),
-    FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject&)
-    {
-    	UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
-    }));
+	FlushHttpRequests();
+	WaitUntil(bRegisterDone, "Waiting for registration...");
 
-    FlushHttpRequests();
-    WaitUntil(bLoginDone, "Waiting for login...");
+	if (!bRegisterSuccessful)
+	{
+		return false;
+	}
+
+	bLoginDone = false;
+	UE_LOG(LogAccelBytePartyTest, Log, TEXT("Logging in test user..."));
+	Invitee.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+	{
+		InviteeUserID = InviteeCredentials.GetUserId();
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("	Success"));
+		bLoginDone = true;
+	}),
+	FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject&)
+	{
+		UE_LOG(LogAccelBytePartyTest, Warning, TEXT("	Error. Code: %d, Reason: %s"), Code, *Message);
+	}));
+
+	FlushHttpRequests();
+	WaitUntil(bLoginDone, "Waiting for login...");
 	
 	return true;
 }
@@ -182,8 +185,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteJoinFlow, "AccelByte.Tests.Party.C.I
 bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 {	
 	Api::Lobby Lobby(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-    Lobby.Connect();
-    WaitUntil([&Lobby] { return Lobby.IsConnected(); }, "", 5);
+	Lobby.Connect();
+	WaitUntil([&Lobby] { return Lobby.IsConnected(); }, "", 5);
 
 	FAccelByteModelsV2PartyUserInvitedEvent InvitePayload;
 	

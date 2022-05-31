@@ -8,6 +8,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "Models/AccelByteLobbyModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,7 +23,7 @@ namespace GameServerApi
 	class ACCELBYTEUE4SDK_API ServerLobby
 	{
 	public:
-		ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings);
+		ServerLobby(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 		~ServerLobby();
 
 		/**
@@ -129,8 +130,9 @@ namespace GameServerApi
 
 		void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
 
-		const ServerCredentials& Credentials;
-		const ServerSettings& Settings;
+		ServerCredentials const& CredentialsRef;
+		ServerSettings const& SettingsRef;
+		FHttpRetryScheduler& HttpRef;
 
 		ServerLobby() = delete;
 		ServerLobby(ServerLobby const&) = delete;

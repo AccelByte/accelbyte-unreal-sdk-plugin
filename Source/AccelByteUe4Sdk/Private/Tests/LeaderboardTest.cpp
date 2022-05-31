@@ -7,7 +7,6 @@
 #include "HttpManager.h"
 #include "HAL/FileManager.h"
 #include "Api/AccelByteUserApi.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
 #include "Api/AccelByteStatisticApi.h"
 #include "Api/AccelByteLeaderboardApi.h"

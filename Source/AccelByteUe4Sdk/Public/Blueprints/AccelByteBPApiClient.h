@@ -26,6 +26,7 @@
 #include "ABMessage.h"
 #include "ABSessionAttribute.h"
 #include "ABSignaling.h"
+#include "ABGroup.h"
 #include "AccelByteUe4Sdk/Public/Core/AccelByteError.h"
 #include "Core/AccelByteMultiRegistry.h"
 #include "AccelByteBPApiClient.generated.h"
@@ -42,10 +43,10 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable)
-	FString GetAccessToken() const;
+	FString GetAccessToken();
 
 	UFUNCTION(BlueprintCallable)
-	FString GetUserId() const;
+	FString GetUserId();
 
 private:
 	FApiClientPtr ApiClientPtr;
@@ -140,6 +141,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UABSignaling* Signaling;
 
+	UPROPERTY(BlueprintReadOnly)
+	UABGroup* Group;
+
 private:
 	FApiClientPtr ApiClientPtr;
 };
@@ -153,6 +157,6 @@ class UABMultiRegistry final : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintCallable)
-	UABApiClient* GetApiClient(FString const& Key);
+	static UABApiClient* GetApiClient(FString const& Key);
 };
 

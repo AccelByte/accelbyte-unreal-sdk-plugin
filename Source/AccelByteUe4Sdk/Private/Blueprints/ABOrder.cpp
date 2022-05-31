@@ -14,7 +14,7 @@ void UABOrder::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 void UABOrder::CreateNewOrder(
 	FAccelByteModelsOrderCreate const& OrderCreateRequest,
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Order.CreateNewOrder(
 		OrderCreateRequest,
@@ -33,7 +33,7 @@ void UABOrder::CreateNewOrder(
 void UABOrder::CancelOrder(
 	FString const& OrderNo,
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Order.CancelOrder(
 		OrderNo,
@@ -52,7 +52,7 @@ void UABOrder::CancelOrder(
 void UABOrder::GetUserOrder(
 	FString const& OrderNo,
 	FDAccelByteModelsOrderInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Order.GetUserOrder(
 		OrderNo,
@@ -72,7 +72,7 @@ void UABOrder::GetUserOrders(
 	int32 const& Page,
 	int32 const& Size,
 	FDAccelByteModelsPagedOrderInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Order.GetUserOrders(
 		Page,
@@ -92,7 +92,7 @@ void UABOrder::GetUserOrders(
 void UABOrder::GetUserOrderHistory(
 	FString const& OrderNo,
 	FDArrayModelsOrderHistoryInfoResponse OnSuccess,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Order.GetUserOrderHistory(
 		OrderNo,

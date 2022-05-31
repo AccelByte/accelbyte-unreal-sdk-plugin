@@ -27,7 +27,7 @@ public:
 	void SetServerApiClient(FServerApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable)
-	FString GetAccessToken() const;
+	FString GetAccessToken();
 
 private:
 	FServerApiClientPtr ApiClientPtr;
@@ -76,5 +76,5 @@ class UServerMultiRegistry final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintCallable)
-	UServerApiClient* GetServerApiClient(FString const& Key);
+	static UServerApiClient* GetServerApiClient(FString const& Key);
 };

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -15,7 +15,12 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerSeasonPass::ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+		ServerSeasonPass::ServerSeasonPass(ServerCredentials const& InCredentialsRef
+			, ServerSettings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef)
+			: CredentialsRef{InCredentialsRef}
+			, SettingsRef{InSettingsRef}
+			, HttpRef{InHttpRef}
 		{
 		}
 
@@ -27,8 +32,8 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
-			FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp"), *Settings.SeasonPassServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp"), *SettingsRef.SeasonPassServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 			FString Verb = TEXT("POST");
 			FString ContentType = TEXT("application/json");
 			FString Accept = TEXT("application/json");
@@ -42,15 +47,15 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Accept"), Accept);
 			Request->SetContentAsString(Content);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
 		void ServerSeasonPass::GetCurrentUserSeasonProgression(const FString& UserId, const THandler<FAccelByteModelsUserSeasonInfoWithoutReward>& OnSuccess, const FErrorHandler& OnError)
 		{
 			FReport::Log(FString(__FUNCTION__));
 			
-			FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression"), *Settings.SeasonPassServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression"), *SettingsRef.SeasonPassServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 			FString Verb = TEXT("GET");
 			FString ContentType = TEXT("application/json");
 			FString Accept = TEXT("application/json");
@@ -62,7 +67,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 		
 	}

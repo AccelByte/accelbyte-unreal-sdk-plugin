@@ -4,7 +4,9 @@
 
 #include "UserTestAdmin.h"
 
+#include "AccelByteUe4SdkModule.h"
 #include "Api/AccelByteUserApi.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "TestUtilities.h"
 
 void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError)
@@ -115,17 +117,7 @@ void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDel
 	}
 }
 
-void AdminBanUser(const FString& userId, const FBanRequest& requestBody, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError)
-{
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
-	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/bans"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId);
-	FString Content;
-	FJsonObjectConverter::UStructToJsonObjectString(requestBody, Content);
-	AB_HTTP_POST(Request, Url, Authorization, Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}
-
-void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool enabled, const THandler<FBanResponse>& OnSuccess, const FErrorHandler& OnError)
+void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool enabled, const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError)
 {
 	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
 	FString Url = FString::Printf(TEXT("%s/iam/v3/admin/namespaces/%s/users/%s/bans/%s"), *GetAdminBaseUrl(), *FRegistry::Settings.Namespace, *userId, *banId);
@@ -137,30 +129,32 @@ void AdminBanUserChangeStatus(const FString& userId, const FString& banId, bool 
 
 bool RegisterTestUser(const FTestUser& InTestUser)
 {
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(InTestUser.Email);
+	
 	bool bIsDone = false;
 	bool bIsOk = false;
 
-	FRegistry::User.Register(
-		InTestUser.Email,
-		InTestUser.Password,
-		InTestUser.DisplayName,
-		InTestUser.Country,
-		InTestUser.DateOfBirth,
-		THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+	ApiClient->User.Register(InTestUser.Email
+		, InTestUser.Password
+		, InTestUser.DisplayName
+		, InTestUser.Country
+		, InTestUser.DateOfBirth
+		, THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
+		{
+			bIsOk = true;
+			bIsDone = true;
+		})
+		, FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+		{
+			if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
 			{
 				bIsOk = true;
-				bIsDone = true;
-			}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-			{
-				if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException)
-				{
-					bIsOk = true;
-				}
-				bIsDone = true;
-			}));
+			}
+			bIsDone = true;
+		})
+	);
 
-	WaitUntil(bIsDone, TEXT("Waiting ..."));
+	WaitUntil(bIsDone, TEXT("Waiting to register user..."));
 
 	return bIsOk;
 }
@@ -177,45 +171,46 @@ void RegisterTestUserV4(const FTestUserV4& InTestUser, const THandler<FCreateTes
 
 bool LoginTestUser(FTestUser& TestUser)
 {
-	AccelByte::Api::User UserApi(
-		TestUser.Credentials,
-		FRegistry::Settings,
-		FRegistry::HttpRetryScheduler);
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 	
 	bool bIsDone = false;
 	bool bIsOk = false;
 	
-	UserApi.LoginWithUsername(
-		TestUser.Email,
-		TestUser.Password,
-		FVoidHandler::CreateLambda([&]()
-			{
-				bIsOk = true;
-				bIsDone = true;
-			}),
-		FCustomErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-			{
-				bIsDone = true;
-			}));
+	ApiClient->User.LoginWithUsername(TestUser.Email
+		, TestUser.Password
+		, FVoidHandler::CreateLambda([&]()
+		{ 
+			bIsOk = true;
+			bIsDone = true;
+		})
+		, FCustomErrorHandler::CreateLambda([&](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+		{
+			bIsDone = true;
+		})
+	);
 
-	WaitUntil(bIsDone, TEXT("Waiting (LoginWithUsername) ..."));
+	WaitUntil(bIsDone, TEXT("Waiting to login with username ..."));
+	
+	TestUser.UserId = ApiClient->CredentialsRef->GetUserId();
 
 	return bIsOk;
 }
 
 bool DeleteTestUser(FTestUser& TestUser)
 {
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	
 	bool bIsDone = false;
 	bool bIsOk = false;
 
 	// No need to delete, if !valid UserId
-	const FString UserId = TestUser.Credentials.GetUserId();
+	const FString UserId = ApiClient->CredentialsRef->GetUserId();
 	if (UserId.IsEmpty())
 	{
 		// You probably want to know if it's a valid TestUser, but invalid UserId.
 		UE_LOG(LogAccelByteTest, Display, TEXT("[DeleteTestUser] Valid TestUser, but invalid UserId"));
 		
-		TestUser.Credentials.ForgetAll();
+		ApiClient->CredentialsRef->ForgetAll();
 		return true; // Technically, we did what we wanted to do!
 	}	
 	
@@ -231,7 +226,7 @@ bool DeleteTestUser(FTestUser& TestUser)
 			}));
 	WaitUntil(bIsDone, TEXT("Waiting ..."));
 		
-	TestUser.Credentials.ForgetAll();
+	ApiClient->CredentialsRef->ForgetAll();
 
 	return bIsOk;
 }
@@ -246,27 +241,34 @@ void GetUserMyAccountData(const FString& JsonWebToken, const THandler<FAccountUs
 
 bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUsers)
 {
+	bool bIsSuccess = true;
 	OutTestUsers.Empty();
 
-	for (int i = 0; i < InNumOfTestUsers; i++)
+	for (int index = 0; index < InNumOfTestUsers; index++)
 	{
-		OutTestUsers.Add(FTestUser(i));
-	}
-
-	for (int i = 0; i < InNumOfTestUsers; i++)
-	{
-		if (!RegisterTestUser(OutTestUsers[i]))
+		FTestUser TestUser{index};
+		bIsSuccess = SetupTestUser(TestUser);
+		OutTestUsers.Add(TestUser);
+		
+		if (!bIsSuccess)
 		{
-			return false; // Stop immediately on the first register error
+			break;
 		}
 	}
 
-	for (int i = 0; i < InNumOfTestUsers; i++)
+	return bIsSuccess;
+}
+
+bool SetupTestUser(FTestUser& InTestUser)
+{
+	if (!RegisterTestUser(InTestUser))
 	{
-		if (!LoginTestUser(OutTestUsers[i]))
-		{
-			return false; // Stop immediately on the first login error
-		}
+		return false;
+	}
+
+	if (!LoginTestUser(InTestUser))
+	{
+		return false;
 	}
 
 	return true;
@@ -275,17 +277,27 @@ bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUser
 bool TeardownTestUsers(TArray<FTestUser>& InTestUsers)
 {
 	bool bIsOk = true;
-	
-	for (int i = 0; i < InTestUsers.Num(); i++)
+	for (auto& TestUser : InTestUsers)
 	{
-		if (!DeleteTestUser(InTestUsers[i]))
-		{
-			bIsOk = false; // One or more errors has happened but try to continue deleting the remaining test users
-		}
+		bIsOk = TeardownTestUser(TestUser);
 	}
 
 	return bIsOk;
 }
+
+bool TeardownTestUser(FTestUser& InTestUser)
+{
+	bool bIsOk = true;
+	
+	if (!DeleteTestUser(InTestUser))
+	{
+		bIsOk = false;
+	}
+	FMultiRegistry::RemoveApiClient(InTestUser.Email);
+	
+	return bIsOk;
+}
+
 
 void UUserTestAdminFunctions::RegisterTestUserV4BP(
 	const FTestUserV4& InTestUser,

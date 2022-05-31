@@ -10,16 +10,11 @@
 
 namespace AccelByte
 {
-	class ACCELBYTEUE4SDK_API IAccelByteDBAdapter
+	class ACCELBYTEUE4SDK_API IAccelByteDataStorage
 	{
 	public:
-		IAccelByteDBAdapter(const FString& DatabaseName)
-			: DatabaseName(DatabaseName)
-		{};
-		virtual ~IAccelByteDBAdapter() = default;
-
 		/**
-		 * @brief Reset an existing Database.
+		 * @brief Reset an existing Table in the Storage.
 		 *
 		 * @param Result This will be called when the operation done. The result is bool.
 		 * @param TableName optional. The name of the table. Default will drop the default KeyValue table.
@@ -27,7 +22,7 @@ namespace AccelByte
 		virtual void Reset(const THandler<bool>& Result, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
 
 		/**
-		 * @brief Delete an Item on the table.
+		 * @brief Delete an Item in the Table.
 		 *
 		 * @param Key The Key of the Item.
 		 * @param OnDone This will be called when the operation done.
@@ -91,10 +86,5 @@ namespace AccelByte
 		 * @param TableName optional. The name of the table. Default will get an item from the default KeyValue table.
 		*/
 		virtual void GetItem(const FString& Key, const THandler<TPair<FString, FJsonObjectWrapper>>& OnDone, const FString& TableName = TEXT("DefaultKeyValueTable")) = 0;
-
-	private:
-
-		IAccelByteDBAdapter();
-		const FString DatabaseName;
 	};
 }

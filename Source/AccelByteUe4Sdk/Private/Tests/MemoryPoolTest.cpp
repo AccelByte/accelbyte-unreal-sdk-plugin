@@ -5,7 +5,7 @@
 #include "Misc/AutomationTest.h"
 #include "Core/AccelByteMemoryPool.h"
 #include "Core/AccelByteHttpCache.h"
-#include "Runtime/Online/HTTP/Public/HttpManager.h"
+#include "HttpManager.h"
 #include "TestUtilities.h"
 #include "Engine/World.h"
 #include "Core/AccelByteHttpClient.h"

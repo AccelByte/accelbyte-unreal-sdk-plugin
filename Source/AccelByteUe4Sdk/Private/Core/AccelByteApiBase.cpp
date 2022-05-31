@@ -8,14 +8,13 @@ namespace AccelByte
 {
 	
 FApiBase::FApiBase(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	CredentialsRef{ CredentialsRef },
-	SettingsRef{ SettingsRef },
-	HttpRef{ HttpRef },
-	HttpClient(CredentialsRef, SettingsRef, HttpRef)
+	Credentials const& InCredentialsRef,
+	Settings const& InSettingsRef,
+	FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
+	, HttpClient(InCredentialsRef, InSettingsRef, InHttpRef)
 {
 }
 

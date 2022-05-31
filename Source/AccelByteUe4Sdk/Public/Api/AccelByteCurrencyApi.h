@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Currency
 {
 public:
-	Currency(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Currency(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Currency();
 private:
 	FHttpRetryScheduler& HttpRef;

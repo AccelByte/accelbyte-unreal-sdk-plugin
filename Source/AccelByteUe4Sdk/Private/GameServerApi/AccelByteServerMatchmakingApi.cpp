@@ -14,7 +14,12 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerMatchmaking::ServerMatchmaking(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+ServerMatchmaking::ServerMatchmaking(ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {
 	StatusPollingDelegate = FTickerDelegate::CreateRaw(this, &ServerMatchmaking::StatusPollingTick);
 	OnStatusPollingResponse.BindLambda([this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bSuccessful)
@@ -37,8 +42,8 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId, const  THandle
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status"), *Settings.MatchmakingServerUrl,*Credentials.GetClientNamespace(), *MatchId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/%s/status"), *SettingsRef.MatchmakingServerUrl,*CredentialsRef.GetClientNamespace(), *MatchId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -52,15 +57,15 @@ void ServerMatchmaking::QuerySessionStatus(const FString MatchId, const  THandle
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmakingResult& MatchmakingResult, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions"), *Settings.MatchmakingServerUrl,*Credentials.GetClientNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions"), *SettingsRef.MatchmakingServerUrl,*CredentialsRef.GetClientNamespace());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -74,15 +79,15 @@ void ServerMatchmaking::EnqueueJoinableSession(const FAccelByteModelsMatchmaking
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue"), *Settings.MatchmakingServerUrl, *Credentials.GetClientNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/namespaces/%s/sessions/dequeue"), *SettingsRef.MatchmakingServerUrl, *CredentialsRef.GetClientNamespace());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -95,7 +100,7 @@ void ServerMatchmaking::DequeueJoinableSession(const FString& MatchId, const FVo
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& PartyId)
@@ -108,8 +113,8 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FStri
 		PartyId
 	};
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s"), *Settings.MatchmakingServerUrl, *Credentials.GetClientNamespace(), *ChannelName, *MatchId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s"), *SettingsRef.MatchmakingServerUrl, *CredentialsRef.GetClientNamespace(), *ChannelName, *MatchId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -123,15 +128,15 @@ void ServerMatchmaking::AddUserToSession(const FString& ChannelName, const FStri
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const FString& MatchId, const FString& UserId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FAccelByteModelsMatchmakingResult& Body)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s"), *Settings.MatchmakingServerUrl, *Credentials.GetClientNamespace(), *ChannelName, *MatchId, *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/channels/%s/sessions/%s/users/%s"), *SettingsRef.MatchmakingServerUrl, *CredentialsRef.GetClientNamespace(), *ChannelName, *MatchId, *UserId);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -145,7 +150,7 @@ void ServerMatchmaking::RemoveUserFromSession(const FString& ChannelName, const 
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerMatchmaking::ActivateSessionStatusPolling(const FString& MatchId, const THandler<FAccelByteModelsMatchmakingResult>& OnSuccess, const FErrorHandler& OnError, uint32 IntervalSec)

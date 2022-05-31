@@ -9,30 +9,37 @@
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteSettings.h"
+#include "Core/AccelByteUtilities.h"
 
 namespace AccelByte
 {
 namespace Api
 {
-CloudSave::CloudSave(
-	AccelByte::Credentials const& Credentials,
-	AccelByte::Settings const& Setting,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	Credentials{Credentials},
-	Settings{Setting}
-{
-}
+CloudSave::CloudSave(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-CloudSave::~CloudSave(){}
+CloudSave::~CloudSave()
+{}
+
+void CloudSave::SaveUserRecord(const FString& Key, bool bSetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
+	SaveUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+}
 
 void CloudSave::SaveUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -56,8 +63,8 @@ void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserR
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -88,9 +95,13 @@ void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserR
 					FString UpdatedAt;
 					jsonObject.TryGetStringField("updated_at", UpdatedAt);
 					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					FString SetByString;
+					jsonObject.TryGetStringField("set_by", SetByString); 
+					userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
-					userRecord.Value = *value->ToSharedRef();
+					userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
+					
 					OnSuccess.ExecuteIfBound(userRecord);
 				}),
 			OnError),
@@ -101,8 +112,8 @@ void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, T
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *UserId, *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *UserId, *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -133,9 +144,12 @@ void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, T
 					FString UpdatedAt;
 					jsonObject.TryGetStringField("updated_at", UpdatedAt);
 					FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
+					FString SetByString;
+					jsonObject.TryGetStringField("set_by", SetByString); 
+					userRecord.SetBy = FAccelByteUtilities::GetUEnumValueFromString<ESetByMetadataRecord>(SetByString);
 					TSharedPtr<FJsonObject> const* value;
 					jsonObject.TryGetObjectField("value", value);
-					userRecord.Value = *value->ToSharedRef();
+					userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 					OnSuccess.ExecuteIfBound(userRecord);
 				}),
 			OnError),
@@ -160,8 +174,8 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -202,8 +216,8 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 						JsonData->TryGetStringField("updated_at", UpdatedAt);
 						FDateTime::ParseIso8601(*UpdatedAt, userRecord.UpdatedAt);
 						TSharedPtr<FJsonObject> const* value;
-						JsonData->TryGetObjectField("value", value);
-						userRecord.Value = *value->ToSharedRef();
+						JsonData->TryGetObjectField("value", value); 
+						userRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 						userRecords.Data.Add(userRecord);
 					}
 					OnSuccess.ExecuteIfBound(userRecords);
@@ -212,12 +226,20 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 		FPlatformTime::Seconds());
 }
 
+void CloudSave::ReplaceUserRecord(const FString& Key, bool bSetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FJsonObject NewRecordRequest = CreatePlayerRecordWithMetadata(ESetByMetadataRecord::CLIENT, bSetPublic, RecordRequest);
+	ReplaceUserRecord(Key, NewRecordRequest, false, OnSuccess, OnError);
+}
+	
 void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest, bool IsPublic, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -237,19 +259,19 @@ void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest,
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 	FJsonObject DataJson;
 	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", MakeShared<FJsonObject>(Data.Value));
+	DataJson.SetObjectField("value", Data.Value.JsonObject);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -294,7 +316,7 @@ void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByte
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObjectWrapper RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -302,10 +324,10 @@ void CloudSave::ReplaceUserRecordCheckLatest(FString const& Key, FDateTime const
 		RecordRequest
 	};
 
-	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceUserRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceUserRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObjectWrapper RecordRequest, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -367,8 +389,8 @@ void CloudSave::DeleteUserRecord(FString const& Key, FVoidHandler const& OnSucce
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -389,8 +411,8 @@ void CloudSave::SaveGameRecord(FString const& Key, FJsonObject RecordRequest, FV
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -414,8 +436,8 @@ void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameR
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -446,7 +468,7 @@ void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameR
 					FDateTime::ParseIso8601(*UpdatedAt, GameRecord.UpdatedAt);
 					TSharedPtr<FJsonObject> const* value;
 					JSONObject.TryGetObjectField("value", value);
-					GameRecord.Value = *value->ToSharedRef();
+					GameRecord.Value = ConvertJsonObjToJsonObjWrapper(value);
 					OnSuccess.ExecuteIfBound(GameRecord);
 				}),
 			OnError),
@@ -457,8 +479,8 @@ void CloudSave::ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest,
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -478,19 +500,19 @@ void CloudSave::ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest,
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByteModelsConcurrentReplaceRequest const& Data, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/concurrent/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/concurrent/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 	FJsonObject DataJson;
 	DataJson.SetStringField("updatedAt", Data.UpdatedAt.ToIso8601());
-	DataJson.SetObjectField("value", MakeShared<FJsonObject>(Data.Value));
+	DataJson.SetObjectField("value", Data.Value.JsonObject);
 	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
 	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
 	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
@@ -536,7 +558,7 @@ void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByte
 		FPlatformTime::Seconds());
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObject RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const LastUpdated, FJsonObjectWrapper RecordRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	FAccelByteModelsConcurrentReplaceRequest Request
 	{
@@ -544,10 +566,10 @@ void CloudSave::ReplaceGameRecordCheckLatest(FString const& Key, FDateTime const
 		RecordRequest
 	};
 
-	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObject, FJsonObject>(), OnSuccess, OnError);
+	CloudSave::ReplaceGameRecord(0, Key, Request, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>(), OnSuccess, OnError);
 }
 
-void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObject RecordRequest, THandlerPayloadModifier<FJsonObject, FJsonObject> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
+void CloudSave::ReplaceGameRecordCheckLatest(int TryAttempt, FString const& Key, FJsonObjectWrapper RecordRequest, THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper> const& PayloadModifier, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {
 	if (TryAttempt <= 0)
 	{
@@ -607,8 +629,8 @@ void CloudSave::DeleteGameRecord(FString const& Key, FVoidHandler const& OnSucce
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -623,6 +645,43 @@ void CloudSave::DeleteGameRecord(FString const& Key, FVoidHandler const& OnSucce
 	Request->SetContentAsString(Content);
 
 	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+FJsonObject CloudSave::CreatePlayerRecordWithMetadata(ESetByMetadataRecord SetBy, bool bSetPublic, FJsonObject const& RecordRequest)
+{
+	FJsonObject NewRecordRequest = RecordRequest;
+
+	const auto MetadataJson = MakeShared<FJsonObject>();
+	FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy);
+	
+	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+	MetadataJson->SetBoolField(TEXT("is_public"), bSetPublic);
+	NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+	return NewRecordRequest;
+}
+
+FJsonObject CloudSave::CreateGameRecordWithMetadata(ESetByMetadataRecord SetBy, FJsonObject const& RecordRequest)
+{
+	FJsonObject NewRecordRequest = RecordRequest;
+
+	const auto MetadataJson = MakeShared<FJsonObject>();
+	FString SetByString = FAccelByteUtilities::GetUEnumValueAsString(SetBy); 
+	MetadataJson->SetStringField(TEXT("set_by"), SetByString);
+	NewRecordRequest.SetObjectField("__META", MetadataJson);
+
+	return NewRecordRequest;
+}
+
+FJsonObjectWrapper CloudSave::ConvertJsonObjToJsonObjWrapper(const TSharedPtr<FJsonObject> *& value)
+{
+	FJsonObjectWrapper jsonObjWrapper{};
+	FString OutputString;
+	TSharedRef< TJsonWriter<> > Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(value->ToSharedRef(), Writer);					
+	jsonObjWrapper.JsonObjectFromString(OutputString);
+	
+	return jsonObjWrapper;
 }
 
 } // Namespace Api

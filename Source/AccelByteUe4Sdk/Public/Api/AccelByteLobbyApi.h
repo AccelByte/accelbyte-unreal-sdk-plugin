@@ -27,18 +27,26 @@ namespace Api
 // Start Matchmaking Optional Params
 struct FMatchmakingOptionalParams
 {
-	FString ServerName;
-	FString ClientVersion;
+	FString ServerName{};
+	FString ClientVersion{};
 
 	/** @brief If !Latencies, we will refresh them from Qos */
-	TArray<TPair<FString, float>> Latencies;
+	TArray<TPair<FString, float>> Latencies{};
 	
-	TMap<FString, FString> PartyAttributes;
-	TArray<FString> TempPartyUserIds;
-	TArray<FString> ExtraAttributes;
+	TMap<FString, FString> PartyAttributes{};
+	TArray<FString> TempPartyUserIds{};
+	TArray<FString> ExtraAttributes{};
 	bool NewSessionOnly {false};
-	TArray<FString> SubGameModes;
+	TArray<FString> SubGameModes{};
 };
+
+struct FLobbyMessageMetaData
+{
+	FString Code{};
+	FString Type{};
+	FString Id{};
+};
+	
 enum Response : uint8;
 enum Notif : uint8;
 /**
@@ -48,23 +56,23 @@ enum Notif : uint8;
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-	Lobby(
-		Credentials& Credentials,
-		const Settings& Settings,
-		FHttpRetryScheduler& HttpRef,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f,
-		TSharedPtr<IWebSocket> WebSocket = nullptr);
+	Lobby(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f
+		, TSharedPtr<IWebSocket> InWebSocket = nullptr);
 	~Lobby();
 private:
 	FHttpRetryScheduler& HttpRef;
-	Credentials& Credentials;
-	const Settings& Settings;
+	Credentials& CredentialsRef;
+	Settings const& SettingsRef;
+
+	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
 	bool BanNotifReceived = false;
-
 public:
 	
 	// Party 
@@ -114,7 +122,7 @@ public:
     /**
      * @brief delegate for handling join party response
      */
-    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinReponse&); 
+    DECLARE_DELEGATE_OneParam(FPartyJoinResponse, const FAccelByteModelsPartyJoinResponse&); 
 
     /**
      * @brief delegate for handling join party notification
@@ -164,7 +172,7 @@ public:
 	/**
 	 * @brief delegate for handling join party via party code event
 	 */
-	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinReponse&);
+	DECLARE_DELEGATE_OneParam(FPartyJoinViaCodeResponse, const FAccelByteModelsPartyJoinResponse&);
 
 	/**
 	 * @brief delegate for handling promote party leader response
@@ -1017,7 +1025,7 @@ public:
 	};
 
 	/**
-	* @brief set invite party kick member reponse
+	* @brief set invite party kick member response
 	*
 	* @param OnInvitePartyKickMemberResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1049,7 +1057,7 @@ public:
 	};
 
 	/**
-	* @brief generate party code reponse
+	* @brief generate party code response
 	*
 	* @param OnPartyGenerateCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1061,7 +1069,7 @@ public:
 	};
 
 	/**
-	* @brief get party code reponse
+	* @brief get party code response
 	*
 	* @param OnPartyGetCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1073,7 +1081,7 @@ public:
 	};
 
 	/**
-	* @brief delete party code reponse
+	* @brief delete party code response
 	*
 	* @param OnPartyDeleteCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1085,7 +1093,7 @@ public:
 	};
 
 	/**
-	* @brief join party via party code reponse
+	* @brief join party via party code response
 	*
 	* @param OnPartyJoinViaCodeResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1097,7 +1105,7 @@ public:
 	};
 
 	/**
-	* @brief set promote party leader reponse
+	* @brief set promote party leader response
 	*
 	* @param OnPromotePartyLeaderResponse set delegate .
 	* @param OnError Delegate that will be called when operation failed.
@@ -1627,6 +1635,7 @@ private:
     FString GenerateMessageID(const FString& Prefix = TEXT("")) const;
 	void CreateWebSocket(const FString& Token = "");
 	void FetchLobbyErrorMessages();
+	bool ExtractLobbyMessageMetaData(const FString& InLobbyMessage, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData);
 	
 	THandler<const FString&> OnTokenReceived = THandler<const FString&>::CreateLambda([&](const FString& Token)
 	{
@@ -1634,7 +1643,7 @@ private:
 	});
 
 #pragma region Message Parsing
-	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
+	void HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta);
 	void HandleMessageNotif(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj);
 	static TMap<FString, Response> ResponseStringEnumMap; 
 	static TMap<FString, Notif> NotifStringEnumMap;
@@ -1664,7 +1673,7 @@ private:
 
 	const FVoidHandler RefreshTokenDelegate = FVoidHandler::CreateLambda([&]()
 	{
-		RefreshToken(Credentials.GetAccessToken());
+		RefreshToken(CredentialsRef.GetAccessToken());
 	});
 	
 #pragma region Message Id - Response Map

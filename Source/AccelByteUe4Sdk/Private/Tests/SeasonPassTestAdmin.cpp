@@ -134,3 +134,11 @@ void AdminDeleteSeasonTier(const FString& SeasonId, const FString& TierId, const
 	AB_HTTP_DELETE(Request, Url, Authorization);
 	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
+
+void AdminSearchReward(const FString& SeasonId, const FString& code, const THandler<FAccelByteModelsSeasonPassReward>& OnSuccess, const FErrorHandler& OnError)
+{
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *GetAdminUserAccessToken());
+	FString Url = FString::Printf(TEXT("%s/seasonpass/admin/namespaces/%s/seasons/%s/rewards/%s"), *GetAdminBaseUrl(), *FRegistry::ServerSettings.Namespace, *SeasonId, *code);
+	AB_HTTP_GET(Request, Url, Authorization);
+	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}

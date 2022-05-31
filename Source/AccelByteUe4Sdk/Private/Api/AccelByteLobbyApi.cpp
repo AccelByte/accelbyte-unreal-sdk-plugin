@@ -15,6 +15,7 @@
 #include "Core/IWebSocketFactory.h"
 #include "Core/FUnrealWebSocketFactory.h"
 #include "Core/IAccelByteTokenGenerator.h"
+#include "Core/AccelByteError.h"
 
 DEFINE_LOG_CATEGORY(LogAccelByteLobby);
 
@@ -423,12 +424,16 @@ void Lobby::Connect(const FString& Token)
 	}
 
 	WebSocket->Connect();
-	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *Settings.LobbyServerUrl);
-	
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Connecting to %s"), *SettingsRef.LobbyServerUrl);
+
+	// if shipping build, skip fetching lobby error messages.
+	// avoid fetching large json file to store lobby error messages.
+#if !UE_BUILD_SHIPPING
 	if(LobbyErrorMessages.Num() == 0)
 	{
 		FetchLobbyErrorMessages();
 	}
+#endif
 }
 
 void Lobby::Disconnect(bool ForceCleanup)
@@ -436,7 +441,7 @@ void Lobby::Disconnect(bool ForceCleanup)
 	FReport::Log(FString(__FUNCTION__));
 
 	ChannelSlug = "";
-	Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+	CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 	if(WebSocket.IsValid())
 	{
 		WebSocket->Disconnect(ForceCleanup);
@@ -743,7 +748,7 @@ FString Lobby::SendStartMatchmaking(const FString& GameMode, const FMatchmakingO
 	if (SelectedLatencies.Num() == 0)
 	{
 		// There are reports of weirdness when !Latencies && Multi-Regioning: This should also already be set.
-		UE_LOG(LogAccelByteLobby, Error, TEXT("!OptionalParams.Latencies && !Qos.Latencies (cached): "
+		UE_LOG(LogAccelByteLobby, Warning, TEXT("No latencies data provided either from cached latencies or optional params. "
 			"Empty latencies will be passed to the server (possibly problematic, if multi-regioning)."));
 	}
 
@@ -936,8 +941,8 @@ void Lobby::BulkFriendRequest(FAccelByteModelsBulkFriendsRequest UserIds, FVoidH
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *Settings.BaseUrl, *Credentials.GetNamespace(), *Credentials.GetUserId());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/friends/namespaces/%s/users/%s/add/bulk"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -958,8 +963,8 @@ void Lobby::GetPartyData(const FString& PartyId, const THandler<FAccelByteModels
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
+	const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	const FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *PartyId);
 	const FString Verb = TEXT("GET");
 	const FString Accept = TEXT("application/json");
 
@@ -994,8 +999,8 @@ void Lobby::BulkGetUserPresence(const TArray<FString>& UserIds, const THandler<F
 
 	Query.Append(FString::Printf(TEXT("&countOnly=%s"), CountOnly ? TEXT("true") : TEXT("false")));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *Query);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/presence/namespaces/%s/users/presence%s"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *Query);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1013,8 +1018,8 @@ void Lobby::GetPartyStorage(const FString& PartyId, const THandler<FAccelByteMod
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *PartyId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1036,8 +1041,8 @@ void Lobby::GetListOfBlockedUsers(const FString& UserId, const THandler<FAccelBy
 		FString(__FUNCTION__),
 		TEXT("Please use GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUserResponse> OnSuccess, const FErrorHandler& OnError)"));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1056,8 +1061,8 @@ void Lobby::GetListOfBlockedUsers(const THandler<FAccelByteModelsListBlockedUser
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *Settings.BaseUrl, *Credentials.GetNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1080,8 +1085,8 @@ void Lobby::GetListOfBlockers(const FString& UserId, const THandler<FAccelByteMo
 		FString(__FUNCTION__),
 		TEXT("please use GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse> OnSuccess, const FErrorHandler& OnError)"));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/%s/blocked-by"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *UserId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1100,8 +1105,8 @@ void Lobby::GetListOfBlockers(const THandler<FAccelByteModelsListBlockerResponse
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *Settings.BaseUrl, *Credentials.GetNamespace());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/player/namespaces/%s/users/me/blocked-by"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace());
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1120,8 +1125,8 @@ void Lobby::SendNotificationToUser(const FString& SendToUserId, const FAccelByte
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/notification/namespaces/%s/users/%s/freeform?async=%s"), *Settings.BaseUrl, *Credentials.GetNamespace(), *SendToUserId, bAsync ? TEXT("true") : TEXT("false"));
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/notification/namespaces/%s/users/%s/freeform?async=%s"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *SendToUserId, bAsync ? TEXT("true") : TEXT("false"));
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -1159,7 +1164,7 @@ void Lobby::BlockPlayer(const FString& UserId)
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(BlockPlayer, Block,
-		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
+		FString::Printf(TEXT("userId: %s\nblockedUserId: %s\nnamespace: %s"), *CredentialsRef.GetUserId(), *UserId, *CredentialsRef.GetNamespace()));
 }
 
 void Lobby::UnblockPlayer(const FString& UserId)
@@ -1167,7 +1172,7 @@ void Lobby::UnblockPlayer(const FString& UserId)
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE(UnblockPlayer, Friends,
-		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *Credentials.GetUserId(), *UserId, *Credentials.GetNamespace()));
+		FString::Printf(TEXT("userId: %s\nunblockedUserId: %s\nnamespace: %s"), *CredentialsRef.GetUserId(), *UserId, *CredentialsRef.GetNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1189,7 +1194,7 @@ FString Lobby::SetSessionAttribute(const FString& Key, const FString& Value)
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(SetSessionAttribute, Attribute,
-		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *Credentials.GetNamespace(), *Key, *Value));
+		FString::Printf(TEXT("namespace: %s\nkey: %s\nvalue: %s"), *CredentialsRef.GetNamespace(), *Key, *Value));
 }
 
 FString Lobby::GetSessionAttribute(const FString& Key)
@@ -1197,7 +1202,7 @@ FString Lobby::GetSessionAttribute(const FString& Key)
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetSessionAttribute, Attribute,
-		FString::Printf(TEXT("namespace: %s\nkey: %s"), *Credentials.GetNamespace(), *Key));
+		FString::Printf(TEXT("namespace: %s\nkey: %s"), *CredentialsRef.GetNamespace(), *Key));
 }
 
 FString Lobby::GetAllSessionAttribute()
@@ -1205,7 +1210,7 @@ FString Lobby::GetAllSessionAttribute()
 	FReport::Log(FString(__FUNCTION__));
 
 	SEND_RAW_REQUEST_CACHED_RESPONSE_RETURNED(GetAllSessionAttribute, Attribute,
-		FString::Printf(TEXT("namespace: %s"), *Credentials.GetNamespace()));
+		FString::Printf(TEXT("namespace: %s"), *CredentialsRef.GetNamespace()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1402,7 +1407,7 @@ void Lobby::OnConnected()
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connected"));
 
-	Credentials.OnTokenRefreshed().Add(RefreshTokenDelegate);
+	CredentialsRef.OnTokenRefreshed().Add(RefreshTokenDelegate);
 		
 	ConnectSuccess.ExecuteIfBound();
 }
@@ -1415,10 +1420,12 @@ void Lobby::OnConnectionError(const FString& Error)
 
 void Lobby::OnClosed(int32 StatusCode, const FString& Reason, bool WasClean)
 {
-	if (StatusCode >= 4000 && !BanNotifReceived)
+	if (StatusCode > 4000 && !BanNotifReceived)
 	{
 		Disconnect();
 	}
+
+	CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 
 	BanNotifReceived = false;
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Connection closed. Status code: %d  Reason: %s Clean: %d"), StatusCode, *Reason, WasClean);
@@ -1455,14 +1462,22 @@ void Lobby::CreateWebSocket(const FString& Token)
 	}
 
 	TMap<FString, FString> Headers;
-	Headers.Add("X-Ab-LobbySessionID", LobbySessionId.LobbySessionID);
+	Headers.Add(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 	if(!Token.IsEmpty())
 	{
 		Headers.Add("Entitlement", Token);
 	}
 	FModuleManager::Get().LoadModuleChecked(FName(TEXT("WebSockets")));
 
-	WebSocket = AccelByteWebSocket::Create(*Settings.LobbyServerUrl, TEXT("wss"), Credentials, Headers, TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()), PingDelay, InitialBackoffDelay, MaxBackoffDelay, TotalTimeout);
+	WebSocket = AccelByteWebSocket::Create(*SettingsRef.LobbyServerUrl,
+		TEXT("wss"),
+		CredentialsRef,
+		Headers,
+		TSharedRef<IWebSocketFactory>(new FUnrealWebSocketFactory()),
+		PingDelay,
+		InitialBackoffDelay,
+		MaxBackoffDelay,
+		TotalTimeout);
 
 	WebSocket->OnConnected().AddRaw(this, &Lobby::OnConnected);
 	WebSocket->OnMessageReceived().AddRaw(this, &Lobby::OnMessage);
@@ -1598,8 +1613,23 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 	else
 	{
 		const FString ErrorCodeString = FString::FromInt(lobbyResponseCode);
-		const bool bHasErrorName = LobbyErrorMessages.Contains(ErrorCodeString);
-		const FString ErrorCodeName = bHasErrorName ? LobbyErrorMessages[ErrorCodeString] : TEXT("NO NAME");
+
+		auto it = ErrorMessages::Default.find(lobbyResponseCode);
+
+		FString ErrorCodeName;
+		if(LobbyErrorMessages.Contains(ErrorCodeString))
+		{
+			ErrorCodeName = LobbyErrorMessages[ErrorCodeString];
+		}
+		else if(it != ErrorMessages::Default.cend())
+		{
+			ErrorCodeName = ErrorMessages::Default.at(lobbyResponseCode);
+		}
+		else
+		{
+			ErrorCodeName = TEXT("Error name not defined");
+		}
+		
 		UE_LOG(LogAccelByteLobby, Display, TEXT("%s returned non zero error code, code is %d with codename %s"), *MessageType, lobbyResponseCode, *ErrorCodeName);
 		if (ErrorCallback.IsBound())
 		{
@@ -1659,16 +1689,27 @@ void HandleResponse(const FString& MessageType, ResponseCallbackType ResponseCal
 //@brief convenient switch case for RESPONSE context; will cache the (MessageId,SuccessDelegate) pair
 #define CASE_RESPONSE_MESSAGE_ID(MessageType, Model) CASE_RESPONSE_MESSAGE_ID_DELEGATE_TYPE(MessageType, Model, DELEGATE_TYPE(MessageType))
 
-void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj)
+void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FString& ParsedJsonString, const TSharedPtr<FJsonObject>& ParsedJsonObj, const TSharedPtr<FLobbyMessageMetaData>& MessageMeta = nullptr)
 {
-	const int lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
+	int lobbyResponseCode{0};
+	FString ReceivedMessageId{};
+
+	if(MessageMeta.IsValid())
+	{
+		lobbyResponseCode = FCString::Atoi(*MessageMeta->Code);
+		ReceivedMessageId = MessageMeta->Id;
+	}
+	else
+	{
+		lobbyResponseCode = ParsedJsonObj->GetIntegerField("code");
+		ReceivedMessageId = ParsedJsonObj->GetStringField("id");
+	}
 
 	Response ResponseEnum = Response::Invalid_Response;
 	Response* ResponseEnumPointer = ResponseStringEnumMap.Find(ReceivedMessageType);
 	if (ResponseEnumPointer) {
 		ResponseEnum = *ResponseEnumPointer;
 	}
-	const FString ReceivedMessageId = ParsedJsonObj->GetStringField(TEXT("id"));
 
 	switch (ResponseEnum)
 	{
@@ -1677,13 +1718,13 @@ void Lobby::HandleMessageResponse(const FString& ReceivedMessageType, const FStr
 		CASE_RESPONSE_MESSAGE_ID(PartyCreate		, FAccelByteModelsCreatePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyLeave			, FAccelByteModelsLeavePartyResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyInvite		, FAccelByteModelsPartyInviteResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoin			, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyReject		, FAccelByteModelsPartyRejectResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyKick			, FAccelByteModelsKickPartyMemberResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGetCode		, FAccelByteModelsPartyGetCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyGenerateCode	, FAccelByteModelsPartyGenerateCodeResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyDeleteCode	, FAccelByteModelsPartyDeleteCodeResponse);
-		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinReponse);
+		CASE_RESPONSE_MESSAGE_ID(PartyJoinViaCode	, FAccelByteModelsPartyJoinResponse);
 		CASE_RESPONSE_MESSAGE_ID(PartyPromoteLeader	, FAccelByteModelsPartyPromoteLeaderResponse);
 		// Chat
 		CASE_RESPONSE_MESSAGE_ID(PersonalChat	, FAccelByteModelsPersonalMessageResponse);
@@ -1799,6 +1840,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 			if (bSuccess)
 			{
 				LobbySessionId = SessionId;
+				WebSocket->UpdateUpgradeHeaders(LobbySessionHeaderName, LobbySessionId.LobbySessionID);
 			}
 			break;
 		}
@@ -1876,7 +1918,7 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 		{
 			BanNotifReceived = true;
 			FAccelByteModelsUserBannedNotification Result;
-			Credentials.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
+			CredentialsRef.OnTokenRefreshed().Remove(RefreshTokenDelegate.GetHandle());
 			if (const bool bParseSuccess = FJsonObjectConverter::JsonObjectStringToUStruct(ParsedJsonString, &Result, 0, 0))
 			{
 				HttpRef.BearerAuthRejected();
@@ -1911,6 +1953,36 @@ void Lobby::HandleMessageNotif(const FString& ReceivedMessageType, const FString
 }
 #undef CASE_NOTIF
 
+bool Lobby::ExtractLobbyMessageMetaData(const FString& InLobbyMessage, TSharedRef<FLobbyMessageMetaData>& OutLobbyMessageMetaData)
+{
+	TArray<FString> MessageLines;
+	InLobbyMessage.ParseIntoArrayLines(MessageLines);
+
+	const FString CodeKey {"code: "};
+	const FString TypeKey {"type: "};
+	const FString IdKey {"id: "};
+	
+	for(const FString& Line : MessageLines)
+	{
+		if(Line.StartsWith(CodeKey))
+		{
+			OutLobbyMessageMetaData->Code = Line.RightChop(CodeKey.Len());
+		}
+		else if(Line.StartsWith(TypeKey))
+		{
+			OutLobbyMessageMetaData->Type = Line.RightChop(TypeKey.Len());
+		}
+		else if(Line.StartsWith(IdKey))
+		{
+			OutLobbyMessageMetaData->Id = Line.RightChop(IdKey.Len());
+		}
+	}
+
+	UE_LOG(LogAccelByteLobby, Display, TEXT("Metadata found type %s, id %s, code %s"), *OutLobbyMessageMetaData->Type, *OutLobbyMessageMetaData->Id, *OutLobbyMessageMetaData->Code);
+
+	return true;
+}
+	
 void Lobby::OnMessage(const FString& Message)
 {
 	UE_LOG(LogAccelByteLobby, Display, TEXT("Raw Lobby Response\n%s"), *Message);
@@ -1922,12 +1994,25 @@ void Lobby::OnMessage(const FString& Message)
 
 	// Conversion : Custom -> Json
 	const FString ParsedJsonString = LobbyMessageToJson(Message);
+	
 	UE_LOG(LogAccelByteLobby, Display, TEXT("JSON Version: %s"), *ParsedJsonString);
+
 	TSharedPtr<FJsonObject> ParsedJsonObj;
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(ParsedJsonString);
 	if (!FJsonSerializer::Deserialize(JsonReader, ParsedJsonObj))
 	{
 		UE_LOG(LogAccelByteLobby, Display, TEXT("Failed to Deserialize. Json: %s"), *ParsedJsonString);
+
+		TSharedRef<FLobbyMessageMetaData> MetaData = MakeShared<FLobbyMessageMetaData>();
+		ExtractLobbyMessageMetaData(Message, MetaData);
+		MetaData->Code = FString::FromInt(static_cast<int>(ErrorCodes::JsonDeserializationFailed));
+
+		// handle error message if message type is response. if notif then ignore.
+		if (MetaData->Type.Contains(Suffix::Response))
+		{
+			HandleMessageResponse(MetaData->Type, ParsedJsonString, ParsedJsonObj, MetaData);
+		}
+		
 		return;
 	}
 
@@ -1959,8 +2044,8 @@ void Lobby::RequestWritePartyStorage(const FString& PartyId, const FAccelByteMod
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *Settings.BaseUrl, *Credentials.GetNamespace(), *PartyId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/public/party/namespaces/%s/parties/%s/attributes"), *SettingsRef.BaseUrl, *CredentialsRef.GetNamespace(), *PartyId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -2001,6 +2086,7 @@ void Lobby::WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapp
 	if (DataWrapper->RemainingAttempt <= 0)
 	{
 		DataWrapper->OnError.ExecuteIfBound(412, TEXT("Exhaust all retry attempt to modify party storage.."));
+		return;
 	}
 
 	GetPartyStorage(
@@ -2052,10 +2138,10 @@ void Lobby::SetRetryParameters(int32 NewTotalTimeout, int32 NewBackoffDelay, int
 
 void Lobby::FetchLobbyErrorMessages()
 {
-	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *Settings.BaseUrl);
+	FString Url = FString::Printf(TEXT("%s/lobby/v1/messages"), *SettingsRef.BaseUrl);
 
 	bool bFetchErrorMessageDone = false;
-	FHttpClient HttpClient(Credentials, Settings, HttpRef);
+	FHttpClient HttpClient(CredentialsRef, SettingsRef, HttpRef);
 	HttpClient.Request("GET", Url, {}, "", {}, THandler<TArray<FLobbyMessages>>::CreateLambda([&](const TArray<FLobbyMessages>& Result)
 	{
 		for(const FLobbyMessages& LobbyMessages : Result)
@@ -2096,30 +2182,28 @@ void Lobby::SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerato
 	}
 }
 
-Lobby::Lobby(
-		AccelByte::Credentials& Credentials,
-		const AccelByte::Settings& Settings,
-		FHttpRetryScheduler& HttpRef,
-		float PingDelay,
-		float InitialBackoffDelay,
-		float MaxBackoffDelay,
-		float TotalTimeout,
-		TSharedPtr<IWebSocket> WebSocket)
-		:
-		HttpRef(HttpRef),
-		Credentials(Credentials),
-		Settings(Settings),
-		PingDelay(PingDelay),
-		InitialBackoffDelay(InitialBackoffDelay),
-		MaxBackoffDelay(MaxBackoffDelay),
-		TotalTimeout(TotalTimeout),
-		BackoffDelay(InitialBackoffDelay),
-		RandomizedBackoffDelay(InitialBackoffDelay),
-		TimeSinceLastPing(0.f),
-		TimeSinceLastReconnect(0.f),
-		TimeSinceConnectionLost(0)
-	{
-	}
+Lobby::Lobby(Credentials & InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef
+	, float InPingDelay
+	, float InInitialBackoffDelay
+	, float InMaxBackoffDelay
+	, float InTotalTimeout
+	, TSharedPtr<IWebSocket> InWebSocket)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, PingDelay{InPingDelay}
+	, InitialBackoffDelay{InInitialBackoffDelay}
+	, MaxBackoffDelay{InMaxBackoffDelay}
+	, TotalTimeout{InTotalTimeout}
+	, BackoffDelay{InInitialBackoffDelay}
+	, RandomizedBackoffDelay{InInitialBackoffDelay}
+	, TimeSinceLastPing{.0f}
+	, TimeSinceLastReconnect{.0f}
+	, TimeSinceConnectionLost{.0f}
+{
+}
 
 Lobby::~Lobby()
 {

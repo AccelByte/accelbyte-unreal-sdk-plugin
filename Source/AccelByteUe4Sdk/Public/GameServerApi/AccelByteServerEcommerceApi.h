@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteEcommerceModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -21,7 +22,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerEcommerce
 {
 public:
-	ServerEcommerce(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerEcommerce(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerEcommerce();
 
 	/**
@@ -153,9 +154,19 @@ public:
 	 */
 	void FulfillUserItem(const FString& UserId, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	* @brief Get items by multiple Sku.
+	*
+	* @param Skus Sku of the Item.
+	* @param OnSuccess This will be called when the operation succeeded. The result is const FAccelByteModelsGetBulkItemsBySkus&.
+	* @param OnError This will be called when the operation fails.
+	*/
+	void BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess, FErrorHandler const& OnError);
+	
 private:
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
+	FHttpRetryScheduler& HttpRef;
 
 	ServerEcommerce() = delete;
 	ServerEcommerce(ServerEcommerce const&) = delete;

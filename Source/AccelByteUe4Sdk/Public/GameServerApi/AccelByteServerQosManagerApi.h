@@ -6,10 +6,11 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Runtime/Online/ICMP/Public/Icmp.h"
+#include "Icmp.h"
 #include "Networking.h"
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteQosModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -24,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerQosManager
 {
 public:
-	ServerQosManager(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerQosManager(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerQosManager();
 
 	/**
@@ -36,6 +37,14 @@ public:
 	void GetQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
 
 	/**
+	* @brief Get List of Qos Server(s) that have ACTIVE status in current game namespace.
+	*
+	* @param OnSuccess This will be called when the operation succeeded. The result is FAccelByteModelsQosServerList.
+	* @param OnError This will be called when the operation failed.
+	*/
+	void GetActiveQosServers(const THandler<FAccelByteModelsQosServerList>& OnSuccess, const FErrorHandler& OnError);
+
+	/**
 	* @brief Get List of Qos Server(s) Latencies.
 	*
 	* @param OnSuccess This will be called when the operation succeeded. The result is an array of TMap with FString as key and int32 as value.
@@ -45,8 +54,9 @@ public:
 
 	TArray<TPair<FString, float>> Latencies;
 private:
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
+	FHttpRetryScheduler& HttpRef;
 
 	ServerQosManager() = delete;
 	ServerQosManager(ServerQosManager const&) = delete;

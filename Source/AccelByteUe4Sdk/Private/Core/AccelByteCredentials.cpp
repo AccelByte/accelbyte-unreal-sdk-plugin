@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteCredentials.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
 using namespace AccelByte::Api;
@@ -31,7 +31,10 @@ Credentials::Credentials()
 
 Credentials::~Credentials()
 {
+	LoginSuccessDelegate.Clear();
 }
+
+const FString Credentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
 
 void Credentials::ForgetAll()
 {
@@ -43,10 +46,51 @@ void Credentials::ForgetAll()
 	UserSessionState = ESessionState::Invalid;
 }
 
-void Credentials::SetClientCredentials(const FString& Id, const FString& Secret)
+void Credentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 {
-	ClientId = Id;
-	ClientSecret = Secret;
+	ClientId = InClientId;
+	ClientSecret = InClientSecret;
+}
+
+void Credentials::SetClientCredentials(const ESettingsEnvironment Environment)
+{
+	FString SectionPath;
+	switch (Environment)
+	{
+	case ESettingsEnvironment::Development:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsDev");
+		break;
+	case ESettingsEnvironment::Certification:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsCert");
+		break;
+	case ESettingsEnvironment::Production:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettingsProd");
+		break;
+	case ESettingsEnvironment::Default:
+	default:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteSettings");
+		break;
+	}
+
+	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	{
+		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+	else
+	{
+		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+}
+
+const FString& Credentials::GetOAuthClientId() const
+{
+	return ClientId;
+}
+
+const FString& Credentials::GetOAuthClientSecret() const
+{
+	return ClientSecret;
 }
 
 void Credentials::SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime)
@@ -87,6 +131,11 @@ Credentials::ESessionState Credentials::GetSessionState() const
 	return UserSessionState;
 }
 
+bool Credentials::IsSessionValid() const
+{
+	return UserSessionState == ESessionState::Valid;
+}
+
 void Credentials::Startup()
 {
 	PollRefreshTokenHandle = FTicker::GetCoreTicker().AddTicker(
@@ -121,6 +170,11 @@ const FString& Credentials::GetUserDisplayName() const
 const FString& Credentials::GetUserEmailAddress() const
 {
 	return UserEmailAddress;
+}
+
+const FString& Credentials::GetLinkingToken() const
+{
+	return ErrorOAuth.LinkingToken;
 }
 
 void Credentials::PollRefreshToken(double CurrentTime)
@@ -185,13 +239,18 @@ const FOauth2Token& Credentials::GetAuthToken() const
 	return AuthToken;
 }
 
-void AccelByte::Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
+void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 {
 	HttpRef.SetBearerAuthRejectedDelegate(
 		FHttpRetryScheduler::FBearerAuthRejected::CreateLambda([&]()
 			{
 				BearerAuthRejectedRefreshToken(HttpRef);
 			}));
+}
+
+void Credentials::SetErrorOAuth(const FErrorOauthInfo NewErrorOAuthInfo)
+{
+	ErrorOAuth = NewErrorOAuthInfo;
 }
 	
 Credentials::FOnLoginSuccessDelegate& Credentials::OnLoginSuccess()
@@ -229,6 +288,16 @@ void Credentials::BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef)
 } // Namespace AccelByte
 
 #include "Core/AccelByteRegistry.h"
+
+FString UAccelByteBlueprintsCredentials::GetOAuthClientId()
+{
+	return FRegistry::Credentials.GetOAuthClientId();
+}
+
+FString UAccelByteBlueprintsCredentials::GetOAuthClientSecret()
+{
+	return FRegistry::Credentials.GetOAuthClientSecret();
+}
 
 FString UAccelByteBlueprintsCredentials::GetUserSessionId()
 {

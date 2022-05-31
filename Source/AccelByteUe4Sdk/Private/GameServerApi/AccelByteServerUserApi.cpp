@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -16,7 +16,12 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerUser::ServerUser(const ServerCredentials& Credentials, const ServerSettings& Setting) : Credentials(Credentials), Settings(Setting)
+		ServerUser::ServerUser(ServerCredentials const& InCredentialsRef
+			, ServerSettings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef)
+			: CredentialsRef{InCredentialsRef}
+			, SettingsRef{InSettingsRef}
+			, HttpRef{InHttpRef}
 		{
 		}
 
@@ -37,9 +42,9 @@ namespace AccelByte
 			
 			FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
 			
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
 			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search?by=thirdPartyPlatform&limit=%d&offset=%d&platformBy=platformDisplayName&platformId=%s&query=%s"),
-					*Settings.IamServerUrl, *Credentials.GetClientNamespace(), Limit, Offset, *PlatformId, *DisplayName);
+					*SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), Limit, Offset, *PlatformId, *DisplayName);
 			FString Verb            = TEXT("GET");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");
@@ -51,7 +56,7 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 
 		void ServerUser::SearchUserOtherPlatformUserId(const FString& PlatformUserId, EAccelBytePlatformType PlatformType, const THandler<FUserOtherPlatformInfo>& OnSuccess,
@@ -60,8 +65,8 @@ namespace AccelByte
 			FReport::Log(FString(__FUNCTION__));
 
 			FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId, *PlatformUserId);
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), *PlatformId, *PlatformUserId);
 			FString Verb            = TEXT("GET");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");
@@ -73,7 +78,32 @@ namespace AccelByte
 			Request->SetHeader(TEXT("Content-Type"), ContentType);
 			Request->SetHeader(TEXT("Accept"), Accept);
 
-			FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		}
+
+		void ServerUser::BanSingleUser(const FString& UserId, const FBanUserRequest& BanUser,
+			const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError)
+		{
+			FReport::Log(FString(__FUNCTION__));
+		
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans"), *SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
+			FString Verb            = TEXT("POST");
+			FString ContentType     = TEXT("application/json");
+			FString Accept          = TEXT("application/json");
+		
+			FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+			Request->SetURL(Url);
+			Request->SetHeader(TEXT("Authorization"), Authorization);
+			Request->SetVerb(Verb);
+			Request->SetHeader(TEXT("Content-Type"), ContentType);
+			Request->SetHeader(TEXT("Accept"), Accept);
+		
+			FString Content{}; 
+			FJsonObjectConverter::UStructToJsonObjectString(BanUser, Content);
+			Request->SetContentAsString(Content);
+		
+			HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 		}
 		
 	}

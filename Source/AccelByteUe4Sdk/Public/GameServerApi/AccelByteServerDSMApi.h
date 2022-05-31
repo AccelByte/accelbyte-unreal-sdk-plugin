@@ -9,6 +9,7 @@
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteDSMModels.h"
 #include "Core/AccelByteUtilities.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 class IWebSocket;
 
@@ -33,7 +34,7 @@ enum class EServerType :uint8
 class ACCELBYTEUE4SDK_API ServerDSM
 {
 public:
-	ServerDSM(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerDSM(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerDSM();
 
 	/*
@@ -42,28 +43,37 @@ public:
 	 * @param Port the port where your game server run.
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+ 	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DSNotice event
 	*/
-	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void RegisterServerToDSM(const int32 Port, const FVoidHandler& OnSuccess, const FErrorHandler& OnError,
+		const FString& CustomAttribute = "");
 
 
     /*
 	 * @brief send register local server to DSM
 	 *
+	 * @param IPAddress the machine's IP address this local DS is in.
 	 * @param Port the port where your game server run.
+	 * @param ServerName the server name of this local DS
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DS Notice event
 	*/
-    void RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+    void RegisterLocalServerToDSM(const FString IPAddress, const int32 Port, const FString ServerName,
+    	const FVoidHandler& OnSuccess, const FErrorHandler& OnError, const FString& CustomAttribute = "");
 
 	/*
 	 * @brief send register local server to DSM using public IP
 	 * this method is using api.ipify.org to get the device's public IP
 	 *
 	 * @param Port the port where your game server run.
+	 * @param ServerName the server name of this local DS
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed.
+	 * @param CustomAttribute A value that will be sent to client that join via armada matchmaking DSNotice event
 	*/
-	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void RegisterLocalServerToDSM(const int32 Port, const FString ServerName, const FVoidHandler& OnSuccess,
+		const FErrorHandler& OnError, const FString& CustomAttribute = "");
 
 	/*
 	 * @brief send shutdown request to DSM
@@ -73,7 +83,8 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed. 
 	*/
-	void SendShutdownToDSM(const bool KillMe, const FString& MatchId, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+	void SendShutdownToDSM(const bool KillMe, const FString& MatchId, const FVoidHandler& OnSuccess,
+		const FErrorHandler& OnError);
 
 
 	/*
@@ -84,7 +95,29 @@ public:
 	 * @param OnSuccess This will be called when the operation succeeded.
 	 * @param OnError This will be called when the operation failed. 
 	*/
-    void DeregisterLocalServerFromDSM(const FString& ServerName, const FVoidHandler& OnSuccess, const FErrorHandler& OnError);
+    void DeregisterLocalServerFromDSM(const FString& ServerName, const FVoidHandler& OnSuccess,
+    	const FErrorHandler& OnError);
+
+	/*
+	* @brief Register server's game session to DSM
+	*
+	* @param Request the request body.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	*/
+	void RegisterServerGameSession(const FAccelByteModelsServerCreateSessionRequest& Request,
+		const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess, const FErrorHandler& OnError);
+	
+	/*
+	* @brief Register server's game session to DSM
+	*
+	* @param SessionId the Session ID of the server.
+	* @param GameMode the matchmaker's game mode the server will use.
+	* @param OnSuccess This will be called when the operation succeeded.
+	* @param OnError This will be called when the operation failed. 
+	*/
+	void RegisterServerGameSession(const FString& SessionId, const FString& GameMode,
+		const THandler<FAccelByteModelsServerCreateSessionResponse>& OnSuccess, const FErrorHandler& OnError);
 
 	/*
 	 * @brief Get Session ID of a claimed DS. Will return empty string OnSucess if DS is not claimed yet.
@@ -137,6 +170,10 @@ public:
 	void ParseCommandParam();
 
 private:
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
+	FHttpRetryScheduler& HttpRef;
+
 	ServerDSM(ServerDSM const&) = delete; // Copy constructor
 	ServerDSM(ServerDSM&&) = delete; // Move constructor
 	ServerDSM& operator=(ServerDSM const&) = delete; // Copy assignment operator

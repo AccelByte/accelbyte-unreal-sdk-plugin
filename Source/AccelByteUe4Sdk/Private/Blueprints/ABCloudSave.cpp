@@ -46,16 +46,7 @@ void UABCloudSave::GetUserRecord(
 		THandler<FAccelByteModelsUserRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserRecord const& Response)
 			{
-				FModelsUserRecord Result;
-				Result.Key = Response.Key;
-				Result.Namespace = Response.Namespace;
-				Result.UserId = Response.UserId;
-				Result.IsPublic = Response.IsPublic;
-				Result.CreatedAt = Response.CreatedAt;
-				Result.UpdatedAt = Response.UpdatedAt;
-				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
-
-				OnSuccess.ExecuteIfBound(Result);
+				OnSuccess.ExecuteIfBound(Response);
 			}
 		),
 		FErrorHandler::CreateLambda(
@@ -79,16 +70,8 @@ void UABCloudSave::GetPublicUserRecord(
 		THandler<FAccelByteModelsUserRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsUserRecord const& Response)
 			{
-				FModelsUserRecord Result;
-				Result.Key = Response.Key;
-				Result.Namespace = Response.Namespace;
-				Result.UserId = Response.UserId;
-				Result.IsPublic = Response.IsPublic;
-				Result.CreatedAt = Response.CreatedAt;
-				Result.UpdatedAt = Response.UpdatedAt;
-				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
 
-				OnSuccess.ExecuteIfBound(Result);
+				OnSuccess.ExecuteIfBound(Response);
 			}
 		),
 		FErrorHandler::CreateLambda(
@@ -138,7 +121,7 @@ void UABCloudSave::ReplaceUserRecordCheckLatest(
 	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
 		Key,
 		LastUpdated,
-		*RecordRequest.JsonObject,
+		RecordRequest,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -166,13 +149,11 @@ void UABCloudSave::ReplaceUserRecordCheckLatestRetry(
 	ApiClientPtr->CloudSave.ReplaceUserRecordCheckLatest(
 		TryAttempt,
 		Key,
-		*RecordRequest.JsonObject,
-		THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda(
-			[PayloadModifier](FJsonObject const& Response)
+		RecordRequest,
+		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
+			[PayloadModifier](FJsonObjectWrapper const& Response)
 			{
-				FJsonObjectWrapper Result;
-				Result.JsonObject = MakeShared<FJsonObject>(Response);
-				return *PayloadModifier.Execute(Result).JsonObject;
+				return PayloadModifier.Execute(Response);
 			}
 		),
 		FVoidHandler::CreateLambda(
@@ -246,15 +227,8 @@ void UABCloudSave::GetGameRecord(
 		Key,
 		THandler<FAccelByteModelsGameRecord>::CreateLambda(
 			[OnSuccess](FAccelByteModelsGameRecord const& Response)
-			{
-				FModelsGameRecord Result;
-				Result.Key = Response.Key;
-				Result.Namespace = Response.Namespace;
-				Result.CreatedAt = Response.CreatedAt;
-				Result.UpdatedAt = Response.UpdatedAt;
-				Result.Value.JsonObject = MakeShared<FJsonObject>(Response.Value);
-
-				OnSuccess.ExecuteIfBound(Result);
+			{ 
+				OnSuccess.ExecuteIfBound(Response);
 			}
 		),
 		FErrorHandler::CreateLambda(
@@ -302,7 +276,7 @@ void UABCloudSave::ReplaceGameRecordCheckLatest(
 	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
 		Key,
 		LastUpdated,
-		*RecordRequest.JsonObject,
+		RecordRequest,
 		FVoidHandler::CreateLambda(
 			[OnSuccess]()
 			{
@@ -330,13 +304,11 @@ void UABCloudSave::ReplaceGameRecordCheckLatestRetry(
 	ApiClientPtr->CloudSave.ReplaceGameRecordCheckLatest(
 		TryAttempt,
 		Key,
-		*RecordRequest.JsonObject,
-		THandlerPayloadModifier<FJsonObject, FJsonObject>::CreateLambda(
-			[PayloadModifier](FJsonObject const& Response)
-			{
-				FJsonObjectWrapper Result;
-				Result.JsonObject = MakeShared<FJsonObject>(Response);
-				return *PayloadModifier.Execute(Result).JsonObject;
+		RecordRequest,
+		THandlerPayloadModifier<FJsonObjectWrapper, FJsonObjectWrapper>::CreateLambda(
+			[PayloadModifier](FJsonObjectWrapper const& Response)
+			{ 
+				return PayloadModifier.Execute(Response);
 			}
 		),
 		FVoidHandler::CreateLambda(

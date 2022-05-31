@@ -19,10 +19,10 @@ struct FPresenceStatus
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	Availability Availability;
+	Availability Availability{};
 
 	UPROPERTY(BlueprintReadWrite)
-	FString Activity;
+	FString Activity{};
 };
 
 USTRUCT(BlueprintType)
@@ -31,10 +31,10 @@ struct FBulkGetUserPresenceRequest
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bCountOnly = false;
+	bool bCountOnly{};
 	
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FString> UserIds;
+	TArray<FString> UserIds{};
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDGetAllFriendsStatusResponse, FAccelByteModelsGetOnlineUsersResponse, Response);
@@ -56,18 +56,18 @@ public:
 //Request-Response
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError) const;
+	void GetAllFriendsStatus(FDGetAllFriendsStatusResponse OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError) const;
+	void BulkGetUserPresence(FBulkGetUserPresenceRequest const& Request, FDBulkGetUserPresence OnResponse, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError) const;
+	void SetPresenceStatus(FPresenceStatus const& Request, FDOnSetUserPresence OnResponse, FDErrorHandler OnError);
 
 //Notification
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Presence")
-	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif) const;
+	void SetOnFriendStatusNotif(FDFriendStatusNotif OnNotif);
 
 private:
 	FApiClientPtr ApiClientPtr;

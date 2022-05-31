@@ -23,12 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile
 {
 public:
-	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& HttpRef);
+	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& InHttpRef);
 	~UserProfile();
 private:
 	FHttpRetryScheduler& HttpRef;
 	Credentials const& CredentialsRef;
-	Settings const& Settings;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
@@ -100,6 +100,15 @@ public:
 	 */
 	void CreateUserProfile(const FAccelByteModelsUserProfileCreateRequest& ProfileCreateRequest, const THandler<FAccelByteModelsUserProfileInfo>& OnSuccess, const FErrorHandler& OnError);
 
+	/**
+	 * @brief Get User Profile Public Info By PublicId.
+	 *
+	 * @param PublicId The Public Id of user used to get user profile 
+	 * @param OnSuccess This will be called when the operation succeeded. The result is FUserProfilePublicInfo.
+	 * @param OnError This will be called when the operation failed.
+	 */
+	void GetUserProfilePublicInfoByPublicId(const FString& PublicId, const THandler<FAccelByteModelsPublicUserProfileInfo>& OnSuccess, const FCustomErrorHandler& OnError);
+ 
 private:
 	UserProfile() = delete;
 	UserProfile(UserProfile const&) = delete;

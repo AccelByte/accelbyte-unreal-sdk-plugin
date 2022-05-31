@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Statistic
 {
 public:
-	Statistic(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Statistic(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Statistic();
 private:
 	FHttpRetryScheduler& HttpRef;

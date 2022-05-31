@@ -18,12 +18,10 @@ namespace AccelByte
 namespace Api
 {
 
-Entitlement::Entitlement(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	FApiBase(CredentialsRef, SettingsRef, HttpRef)
+Entitlement::Entitlement(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {
 }
 
@@ -33,60 +31,38 @@ void Entitlement::QueryUserEntitlements(FString const& EntitlementName, FString 
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-	
-	FString Query = TEXT("");
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
+
+	TMap<FString, FString> QueryParams;
 	if (!EntitlementName.IsEmpty())
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("entitlementName=%s"), *EntitlementName));
+		QueryParams.Add("entitlementName", *EntitlementName);
 	}
 	if (!ItemId.IsEmpty())
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
+		QueryParams.Add("itemId", *ItemId);
 	}
 	if (Offset>=0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add("offset", FString::FromInt(Offset));
 	}
 	if (Limit>=0)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add("limit", FString::FromInt(Limit));
 	}
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("entitlementClazz=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass)));
+		QueryParams.Add("entitlementClazz", *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass));
 	}
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		Query.Append(Query.IsEmpty() ? TEXT("") : TEXT("&"));
-		Query.Append(FString::Printf(TEXT("appType=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType)));
+		QueryParams.Add("appType", *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType));
 	}
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
-	
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content;
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-	
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
-void Entitlement::QueryUserEntitlements(
+	void Entitlement::QueryUserEntitlements(
 	FString const& EntitlementName,
 	TArray<FString> const& ItemIds,
 	int32 const& Offset,
@@ -96,9 +72,7 @@ void Entitlement::QueryUserEntitlements(
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url             = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
-	
 	FString Query = TEXT("");
 	if (!EntitlementName.IsEmpty())
 	{
@@ -136,104 +110,57 @@ void Entitlement::QueryUserEntitlements(
 
 	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
 	
-	FString Verb            = TEXT("GET");
-	FString ContentType     = TEXT("application/json");
-	FString Accept          = TEXT("application/json");
-	FString Content;
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-	
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementById(FString const& Entitlementid, THandler<FAccelByteModelsEntitlementInfo> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Entitlementid);
 
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementOwnershipByAppId(FString const& AppId, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byAppId?appId=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace, *AppId);
+	const FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byAppId"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace, *AppId);
 
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	const TMap<FString, FString> QueryParams
+	{
+		{"appId", AppId}
+	};
+	
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementOwnershipBySku(FString const& Sku, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/bySku?sku=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace, *Sku);
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/bySku"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace, *Sku);
 
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	const TMap<FString, FString> QueryParams
+	{
+		{"sku", Sku}
+	};
+	
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementOwnershipByItemId(FString const& ItemId, THandler<FAccelByteModelsEntitlementOwnership> const& OnSuccess, FErrorHandler const& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
+	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byItemId"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace, *ItemId);
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/byItemId?itemId=%s"), *SettingsRef.PlatformServerUrl, *SettingsRef.Namespace, *ItemId);
-
-	FString Verb = TEXT("GET");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	const TMap<FString, FString> QueryParams
+	{
+		{"itemId", ItemId}
+	};
+	
+	HttpClient.ApiRequest("GET", Url, QueryParams, FString(), OnSuccess, OnError);
 }
 
 void Entitlement::GetUserEntitlementOwnershipAny(
@@ -253,7 +180,6 @@ void Entitlement::GetUserEntitlementOwnershipAny(
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownership/any"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace);
 
 		int paramCount = 0;
@@ -272,19 +198,8 @@ void Entitlement::GetUserEntitlementOwnershipAny(
 			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("skus=")).Append(Skus[i]);
 			paramCount++;
 		}
-
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-
-		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		
+		HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 	}
 }
 
@@ -336,7 +251,7 @@ void Entitlement::GetUserEntitlementOwnershipViaToken(const FString& PublicKey, 
 void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& ItemIds, const TArray<FString>& AppIds, const TArray<FString>& Skus, const THandler<FAccelByteModelsOwnershipToken>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
-
+	
 	if (ItemIds.Num() < 1
 		&& AppIds.Num() < 1
 		&& Skus.Num() < 1)
@@ -345,7 +260,6 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 	}
 	else
 	{
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/me/entitlements/ownershipToken"), *SettingsRef.PlatformServerUrl, *SettingsRef.PublisherNamespace);
 
 		int paramCount = 0;
@@ -364,19 +278,8 @@ void Entitlement::GetUserEntitlementOwnershipTokenOnly(const TArray<FString>& It
 			Url.Append((paramCount == 0) ? TEXT("?") : TEXT("&")).Append(TEXT("skus=")).Append(Skus[i]);
 			paramCount++;
 		}
-
-		FString Verb = TEXT("GET");
-		FString ContentType = TEXT("application/json");
-		FString Accept = TEXT("application/json");
-
-		FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-		Request->SetURL(Url);
-		Request->SetHeader(TEXT("Authorization"), Authorization);
-		Request->SetVerb(Verb);
-		Request->SetHeader(TEXT("Content-Type"), ContentType);
-		Request->SetHeader(TEXT("Accept"), Accept);
-
-		FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+		
+		HttpClient.ApiRequest("GET", Url, {}, FString(), OnSuccess, OnError);
 	}
 }
 
@@ -387,24 +290,12 @@ void Entitlement::ConsumeUserEntitlement(FString const& EntitlementId, int32 con
 	FAccelByteModelsConsumeUserEntitlementRequest ConsumeUserEntitlementRequest;
 	ConsumeUserEntitlementRequest.UseCount = UseCount;
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/entitlements/%s/decrement"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *EntitlementId);
 
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
 	FString Content;
 	FJsonObjectConverter::UStructToJsonObjectString(ConsumeUserEntitlementRequest, Content);
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::CreateDistributionReceiver(FString const& ExtUserId, FAccelByteModelsAttributes const Attributes, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -480,22 +371,10 @@ void Entitlement::SyncPlatformPurchase(EAccelBytePlatformSync PlatformType, FVoi
 		return;
 	}
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *PlatformText);
 
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
 
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -504,24 +383,12 @@ void Entitlement::SyncMobilePlatformPurchaseGoogle(FAccelByteModelsPlatformSyncM
 	FReport::LogDeprecated(FString(__FUNCTION__),TEXT("This method will be deprecated. Use SyncMobilePlatformPurchaseGooglePlay instead!"));
 
 	FString PlatformText = TEXT("google");
-	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *PlatformText);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
-	
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
 
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformSyncMobileGoogle const& SyncRequest, THandler<FAccelByteModelsPlatformSyncMobileGoogleResponse> const& OnSuccess, FErrorHandler const& OnError)
@@ -530,23 +397,11 @@ void Entitlement::SyncMobilePlatformPurchaseGooglePlay(FAccelByteModelsPlatformS
 
 	FString PlatformText = TEXT("google");
 	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *PlatformText);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
 	
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMobileApple const& SyncRequest, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -555,23 +410,11 @@ void Entitlement::SyncMobilePlatformPurchaseApple(FAccelByteModelsPlatformSyncMo
 
 	FString PlatformText = TEXT("apple");
 	
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/iap/%s/receipt"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *PlatformText);
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
 	FString Content = TEXT("");
 	FJsonObjectConverter::UStructToJsonObjectString(SyncRequest, Content);
 	
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -583,22 +426,9 @@ void Entitlement::SyncXBoxDLC(FAccelByteModelsXBoxDLCSync const& XboxDLCSync, FV
 	{
 		Content = FString::Printf(TEXT("{}"));
 	}
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/xbl/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
 }
 
 void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -613,23 +443,17 @@ void Entitlement::SyncSteamDLC(FVoidHandler const& OnSuccess, FErrorHandler cons
 		return;
 	}
 
-	FString Content = FString::Printf(TEXT("{\"steamId\": \"%s\", \"appId\": \"%s\"}"), *CredentialsRef.GetPlatformUserId(), *SettingsRef.AppId);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Content = TEXT("");
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/steam/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	FJsonObject DataJson;
+	DataJson.SetStringField("steamId", platformUserId);
+	DataJson.SetStringField("appId", SettingsRef.AppId);
+	TSharedPtr<FJsonObject> JsonObject = MakeShared<FJsonObject>(DataJson);
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Content);
+	FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
+	
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError);
 }
 
 void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncModel, FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
@@ -637,23 +461,12 @@ void Entitlement::SyncPSNDLC(FAccelByteModelsPlayStationDLCSync const& PSSyncMod
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Content = FString::Printf(TEXT("{\"serviceLabel\": \"%d\"}"), PSSyncModel.ServiceLabel);
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+
+	//	URL
 	FString Url = FString::Printf(TEXT("%s/public/namespaces/%s/users/%s/dlc/psn/sync"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId());
 
-	FString Verb = TEXT("PUT");
-	FString ContentType = TEXT("application/json");
-	FString Accept = TEXT("application/json");
-
-	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-	Request->SetURL(Url);
-	Request->SetHeader(TEXT("Authorization"), Authorization);
-	Request->SetVerb(Verb);
-	Request->SetHeader(TEXT("Content-Type"), ContentType);
-	Request->SetHeader(TEXT("Accept"), Accept);
-	Request->SetContentAsString(Content);
-
-	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
-}	
+	HttpClient.ApiRequest("PUT", Url, {}, Content, OnSuccess, OnError); 
+}
 
 void Entitlement::SyncTwitchDropEntitlement(FAccelByteModelsTwitchDropEntitlement const& TwitchDropModel,FVoidHandler const& OnSuccess, FErrorHandler const& OnError)
 {

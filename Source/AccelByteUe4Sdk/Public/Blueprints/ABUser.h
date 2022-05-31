@@ -40,120 +40,120 @@ public:
 //Login & logout
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithUsername(FString const& Username, FString const& Password, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void LoginWithUsername(FString const& Username, FString const& Password, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformToken, FDHandler OnSuccess, FDErrorHandler OnError, bool bCreateHeadless = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithDeviceId(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void LoginWithDeviceId(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithLauncher(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void LoginWithLauncher(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LoginWithRefreshToken(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void LoginWithRefreshToken(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Logout(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void Logout(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void ForgetAllCredentials() const;
+	void ForgetAllCredentials();
 
 //Registration
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Register(FString const& Username, FString const& Password, FString const& DisplayName, FString const& Country, FString const& DateOfBirth, FDRegisterResponse OnSuccess, FDErrorHandler OnError) const;
+	void Register(FString const& Username, FString const& Password, FString const& DisplayName, FString const& Country, FString const& DateOfBirth, FDRegisterResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Registerv2(FString const& EmailAddress, FString const& Username, FString const& Password, FString const& DisplayName, FString const& Country, FString const& DateOfBirth, FDRegisterResponse OnSuccess, FDErrorHandler OnError) const;
+	void Registerv2(FString const& EmailAddress, FString const& Username, FString const& Password, FString const& DisplayName, FString const& Country, FString const& DateOfBirth, FDRegisterResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Registerv3(FRegisterRequestv3 const& RegisterRequest, FDRegisterResponse OnSuccess, FDErrorHandler OnError) const;
+	void Registerv3(FRegisterRequestv3 const& RegisterRequest, FDRegisterResponse OnSuccess, FDErrorHandler OnError);
 
 //Upgrade and Verify
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Upgrade(FString const& Username, FString const& Password, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void Upgrade(FString const& Username, FString const& Password, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Upgradev2(FString const& EmailAddress, FString const& Username, FString const& Password, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void Upgradev2(FString const& EmailAddress, FString const& Username, FString const& Password, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SendVerificationCode(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void SendVerificationCode(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void Verify(FString const& VerificationCode, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void Verify(FString const& VerificationCode, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SendUpgradeVerificationCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void SendUpgradeVerificationCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void UpgradeAndVerify(FString const& Username, FString const& Password, FString const& VerificationCode, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void UpgradeAndVerify(FString const& Username, FString const& Password, FString const& VerificationCode, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 //Reset Password
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SendResetPasswordCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void SendResetPasswordCode(FString const& Username, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void ResetPassword(FString const& VerificationCode, FString const& Username, FString const& NewPassword, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void ResetPassword(FString const& VerificationCode, FString const& Username, FString const& NewPassword, FDHandler OnSuccess, FDErrorHandler OnError);
 
 //Update
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SendUpdateEmailVerificationCode(FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void SendUpdateEmailVerificationCode(FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void UpdateEmail(FUpdateEmailRequest UpdateEmailRequest, FDHandler OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void UpdateUser(FUserUpdateRequest UpdateRequest, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void UpdateUser(FUserUpdateRequest UpdateRequest, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 //Platform Link
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetPlatformLinks(FDPagedPlatformLinksResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetPlatformLinks(FDPagedPlatformLinksResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void LinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& Ticket, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError) const;
+	void LinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& Ticket, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformUserId, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError) const;
+	void ForcedLinkOtherPlatform(EAccelBytePlatformType PlatformType, FString const& PlatformUserId, FDHandler OnSuccess, FDAccountLinkConflictErrorJsonResponse OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDErrorHandler OnError) const;
+	void UnlinkOtherPlatform(EAccelBytePlatformType PlatformType, FDHandler OnSuccess, FDErrorHandler OnError);
 
 //Queries
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SearchUsers(FString const& Query, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void SearchUsers(FString const& Query, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void SearchUsersByType(FString const& Query, EAccelByteSearchType By, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void SearchUsersByType(FString const& Query, EAccelByteSearchType By, FDPagedPublicUsersInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetUserByUserId(FString const& UserId, FDSimpleUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserByUserId(FString const& UserId, FDSimpleUserDataResponse OnSuccess, FDErrorHandler OnError);
 	
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, FString const& OtherPlatformUserId, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserByOtherPlatformUserId(EAccelBytePlatformType PlatformType, FString const& OtherPlatformUserId, FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, TArray<FString> const& OtherPlatformUserId, FDBulkPlatformUserIdResponse OnSuccess, FDErrorHandler OnError) const;
+	void BulkGetUserByOtherPlatformUserIds(EAccelBytePlatformType PlatformType, TArray<FString> const& OtherPlatformUserId, FDBulkPlatformUserIdResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void BulkGetUserInfo(TArray<FString> const& UserIds, FDListBulkUserInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void BulkGetUserInfo(TArray<FString> const& UserIds, FDListBulkUserInfoResponse OnSuccess, FDErrorHandler OnError);
 
 //Misc.
 public:
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetCountryFromIP(FDCountryInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetCountryFromIP(FDCountryInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetUserEligibleToPlay(FDBooleanResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserEligibleToPlay(FDBooleanResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | User")
-	void GetData(FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetData(FDAccountUserDataResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

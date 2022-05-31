@@ -23,7 +23,7 @@ void UBPUser::LoginWithUsername(const FString& Username, const FString& Password
 	}));
 }
 
-void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError)
+void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const FString& Token, const FDHandler& OnSuccess, const FDErrorHandler& OnError, bool bCreateHeadless)
 {
 	FRegistry::User.LoginWithOtherPlatform(PlatformType, Token, FVoidHandler::CreateLambda([OnSuccess]()
 	{
@@ -32,7 +32,7 @@ void UBPUser::LoginWithOtherPlatform(EAccelBytePlatformType PlatformType, const 
 	FCustomErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 	{
 		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	}), bCreateHeadless);
 }
 
 void UBPUser::LoginWithDeviceId(const FDHandler& OnSuccess, const FDErrorHandler& OnError)

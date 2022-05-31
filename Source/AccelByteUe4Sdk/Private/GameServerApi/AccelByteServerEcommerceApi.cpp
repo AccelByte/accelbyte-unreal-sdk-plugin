@@ -13,7 +13,12 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerEcommerce::ServerEcommerce(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+ServerEcommerce::ServerEcommerce(ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {}
 
 ServerEcommerce::~ServerEcommerce()
@@ -24,39 +29,51 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
-	
-	FString Query = FString::Printf(TEXT("activeOnly=%s"), bActiveOnly ? TEXT("true") : TEXT("false"));
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
+
+	TMap<FString, FString> QueryParams = {};
+	QueryParams.Add("activeOnly", bActiveOnly ? TEXT("true") : TEXT("false"));
 	if (!EntitlementName.IsEmpty())
 	{
-		Query.Append(FString::Printf(TEXT("entitlementName=%s"), *EntitlementName));
+		QueryParams.Add("entitlementName", *EntitlementName);
 	}
 	for (const FString& ItemId : ItemIds)
 	{
 		if (!ItemId.IsEmpty())
 		{
-			Query.Append(FString::Printf(TEXT("itemId=%s"), *ItemId));
+			QueryParams.Add("itemId", *ItemId);
 		}
 	}
 	if (Offset>=0)
 	{
-		Query.Append(FString::Printf(TEXT("offset=%d"), Offset));
+		QueryParams.Add("offset", FString::FromInt(Offset));
 	}
 	if (Limit>=0)
 	{
-		Query.Append(FString::Printf(TEXT("limit=%d"), Limit));
+		QueryParams.Add("limit", FString::FromInt(Limit));
 	}
 	if (EntitlementClass != EAccelByteEntitlementClass::NONE)
 	{
-		Query.Append(FString::Printf(TEXT("entitlementClazz=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass)));
+		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteEntitlementClass"), true)->GetNameStringByValue((int32)EntitlementClass);
+		QueryParams.Add("entitlementClazz", stringValue);
 	}
 	if (AppType != EAccelByteAppType::NONE)
 	{
-		Query.Append(FString::Printf(TEXT("appType=%s"), *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType)));
+		FString stringValue = *FindObject<UEnum>(ANY_PACKAGE, TEXT("EAccelByteAppType"), true)->GetNameStringByValue((int32)AppType);
+		QueryParams.Add("appType", stringValue);
 	}
 
-	Url.Append(Query.IsEmpty() ? TEXT("") : FString::Printf(TEXT("?%s"),*Query));
+	// Converting TMap QueryParams as one line QueryString 
+	FString QueryString;
+	int i = 0;
+	for (const auto& Kvp : QueryParams)
+	{
+		QueryString.Append(FString::Printf(TEXT("%s%s=%s"), (i++ == 0 ? TEXT("?") : TEXT("&")),
+				*FGenericPlatformHttp::UrlEncode(Kvp.Key), *FGenericPlatformHttp::UrlEncode(Kvp.Value)));
+	}
+
+	Url.Append(QueryString);
 	
 	FString Verb            = TEXT("GET");
 	FString ContentType     = TEXT("application/json");
@@ -71,15 +88,15 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const THandler<FAccelByteModelsEntitlementInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *Entitlementid);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *Entitlementid);
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -92,7 +109,7 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FString& EntitlementId,
@@ -100,8 +117,8 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -113,15 +130,15 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<FAccelByteModelsEntitlementGrant>& EntitlementGrant, const THandler<TArray<FAccelByteModelsStackableEntitlementInfo>>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -148,15 +165,15 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Contents);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& CurrencyCode, const FAccelByteModelsCreditUserWalletRequest& CreditUserWalletRequest, const THandler<FAccelByteModelsWalletInfo>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *CurrencyCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *CurrencyCode);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -170,7 +187,7 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& Cur
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray<FString>& EntitlementIds,
@@ -178,8 +195,8 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds?entitlementIds="), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds?entitlementIds="), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	for(int i = 0; i < EntitlementIds.Num(); i++)
 	{
 		Url += EntitlementIds[i];
@@ -196,7 +213,7 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -204,8 +221,8 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -216,7 +233,7 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	
 }
 
@@ -225,8 +242,8 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -239,7 +256,7 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FStrin
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -247,8 +264,8 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -259,7 +276,7 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FStrin
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString& EntitlementId,
@@ -267,8 +284,8 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -279,7 +296,7 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& WalletId,
@@ -288,8 +305,8 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *WalletId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *WalletId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -303,15 +320,15 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteModelsFulfillmentRequest& FulfillmentRequest, const THandler<FAccelByteModelsFulfillmentResult>& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -325,7 +342,37 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteMod
 	Request->SetHeader(TEXT("Content-Type"), ContentType);
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+}
+
+void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess, FErrorHandler const& OnError)
+{
+	FReport::Log(FString(__FUNCTION__));
+
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Params;
+	for(FString const& Sku : Skus)
+	{
+		if(!Params.IsEmpty())
+		{
+			Params = FString::Printf(TEXT("%s&"), *Params);
+		}
+		Params = FString::Printf(TEXT("%ssku=%s"), *Params, *Sku);
+	}
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus?%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *Params);
+
+	FString Verb = TEXT("GET");
+	FString ContentType = TEXT("application/json");
+	FString Accept = TEXT("application/json");
+
+	FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	Request->SetURL(Url);
+	Request->SetHeader(TEXT("Authorization"), Authorization);
+	Request->SetVerb(Verb);
+	Request->SetHeader(TEXT("Content-Type"), ContentType);
+	Request->SetHeader(TEXT("Accept"), Accept);
+
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 } // Namespace GameServerApi
 } // Namespace AccelByte

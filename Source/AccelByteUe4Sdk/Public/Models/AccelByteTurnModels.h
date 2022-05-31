@@ -11,26 +11,34 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServer
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Ip;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int32 Port;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int32 Qos_port;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Region;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Status;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		FString Last_update;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | TurnServer")
-		int64 Current_time;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Ip{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	int32 Port{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	int32 Qos_port{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Status{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	FString Last_update{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | TurnServer")
+	int64 Current_time{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsTurnServerList
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | Turn | Models | QosServerList")
-		TArray<FAccelByteModelsTurnServer> Servers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | Turn | Models | QosServerList")
+	TArray<FAccelByteModelsTurnServer> Servers{};
 };

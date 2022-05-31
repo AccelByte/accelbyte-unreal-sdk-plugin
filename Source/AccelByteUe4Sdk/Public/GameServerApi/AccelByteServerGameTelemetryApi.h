@@ -10,6 +10,7 @@
 #include "Containers/Set.h"
 #include "Models/AccelByteGameTelemetryModels.h"
 #include "Core/AccelByteError.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -24,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerGameTelemetry
 {
 public:
-	ServerGameTelemetry(const ServerCredentials& Credentials, const ServerSettings& Settings);
+	ServerGameTelemetry(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerGameTelemetry();
 
 	/**
@@ -80,8 +81,9 @@ private:
 	ServerGameTelemetry(ServerGameTelemetry const&) = delete;
 	ServerGameTelemetry(ServerGameTelemetry&&) = delete;
 
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
+	FHttpRetryScheduler& HttpRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);
 	TSet<FString> ImmediateEvents;

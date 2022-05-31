@@ -8,6 +8,7 @@
 #include "Models/AccelByteOauth2Models.h"
 #include "Core/AccelByteError.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteEnvironment.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteCredentials.generated.h"
@@ -45,14 +46,19 @@ public:
 	
 	/** @brief Forgets post-auth info, but pre-auth (such as setting email) will remain. */
 	void ForgetAll();
-	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
+	void SetClientCredentials(const FString& InClientId, const FString& InClientSecret);
+	void SetClientCredentials(const ESettingsEnvironment Environment);
 	void SetAuthToken(const FOauth2Token NewAuthToken, float CurrentTime);
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
-	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef);
+	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
+	void SetErrorOAuth(const FErrorOauthInfo ErrorOAuthInfo);
 
 	FTokenRefreshedEvent& OnTokenRefreshed();
+
+	const FString& GetOAuthClientId() const;
+	const FString& GetOAuthClientSecret() const;
 
 	const FOauth2Token& GetAuthToken() const;
 	const FString& GetRefreshToken() const;
@@ -62,8 +68,10 @@ public:
 	const FString& GetUserDisplayName() const;
 	const FString& GetNamespace() const;
 	const FString& GetUserEmailAddress() const;
+	const FString& GetLinkingToken() const; 
 	
 	ESessionState GetSessionState() const;
+	bool IsSessionValid() const;
 
 	void Startup();
 	void Shutdown();
@@ -72,6 +80,7 @@ private:
 	FString ClientId;
 	FString ClientSecret;
 	FOauth2Token AuthToken;
+	FErrorOauthInfo ErrorOAuth; 
 	
 	double UserSessionExpire;
 	FString UserEmailAddress;
@@ -86,7 +95,9 @@ private:
 	FTokenRefreshedEvent TokenRefreshedEvent;
 	FOnLoginSuccessDelegate LoginSuccessDelegate;
 
-	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
+	static const FString DefaultSection;
+
+	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& InHttpRef);
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;
@@ -100,6 +111,10 @@ class UAccelByteBlueprintsCredentials : public UBlueprintFunctionLibrary
 {
 public:
 	GENERATED_BODY()
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetOAuthClientId();
+	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
+	static FString GetOAuthClientSecret();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")
 	static FString GetUserSessionId();
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Credentials")

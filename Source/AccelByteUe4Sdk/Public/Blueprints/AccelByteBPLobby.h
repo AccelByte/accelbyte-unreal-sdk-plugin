@@ -67,34 +67,34 @@ public:
 	void SetApiClient(FApiClientPtr const& NewApiClientPtr);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsConnected() const;
+	bool IsConnected();
 
 	UFUNCTION(BlueprintCallable)
-	void Connect() const;
+	void Connect();
 
 	UFUNCTION(BlueprintCallable)
-	void Disconnect() const;
+	void Disconnect();
 
 	UFUNCTION(BlueprintCallable)
-	void UnbindEvent() const;
+	void UnbindEvent();
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnConnected(FDHandler OnConnected) const;
+	void SetOnConnected(FDHandler OnConnected);
 
 	UFUNCTION(BlueprintCallable)
-	void SetOnErrorNotification(FDErrorHandler OnErrorNotification) const;
+	void SetOnErrorNotification(FDErrorHandler OnErrorNotification);
 
 	UFUNCTION(BlueprintCallable)
-	FString RefreshToken(FRefreshTokenRequest const& Request, FDRefreshTokenResponseDelegate OnResponse, FDErrorHandler OnError) const;
+	FString RefreshToken(FRefreshTokenRequest const& Request, FDRefreshTokenResponseDelegate OnResponse, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable)
-	void SetRetryParameters(FSetRetryParametersRequest const& Request) const;
+	void SetRetryParameters(FSetRetryParametersRequest const& Request);
 
 	//Can not test this through lua yet, removing the UFUNCTION for now
 	void SetTokenGenerator(TSharedPtr<IAccelByteTokenGenerator> TokenGenerator);
 
 	UFUNCTION(BlueprintCallable)
-	FString RequestDS(FRequestDSModel const& Request) const;
+	FString RequestDS(FRequestDSModel const& Request);
 
 private:
 	bool bConnected{false};

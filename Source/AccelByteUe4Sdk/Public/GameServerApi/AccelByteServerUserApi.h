@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -8,6 +8,7 @@
 
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteUserModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,11 +23,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerUser
 		{
 		public:
-			ServerUser(const ServerCredentials& Credentials, const ServerSettings& Settings);
+			ServerUser(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 			~ServerUser();
 		private:
-			const ServerCredentials& Credentials;
-			const ServerSettings& Settings;
+			ServerCredentials const& CredentialsRef;
+			ServerSettings const& SettingsRef;
+			FHttpRetryScheduler& HttpRef;
 		public:
 			/**
 			* @brief This function will search user by their third party Display Name. The query will be used to find the user with the most approximate display name.
@@ -51,7 +53,17 @@ namespace AccelByte
 			*/
 			void SearchUserOtherPlatformUserId(const FString& PlatformUserId, EAccelBytePlatformType PlatformType, const THandler<FUserOtherPlatformInfo>& OnSuccess,
 				const FErrorHandler& OnError);
-			
+
+			/**
+			 * @brief This function will ban a user with specific type of ban. Ban types and reason can be queried.
+			 * @param UserId Id of user that will be banned.
+			 * @param BanUser Information of user that will be banned.
+			 * @param OnSuccess This will be called when the operation succeeded. The result is FBanUserInfo.
+			 * @param OnError This will be called when the operation failed.
+			 */
+			void BanSingleUser(const FString& UserId, const FBanUserRequest& BanUser,
+							   const THandler<FBanUserResponse>& OnSuccess, const FErrorHandler& OnError);
+
 		private:
 			ServerUser() = delete;
 			ServerUser(const ServerUser&) = delete;

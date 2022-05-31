@@ -3,7 +3,6 @@
 // and restrictions contact your company contract manager.
 
 #include "Api/AccelByteOrderApi.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "JsonUtilities.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
@@ -16,13 +15,16 @@ namespace AccelByte
 namespace Api
 {
 
-Order::Order(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Order::Order(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Order::~Order(){}
+Order::~Order()
+{}
 
 void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {

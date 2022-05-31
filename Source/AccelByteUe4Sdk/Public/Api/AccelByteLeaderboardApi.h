@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Leaderboard
 {
 public:
-	Leaderboard(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Leaderboard(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Leaderboard();
 private:
 	FHttpRetryScheduler& HttpRef;

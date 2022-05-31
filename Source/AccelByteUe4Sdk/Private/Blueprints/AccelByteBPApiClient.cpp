@@ -5,12 +5,12 @@ void UABCredentials::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-FString UABCredentials::GetAccessToken() const
+FString UABCredentials::GetAccessToken() 
 {
 	return ApiClientPtr->CredentialsRef->GetAccessToken();
 }
 
-FString UABCredentials::GetUserId() const
+FString UABCredentials::GetUserId() 
 {
 	return ApiClientPtr->CredentialsRef->GetUserId();
 }
@@ -43,6 +43,7 @@ UABApiClient::UABApiClient()
 	Message = NewObject<UABMessage>();
 	SessionAttribute = NewObject<UABSessionAttribute>();
 	Signaling = NewObject<UABSignaling>();
+	Group = NewObject<UABGroup>();
 
 	SetApiClient(FMultiRegistry::GetApiClient());
 }
@@ -76,6 +77,7 @@ void UABApiClient::SetApiClient(FApiClientPtr NewApiClientPtr)
 	Message->SetApiClient(ApiClientPtr);
 	SessionAttribute->SetApiClient(ApiClientPtr);
 	Signaling->SetApiClient(ApiClientPtr);
+	Group->SetApiClient(ApiClientPtr);
 }
 
 UABApiClient* UABMultiRegistry::GetApiClient(FString const& Key)

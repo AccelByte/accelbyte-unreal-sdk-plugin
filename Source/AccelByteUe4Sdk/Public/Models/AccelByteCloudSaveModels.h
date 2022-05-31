@@ -6,35 +6,82 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h" 
+#include "JsonObjectWrapper.h"
 #include "Models/AccelByteGeneralModels.h"
 #include "AccelByteCloudSaveModels.generated.h"
 
+UENUM(BlueprintType)
+enum class ESetByMetadataRecord : uint8
+{
+	NONE = 0,
+	SERVER, 
+	CLIENT,
+};
+
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsUserRecord
 {
-	FString Key;
-	FString Namespace;
-	FString UserId;
-	bool IsPublic;
-	FDateTime CreatedAt;
-	FDateTime UpdatedAt;
-	FString SetBy;
-	FJsonObject Value;
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FString UserId{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	bool IsPublic{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecord")
+	FJsonObjectWrapper Value{}; 
 };
 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsGameRecord
 {
-	FString Key;
-	FString Namespace;
-	FDateTime CreatedAt;
-	FDateTime UpdatedAt;
-	FString SetBy;
-	FJsonObject Value;
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FString Key{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FString Namespace{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FDateTime CreatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	ESetByMetadataRecord SetBy{ESetByMetadataRecord::NONE};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | GameRecord")
+	FJsonObjectWrapper Value{};
 };
 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FAccelByteModelsConcurrentReplaceRequest
 {
-	FDateTime UpdatedAt;
-	FJsonObject Value;
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ConcurrentReplaceRequest")
+	FDateTime UpdatedAt{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | ConcurrentReplaceRequest")
+	FJsonObjectWrapper Value{};
 };
 
 USTRUCT(BlueprintType)
@@ -43,13 +90,17 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsPaginatedRecordsKey
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
-	TArray<FString> Data;
+	TArray<FString> Data{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | PaginatedRecordsKey")
-	FAccelByteModelsPaging Paging;
+	FAccelByteModelsPaging Paging{};
 };
 
+USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FListAccelByteModelsUserRecord
 {
-	TArray<FAccelByteModelsUserRecord> Data;
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Accelbyte | CloudSave | Models | UserRecordList")
+	TArray<FAccelByteModelsUserRecord> Data{};
 };

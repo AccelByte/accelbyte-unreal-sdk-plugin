@@ -4,8 +4,8 @@
 
 #include "Misc/AutomationTest.h"
 #include "Api/AccelByteUserApi.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Api/AccelByteStatisticApi.h"
 #include "GameServerApi/AccelByteServerStatisticApi.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
@@ -37,10 +37,7 @@ void FStatisticTestSpec::Define()
 {
 	const auto setupOnce = [this]()
 	{
-		Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
-		
-		AB_TEST_TRUE(RegisterTestUser(TestUser));
-		AB_TEST_TRUE(LoginTestUser(TestUser));
+		AB_TEST_TRUE(SetupTestUser(TestUser));
 
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("LOGIN WITH CLIENT CREDENTIALS..."));
 		bool bClientLoginSuccess = false;
@@ -99,11 +96,13 @@ void FStatisticTestSpec::Define()
 			WaitUntil(bCreateStatDone, "Waiting for stat created...");
 		}
 
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+		
 		UE_LOG(LogAccelByteStatisticTest, Log, TEXT("CREATE USER STAT ITEM..."));
 		TArray<FString> StatCodes;
 		StatCodes.Add(StatisticStatCode);
 		bool bCreateStatSuccess = false;
-		Statistic.CreateUserStatItems(StatCodes, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&bCreateStatSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
+		ApiClient->Statistic.CreateUserStatItems(StatCodes, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&bCreateStatSuccess](const TArray<FAccelByteModelsBulkStatItemOperationResult>& Result)
 		{
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("Stat Codes are created."));
 			bCreateStatSuccess = true;
@@ -130,12 +129,12 @@ void FStatisticTestSpec::Define()
 	{
 		It("Should get all user stat item", [this]()
 		{
-			Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
-			
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING USER ALL STATITEMS..."));
+			
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 			bool bGetAllUserStatItemsSuccess = false;
 			FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-			Statistic.GetAllUserStatItems(THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetAllUserStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+			ApiClient->Statistic.GetAllUserStatItems(THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetAllUserStatItemsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 			{
 				UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET ALL User STATITEMS SUCCESS!"));
 				bGetAllUserStatItemsSuccess = true;
@@ -158,12 +157,12 @@ void FStatisticTestSpec::Define()
 	{
 		It("Should get user stat item by stat code", [this]()
 		{
-			Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
-			
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING USER STATITEMS BY STATCODES..."));
+			
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 			bool bGetUserStatItemsByStatCodesSuccess = false;
 			FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-			Statistic.GetUserStatItems({ StatisticStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetUserStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+			ApiClient->Statistic.GetUserStatItems({ StatisticStatCode }, {}, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetUserStatItemsByStatCodesSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 			{
 				UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET User STATITEMS SUCCESS!"));
 				bGetUserStatItemsByStatCodesSuccess = true;
@@ -187,12 +186,12 @@ void FStatisticTestSpec::Define()
 	{
 		It("Should get user stat item by tags", [this]()
 		{
-			Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
-			
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GETTING USER STATITEMS BY TAGS..."));
+			
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 			bool bGetUserStatItemsByTagsSuccess = false;
 			FAccelByteModelsUserStatItemPagingSlicedResult GetResult;
-			Statistic.GetUserStatItems({}, { StatisticStatCode }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetUserStatItemsByTagsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
+			ApiClient->Statistic.GetUserStatItems({}, { StatisticStatCode }, THandler<FAccelByteModelsUserStatItemPagingSlicedResult>::CreateLambda([&GetResult, &bGetUserStatItemsByTagsSuccess](const FAccelByteModelsUserStatItemPagingSlicedResult& Result)
 			{
 				UE_LOG(LogAccelByteStatisticTest, Log, TEXT("GET User STATITEMS SUCCESS!"));
 				bGetUserStatItemsByTagsSuccess = true;
@@ -216,15 +215,15 @@ void FStatisticTestSpec::Define()
 	{
 		It("Should add User Stat item in bulk", [this]()
 		{
-			Api::Statistic Statistic(TestUser.Credentials, FRegistry::Settings,	FRegistry::HttpRetryScheduler);
-			
 			UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEM VALUE..."));
+			
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 			bool bBulkAddUserStatItemSuccess = false;
 			TArray<FAccelByteModelsBulkStatItemOperationResult> BulkAddUserStatItemResult;
 			FAccelByteModelsBulkStatItemInc MVP;
 			MVP.inc = 1;
 			MVP.statCode = StatisticStatCode;
-			Statistic.IncrementUserStatItems({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&BulkAddUserStatItemResult, &bBulkAddUserStatItemSuccess](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
+			ApiClient->Statistic.IncrementUserStatItems({ MVP }, THandler<TArray<FAccelByteModelsBulkStatItemOperationResult>>::CreateLambda([&BulkAddUserStatItemResult, &bBulkAddUserStatItemSuccess](TArray<FAccelByteModelsBulkStatItemOperationResult> Result)
 			{
 				UE_LOG(LogAccelByteStatisticTest, Log, TEXT("BULK ADD USER STATITEMS SUCCESS!"));
 				bBulkAddUserStatItemSuccess = true;

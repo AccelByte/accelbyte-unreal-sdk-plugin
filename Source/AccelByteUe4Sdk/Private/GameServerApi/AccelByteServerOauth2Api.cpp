@@ -6,8 +6,9 @@
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
+#include "Core/AccelByteServerCredentials.h"
 #include "JsonUtilities.h"
-#include "Runtime/Core/Public/Misc/Base64.h"
+#include "Misc/Base64.h"
 
 namespace AccelByte
 {
@@ -19,7 +20,7 @@ void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& Clien
 	FReport::Log(FString(__FUNCTION__));
 
 	FString Authorization   = TEXT("Basic " + FBase64::Encode(ClientId + ":" + ClientSecret));
-	FString Url             = FString::Printf(TEXT("%s/v3/oauth/token"), *FRegistry::ServerSettings.IamServerUrl);
+	FString Url             = FString::Printf(TEXT("%s/v3/oauth/token"), *SettingsRef.IamServerUrl);
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/x-www-form-urlencoded");
 	FString Accept          = TEXT("application/json");
@@ -33,28 +34,31 @@ void ServerOauth2::GetAccessTokenWithClientCredentialsGrant(const FString& Clien
 	Request->SetHeader(TEXT("Accept"), Accept);
 	Request->SetContentAsString(Content);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerOauth2::LoginWithClientCredentials(const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	GetAccessTokenWithClientCredentialsGrant(Settings.ClientId, Settings.ClientSecret, THandler<FOauth2Token>::CreateLambda([OnSuccess](const FOauth2Token& Result)
-	{
-		FRegistry::ServerCredentials.SetClientToken(Result.Access_token, FPlatformTime::Seconds() + (Result.Expires_in*FMath::FRandRange(0.7, 0.9)), Result.Namespace);	
-		OnSuccess.ExecuteIfBound();
-	}), FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
-	{
-		OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
-	}));
+	GetAccessTokenWithClientCredentialsGrant(
+		CredentialsRef.GetOAuthClientId(),
+		CredentialsRef.GetOAuthClientSecret(),
+		THandler<FOauth2Token>::CreateLambda([this, OnSuccess](const FOauth2Token& Result)
+		{
+			OnLoginSuccess(OnSuccess, Result);
+		}),
+		FErrorHandler::CreateLambda([OnError](int32 ErrorCode, const FString& ErrorMessage)
+		{
+			OnError.ExecuteIfBound(ErrorCode, ErrorMessage);
+		}));
 }
 
 void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler const& OnError) const
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Url             = FString::Printf(TEXT("%s/v3/oauth/jwks"), *FRegistry::ServerSettings.IamServerUrl);
+	FString Url             = FString::Printf(TEXT("%s/v3/oauth/jwks"), *SettingsRef.IamServerUrl);
 	FString Verb            = TEXT("GET");
 	FString Accept          = TEXT("application/json");
 
@@ -63,17 +67,28 @@ void ServerOauth2::GetJwks(THandler<FJwkSet> const& OnSuccess, FErrorHandler con
 	Request->SetVerb(Verb);
 	Request->SetHeader(TEXT("Accept"), Accept);
 
-	FRegistry::HttpRetryScheduler.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
+	HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 }
 
 void ServerOauth2::ForgetAllCredentials()
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	Credentials.ForgetAll();
+	CredentialsRef.ForgetAll();
 }
 
-ServerOauth2::ServerOauth2(AccelByte::ServerCredentials& Credentials, AccelByte::ServerSettings& Settings) : Credentials(Credentials), Settings(Settings)
+void ServerOauth2::OnLoginSuccess(const FVoidHandler& OnSuccess, const FOauth2Token& Response) const
+{
+	CredentialsRef.SetClientToken(Response.Access_token, Response.Expires_in, Response.Namespace);
+	OnSuccess.ExecuteIfBound();
+}
+
+ServerOauth2::ServerOauth2(ServerCredentials& InCredentialsRef
+	, ServerSettings& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {}
 
 ServerOauth2::~ServerOauth2()

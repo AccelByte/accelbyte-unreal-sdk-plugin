@@ -15,7 +15,12 @@ namespace AccelByte
 namespace Api
 {
 
-	TurnManager::TurnManager(const AccelByte::Credentials& Credentials, const AccelByte::Settings& Settings, FHttpRetryScheduler& HttpRef) : HttpRef{HttpRef}, Credentials(Credentials), Settings(Settings)
+	TurnManager::TurnManager(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: HttpRef{InHttpRef}
+		, CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
 	{}
 
 	TurnManager::~TurnManager()
@@ -25,7 +30,7 @@ namespace Api
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
 		FString Url = FString::Printf(TEXT("%s/public/turn"), *GetTurnManagerServerUrl());
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
@@ -80,7 +85,8 @@ namespace Api
 
 	FString TurnManager::GetTurnManagerServerUrl() const
 	{
-		return Settings.TurnManagerServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/turnmanager"), *Settings.BaseUrl) : Settings.TurnManagerServerUrl;
+		return SettingsRef.TurnManagerServerUrl.IsEmpty() ? FString::Printf(TEXT("%s/turnmanager"), *SettingsRef.BaseUrl) : SettingsRef.TurnManagerServerUrl;
 	}
+	
 } // Namespace Api
 } // Namespace AccelByte

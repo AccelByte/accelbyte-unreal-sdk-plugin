@@ -40,19 +40,19 @@ public:
 
 public: 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order")
-	void CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void CreateNewOrder(FAccelByteModelsOrderCreate const& OrderCreateRequest, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order")
-	void CancelOrder(FString const& OrderNo, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void CancelOrder(FString const& OrderNo, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order")
-	void GetUserOrder(FString const& OrderNo, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserOrder(FString const& OrderNo, FDAccelByteModelsOrderInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order")
-	void GetUserOrders(int32 const& Page, int32 const& Size, FDAccelByteModelsPagedOrderInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserOrders(int32 const& Page, int32 const& Size, FDAccelByteModelsPagedOrderInfoResponse OnSuccess, FDErrorHandler OnError);
 
 	UFUNCTION(BlueprintCallable, Category = "AccelByte | Order")
-	void GetUserOrderHistory(FString const& OrderNo, FDArrayModelsOrderHistoryInfoResponse OnSuccess, FDErrorHandler OnError) const;
+	void GetUserOrderHistory(FString const& OrderNo, FDArrayModelsOrderHistoryInfoResponse OnSuccess, FDErrorHandler OnError);
 
 private:
 	FApiClientPtr ApiClientPtr;

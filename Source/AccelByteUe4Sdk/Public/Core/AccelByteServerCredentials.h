@@ -6,7 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "Models/AccelByteOauth2Models.h"
-#include "Runtime/Core/Public/Containers/Ticker.h"
+#include "Core/AccelByteEnvironment.h"
+#include "Containers/Ticker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine.h"
 #include "AccelByteServerCredentials.generated.h"
@@ -32,7 +33,8 @@ public:
 	ServerCredentials();
 
 	void ForgetAll();
-	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
+	void SetClientCredentials(const FString& InClientId, const FString& InClientSecret);
+	void SetClientCredentials(const ESettingsEnvironment Environment);
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void ScheduleRefreshToken(double RefreshTime);
 	void SetMatchId(const FString& GivenMatchId);
@@ -41,6 +43,9 @@ public:
 	void Shutdown();
 	void PollRefreshToken(double CurrentTime);
 
+	const FString& GetOAuthClientId() const;
+	const FString& GetOAuthClientSecret() const;
+	
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */
@@ -64,6 +69,7 @@ private:
 	FString MatchId;
 	
 	ESessionState ClientSessionState;
+	static const FString DefaultSection;
 
 	FDelegateHandle PollRefreshTokenHandle;
 	void RemoveFromTicker(FDelegateHandle& handle);

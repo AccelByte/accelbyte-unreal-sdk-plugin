@@ -14,16 +14,16 @@ namespace AccelByte
 {
 namespace Api
 {
-Category::Category(
-	const AccelByte::Credentials& CredentialsRef,
-	const AccelByte::Settings& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Category::Category(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Category::~Category(){}
+Category::~Category()
+{}
 
 void Category::GetRootCategories(const FString& Language, const THandler<TArray<FAccelByteModelsCategoryInfo>>& OnSuccess, const FErrorHandler& OnError)
 {

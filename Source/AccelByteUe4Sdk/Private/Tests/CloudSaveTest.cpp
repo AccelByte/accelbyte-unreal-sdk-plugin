@@ -7,30 +7,30 @@
 #include "Api/AccelByteCloudSaveApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "UserTestAdmin.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
+#include "GameServerApi/AccelByteServerCloudSaveApi.h"
+#include "GameServerApi/AccelByteServerOauth2Api.h"
 
 using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::User;
-using AccelByte::Api::CloudSave;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudSaveTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCloudSaveTest);
 
 const int32 AutomationFlagMaskCloudSave = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-static Credentials User2Creds;
-static TSharedPtr<Api::User> User2;
-static TSharedPtr<Api::CloudSave> CloudSave2;
-static FString KeyUserTest = "UE4SDKKeyUserTest";
-static FString KeyPublicUserTest = "UE4SDKKeyPublicUserTest";
-static FString UnexistKeyUserTest = "UnexistUnitySDKKeyUserTest";
-static FString KeyGameTest = "UE4SDKKeyGameTest";
-static FString UnexistKeyGameTest = "UnexistUnitySDKKeyGameTest";
+static FTestUser TestUser1{0};
+static FString KeyUserTest = TEXT("UE4SDKKeyUserTest");
+static FString KeyUserTestMetaPrivate = TEXT("UE4SDKKeyUserTestMetaPrivate");
+static FString KeyPublicUserTest = TEXT("UE4SDKKeyPublicUserTest");
+static FString UnexistKeyUserTest = TEXT("UnexistUnitySDKKeyUserTest");
+static FString KeyGameTest = TEXT("UE4SDKKeyGameTest");
+static FString UnexistKeyGameTest = TEXT("UnexistUnitySDKKeyGameTest");
 static FJsonObject Record1Test;
 static FJsonObject Record2Test;
 static FJsonObject NewRecord1Test;
@@ -96,113 +96,82 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 	}
 
 	// user1 preps
-	bool bUserLoginSuccess= false;
-	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
-		bUserLoginSuccess = true;
-	}), CloudSaveErrorHandler);
-	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
+	bool bUser1Setup= false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUser1Setup]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
+				bUser1Setup = true;
+			})
+		, CloudSaveErrorHandler);
+	WaitUntil(bUser1Setup, "Waiting for Login...");
 
+	bool bClientTokenObtained = false;
+
+	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("    Success"));
+				bClientTokenObtained = true;
+			})
+		, CloudSaveErrorHandler);
+
+	WaitUntil(bClientTokenObtained, "Waiting for Login...");
+	
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteUserRecord1Success = false;
-	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecord1Success, "Waiting for deleting user record ...");
 
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
-		bDeleteGameRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest
+		, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
+				bDeleteGameRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecord1Success = false;
-	FRegistry::CloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
-		bDeleteGameRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKeyGameTest
+		, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
+				bDeleteGameRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecord1Success, "Waiting for deleting game record ...");
 
 	bool bDeleteUserPublicRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyPublicUserTest, FVoidHandler::CreateLambda([&bDeleteUserPublicRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserPublicRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyPublicUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserPublicRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserPublicRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserPublicRecordSuccess, "Waiting for deleting user record ...");
 
 	// user2 preps
-	User2 = MakeShared<Api::User>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
-	Email.ToLowerInline();
-	FString const Password = TEXT("123Password123");
-	FString const DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
-	FString const Country = "US";
-	FDateTime const DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
-	FString const Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-	bool bUserCreationSuccess = false;
-	User2->Register(
-		Email,
-		Password,
-		DisplayName,
-		Country,
-		Format,
-		THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-	{
-		bUserCreationSuccess = true;
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User2 is Created"));
+	bool bUser2Setup = SetupTestUser(TestUser1);
 
-	}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Code=%d"), Code);
-		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException || static_cast<ErrorCodes>(Code) == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
-		{
-			bUserCreationSuccess = true;
-			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User2 is already"));
-		}
-		else
-		{
-			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User can't be created"));
-		}
-	}));
-
-	WaitUntil(bUserCreationSuccess, "Waiting for user created...");
-
-	bool bUser2LoginSuccess = false;
-	User2->LoginWithUsername(
-		Email,
-		Password,
-		FVoidHandler::CreateLambda([&]()
-	{
-		bUser2LoginSuccess = true;
-	}),
-	FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-	}));
-
-	WaitUntil(bUser2LoginSuccess, "Waiting for Login...");
-
-	CloudSave2 = MakeShared<Api::CloudSave>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
-	AB_TEST_TRUE(bUserLoginSuccess);
-	AB_TEST_TRUE(bUserCreationSuccess);
-	AB_TEST_TRUE(bUser2LoginSuccess);
+	AB_TEST_TRUE(bUser1Setup);
+	AB_TEST_TRUE(bUser2Setup);
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	AB_TEST_TRUE(bDeleteUserRecord1Success);
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
@@ -214,23 +183,77 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveUserRecord, "AccelByte.Tests.Cloud
 bool CloudSaveSaveUserRecord::RunTest(const FString& Parameters)
 {
 	bool bSaveUserRecord1Success = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, Record1Test, false, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
-		bSaveUserRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		, Record1Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
 	
 	bool bSaveUserRecord2Success = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, Record2Test, false, FVoidHandler::CreateLambda([&bSaveUserRecord2Success]()
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		, Record2Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord2Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
+				bSaveUserRecord2Success = true;
+			})
+		, CloudSaveErrorHandler);
+	WaitUntil(bSaveUserRecord2Success, "Waiting for saving user record2 ...");
+
+	AB_TEST_TRUE(bSaveUserRecord1Success);
+	AB_TEST_TRUE(bSaveUserRecord2Success);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveUserRecordWithMetaData, "AccelByte.Tests.CloudSave.B.SaveUserRecordWithMetaData", AutomationFlagMaskCloudSave);
+bool CloudSaveSaveUserRecordWithMetaData::RunTest(const FString& Parameters)
+{
+	bool bSaveUserRecord1Success = false;
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		,Record1Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
+	WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
+	
+	bool bSaveUserRecord2Success = false;
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTestMetaPrivate, true, Record2Test, FVoidHandler::CreateLambda([&bSaveUserRecord2Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
 		bSaveUserRecord2Success = true;
 	}), CloudSaveErrorHandler);
 	WaitUntil(bSaveUserRecord2Success, "Waiting for saving user record2 ...");
 
+	bool bSaveUserRecord3Success = false;
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true, Record2Test, FVoidHandler::CreateLambda([&bSaveUserRecord3Success]()
+	{
+		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record3 success"));
+		bSaveUserRecord3Success = true;
+	}), CloudSaveErrorHandler);
+	WaitUntil(bSaveUserRecord3Success, "Waiting for saving user record3 ...");
+
+	bool bSaveUserRecord4Success = false;
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTestMetaPrivate, false, Record2Test, FVoidHandler::CreateLambda([&bSaveUserRecord4Success]()
+	{
+		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record4 success"));
+		bSaveUserRecord4Success = true;
+	}), CloudSaveErrorHandler);
+	WaitUntil(bSaveUserRecord4Success, "Waiting for saving user record4 ...");
+
 	AB_TEST_TRUE(bSaveUserRecord1Success);
 	AB_TEST_TRUE(bSaveUserRecord2Success);
+	AB_TEST_TRUE(bSaveUserRecord3Success);
+	AB_TEST_TRUE(bSaveUserRecord4Success);
 	return true;
 }
 
@@ -258,12 +281,12 @@ bool CloudSaveSavePublicUserRecord::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveGetUserRecord, "AccelByte.Tests.CloudSave.C.GetUserRecord", AutomationFlagMaskCloudSave);
-bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveGetUserRecordPrivate, "AccelByte.Tests.CloudSave.C.GetUserRecordPrivate", AutomationFlagMaskCloudSave);
+bool CloudSaveGetUserRecordPrivate::RunTest(const FString& Parameters)
 {
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	FRegistry::CloudSave.GetUserRecord(KeyUserTest, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+	FRegistry::CloudSave.GetUserRecord(KeyUserTestMetaPrivate, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
 		getUserRecordResult = userRecord;
@@ -272,12 +295,33 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 	
 	AB_TEST_TRUE(bGetUserRecordSuccess);
+	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTestMetaPrivate);
+	AB_TEST_FALSE(getUserRecordResult.IsPublic);
+	return true; 
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveGetUserRecord, "AccelByte.Tests.CloudSave.C.GetUserRecord", AutomationFlagMaskCloudSave);
+bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
+{
+	bool bGetUserRecordSuccess = false;
+	FAccelByteModelsUserRecord getUserRecordResult;
+	FRegistry::CloudSave.GetUserRecord(KeyUserTest
+		, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+				getUserRecordResult = userRecord;
+				bGetUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
+	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
+	
+	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -290,13 +334,13 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -309,9 +353,9 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
-	AB_TEST_FALSE(getUserRecordResult.IsPublic);
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
 
@@ -331,10 +375,10 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -347,13 +391,13 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -366,8 +410,8 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
@@ -375,23 +419,25 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveGetOtherPublicUserRecord, "AccelByte.Tests.CloudSave.C.GetOtherPublicUserRecord", AutomationFlagMaskCloudSave);
 bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser1.Email);
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	CloudSave2->GetPublicUserRecord(KeyPublicUserTest, FRegistry::Credentials.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
-		getUserRecordResult = userRecord;
-		bGetUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	ApiClient->CloudSave.GetPublicUserRecord(KeyPublicUserTest, FRegistry::Credentials.GetUserId(),
+		THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+		{
+			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+			getUserRecordResult = userRecord;
+			bGetUserRecordSuccess = true;
+		}), CloudSaveErrorHandler);
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -404,13 +450,13 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -423,8 +469,8 @@ bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	AB_TEST_TRUE(getUserRecordResult.IsPublic);
 	return true;
 }
@@ -464,14 +510,13 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
 	
-	for (int i = 0; i < UserCount; i++)
+	for (auto& TestUser : TestUsers)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
-		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+		ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 			{
 				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 				bSaveUserRecord1Success = true;
@@ -498,10 +543,10 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 		{
 			AB_TEST_EQUAL(getUserRecordResults.Data[i].Key, KeyPublicUserTest);
 			AB_TEST_EQUAL(getUserRecordResults.Data[i].UserId, UserIds[UserChecked]);
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-			for (auto buildingResult : getUserRecordResults.Data[i].Value.GetArrayField("buildings"))
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+			for (auto buildingResult : getUserRecordResults.Data[i].Value.JsonObject->GetArrayField("buildings"))
 			{
 				bool bItemFound = false;
 				for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -514,9 +559,9 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 				}
 				AB_TEST_TRUE(bItemFound);
 			}
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+			AB_TEST_EQUAL(getUserRecordResults.Data[i].Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 			AB_TEST_TRUE(getUserRecordResults.Data[i].IsPublic);
 
 			UserChecked++;
@@ -551,15 +596,14 @@ bool CloudSaveBulkGetPublicUserRecord_SomeUserNotFound::RunTest(const FString& P
 	FListAccelByteModelsUserRecord getUserRecordResults;
 
 	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
-
-	for (int i = 0; i < UserCount; i++)
+	
+	for (auto& TestUser : TestUsers)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
-		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+		ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 			{
 				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 				bSaveUserRecord1Success = true;
@@ -607,15 +651,14 @@ bool CloudSaveBulkGetPublicUserRecord_SomeRecordNotFound::RunTest(const FString&
 
 	for (int i = 0; i < UserCount; i++)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUsers[i].Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
 		if (i % 2) //not all user saving the record
 		{
 			ExpectedUserHavingRecord++;
-			CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 				{
 					UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 					bSaveUserRecord1Success = true;
@@ -656,21 +699,23 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	FRegistry::CloudSave.GetUserRecord(KeyUserTest, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record1 success"));
-		getUserRecordResult = userRecord;
-		bGetUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.GetUserRecord(KeyUserTest
+		, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record1 success"));
+				getUserRecordResult = userRecord;
+				bGetUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -683,9 +728,9 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -713,10 +758,10 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyPublicUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -729,9 +774,9 @@ bool CloudSaveReplacePublicUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -787,21 +832,23 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	AB_TEST_TRUE(bReplaceUserRecordSuccess);
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, UnexistKeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -814,9 +861,9 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	return true;
 }
@@ -824,9 +871,9 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceWithSaveUserRecord, "AccelByte.Tests.CloudSave.F.ReplaceWithSaveUserRecord", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 {
-	FString Key = "UnexistUnitySDKKeyUserTest";
 	bool bSaveUserRecordSuccess = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, Record1Test, false, FVoidHandler::CreateLambda([&bSaveUserRecordSuccess]()
+	// We could not replace user record with save user record method 
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true, Record1Test, FVoidHandler::CreateLambda([&bSaveUserRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 		bSaveUserRecordSuccess = true;
@@ -844,24 +891,26 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	AB_TEST_TRUE(bSaveUserRecordSuccess);
 	AB_TEST_TRUE(bGetUserRecordSuccess);
 	AB_TEST_EQUAL(getUserRecordResult.Key, KeyUserTest);
 	AB_TEST_EQUAL(getUserRecordResult.UserId, *FRegistry::Credentials.GetUserId());
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getUserRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
-		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
+		for (auto buildingResult : getUserRecordResult.Value.JsonObject->GetArrayField("buildings"))
 		{
 			if (buildingResult.Get()->AsString() == buildingRecord.Get()->AsString())
 			{
@@ -871,9 +920,9 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getUserRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getUserRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	return true;
 }
@@ -883,6 +932,7 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordRacingConditionManual, "AccelByte.Tests.CloudSave.F.ReplaceUserRecordRacingConditionManual", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	const FString ConcurrentKey = "UE4KeyConcurrentManualUserRecordTest";
 	int DictIndex = 0;
 	bool bReplaceRecordSuccess = false;
@@ -946,6 +996,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordRacingConditionAuto, 
 bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1014,6 +1065,7 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
 
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1088,7 +1140,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveGameRecord, "AccelByte.Tests.Cloud
 bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 {
 	bool bSaveGameRecord1Success = false;
-	FRegistry::CloudSave.SaveGameRecord(KeyGameTest, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecord1Success]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::CLIENT, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecord1Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save Game record1 success"));
 		bSaveGameRecord1Success = true;
@@ -1096,7 +1148,7 @@ bool CloudSaveSaveGameRecord::RunTest(const FString& Parameters)
 	WaitUntil(bSaveGameRecord1Success, "Waiting for saving game record1 ...");
 
 	bool bSaveGameRecord2Success = false;
-	FRegistry::CloudSave.SaveGameRecord(KeyGameTest, Record2Test, FVoidHandler::CreateLambda([&bSaveGameRecord2Success]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, ESetByMetadataRecord::CLIENT, Record2Test, FVoidHandler::CreateLambda([&bSaveGameRecord2Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save game record2 success"));
 		bSaveGameRecord2Success = true;
@@ -1123,10 +1175,10 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1139,13 +1191,13 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("countryName"), Record2Test.GetStringField("countryName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("islands"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numIsland"), Record2Test.GetNumberField("numIsland"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("waterReserve"), Record2Test.GetNumberField("waterReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("countryName"), Record2Test.GetStringField("countryName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("islands"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record2Test.GetArrayField("islands"))
@@ -1158,8 +1210,8 @@ bool CloudSaveGetGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("smile island"), Record2Test.GetObjectField("population").Get()->GetNumberField("smile island"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("population").Get()->GetNumberField("dance island"), Record2Test.GetObjectField("population").Get()->GetNumberField("dance island"));
 	return true;
 }
 
@@ -1189,7 +1241,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecord, "AccelByte.Tests.Cl
 bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 {
 	bool bReplaceGameRecordSuccess = false;
-	FRegistry::CloudSave.ReplaceGameRecord(KeyGameTest, NewRecord1Test, FVoidHandler::CreateLambda([&bReplaceGameRecordSuccess]()
+	FRegistry::ServerCloudSave.ReplaceGameRecord(KeyGameTest, NewRecord1Test, FVoidHandler::CreateLambda([&bReplaceGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace game record success"));
 		bReplaceGameRecordSuccess = true;
@@ -1208,10 +1260,10 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), NewRecord1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), NewRecord1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), NewRecord1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : NewRecord1Test.GetArrayField("buildings"))
@@ -1224,9 +1276,9 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), NewRecord1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	return true;
 }
 
@@ -1235,6 +1287,7 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordRacingConditionManual, "AccelByte.Tests.CloudSave.J.ReplaceGameRecordRacingConditionManual", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	const FString ConcurrentKey = "UE4KeyConcurrentManualGameRecordTest";
 	int DictIndex = 0;
 	bool bReplaceRecordSuccess = false;
@@ -1298,6 +1351,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordRacingConditionAuto, 
 bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1365,6 +1419,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordAutoExhaustAllRetries
 bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1439,7 +1494,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveDeleteGameRecord, "AccelByte.Tests.Clo
 bool CloudSaveDeleteGameRecord::RunTest(const FString& Parameters)
 {
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
@@ -1454,7 +1509,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveDeleteGameRecordInvalidKey, "AccelByte
 bool CloudSaveDeleteGameRecordInvalidKey::RunTest(const FString& Parameters)
 {
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord("Invalid", FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+	FRegistry::ServerCloudSave.DeleteGameRecord("Invalid", FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record invalid key success"));
 		bDeleteGameRecordSuccess = true;
@@ -1469,7 +1524,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordUnexistKey, "AccelByt
 bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 {
 	bool bReplaceGameRecordSuccess = false;
-	FRegistry::CloudSave.ReplaceGameRecord(UnexistKeyGameTest, Record1Test, FVoidHandler::CreateLambda([&bReplaceGameRecordSuccess]()
+	FRegistry::ServerCloudSave.ReplaceGameRecord(UnexistKeyGameTest, Record1Test, FVoidHandler::CreateLambda([&bReplaceGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Replace game record success"));
 		bReplaceGameRecordSuccess = true;
@@ -1487,7 +1542,7 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 	WaitUntil(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
@@ -1497,10 +1552,10 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bReplaceGameRecordSuccess);
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, UnexistKeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1513,9 +1568,9 @@ bool CloudSaveReplaceGameRecordUnexistKey::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
 	return true;
 }
@@ -1525,7 +1580,7 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 {
 	FString Key	= "UnexistUnitySDKKeyGameTest";
 	bool bSaveGameRecordSuccess = false;
-	FRegistry::CloudSave.SaveGameRecord(KeyGameTest, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess]()
+	FRegistry::ServerCloudSave.SaveGameRecord(KeyGameTest, Record1Test, FVoidHandler::CreateLambda([&bSaveGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save game record1 success"));
 		bSaveGameRecordSuccess = true;
@@ -1543,7 +1598,7 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 	WaitUntil(bGetGameRecordSuccess, "Waiting for getting game record ...");
 
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
@@ -1553,10 +1608,10 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bSaveGameRecordSuccess);
 	AB_TEST_TRUE(bGetGameRecordSuccess);
 	AB_TEST_EQUAL(getGameRecordResult.Key, KeyGameTest);
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetStringField("islandName"), Record1Test.GetStringField("islandName"));
-	for (auto buildingResult : getGameRecordResult.Value.GetArrayField("buildings"))
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("numRegion"), Record1Test.GetNumberField("numRegion"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetNumberField("oilsReserve"), Record1Test.GetNumberField("oilsReserve"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetStringField("islandName"), Record1Test.GetStringField("islandName"));
+	for (auto buildingResult : getGameRecordResult.Value.JsonObject->GetArrayField("buildings"))
 	{
 		bool bItemFound = false;
 		for (auto buildingRecord : Record1Test.GetArrayField("buildings"))
@@ -1569,9 +1624,9 @@ bool CloudSaveReplaceWithSaveGameRecord::RunTest(const FString& Parameters)
 		}
 		AB_TEST_TRUE(bItemFound);
 	}
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
-	AB_TEST_EQUAL(getGameRecordResult.Value.GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gas"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gas"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("gold"), Record1Test.GetObjectField("resources").Get()->GetNumberField("gold"));
+	AB_TEST_EQUAL(getGameRecordResult.Value.JsonObject->GetObjectField("resources").Get()->GetNumberField("water"), Record1Test.GetObjectField("resources").Get()->GetNumberField("water"));
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
 	return true;
 }
@@ -1604,7 +1659,7 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::CloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecordSuccess = true;
@@ -1612,21 +1667,14 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 	WaitUntil(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecord1Success = false;
-	FRegistry::CloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
+	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
 	{
 		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
 		bDeleteGameRecord1Success = true;
 	}), CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
-	bool bDeleteSuccess = false;
-	UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user by id success"));
-		bDeleteSuccess = true;
-	}), CloudSaveErrorHandler);
-	WaitUntil(bDeleteSuccess, "Waiting for user deletion...");
+	TeardownTestUser(TestUser1);
 
 	return true;
 }

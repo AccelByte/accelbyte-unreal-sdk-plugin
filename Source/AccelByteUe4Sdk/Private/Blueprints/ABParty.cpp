@@ -11,7 +11,7 @@ void UABParty::SetApiClient(FApiClientPtr const& NewApiClientPtr)
 	ApiClientPtr = NewApiClientPtr;
 }
 
-void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) const
+void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetInfoPartyResponseDelegate(
 		Api::Lobby::FPartyInfoResponse::CreateLambda(
@@ -27,7 +27,7 @@ void UABParty::PartyInfo(FDInfoPartyResponse OnResponse, FDErrorHandler OnError)
 	ApiClientPtr->Lobby.SendInfoPartyRequest();
 }
 
-void UABParty::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) const
+void UABParty::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetCreatePartyResponseDelegate(
 		Api::Lobby::FPartyCreateResponse::CreateLambda(
@@ -44,7 +44,7 @@ void UABParty::CreateParty(FDPartyCreateResponse OnResponse, FDErrorHandler OnEr
 	ApiClientPtr->Lobby.SendCreatePartyRequest();
 }
 
-void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) const
+void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetLeavePartyResponseDelegate(
 		Api::Lobby::FPartyLeaveResponse::CreateLambda(
@@ -63,7 +63,7 @@ void UABParty::PartyLeave(FDLeavePartyResponse OnResponse, FDErrorHandler OnErro
 void UABParty::PartyInvite(
 	FPartyInviteRequest Request,
 	FDPartyInviteResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetInvitePartyResponseDelegate(
 		Api::Lobby::FPartyInviteResponse::CreateLambda(
@@ -82,11 +82,11 @@ void UABParty::PartyInvite(
 void UABParty::PartyJoin(
 	FPartyJoinRequest const& Request,
 	FDPartyJoinResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetInvitePartyJoinResponseDelegate(
 		Api::Lobby::FPartyJoinResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsPartyJoinReponse const& Response)
+			[OnResponse](FAccelByteModelsPartyJoinResponse const& Response)
 			{
 				OnResponse.ExecuteIfBound(Response);
 			}),
@@ -101,7 +101,7 @@ void UABParty::PartyJoin(
 void UABParty::PartyReject(
 	FPartyRejectRequest Request,
 	FDPartyRejectResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetInvitePartyRejectResponseDelegate(
 		Api::Lobby::FPartyRejectResponse::CreateLambda(
@@ -120,7 +120,7 @@ void UABParty::PartyReject(
 void UABParty::PartyKick(
 	FPartyKickRequest const& Request,
 	FDPartyKickResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetInvitePartyKickMemberResponseDelegate(
 		Api::Lobby::FPartyKickResponse::CreateLambda(
@@ -138,7 +138,7 @@ void UABParty::PartyKick(
 
 void UABParty::PartyGenerateCode(
 	FDPartyGenerateCodeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyGenerateCodeResponseDelegate(
 		Api::Lobby::FPartyGenerateCodeResponse::CreateLambda(
@@ -157,7 +157,7 @@ void UABParty::PartyGenerateCode(
 
 void UABParty::PartyGetCode(
 	FDPartyGetCodeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyGetCodeResponseDelegate(
 		Api::Lobby::FPartyGetCodeResponse::CreateLambda(
@@ -175,7 +175,7 @@ void UABParty::PartyGetCode(
 
 void UABParty::PartyDeleteCode(
 	FDPartyDeleteCodeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyDeleteCodeResponseDelegate(
 		Api::Lobby::FPartyDeleteCodeResponse::CreateLambda(
@@ -194,11 +194,11 @@ void UABParty::PartyDeleteCode(
 void UABParty::PartyJoinViaCode(
 	FPartyJoinViaCodeRequest const& Request,
 	FDPartyJoinViaCodeResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyJoinViaCodeResponseDelegate(
 		Api::Lobby::FPartyJoinViaCodeResponse::CreateLambda(
-			[OnResponse](FAccelByteModelsPartyJoinReponse Response)
+			[OnResponse](FAccelByteModelsPartyJoinResponse Response)
 			{
 				OnResponse.ExecuteIfBound(Response);
 			}),
@@ -213,7 +213,7 @@ void UABParty::PartyJoinViaCode(
 void UABParty::PartyPromoteLeader(
 	FPartyPromoteLeaderRequest const& Request,
 	FDPartyPromoteLeaderResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.SetPartyPromoteLeaderResponseDelegate(
 		Api::Lobby::FPartyPromoteLeaderResponse::CreateLambda(
@@ -232,7 +232,7 @@ void UABParty::PartyPromoteLeader(
 void UABParty::GetPartyData(
 	FGetPartyDataRequest const& Request,
 	FDPartyGetDataResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.GetPartyData(Request.partyId,
 		THandler<FAccelByteModelsPartyData>::CreateLambda(
@@ -250,7 +250,7 @@ void UABParty::GetPartyData(
 void UABParty::GetPartyStorage(
 	FGetPartyStorageRequest const& Request,
 	FDPartyGetStorageResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.GetPartyStorage(Request.partyId,
 		THandler<FAccelByteModelsPartyDataNotif>::CreateLambda(
@@ -268,7 +268,7 @@ void UABParty::GetPartyStorage(
 void UABParty::WritePartyStorage(
 	FWritePartyStorageRequest const& Request,
 	FDPartyWriteDataResponse OnResponse,
-	FDErrorHandler OnError) const
+	FDErrorHandler OnError) 
 {
 	ApiClientPtr->Lobby.WritePartyStorage(
 		Request.partyId,
@@ -284,7 +284,7 @@ void UABParty::WritePartyStorage(
 				OnError.ExecuteIfBound(Code, Message);
 			}));}
 
-void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const
+void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
 		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(
@@ -294,7 +294,7 @@ void UABParty::SetOnPartyDataUpdate(FDPartyDataUpdateNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) const
+void UABParty::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyGetInvitedNotifDelegate(
 		Api::Lobby::FPartyGetInvitedNotif::CreateLambda(
@@ -304,7 +304,7 @@ void UABParty::SetOnPartyGetInvited(FDPartyGetInvitedNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyJoin(FDPartyJoinNotif OnNotif) const
+void UABParty::SetOnPartyJoin(FDPartyJoinNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyJoinNotifDelegate(
 		Api::Lobby::FPartyJoinNotif::CreateLambda(
@@ -314,7 +314,7 @@ void UABParty::SetOnPartyJoin(FDPartyJoinNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyReject(FDPartyRejectNotif OnNotif) const
+void UABParty::SetOnPartyReject(FDPartyRejectNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyInvitationRejectedNotifDelegate(
 		Api::Lobby::FPartyRejectNotif::CreateLambda(
@@ -324,7 +324,7 @@ void UABParty::SetOnPartyReject(FDPartyRejectNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) const
+void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyLeaveNotifDelegate(
 		Api::Lobby::FPartyLeaveNotif::CreateLambda(
@@ -334,7 +334,7 @@ void UABParty::SetOnPartyLeave(FDPartyLeaveNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif) const
+void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyKickNotifDelegate(
 		Api::Lobby::FPartyKickNotif::CreateLambda(
@@ -344,7 +344,7 @@ void UABParty::SetOnPartyKick(FDPartyKickNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) const
+void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyInviteNotifDelegate(
 		Api::Lobby::FPartyInviteNotif::CreateLambda(
@@ -354,7 +354,7 @@ void UABParty::SetOnPartyInvite(FDPartyInviteNotif OnNotif) const
 			}));
 }
 
-void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) const
+void UABParty::SetOnPartyDataUpdateNotifDelegate(FDPartyDataUpdateNotif OnNotif) 
 {
 	ApiClientPtr->Lobby.SetPartyDataUpdateNotifDelegate(
 		Api::Lobby::FPartyDataUpdateNotif::CreateLambda(

@@ -2,6 +2,186 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [12.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.1%0D12.1.0) (2022-05-23)
+
+
+### Bug Fixes
+
+* **blueprints:** remove const from functions, change blueprintreadonly to blueprintreadwrite ([d6e85b4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d6e85b4e483c458d11a4694fb407aae8d48de0a9))
+
+## [12.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.1.0%0D12.0.0) (2022-05-23)
+
+
+### Features
+
+* **iam:** Expose the Admin Ban User endpoint ([1dd1db2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1dd1db2cda2095be7b3f82b014a82a696a9c2444))
+
+
+### Bug Fixes
+
+* **lobby:** fix sdk still retry update party storage after retry limit is reached. ([df9d2c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/df9d2c4ccb7a762abb12fdc5e2df179357e41e0a))
+* **test:** add wait 60s for lobby to refresh mm game mode cache ([9920a6b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9920a6be70cda355e0fec166fd660078fc409e7a))
+* **websocket:** properly clean up websocket object on destroy ([82d6f54](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/82d6f54ee46b0bac3a56f9c7c702afbf5539866e))
+
+
+### Tests
+
+* **lobby:** commented lobby channel chat tests ([8617606](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/861760663069db715bddc107fde5d80af7f4f094))
+
+## [12.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/12.0.0%0D11.0.0) (2022-05-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ecommerce:** To get total  balance could not be retrieved from credit wallet response (call via admin end point call) anymore because it’s be a current wallet balance. User should call again get use wallet balance public interface to get total balance.
+* Game and user record struct utiization
+
+### Features
+
+* **blueprints:** add Group API blueprint to the API Client blueprint ([93880d4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/93880d4859fe11b6aa5309bbafe8aca839e241c9))
+* **Credentials:** add method to set clientid and secret directly from gconfig ([6e52c35](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6e52c350c2faecf75a96f3ca5328ac56022f296b))
+* **dsm:** Add custom attribute parameter in register DS and in DSNotice model. ([25a8a49](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/25a8a49e534c44d25fa13be6f140077ab81b46cd))
+* **ecommerce:** add BulkGetItemsBySkus API ([b95155f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b95155f301ae1002c819076ffa9aa20da2501b7b))
+* **ecommerce:** add initializer on the model, add integration test when sku is invalid ([86dfeb0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/86dfeb023a82ff98bb261b7b1319787620867068))
+* **ecommerce:** Update Unit Test Code for New Behavior Cross Platform Wallet ([2b7b76f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/2b7b76fa5aca955b17fa64f0bf16a4ce4786d391))
+* **lobby:** enable trigger error/response callback when failed to deserialize lobby responses. ([e322aaf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e322aaf294133f93ef188114ee7e97f92a901a31))
+* **lobby:** Skip fetching lobby error messages in shipping build ([d37441d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d37441d1b151471d65a0b20b947085ad1bc99b4b))
+* **models:** adding ItemSku & Currency into FAccelByteModelsSeasonPassReward ([f0806db](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/f0806dbe70907304fa378f6b1ffae2b96de7a5fc))
+* **serverecommerse:** fixed params query user entitlement in unit test to make it passes ([56c985a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/56c985a1b6af415aab891bf828ff2e00badb9a58))
+
+
+### Bug Fixes
+
+* change server refresh token to not pointed to FRegistry ([9d5c63a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9d5c63a19d1398a1ad62ad1ccb835f547eda18d2))
+* **models:** add missing header file ([1d63123](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1d63123db045a6a4a0a8408e4379c8fbf8531039))
+
+
+### Tests
+
+* **lobby:** commented lobby multithread test ([abff2fb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/abff2fb31bc20388189a2bcb5957fe7cea4279f9))
+* **lobby:** re-enable channel chat test ([6f76c9b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6f76c9b39c7a7393b3bf94dec0852c8823fdfe64))
+
+
+* Refactor Redundancy of Game Record and User Record Cloud Save on Api and Blueprint class ([6fb817a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6fb817a4e646108ce03b57fe6ab8cfa79978ff96))
+
+## [11.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/11.0.0%0D10.0.1) (2022-04-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **server lobby:** renamed leaderId field in FAccelByteModelsDataPartyResponse to leader
+* **serverecommerse:** make breaking changes when using user record or game record on BP
+* make breaking changes when using user record or game record on BP
+* make breaking changes when using user record or game record on BP
+* **lobby:** data model signature is changed
+* Renamed User/Game Record Enum
+* Renamed User/Game Record Enum
+* Renamed User/Game Record Enum
+* Enum User/Game Record renamed
+* **cloudsave:** save, delete, update game record using admin endpoint; parameter order in cloudsave
+
+feat(cloudsave): Change field Metadata in RecordRequest Input and game record behaviour
+* **cloudsave:** save, delete, update game record using admin endpoint; parameter order in cloudsave
+* **cloudsave:** save, delete, update game record using admin endpoint; parameter order in cloudsave
+* **cloudsave:** save, delete, update game record using admin endpoint; parameter order in cloudsave
+
+### Features
+
+* **AccelByteUe4SdkModule:** add environment changed delegate ([146662a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/146662ab9f4386bf6cedc4618537188e995aa459))
+* **cloudsave:** Change field Metadata in RecordRequest Input and game record behaviour ([aa6824b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/aa6824b76c35845142a438c9b3f0787f788b3378))
+* **cloudsave:** Change field Metadata in RecordRequest Input and game record behaviour ([1ca34a5](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ca34a5f9faf90b709c185d681ca913cd674e0d7))
+* **cloudsave:** Change field Metadata in RecordRequest Input and game record behaviour ([37d9f49](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/37d9f492642da62687f643050011474d8a43027c))
+* **cloudsave:** updated signature couldsave record in BP ([584372d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/584372d4e0152f8aae82d017be09c4803a84487e))
+* **credentials:** add method to check if session is valid ([1a48fa4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1a48fa463ce7fb389c034fad985f499ca3c3d617))
+* **lobby:** add websocket reconnect to lobby if receive close code 4000 ([b15604c](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/b15604cfc8c64812a1e7a97d93052c35255b6c91))
+* **MultiRegistry:** Change RemoveApi to bool. NOT BREAKING CHANGE: new API ([9d078aa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9d078aa2c9db6e91dca62178d0268bebbd043d7a))
+* **serverecommerse:** fixed params query user entitlement in unit test to make it passes ([6fccdc8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/6fccdc8c349338614e025e834e3e89fdd4a9d2e3))
+* **serverecommerse:** fixed Proper Query Params for ServerEcommerce::QueryUserEntitlements Url ([d2d8954](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d2d8954cedfbbd97d9ac815fcfd40c760b34b067))
+* **ServerSettings:** multiple environment support on server settings ([ced158b](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ced158bfea18d3f4d00e2b19130e6b500d1d428e))
+* **Settings:** change way to retrieve settings, from GetDefaut to GConfig ([c621a5e](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c621a5e9e9ecd1131a57433ab94eb01c46c4400d))
+* **Wallet:** add ListWalletTransactionsByCurrencyCode ([d22c755](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d22c755cbee2a72857794bde5f65af3c00d49e60))
+
+
+### Bug Fixes
+
+* **lobby:** Fix typo on model name ([d37845a](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/d37845a15a54c414ba0fa3c32a07a1db6ef22111))
+* **lobby:** fixed empty session upgrade headers on reconnect ([90370b6](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/90370b6844446851804385282d2e8f78ca30c248))
+* **lobby:** remove refresh token delegate when conenction closed. ([406e5a0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/406e5a0c65f80642574d529f04957d4f2a62cf07))
+* **multiregistry:** Implement input from Ben (SIMS). NOT BREAKING CHANGE: no implementation breaking api ([20cc71d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/20cc71d6ffd150ef762ed0bbb9b7742cc65500f4))
+* **qos:** calculate latencies data even when the scheduler is activated ([8b4d908](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b4d9085211fde32d5c838c758e45964b2e9ac4d))
+* **qos:** wrong ping regions on success mechanism ([3938ea4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/3938ea44f864f7081e07baa89d94a794193003c2))
+* **server lobby:** fix wrong field name in FAccelByteModelsDataPartyResponse ([da29c50](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/da29c501ab4c885825eccedc5d5fe61dae92da43))
+* **setting:** remove set min latency polling in setting. ([c02cc6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c02cc6feedf01dc60e1e993acdba4f7a2eb2d23a))
+* **user:** change logout to revoke user token instead ([cd266ed](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/cd266edcc00057145c9c7651c67e6b61e71e627d))
+
+
+* Merge branch 'master' into feature/OS-6137-Signature-Record-CloudSave-on-BP ([05c9e15](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/05c9e15ed614f62278ea5a528734a949ae5cb018))
+* Merge branch 'master' into feature/OS-6137-Signature-Record-CloudSave-on-BP ([9a565fb](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9a565fba466febb3e18718606cb220d47927f8b5))
+* Merge branch 'feature/OS-6137-Metadata-Field-and-Game-Record' of bitbucket.org:accelbyte/justice-unreal-sdk-plugin into feature/OS-6137-Metadata-Field-and-Game-Record ([9cf7fff](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/9cf7fff7f03a95f364b9bc6519f583531ecf3888))
+* Merge branch 'master' into feature/OS-6137-Metadata-Field-and-Game-Record ([bf76d82](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/bf76d82d5b1ab0037436916d167e950d5e81dd80))
+* Merge branch 'feature/OS-6137-Metadata-Field-and-Game-Record' of bitbucket.org:accelbyte/justice-unreal-sdk-plugin into feature/OS-6137-Metadata-Field-and-Game-Record ([e1f36a7](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e1f36a7e91fbee88be28d425631fabc64b9d77d3))
+* Merge branch 'feature/OS-6137-Metadata-Field-and-Game-Record' of bitbucket.org:accelbyte/justice-unreal-sdk-plugin into feature/OS-6137-Metadata-Field-and-Game-Record ([1caaa2d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1caaa2d7db206fbbaa888d2fbb4774104988ae33))
+
+
+### Tests
+
+* disabled test because of major changes in the lobby backend ([9560421](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/95604213aa89083f75b8f132c8279678c8e5e447))
+* **qos:** Commented GetActiveLatencies test ([39e7954](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/39e79548a7e4509f09e2d859b001b3e0b8eb366a))
+
+### [10.0.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/10.0.1%0D10.0.0) (2022-04-20)
+
+## [10.0.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/10.0.0%0D9.1.2) (2022-04-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **oauth:** Get DeviceId from FPlatformMisc, FCustomErrorHandler
+
+### Features
+
+* **dbAdapter:** add db adapter interface and sqlite adapter implementation ([8b7bd35](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8b7bd354859d28957d80780077f0f866dd25f572))
+* IAM Input validation ([beb5947](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/beb5947af586df053549afcdb5dc5c5498052bdd))
+* **lua:** lobby missing blueprint API added along with the functional test ([a1cbcf8](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a1cbcf8345f89c88a9f27fb91a0053ba5b4e793a))
+* **oauth:** bring back old login flow ([c90d0aa](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/c90d0aa436c4f0f649a9d59b6774b48e439102b4))
+* **oauth:** handle verify 2FA code when user enable 2FA from player portal ([a017f07](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a017f07be0d472236c2e7329e55a4fd94b25140b))
+* **plugin:** change cisqlite3 plugin to false as default ([ae02242](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/ae02242efa1ebaf169aeb710793d224d70f9734d))
+* **test:** create agreement admin blueprint ([8631ff4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/8631ff47a34adb0479f0b655af3d9fa3130cb7ad))
+
+
+### Bug Fixes
+
+* disabling getItembyAppId test ([73e3f9d](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/73e3f9df83b6091201dc47d100ac4f47ef038965))
+* **lobby:** Fix lobby reconnecting on multiple user connected. ([e0fbfaf](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/e0fbfafdb916ebf38821ba13334743b97e3368a4))
+* missing header #include "JsonObjectWrapper.h" ([1ffa843](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1ffa843803e4122dceef2afda6c55be5d5d95784))
+* **TokenGenerator:** fix header dir ([21e4497](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/21e44978ff9be00ca04ee759bb66aa5d5016b286))
+
+
+### Refactors
+
+* **dbadapter:** Refactor DB adapter and SQLite3 adapter ([53aadae](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/53aadae4f76b03d245d03560f755e958bedf44fb))
+
+
+### Tests
+
+* **lobby:** fix concurrent test to be more reliable when failing. ([4d14103](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4d14103d0e316afa606e60eed98d347922fbacd5))
+* **qos:** Commented GetActiveLatencies test ([a2ced73](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a2ced7368a39a0abf8d398433fc66d56b84376ae))
+
+### [9.1.2](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.2%0D9.1.1) (2022-04-07)
+
+
+### Features
+
+* **qos:** Add get active qos server and latencies ([1901e6f](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/1901e6fa3acc17dfaf2b5e1b355c42dbcec43db8))
+
+### [9.1.1](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.1%0D9.1.0) (2022-04-06)
+
+
+### Bug Fixes
+
+* **blueprint:** update GetApiClient method to be static so it can be used in the Blueprint ([923bf82](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/923bf82f9c12641d3bfcf94932aa310f92d60caa))
+* disabling getItembyAppId test ([a254c74](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/a254c74d3c45e5518411625531281a5937cae5ac))
+* incorrect header path on some files ([4f329c4](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/commits/4f329c4e0fd53ff1ef5750f1fb43a913dfff6d5b))
+
 ## [9.1.0](https://bitbucket.org/accelbyte/justice-unreal-sdk-plugin/branches/compare/9.1.0%0D9.0.2) (2022-03-28)
 
 

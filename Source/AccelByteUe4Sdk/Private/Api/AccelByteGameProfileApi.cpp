@@ -13,18 +13,16 @@ namespace AccelByte
 namespace Api
 {
 
-GameProfile::GameProfile(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef}
-{
-}
+GameProfile::GameProfile(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-GameProfile::~GameProfile() { }
+GameProfile::~GameProfile()
+{}
 
 void GameProfile::BatchGetPublicGameProfiles(TArray<FString> UserIds, const THandler<TArray<FAccelByteModelsPublicGameProfile>>& OnSuccess, const FErrorHandler& OnError)
 {

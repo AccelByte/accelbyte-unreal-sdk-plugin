@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
+// Copyright (c) 2021 AccelByte Inc. All Rights Reserved.
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
@@ -8,6 +8,7 @@
 
 #include "Core/AccelByteError.h"
 #include "Models/AccelByteSeasonPassModels.h"
+#include "Core/AccelByteHttpRetryScheduler.h"
 
 namespace AccelByte
 {
@@ -22,11 +23,12 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerSeasonPass
 		{
 		public:
-			ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Settings);
+			ServerSeasonPass(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 			~ServerSeasonPass();
 		private:
-			const ServerCredentials& Credentials;
-			const ServerSettings& Settings;
+			ServerCredentials const& CredentialsRef;
+			ServerSettings const& SettingsRef;
+			FHttpRetryScheduler& HttpRef;
 		public:
 			/** @brief Grant exp to user by UserId. After reaching to the next level, currentExp will be reset to 0, remainder will be added.
 			 *

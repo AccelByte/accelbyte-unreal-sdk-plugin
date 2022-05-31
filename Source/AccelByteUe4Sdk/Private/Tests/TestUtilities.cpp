@@ -8,7 +8,6 @@
 #include "Core/AccelByteReport.h"
 #include "Core/AccelByteHttpRetryScheduler.h"
 #include "Core/AccelByteEnvironment.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "Api/AccelByteUserApi.h"
 #include "Misc/Base64.h"
 
@@ -21,12 +20,7 @@ using AccelByte::Settings;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
 
-void WaitUntil(const bool& bCondition, const FString Message, const double TimeoutSeconds)
-{
-	WaitUntil([&] { return bCondition; }, Message, TimeoutSeconds);
-}
-
-void WaitUntil(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
+void WaitUntilInternal(const TFunction<bool()> Condition, const FString Message, const double TimeoutSeconds)
 {
 	const double StartSeconds = FPlatformTime::Seconds();
 	const double LimitSeconds = StartSeconds + TimeoutSeconds;
@@ -221,7 +215,7 @@ bool CheckSteamTicket() {
 		FPlatformTime::Seconds());
 	WaitUntil(bIsDone, "Waiting ...");
 	return bIsOk;
-};
+}
 
 void UAccelByteBlueprintsTest::SendNotification(FString Message, bool bAsync, const UAccelByteBlueprintsTest::FSendNotificationSuccess& OnSuccess, const UAccelByteBlueprintsTest::FBlueprintErrorHandler& OnError)
 {

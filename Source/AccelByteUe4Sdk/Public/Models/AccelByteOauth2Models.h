@@ -16,20 +16,24 @@ USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FOauth2TokenPermission
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Permission")
-	FString Resource;
+	FString Resource{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Permission")
-	int32 Action;
+	int32 Action{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FOauth2TokenBan
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Ban")
-	FString Ban;
+	FString Ban{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token | Ban")
-	FDateTime EndDate;
+	FDateTime EndDate{0};
 };
 
 USTRUCT(BlueprintType)
@@ -38,51 +42,67 @@ struct ACCELBYTEUE4SDK_API FOauth2Token
 	// UE4 JSON parser is case-insensitive and we have to match the variable names against the backend's model.
 	// But "namespace" is a reserved keyword so we capitalize the first character.
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Access_token;
+	FString Access_token{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Refresh_token;
+	FString Refresh_token{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Token_type;
+	FString Token_type{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	float Expires_in;
+	float Expires_in{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-		bool Is_comply;
+	bool Is_comply{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-		TArray<FOauth2TokenPermission> Permissions;
+	TArray<FOauth2TokenPermission> Permissions{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	TArray<FString> Roles;
+	TArray<FString> Roles{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	TArray<FOauth2TokenBan> Bans;
+	TArray<FOauth2TokenBan> Bans{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString User_id;
+	FString User_id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Display_name;
+	FString Display_name{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Namespace;
+	FString Namespace{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Platform_id;
+	FString Platform_id{};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Token")
-	FString Platform_user_id;
+	FString Platform_user_id{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FOauth2Session
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Session")
-	FString Session_id;
+	FString Session_id{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Session")
-	int32 Expires_in;
+	int32 Expires_in{};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | Oauth2Session")
-	FString Refresh_id;
+	FString Refresh_id{};
 };
 
 USTRUCT(BlueprintType)
 struct ACCELBYTEUE4SDK_API FJwkSet
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Oauth2 | Models | JWKSet")
-	TArray<FJsonObjectWrapper> keys;
+	TArray<FJsonObjectWrapper> keys{};
 };

@@ -4,7 +4,7 @@
 
 #include "Core/AccelByteServerCredentials.h"
 #include "Core/AccelByteRegistry.h"
-#include "Api/AccelByteOauth2Api.h"
+#include "Core/AccelByteOauth2Api.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
 #include "Models/AccelByteOauth2Models.h"
 
@@ -18,11 +18,13 @@ namespace AccelByte
 {
 
 ServerCredentials::ServerCredentials()
-	: ClientAccessToken(TEXT(""))
-	, ClientNamespace(TEXT(""))
+	: ClientAccessToken()
+	, ClientNamespace()
 	, ClientSessionState(ESessionState::Invalid)
 {
 }
+
+const FString ServerCredentials::DefaultSection = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
 
 void ServerCredentials::ForgetAll()
 {
@@ -31,10 +33,51 @@ void ServerCredentials::ForgetAll()
 	ClientSessionState = ESessionState::Invalid;
 }
 
-void ServerCredentials::SetClientCredentials(const FString& ClientId_, const FString& ClientSecret_)
+void ServerCredentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 {
-	ClientId = ClientId_;
-	ClientSecret = ClientSecret_;
+	ClientId = InClientId;
+	ClientSecret = InClientSecret;
+}
+
+void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
+{
+	FString SectionPath;
+	switch (Environment)
+	{
+	case ESettingsEnvironment::Development:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsDev");
+		break;
+	case ESettingsEnvironment::Certification:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsCert");
+		break;
+	case ESettingsEnvironment::Production:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettingsProd");
+		break;
+	case ESettingsEnvironment::Default:
+	default:
+		SectionPath = TEXT("/Script/AccelByteUe4Sdk.AccelByteServerSettings");
+		break;
+	}
+
+	if (GConfig->GetString(*SectionPath, TEXT("ClientId"), ClientId, GEngineIni))
+	{
+		GConfig->GetString(*SectionPath, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+	else
+	{
+		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
+		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
+	}
+}
+
+const FString& ServerCredentials::GetOAuthClientId() const
+{
+	return ClientId;
+}
+
+	const FString& ServerCredentials::GetOAuthClientSecret() const
+{
+	return ClientSecret;
 }
 
 void ServerCredentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)
@@ -82,22 +125,25 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 		case ESessionState::Valid:
 			if (GetRefreshTime() <= CurrentTime)
 			{
-				FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]() 
-					{ 
-						ClientSessionState = ESessionState::Valid; 
-					}),
-					FErrorHandler::CreateLambda([&](int32 Code, const FString& Message) 
-						{ 
-							if (ClientRefreshBackoff <= 0.0)
-							{
-								ClientRefreshBackoff = 10.0;
-							}
+				Oauth2::GetTokenWithClientCredentials(
+					ClientId, ClientSecret,
+					THandler<FOauth2Token>::CreateLambda([this, CurrentTime](const FOauth2Token& Result)
+						{
+							ClientSessionState = ESessionState::Valid;
+							SetClientToken(Result.Access_token, Result.Expires_in, Result.Namespace);
+						}),
+						FErrorHandler::CreateLambda([&](int32 Code, const FString& Message) 
+							{ 
+								if (ClientRefreshBackoff <= 0.0)
+								{
+									ClientRefreshBackoff = 10.0;
+								}
 
-							ClientRefreshBackoff *= 2.0;
-							ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
-							ScheduleRefreshToken(CurrentTime + ClientRefreshBackoff);
-							ClientSessionState = ESessionState::Expired; 
-						}));
+								ClientRefreshBackoff *= 2.0;
+								ClientRefreshBackoff += FMath::FRandRange(1.0, 60.0);
+								ScheduleRefreshToken(ClientRefreshBackoff);
+								ClientSessionState = ESessionState::Expired; 
+							}));
 
 				ClientSessionState = ESessionState::Refreshing;
 			}
@@ -111,7 +157,7 @@ void ServerCredentials::PollRefreshToken(double CurrentTime)
 
 void ServerCredentials::ScheduleRefreshToken(double RefreshTime)
 {
-	ClientRefreshTime = RefreshTime;
+	ClientRefreshTime = FPlatformTime::Seconds() + (RefreshTime * FMath::FRandRange(0.7, 0.9));;
 }
 
 void ServerCredentials::SetMatchId(const FString& GivenMatchId)

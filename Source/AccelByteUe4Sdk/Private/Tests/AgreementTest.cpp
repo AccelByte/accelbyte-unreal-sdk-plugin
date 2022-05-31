@@ -4,8 +4,8 @@
 
 #include "Misc/AutomationTest.h"
 #include "Api/AccelByteUserApi.h"
-#include "Api/AccelByteOauth2Api.h"
 #include "Core/AccelByteRegistry.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Api/AccelByteAgreementApi.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
@@ -27,6 +27,7 @@ const auto AgreementTestErrorHandler =
 
 BEGIN_DEFINE_SPEC(FAgreementTestSpec, "AccelByte.Tests.Agreement",
                   EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
+	FTestUser TestUser{0};
 	// XXX Need to use predefined policies in backend (policy name, tags, country)
 	// because we cannot freely add and remove policies.
 	const FString AgreementTestPolicyName = TEXT("SDK Test Policy");
@@ -41,6 +42,9 @@ void FAgreementTestSpec::Define()
 {
 	const auto SetupOnce = [this]()
 	{
+		TestUser.Country = AgreementTestPolicyCountry;
+		AB_TEST_TRUE(SetupTestUser(TestUser));
+		
 		if (bSetupPolicyOnce)
 		{
 			return true;
@@ -58,13 +62,13 @@ void FAgreementTestSpec::Define()
 
 		bool bGetBasePoliciesSuccess = false;
 		TArray<FAgreementBasePolicy> BasePolicies;
-		AdminGetAgreementBasePolicies(
-			THandler<TArray<FAgreementBasePolicy>>::CreateLambda(
+		AdminGetAgreementBasePolicies(THandler<TArray<FAgreementBasePolicy>>::CreateLambda(
 				[&](const TArray<FAgreementBasePolicy>& Response)
 				{
 					BasePolicies = Response;
 					bGetBasePoliciesSuccess = true;
-				}), AgreementTestErrorHandler);
+				})
+			, AgreementTestErrorHandler);
 		WaitUntil(bGetBasePoliciesSuccess, "Waiting for AdminGetAgreementBasePolicies ...");
 
 		FAgreementBasePolicy BasePolicy;
@@ -82,14 +86,13 @@ void FAgreementTestSpec::Define()
 		{
 			bool bGetPolicyTypesDone = false;
 			TArray<FAgreementPolicyTypeObject> PolicyTypes;
-			AdminGetAgreementPolicyTypes(
-				THandler<TArray<FAgreementPolicyTypeObject>>::CreateLambda(
-					[&](
-					const TArray<FAgreementPolicyTypeObject>& Response)
+			AdminGetAgreementPolicyTypes(THandler<TArray<FAgreementPolicyTypeObject>>::CreateLambda(
+					[&](const TArray<FAgreementPolicyTypeObject>& Response)
 					{
 						PolicyTypes = Response;
 						bGetPolicyTypesDone = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetPolicyTypesDone, "Waiting for AdminGetAgreementPolicyTypes ...");
 
 			FString PolicyTypeId;
@@ -110,14 +113,14 @@ void FAgreementTestSpec::Define()
 			CreateRequest.TypeId = PolicyTypeId;
 			CreateRequest.Tags = AgreementTestPolicyTags;
 			CreateRequest.Namespace = FRegistry::Settings.Namespace;
-			AdminCreateAgreementBasePolicy(
-				CreateRequest,
-				THandler<FAgreementBasePolicy>::CreateLambda(
+			AdminCreateAgreementBasePolicy(CreateRequest
+				, THandler<FAgreementBasePolicy>::CreateLambda(
 					[&bCreatePoliciesDone, &BasePolicy](const FAgreementBasePolicy& Response)
 					{
 						BasePolicy = Response;
 						bCreatePoliciesDone = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bCreatePoliciesDone, "Waiting for AdminCreateAgreementBasePolicy ...");
 		}
 
@@ -137,16 +140,15 @@ void FAgreementTestSpec::Define()
 
 		bool bGetCountryPolicySuccess = false;
 		FAgreementCountryPolicy CountryPolicy;
-		AdminGetAgreementCountryBasePolicy(
-			BasePolicy.Id,
-			AgreementTestPolicyCountry,
-			THandler<FAgreementCountryPolicy>::CreateLambda(
-				[&bGetCountryPolicySuccess, &CountryPolicy](
-				const FAgreementCountryPolicy& Response)
+		AdminGetAgreementCountryBasePolicy(BasePolicy.Id
+			, AgreementTestPolicyCountry
+			, THandler<FAgreementCountryPolicy>::CreateLambda(
+				[&bGetCountryPolicySuccess, &CountryPolicy](const FAgreementCountryPolicy& Response)
 				{
 					CountryPolicy = Response;
 					bGetCountryPolicySuccess = true;
-				}), AgreementTestErrorHandler);
+				})
+			, AgreementTestErrorHandler);
 		WaitUntil(bGetCountryPolicySuccess, "Waiting for AdminGetAgreementCountryBasePolicy ...");
 
 		AB_TEST_FALSE(CountryPolicy.Id.IsEmpty())
@@ -161,16 +163,15 @@ void FAgreementTestSpec::Define()
 			CreateRequest.DisplayVersion = "1.0.0";
 			CreateRequest.IsCommitted = true;
 			CreateRequest.Description = AgreementTestPolicyName;
-			AdminCreateAgreementPolicyVersion(
-				AgreementTestPolicyId,
-				CreateRequest,
-				THandler<FAgreementPolicyVersion>::CreateLambda(
-					[&PolicyVersion, &bCreatePolicyVersionSuccess](
-					const FAgreementPolicyVersion& Response)
+			AdminCreateAgreementPolicyVersion(AgreementTestPolicyId
+				, CreateRequest
+				, THandler<FAgreementPolicyVersion>::CreateLambda(
+					[&PolicyVersion, &bCreatePolicyVersionSuccess](const FAgreementPolicyVersion& Response)
 					{
 						PolicyVersion = Response;
 						bCreatePolicyVersionSuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bCreatePolicyVersionSuccess, "Waiting for AdminCreateAgreementPolicyVersion ...");
 		}
 		else
@@ -195,15 +196,14 @@ void FAgreementTestSpec::Define()
 
 		TArray<FAgreementLocalizedPolicy> LocalizedPolicies;
 		bool bGetLocalizedPolicySuccess = false;
-		AdminGetAgreementLocalizedPolicies(
-			PolicyVersion.Id,
-			THandler<TArray<FAgreementLocalizedPolicy>>::CreateLambda(
-				[&bGetLocalizedPolicySuccess, &LocalizedPolicies](
-				const TArray<FAgreementLocalizedPolicy>& Result)
+		AdminGetAgreementLocalizedPolicies(PolicyVersion.Id
+			, THandler<TArray<FAgreementLocalizedPolicy>>::CreateLambda(
+				[&bGetLocalizedPolicySuccess, &LocalizedPolicies](const TArray<FAgreementLocalizedPolicy>& Result)
 				{
 					LocalizedPolicies = Result;
 					bGetLocalizedPolicySuccess = true;
-				}), AgreementTestErrorHandler);
+				})
+			, AgreementTestErrorHandler);
 		WaitUntil(bGetLocalizedPolicySuccess, "Waiting for AdminGetAgreementLocalizedPolicies ...");
 
 		if (LocalizedPolicies.Num() == 0)
@@ -214,30 +214,30 @@ void FAgreementTestSpec::Define()
 			CreateRequest.LocaleCode = "en";
 			CreateRequest.ContentType = "text/plain";
 			CreateRequest.Description = AgreementTestPolicyName;
-			AdminCreateAgreementLocalizedPolicy(
-				PolicyVersion.Id,
-				CreateRequest,
-				THandler<FAgreementLocalizedPolicy>::CreateLambda(
+			AdminCreateAgreementLocalizedPolicy(PolicyVersion.Id
+				, CreateRequest
+				, THandler<FAgreementLocalizedPolicy>::CreateLambda(
 					[&LocalizedPolicy, &bCreateLocalizedPolicySuccess](
 					const FAgreementLocalizedPolicy& Response)
 					{
 						LocalizedPolicy = Response;
 						bCreateLocalizedPolicySuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bCreateLocalizedPolicySuccess, "Waiting for AdminCreateAgreementLocalizedPolicy ...");
 		}
 
 		if (!bPolicyPublished)
 		{
 			bool bPublishPolicyVersionSuccess = false;
-			AdminPublishAgreementPolicyVersion(
-				PolicyVersion.Id,
-				false,
-				FSimpleDelegate::CreateLambda(
+			AdminPublishAgreementPolicyVersion(PolicyVersion.Id
+				, false
+				, FSimpleDelegate::CreateLambda(
 					[&bPublishPolicyVersionSuccess]()
 					{
 						bPublishPolicyVersionSuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bPublishPolicyVersionSuccess, "Waiting for AdminPublishAgreementPolicyVersion ...");
 		}
 
@@ -246,36 +246,33 @@ void FAgreementTestSpec::Define()
 
 	BeforeEach(SetupOnce);
 
+	AfterEach([this]()
+	{
+		AB_TEST_TRUE(TeardownTestUser(TestUser));
+		
+		return true;
+	});
+
 	Describe("GetLegalPolicies", [this]()
 	{
 		It("should return some legal policies", [this]()
 		{
-			FTestUser TestUser;
-			TestUser.Country = AgreementTestPolicyCountry;
-
-			AB_TEST_TRUE(RegisterTestUser(TestUser));
-			AB_TEST_TRUE(LoginTestUser(TestUser));
-
-			Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-			                            FRegistry::HttpRetryScheduler);
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 
 			TArray<FAccelByteModelsPublicPolicy> Policies;
 			bool bGetPoliciesSuccess = false;
-			AgreementApi.GetLegalPolicies(
-				EAccelByteAgreementPolicyType::EMPTY,
-				false,
-				THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-					[&](
-					const TArray<FAccelByteModelsPublicPolicy>& Response)
+			ApiClient->Agreement.GetLegalPolicies(EAccelByteAgreementPolicyType::EMPTY
+				, false
+				, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+					[&](const TArray<FAccelByteModelsPublicPolicy>& Response)
 					{
 						Policies = Response;
 						bGetPoliciesSuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetPoliciesSuccess, "Waiting for GetLegalPolicies ...");
 
 			AB_TEST_TRUE(bGetPoliciesSuccess);
-
-			AB_TEST_TRUE(DeleteTestUser(TestUser));
 
 			return true;
 		});
@@ -289,25 +286,21 @@ void FAgreementTestSpec::Define()
 		{
 			It("should return some legal policies", [this]()
 			{
-				FTestUser TestUser;
-				TestUser.Country = AgreementTestPolicyCountry;
-
 				bool bGetPoliciesDone = false;
 				TArray<FAccelByteModelsPublicPolicy> Policies;
 
-				Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-				                            FRegistry::HttpRetryScheduler);
-				AgreementApi.GetLegalPoliciesByCountry(
-					AgreementTestPolicyCountry,
-					EAccelByteAgreementPolicyType::EMPTY,
-					false,
-					THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-						[&bGetPoliciesDone, &Policies](
-						const TArray<FAccelByteModelsPublicPolicy>& Response)
+				FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+				
+				ApiClient->Agreement.GetLegalPoliciesByCountry(AgreementTestPolicyCountry
+					, EAccelByteAgreementPolicyType::EMPTY
+					, false
+					, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+						[&bGetPoliciesDone, &Policies](const TArray<FAccelByteModelsPublicPolicy>& Response)
 						{
 							Policies = Response;
 							bGetPoliciesDone = true;
-						}), AgreementTestErrorHandler);
+						})
+					, AgreementTestErrorHandler);
 				WaitUntil(bGetPoliciesDone, "Waiting for GetLegalPoliciesByCountry ...");
 
 				AB_TEST_TRUE(Policies.Num() > 0);
@@ -327,28 +320,23 @@ void FAgreementTestSpec::Define()
 			for (int Index = 0; Index < MatchingPolicyTagsCombinations.Num(); Index++)
 			{
 				It(FString::Printf(TEXT("should return some legal policies with matching tags (%d)"), Index + 1),
-				   [this, MatchingPolicyTagsCombinations, Index]()
-				   {
-					   FTestUser TestUser;
-					   TestUser.Country = AgreementTestPolicyCountry;
-				   	
-					   bool bGetPoliciesDone = false;
-					   TArray<FAccelByteModelsPublicPolicy> Policies;
+					[this, MatchingPolicyTagsCombinations, Index]()
+					{
+						bool bGetPoliciesDone = false;
+						TArray<FAccelByteModelsPublicPolicy> Policies;
 
-					   Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-					                               FRegistry::HttpRetryScheduler);
-					   AgreementApi.GetLegalPoliciesByCountry(
-						   AgreementTestPolicyCountry,
-						   EAccelByteAgreementPolicyType::EMPTY,
-						   MatchingPolicyTagsCombinations[Index],
-						   false,
-						   THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-							   [&bGetPoliciesDone, &Policies](
-							   const TArray<FAccelByteModelsPublicPolicy>& Result)
-							   {
-								   Policies = Result;
-								   bGetPoliciesDone = true;
-							   }), AgreementTestErrorHandler);
+				   		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+						ApiClient->Agreement.GetLegalPoliciesByCountry(AgreementTestPolicyCountry
+							, EAccelByteAgreementPolicyType::EMPTY
+					   		, MatchingPolicyTagsCombinations[Index]
+					   		, false
+					   		, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+							   [&bGetPoliciesDone, &Policies](const TArray<FAccelByteModelsPublicPolicy>& Result)
+								{
+									Policies = Result;
+									bGetPoliciesDone = true;
+								})
+							, AgreementTestErrorHandler);
 					   WaitUntil(bGetPoliciesDone, "Waiting for GetLegalPoliciesByCountry ...");
 
 					   AB_TEST_TRUE(Policies.Num() > 0);
@@ -363,25 +351,22 @@ void FAgreementTestSpec::Define()
 		{
 			It("should not return any legal policies", [this]()
 			{
-				FTestUser TestUser;
-				TestUser.Country = AgreementTestPolicyCountry;
-
 				bool bGetPoliciesDone = false;
 				TArray<FAccelByteModelsPublicPolicy> Policies;
 
-				Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-				                            FRegistry::HttpRetryScheduler);
-				AgreementApi.GetLegalPoliciesByCountry(
-					AgreementTestPolicyCountry,
-					EAccelByteAgreementPolicyType::EMPTY,
-					{TEXT("nonmatchingtag")},
-					false,
-					THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda([&](
-						const TArray<FAccelByteModelsPublicPolicy>& Response)
+				FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+				
+				ApiClient->Agreement.GetLegalPoliciesByCountry(AgreementTestPolicyCountry
+					, EAccelByteAgreementPolicyType::EMPTY
+					, {TEXT("nonmatchingtag")}
+					, false
+					, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+						[&](const TArray<FAccelByteModelsPublicPolicy>& Response)
 						{
 							Policies = Response;
 							bGetPoliciesDone = true;
-						}), AgreementTestErrorHandler);
+						})
+					, AgreementTestErrorHandler);
 				WaitUntil(bGetPoliciesDone, "Waiting for GetLegalPoliciesByCountry...");
 
 				AB_TEST_EQUAL(Policies.Num(), 0);
@@ -395,40 +380,32 @@ void FAgreementTestSpec::Define()
 	{
 		It("should get a publisher legal policy and its document", [this]()
 		{
-			FTestUser TestUser;
-			TestUser.Country = AgreementTestPolicyCountry;
-
-			AB_TEST_TRUE(RegisterTestUser(TestUser));
-			AB_TEST_TRUE(LoginTestUser(TestUser));
-
-			Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-			                            FRegistry::HttpRetryScheduler);
-
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+			
 			bool bGetPoliciesSuccess = false;
 			TArray<FAccelByteModelsPublicPolicy> Policies;
 
-			AgreementApi.GetLegalPolicies(
-				GetPublisherNamespace(),
-				EAccelByteAgreementPolicyType::EMPTY,
-				true,
-				THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
-					[&bGetPoliciesSuccess, &Policies](
-					const TArray<FAccelByteModelsPublicPolicy>& Response)
+			ApiClient->Agreement.GetLegalPolicies(GetPublisherNamespace()
+				, EAccelByteAgreementPolicyType::EMPTY
+				, true
+				, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+					[&bGetPoliciesSuccess, &Policies](const TArray<FAccelByteModelsPublicPolicy>& Response)
 					{
 						Policies = Response;
 						bGetPoliciesSuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 
 			WaitUntil(bGetPoliciesSuccess, "Waiting for GetLegalPolicies ...");
 			FString LocalizedPolicyUrl;
-			for (const auto& policy : Policies)
+			for (const auto& Policy : Policies)
 			{
-				for (const auto& policyVersion : policy.PolicyVersions)
+				for (const auto& PolicyVersion : Policy.PolicyVersions)
 				{
-					if (policyVersion.IsInEffect)
+					if (PolicyVersion.IsInEffect)
 					{
-						FString LocalizedPolicyVersionId = policyVersion.LocalizedPolicyVersions[0].Id;
-						LocalizedPolicyUrl = policyVersion.LocalizedPolicyVersions[0].AttachmentLocation;
+						FString LocalizedPolicyVersionId = PolicyVersion.LocalizedPolicyVersions[0].Id;
+						LocalizedPolicyUrl = PolicyVersion.LocalizedPolicyVersions[0].AttachmentLocation;
 						break;
 					}
 				}
@@ -436,14 +413,14 @@ void FAgreementTestSpec::Define()
 
 			FString Result;
 			bool bGetLegalDocSuccess = false;
-			AgreementApi.GetLegalDocument(
-				LocalizedPolicyUrl,
-				THandler<FString>::CreateLambda(
+			ApiClient->Agreement.GetLegalDocument(LocalizedPolicyUrl
+				, THandler<FString>::CreateLambda(
 					[&bGetLegalDocSuccess, &Result](const FString& Response)
 					{
 						bGetLegalDocSuccess = true;
 						Result = Response;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetLegalDocSuccess, "Waiting for GetLegalDocument ...");
 
 			AB_TEST_TRUE(bGetLegalDocSuccess);
@@ -459,33 +436,21 @@ void FAgreementTestSpec::Define()
 	{
 		It("should get user to accept a policy", [this]()
 		{
-			// Setup
-
-			FTestUser TestUser;
-			TestUser.Country = AgreementTestPolicyCountry;
-
-			AB_TEST_TRUE(RegisterTestUser(TestUser));
-			AB_TEST_TRUE(LoginTestUser(TestUser));
-
-			Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-			                            FRegistry::HttpRetryScheduler);
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 
 			// Verify that policy has NOT been accepted by user
 
 			TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesBeforeResult;
 			bool bGetEligibilitiesBeforeSuccess = false;
 
-			AgreementApi.QueryLegalEligibilities(
-				FRegistry::Settings.Namespace,
-				THandler<TArray<
-					FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
-					[&](
-					const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>&
-					Result)
+			ApiClient->Agreement.QueryLegalEligibilities(FRegistry::Settings.Namespace
+				, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
+					[&](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>&	Result)
 					{
 						bGetEligibilitiesBeforeSuccess = true;
 						EligibilitiesBeforeResult = Result;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetEligibilitiesBeforeSuccess, "Waiting for get QueryLegalEligibilities ...");
 			AB_TEST_TRUE(bGetEligibilitiesBeforeSuccess);
 
@@ -519,7 +484,7 @@ void FAgreementTestSpec::Define()
 			AB_TEST_FALSE(LocalizedPolicyVersionId.IsEmpty());
 
 			bool bAcceptPolicySuccess = false;
-			AgreementApi.AcceptPolicyVersion(
+			ApiClient->Agreement.AcceptPolicyVersion(
 				LocalizedPolicyVersionId,
 				FVoidHandler::CreateLambda([&]()
 				{
@@ -533,7 +498,7 @@ void FAgreementTestSpec::Define()
 			TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesAfterResult;
 			bool bGetEligibilitiesAfterSuccess = false;
 
-			AgreementApi.QueryLegalEligibilities(
+			ApiClient->Agreement.QueryLegalEligibilities(
 				FRegistry::Settings.Namespace,
 				THandler<TArray<
 					FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
@@ -572,31 +537,19 @@ void FAgreementTestSpec::Define()
 	{
 		It("should get user to bulk accept policies", [this]()
 		{
-			// Setup
-
-			FTestUser TestUser;
-			TestUser.Country = AgreementTestPolicyCountry;
-
-			AB_TEST_TRUE(RegisterTestUser(TestUser));
-			AB_TEST_TRUE(LoginTestUser(TestUser));
-
-			Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-			                            FRegistry::HttpRetryScheduler);
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 
 			TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesBeforeResult;
 			bool bGetEligibilitiesBeforeSuccess = false;
 
-			AgreementApi.QueryLegalEligibilities(
-				FRegistry::Settings.Namespace,
-				THandler<TArray<
-					FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
-					[&](
-					const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>&
-					Result)
+			ApiClient->Agreement.QueryLegalEligibilities(FRegistry::Settings.Namespace
+				, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
+					[&](const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>&	Result)
 					{
 						bGetEligibilitiesBeforeSuccess = true;
 						EligibilitiesBeforeResult = Result;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetEligibilitiesBeforeSuccess, "Waiting for get QueryLegalEligibilities ...");
 			AB_TEST_TRUE(bGetEligibilitiesBeforeSuccess);
 
@@ -635,34 +588,31 @@ void FAgreementTestSpec::Define()
 
 			bool bAcceptPoliciesSuccess = false;
 			bool bProceed = false;
-			AgreementApi.BulkAcceptPolicyVersions(
-				AcceptAgreementRequests,
-				THandler<FAccelByteModelsAcceptAgreementResponse>::CreateLambda(
-					[&](
-					const FAccelByteModelsAcceptAgreementResponse& Response)
+			ApiClient->Agreement.BulkAcceptPolicyVersions(AcceptAgreementRequests
+				, THandler<FAccelByteModelsAcceptAgreementResponse>::CreateLambda(
+					[&](const FAccelByteModelsAcceptAgreementResponse& Response)
 					{
 						bProceed = Response.Proceed;
 						bAcceptPoliciesSuccess = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bAcceptPoliciesSuccess, "Waiting for BulkAcceptPolicyVersions ...");
 			AB_TEST_TRUE(bProceed);
 
 			// Verify that now policy has been accepted by user
-
+			
 			TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse> EligibilitiesAfterResult;
 			bool bGetEligibilitiesAfterSuccess = false;
 
-			AgreementApi.QueryLegalEligibilities(
-				FRegistry::Settings.Namespace,
-				THandler<TArray<
-					FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
-					[&bGetEligibilitiesAfterSuccess, &EligibilitiesAfterResult](
-					const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>&
-					Result)
+			ApiClient->Agreement.QueryLegalEligibilities(FRegistry::Settings.Namespace
+				, THandler<TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>>::CreateLambda(
+					[&bGetEligibilitiesAfterSuccess, &EligibilitiesAfterResult]
+					(const TArray<FAccelByteModelsRetrieveUserEligibilitiesResponse>& Result)
 					{
 						bGetEligibilitiesAfterSuccess = true;
 						EligibilitiesAfterResult = Result;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetEligibilitiesAfterSuccess, "Waiting for QueryLegalEligibilities ...");
 			AB_TEST_TRUE(bGetEligibilitiesAfterSuccess);
 
@@ -691,30 +641,24 @@ void FAgreementTestSpec::Define()
 	{
 		It("should register user with accepted policies", [this]()
 		{
-			// Setup
-
-			FTestUser TestUser;
-			TestUser.Country = AgreementTestPolicyCountry;
-
-			Api::Agreement AgreementApi(TestUser.Credentials, FRegistry::Settings,
-			                            FRegistry::HttpRetryScheduler);
-			Api::User UserApi(TestUser.Credentials, FRegistry::Settings,
-			                  FRegistry::HttpRetryScheduler);
+			AB_TEST_TRUE(DeleteTestUser(TestUser));
+			
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 
 			// Get legal policies
 
 			TArray<FAccelByteModelsPublicPolicy> Policies;
 			bool bGetPoliciesDone = false;
-			AgreementApi.GetLegalPoliciesByCountry(
-				TestUser.Country,
-				EAccelByteAgreementPolicyType::EMPTY,
-				false,
-				THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
+			ApiClient->Agreement.GetLegalPoliciesByCountry(TestUser.Country
+				, EAccelByteAgreementPolicyType::EMPTY
+				, false
+				, THandler<TArray<FAccelByteModelsPublicPolicy>>::CreateLambda(
 					[&](const TArray<FAccelByteModelsPublicPolicy>& Result)
 					{
 						Policies = Result;
 						bGetPoliciesDone = true;
-					}), AgreementTestErrorHandler);
+					})
+				, AgreementTestErrorHandler);
 			WaitUntil(bGetPoliciesDone, "Waiting for GetLegalPoliciesByCountry ...");
 
 			AB_TEST_TRUE(Policies.Num() > 0);
@@ -752,25 +696,22 @@ void FAgreementTestSpec::Define()
 
 			bool bUsersCreationDone = false;
 			bool bUserCreated = false;
-			UserApi.Registerv3(
-				NewUserRequest,
-				THandler<FRegisterResponse>::CreateLambda(
+			ApiClient->User.Registerv3(NewUserRequest
+				, THandler<FRegisterResponse>::CreateLambda(
 					[&](const FRegisterResponse& Response)
 					{
 						bUserCreated = true;
 						bUsersCreationDone = true;
-					}), FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+					})
+				, FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 				{
 					bUsersCreationDone = true;
-				}));
+				})
+			);
 			WaitUntil(bUsersCreationDone, "Waiting for Registerv3 ...");
 			AB_TEST_TRUE(bUserCreated);
 
 			AB_TEST_TRUE(LoginTestUser(TestUser));
-
-			// Teardown
-
-			AB_TEST_TRUE(DeleteTestUser(TestUser));
 
 			return true;
 		});

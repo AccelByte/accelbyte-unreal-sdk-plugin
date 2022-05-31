@@ -55,10 +55,9 @@ BEGIN_DEFINE_SPEC(FGroupTestSpec, "AccelByte.Tests.Group", EAutomationTestFlags:
 	const FString GroupTestUpdatedAttrTestStrKey = "testStr";
 
 	const FString GroupTestRoleResourceName = "GROUP:INVITE";
-	const FString GroupTestRoleId; // Set later
+	FString GroupTestRoleId; // Set later
 
 	TArray<FTestUser> GroupTestUsers;
-	TArray<FApiClientPtr> GroupTestApiUserPtrArr;
 	FGroupConfigResponse GroupTestInitGroupConfig;	
 	FString GroupTestConfigurationCode;
 	FAccelByteModelsCreateGroupRequest GroupTestCreateGroupRequest;
@@ -72,7 +71,7 @@ END_DEFINE_SPEC(FGroupTestSpec)
 
 #pragma region Lambda Callbacks -> Admin Lambda Callbacks
 /** @brief Admin: Init test config with default vals. Ok if !bIsOk (already exists?); out OutInitGroupConfigResponse */
-const auto AdminGroupTestInitConfig = [](FGroupConfigResponse& OutInitGroupConfigResponse)
+bool AdminGroupTestInitConfig(FGroupConfigResponse& OutInitGroupConfigResponse)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
@@ -95,10 +94,10 @@ const auto AdminGroupTestInitConfig = [](FGroupConfigResponse& OutInitGroupConfi
 
 	WaitUntil(bIsDone, "Waiting for Admin to init default test config ...");
 	return bIsOk; // User could already be created
-};
+}
 
 /** @brief Gets a list of configs, but limits 1 and returns the 1st FGroupConfigResponse */
-const auto AdminGroupTestGetFirstConfig = [](FGroupConfigResponse& OutFirstGroupConfig)
+bool AdminGroupTestGetFirstConfig(FGroupConfigResponse& OutFirstGroupConfig)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
@@ -139,10 +138,10 @@ const auto AdminGroupTestGetFirstConfig = [](FGroupConfigResponse& OutFirstGroup
 	
 	WaitUntil(bIsDone, "Waiting for Admin to init default test config ...");
 	return bIsOk; // User could already be created
-};
+}
 
 /** @brief Deletes the test config we just made/used */
-const auto AdminGroupTestDeleteConfig = [](const FString& ConfigurationCode)
+bool AdminGroupTestDeleteConfig(const FString& ConfigurationCode)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
@@ -164,12 +163,11 @@ const auto AdminGroupTestDeleteConfig = [](const FString& ConfigurationCode)
 	
 	WaitUntil(bIsDone, "Waiting for Admin to delete test config ...");
 	return bIsOk;
-};
+}
 
 /** @brief Admin: Create role of { Action<EAccelByteRoleAction>, ResourceName<FString> } */
-const auto AdminGroupTestCreateMemberRole = [](
-	const FCreateMemberRoleRequest& RequestContent,
-	FString OutMemberRoleId)
+bool AdminGroupTestCreateMemberRole(FCreateMemberRoleRequest const& RequestContent
+	, FString & OutMemberRoleId)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
@@ -194,91 +192,89 @@ const auto AdminGroupTestCreateMemberRole = [](
 	
 	WaitUntil(bIsDone, "Waiting for AdminDeleteGroupConfig ...");
 	return bIsOk;
-};
+}
 #pragma endregion Lambda Callbacks -> /Admin Lambda Callbacks
 
 /** @brief CreateGroup with GroupLeader; out OutGroupInformationResponse */
-const auto GroupTestClientCreateGroup = [](
-	const FApiClientPtr& GroupLeader,
-	const FAccelByteModelsCreateGroupRequest& CreateGroupRequest,
-	FAccelByteModelsGroupInformation& OutGroupInformationResponse)
+bool GroupTestClientCreateGroup(FTestUser const& GroupLeader
+	, FAccelByteModelsCreateGroupRequest const& CreateGroupRequest
+	, FAccelByteModelsGroupInformation& OutGroupInformationResponse)
 {
 	// Sanity check
-	if (!GroupLeader)
-		return false;
 	if (CreateGroupRequest.ConfigurationCode.IsEmpty())
 		return false;
 	
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestClientCreateGroup with ConfigCode '%s'"),
-		*CreateGroupRequest.ConfigurationCode);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestClientCreateGroup with ConfigCode '%s'")
+		, *CreateGroupRequest.ConfigurationCode);
 
-	GroupLeader->Group.CreateGroup(
-		CreateGroupRequest,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(GroupLeader.Email);
+	ApiClient->Group.CreateGroup(CreateGroupRequest
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[&](const FAccelByteModelsGroupInformation Result)
 			{
 				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] CreateGroup Success"));
 				OutGroupInformationResponse = Result;
 				bIsOk = true;
 				bIsDone = true;
-			}),
-			FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
 				bIsDone = true;
-			}));
+			})
+		);
 	
 	WaitUntil(bIsDone, "Waiting for User to create group ...");
 	return bIsOk;
-};
+}
 
 /** @brief LoginWithUsername with TestUser */
-const auto GroupTestLoginApiClient = [](const FTestUser& User)
+bool GroupTestLoginApiClient(FTestUser const& TestUser)
 {
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestLoginApiClient: %s"), *User.Email);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestLoginApiClient: %s"), *TestUser.Email);
 	bool bIsOk = false;
 	bool bIsDone = false;
 
-	const FApiClientPtr& ApiClient = FMultiRegistry::GetApiClient(User.Email); // Using email as key
-	ApiClient->User.LoginWithUsername(
-		User.Email,
-		User.Password,
-		FVoidHandler::CreateLambda([&]()
+	const FApiClientPtr& ApiClient = FMultiRegistry::GetApiClient(TestUser.Email); // Using email as key
+	ApiClient->User.LoginWithUsername(TestUser.Email
+		, TestUser.Password
+		, FVoidHandler::CreateLambda([&]()
 			{
 				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] LoginWithUsername Success"));
 				bIsOk = true;
 				bIsDone = true;
-			}),
-			FCustomErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
+			})
+		, FCustomErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
 			{
 				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
 				bIsDone = true;
-			}));
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting "
-		"for Client (%s) to login ..."), *User.Email));
+		"for Client (%s) to login ..."), *TestUser.Email));
 	return bIsOk;
-};
+}
 
 /**
  * @brief AKA "SearchGroups"
  * @param GroupLeaderPtr 
  * @param GroupTestGroupListResponse
- * @param GroupTestGroupListRequest
+ * @param OutGroupTestGroupListResponse
  * @return bIsOk; out GroupTestGroupListResponse
  */
-const auto GroupTestGetGroupList = [](
-	const FString& GroupTestGroupName,
-	// const FString& GroupTestGroupRegion,
-	const FApiClientPtr& GroupLeaderPtr,
-	FAccelByteModelsGroupInformation& OutGroupTestGroupListResponse)
+bool GroupTestGetGroupList(FString const& GroupTestGroupName
+	//, const FString& GroupTestGroupRegion
+	, FTestUser const& GroupLeader
+	, FAccelByteModelsGroupInformation& OutGroupTestGroupListResponse)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestGetGroupList"));
 
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(GroupLeader.Email);
 	FAccelByteModelsGetGroupListRequest GetGroupListRequest;				
 	GetGroupListRequest.GroupName = GroupTestGroupName; // "SDK Test Group Name"
 	GetGroupListRequest.Offset = 0;
@@ -286,80 +282,79 @@ const auto GroupTestGetGroupList = [](
 			
 	FAccelByteModelsGroupInformation GroupListResponse;
 	
-	GroupLeaderPtr->Group.GetGroupList(
-		GetGroupListRequest,
-		THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
+	ApiClient->Group.GetGroupList(GetGroupListRequest
+		, THandler<FAccelByteModelsGetGroupListResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetGroupListResponse Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Log, TEXT("[GroupTest] SearchGroups Responded"));
-			OutGroupTestGroupListResponse = static_cast<FAccelByteModelsGroupInformation>(Response);
-			
-			const int32 NumGroups = Response.GroupMembers.Num();
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] SearchGroups found %d groups"), NumGroups);
-			
-			bIsOk = NumGroups > 0;			
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Log, TEXT("[GroupTest] SearchGroups Responded"));
+				OutGroupTestGroupListResponse = static_cast<FAccelByteModelsGroupInformation>(Response);
+				
+				const int32 NumGroups = Response.GroupMembers.Num();
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] SearchGroups found %d groups"), NumGroups);
+				
+				bIsOk = NumGroups > 0;			
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, "Waiting for SearchGroups ...");
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetGroupById = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId)
+bool GroupTestGetGroupById(FTestUser const& TestUser
+	, FString const& GroupId)
 {
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestGetGroupById (%s)"), *GroupId);
 
-	TestUserPtr->Group.GetGroup(
-		GroupId,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetGroup(GroupId
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[&](const FAccelByteModelsGroupInformation Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GetGroup (by id) Responded"));
-			
-			bIsOk = !Response.GroupId.IsEmpty();
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GetGroup (by id) Responded"));
+				
+				bIsOk = !Response.GroupId.IsEmpty();
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, "Waiting for GetGroup ...");
 	return bIsOk;
-};
+}
 
 /**
  *@brief Update the group name and ensure the response shows a different name.
  * - Empty strings will convert to null!
  */
-const auto GroupTestUpdateGroup = [](
-		const FApiClientPtr& GroupLeaderPtr,
-		const FString& GroupId,
-		const bool bCompletelyReplace,
-		const FAccelByteModelsGroupUpdatable& UpdatedGroupInfo,
-		FAccelByteModelsGroupInformation& OutUpdateGroupInfo)
+bool GroupTestUpdateGroup(FTestUser const& GroupLeader
+	, FString const& GroupId
+	, bool bCompletelyReplace
+	, FAccelByteModelsGroupUpdatable const& UpdatedGroupInfo
+	, FAccelByteModelsGroupInformation& OutUpdateGroupInfo)
 {
-		bool bIsOk = false;
-		bool bIsDone = false;
-		UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroup (GroupId %s)"), *GroupId);
+	bool bIsOk = false;
+	bool bIsDone = false;
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroup (GroupId %s)"), *GroupId);
 
-		// Empty strings will turn null!
-		GroupLeaderPtr->Group.UpdateGroup(
-			GroupId,
-			bCompletelyReplace,
-			UpdatedGroupInfo,
-			THandler<FAccelByteModelsGroupInformation>::CreateLambda(
-				[&](const FAccelByteModelsGroupInformation Response)
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(GroupLeader.Email);
+	// Empty strings will turn null!
+	ApiClient->Group.UpdateGroup(GroupId
+		, bCompletelyReplace
+		, UpdatedGroupInfo
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+			[&](const FAccelByteModelsGroupInformation Response)
 			{
 				UE_LOG(LogAccelByteGroupTest, Log, TEXT("[GroupTest] UpdateGroup Responded"));
 
@@ -369,430 +364,427 @@ const auto GroupTestUpdateGroup = [](
 				OutUpdateGroupInfo = Response;
 								
 				bIsDone = true;
-			}),
-			FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
 			{
 				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
 				bIsDone = true;
-			}));
-		
-		WaitUntil(bIsDone, "Waiting for UpdateGroup ...");
-		return bIsOk;
-};
+			})
+		);
+	
+	WaitUntil(bIsDone, "Waiting for UpdateGroup ...");
+	return bIsOk;
+}
 
 /** @brief Update GroupInformation.CustomAttributes. */
-const auto GroupTestUpdateCustomAttributes = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const FAccelByteModelsUpdateGroupCustomAttributesRequest& UpdatedCustomAttrRequest)
-	// FAccelByteModelsGroupInformation& OutGroupInfo)
+bool GroupTestUpdateCustomAttributes(FTestUser const& TestUser
+	, FString const& GroupId
+	, FAccelByteModelsUpdateGroupCustomAttributesRequest const& UpdatedCustomAttrRequest)
 {
-	const FString FuncName = "GroupTestUpdateCustomAttributes";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateCustomAttributes (%s)"), *GroupId);
 
-	TestUserPtr->Group.UpdateGroupCustomAttributes(
-		GroupId,
-		UpdatedCustomAttrRequest,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.UpdateGroupCustomAttributes(GroupId
+		, UpdatedCustomAttrRequest
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[&](const FAccelByteModelsGroupInformation Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"),
-				*FuncName);
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateCustomAttributes Responded"));
+					
+				// OutGroupInfo = Response;
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
+	
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestUpdateCustomAttributes ...)")));
+	return bIsOk;
+}
+
+bool GroupTestDeleteGroupById(FTestUser const& TestUser
+	, FString const& GroupId)
+{
+	bool bIsOk = false;
+	bool bIsDone = false;
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestDeleteGroupById (%s)"), *GroupId);
+
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.DeleteGroup(GroupId
+		, FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestDeleteGroupById Responded"));
 				
-			// OutGroupInfo = Response;
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestDeleteGroupById ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestDeleteGroupById = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId)
+bool GroupTestUpdateGroupCustomRule(FTestUser const& TestUser
+	, FString const& GroupId
+	, FAccelByteModelsUpdateCustomRulesRequest const& RequestContent)
 {
-	const FString FuncName = "GroupTestDeleteGroupById";
-	bool bIsOk = false;
-	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
-
-	TestUserPtr->Group.DeleteGroup(
-		GroupId,
-		FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
-	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
-	return bIsOk;
-};
-
-const auto GroupTestUpdateGroupCustomRule = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const FAccelByteModelsUpdateCustomRulesRequest& RequestContent)
-{
-	const FString FuncName = "GroupTestUpdateGroupCustomRule";
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroupCustomRule (%s)"), *GroupId);
 	bool bIsOk = false;
 	bool bIsDone = false;
 
-	TestUserPtr->Group.UpdateGroupCustomRule(
-		GroupId,
-		RequestContent,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.UpdateGroupCustomRule(GroupId
+		, RequestContent
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[&](const FAccelByteModelsGroupInformation Result)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = !Result.GroupId.IsEmpty();
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroupCustomRule Responded"));
+				
+				bIsOk = !Result.GroupId.IsEmpty();
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestUpdateGroupCustomRule ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestUpdateGroupPredefinedRule = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const EAccelByteAllowedAction& AllowedAction,
-	const FAccelByteModelsUpdateGroupPredefinedRuleRequest& RequestContent)
+bool GroupTestUpdateGroupPredefinedRule(FTestUser const& TestUser
+	, FString const& GroupId
+	, EAccelByteAllowedAction const AllowedAction
+	, FAccelByteModelsUpdateGroupPredefinedRuleRequest const& RequestContent)
 {
-	const FString FuncName = "GroupTestUpdateGroupPredefinedRule";
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroupPredefinedRule (%s)"), *GroupId);
 	bool bIsOk = false;
 	bool bIsDone = false;
 
-	TestUserPtr->Group.UpdateGroupPredefinedRule(
-		GroupId,
-		AllowedAction,		
-		RequestContent,
-		THandler<FAccelByteModelsGroupInformation>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.UpdateGroupPredefinedRule(GroupId
+		, AllowedAction		
+		, RequestContent
+		, THandler<FAccelByteModelsGroupInformation>::CreateLambda(
 			[&](const FAccelByteModelsGroupInformation Result)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = !Result.GroupId.IsEmpty();
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestUpdateGroupPredefinedRule Responded"));
+				
+				bIsOk = !Result.GroupId.IsEmpty();
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestUpdateGroupPredefinedRule ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestDeleteGroupPredefinedRule = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const EAccelByteAllowedAction& AllowedAction)
+bool GroupTestDeleteGroupPredefinedRule(FTestUser const& TestUser
+	, FString const& GroupId
+	, EAccelByteAllowedAction const AllowedAction)
 {
-	const FString FuncName = "GroupTestDeleteGroupPredefinedRule";
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestDeleteGroupPredefinedRule (%s)"), *GroupId);
 	bool bIsOk = false;
 	bool bIsDone = false;
 
-	TestUserPtr->Group.DeleteGroupPredefinedRule(
-		GroupId,
-		AllowedAction,
-		FVoidHandler::CreateLambda([&]()
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.DeleteGroupPredefinedRule(GroupId
+		, AllowedAction
+		, FVoidHandler::CreateLambda([&]()
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestDeleteGroupPredefinedRule Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestDeleteGroupPredefinedRule ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetUserGroupInfoByUserId = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestGetUserGroupInfoByUserId(FTestUser const& TestUser, FString const& UserId)
 {
-	const FString FuncName = "GroupTestGetUserGroupInfoByUserId";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestGetUserGroupInfoByUserId (%s)"), *UserId);
 
-	TestUserPtr->Group.GetUserGroupInfoByUserId(
-		UserId,
-		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetUserGroupInfoByUserId(UserId
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetUserGroupInfoResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %GroupTestGetUserGroupInfoByUserId Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %GroupTestGetUserGroupInfoByUserId ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestAcceptGroupInvitation = [](const FApiClientPtr& TestUserPtr, const FString& GroupId)
+bool GroupTestAcceptGroupInvitation(FTestUser const& TestUser, FString const& GroupId)
 {
-	const FString FuncName = "GroupTestAcceptGroupInvitation";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestAcceptGroupInvitation (%s)"), *GroupId);
 
-	TestUserPtr->Group.AcceptGroupInvitation(
-		GroupId,
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.AcceptGroupInvitation(GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestAcceptGroupInvitation Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestAcceptGroupInvitation ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetGroupInvitationRequests = [](
-	const FApiClientPtr& TestUserPtr,
-	const FAccelByteModelsLimitOffsetRequest& RequestContent)
+bool GroupTestGetGroupInvitationRequests(FTestUser const& TestUser
+	, FAccelByteModelsLimitOffsetRequest const& RequestContent)
 {
-	const FString FuncName = "GroupTestGetGroupInvitationRequests";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s"), *FuncName);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestGetGroupInvitationRequests"));
 
-	TestUserPtr->Group.GetGroupInvitationRequests(
-		RequestContent,
-		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetGroupInvitationRequests(RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetMemberRequestsListResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestGetGroupInvitationRequestss Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestGetGroupInvitationRequests ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestRejectGroupInvitation = [](const FApiClientPtr& TestUserPtr, const FString& GroupId)
+bool GroupTestRejectGroupInvitation(FTestUser const& TestUser, FString const& GroupId)
 {
-	const FString FuncName = "GroupTestRejectGroupInvitation";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestRejectGroupInvitation (%s)"), *GroupId);
 
-	TestUserPtr->Group.RejectGroupInvitation(
-		GroupId,
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.RejectGroupInvitation(GroupId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestRejectGroupInvitation Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestRejectGroupInvitation ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestLeaveGroup = [](const FApiClientPtr& TestUserPtr)
+bool GroupTestLeaveGroup(FTestUser const& TestUser)
 {
-	const FString FuncName = "GroupTestLeaveGroup";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s"), *FuncName);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestLeaveGroup"));
 
-	TestUserPtr->Group.LeaveGroup(
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.LeaveGroup(THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestLeaveGroup Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestLeaveGroup ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestInviteUserToGroup = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestInviteUserToGroup(FTestUser const& TestUser
+	, FString const& UserId)
 {
-	const FString FuncName = "GroupTestInviteUserToGroup";
 	bool bIsOk = false;
 	bool bIsDone = false;
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestInviteUserToGroup (%s)"), *UserId);
 
-	TestUserPtr->Group.InviteUserToGroup(
-		UserId,
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.InviteUserToGroup(UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] GroupTestInviteUserToGroup Responded"));
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
-	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
+	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for GroupTestInviteUserToGroup ...)")));
 	return bIsOk;
-};
+}
 
-const auto GroupTestAcceptGroupJoinRequest = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestAcceptGroupJoinRequest(FTestUser const& TestUser, FString const& UserId)
 {
 	const FString FuncName = "GroupTestAcceptGroupJoinRequest";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
 
-	TestUserPtr->Group.AcceptGroupJoinRequest(
-		UserId,
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.AcceptGroupJoinRequest(UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestRejectGroupJoinRequest = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestRejectGroupJoinRequest(FTestUser const& TestUser, FString const& UserId)
 {
 	const FString FuncName = "GroupTestRejectGroupJoinRequest";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
 
-	TestUserPtr->Group.RejectGroupJoinRequest(
-		UserId,
-		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.RejectGroupJoinRequest(UserId
+		, THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetJoinRequestsRequest = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const FAccelByteModelsLimitOffsetRequest RequestContent)
+bool GroupTestGetJoinRequestsRequest(FTestUser const& TestUser
+	, FString const& GroupId
+	, FAccelByteModelsLimitOffsetRequest const& RequestContent)
 {
 	const FString FuncName = "GroupTestGetJoinRequestsRequest";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
 
-	TestUserPtr->Group.GetGroupJoinRequests(
-		GroupId,
-		RequestContent,
-		THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetGroupJoinRequests(GroupId
+		, RequestContent
+		, THandler<FAccelByteModelsGetMemberRequestsListResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetMemberRequestsListResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestCancelJoinGroupRequest = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestCancelJoinGroupRequest(FTestUser const& TestUser, FString const& UserId)
 {
 	const FString FuncName = "GroupTestCancelJoinGroupRequest";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
 
-	TestUserPtr->Group.CancelJoinGroupRequest(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.CancelJoinGroupRequest(
 		UserId,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsMemberRequestGroupResponse& Response)
@@ -810,19 +802,19 @@ const auto GroupTestCancelJoinGroupRequest = [](const FApiClientPtr& TestUserPtr
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetGroupMembersListByGroupId = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& GroupId,
-	const FAccelByteModelsGetGroupMembersListByGroupIdRequest& RequestContent)
+bool GroupTestGetGroupMembersListByGroupId(FTestUser const& TestUser
+	, FString const& GroupId
+	, FAccelByteModelsGetGroupMembersListByGroupIdRequest const& RequestContent)
 {
 	const FString FuncName = "GroupTestGetGroupMembersListByGroupId";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
 
-	TestUserPtr->Group.GetGroupMembersListByGroupId(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetGroupMembersListByGroupId(
 		GroupId,
 		RequestContent,
 		THandler<FAccelByteModelsMemberRequestGroupResponse>::CreateLambda(
@@ -841,16 +833,17 @@ const auto GroupTestGetGroupMembersListByGroupId = [](
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestJoinGroup = [](const FApiClientPtr& TestUserPtr, const FString& GroupId)
+bool GroupTestJoinGroup(FTestUser const& TestUser, FString const& GroupId)
 {
 	const FString FuncName = "GroupTestJoinGroup";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *GroupId);
 
-	TestUserPtr->Group.JoinGroup(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.JoinGroup(
 		GroupId,
 		THandler<FAccelByteModelsJoinGroupResponse>::CreateLambda(
 			[&](const FAccelByteModelsJoinGroupResponse& Response)
@@ -868,16 +861,17 @@ const auto GroupTestJoinGroup = [](const FApiClientPtr& TestUserPtr, const FStri
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestKickGroupMember = [](const FApiClientPtr& TestUserPtr, const FString& UserId)
+bool GroupTestKickGroupMember(FTestUser const& TestUser, FString const& UserId)
 {
 	const FString FuncName = "GroupTestKickGroupMember";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s (%s)"), *FuncName, *UserId);
 
-	TestUserPtr->Group.KickGroupMember(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.KickGroupMember(
 		UserId,
 		THandler<FAccelByteModelsKickGroupMemberResponse>::CreateLambda(
 			[&](const FAccelByteModelsKickGroupMemberResponse& Response)
@@ -895,100 +889,100 @@ const auto GroupTestKickGroupMember = [](const FApiClientPtr& TestUserPtr, const
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
-const auto GroupTestGetMemberRoles = [](
-	const FApiClientPtr& TestUserPtr,
-	const FAccelByteModelsLimitOffsetRequest& RequestContent)
+bool GroupTestGetMemberRoles(FTestUser const& TestUser
+	, FAccelByteModelsLimitOffsetRequest const& RequestContent)
 {
 	const FString FuncName = "GroupTestGetMemberRoles";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s"), *FuncName);
 
-	TestUserPtr->Group.GetMemberRoles(
-		RequestContent,
-		THandler<FAccelByteModelsGetMemberRolesListResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.GetMemberRoles(RequestContent
+		, THandler<FAccelByteModelsGetMemberRolesListResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetMemberRolesListResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
 /** @brief Must assign an existing role, created via AdminCreateMemberRole */
-const auto GroupTestAssignMemberRole = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& MemberRoleId,
-	const FAccelByteModelsUserIdWrapper& RequestContent)
+bool GroupTestAssignMemberRole(FTestUser const& TestUser
+	, FString const& MemberRoleId
+	, FAccelByteModelsUserIdWrapper const& RequestContent)
 {
 	const FString FuncName = "GroupTestAssignMemberRole";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s"), *FuncName);
 
-	TestUserPtr->Group.AssignMemberRole(
-		MemberRoleId,
-		RequestContent,
-		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.AssignMemberRole(MemberRoleId
+		, RequestContent
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetUserGroupInfoResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
 /** @brief Must revoke an existing role, created via AdminCreateMemberRole */
-const auto GroupTestDeleteMemberRole = [](
-	const FApiClientPtr& TestUserPtr,
-	const FString& MemberRoleId,
-	const FAccelByteModelsUserIdWrapper& RequestContent)
+bool GroupTestDeleteMemberRole(FTestUser const& TestUser
+	, FString const& MemberRoleId
+	, FAccelByteModelsUserIdWrapper const& RequestContent)
 {
 	const FString FuncName = "GroupTestDeleteMemberRole";
 	bool bIsOk = false;
 	bool bIsDone = false;
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s"), *FuncName);
 
-	TestUserPtr->Group.DeleteMemberRole(
-		MemberRoleId,
-		RequestContent,
-		THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+	ApiClient->Group.DeleteMemberRole(MemberRoleId
+		, RequestContent
+		, THandler<FAccelByteModelsGetUserGroupInfoResponse>::CreateLambda(
 			[&](const FAccelByteModelsGetUserGroupInfoResponse& Response)
-		{
-			UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
-			
-			bIsOk = true;
-			bIsDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
-		{
-			GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
-			bIsDone = true;
-		}));
+			{
+				UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] %s Responded"), *FuncName);
+				
+				bIsOk = true;
+				bIsDone = true;
+			})
+		, FErrorHandler::CreateLambda([&bIsDone](const int32 ErrorCode, const FString& ErrorMessage)
+			{
+				GroupTestErrorHandler(ErrorCode, ErrorMessage); // Curry to general err handler
+				bIsDone = true;
+			})
+		);
 	
 	WaitUntil(bIsDone, FString::Printf(TEXT("[GroupTest] Waiting for %s ...)"), *FuncName));
 	return bIsOk;
-};
+}
 
 #pragma endregion /Lambda Callbacks
 
@@ -1047,12 +1041,11 @@ FAccelByteModelsGroupRules GetMockGroupRules()
 	return GroupRules;
 }
 
-void SetMockGroupReqData(
-	const FString& GroupName,
-	const FString& GroupRegion,
-	const FString& GroupConfigCode,
-	const EAccelByteGroupType GroupType,
-	FAccelByteModelsCreateGroupRequest& OutCreateGroupRequest)
+void SetMockGroupReqData(const FString& GroupName
+	, const FString& GroupRegion
+	, const FString& GroupConfigCode
+	, const EAccelByteGroupType GroupType
+	, FAccelByteModelsCreateGroupRequest& OutCreateGroupRequest)
 {
 	OutCreateGroupRequest.GroupDescription = "SDK Test Create Group Description";
 	OutCreateGroupRequest.GroupIcon = "https://via.placeholder.com/256x256.jpg";
@@ -1076,9 +1069,8 @@ void SetMockGroupReqData(
 	OutCreateGroupRequest.CustomAttributes = JsonCustomAttribute;
 }
 
-bool InitSetupConfig(
-	FGroupConfigResponse& OutGroupTestInitGroupConfig,
-	FString& OutGroupTestConfigurationCode)
+bool InitSetupConfig(FGroupConfigResponse& OutGroupTestInitGroupConfig
+	, FString& OutGroupTestConfigurationCode)
 {
 	// !ConfigurationCode, likely because there was already an existing Config. Instead, use Admin to GET the 1st config.
 	bool bGotConfig = AdminGroupTestGetFirstConfig(OutGroupTestInitGroupConfig);
@@ -1094,35 +1086,9 @@ bool InitSetupConfig(
 	return bGotConfig;
 }
 
-bool InitSetupTestUsers(
-	const int32 NumTestUsers,
-	TArray<FTestUser>& OutGroupTestUsers,
-	TArray<FApiClientPtr>& OutGroupTestApiUserPtrArr)
-{
-	// Create, register and login test user(s) with random details to avoid test collision
-	const bool bSetupUsers = SetupTestUsers(NumTestUsers, OutGroupTestUsers);
-
-	// Get ref to the client pointers since this is used more often than raw Users
-	OutGroupTestApiUserPtrArr.Reset();
-	for (const FTestUser& User : OutGroupTestUsers)
-	{
-		OutGroupTestApiUserPtrArr.Emplace(FMultiRegistry::GetApiClient(User.Email));
-	}
-			
-	// Multi-user login
-	for (const auto& User : OutGroupTestUsers)
-	{
-		if (!GroupTestLoginApiClient(User))
-			return false;
-	}
-	
-	return bSetupUsers;
-}
-
-bool CallUpdateCustomAttributes(
-	const FString& GroupTestUpdatedAttrTestStrKey,
-	const TArray<FApiClientPtr>& GroupTestApiUserPtrArr,
-	const FString& GroupId)
+bool CallUpdateCustomAttributes(const TArray<FTestUser>& GroupTestUsers
+	, const FString& GroupTestUpdatedAttrTestStrKey
+	, const FString& GroupId)
 {
 	/*
 	 *  "body":
@@ -1138,14 +1104,15 @@ bool CallUpdateCustomAttributes(
 	UpdateCustomAttrRequest.CustomAttributes = UpdatedCustomAttributes;
 								
 	const bool bIsDone = GroupTestUpdateCustomAttributes(
-		GroupTestApiUserPtrArr[0],
+		GroupTestUsers[0],
 		GroupId,
 		UpdateCustomAttrRequest);
 
 	return bIsDone;
 }
 
-bool InitTeardown(TArray<FTestUser>& GroupTestUsers, const FString& GroupTestConfigurationCode)
+bool InitTeardown(TArray<FTestUser>& GroupTestUsers
+	, const FString& GroupTestConfigurationCode)
 {
 	// 1: Should teardown test users
 	// Teardown: Always delete test users after it is done
@@ -1169,22 +1136,20 @@ bool InitTeardown(TArray<FTestUser>& GroupTestUsers, const FString& GroupTestCon
 	return true;
 }
 
-bool GroupTestPreInitCreateGroup(
-	 const FString& GroupName,
-	 const FString& GroupRegion,
-	 const EAccelByteGroupType GroupType,
-	 const FString& ConfigCode,
-	 const FApiClientPtr& GroupTestApiUserPtrArr, // Group leader
-	 FAccelByteModelsCreateGroupRequest& OutGroupCreateGroupReq,
-	 FAccelByteModelsGroupInformation& OutGroupInfoRes)
+bool GroupTestPreInitCreateGroup(FTestUser const& GroupLeader
+	, FString const& GroupName
+	, FString const& GroupRegion
+	, EAccelByteGroupType GroupType
+	, FString const& ConfigCode
+	, FAccelByteModelsCreateGroupRequest& OutGroupCreateGroupReq
+	, FAccelByteModelsGroupInformation& OutGroupInfoRes)
 { 
 	// 1: Should create a new group request obj. OPEN group type.
-	SetMockGroupReqData(
-		GroupName,
-		GroupRegion,
-		ConfigCode,
-		GroupType,
-		OutGroupCreateGroupReq);
+	SetMockGroupReqData(GroupName
+		, GroupRegion
+		, ConfigCode
+		, GroupType
+		, OutGroupCreateGroupReq);
 	
 	if (ConfigCode.IsEmpty())
 		return false; // We can only CreateGroup with a ConfigCode
@@ -1192,26 +1157,23 @@ bool GroupTestPreInitCreateGroup(
 	// -----------------
 	// 2: Should POST CreateGroup with TestUser[0]
 	// GroupTestUsers[0] is creating new group as leader
-	const bool bCreatedGroup = GroupTestClientCreateGroup(
-		GroupTestApiUserPtrArr,
-		OutGroupCreateGroupReq,
-		OutGroupInfoRes);
+	const bool bCreatedGroup = GroupTestClientCreateGroup(GroupLeader
+		, OutGroupCreateGroupReq
+		, OutGroupInfoRes);
  
 	return bCreatedGroup;
 }
 
-const auto GroupTestPreInitAll = [](
-	const int32 NumTestUsers,
-	const bool bCreateGroupNow,
-	const FString& GroupTestGroupName,
-	const FString& GroupTestGroupRegion,
-	const EAccelByteGroupType GroupType,
-	TArray<FTestUser>& OutGroupTestUsers,
-	FGroupConfigResponse& OutGroupTestInitGroupConfig,
-	FString& OutGroupTestConfigurationCode,
-	TArray<FApiClientPtr>& OutGroupTestApiUserPtrs,
-	FAccelByteModelsCreateGroupRequest& OutGroupTestCreateGroupRequest,
-	FAccelByteModelsGroupInformation& OutGroupTestGroupInfo)
+bool GroupTestPreInitAll(int32 const NumTestUsers
+	, bool const bCreateGroupNow
+	, FString const& GroupTestGroupName
+	, FString const& GroupTestGroupRegion
+	, EAccelByteGroupType const GroupType
+	, TArray<FTestUser>& OutGroupTestUsers
+	, FGroupConfigResponse& OutGroupTestInitGroupConfig
+	, FString& OutGroupTestConfigurationCode
+	, FAccelByteModelsCreateGroupRequest& OutGroupTestCreateGroupRequest
+	, FAccelByteModelsGroupInformation& OutGroupTestGroupInfo)
 {
 	UE_LOG(LogAccelByteGroupTest, Display, TEXT("\n-------------\n"
 		"[GroupTest] @ GroupTestPreInitAll (%d test users)"), NumTestUsers);
@@ -1224,11 +1186,10 @@ const auto GroupTestPreInitAll = [](
 
 	// --------------------
 	// 2: Should create test users to manage groups
-	const bool bSetupUsers = InitSetupTestUsers(NumTestUsers, OutGroupTestUsers, OutGroupTestApiUserPtrs);
+	const bool bSetupUsers = SetupTestUsers(NumTestUsers, OutGroupTestUsers);
 	const bool bIsValidTestUsers =
 		bSetupUsers &&
-		OutGroupTestUsers.Num() == NumTestUsers &&
-		OutGroupTestApiUserPtrs.Num() == NumTestUsers;
+		OutGroupTestUsers.Num() == NumTestUsers;
 	
 	if (!bIsValidTestUsers)
 		return false;
@@ -1241,19 +1202,18 @@ const auto GroupTestPreInitAll = [](
 
 	// --------------------
 	// 3: Create group
-	const bool bCreatedGroup = GroupTestPreInitCreateGroup(
-		GroupTestGroupName,
-		GroupTestGroupRegion,
-		GroupType,
-		OutGroupTestConfigurationCode,
-		OutGroupTestApiUserPtrs[0],
-		OutGroupTestCreateGroupRequest,
-		OutGroupTestGroupInfo);
+	const bool bCreatedGroup = GroupTestPreInitCreateGroup(OutGroupTestUsers[0]
+		, GroupTestGroupName
+		, GroupTestGroupRegion
+		, GroupType
+		, OutGroupTestConfigurationCode
+		, OutGroupTestCreateGroupRequest
+		, OutGroupTestGroupInfo);
 
 	// This is going to repeat, so make it clear this is the end of init
-	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] /END InitSetupTestUsers\n"));
+	UE_LOG(LogAccelByteGroupTest, Display, TEXT("[GroupTest] /END InitCreateGroup\n"));
 	return bCreatedGroup;
-};
+}
 
 /**
  * @brief Creates a mock CreateRole request obj with max permissions (DeleteUpdateReadCreate=15)
@@ -1261,7 +1221,7 @@ const auto GroupTestPreInitAll = [](
  * @param ResourceName 
  * @return 
  */
-FCreateMemberRoleRequest GroupTestCreateRoleAllPerms(const FString& RoleName, const FString& ResourceName)
+FCreateMemberRoleRequest GroupTestCreateRoleAllPerms(FString const& RoleName, FString const& ResourceName)
 {
 	FCreateMemberRoleRequest CreateRoleRequest;
 	CreateRoleRequest.MemberRoleName = RoleName;
@@ -1291,27 +1251,23 @@ FCreateMemberRoleRequest GroupTestCreateRoleAllPerms(const FString& RoleName, co
  * @param OutRoleId 
  * @return IsSuccess: TestUser[1] was assigned a group role (by TestUser[0])
  */
-bool GroupTestMockAssignRole(
-	const TArray<FTestUser>& TestUsers,
-	const TArray<FApiClientPtr>& ApiUserPtrArr,
-	const FString& GroupId,
-	const FString& RoleName,
-	const FString& RoleResourceName,
-	const FString& OutRoleId)
+bool GroupTestMockAssignRole(TArray<FTestUser> const& TestUsers
+	, FString const& GroupId
+	, FString const& RoleName
+	, FString const& RoleResourceName
+	, FString& OutRoleId)
 {
 	// TestUser[1] will join [0]'s OPEN group
-	const bool bSentJoinRequest = GroupTestJoinGroup(
-		ApiUserPtrArr[1],
-		GroupId);
+	const bool bSentJoinRequest = GroupTestJoinGroup(TestUsers[1]
+		, GroupId);
 
 	if (!bSentJoinRequest)
 		return false;
 
 	// -------------
 	// Then Admin: Create an arbitrary role -> Get the RoleId
-	const FCreateMemberRoleRequest CreateRoleRequest = GroupTestCreateRoleAllPerms(
-		RoleName,
-		RoleResourceName);
+	const FCreateMemberRoleRequest CreateRoleRequest = GroupTestCreateRoleAllPerms(RoleName
+		, RoleResourceName);
 				
 	const bool bCreatedRole = AdminGroupTestCreateMemberRole(CreateRoleRequest, OutRoleId);
 	if (!bCreatedRole || OutRoleId.IsEmpty())
@@ -1320,12 +1276,11 @@ bool GroupTestMockAssignRole(
 	// -------------
 	// Then TestUser[0] assigns the recently-made group role to [1]
 	FAccelByteModelsUserIdWrapper RequestContent;
-	RequestContent.UserId = TestUsers[1].Credentials.GetUserId();
+	RequestContent.UserId = TestUsers[1].UserId;
 		
-	const bool bIsSuccess = GroupTestAssignMemberRole(
-		ApiUserPtrArr[0],
-		RoleName,
-		RequestContent);
+	const bool bIsSuccess = GroupTestAssignMemberRole(TestUsers[0]
+		, OutRoleId
+		, RequestContent);
 
 	return bIsSuccess;
 }
@@ -1342,18 +1297,16 @@ void FGroupTestSpec::Define()
 			constexpr bool bCreateGroupNow = true;
 			constexpr EAccelByteGroupType GroupType = EAccelByteGroupType::OPEN;
 			
-			const bool bIsSuccess = GroupTestPreInitAll(
-				NumTestUsers,
-				bCreateGroupNow,
-				GroupTestGroupName,
-				GroupTestGroupRegion,
-				GroupType,
-				GroupTestUsers,
-				GroupTestInitGroupConfig,
-				GroupTestConfigurationCode,
-				GroupTestApiUserPtrArr,
-				GroupTestCreateGroupRequest,
-				GroupTestGroupInfo);
+			const bool bIsSuccess = GroupTestPreInitAll(NumTestUsers
+				, bCreateGroupNow
+				, GroupTestGroupName
+				, GroupTestGroupRegion
+				, GroupType
+				, GroupTestUsers
+				, GroupTestInitGroupConfig
+				, GroupTestConfigurationCode
+				, GroupTestCreateGroupRequest
+				, GroupTestGroupInfo);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1362,11 +1315,10 @@ void FGroupTestSpec::Define()
 		
 		LatentIt("01: Should GET::SearchGroups for list of groups", [this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = GroupTestGetGroupList(
-				GroupTestGroupName,
-				// GroupTestGroupRegion,
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo);				
+			const bool bIsSuccess = GroupTestGetGroupList(GroupTestGroupName
+				//, GroupTestGroupRegion,
+				, GroupTestUsers[0]
+				, GroupTestGroupInfo);				
 			
 			Done.Execute();
 			return bIsSuccess;
@@ -1374,9 +1326,8 @@ void FGroupTestSpec::Define()
 
 		LatentIt("02: Should GET::GetGroup by GroupId", [this](const FDoneDelegate& Done)
 		{			
-			const bool bIsSuccess = GroupTestGetGroupById(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = GroupTestGetGroupById(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId);
 					
 			Done.Execute();
 			return bIsSuccess;
@@ -1388,12 +1339,11 @@ void FGroupTestSpec::Define()
 			UpdateGroupRequest.GroupName = GroupTestUpdatedGroupName; // "Updated SDK Test Group Name"
 			constexpr bool bCompletelyReplace = false;
 			
-			const bool bIsSuccess = GroupTestUpdateGroup(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				bCompletelyReplace,
-				UpdateGroupRequest,
-				GroupTestGroupInfo);
+			const bool bIsSuccess = GroupTestUpdateGroup(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, bCompletelyReplace
+				, UpdateGroupRequest
+				, GroupTestGroupInfo);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1402,10 +1352,9 @@ void FGroupTestSpec::Define()
 		LatentIt("04: Should PUT::GroupTestUpdateCustomAttributes:CustomAttributes with a new string",
 			[this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = CallUpdateCustomAttributes(
-				GroupTestUpdatedAttrTestStrKey,
-				GroupTestApiUserPtrArr,
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = CallUpdateCustomAttributes(GroupTestUsers
+				, GroupTestUpdatedAttrTestStrKey
+				, GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1414,9 +1363,8 @@ void FGroupTestSpec::Define()
 		LatentIt("05: Should DELETE::DeleteGroup; returns void", [this](const FDoneDelegate& Done)
 		{
 			// This is how Group Admin's (group leaders) leave/disband their group
-			const bool bIsSuccess = GroupTestDeleteGroupById(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = GroupTestDeleteGroupById(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1432,10 +1380,9 @@ void FGroupTestSpec::Define()
 			FAccelByteModelsUpdateCustomRulesRequest RequestContent;
 			RequestContent.GroupCustomRule = ArbitraryJson;
 	
-			const bool bIsSuccess = GroupTestUpdateGroupCustomRule(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				RequestContent);
+			const bool bIsSuccess = GroupTestUpdateGroupCustomRule(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, RequestContent);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1447,11 +1394,10 @@ void FGroupTestSpec::Define()
 			FAccelByteModelsUpdateGroupPredefinedRuleRequest RequestContent;
 			RequestContent.RuleDetail = GetMockRuleInfoArr(2);
 			
-			const bool bIsSuccess = GroupTestUpdateGroupPredefinedRule(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				EAccelByteAllowedAction::createGroup,
-				RequestContent);
+			const bool bIsSuccess = GroupTestUpdateGroupPredefinedRule(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, EAccelByteAllowedAction::createGroup
+				, RequestContent);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1460,10 +1406,9 @@ void FGroupTestSpec::Define()
 		LatentIt("08: Should DELETE::DeleteGroupPredefinedRule; returns void",
 			[this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = GroupTestDeleteGroupPredefinedRule(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				EAccelByteAllowedAction::createGroup);
+			const bool bIsSuccess = GroupTestDeleteGroupPredefinedRule(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, EAccelByteAllowedAction::createGroup);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1473,9 +1418,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[0] invites [1] to group
-			const bool bUser0Invited1 = GroupTestInviteUserToGroup(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bUser0Invited1 = GroupTestInviteUserToGroup(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			if (!bUser0Invited1)
 			{
@@ -1486,7 +1430,7 @@ void FGroupTestSpec::Define()
 			// -----------
 			// TestUser[1] will accept [0]'s invitation to group up >>
 			const bool bIsSuccess = GroupTestAcceptGroupInvitation(
-				GroupTestApiUserPtrArr[1],
+				GroupTestUsers[1],
 				GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
@@ -1497,9 +1441,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[0] invites [1] to their OPEN group
-			const bool bTestUser0Invited1 = GroupTestInviteUserToGroup(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bTestUser0Invited1 = GroupTestInviteUserToGroup(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			if (!bTestUser0Invited1)
 			{
@@ -1509,9 +1452,8 @@ void FGroupTestSpec::Define()
 
 			// ------------------
 			// TestUser[1] will reject TestUser[0]'s invitation to group up >>
-			const bool bIsSuccess = GroupTestRejectGroupInvitation(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = GroupTestRejectGroupInvitation(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1521,9 +1463,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will join [0]'s OPEN group (OPEN groups don't require a request to join)
-			const bool bIsSuccess = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1534,9 +1475,8 @@ void FGroupTestSpec::Define()
 		{
 			// TestUser[1] will join [0]'s OPEN group.
 			// Admins (leaders) can't LeaveGroup(): If a Group Admin like [0] wants to leave their group, use DeleteGroup
-			const bool bJoinedGroup = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bJoinedGroup = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bJoinedGroup)
 			{
@@ -1546,7 +1486,7 @@ void FGroupTestSpec::Define()
 
 			// -----------------
 			// TestUser[1] will leave [0]'s group >>
-			const bool bIsSuccess = GroupTestLeaveGroup(GroupTestApiUserPtrArr[1]);
+			const bool bIsSuccess = GroupTestLeaveGroup(GroupTestUsers[1]);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1556,9 +1496,8 @@ void FGroupTestSpec::Define()
 			"where TestUser[0] gets [0]'s own group info; returns group info",
 			[this](const FDoneDelegate& Done)
 		{				
-			const bool bIsSuccess = GroupTestGetUserGroupInfoByUserId(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupMembers[0].UserId);
+			bool bIsSuccess = GroupTestGetUserGroupInfoByUserId(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupMembers[0].UserId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1567,9 +1506,8 @@ void FGroupTestSpec::Define()
 		LatentIt("14: Should POST::InviteUserToGroup, where TestUser[0] invites [1]; returns group+user ids",
 			[this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = GroupTestInviteUserToGroup(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bIsSuccess = GroupTestInviteUserToGroup(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1582,10 +1520,9 @@ void FGroupTestSpec::Define()
 			// Defaults are ok - just paginated options 
 			const FAccelByteModelsGetGroupMembersListByGroupIdRequest GetGroupMembersListByGroupIdRequest;
 				
-			const bool bIsSuccess = GroupTestGetGroupMembersListByGroupId(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				GetGroupMembersListByGroupIdRequest);
+			const bool bIsSuccess = GroupTestGetGroupMembersListByGroupId(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, GetGroupMembersListByGroupIdRequest);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1595,9 +1532,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will join [0]'s OPEN group (won't required a request to join)
-			const bool bJoinedGroup = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bJoinedGroup = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bJoinedGroup)
 			{
@@ -1607,9 +1543,8 @@ void FGroupTestSpec::Define()
 
 			// ---------------
 			// TestUser[1] will kick [0] out of the group
-			const bool bIsSuccess = GroupTestKickGroupMember(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bIsSuccess = GroupTestKickGroupMember(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1620,9 +1555,8 @@ void FGroupTestSpec::Define()
 		{
 			constexpr FAccelByteModelsLimitOffsetRequest RequestContent; // { Limit=1, Offset=0 }
 				
-			const bool bIsSuccess = GroupTestGetMemberRoles(
-				GroupTestApiUserPtrArr[0],
-				RequestContent);
+			const bool bIsSuccess = GroupTestGetMemberRoles(GroupTestUsers[0]
+				, RequestContent);
 					
 			Done.Execute();
 			return bIsSuccess;
@@ -1635,13 +1569,11 @@ void FGroupTestSpec::Define()
 			// TestUser[1] will join [0]'s OPEN group
 			// Then Admin: Create an arbitrary role
 			// Then TestUser[0] assigns the recently-made group role to [1]
-			const bool bIsSuccess =  GroupTestMockAssignRole(
-				GroupTestUsers,
-				GroupTestApiUserPtrArr,
-				GroupTestGroupInfo.GroupId,
-				GroupTestRoleResourceName,
-				GroupTestRoleResourceName,
-				GroupTestRoleId); // out
+			const bool bIsSuccess =  GroupTestMockAssignRole(GroupTestUsers
+				, GroupTestGroupInfo.GroupId
+				, GroupTestRoleResourceName
+				, GroupTestRoleResourceName
+				, GroupTestRoleId); // out
 				
 			Done.Execute();
 			return bIsSuccess;
@@ -1655,13 +1587,11 @@ void FGroupTestSpec::Define()
 			// TestUser[1] will join [0]'s OPEN group
 			// Then Admin: Create an arbitrary role
 			// Then TestUser[0] assigns the recently-made group role to [1]
-			const bool bUser1WasAssignedRoleBy0 =  GroupTestMockAssignRole(
-				GroupTestUsers,
-				GroupTestApiUserPtrArr,
-				GroupTestGroupInfo.GroupId,
-				GroupTestRoleResourceName,
-				GroupTestRoleResourceName,
-				GroupTestRoleId); // out
+			const bool bUser1WasAssignedRoleBy0 =  GroupTestMockAssignRole(GroupTestUsers
+				, GroupTestGroupInfo.GroupId
+				, GroupTestRoleResourceName
+				, GroupTestRoleResourceName
+				, GroupTestRoleId); // out
 
 			if (!bUser1WasAssignedRoleBy0)
 			{
@@ -1672,12 +1602,11 @@ void FGroupTestSpec::Define()
 			// -------------
 			// Then TestUser[0] removes [1]'s new role
 			FAccelByteModelsUserIdWrapper UserIdWrapper;
-			UserIdWrapper.UserId = GroupTestUsers[1].Credentials.GetUserId();
+			UserIdWrapper.UserId = GroupTestUsers[1].UserId;
 				
-			const bool bIsSuccess = GroupTestDeleteMemberRole(
-				GroupTestApiUserPtrArr[0],
-            	GroupTestRoleId,
-            	UserIdWrapper);
+			const bool bIsSuccess = GroupTestDeleteMemberRole(GroupTestUsers[0]
+            	, GroupTestRoleId
+            	, UserIdWrapper);
 				
 			Done.Execute();
 			return bIsSuccess;
@@ -1688,9 +1617,8 @@ void FGroupTestSpec::Define()
         	[this](const FDoneDelegate& Done)
         {
         	// TestUser[0] invites [1] to group
-        	const bool bUser0Invited1 = GroupTestInviteUserToGroup(
-        		GroupTestApiUserPtrArr[0],
-        		GroupTestUsers[1].Credentials.GetUserId());
+        	const bool bUser0Invited1 = GroupTestInviteUserToGroup(GroupTestUsers[0]
+        		, GroupTestUsers[1].UserId);
 
         	if (!bUser0Invited1)
         	{
@@ -1701,9 +1629,8 @@ void FGroupTestSpec::Define()
         	// -----------
         	// TestUser[1] will get their own list of invites (which should contain [0]s invite)
         	constexpr FAccelByteModelsLimitOffsetRequest RequestContent;     		
-        	const bool bIsSuccess = GroupTestGetGroupInvitationRequests(
-        		GroupTestApiUserPtrArr[1],
-        		RequestContent);
+        	const bool bIsSuccess = GroupTestGetGroupInvitationRequests(GroupTestUsers[1]
+        		, RequestContent);
 
         	Done.Execute();
         	return bIsSuccess;
@@ -1712,9 +1639,8 @@ void FGroupTestSpec::Define()
 		// ===================================================================		
 		LatentAfterEach([this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = InitTeardown(
-				GroupTestUsers,
-				GroupTestConfigurationCode);
+			const bool bIsSuccess = InitTeardown(GroupTestUsers
+				, GroupTestConfigurationCode);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1730,18 +1656,16 @@ void FGroupTestSpec::Define()
 			constexpr bool bCreateGroupNow = true;
 			constexpr EAccelByteGroupType GroupType = EAccelByteGroupType::PUBLIC;
 			
-			const bool bIsSuccess = GroupTestPreInitAll(
-				NumTestUsers,
-				bCreateGroupNow,
-				GroupTestGroupName,
-				GroupTestGroupRegion,
-				GroupType,
-				GroupTestUsers,
-				GroupTestInitGroupConfig,
-				GroupTestConfigurationCode,
-				GroupTestApiUserPtrArr,
-				GroupTestCreateGroupRequest,
-				GroupTestGroupInfo);
+			const bool bIsSuccess = GroupTestPreInitAll(NumTestUsers
+				, bCreateGroupNow
+				, GroupTestGroupName
+				, GroupTestGroupRegion
+				, GroupType
+				, GroupTestUsers
+				, GroupTestInitGroupConfig
+				, GroupTestConfigurationCode
+				, GroupTestCreateGroupRequest
+				, GroupTestGroupInfo);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1753,9 +1677,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will send a REQUEST to join [0]'s PUBLIC group
-			const bool bSentJoinRequest = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bSentJoinRequest = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bSentJoinRequest)
 			{
@@ -1765,9 +1688,8 @@ void FGroupTestSpec::Define()
 
 			// -------------
 			// TestUser[1] no longer wants to join, so cancels their join request to [0]'s PUBLIC group.
-			const bool bIsSuccess = GroupTestCancelJoinGroupRequest(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bIsSuccess = GroupTestCancelJoinGroupRequest(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1778,9 +1700,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will send a REQUEST to join [0]'s PUBLIC group
-			const bool bSentJoinRequest = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bSentJoinRequest = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bSentJoinRequest)
 			{
@@ -1790,9 +1711,8 @@ void FGroupTestSpec::Define()
 
 			// -------------
 			// TestUser[0] accepts [1]'s request to join [0]'s PUBLIC group.
-			const bool bIsSuccess = GroupTestAcceptGroupJoinRequest(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bIsSuccess = GroupTestAcceptGroupJoinRequest(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1804,9 +1724,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will send a REQUEST to join [0]'s PUBLIC group
-			const bool bSentJoinRequest = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bSentJoinRequest = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bSentJoinRequest)
 			{
@@ -1816,9 +1735,8 @@ void FGroupTestSpec::Define()
 
 			// -------------
 			// TestUser[0] rejects [1]'s request to join [0]'s PUBLIC group.
-			const bool bIsSuccess = GroupTestRejectGroupJoinRequest(
-				GroupTestApiUserPtrArr[0],
-				GroupTestUsers[1].Credentials.GetUserId());
+			const bool bIsSuccess = GroupTestRejectGroupJoinRequest(GroupTestUsers[0]
+				, GroupTestUsers[1].UserId);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1829,9 +1747,8 @@ void FGroupTestSpec::Define()
 			[this](const FDoneDelegate& Done)
 		{
 			// TestUser[1] will send a REQUEST to join [0]'s PUBLIC group
-			const bool bSentJoinRequest = GroupTestJoinGroup(
-				GroupTestApiUserPtrArr[1],
-				GroupTestGroupInfo.GroupId);
+			const bool bSentJoinRequest = GroupTestJoinGroup(GroupTestUsers[1]
+				, GroupTestGroupInfo.GroupId);
 
 			if (!bSentJoinRequest)
 			{
@@ -1842,10 +1759,9 @@ void FGroupTestSpec::Define()
 			// -------------
 			// Then [0] gets join requests
 			constexpr FAccelByteModelsLimitOffsetRequest RequestContent;
-			const bool bIsSuccess = GroupTestGetJoinRequestsRequest(
-				GroupTestApiUserPtrArr[0],
-				GroupTestGroupInfo.GroupId,
-				RequestContent);
+			const bool bIsSuccess = GroupTestGetJoinRequestsRequest(GroupTestUsers[0]
+				, GroupTestGroupInfo.GroupId
+				, RequestContent);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1854,9 +1770,8 @@ void FGroupTestSpec::Define()
 		// ===================================================================
 		LatentAfterEach([this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = InitTeardown(
-				GroupTestUsers,
-				GroupTestConfigurationCode);
+			const bool bIsSuccess = InitTeardown(GroupTestUsers
+				, GroupTestConfigurationCode);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1871,18 +1786,16 @@ void FGroupTestSpec::Define()
 			constexpr bool bCreateGroupNow = false;
 			constexpr EAccelByteGroupType GroupType = EAccelByteGroupType::NONE;
 			
-			const bool bIsSuccess = GroupTestPreInitAll(
-				NumTestUsers,
-				bCreateGroupNow,
-				GroupTestGroupName,
-				GroupTestGroupRegion,
-				GroupType,
-				GroupTestUsers,
-				GroupTestInitGroupConfig,
-				GroupTestConfigurationCode,
-				GroupTestApiUserPtrArr,
-				GroupTestCreateGroupRequest,
-				GroupTestGroupInfo);
+			const bool bIsSuccess = GroupTestPreInitAll(NumTestUsers
+				, bCreateGroupNow
+				, GroupTestGroupName
+				, GroupTestGroupRegion
+				, GroupType
+				, GroupTestUsers
+				, GroupTestInitGroupConfig
+				, GroupTestConfigurationCode
+				, GroupTestCreateGroupRequest
+				, GroupTestGroupInfo);
 
 			Done.Execute();
 			return bIsSuccess;
@@ -1894,14 +1807,13 @@ void FGroupTestSpec::Define()
 		{
 			constexpr EAccelByteGroupType GroupType = EAccelByteGroupType::OPEN;
 				
-			const bool bIsSuccess = GroupTestPreInitCreateGroup(
-				GroupTestGroupName,
-				GroupTestGroupRegion,
-				GroupType,
-				GroupTestConfigurationCode,
-				GroupTestApiUserPtrArr[0],
-				GroupTestCreateGroupRequest,
-				GroupTestGroupInfo);
+			const bool bIsSuccess = GroupTestPreInitCreateGroup(GroupTestUsers[0]
+				, GroupTestGroupName
+				, GroupTestGroupRegion
+				, GroupType
+				, GroupTestConfigurationCode
+				, GroupTestCreateGroupRequest
+				, GroupTestGroupInfo);
 	
 			Done.Execute();
 			return bIsSuccess;
@@ -1910,9 +1822,8 @@ void FGroupTestSpec::Define()
 		// ===================================================================
 		LatentAfterEach([this](const FDoneDelegate& Done)
 		{
-			const bool bIsSuccess = InitTeardown(
-				GroupTestUsers,
-				GroupTestConfigurationCode);
+			const bool bIsSuccess = InitTeardown(GroupTestUsers
+				, GroupTestConfigurationCode);
 
 			Done.Execute();
 			return bIsSuccess;
