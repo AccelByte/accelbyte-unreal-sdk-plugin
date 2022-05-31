@@ -19,6 +19,7 @@ namespace Api
 {
 namespace SessionTopic
 {
+// Temp solution while using freeform notifs
 const FString UserInvited = TEXT("OnPartyInvited");
 }
 

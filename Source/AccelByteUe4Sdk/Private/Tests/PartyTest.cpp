@@ -34,6 +34,19 @@ const auto PartyErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCode, F
 	UE_LOG(LogAccelBytePartyTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
 });
 
+static bool TestPartyMembership(const FAccelByteModelsV2PartySession& TestParty, const FString& MemberID, const FString& Status=TEXT("active"))
+{
+    for(auto& Member : TestParty.Members)
+    {
+        if(Member.ID.Equals(MemberID))
+        {
+            return Member.Status.Equals(Status);
+        }
+    }
+
+    return false;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartySetup, "AccelByte.Tests.Party.A.Setup", AutomationFlagMaskParty);
 bool PartySetup::RunTest(const FString& Parameters)
 {
@@ -41,7 +54,56 @@ bool PartySetup::RunTest(const FString& Parameters)
     FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone] { bLoginDone = true; }), PartyErrorHandler);	
     WaitUntil(bLoginDone, "Waiting for LoginWithDeviceId...");
 
-	AB_TEST_TRUE(bLoginDone);
+	User Invitee(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
+    	
+    // Create test user and log in
+    const FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+    FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
+    EmailAddress.ToLowerInline();
+    const FString Password = "123SDKTest123";
+    const FString Country = "US";
+    const FDateTime BirthDateTime = FDateTime::Now() - FTimespan::FromDays(365 * 25);
+    const FString DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), BirthDateTime.GetYear(), BirthDateTime.GetMonth(), BirthDateTime.GetDay());
+
+    bool bRegisterSuccessful = false;
+    bool bRegisterDone = false;
+    UE_LOG(LogAccelBytePartyTest, Log, TEXT("Creating test user..."));
+    Invitee.Register(EmailAddress, Password, DisplayName, Country, DateOfBirth,
+    	THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse&)
+    	{
+    		UE_LOG(LogAccelBytePartyTest, Log, TEXT("   Success"));
+    		bRegisterSuccessful = true;
+    		bRegisterDone = true;
+    	}),
+    	FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
+    	{
+    		UE_LOG(LogAccelBytePartyTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
+    		bRegisterDone = true;
+    	}));
+
+    FlushHttpRequests();
+    WaitUntil(bRegisterDone, "Waiting for registration...");
+
+    if (!bRegisterSuccessful)
+    {
+    	return false;
+    }
+
+    bLoginDone = false;
+    UE_LOG(LogAccelBytePartyTest, Log, TEXT("Logging in test user..."));
+    Invitee.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
+    {
+    	InviteeUserID = InviteeCredentials.GetUserId();
+    	UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Success"));
+    	bLoginDone = true;
+    }),
+    FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject&)
+    {
+    	UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
+    }));
+
+    FlushHttpRequests();
+    WaitUntil(bLoginDone, "Waiting for login...");
 	
 	return true;
 }
@@ -118,58 +180,7 @@ bool PartyUpdate::RunTest(const FString& Parameters)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteJoinFlow, "AccelByte.Tests.Party.C.InviteJoinFlow", AutomationFlagMaskParty);
 bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
-{
-	User Invitee(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	
-	// Create test user and log in
-	FString DisplayName = "ab" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
-	FString EmailAddress = "test+u4esdk+" + DisplayName + "@game.test";
-	EmailAddress.ToLowerInline();
-	FString Password = "123SDKTest123";
-	const FString Country = "US";
-	const FDateTime BirthDateTime = FDateTime::Now() - FTimespan::FromDays(365 * 25);
-	const FString DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), BirthDateTime.GetYear(), BirthDateTime.GetMonth(), BirthDateTime.GetDay());
-
-	bool bRegisterSuccessful = false;
-	bool bRegisterDone = false;
-	UE_LOG(LogAccelBytePartyTest, Log, TEXT("Creating test user..."));
-	Invitee.Register(EmailAddress, Password, DisplayName, Country, DateOfBirth,
-		THandler<FRegisterResponse>::CreateLambda([&bRegisterSuccessful, &bRegisterDone](const FRegisterResponse&)
-		{
-			UE_LOG(LogAccelBytePartyTest, Log, TEXT("   Success"));
-			bRegisterSuccessful = true;
-			bRegisterDone = true;
-		}),
-		FErrorHandler::CreateLambda([&bRegisterDone](int32 ErrorCode, const FString& ErrorMessage)
-		{
-			UE_LOG(LogAccelBytePartyTest, Warning, TEXT("    Error. Code: %d, Reason: %s"), ErrorCode, *ErrorMessage);
-			bRegisterDone = true;
-		}));
-
-	FlushHttpRequests();
-	WaitUntil(bRegisterDone, "Waiting for registration...");
-
-	if (!bRegisterSuccessful)
-	{
-		return false;
-	}
-
-	bool bLoginSuccessful = false;
-	UE_LOG(LogAccelBytePartyTest, Log, TEXT("Log in test user..."));
-	Invitee.LoginWithUsername(EmailAddress, Password, FVoidHandler::CreateLambda([&]()
-	{
-		InviteeUserID = InviteeCredentials.GetUserId();
-		UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Success"));
-		bLoginSuccessful = true;
-	}),
-	FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject&)
-	{
-		UE_LOG(LogAccelBytePartyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
-	}));
-
-	FlushHttpRequests();
-	WaitUntil(bLoginSuccessful, "Waiting for login...");
-	
+{	
 	Api::Lobby Lobby(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
     Lobby.Connect();
     WaitUntil([&Lobby] { return Lobby.IsConnected(); }, "", 5);
@@ -212,24 +223,15 @@ bool PartyInviteJoinFlow::RunTest(const FString& Parameters)
 	}), PartyErrorHandler);
 	WaitUntil(bJoinPartySuccess, "Waiting for party join...");
 
+	Lobby.Disconnect();
+	WaitUntil([&Lobby] { return !Lobby.IsConnected(); }, "", 5);
+	
 	Party = JoinedParty;
 	
-	// Ensure that the new user is an active party member for the joined party
-	bool bInParty = false;
-	for(auto& Member : JoinedParty.Members)
-	{
-		if(Member.ID.Equals(InviteeUserID))
-		{
-			AB_TEST_TRUE(Member.Status.Equals(FString(TEXT("active"))));
-			bInParty = true;
-			break;
-		}
-	}
-
 	AB_TEST_TRUE(bSendInviteSuccess);
 	AB_TEST_TRUE(bGetInviteSuccess);
 	AB_TEST_TRUE(bJoinPartySuccess);
-	AB_TEST_TRUE(bInParty);
+	AB_TEST_TRUE(TestPartyMembership(Party, InviteeUserID));
 	
 	return true;
 }
@@ -246,7 +248,20 @@ bool PartyLeave::RunTest(const FString& Parameters)
 	}), PartyErrorHandler);
 	WaitUntil(bLeaveSuccess, "Waiting for party leave...");
 	
+	bool bGetDetailsSuccess = false;
+	FAccelByteModelsV2PartySession Response;
+	FRegistry::Session.GetPartyDetails(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bGetDetailsSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Get party details success"));
+		bGetDetailsSuccess = true;
+		Response = PartyResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bGetDetailsSuccess, "Waiting for get party details...");
+
+	Party = Response;
+	
 	AB_TEST_TRUE(bLeaveSuccess);
+	AB_TEST_TRUE(!TestPartyMembership(Party, InviteeUserID));
 	
 	return true;
 }
@@ -278,22 +293,35 @@ bool PartyKickPlayer::RunTest(const FString& Parameters)
 		bKickSuccess = true;
 	}), PartyErrorHandler);
 	WaitUntil(bKickSuccess, "Waiting for party kick...");
+
+	bool bGetDetailsSuccess = false;
+	FAccelByteModelsV2PartySession Response;
+	FRegistry::Session.GetPartyDetails(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bGetDetailsSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Get party details success"));
+		bGetDetailsSuccess = true;
+		Response = PartyResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bGetDetailsSuccess, "Waiting for get party details...");
+
+	Party = Response;
 	
 	AB_TEST_TRUE(bKickSuccess);
+	AB_TEST_TRUE(!TestPartyMembership(Party, InviteeUserID));
 	
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(PartyInviteReject, "AccelByte.Tests.Party.F.InviteReject", AutomationFlagMaskParty);
 bool PartyInviteReject::RunTest(const FString& Parameters)
-{	
+{
 	bool bSendInviteSuccess = false;
 	FRegistry::Session.SendPartyInvite(Party.ID, InviteeUserID, FVoidHandler::CreateLambda([&bSendInviteSuccess]
 	{
 		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Send party invite success"));
 		bSendInviteSuccess = true;
 	}), PartyErrorHandler);
-	WaitUntil(bSendInviteSuccess, "Waiting for party invite notif...", 30);
+	WaitUntil(bSendInviteSuccess, "Waiting for party invite success...", 30);
 
 	Session InviteeSession(InviteeCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
 	
@@ -306,8 +334,21 @@ bool PartyInviteReject::RunTest(const FString& Parameters)
 	}), PartyErrorHandler);
 	WaitUntil(bRejectInviteSuccess, "Waiting for invite rejection...");
 
+	bool bGetDetailsSuccess = false;
+	FAccelByteModelsV2PartySession Response;
+	FRegistry::Session.GetPartyDetails(Party.ID, THandler<FAccelByteModelsV2PartySession>::CreateLambda([&bGetDetailsSuccess, &Response](FAccelByteModelsV2PartySession const PartyResponse)
+	{
+		UE_LOG(LogAccelBytePartyTest, Log, TEXT("Get party details success"));
+		bGetDetailsSuccess = true;
+		Response = PartyResponse;
+	}), PartyErrorHandler);
+	WaitUntil(bGetDetailsSuccess, "Waiting for get party details...");
+
+	Party = Response;
+	
 	AB_TEST_TRUE(bSendInviteSuccess);
 	AB_TEST_TRUE(bRejectInviteSuccess);
+	AB_TEST_TRUE(!TestPartyMembership(Party, InviteeUserID));
 	
 	return true;
 }
