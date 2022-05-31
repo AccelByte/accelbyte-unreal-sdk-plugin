@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Wallet
 {
 public:
-	Wallet(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Wallet(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Wallet();
 private:
 	FHttpRetryScheduler& HttpRef;

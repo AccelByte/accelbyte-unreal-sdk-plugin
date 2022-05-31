@@ -26,7 +26,7 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API SeasonPass
 		{
 		public:
-			SeasonPass(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+			SeasonPass(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 			~SeasonPass();
 		private:
 			FHttpRetryScheduler& HttpRef;

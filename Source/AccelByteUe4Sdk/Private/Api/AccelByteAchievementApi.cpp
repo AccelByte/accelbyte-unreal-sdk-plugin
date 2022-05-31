@@ -15,16 +15,16 @@ namespace AccelByte
 namespace Api
 {
 
-Achievement::Achievement(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Achievement::Achievement(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Achievement::~Achievement(){}
+Achievement::~Achievement()
+{}
 
 FString Achievement::ConvertAchievementSortByToString(const EAccelByteAchievementListSortBy& SortBy)
 {

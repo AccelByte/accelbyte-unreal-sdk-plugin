@@ -13,15 +13,16 @@ namespace AccelByte
 {
 namespace Api
 {
-Fulfillment::Fulfillment(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef):
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Fulfillment::Fulfillment(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Fulfillment::~Fulfillment(){}
+Fulfillment::~Fulfillment()
+{}
 
 void Fulfillment::RedeemCode(FString const& Code, FString const& Region, FString const& Language, THandler<FAccelByteModelsFulfillmentResult> OnSuccess, FErrorHandler OnError)
 {

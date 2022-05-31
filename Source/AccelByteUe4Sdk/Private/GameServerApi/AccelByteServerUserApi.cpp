@@ -16,7 +16,12 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerUser::ServerUser(const ServerCredentials& Credentials, const ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
+		ServerUser::ServerUser(ServerCredentials const& InCredentialsRef
+			, ServerSettings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef)
+			: CredentialsRef{InCredentialsRef}
+			, SettingsRef{InSettingsRef}
+			, HttpRef{InHttpRef}
 		{
 		}
 
@@ -37,9 +42,9 @@ namespace AccelByte
 			
 			FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
 			
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
 			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/search?by=thirdPartyPlatform&limit=%d&offset=%d&platformBy=platformDisplayName&platformId=%s&query=%s"),
-					*Settings.IamServerUrl, *Credentials.GetClientNamespace(), Limit, Offset, *PlatformId, *DisplayName);
+					*SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), Limit, Offset, *PlatformId, *DisplayName);
 			FString Verb            = TEXT("GET");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");
@@ -60,8 +65,8 @@ namespace AccelByte
 			FReport::Log(FString(__FUNCTION__));
 
 			FString PlatformId      = FAccelByteUtilities::GetPlatformString(PlatformType);
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *PlatformId, *PlatformUserId);
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/platforms/%s/users/%s"), *SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), *PlatformId, *PlatformUserId);
 			FString Verb            = TEXT("GET");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");
@@ -81,8 +86,8 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 		
-			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans"), *Settings.IamServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url				= FString::Printf(TEXT("%s/v3/admin/namespaces/%s/users/%s/bans"), *SettingsRef.IamServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 			FString Verb            = TEXT("POST");
 			FString ContentType     = TEXT("application/json");
 			FString Accept          = TEXT("application/json");

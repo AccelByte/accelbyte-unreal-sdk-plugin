@@ -13,7 +13,12 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-ServerEcommerce::ServerEcommerce(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
+ServerEcommerce::ServerEcommerce(ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {}
 
 ServerEcommerce::~ServerEcommerce()
@@ -24,8 +29,8 @@ void ServerEcommerce::QueryUserEntitlements(const FString& UserId, bool bActiveO
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 
 	TMap<FString, FString> QueryParams = {};
 	QueryParams.Add("activeOnly", bActiveOnly ? TEXT("true") : TEXT("false"));
@@ -90,8 +95,8 @@ void ServerEcommerce::GetUserEntitlementById(const FString& Entitlementid, const
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *Entitlementid);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/entitlements/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *Entitlementid);
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
@@ -112,8 +117,8 @@ void ServerEcommerce::GetUserEntitlementById(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -132,8 +137,8 @@ void ServerEcommerce::GrantUserEntitlements(const FString& UserId, const TArray<
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -167,8 +172,8 @@ void ServerEcommerce::CreditUserWallet(const FString& UserId, const FString& Cur
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *CurrencyCode);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/credit"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *CurrencyCode);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -190,8 +195,8 @@ void ServerEcommerce::RevokeUserEntitlements(const FString& UserId, const TArray
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds?entitlementIds="), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/revoke/byIds?entitlementIds="), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	for(int i = 0; i < EntitlementIds.Num(); i++)
 	{
 		Url += EntitlementIds[i];
@@ -216,8 +221,8 @@ void ServerEcommerce::RevokeUserEntitlement(const FString& UserId, const FString
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/revoke"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -237,8 +242,8 @@ void ServerEcommerce::ConsumeUserEntitlement(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/decrement"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -259,8 +264,8 @@ void ServerEcommerce::DisableUserEntitlement(const FString& UserId, const FStrin
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/disable"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -279,8 +284,8 @@ void ServerEcommerce::EnableUserEntitlement(const FString& UserId, const FString
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *EntitlementId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/entitlements/%s/enable"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *EntitlementId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -300,8 +305,8 @@ void ServerEcommerce::DebitUserWallet(const FString& UserId, const FString& Wall
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId, *WalletId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/wallets/%s/debit"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *WalletId);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -322,8 +327,8 @@ void ServerEcommerce::FulfillUserItem(const FString& UserId, const FAccelByteMod
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *UserId);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/fulfillment"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -344,7 +349,7 @@ void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<T
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
 	FString Params;
 	for(FString const& Sku : Skus)
 	{
@@ -354,7 +359,7 @@ void ServerEcommerce::BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<T
 		}
 		Params = FString::Printf(TEXT("%ssku=%s"), *Params, *Sku);
 	}
-	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus?%s"), *Settings.PlatformServerUrl, *Credentials.GetClientNamespace(), *Params);
+	FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/items/itemId/bySkus?%s"), *SettingsRef.PlatformServerUrl, *CredentialsRef.GetClientNamespace(), *Params);
 
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");

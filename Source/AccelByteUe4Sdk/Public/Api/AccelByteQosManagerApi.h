@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API QosManager
 {
 public:
-	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& HttpRef);
+	QosManager(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
 	~QosManager();
 
 	/**

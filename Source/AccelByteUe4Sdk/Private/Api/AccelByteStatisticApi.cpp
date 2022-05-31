@@ -13,14 +13,13 @@ namespace AccelByte
 namespace Api
 {
 
-Statistic::Statistic(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+	Statistic::Statistic(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: HttpRef{InHttpRef}
+		, CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+	{}
 
 	Statistic::~Statistic()
 	{}

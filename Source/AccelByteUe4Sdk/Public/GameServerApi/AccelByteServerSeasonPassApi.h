@@ -23,11 +23,11 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API ServerSeasonPass
 		{
 		public:
-			ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+			ServerSeasonPass(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 			~ServerSeasonPass();
 		private:
-			const ServerCredentials& Credentials;
-			const ServerSettings& Settings;
+			ServerCredentials const& CredentialsRef;
+			ServerSettings const& SettingsRef;
 			FHttpRetryScheduler& HttpRef;
 		public:
 			/** @brief Grant exp to user by UserId. After reaching to the next level, currentExp will be reset to 0, remainder will be added.

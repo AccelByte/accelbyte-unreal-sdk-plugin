@@ -234,7 +234,7 @@ const FOauth2Token& Credentials::GetAuthToken() const
 	return AuthToken;
 }
 
-void AccelByte::Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
+void Credentials::SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef)
 {
 	HttpRef.SetBearerAuthRejectedDelegate(
 		FHttpRetryScheduler::FBearerAuthRejected::CreateLambda([&]()

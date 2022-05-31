@@ -24,7 +24,7 @@ namespace AccelByte
 		class ACCELBYTEUE4SDK_API User : public FApiBase
 		{
 		public:
-			User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& HttpRef);
+			User(Credentials& Credentials, Settings& Settings, FHttpRetryScheduler& InHttpRef);
 			~User();
 		private:
 			FHttpRetryScheduler& HttpRef;

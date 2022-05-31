@@ -18,12 +18,10 @@ namespace AccelByte
 namespace Api
 {
 
-Entitlement::Entitlement(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	FApiBase(CredentialsRef, SettingsRef, HttpRef)
+Entitlement::Entitlement(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
 {
 }
 

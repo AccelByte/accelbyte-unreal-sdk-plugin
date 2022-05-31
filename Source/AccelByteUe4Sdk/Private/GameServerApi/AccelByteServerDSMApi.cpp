@@ -32,8 +32,8 @@ namespace AccelByte
 			else
 			{
 				ServerName = Environment::GetEnvironmentVariable("POD_NAME", 100);
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/register"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -96,8 +96,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/shutdown"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -134,8 +134,8 @@ namespace AccelByte
 			else
 			{
 				this->ServerName = ServerName_;
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/register"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -209,8 +209,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace());
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/local/deregister"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace());
 				FString Verb = TEXT("POST");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -257,8 +257,8 @@ namespace AccelByte
 			}
 			else
 			{
-				FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *Settings.DSMControllerServerUrl, *Credentials.GetClientNamespace(), *ServerName);
+				FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+				FString Url = FString::Printf(TEXT("%s/namespaces/%s/servers/%s/session"), *SettingsRef.DSMControllerServerUrl, *CredentialsRef.GetClientNamespace(), *ServerName);
 				FString Verb = TEXT("GET");
 				FString ContentType = TEXT("application/json");
 				FString Accept = TEXT("application/json");
@@ -392,7 +392,12 @@ namespace AccelByte
 			}
 		}
 
-		ServerDSM::ServerDSM(const AccelByte::ServerCredentials& InCredentials, const AccelByte::ServerSettings& InSettings, FHttpRetryScheduler& InHttpRef) : Credentials(InCredentials), Settings(InSettings), HttpRef(InHttpRef)
+		ServerDSM::ServerDSM(ServerCredentials const& InCredentialsRef
+			, ServerSettings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef)
+    		: CredentialsRef{InCredentialsRef}
+    		, SettingsRef{InSettingsRef}
+    		, HttpRef{InHttpRef}
 		{
 			AutoShutdownDelegate = FTickerDelegate::CreateRaw(this, &ServerDSM::ShutdownTick);
 		}

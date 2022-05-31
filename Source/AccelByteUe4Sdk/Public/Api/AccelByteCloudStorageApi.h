@@ -23,11 +23,11 @@ namespace Api
 class ACCELBYTEUE4SDK_API CloudStorage
 {
 public:
-	CloudStorage(const Credentials& Credentials, const Settings& Settings);
+	CloudStorage(Credentials const& InCredentialsRef, Settings const& InSettingsRef);
 	~CloudStorage();
 private:
-	const Credentials& Credentials;
-	const Settings& Settings;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief This function gets list of slot(s) those owned by the player.

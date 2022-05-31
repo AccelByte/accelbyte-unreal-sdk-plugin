@@ -52,7 +52,7 @@ public:
 	void SetUserEmailAddress(const FString& EmailAddress);
 	void PollRefreshToken(double CurrentTime);
 	void ScheduleRefreshToken(double NextRefreshTime);
-	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& HttpRef);
+	void SetBearerAuthRejectedHandler(FHttpRetryScheduler& InHttpRef);
 
 	FTokenRefreshedEvent& OnTokenRefreshed();
 
@@ -94,7 +94,7 @@ private:
 
 	static const FString DefaultSection;
 
-	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& HttpRef);
+	void BearerAuthRejectedRefreshToken(FHttpRetryScheduler& InHttpRef);
 };
 
 typedef TSharedRef<Credentials, ESPMode::ThreadSafe> FCredentialsRef;

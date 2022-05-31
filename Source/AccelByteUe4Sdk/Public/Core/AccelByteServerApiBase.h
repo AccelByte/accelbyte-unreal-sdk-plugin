@@ -16,10 +16,9 @@ namespace AccelByte
 class ACCELBYTEUE4SDK_API FServerApiBase
 {
 public:
-	FServerApiBase(
-		ServerCredentials const& ServerCredentialsRef,
-		ServerSettings const& ServerSettingsRef,
-		FHttpRetryScheduler& HttpRef);
+	FServerApiBase(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRe
+		, FHttpRetryScheduler& InHttpRef);
 	
 protected:
 	ServerCredentials const& ServerCredentialsRef;

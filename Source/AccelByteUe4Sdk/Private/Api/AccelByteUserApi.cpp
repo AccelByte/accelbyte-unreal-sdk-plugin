@@ -26,12 +26,13 @@ namespace AccelByte
 namespace Api
 {
 
-User::User(Credentials& CredentialsRef, Settings& SettingsRef, FHttpRetryScheduler& HttpRef)
-	:
-	FApiBase(CredentialsRef, SettingsRef, HttpRef),
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef}
+User::User(Credentials& InCredentialsRef
+	, Settings& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+	, HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
 {
 }
 
