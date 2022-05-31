@@ -7,6 +7,7 @@
 #include "Api/AccelByteUserApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteEnvironment.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "Api/AccelByteLobbyApi.h"
 #include "Api/AccelByteQos.h"
 #include "GameServerApi/AccelByteServerOauth2Api.h"
@@ -28,8 +29,6 @@ using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::User;
-using AccelByte::Api::Lobby;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteLobbyTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteLobbyTest);
@@ -44,11 +43,9 @@ const auto LobbyTestErrorHandler = FErrorHandler::CreateLambda([](int32 ErrorCod
 const int WaitMatchmakingTime = 125;
 const int DsNotifWaitTime = 60;
 const int TestUserCount = 6;
-FString UserIds[TestUserCount];
-Credentials UserCreds[TestUserCount];
-TArray<TSharedPtr<Api::User>> LobbyUsers;
-TArray<TSharedPtr<Api::Lobby>> Lobbies;
-TArray<TPair<FString, float>> PreferedLatencies;
+TArray<FTestUser> LobbyUsers;
+TArray<FApiClientPtr> LobbyApiClients;
+TArray<TPair<FString, float>> PreferredLatencies;
 //General
 bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bGetFriendsPresenceSuccess;
 //Friends
@@ -129,53 +126,56 @@ inline static bool LatenciesPredicate(const TPair<FString, float>& left, const T
 	return left.Value < right.Value;
 }
 
-void LobbyConnect(int userCount)
+void LobbyConnect(int UserCount)
 {
-	if (userCount > TestUserCount)
+	if (UserCount > TestUserCount)
 	{
-		userCount = TestUserCount;
+		UserCount = TestUserCount;
 	}
-	if (userCount <= 0)
+	if (UserCount <= 0)
 	{
-		userCount = 1;
+		UserCount = 1;
 	}
-	for (int i = 0; i < userCount; i++)
+	for (int Index = 0; Index < UserCount; Index++)
 	{
-		if (!Lobbies[i]->IsConnected())
+		FApiClientPtr ApiClient = LobbyApiClients[Index];
+		if (!ApiClient->Lobby.IsConnected())
 		{
-			Lobbies[i]->Connect();
+			ApiClient->Lobby.Connect();
 		}
-		FString text = FString::Printf(TEXT("LobbyConnect: Wait user %d"), i);
-		while (!Lobbies[i]->IsConnected())
+		
+		while (!ApiClient->Lobby.IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s"), *text);
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyConnect: Wait user %s to connect")
+				, *ApiClient->CredentialsRef->GetUserId());
 			FTicker::GetCoreTicker().Tick(.5f);
 		}
 	}
 }
 
-void LobbyDisconnect(int userCount)
+void LobbyDisconnect(int UserCount)
 {
-	if (userCount > TestUserCount)
+	if (UserCount > TestUserCount)
 	{
-		userCount = TestUserCount;
+		UserCount = TestUserCount;
 	}
-	if (userCount <= 0)
+	if (UserCount <= 0)
 	{
-		userCount = 1;
+		UserCount = 1;
 	}
-	for (int i = 0; i < userCount; i++)
+	for (int Index = 0; Index < UserCount; Index++)
 	{
-		Lobbies[i]->UnbindEvent();
-		Lobbies[i]->Disconnect();
-		while (Lobbies[i]->IsConnected())
+		FApiClientPtr ApiClient = LobbyApiClients[Index];
+		ApiClient->Lobby.UnbindEvent();
+		ApiClient->Lobby.Disconnect();
+		while (ApiClient->Lobby.IsConnected())
 		{
 			FPlatformProcess::Sleep(.5f);
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("disconecting lobby %d"), i);
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby Disconnect: Waiting user %s to disconnect")
+				, *ApiClient->CredentialsRef->GetUserId());
 			FTicker::GetCoreTicker().Tick(.5f);
 		}
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("lobby %d disconnected"), i);
 	}
 }
 
@@ -833,62 +833,22 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	{
 		UsersCreationSuccess[i] = false;
 		UsersLoginSuccess[i] = false;
-		bClientLoginSuccess = false;
-
-		LobbyUsers.Add(MakeShared<Api::User>(UserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
-
-		FString Email = FString::Printf(TEXT("lobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
-		Email.ToLowerInline();
-		FString Password = TEXT("123Password123");
-		FString DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
-		FString Country = "US";
+		FTestUser TestUser{i};
+		TestUser.Email = FString::Printf(TEXT("lobbyUE4Test+%d-%d@example.com"), i, FMath::RandRange(0, 100000000));
+		TestUser.Email.ToLowerInline();
+		TestUser.Password = TEXT("123Password123");
+		TestUser.DisplayName = FString::Printf(TEXT("lobbyUE4%d"), i);
+		TestUser.Country = "US";
 		const FDateTime DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
-		const FString format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+		TestUser.DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-		LobbyUsers[i]->Register(
-			Email, 
-			Password, 
-			DisplayName, 
-			Country, 
-			format, 
-			THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-			{
-				UsersCreationSuccess[i] = true;
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is Created"), i, TestUserCount);
+		UsersCreationSuccess[i] = RegisterTestUser(TestUser); 
 
-			}), 
-			FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-			{
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Code=%d"), Code);
-				if ((ErrorCodes)Code == ErrorCodes::UserEmailAlreadyUsedException || (ErrorCodes)Code == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
-				{
-					UsersCreationSuccess[i] = true;
-					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d is already"), i, TestUserCount);
-				}
-				else
-				{
-					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Test Lobby User %d/%d can't be created"), i, TestUserCount);
-				}
-			}));
+		UsersLoginSuccess[i] = LoginTestUser(TestUser);
+
+		LobbyUsers.Add(TestUser);
 		
-		WaitUntil(UsersCreationSuccess[i],"Waiting for user created..."); 
-
-		LobbyUsers[i]->LoginWithUsername(
-			Email,
-			Password,
-			FVoidHandler::CreateLambda([&]()
-			{
-				UsersLoginSuccess[i] = true;
-				UserIds[i] = UserCreds[i].GetUserId();
-			}), 
-			FCustomErrorHandler::CreateLambda([](int Code, const FString& Message, const FJsonObject& ErrorJson)
-			{
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Error. Code: %d, Reason: %s"), Code, *Message);
-			}));
-		
-		WaitUntil(UsersLoginSuccess[i],"Waiting for Login...");
-
-		Lobbies.Add(MakeShared<Api::Lobby>(UserCreds[i], FRegistry::Settings, FRegistry::HttpRetryScheduler));
+		LobbyApiClients.Add(FMultiRegistry::GetApiClient(TestUser.Email));
 	}
 	
 	for (int i = 0; i < TestUserCount; i++)
@@ -900,25 +860,13 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 
 	if (!PreferedDSRegion.IsEmpty()) 
 	{
-		bool bGetServerLatenciesSuccess = false;
-		FRegistry::Qos.GetServerLatencies(THandler<TArray<TPair<FString, float>>>::CreateLambda([&bGetServerLatenciesSuccess](const TArray<TPair<FString, float>>& Result)
+		PreferredLatencies = FRegistry::Qos.GetCachedLatencies();
+		for (int i = 0; i < PreferredLatencies.Num(); i++)
 		{
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Server Latencies Success! Count: %d"), Result.Num());
-			bGetServerLatenciesSuccess = true;
-			PreferedLatencies = Result;
-		}), LobbyTestErrorHandler);
-		WaitUntil([&]()
-		{
-			return bGetServerLatenciesSuccess;
-		}, "Waiting for get server latencies (Lobby.A.Setup)...", 60);
-		AB_TEST_TRUE(bGetServerLatenciesSuccess);
-
-		for (int i = 0; i < PreferedLatencies.Num(); i++)
-		{
-			if (PreferedLatencies[i].Key == PreferedDSRegion)
+			if (PreferredLatencies[i].Key == PreferedDSRegion)
 			{
-				PreferedLatencies[i].Value = 10;
-				PreferedLatencies = { PreferedLatencies[i] };
+				PreferredLatencies[i].Value = 10;
+				PreferredLatencies = { PreferredLatencies[i] };
 				break;
 			}
 		}
@@ -929,53 +877,60 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	bool bGetDsmConfigComplete = false;
 	
 	FDsmConfig dsmConfig;
-	AdminGetLobbyDSMConfig(THandler<FDsmConfig>::CreateLambda([&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
-	{
-		dsmConfig = result;
-
-		auto customPorts = GetNewCustomPorts();
-		for (auto port : customPorts.Get())
-		{
-			if (!dsmConfig.Ports.Contains(port.Key))
+	AdminGetLobbyDSMConfig(THandler<FDsmConfig>::CreateLambda(
+			[&dsmConfig, &bGetDsmConfigComplete, &isUpdateDsmConfig](const FDsmConfig& result)
 			{
-				dsmConfig.Ports.Add(port.Key, port.Value);
-				isUpdateDsmConfig = true;
-			}
-		}
+				dsmConfig = result;
 
-		bGetDsmConfigComplete = true;
-	}), FErrorHandler::CreateLambda([&dsmConfig, &isUpdateDsmConfig, &bGetDsmConfigComplete](int32 ErrorCode, FString ErrorMessage)
-	{
-		if (ErrorCode == (int)ErrorCodes::DedicatedServerConfigNotFoundException)
-		{
-			dsmConfig = GetNewDsmConfig().Get();
-			isUpdateDsmConfig = true;
-		}
-		else
-		{
-			LobbyTestErrorHandler.Execute(ErrorCode, ErrorMessage);
-		}
-		bGetDsmConfigComplete = true;
-	}));
+				auto customPorts = GetNewCustomPorts();
+				for (auto port : customPorts.Get())
+				{
+					if (!dsmConfig.Ports.Contains(port.Key))
+					{
+						dsmConfig.Ports.Add(port.Key, port.Value);
+						isUpdateDsmConfig = true;
+					}
+				}
+
+				bGetDsmConfigComplete = true;
+			})
+		, FErrorHandler::CreateLambda([&dsmConfig, &isUpdateDsmConfig, &bGetDsmConfigComplete](int32 ErrorCode, FString ErrorMessage)
+			{
+				if (ErrorCode == (int)ErrorCodes::DedicatedServerConfigNotFoundException)
+				{
+					dsmConfig = GetNewDsmConfig().Get();
+					isUpdateDsmConfig = true;
+				}
+				else
+				{
+					LobbyTestErrorHandler.Execute(ErrorCode, ErrorMessage);
+				}
+				bGetDsmConfigComplete = true;
+			})
+		);
 	WaitUntil(bGetDsmConfigComplete, "Waiting get dsm config");
 
 	if (isUpdateDsmConfig)
 	{
 		bool bSetDsmConfigComplete = false;
-		AdminSetLobbyDSMConfig(dsmConfig, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]() {
-			bSetDsmConfigComplete = true;
-		}), LobbyTestErrorHandler);
+		AdminSetLobbyDSMConfig(dsmConfig
+			, FVoidHandler::CreateLambda([&bSetDsmConfigComplete]()
+				{
+					bSetDsmConfigComplete = true;
+				})
+			, LobbyTestErrorHandler);
 		WaitUntil(bSetDsmConfigComplete, "Waiting set dsm config");
 	}
 
 	// update lobby config (set lobby burst limit to 100)
 	bool bGetLobbyConfigDone {false};
 	AdminGetLobbyConfig(THandler<FLobbyModelConfig>::CreateLambda(
-		[&](const FLobbyModelConfig& result)
-		{
-			bGetLobbyConfigDone = true;
-			OriginalLobbyConfig = result;
-		}), LobbyTestErrorHandler);
+			[&](const FLobbyModelConfig& result)
+			{
+				bGetLobbyConfigDone = true;
+				OriginalLobbyConfig = result;
+			})
+		, LobbyTestErrorHandler);
 
 	WaitUntil(bGetLobbyConfigDone, "Waiting fetching original lobby config");
 	
@@ -983,11 +938,12 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 	NewLobbyConfig.GeneralRateLimitBurst = 100;
 
 	bool bSetLobbyConfigDone {false};
-	AdminSetLobbyConfig(NewLobbyConfig, THandler<FLobbyModelConfig>::CreateLambda(
-		[&bSetLobbyConfigDone](const FLobbyModelConfig& )
-		{
-			bSetLobbyConfigDone = true;
-		}), LobbyTestErrorHandler);
+	AdminSetLobbyConfig(NewLobbyConfig
+		, THandler<FLobbyModelConfig>::CreateLambda([&bSetLobbyConfigDone](const FLobbyModelConfig& )
+			{
+				bSetLobbyConfigDone = true;
+			})
+		, LobbyTestErrorHandler);
 
 	WaitUntil(bSetLobbyConfigDone, "Waiting set new lobby config");
 
@@ -996,11 +952,13 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		ChannelName = "ue4sdktest" + FGuid::NewGuid().ToString(EGuidFormats::Digits);
 
 		bool bCreateMatchmakingChannelSuccess = false;
-		AdminCreateMatchmakingChannel(ChannelName, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler);
+		AdminCreateMatchmakingChannel(ChannelName
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler);
 		
 		WaitUntil([&]()
 		{
@@ -1035,11 +993,17 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		SubGameModes.Add({SubGameModeNames[1], AllianceRuleSub4});
 	
 		bool bCreateMatchmakingChannelSuccess = false;
-		AdminCreateMatchmakingChannel(ChannelNameSubGameMode, AllianceRule, {}, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler, false, SubGameModes);
+		AdminCreateMatchmakingChannel(ChannelNameSubGameMode
+			, AllianceRule
+			, {}
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler
+			, false
+			, SubGameModes);
 		
 		WaitUntil([&]()
 		{
@@ -1066,12 +1030,15 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		MatchingRules.Add(MmrRule);
 
 		bool bCreateMatchmakingChannelSuccess = false;
-		AdminCreateMatchmakingChannel(ChannelNameExtraAttributeTest, AllianceRule, MatchingRules,
-			FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler);
+		AdminCreateMatchmakingChannel(ChannelNameExtraAttributeTest
+			, AllianceRule
+			, MatchingRules
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler);
 
 		WaitUntil([&]()
 		{
@@ -1090,12 +1057,15 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		AllianceRule.player_max_number = 1;
 
 		bool bCreateMatchmakingChannelSuccess = false;
-		AdminCreateMatchmakingChannel(ChannelNameNewSessionTest, AllianceRule,
-			FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler, true);
+		AdminCreateMatchmakingChannel(ChannelNameNewSessionTest
+			, AllianceRule
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler
+			, true);
 
 		WaitUntil([&]()
 		{
@@ -1113,11 +1083,14 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		AllianceRule.player_max_number = 2;
 
 		bool bCreateMatchmakingChannelSuccess = false;
-		AdminCreateMatchmakingChannel(ChannelNameTempParty2, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler);
+		AdminCreateMatchmakingChannel(ChannelNameTempParty2
+			, AllianceRule
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler);
 		WaitUntil([&]()
 		{
 			return bCreateMatchmakingChannelSuccess;
@@ -1134,11 +1107,14 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 		AllianceRule.player_min_number = 1;
 		AllianceRule.player_max_number = 1;
 
-		AdminCreateMatchmakingChannel(ChannelNameTest3v3, AllianceRule, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
-		{
-			bCreateMatchmakingChannelSuccess = true;
-			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
-		}), LobbyTestErrorHandler);
+		AdminCreateMatchmakingChannel(ChannelNameTest3v3
+			, AllianceRule
+			, FSimpleDelegate::CreateLambda([&bCreateMatchmakingChannelSuccess]()
+				{
+					bCreateMatchmakingChannelSuccess = true;
+					UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create Matchmaking Channel Success..!"));
+				})
+			, LobbyTestErrorHandler);
 
 		WaitUntil([&]()
 		{
@@ -1154,29 +1130,8 @@ bool LobbyTestSetup::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestTeardown, "AccelByte.Tests.Lobby.Z.Teardown", AutomationFlagMaskLobby);
 bool LobbyTestTeardown::RunTest(const FString& Parameters)
 {
-	TArray<bool> SuccessfulDeletions;
-	SuccessfulDeletions.Init(false, TestUserCount);
-
-	for (int i = 0; i < TestUserCount; i++)
-	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserById (%d/%d)"), i + 1, TestUserCount);
-		AdminDeleteUser(
-			UserCreds[i].GetUserId(),
-			FSimpleDelegate::CreateLambda([&SuccessfulDeletions, i]()
-			{
-				UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Success"));
-				SuccessfulDeletions[i] = true;
-			}),
-			FErrorHandler::CreateLambda([&SuccessfulDeletions, i](int32 ErrorCode, FString ErrorMessage)
-			{
-				//Not found means we don't need to delete it
-				if (ErrorCode == static_cast<int32>(ErrorCodes::StatusNotFound))
-				{
-					SuccessfulDeletions[i] = true;
-				}
-			}));
-		WaitUntil([&]() { return SuccessfulDeletions[i]; }, "Waiting for user deletion...", 60.0);
-	}
+	LobbyDisconnect(TestUserCount);
+	AB_TEST_TRUE(TeardownTestUsers(LobbyUsers));
 
 	bool bSetLobbyConfigDone {false};
 	AdminSetLobbyConfig(OriginalLobbyConfig, THandler<FLobbyModelConfig>::CreateLambda(
@@ -1259,7 +1214,6 @@ bool LobbyTestTeardown::RunTest(const FString& Parameters)
 		WaitUntil(bDeleteMatchmakingChannelSuccess, "Delete Matchmaking channel...");
 	}
 
-	AB_TEST_FALSE(SuccessfulDeletions.ContainsByPredicate([](const bool SuccessfulDeletion){ return !SuccessfulDeletion; }));
 	return true;
 }
 
@@ -1303,7 +1257,7 @@ bool LobbyTestMessage::RunTest(const FString& Parameters)
 
 	for (const auto& Data : TestData)
 	{
-		FString MessageJSON = Lobby::LobbyMessageToJson(*Data.Message);
+		FString MessageJSON = AccelByte::Api::Lobby::LobbyMessageToJson(*Data.Message);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("%s -> %s"), *Data.Message, *MessageJSON);
 		AB_TEST_EQUAL(Data.ExpectedJSON, MessageJSON);
 	}
@@ -1316,14 +1270,14 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 {
 	bool userResponded[2], userConnected[2];
 
-	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
-	Lobbies[1]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
-	Lobbies[0]->SetConnectFailedDelegate(ConnectFailedDelegate);
-	Lobbies[1]->SetConnectFailedDelegate(ConnectFailedDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	LobbyApiClients[1]->Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
+	LobbyApiClients[1]->Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
 
-	Lobbies[0]->Connect();
+	LobbyApiClients[0]->Lobby.Connect();
 
-	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
+	while (!LobbyApiClients[0]->Lobby.IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 0"));
@@ -1334,9 +1288,9 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 	bUsersConnectionSuccess = false;
 	bUsersConnected = false;
 
-	Lobbies[1]->Connect();
+	LobbyApiClients[1]->Lobby.Connect();
 
-	while (!Lobbies[1]->IsConnected() || !bUsersConnectionSuccess)
+	while (!LobbyApiClients[1]->Lobby.IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnect2Users: Wait user 1"));
@@ -1358,11 +1312,11 @@ bool LobbyTestConnect2Users::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestConnectUser, "AccelByte.Tests.Lobby.B.ConnectUser", AutomationFlagMaskLobby);
 bool LobbyTestConnectUser::RunTest(const FString& Parameters)
 {
-	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
-	Lobbies[0]->SetConnectFailedDelegate(ConnectFailedDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
 
 	LobbyConnect(1);
-	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
+	while (!LobbyApiClients[0]->Lobby.IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestConnectUser: Wait user 0"));
@@ -1384,13 +1338,13 @@ bool LobbyTestSendPrivateChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 
 	int receivedChatCount = 0;
 
-	Lobbies[0]->SetPrivateMessageNotifDelegate(GetMessageDelegate);
+	LobbyApiClients[0]->Lobby.SetPrivateMessageNotifDelegate(GetMessageDelegate);
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		FString userId = UserCreds[0].GetUserId();
-		FString chatMessage = "Hello " + UserCreds[0].GetUserDisplayName() + " from " + UserCreds[i].GetUserDisplayName();
-		Lobbies[i]->SendPrivateMessage(userId, chatMessage);
+		FString userId = LobbyUsers[0].UserId;
+		FString chatMessage = "Hello " + LobbyUsers[0].DisplayName + " from " + LobbyUsers[i].DisplayName;
+		LobbyApiClients[i]->Lobby.SendPrivateMessage(userId, chatMessage);
 		FString text = FString::Printf(TEXT("Wait receiving message : %d"), receivedChatCount);
 		WaitUntil([&]()
 		{
@@ -1426,7 +1380,7 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 
 	for (int i = 0; i < TestUserCount; i++)
 	{
-		Lobbies[i]->SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, chatMultiplier](const FAccelByteModelsChannelMessageNotice& result)
+		LobbyApiClients[i]->Lobby.SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, chatMultiplier](const FAccelByteModelsChannelMessageNotice& result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Payload : %s"), *result.Payload);
 			FPlatformAtomics::InterlockedIncrement(&receivedChatCount);
@@ -1437,11 +1391,11 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 		}));
 
 		bool bJoinedChannel = false;
-		Lobbies[i]->SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
+		LobbyApiClients[i]->Lobby.SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
 		{
 			bJoinedChannel = true;
 		}));
-		Lobbies[i]->SendJoinDefaultChannelChatRequest();
+		LobbyApiClients[i]->Lobby.SendJoinDefaultChannelChatRequest();
 		WaitUntil(bJoinedChannel, TEXT("Waiting for join..."));
 	}
 
@@ -1449,8 +1403,8 @@ bool LobbyTestSendChannelChat_FromMultipleUsers_ChatReceived::RunTest(const FStr
 	{
 		for (int i = 0; i < TestUserCount; i++)
 		{
-			FString chatMessage = "Hello Chat, from " + UserCreds[i].GetUserDisplayName();
-			Lobbies[i]->SendChannelMessage(chatMessage);
+			FString chatMessage = "Hello Chat, from " + LobbyUsers[i].DisplayName;
+			LobbyApiClients[i]->Lobby.SendChannelMessage(chatMessage);
 		}
 	}
 
@@ -1479,7 +1433,7 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 
 	for (int i = 0; i < playerCount; i++)
 	{
-		Lobbies[i]->SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, playerCount](const FAccelByteModelsChannelMessageNotice& result)
+		LobbyApiClients[i]->Lobby.SetChannelMessageNotifDelegate(THandler<FAccelByteModelsChannelMessageNotice>::CreateLambda([&receivedChatCount, &bChatAllReceived, playerCount](const FAccelByteModelsChannelMessageNotice& result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Payload : %s"), *result.Payload);
 			FPlatformAtomics::InterlockedIncrement(&receivedChatCount);
@@ -1490,24 +1444,24 @@ bool LobbyTestSendChannelChat_Reconnected_ReceiveNoMessage::RunTest(const FStrin
 		}));
 
 		bool bJoinedChannel = false;
-		Lobbies[i]->SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
+		LobbyApiClients[i]->Lobby.SetJoinChannelChatResponseDelegate(THandler<FAccelByteModelsJoinDefaultChannelResponse>::CreateLambda([&bJoinedChannel](const FAccelByteModelsJoinDefaultChannelResponse& result)
 		{
 			bJoinedChannel = true;
 		}));
-		Lobbies[i]->SendJoinDefaultChannelChatRequest();
+		LobbyApiClients[i]->Lobby.SendJoinDefaultChannelChatRequest();
 		WaitUntil(bJoinedChannel, TEXT("Waiting for join..."));
 	}
 
-	FString chatMessage = "Hello Chat, from " + UserCreds[0].GetUserDisplayName();
-	Lobbies[0]->SendChannelMessage(chatMessage);
+	FString chatMessage = "Hello Chat, from " + LobbyUsers[0].DisplayName;
+	LobbyApiClients[0]->Lobby.SendChannelMessage(chatMessage);
 	DelaySeconds(3);
 
-	Lobbies[1]->Disconnect();
+	LobbyApiClients[1]->Lobby.Disconnect();
 	DelaySeconds(1);
-	Lobbies[1]->Connect();
+	LobbyApiClients[1]->Lobby.Connect();
 	DelaySeconds(1);
 
-	Lobbies[0]->SendChannelMessage(chatMessage);
+	LobbyApiClients[0]->Lobby.SendChannelMessage(chatMessage);
 
 	FString text = FString::Printf(TEXT("Wait receiving message : %d"), receivedChatCount);
 	WaitUntil([&]()
@@ -1530,31 +1484,31 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 {
 	LobbyConnect(TestUserCount);
 
-	Lobbies[0]->SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
+	LobbyApiClients[0]->Lobby.SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+		LobbyApiClients[i]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 	}
 
-	Lobbies[0]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[0]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->RequestFriend(UserCreds[0].GetUserId());
+		LobbyApiClients[i]->Lobby.RequestFriend(LobbyUsers[0].UserId);
 		FString text = FString::Printf(TEXT("Requesting Friend %d... "), i);
 		WaitUntil(bRequestFriendSuccess, text);
 
-		Lobbies[0]->AcceptFriend(UserCreds[i].GetUserId());
+		LobbyApiClients[0]->Lobby.AcceptFriend(LobbyUsers[i].UserId);
 		text = FString::Printf(TEXT("Accepting Friend %d... "), i);
 		WaitUntil(bAcceptFriendSuccess, text);
 
-		Lobbies[i]->SendSetPresenceStatus(Availability::Availabe, "random activity");
+		LobbyApiClients[i]->Lobby.SendSetPresenceStatus(Availability::Availabe, "random activity");
 		bRequestFriendSuccess = false;
 		bAcceptFriendSuccess = false;
 	}
 
-	Lobbies[0]->SendGetOnlineUsersRequest();
+	LobbyApiClients[0]->Lobby.SendGetOnlineUsersRequest();
 	WaitUntil([&]()
 	{
 		return bGetAllUserPresenceSuccess;
@@ -1562,17 +1516,17 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->SendSetPresenceStatus(Availability::Offline, "disappearing");
-		Lobbies[i]->Unfriend(UserCreds[0].GetUserId());
+		LobbyApiClients[i]->Lobby.SendSetPresenceStatus(Availability::Offline, "disappearing");
+		LobbyApiClients[i]->Lobby.Unfriend(LobbyUsers[0].UserId);
 	}
 
 	LobbyDisconnect(TestUserCount);
 
 	AB_TEST_TRUE(bGetAllUserPresenceSuccess);
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Num() >= 3);
-	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[1].GetUserId()));
-	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[2].GetUserId()));
-	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(UserCreds[3].GetUserId()));
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[1].UserId));
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[2].UserId));
+	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[3].UserId));
 	ResetResponses();
 	return true;
 }
@@ -1582,35 +1536,35 @@ bool FriendPresenceWithInvalidChar::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
-	Lobbies[0]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetGetAllUserPresenceResponseDelegate(GetAllUsersPresenceDelegate);
+	LobbyApiClients[0]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[1]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
-	Lobbies[1]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	LobbyApiClients[1]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetUserPresenceResponseDelegate(UserPresenceDelegate);
 	
-	Lobbies[1]->RequestFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.RequestFriend(LobbyUsers[0].UserId);
 	FString text = FString::Printf(TEXT("Requesting Friend %d... "), 1);
 	WaitUntil(bRequestFriendSuccess, text);
 
-	Lobbies[0]->AcceptFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.AcceptFriend(LobbyUsers[1].UserId);
 	text = FString::Printf(TEXT("Accepting Friend %d... "), 1);
 	WaitUntil(bAcceptFriendSuccess, text);
 
-	Lobbies[1]->SendSetPresenceStatus(Availability::Availabe, "\"acti \" vity\"");
+	LobbyApiClients[1]->Lobby.SendSetPresenceStatus(Availability::Availabe, "\"acti \" vity\"");
 	bRequestFriendSuccess = false;
 	bAcceptFriendSuccess = false;
 
 	text = FString::Printf(TEXT("Setting presence %d... "), 1);
 	WaitUntil(bUserPresenceSuccess, text);
 
-	Lobbies[0]->SendGetOnlineUsersRequest();
+	LobbyApiClients[0]->Lobby.SendGetOnlineUsersRequest();
 	WaitUntil([&]()
 	{
 		return bGetAllUserPresenceSuccess;
 	}, "Getting Friend Status...", 30);
 
-	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.Unfriend(LobbyUsers[1].UserId);
 	WaitUntil(bUnfriendSuccess, "Waiting unfriend...");
 
 	LobbyDisconnect(2);
@@ -1626,31 +1580,31 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends::RunTest
 {
 	LobbyConnect(TestUserCount);
 
-	Lobbies[0]->SetGetOnlineFriendsPresenceResponseDelegate(GetFriendsPresenceDelegate);
+	LobbyApiClients[0]->Lobby.SetGetOnlineFriendsPresenceResponseDelegate(GetFriendsPresenceDelegate);
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+		LobbyApiClients[i]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 	}
 
-	Lobbies[0]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[0]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->RequestFriend(UserCreds[0].GetUserId());
+		LobbyApiClients[i]->Lobby.RequestFriend(LobbyUsers[0].UserId);
 		FString text = FString::Printf(TEXT("Requesting Friend %d... "), i);
 		WaitUntil(bRequestFriendSuccess, text);
 
-		Lobbies[0]->AcceptFriend(UserCreds[i].GetUserId());
+		LobbyApiClients[0]->Lobby.AcceptFriend(LobbyUsers[i].UserId);
 		text = FString::Printf(TEXT("Accepting Friend %d... "), i);
 		WaitUntil(bAcceptFriendSuccess, text);
 
-		Lobbies[i]->SendSetPresenceStatus(Availability::Availabe, "random activity");
+		LobbyApiClients[i]->Lobby.SendSetPresenceStatus(Availability::Availabe, "random activity");
 		bRequestFriendSuccess = false;
 		bAcceptFriendSuccess = false;
 	}
 
-	Lobbies[0]->SendGetOnlineFriendPresenceRequest();
+	LobbyApiClients[0]->Lobby.SendGetOnlineFriendPresenceRequest();
 	WaitUntil([&]()
 	{
 		return bGetFriendsPresenceSuccess;
@@ -1658,17 +1612,17 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllFriends::RunTest
 
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		Lobbies[i]->SendSetPresenceStatus(Availability::Offline, "disappearing");
-		Lobbies[i]->Unfriend(UserCreds[0].GetUserId());
+		LobbyApiClients[i]->Lobby.SendSetPresenceStatus(Availability::Offline, "disappearing");
+		LobbyApiClients[i]->Lobby.Unfriend(LobbyUsers[0].UserId);
 	}
 
 	LobbyDisconnect(TestUserCount);
 
 	AB_TEST_TRUE(bGetFriendsPresenceSuccess);
 	AB_TEST_TRUE(onlineFriendResponse.friendsId.Num() >= 3);
-	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
-	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[2].GetUserId()));
-	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(UserCreds[3].GetUserId()));
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(LobbyUsers[2].UserId));
+	AB_TEST_TRUE(onlineFriendResponse.friendsId.Contains(LobbyUsers[3].UserId));
 	ResetResponses();
 	return true;
 }
@@ -1682,10 +1636,10 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 	TArray<FString> LobbyUserIds;
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		LobbyUserIds.Add(UserIds[i]);
+		LobbyUserIds.Add(LobbyUsers[i].UserId);
 		if(i >= (TestUserCount - ExpectedOffline))
 		{
-			Lobbies[i]->Disconnect();
+			LobbyApiClients[i]->Lobby.Disconnect();
 		}
 	}
 
@@ -1694,7 +1648,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
 	bool bGetPresenceSuccess = false;
-	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+	LobbyApiClients[0]->Lobby.BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
 	{
 		GetPresenceResult = Result;
 		bGetPresenceSuccess = true;
@@ -1716,7 +1670,7 @@ bool LobbyTestBulk_User_Get_Presence_Success::RunTest(const FString& Parameters)
 		bool bIsOnline = false;
 		bool bIsExpectedOnline = false;
 		for (int i = 1; i < (TestUserCount - ExpectedOffline); i++) {
-			if (Online.UserID == UserIds[i])
+			if (Online.UserID == LobbyUsers[i].UserId)
 			{
 				bIsExpectedOnline = true;
 				if (Online.Availability == EAccelByteGeneralUserStatus::Online)
@@ -1760,10 +1714,10 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 	TArray<FString> LobbyUserIds;
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		LobbyUserIds.Add(UserIds[i]);
+		LobbyUserIds.Add(LobbyUsers[i].UserId);
 		if (i >= (TestUserCount - ExpectedOffline))
 		{
-			Lobbies[i]->Disconnect();
+			LobbyApiClients[i]->Lobby.Disconnect();
 		}
 	}
 
@@ -1772,7 +1726,7 @@ bool LobbyTestBulk_User_Get_Presence_CountOnly::RunTest(const FString& Parameter
 	// Act (call bulk get user presence)
 	FAccelByteModelsBulkUserStatusNotif GetPresenceResult;
 	bool bGetPresenceSuccess = false;
-	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+	LobbyApiClients[0]->Lobby.BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
 		{
 			GetPresenceResult = Result;
 			bGetPresenceSuccess = true;
@@ -1806,7 +1760,7 @@ bool LobbyTestBulk_User_Get_Presence_EmptyUserId::RunTest(const FString& Paramet
 	bool bGetPresenceSuccess = false;
 	bool bGetPresenceDone = false;
 	int32 GetPresenceErrorCode;
-	Lobbies[0]->BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &bGetPresenceDone, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
+	LobbyApiClients[0]->Lobby.BulkGetUserPresence(LobbyUserIds, THandler<FAccelByteModelsBulkUserStatusNotif>::CreateLambda([&bGetPresenceSuccess, &bGetPresenceDone, &GetPresenceResult](const FAccelByteModelsBulkUserStatusNotif& Result)
 		{
 			GetPresenceResult = Result;
 			bGetPresenceSuccess = true;
@@ -1836,14 +1790,14 @@ bool LobbyTestGetPartyInfo_NoParty_ReturnError::RunTest(const FString& Parameter
 {
 	LobbyConnect(1);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	LobbyDisconnect(2);
@@ -1857,21 +1811,21 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 {
 	LobbyConnect(1);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
@@ -1881,7 +1835,7 @@ bool LobbyTestGetPartyInfo_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	AB_TEST_FALSE(infoPartyResponse.PartyId.IsEmpty());
 	AB_TEST_FALSE(infoPartyResponse.InvitationToken.IsEmpty());
 	AB_TEST_TRUE(infoPartyResponse.Members.Num() > 0);
-	AB_TEST_EQUAL(infoPartyResponse.Members[0], UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(infoPartyResponse.Members[0], LobbyUsers[0].UserId);
 
 	ResetResponses();
 	return true;
@@ -1892,14 +1846,13 @@ bool MessageIdCachedResponse::RunTest(const FString& Parameters)
 {
 	// Lobby Prep
 	LobbyConnect(1);
-	TSharedPtr<Lobby> Lobby = Lobbies[0];
-	Lobby->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobby->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobby->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	{ // Case 1: No response delegate changes
-		const FString MessageIdA = Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
+		const FString MessageIdA = LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate);
 		WaitUntil(bGetInfoPartySuccess, "Waiting for basic delegate response...");
 		AB_TEST_TRUE(bGetInfoPartySuccess);
 		bGetInfoPartySuccess = false;
@@ -1920,8 +1873,8 @@ bool MessageIdCachedResponse::RunTest(const FString& Parameters)
 				CallbackCount += 1;
 			});
 
-		const FString MessageIdA = Lobby->SendInfoPartyRequest(GetInfoPartyDelegateA);
-		const FString MessageIdB = Lobby->SendInfoPartyRequest(GetInfoPartyDelegateB);
+		const FString MessageIdA = LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegateA);
+		const FString MessageIdB = LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegateB);
 		WaitUntil([&] { return CallbackCount == 2; }, "Waiting for 2 responses...");
 		UTEST_TRUE("2 different cached callbacks returning 2 different responses", bIsACalled && bIsBCalled);
 	}
@@ -1940,7 +1893,7 @@ bool MessageIdCachedResponse::RunTest(const FString& Parameters)
 					UniqueResponseChecker.Add(i);
 				});
 
-			const FString MessageId = Lobby->SendInfoPartyRequest(GetInfoPartyDelegate_Unique);
+			const FString MessageId = LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate_Unique);
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Just sent request with message id [%s] expecting response [%d]"), *MessageId, i);
 
 			Index.Add(i);
@@ -1968,24 +1921,24 @@ bool MessageIdCachedResponse::RunTest(const FString& Parameters)
 				bLastAssignedWrongDelegateCalled = true;
 			});
 
-		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
-		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate);
+		LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
 		WaitUntil(bGetInfoPartySuccess, "Waiting for cached response ...", 15);
 		UTEST_FALSE("Overriding response will not affect response for request that is already on the way. Single Sequence", bLastAssignedWrongDelegateCalled);
 
 		bLastAssignedWrongDelegateCalled = false;
-		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
-		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
-		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
-		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-		Lobby->SendInfoPartyRequest(GetInfoPartyDelegate);
-		Lobby->SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate);
+		LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate);
+		LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
+		LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+		LobbyApiClients[0]->Lobby.SendInfoPartyRequest(GetInfoPartyDelegate);
+		LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate_ShouldNotBeCalled);
 		UTEST_FALSE("Overriding response will not affect response for request that is already on the way. Pseudo-Random Sequence", bLastAssignedWrongDelegateCalled);
 	}
 
 	//@TODO dummy uncached/unregistered/unknown message id will not call a response
 
-	Lobby->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	LobbyDisconnect(1);
 	ResetResponses();
@@ -1998,20 +1951,20 @@ bool LobbyTestGetPartyData_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 	LobbyConnect(1);
 	FString PartyId;
 
-	const Lobby::FPartyInfoResponse OnInfoPartyResponse = Lobby::FPartyInfoResponse::CreateLambda(
+	const AccelByte::Api::Lobby::FPartyInfoResponse OnInfoPartyResponse = AccelByte::Api::Lobby::FPartyInfoResponse::CreateLambda(
 		[&PartyId](FAccelByteModelsInfoPartyResponse Response)
 		{
 			PartyId = Response.PartyId;	
 		});
-	Lobbies[0]->SetInfoPartyResponseDelegate(OnInfoPartyResponse);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(OnInfoPartyResponse);
 	
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating party..");
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 	WaitUntil([&]() { return !PartyId.IsEmpty(); });
 
 	bool bGetPartyDataDone = false;
@@ -2032,10 +1985,10 @@ bool LobbyTestGetPartyData_PartyCreated_ReturnOk::RunTest(const FString& Paramet
 			bGetPartyDataError = true;
 		});
 	
-	Lobbies[0]->GetPartyData(PartyId, OnPartyDataSuccess, OnPartyDataError);
+	LobbyApiClients[0]->Lobby.GetPartyData(PartyId, OnPartyDataSuccess, OnPartyDataError);
 	WaitUntil(bGetPartyDataDone, "Getting party data...");
 	
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
 	LobbyDisconnect(1);
@@ -2051,25 +2004,25 @@ bool LobbyTestCreateParty_PartyAlreadyCreated_ReturnError::RunTest(const FString
 {
 	LobbyConnect(1);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	bCreatePartySuccess = false;
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
@@ -2087,68 +2040,68 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	FString partyCode;
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetPartyGenerateCodeResponseDelegate(GeneratePartyCodeDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyGenerateCodeResponseDelegate(GeneratePartyCodeDelegate);
 
-	Lobbies[0]->SetPartyGetCodeResponseDelegate(GetPartyCodeDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyGetCodeResponseDelegate(GetPartyCodeDelegate);
 
-	Lobbies[0]->SetPartyDeleteCodeResponseDelegate(DeletePartyCodeDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyDeleteCodeResponseDelegate(DeletePartyCodeDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetPartyJoinViaCodeResponseDelegate(JoinViaCodeDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyJoinViaCodeResponseDelegate(JoinViaCodeDelegate);
 
 	// Leave Previous parties
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	// Create Party
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
 	// Get Party Code
-	Lobbies[0]->SendPartyGetCodeRequest();
+	LobbyApiClients[0]->Lobby.SendPartyGetCodeRequest();
 	WaitUntil(bGetPartyCodeSuccess, "Getting Party Code...");
 	AB_TEST_TRUE(bGetPartyCodeSuccess);
 	bGetPartyCodeSuccess = false;
 	partyCode = partyCodeResponse.PartyCode;
 
 	bCreatePartySuccess = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating party...");
 
 	// Join via Party Code
-	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
+	LobbyApiClients[1]->Lobby.SendPartyJoinViaCodeRequest(partyCode);
 	WaitUntil(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
 	AB_TEST_TRUE(bJoinPartyViaCodeSuccess);
 	bJoinPartyViaCodeError = false;
@@ -2156,23 +2109,23 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 
 	// Leave Party
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendLeavePartyRequest();
+	LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 
 	// Generate new Party Code
-	Lobbies[0]->SendPartyGenerateCodeRequest();
+	LobbyApiClients[0]->Lobby.SendPartyGenerateCodeRequest();
 	WaitUntil(bGeneratePartyCodeSuccess, "Generate Party Code...");
 	AB_TEST_TRUE(bGeneratePartyCodeSuccess);
 
 	// Join via Party Code using previous code
-	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
+	LobbyApiClients[1]->Lobby.SendPartyJoinViaCodeRequest(partyCode);
 	WaitUntil(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
 	AB_TEST_TRUE(bJoinPartyViaCodeError);
 	bJoinPartyViaCodeError = false;
 	bJoinPartyViaCodeSuccess = false;
 
 	// Get Party Code
-	Lobbies[0]->SendPartyGetCodeRequest();
+	LobbyApiClients[0]->Lobby.SendPartyGetCodeRequest();
 	WaitUntil(bGetPartyCodeSuccess, "Getting Party Code...");
 	AB_TEST_TRUE(bGetPartyCodeSuccess);
 	bGetPartyCodeSuccess = false;
@@ -2180,14 +2133,14 @@ bool LobbyTestJoinParty_Via_PartyCode::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(partyCode == partyGenerateCodeResponse.PartyCode);
 
 	// Join via Party Code using new code
-	Lobbies[1]->SendPartyJoinViaCodeRequest(partyCode);
+	LobbyApiClients[1]->Lobby.SendPartyJoinViaCodeRequest(partyCode);
 	WaitUntil(bJoinPartyViaCodeSuccess, "Joining Party via Code...");
 	AB_TEST_TRUE(bJoinPartyViaCodeSuccess);
 	bJoinPartyViaCodeError = false;
 	bJoinPartyViaCodeSuccess = false;
 
 	// Delete Party Code
-	Lobbies[0]->SendPartyDeleteCodeRequest();
+	LobbyApiClients[0]->Lobby.SendPartyDeleteCodeRequest();
 	WaitUntil(bDeletePartyCodeSuccess, "Deleting Party Code...");
 	AB_TEST_TRUE(bDeletePartyCodeSuccess);
 
@@ -2203,7 +2156,7 @@ bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
 	LobbyConnect(1);
 
 	bool bJoinFailed = false;
-	Lobbies[0]->SetPartyJoinViaCodeResponseDelegate(Lobby::FPartyJoinViaCodeResponse::CreateLambda([&](const FAccelByteModelsPartyJoinResponse& Result)
+	LobbyApiClients[0]->Lobby.SetPartyJoinViaCodeResponseDelegate(AccelByte::Api::Lobby::FPartyJoinViaCodeResponse::CreateLambda([&](const FAccelByteModelsPartyJoinResponse& Result)
 	{
 		if(Result.Code.Equals("11573") || !Result.Code.Equals("0"))
 		{
@@ -2211,7 +2164,7 @@ bool LobbyTestJoinParty_Via_PartyCodeInvalid::RunTest(const FString& Parameters)
 			bJoinFailed = true;
 		}
 	}));
-	Lobbies[0]->SendPartyJoinViaCodeRequest("INVALID");
+	LobbyApiClients[0]->Lobby.SendPartyJoinViaCodeRequest("INVALID");
 	WaitUntil(bJoinFailed, "Waiting to join party via code...");
 	
 	AB_TEST_TRUE(bJoinFailed);
@@ -2227,54 +2180,54 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyResponseDelegate(InvitePartyDelegate);
 
-	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 
-	Lobbies[1]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
 	
-	Lobbies[0]->SetPartyChatNotifDelegate(PartyChatNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyChatNotifDelegate(PartyChatNotifDelegate);
 	
-	Lobbies[1]->SetPartyMessageResponseDelegate(PartyChatSendDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyMessageResponseDelegate(PartyChatSendDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyUsers[1].UserId);
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
 
 	AB_TEST_TRUE(bInvitePartySuccess);
@@ -2286,9 +2239,9 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 
 	AB_TEST_FALSE(bGetInvitedNotifError);
 
-	Lobbies[0]->SetPartyDataUpdateNotifDelegate(PartyDataUpdateDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyDataUpdateNotifDelegate(PartyDataUpdateDelegate);
 
-	Lobbies[1]->SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
+	LobbyApiClients[1]->Lobby.SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 	while (!bJoinPartySuccess && !bGetInvitedNotifError)
 	{
 		FPlatformProcess::Sleep(.5f);
@@ -2302,7 +2255,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 	const auto partyInfoResult = infoPartyResponse;
 
@@ -2313,7 +2266,7 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 	AB_TEST_EQUAL(partyDataUpdate.Leader, partyInfoResult.LeaderId);
 	AB_TEST_EQUAL(partyDataUpdate.Members.Num(), partyInfoResult.Members.Num());
 
-	Lobbies[1]->SendPartyMessage("This is a party chat");
+	LobbyApiClients[1]->Lobby.SendPartyMessage("This is a party chat");
 	WaitUntil(bSendPartyChatSuccess, "Sending a Party Chat...");
 	AB_TEST_FALSE(bSendPartyChatError);
 
@@ -2327,13 +2280,13 @@ bool LobbyTestInviteToParty_InvitationAccepted_CanChat::RunTest(const FString& P
 
 	bLeavePartySuccess = false;
 	bLeavePartyError = false;
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	AB_TEST_FALSE(bLeavePartyError);
 
 	bLeavePartySuccess = false;
 	bLeavePartyError = false;
-	Lobbies[1]->SendLeavePartyRequest();
+	LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	AB_TEST_FALSE(bLeavePartyError);
 
@@ -2348,24 +2301,24 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
-	Lobbies[1]->SetInvitePartyRejectResponseDelegate(RejectPartyDelegate);
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[0]->SetPartyInvitationRejectedNotifDelegate(RejectPartyNotifDelegate);
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyResponseDelegate(InvitePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInvitePartyRejectResponseDelegate(RejectPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyInvitationRejectedNotifDelegate(RejectPartyNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 	
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
 		bLeavePartySuccess = false;
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
@@ -2374,23 +2327,23 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 	bRejectPartySuccess = false;
 	bRejectPartyError = false; 
 	bRejectedPartyNotifSuccess = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
 		bLeavePartySuccess = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyUsers[1].UserId);
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
 
 	AB_TEST_TRUE(bInvitePartySuccess);
@@ -2403,7 +2356,7 @@ bool LobbyTestInviteToParty_InvitationRejected::RunTest(const FString& Parameter
 
 	AB_TEST_FALSE(bGetInvitedNotifError);
 
-	Lobbies[1]->SendRejectInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
+	LobbyApiClients[1]->Lobby.SendRejectInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 	while (!bRejectPartySuccess && !bGetInvitedNotifError)
 	{
 		FPlatformProcess::Sleep(.5f);
@@ -2432,67 +2385,67 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	FAccelByteModelsPartyJoinResponse joinParty[2];
 	LobbyConnect(3);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyResponseDelegate(InvitePartyDelegate);
 
-	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 
-	Lobbies[2]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 
-	Lobbies[1]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
 
-	Lobbies[2]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[2]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[2]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[2]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetInvitePartyKickMemberResponseDelegate(KickPartyMemberDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyKickMemberResponseDelegate(KickPartyMemberDelegate);
 
-	Lobbies[2]->SetPartyKickNotifDelegate(KickedFromPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetPartyKickNotifDelegate(KickedFromPartyDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
-	Lobbies[2]->SendInfoPartyRequest();
+	LobbyApiClients[2]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[2]->SendLeavePartyRequest();
+		LobbyApiClients[2]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
@@ -2500,11 +2453,11 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
-	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyUsers[1].UserId);
 
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
 
@@ -2519,10 +2472,10 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	bGetInvitedNotifSuccess = false;
 	invitedToParty[0] = invitedToPartyResponse;
 
-	Lobbies[0]->SendInviteToPartyRequest(UserCreds[2].GetUserId());
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyUsers[2].UserId);
 
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
-	const FString InvitedUserId {UserCreds[2].GetUserId()};
+	const FString InvitedUserId {LobbyUsers[2].UserId};
 	const FAccelByteModelsPartyInviteResponse InviteToPartyResponse {partyInviteResponse};
 
 	bInvitePartySuccess = false;
@@ -2535,35 +2488,35 @@ bool LobbyTestPartyMember_Kicked::RunTest(const FString& Parameters)
 	bGetInvitedNotifSuccess = false;
 	invitedToParty[1] = invitedToPartyResponse;
 
-	Lobbies[1]->SendAcceptInvitationRequest(invitedToParty[0].PartyId, invitedToParty[0].InvitationToken);
+	LobbyApiClients[1]->Lobby.SendAcceptInvitationRequest(invitedToParty[0].PartyId, invitedToParty[0].InvitationToken);
 
 	WaitUntil(bJoinPartySuccess, "Joining a Party...");
 
 	bJoinPartySuccess = false;
 	joinParty[0] = joinPartyResponse;
 
-	Lobbies[2]->SendAcceptInvitationRequest(invitedToParty[1].PartyId, invitedToParty[1].InvitationToken);
+	LobbyApiClients[2]->Lobby.SendAcceptInvitationRequest(invitedToParty[1].PartyId, invitedToParty[1].InvitationToken);
 
 	WaitUntil(bJoinPartySuccess, "Joining a Party...");
 
 	bJoinPartySuccess = false;
 	joinParty[1] = joinPartyResponse;
 
-	Lobbies[0]->SendKickPartyMemberRequest(UserCreds[2].GetUserId());
+	LobbyApiClients[0]->Lobby.SendKickPartyMemberRequest(LobbyUsers[2].UserId);
 
 	WaitUntil(bKickPartyMemberSuccess, "Kicking Party Member...");
-	const FString KickedUserId {UserCreds[2].GetUserId()};
+	const FString KickedUserId {LobbyUsers[2].UserId};
 	const FAccelByteModelsKickPartyMemberResponse KickMemberFromPartyResponse {kickMemberFromPartyResponse};
 
 	WaitUntil(bKickedFromPartySuccess, "Waiting to Get Kicked from Party...");
 
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	for (int i = 0; i < 2; i++)
 	{
-		Lobbies[i]->SendLeavePartyRequest();
+		LobbyApiClients[i]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 		bLeavePartySuccess = false;
 	}
@@ -2588,44 +2541,44 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetInvitePartyResponseDelegate(InvitePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInvitePartyResponseDelegate(InvitePartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetPartyPromoteLeaderResponseDelegate(PromotePartyLeaderDelegate);
+	LobbyApiClients[0]->Lobby.SetPartyPromoteLeaderResponseDelegate(PromotePartyLeaderDelegate);
 
-	Lobbies[1]->SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInvitePartyJoinResponseDelegate(JoinPartyDelegate);
 
-	Lobbies[1]->SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetPartyGetInvitedNotifDelegate(InvitedToPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 
@@ -2633,12 +2586,12 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 	bGetInfoPartySuccess = false;
 	bLeavePartySuccess = false;
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendInviteToPartyRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.SendInviteToPartyRequest(LobbyUsers[1].UserId);
 
 	WaitUntil(bInvitePartySuccess, "Inviting to Party...");
 
@@ -2651,7 +2604,7 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	bGetInvitedNotifSuccess = false;
 
-	Lobbies[1]->SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
+	LobbyApiClients[1]->Lobby.SendAcceptInvitationRequest(*invitedToPartyResponse.PartyId, *invitedToPartyResponse.InvitationToken);
 
 	WaitUntil(bJoinPartySuccess, "Joining a Party...");
 
@@ -2659,13 +2612,13 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	bJoinPartySuccess = false;
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	bGetInfoPartySuccess = false;
 
-	Lobbies[0]->SendPartyPromoteLeaderRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.SendPartyPromoteLeaderRequest(LobbyUsers[1].UserId);
 
 	WaitUntil(bPromotePartyLeaderSuccess, "Promoting Party leader...");
 
@@ -2673,13 +2626,13 @@ bool LobbyTestPartyMember_PromoteLeader::RunTest(const FString& Parameters)
 
 	bPromotePartyLeaderSuccess = false;
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	bGetInfoPartySuccess = false;
 
-	AB_TEST_EQUAL(infoPartyResponse.LeaderId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(infoPartyResponse.LeaderId, LobbyUsers[1].UserId);
 
 	LobbyDisconnect(2);
 
@@ -2693,11 +2646,11 @@ bool LobbyTestConnected_ForMoreThan1Minutes_DoesntDisconnect::RunTest(const FStr
 	LobbyConnect(1);
 	for (int i = 0; i < 100; i += 5)
 	{
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait for %d seconds. Lobby.IsConnected=%d"), i, Lobbies[0]->IsConnected());
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Wait for %d seconds. Lobby.IsConnected=%d"), i, LobbyApiClients[0]->Lobby.IsConnected());
 		FPlatformProcess::Sleep(5);
 		FTicker::GetCoreTicker().Tick(5);
 	}
-	AB_TEST_TRUE(Lobbies[0]->IsConnected());
+	AB_TEST_TRUE(LobbyApiClients[0]->Lobby.IsConnected());
 
 	LobbyDisconnect(1);
 	ResetResponses();
@@ -2715,13 +2668,13 @@ bool LobbyTestNotification_GetSyncNotification::RunTest(const FString& Parameter
 
 	LobbyConnect(1);
 
-	Lobbies[0]->SetMessageNotifDelegate(GetNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetMessageNotifDelegate(GetNotifDelegate);
 
 	for (int i = 0; i < repetition; i++)
 	{
 		payloads[i] = FString::Printf(TEXT("Notification number %d"), i);
 
-		UAccelByteBlueprintsTest::SendNotif(UserCreds[0].GetUserId(), payloads[i], true, FVoidHandler::CreateLambda([&]()
+		UAccelByteBlueprintsTest::SendNotif(LobbyUsers[0].UserId, payloads[i], true, FVoidHandler::CreateLambda([&]()
 		{
 			bSendNotifSucccess[i] = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
@@ -2760,14 +2713,14 @@ bool LobbyTestNotification_SendNotifUserToUserSync::RunTest(const FString& Param
 
 	LobbyConnect(2);
 
-	Lobbies[1]->SetMessageNotifDelegate(GetNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetMessageNotifDelegate(GetNotifDelegate);
 
 	for (int i = 0; i < repetition; i++)
 	{
 		MessageRequest[i].Topic = FString::Printf(TEXT("Message number %d"), i);
 		MessageRequest[i].Message = FString::Printf(TEXT("Test from the integration test UE4 number %d"), i);
 
-		Lobbies[0]->SendNotificationToUser(UserCreds[1].GetUserId(), MessageRequest[i], false, FVoidHandler::CreateLambda([&]()
+		LobbyApiClients[0]->Lobby.SendNotificationToUser(LobbyUsers[1].UserId, MessageRequest[i], false, FVoidHandler::CreateLambda([&]()
 		{
 			bSendNotifSucccess[i] = true;
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Notification Sent!"));
@@ -2802,27 +2755,27 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 
 	LobbyConnect(2);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[0]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	LobbyApiClients[0]->Lobby.SetUserPresenceResponseDelegate(UserPresenceDelegate);
 
-	Lobbies[1]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	LobbyApiClients[1]->Lobby.SetUserPresenceResponseDelegate(UserPresenceDelegate);
 
-	Lobbies[1]->SetUserPresenceNotifDelegate(UserPresenceNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetUserPresenceNotifDelegate(UserPresenceNotifDelegate);
 
-	Lobbies[1]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[1]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend...");
 
-	Lobbies[1]->SendSetPresenceStatus(Availability::Availabe, "ready to play");
+	LobbyApiClients[1]->Lobby.SendSetPresenceStatus(Availability::Availabe, "ready to play");
 
 	WaitUntil([&]()
 	{
@@ -2831,7 +2784,7 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 
 	bUserPresenceSuccess = false;
 
-	Lobbies[0]->SendSetPresenceStatus(expectedUserStatus, "expected activity");
+	LobbyApiClients[0]->Lobby.SendSetPresenceStatus(expectedUserStatus, "expected activity");
 
 	WaitUntil([&]()
 	{
@@ -2843,7 +2796,7 @@ bool LobbyTestSetUserStatus_CheckedByAnotherUser::RunTest(const FString& Paramet
 		return bUserPresenceNotifSuccess; 
 	}, "Waiting for Changing User Presence...", 30);
 
-	Lobbies[1]->Unfriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.Unfriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 
@@ -2868,27 +2821,27 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 
 	LobbyConnect(2);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[1]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	LobbyApiClients[1]->Lobby.SetUserPresenceResponseDelegate(UserPresenceDelegate);
 
-	Lobbies[0]->SetUserPresenceResponseDelegate(UserPresenceDelegate);
+	LobbyApiClients[0]->Lobby.SetUserPresenceResponseDelegate(UserPresenceDelegate);
 
-	Lobbies[1]->SetUserPresenceNotifDelegate(UserPresenceNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetUserPresenceNotifDelegate(UserPresenceNotifDelegate);
 
-	Lobbies[1]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[1]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend...");
 
-	Lobbies[1]->SendSetPresenceStatus(Availability::Availabe, "ready to play again");
+	LobbyApiClients[1]->Lobby.SendSetPresenceStatus(Availability::Availabe, "ready to play again");
 
 	WaitUntil([&]()
 	{
@@ -2896,7 +2849,7 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 	}, "Changing User Status...", 30);
 
 	bUserPresenceSuccess = false;
-	Lobbies[0]->SendSetPresenceStatus(Availability::Availabe, "ready to play too");
+	LobbyApiClients[0]->Lobby.SendSetPresenceStatus(Availability::Availabe, "ready to play too");
 
 	WaitUntil([&]()
 	{
@@ -2910,7 +2863,7 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 
 	bUserPresenceSuccess = false;
 	bUserPresenceNotifSuccess = false;
-	Lobbies[0]->SendSetPresenceStatus(expectedUserStatus, "busy, can't play");
+	LobbyApiClients[0]->Lobby.SendSetPresenceStatus(expectedUserStatus, "busy, can't play");
 
 	WaitUntil([&]()
 	{
@@ -2922,7 +2875,7 @@ bool LobbyTestChangeUserStatus_CheckedByAnotherUser::RunTest(const FString& Para
 		return bUserPresenceNotifSuccess;
 	}, "Waiting for Changing User Presence...", 30);
 
-	Lobbies[1]->Unfriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.Unfriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 
@@ -2945,84 +2898,84 @@ bool LobbyTestFriends_Request_Accept::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[0]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[1]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[1]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[0]->SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
 
-	Lobbies[1]->SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[1]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[1]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend Request...");
 	AB_TEST_FALSE(bAcceptFriendError);
 
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[1]->LoadFriendsList();
+	LobbyApiClients[1]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.Unfriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 	AB_TEST_FALSE(bUnfriendError);
@@ -3037,53 +2990,53 @@ bool LobbyTestFriends_Notification_Request_Accept::RunTest(const FString& Parame
 {
 	LobbyConnect(2);
 
-	Lobbies[1]->SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
 
-	Lobbies[0]->SetOnFriendRequestAcceptedNotifDelegate(OnRequestAcceptedNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetOnFriendRequestAcceptedNotifDelegate(OnRequestAcceptedNotifDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[1]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[1]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
 	WaitUntil(bOnIncomingRequestNotifSuccess, "Waiting for Incoming Friend Request...");
 	AB_TEST_FALSE(bOnIncomingRequestNotifError);
-	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, LobbyUsers[0].UserId);
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend Request...");
 	AB_TEST_FALSE(bAcceptFriendError);
 
 	WaitUntil(bOnRequestAcceptedNotifSuccess, "Waiting for Accepted Friend Request...");
 	AB_TEST_FALSE(bOnRequestAcceptedNotifError);
-	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, LobbyUsers[1].UserId);
 
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[1]->LoadFriendsList();
+	LobbyApiClients[1]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.Unfriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 	AB_TEST_FALSE(bUnfriendError);
@@ -3098,85 +3051,85 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[0]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[1]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[1]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[0]->SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
 
-	Lobbies[1]->SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[1]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[1]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
-	Lobbies[1]->SetOnUnfriendNotifDelegate(UnfriendNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetOnUnfriendNotifDelegate(UnfriendNotifDelegate);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend Request...");
 	AB_TEST_FALSE(bAcceptFriendError);
 
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[1]->LoadFriendsList();
+	LobbyApiClients[1]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.Unfriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 	AB_TEST_FALSE(bUnfriendError);
@@ -3184,28 +3137,28 @@ bool LobbyTestFriends_Request_Unfriend::RunTest(const FString& Parameters)
 	WaitUntil(bUnfriendNotifSuccess, "Waiting Unfriend Notif...");
 	AB_TEST_TRUE(bUnfriendNotifSuccess);
 
-	AB_TEST_EQUAL(UnfriendNotifResponse.friendId, UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(UnfriendNotifResponse.friendId, LobbyUsers[0].UserId);
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 	}
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[1]->LoadFriendsList();
+	LobbyApiClients[1]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(LobbyUsers[0].UserId));
 	}
 
 	LobbyDisconnect(2);
@@ -3218,71 +3171,71 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[0]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[1]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[1]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[0]->SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
 
-	Lobbies[1]->SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
 
-	Lobbies[1]->SetRejectFriendsResponseDelegate(RejectFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetRejectFriendsResponseDelegate(RejectFriendDelegate);
 
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
-	Lobbies[0]->SetOnRejectFriendsNotifDelegate(RejectFriendNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetOnRejectFriendsNotifDelegate(RejectFriendNotifDelegate);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[1]->RejectFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.RejectFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bRejectFriendSuccess, "Rejecting Friend Request...");
 	AB_TEST_FALSE(bRejectFriendError);
 
 	WaitUntil(bRejectFriendNotifSuccess, "Getting Reject Friend Notif...");
 	AB_TEST_TRUE(bRejectFriendNotifSuccess);
-	AB_TEST_EQUAL(RejectFriendNotifResponse.userId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(RejectFriendNotifResponse.userId, LobbyUsers[1].UserId);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
@@ -3290,15 +3243,15 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_FALSE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_FALSE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
@@ -3306,11 +3259,11 @@ bool LobbyTestFriends_Request_Reject::RunTest(const FString& Parameters)
 
 	bListOutgoingFriendSuccess = false;
 	bListOutgoingFriendError = false;
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_FALSE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_FALSE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3322,98 +3275,98 @@ bool LobbyTestFriends_Request_Cancel::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[0]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[1]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[1]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[0]->SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
 
-	Lobbies[1]->SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
 
-	Lobbies[0]->SetCancelFriendsResponseDelegate(CancelFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetCancelFriendsResponseDelegate(CancelFriendDelegate);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[1]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[1]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
-	Lobbies[1]->SetOnCancelFriendsNotifDelegate(CancelFriendNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetOnCancelFriendsNotifDelegate(CancelFriendNotifDelegate);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[0]->CancelFriendRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.CancelFriendRequest(LobbyUsers[1].UserId);
 
 	WaitUntil(bCancelFriendSuccess, "Cancelling Friend Request...");
 	AB_TEST_FALSE(bCancelFriendError);
 
 	WaitUntil(bCancelFriendNotifSuccess, "Getting Cancel Friend Notif...");
 	AB_TEST_TRUE(bCancelFriendNotifSuccess);
-	AB_TEST_EQUAL(CancelFriendNotifResponse.userId, UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(CancelFriendNotifResponse.userId, LobbyUsers[0].UserId);
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_FALSE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_FALSE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[1]->LoadFriendsList();
+	LobbyApiClients[1]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(LobbyUsers[0].UserId));
 	}
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 	}
 
 	LobbyDisconnect(2);
@@ -3426,100 +3379,100 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[1]->SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetOnIncomingRequestFriendsNotifDelegate(OnIncomingRequestNotifDelegate);
 
-	Lobbies[0]->SetOnFriendRequestAcceptedNotifDelegate(OnRequestAcceptedNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetOnFriendRequestAcceptedNotifDelegate(OnRequestAcceptedNotifDelegate);
 
-	Lobbies[0]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[0]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[1]->SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
+	LobbyApiClients[1]->Lobby.SetGetFriendshipStatusResponseDelegate(GetFriendshipStatusDelegate);
 
-	Lobbies[0]->SetRequestFriendsResponseDelegate(RequestFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetRequestFriendsResponseDelegate(RequestFriendDelegate);
 
-	Lobbies[0]->SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetListOutgoingFriendsResponseDelegate(ListOutgoingFriendDelegate);
 
-	Lobbies[1]->SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetListIncomingFriendsResponseDelegate(ListIncomingFriendDelegate);
 
-	Lobbies[0]->SetCancelFriendsResponseDelegate(CancelFriendDelegate);
+	LobbyApiClients[0]->Lobby.SetCancelFriendsResponseDelegate(CancelFriendDelegate);
 
-	Lobbies[1]->SetRejectFriendsResponseDelegate(RejectFriendDelegate);
+	LobbyApiClients[1]->Lobby.SetRejectFriendsResponseDelegate(RejectFriendDelegate);
 
-	Lobbies[1]->SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
+	LobbyApiClients[1]->Lobby.SetAcceptFriendsResponseDelegate(AcceptFriendsDelegate);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
 
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::NotFriend);
 
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
-	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Outgoing);
 
-	Lobbies[0]->CancelFriendRequest(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.CancelFriendRequest(LobbyUsers[1].UserId);
 
 	WaitUntil(bCancelFriendSuccess, "Cancelling Friend Request...");
 	AB_TEST_FALSE(bCancelFriendError);
 
 	bListOutgoingFriendSuccess = false;
 	bListOutgoingFriendError = false;
-	Lobbies[0]->ListOutgoingFriends();
+	LobbyApiClients[0]->Lobby.ListOutgoingFriends();
 
 	WaitUntil(bListOutgoingFriendSuccess, "Getting List Outgoing Friend...");
 	AB_TEST_FALSE(bListOutgoingFriendError);
 	if (listOutgoingFriendResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(listOutgoingFriendResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_FALSE(listOutgoingFriendResponse.friendsId.Contains(LobbyUsers[1].UserId));
 	}
 
 	bRequestFriendSuccess = false;
 	bRequestFriendError = false;
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
 
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Incoming);
 
-	Lobbies[1]->RejectFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.RejectFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bRejectFriendSuccess, "Rejecting Friend Request...");
 	AB_TEST_FALSE(bRejectFriendError);
 
 	bRequestFriendSuccess = false;
 	bRequestFriendError = false;
-	Lobbies[0]->RequestFriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.RequestFriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bRequestFriendSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bRequestFriendError);
@@ -3528,17 +3481,17 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 		return bOnIncomingRequestNotifSuccess;
 	}, "Waiting for Incoming Friend Request...", 30);
 	AB_TEST_FALSE(bOnIncomingRequestNotifError);
-	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(requestFriendNotifResponse.friendId, LobbyUsers[0].UserId);
 
 	bListIncomingFriendSuccess = false;
 	bListIncomingFriendError = false;
-	Lobbies[1]->ListIncomingFriends();
+	LobbyApiClients[1]->Lobby.ListIncomingFriends();
 
 	WaitUntil(bListIncomingFriendSuccess, "Getting List Incoming Friend...");
 	AB_TEST_FALSE(bListIncomingFriendError);
-	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(UserCreds[0].GetUserId()));
+	AB_TEST_TRUE(listIncomingFriendResponse.friendsId.Contains(LobbyUsers[0].UserId));
 
-	Lobbies[1]->AcceptFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.AcceptFriend(LobbyUsers[0].UserId);
 
 	WaitUntil(bAcceptFriendSuccess, "Accepting Friend Request...");
 	AB_TEST_FALSE(bAcceptFriendError);
@@ -3547,17 +3500,17 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 		return bOnRequestAcceptedNotifSuccess;
 	}, "Waiting for Accepted Friend Request...", 30);
 	AB_TEST_FALSE(bOnRequestAcceptedNotifError);
-	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(acceptFriendNotifResponse.friendId, LobbyUsers[1].UserId);
 
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
-	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+	AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[0]->GetFriendshipStatus(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.GetFriendshipStatus(LobbyUsers[1].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
@@ -3565,31 +3518,31 @@ bool LobbyTestFriends_Complete_Scenario::RunTest(const FString& Parameters)
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 	
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
 	AB_TEST_EQUAL(getFriendshipStatusResponse.friendshipStatus, ERelationshipStatusCode::Friend);
 
-	Lobbies[0]->Unfriend(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.Unfriend(LobbyUsers[1].UserId);
 
 	WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 	AB_TEST_FALSE(bUnfriendError);
 
 	bLoadFriendListSuccess = false;
 	bLoadFriendListError = false;
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 
 	WaitUntil(bLoadFriendListSuccess, "Loading Friend List...");
 	AB_TEST_FALSE(bLoadFriendListError);
 	if (loadFriendListResponse.friendsId.Num() != 0)
 	{
-		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(UserCreds[1].GetUserId()));
+		AB_TEST_FALSE(loadFriendListResponse.friendsId.Contains(LobbyUsers[1].UserId));
 	}
 
 	bGetFriendshipStatusSuccess = false;
 	bGetFriendshipStatusError = false;
-	Lobbies[1]->GetFriendshipStatus(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.GetFriendshipStatus(LobbyUsers[0].UserId);
 
 	WaitUntil(bGetFriendshipStatusSuccess, "Getting Friendship Status...");
 	AB_TEST_FALSE(bGetFriendshipStatusError);
@@ -3606,11 +3559,11 @@ bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 	FAccelByteModelsBulkFriendsRequest FriendUserIds;
 	for (int i = 1; i < TestUserCount; i++)
 	{
-		FriendUserIds.FriendIds.Add(UserIds[i]);
+		FriendUserIds.FriendIds.Add(LobbyUsers[i].UserId);
 	}
 
 	bool bBulkAddFriendSuccess = false;
-	Lobbies[0]->BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess]()
+	LobbyApiClients[0]->Lobby.BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess]()
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Bulk Add Friend Success!"));
 		bBulkAddFriendSuccess = true;
@@ -3619,16 +3572,16 @@ bool LobbyTestFriends_BulkFriendRequest::RunTest(const FString& Parameters)
 	
 	LobbyConnect(1);
 
-	Lobbies[0]->SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
-	Lobbies[0]->LoadFriendsList();
+	LobbyApiClients[0]->Lobby.SetLoadFriendListResponseDelegate(LoadFriendListDelegate);
+	LobbyApiClients[0]->Lobby.LoadFriendsList();
 	WaitUntil(bLoadFriendListSuccess, "Waiting Load Friend List...!");
 
-	Lobbies[0]->SetUnfriendResponseDelegate(UnfriendDelegate);
+	LobbyApiClients[0]->Lobby.SetUnfriendResponseDelegate(UnfriendDelegate);
 
 	for (auto FriendId : FriendUserIds.FriendIds)
 	{
 		AB_TEST_TRUE(loadFriendListResponse.friendsId.Contains(FriendId));
-		Lobbies[0]->Unfriend(FriendId);
+		LobbyApiClients[0]->Lobby.Unfriend(FriendId);
 		WaitUntil(bUnfriendSuccess, "Waiting Unfriend...");
 		AB_TEST_FALSE(bUnfriendError);
 		bUnfriendError = false;
@@ -3644,12 +3597,12 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestFriends_BulkFriendRequest_AddSelfUserI
 bool LobbyTestFriends_BulkFriendRequest_AddSelfUserId_Failed::RunTest(const FString& Parameters)
 {
 	FAccelByteModelsBulkFriendsRequest FriendUserIds;
-	FriendUserIds.FriendIds.Add(UserIds[0]);
+	FriendUserIds.FriendIds.Add(LobbyUsers[0].UserId);
 
 	bool bBulkAddFriendSuccess = false;
 	bool bBulkAddFriendError = false;
 	bool bBulkAddFriendDone = false;
-	Lobbies[0]->BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess, &bBulkAddFriendDone]()
+	LobbyApiClients[0]->Lobby.BulkFriendRequest(FriendUserIds, FVoidHandler::CreateLambda([&bBulkAddFriendSuccess, &bBulkAddFriendDone]()
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Bulk Add Friend Success!"));
 		bBulkAddFriendSuccess = true;
@@ -3676,29 +3629,29 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	LobbyConnect(2);
 
 	// Set Block Player Delegates
-	Lobbies[0]->SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
+	LobbyApiClients[0]->Lobby.SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
 
-	Lobbies[1]->SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
 
-	Lobbies[0]->SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
+	LobbyApiClients[0]->Lobby.SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
 
-	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
 
-	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	LobbyApiClients[0]->Lobby.GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 
 	WaitUntil(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
 	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	auto CurrentListBlockedUser = listBlockedUserResponse;
 	
-	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.BlockPlayer(LobbyUsers[1].UserId);
 	WaitUntil(bBlockPlayerSuccess, "Player 0 Blocks Player 1...");
 	AB_TEST_FALSE(bBlockPlayerError);
-	AB_TEST_EQUAL(blockPlayerResponse.BlockedUserId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(blockPlayerResponse.BlockedUserId, LobbyUsers[1].UserId);
 
 	bListBlockedUserListSuccess = false;
 	FBlockedData BlockedUserData;
-	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
-	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	BlockedUserData.BlockedUserId = LobbyUsers[1].UserId;
+	LobbyApiClients[0]->Lobby.GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	WaitUntil(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
 	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	bool bFound = false;
@@ -3714,8 +3667,8 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 	bFound = false;
 
 	FBlockerData BlockerUserData;
-	BlockerUserData.UserId = UserCreds[0].GetUserId();
-	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
+	BlockerUserData.UserId = LobbyUsers[0].UserId;
+	LobbyApiClients[1]->Lobby.GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
 	WaitUntil(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
 	AB_TEST_TRUE(bListBlockerListSuccess);
 	for (auto ResponseData : listBlockerResponse.Data)
@@ -3731,7 +3684,7 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 
 	bool bRequestFriendAttemptDone = false;
 	bool bBlockedFriendRequestPassed = false;
-	Lobbies[1]->SetRequestFriendsResponseDelegate(Lobby::FRequestFriendsResponse::CreateLambda([&bRequestFriendAttemptDone, &bBlockedFriendRequestPassed](FAccelByteModelsRequestFriendsResponse Result)
+	LobbyApiClients[1]->Lobby.SetRequestFriendsResponseDelegate(AccelByte::Api::Lobby::FRequestFriendsResponse::CreateLambda([&bRequestFriendAttemptDone, &bBlockedFriendRequestPassed](FAccelByteModelsRequestFriendsResponse Result)
 	{
 		bRequestFriendAttemptDone = true;
 		// Should be changed to something to signify blocked user response, but for now we'll use != 0
@@ -3740,16 +3693,16 @@ bool LobbyTestPlayer_BlockPlayer::RunTest(const FString& Parameters)
 			bBlockedFriendRequestPassed = true;
 		}
 	}));
-	Lobbies[1]->RequestFriend(UserCreds[0].GetUserId());
+	LobbyApiClients[1]->Lobby.RequestFriend(LobbyUsers[0].UserId);
 	WaitUntil(bRequestFriendAttemptDone, "Checking if Player 1 has been blocked from Requesting Friend Request properly.");
 	AB_TEST_TRUE(bBlockedFriendRequestPassed);
 	bRequestFriendAttemptDone = false;
 	bBlockedFriendRequestPassed = false;
 
-	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.UnblockPlayer(LobbyUsers[1].UserId);
 	WaitUntil(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
 	AB_TEST_FALSE(bUnblockPlayerError);
-	AB_TEST_EQUAL(unblockPlayerResponse.UnblockedUserId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(unblockPlayerResponse.UnblockedUserId, LobbyUsers[1].UserId);
 
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -3763,29 +3716,29 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	LobbyConnect(2);
 
 	// Set Block Player Delegates
-	Lobbies[0]->SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
+	LobbyApiClients[0]->Lobby.SetBlockPlayerResponseDelegate(BlockPlayerDelegate);
 
-	Lobbies[1]->SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetBlockPlayerNotifDelegate(BlockPlayerNotifDelegate);
 
-	Lobbies[0]->SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
+	LobbyApiClients[0]->Lobby.SetUnblockPlayerResponseDelegate(UnblockPlayerDelegate);
 
-	Lobbies[1]->SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetUnblockPlayerNotifDelegate(UnblockPlayerNotifDelegate);
 
 	// Start Test
-	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	LobbyApiClients[0]->Lobby.GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 
 	WaitUntil(bListBlockedUserListSuccess, "Getting List of Blocked User for Lobby 0...");
 	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	auto CurrentListBlockedUser = listBlockedUserResponse;
 
-	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.BlockPlayer(LobbyUsers[1].UserId);
 	WaitUntil(bBlockPlayerSuccess, "Requesting Friend...");
 	AB_TEST_FALSE(bBlockPlayerError);
 
 	bListBlockedUserListSuccess = false;
 	FBlockedData BlockedUserData;
-	BlockedUserData.BlockedUserId = UserCreds[1].GetUserId();
-	Lobbies[0]->GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
+	BlockedUserData.BlockedUserId = LobbyUsers[1].UserId;
+	LobbyApiClients[0]->Lobby.GetListOfBlockedUsers(ListBlockedUserDelegate, LobbyTestErrorHandler);
 	WaitUntil(bListBlockedUserListSuccess, "Checking if Player 1 is in Player 0 Block list.");
 	AB_TEST_TRUE(bListBlockedUserListSuccess);
 	bool bFound = false;
@@ -3801,8 +3754,8 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	bFound = false;
 
 	FBlockerData BlockerUserData;
-	BlockerUserData.UserId = UserCreds[0].GetUserId();
-	Lobbies[1]->GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
+	BlockerUserData.UserId = LobbyUsers[0].UserId;
+	LobbyApiClients[1]->Lobby.GetListOfBlockers(ListBlockerDelegate, LobbyTestErrorHandler);
 	WaitUntil(bListBlockerListSuccess, "Checking if Player 0 is in Player 1 Blocker list.");
 
 	AB_TEST_TRUE(bListBlockerListSuccess);
@@ -3820,13 +3773,13 @@ bool LobbyTestPlayer_BlockPlayerReblockPlayer::RunTest(const FString& Parameters
 	bBlockPlayerSuccess = false;
 	bBlockPlayerNotifSuccess = false;
 	bUnblockPlayerSuccess = false;
-	Lobbies[0]->BlockPlayer(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.BlockPlayer(LobbyUsers[1].UserId);
 	WaitUntil(bBlockPlayerSuccess, "Player 0 Blocks Player 1 Again");
 	AB_TEST_FALSE(bBlockPlayerError);
 
 	WaitUntil(bBlockPlayerNotifSuccess, "Waiting for block notif");
 
-	Lobbies[0]->UnblockPlayer(UserCreds[1].GetUserId());
+	LobbyApiClients[0]->Lobby.UnblockPlayer(LobbyUsers[1].UserId);
 	WaitUntil(bUnblockPlayerSuccess, "Player 0 Unblocks Player 1...");
 	AB_TEST_FALSE(bUnblockPlayerError);
 
@@ -3840,35 +3793,35 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -3880,7 +3833,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -3892,21 +3845,21 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -3914,7 +3867,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -3922,25 +3875,25 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -3951,7 +3904,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 	
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -3962,7 +3915,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -3998,7 +3951,7 @@ bool LobbyTestStartMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		{
 			for(auto Member : Party.Party_members)
 			{
-				if(Member.User_id == UserIds[0])
+				if(Member.User_id == LobbyUsers[0].UserId)
 				{
 					bUserFound = true;
 					break;
@@ -4022,35 +3975,35 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -4062,7 +4015,7 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -4074,21 +4027,21 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -4096,7 +4049,7 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -4104,13 +4057,13 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
@@ -4121,14 +4074,14 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 	Api::FMatchmakingOptionalParams MMOptionals2;
 	MMOptionals2.SubGameModes = {SubGameModeNames[0]};
 
-	Lobbies[0]->SendStartMatchmaking(ChannelNameSubGameMode, MMOptionals);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelNameSubGameMode, MMOptionals);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelNameSubGameMode, MMOptionals2);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelNameSubGameMode, MMOptionals2);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -4139,7 +4092,7 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 	
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4150,7 +4103,7 @@ bool LobbyTestStartMatchmaking_SubGameMode_ReturnOk::RunTest(const FString& Para
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4187,29 +4140,29 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
@@ -4217,7 +4170,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	int matchMakingNotifNum = 0;
 
 
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -4229,7 +4182,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -4241,21 +4194,21 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -4263,7 +4216,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -4271,25 +4224,25 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -4300,7 +4253,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4312,7 +4265,7 @@ bool LobbyTestStartMatchmakingCheckCustomPort_ReturnOk::RunTest(const FString& P
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4359,36 +4312,36 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
 	
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 			matchmakingNotifResponse[0] = result;
@@ -4400,7 +4353,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			}
 		}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 			matchmakingNotifResponse[1] = result;
@@ -4412,43 +4365,43 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 			}
 		}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
 	bGetInfoPartyError = false;
 	bGetInfoPartySuccess = false;
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 	
 	if (!bGetInfoPartyError)
 	{
 		bLeavePartySuccess = false;
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	
 	bCreatePartySuccess = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
 	AB_TEST_FALSE(bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
@@ -4486,13 +4439,13 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, ServerName, "", TArray<TPair<FString, float>>(), PartyAttributes);
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
@@ -4507,7 +4460,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 	WaitUntil([&]()
 	{
 		return bReadyConsentNotifSuccess;
@@ -4517,7 +4470,7 @@ bool LobbyTestStartMatchmaking_withPartyAttributes::RunTest(const FString& Param
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 	WaitUntil([&]()
 	{
 		return bReadyConsentNotifSuccess;
@@ -4601,29 +4554,29 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FThreadSafeCounter setSessionAttributeSuccessCounter = 0;
 	auto SetSessionAttributeResponseHandler = THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&setSessionAttributeSuccessCounter](const FAccelByteModelsSetSessionAttributesResponse& result)
@@ -4639,14 +4592,14 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 		}
 	});
 
-	Lobbies[0]->SetSetSessionAttributeDelegate(SetSessionAttributeResponseHandler);
-	Lobbies[1]->SetSetSessionAttributeDelegate(SetSessionAttributeResponseHandler);
+	LobbyApiClients[0]->Lobby.SetSetSessionAttributeDelegate(SetSessionAttributeResponseHandler);
+	LobbyApiClients[1]->Lobby.SetSetSessionAttributeDelegate(SetSessionAttributeResponseHandler);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -4658,7 +4611,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -4670,23 +4623,23 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 	
 	if (!bGetInfoPartyError)
 	{
 		bLeavePartySuccess = false;
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -4694,7 +4647,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -4702,30 +4655,30 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SetSessionAttribute("mmr", "120");
-	Lobbies[1]->SetSessionAttribute("mmr", "110");
+	LobbyApiClients[0]->Lobby.SetSessionAttribute("mmr", "120");
+	LobbyApiClients[1]->Lobby.SetSessionAttribute("mmr", "110");
 
 	TArray<FString> ExtraAttributes = { "mmr" };
 
-	Lobbies[0]->SendStartMatchmaking(ChannelNameExtraAttributeTest, "", "", PreferedLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelNameExtraAttributeTest, "", "", PreferredLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelNameExtraAttributeTest, "", "", PreferedLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelNameExtraAttributeTest, "", "", PreferredLatencies, TMap<FString, FString>(), TArray<FString>(), ExtraAttributes);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -4736,7 +4689,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4748,7 +4701,7 @@ bool LobbyTestStartMatchmakingExtraAttributes_ReturnOk::RunTest(const FString& P
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -4788,20 +4741,20 @@ bool LobbyTestStartMatchmakingAllParams_ReturnOk::RunTest(const FString& Paramet
 	LobbyConnect(1);
 	bool bMatchmakingNotifReceived = false;
 	
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[0]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&bMatchmakingNotifReceived](const FAccelByteModelsMatchmakingNotice& Result){bMatchmakingNotifReceived = true;}));
-	Lobbies[0]->SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&bMatchmakingNotifReceived](const FAccelByteModelsMatchmakingNotice& Result){bMatchmakingNotifReceived = true;}));
+	LobbyApiClients[0]->Lobby.SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
 
 	// Arrange, make sure lobby not in party.
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 0 leave party");
 
 	// Arrange, lobby set session attribute
 	bool bSetSessionAttributeFinish = false;
 	bool bSetSessionAttributeError = false;
-	Lobbies[0]->SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&bSetSessionAttributeFinish, &bSetSessionAttributeError](const FAccelByteModelsSetSessionAttributesResponse& result)
+	LobbyApiClients[0]->Lobby.SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&bSetSessionAttributeFinish, &bSetSessionAttributeError](const FAccelByteModelsSetSessionAttributesResponse& result)
 	{
 		if (result.Code == "0")
 		{
@@ -4815,17 +4768,17 @@ bool LobbyTestStartMatchmakingAllParams_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[0]->SetSessionAttribute("mmr", "120");
+	LobbyApiClients[0]->Lobby.SetSessionAttribute("mmr", "120");
 	WaitUntil(bSetSessionAttributeFinish, "Waiting set session attribute");
 
 	// Arrange, extra attribute to be passed to start matchmaking function
 	TArray<FString> ExtraAttributes = { "mmr" };
 
 	// ACT
-	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies, partyAttribute, TArray<FString>({UserIds[0]}), ExtraAttributes);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies, partyAttribute, TArray<FString>({LobbyUsers[0].UserId}), ExtraAttributes);
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 
-	Lobbies[0]->SendCancelMatchmaking(ChannelName, true);
+	LobbyApiClients[0]->Lobby.SendCancelMatchmaking(ChannelName, true);
 	WaitUntil(bCancelMatchmakingSuccess, "Canceling matchmaking");
 
 	WaitUntil(bMatchmakingNotifReceived, "Waiting cancel matchmaking notification");
@@ -4848,19 +4801,19 @@ bool LobbyTestStartMatchmakingAllParamsStruct_ReturnOk::RunTest(const FString& P
 	LobbyConnect(1);
 	bool bMatchmakingNotifReceived = false;
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[0]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&bMatchmakingNotifReceived](const FAccelByteModelsMatchmakingNotice& Result){bMatchmakingNotifReceived = true;}));
-	Lobbies[0]->SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&bMatchmakingNotifReceived](const FAccelByteModelsMatchmakingNotice& Result){bMatchmakingNotifReceived = true;}));
+	LobbyApiClients[0]->Lobby.SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
 	// Arrange, make sure lobby not in party.
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 0 leave party");
 
 	// Arrange, lobby set session attribute
 	bool bSetSessionAttributeFinish = false;
 	bool bSetSessionAttributeError = false;
-	Lobbies[0]->SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&bSetSessionAttributeFinish, &bSetSessionAttributeError](const FAccelByteModelsSetSessionAttributesResponse& result)
+	LobbyApiClients[0]->Lobby.SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&bSetSessionAttributeFinish, &bSetSessionAttributeError](const FAccelByteModelsSetSessionAttributesResponse& result)
 	{
 		if (result.Code == "0")
 		{
@@ -4874,7 +4827,7 @@ bool LobbyTestStartMatchmakingAllParamsStruct_ReturnOk::RunTest(const FString& P
 		}
 	}));
 
-	Lobbies[0]->SetSessionAttribute("mmr", "120");
+	LobbyApiClients[0]->Lobby.SetSessionAttribute("mmr", "120");
 	WaitUntil(bSetSessionAttributeFinish, "Waiting set session attribute");
 
 	// Arrange, extra attribute to be passed to start matchmaking function
@@ -4883,18 +4836,18 @@ bool LobbyTestStartMatchmakingAllParamsStruct_ReturnOk::RunTest(const FString& P
 	Api::FMatchmakingOptionalParams OptionalParams;
 	OptionalParams.ServerName = "TestServer";
 	OptionalParams.ClientVersion = "0.0.0";
-	OptionalParams.Latencies = PreferedLatencies;
+	OptionalParams.Latencies = PreferredLatencies;
 	OptionalParams.PartyAttributes = partyAttribute;
-	OptionalParams.TempPartyUserIds.Add(UserIds[0]);
+	OptionalParams.TempPartyUserIds.Add(LobbyUsers[0].UserId);
 	OptionalParams.ExtraAttributes = ExtraAttributes;
 	OptionalParams.NewSessionOnly = true;
 	OptionalParams.SubGameModes = {"sgm", "test", "another1"};
 
 	// ACT
-	Lobbies[0]->SendStartMatchmaking(ChannelName, OptionalParams);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, OptionalParams);
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 
-	Lobbies[0]->SendCancelMatchmaking(ChannelName, true);
+	LobbyApiClients[0]->Lobby.SendCancelMatchmaking(ChannelName, true);
 	WaitUntil(bCancelMatchmakingSuccess, "Canceling Matchmaking...");
 
 	WaitUntil(bMatchmakingNotifReceived, "Waiting cancel matchmaking notification");
@@ -4916,11 +4869,11 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 	FString Lobby0MatchId;
 	bool Lobby0MatchFound = false;
 	bool bDSBusy = false;
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[0]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby0MatchId, &Lobby0MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby0MatchId, &Lobby0MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
 	{
 		if(notif.Status == EAccelByteMatchmakingStatus::Done)
 		{
@@ -4928,7 +4881,7 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 			Lobby0MatchFound = true;
 		}
 	}));
-	Lobbies[0]->SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&bDSBusy](const FAccelByteModelsDsNotice& result)
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&bDSBusy](const FAccelByteModelsDsNotice& result)
 	{
 		if(result.Status == "BUSY")
 		{
@@ -4938,11 +4891,11 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 
 	FString Lobby1MatchId;
 	bool Lobby1MatchFound = false;
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[1]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby1MatchId, &Lobby1MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby1MatchId, &Lobby1MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
 	{
 		if(notif.Status == EAccelByteMatchmakingStatus::Done)
 		{
@@ -4958,11 +4911,11 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 	{
 		RematchmakingNotifCount++;
 	});
-	Lobbies[2]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[2]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[2]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[2]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[2]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby2MatchId, &Lobby2MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
+	LobbyApiClients[2]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[2]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[2]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[2]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby2MatchId, &Lobby2MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
 	{
 		if(notif.Status == EAccelByteMatchmakingStatus::Done)
 		{
@@ -4970,15 +4923,15 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 			Lobby2MatchId = notif.MatchId;	
 		}
 	}));
-	Lobbies[2]->SetRematchmakingNotifDelegate(IncrementCounterOnRematchmakingDelegate);
+	LobbyApiClients[2]->Lobby.SetRematchmakingNotifDelegate(IncrementCounterOnRematchmakingDelegate);
 
 	FString Lobby3MatchId;
 	bool Lobby3MatchFound = false;
-	Lobbies[3]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
-	Lobbies[3]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
-	Lobbies[3]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
-	Lobbies[3]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[3]->SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby3MatchId, &Lobby3MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
+	LobbyApiClients[3]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[3]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[3]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[3]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[3]->Lobby.SetMatchmakingNotifDelegate(THandler<FAccelByteModelsMatchmakingNotice>::CreateLambda([&Lobby3MatchId, &Lobby3MatchFound](const FAccelByteModelsMatchmakingNotice& notif)
 	{
 		if(notif.Status == EAccelByteMatchmakingStatus::Done)
 		{
@@ -4986,32 +4939,32 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 			Lobby3MatchId = notif.MatchId;	
 		}
 	}));
-	Lobbies[3]->SetRematchmakingNotifDelegate(IncrementCounterOnRematchmakingDelegate);
+	LobbyApiClients[3]->Lobby.SetRematchmakingNotifDelegate(IncrementCounterOnRematchmakingDelegate);
 
 	// Arrange, make sure lobby not in party.
-	Lobbies[0]->SendLeavePartyRequest();
+	LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 0 leave party");
 	bLeavePartySuccess = false;
-	Lobbies[1]->SendLeavePartyRequest();
+	LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 1 leave party");
 	bLeavePartySuccess = false;
-	Lobbies[2]->SendLeavePartyRequest();
+	LobbyApiClients[2]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 2 leave party");
 	bLeavePartySuccess = false;
-	Lobbies[3]->SendLeavePartyRequest();
+	LobbyApiClients[3]->Lobby.SendLeavePartyRequest();
 	WaitUntil(bLeavePartySuccess, "waiting 3 leave party");
 	bLeavePartySuccess = false;
 
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "waiting 0 create party");
 	bCreatePartySuccess = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "waiting 1 create party");
 	bCreatePartySuccess = false;
-	Lobbies[2]->SendCreatePartyRequest();
+	LobbyApiClients[2]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "waiting 2 create party");
 	bCreatePartySuccess = false;
-	Lobbies[3]->SendCreatePartyRequest();
+	LobbyApiClients[3]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartySuccess, "waiting 3 create party");
 	
 	// Set optional params to be used 
@@ -5019,17 +4972,17 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 	OptionalParams.NewSessionOnly = true;
 
 	// ACT
-	Lobbies[0]->SendStartMatchmaking(ChannelNameNewSessionTest);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelNameNewSessionTest);
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
 	bStartMatchmakingSuccess = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelNameNewSessionTest);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelNameNewSessionTest);
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
 
 	WaitUntil(Lobby0MatchFound, "Waiting Lobby 0 get matchId");
 	WaitUntil(Lobby1MatchFound, "Waiting Lobby 1 get matchId");
 
-	Lobbies[0]->SendReadyConsentRequest(Lobby0MatchId);
-	Lobbies[1]->SendReadyConsentRequest(Lobby1MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(Lobby0MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(Lobby1MatchId);
 
 	WaitUntil(bDSBusy, "Waiting DS to be busy");
 
@@ -5044,10 +4997,10 @@ bool LobbyTestStartMatchmakingNewSessinOnly::RunTest(const FString& Parameters)
 	DelaySeconds(5, "Waiting 5 sec");
 
 	bStartMatchmakingSuccess = false;
-	Lobbies[2]->SendStartMatchmaking(ChannelNameNewSessionTest, OptionalParams);
+	LobbyApiClients[2]->Lobby.SendStartMatchmaking(ChannelNameNewSessionTest, OptionalParams);
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
 	bStartMatchmakingSuccess = false;
-	Lobbies[3]->SendStartMatchmaking(ChannelNameNewSessionTest, OptionalParams);
+	LobbyApiClients[3]->Lobby.SendStartMatchmaking(ChannelNameNewSessionTest, OptionalParams);
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 3 Starting Matchmaking...");
 
 	WaitUntil(Lobby2MatchFound, "Waiting Lobby 2 get matchId");
@@ -5069,36 +5022,36 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	bool bMatchmakingNotifTimeout[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -5117,7 +5070,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -5136,21 +5089,21 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -5158,7 +5111,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -5166,18 +5119,18 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -5188,14 +5141,14 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -5206,7 +5159,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5217,7 +5170,7 @@ bool LobbyTestStartMatchmaking_Timeout::RunTest(const FString& Parameters)
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5250,31 +5203,31 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 {
 	LobbyConnect(2);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
 	bool bIsTheRightRegion[2] = { false };
 	bool bLatencyDsNotifSuccess[2] = { false };
 	bool bLatencyDsNotifError[2] = { false };
 	TArray<TPair<FString, float>> Latencies;
-	Lobbies[0]->SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&Latencies, &bIsTheRightRegion, &bLatencyDsNotifSuccess, &bLatencyDsNotifError](FAccelByteModelsDsNotice result)
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&Latencies, &bIsTheRightRegion, &bLatencyDsNotifSuccess, &bLatencyDsNotifError](FAccelByteModelsDsNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s | Region: %s"), *result.MatchId, *result.Message, *result.Status, *result.Region);
@@ -5293,7 +5246,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[1]->SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&Latencies, &bIsTheRightRegion, &bLatencyDsNotifSuccess, &bLatencyDsNotifError](FAccelByteModelsDsNotice result)
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(Api::Lobby::FDsNotif::CreateLambda([&Latencies, &bIsTheRightRegion, &bLatencyDsNotifSuccess, &bLatencyDsNotifError](FAccelByteModelsDsNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get DS Notice!"));
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DS ID: %s | Message: %s | Status: %s | Region: %s"), *result.MatchId, *result.Message, *result.Status, *result.Region);
@@ -5316,7 +5269,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -5328,7 +5281,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -5340,21 +5293,21 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -5362,7 +5315,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -5370,13 +5323,13 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
@@ -5402,14 +5355,14 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	}
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Selected Region: %s"), *Latencies[0].Key);
-	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0]});
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, "", "", { Latencies[0]});
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", { Latencies[0] });
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, "", "", { Latencies[0] });
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -5420,7 +5373,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5431,7 +5384,7 @@ bool LobbyTestStartMatchmakingLatencies_ReturnOk::RunTest(const FString& Paramet
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5473,23 +5426,23 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 {
 	LobbyConnect(2);
 	bDsNotifSuccess = false;
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 
@@ -5506,7 +5459,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 
@@ -5518,20 +5471,20 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>
-	{UserCreds[0].GetUserId()});
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, TArray<FString>
+	{LobbyUsers[0].UserId});
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, TArray<FString>
-	{UserCreds[1].GetUserId()});
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, TArray<FString>
+	{LobbyUsers[1].UserId});
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
@@ -5543,7 +5496,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5555,7 +5508,7 @@ bool LobbyTestStartMatchmakingTempParty_ReturnOk::RunTest(const FString& Paramet
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -5596,13 +5549,13 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	int matchmakingNotifDone = 0;
 	for (int i = 0; i < UserNum; i++)
 	{
-		Lobbies[i]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+		LobbyApiClients[i]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-		Lobbies[i]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+		LobbyApiClients[i]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-		Lobbies[i]->SetDsNotifDelegate(DsNotifDelegate);
+		LobbyApiClients[i]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-		Lobbies[i]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&, i](FAccelByteModelsMatchmakingNotice result)
+		LobbyApiClients[i]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&, i](FAccelByteModelsMatchmakingNotice result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 			matchmakingNotifResponse[i] = result;
@@ -5613,19 +5566,19 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 			}
 		}));
 
-		Lobbies[i]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+		LobbyApiClients[i]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 	}
 
-	Lobbies[0]->SendStartMatchmaking(ChannelNameTempParty2, TArray<FString>
-	{UserCreds[0].GetUserId(), UserCreds[1].GetUserId()});
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelNameTempParty2, TArray<FString>
+	{LobbyUsers[0].UserId, LobbyUsers[1].UserId});
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[2]->SendStartMatchmaking(ChannelNameTempParty2, TArray<FString>
-	{UserCreds[2].GetUserId(), UserCreds[3].GetUserId()});
+	LobbyApiClients[2]->Lobby.SendStartMatchmaking(ChannelNameTempParty2, TArray<FString>
+	{LobbyUsers[2].UserId, LobbyUsers[3].UserId});
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -5638,7 +5591,7 @@ bool LobbyTestStartMatchmakingTempPartyOfTwo_ReturnOk::RunTest(const FString& Pa
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[UserNum];
 	for (int i = 0; i < UserNum; i++)
 	{
-		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+		LobbyApiClients[i]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 		WaitUntil([&]()
 		{
@@ -5686,20 +5639,20 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	LobbyConnect(1);
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse;
 	bool bMatchmakingNotifSuccess = false;
 	bool bMatchmakingNotifError = false;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse = result;
@@ -5710,27 +5663,27 @@ bool LobbyTestCancelMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
-	Lobbies[0]->SendCancelMatchmaking(ChannelName);
+	LobbyApiClients[0]->Lobby.SendCancelMatchmaking(ChannelName);
 
 	WaitUntil(bCancelMatchmakingSuccess, "Cancelling Matchmaking...");
 	AB_TEST_FALSE(bCancelMatchmakingError);
@@ -5768,15 +5721,15 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 
 	LobbyConnect(1);
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetCancelMatchmakingResponseDelegate(CancelMatchmakingDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse;
 	bool bMatchmakingNotifSuccess = false;
 	bool bMatchmakingNotifError = false;
 	bStartMatchmakingSuccess = false;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse = result;
@@ -5787,13 +5740,13 @@ bool LobbyTestCancelMatchmakingTempParty_ReturnOk::RunTest(const FString& Parame
 		}
 	}));
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName, TArray<FString>{UserCreds[0].GetUserId()});
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, TArray<FString>{LobbyUsers[0].UserId});
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bCancelMatchmakingSuccess = false;
-	Lobbies[0]->SendCancelMatchmaking(ChannelName, true);
+	LobbyApiClients[0]->Lobby.SendCancelMatchmaking(ChannelName, true);
 
 	WaitUntil(bCancelMatchmakingSuccess, "Cancelling Matchmaking...");
 	AB_TEST_FALSE(bCancelMatchmakingError);
@@ -5827,17 +5780,17 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	int matchMakingNotifNum = 0;
 	int rematchmakingNotifNum = 0;
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 0 Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -5849,28 +5802,28 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 0 Get Rematchmaking Notification!"));
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[0].GetUserId(), result.BanDuration);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *LobbyUsers[0].UserId, result.BanDuration);
 		rematchmakingNotifNum++;
 	}));
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 1 Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -5882,28 +5835,28 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 1 Get Rematchmaking Notification!"));
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[1].GetUserId(), result.BanDuration);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *LobbyUsers[1].UserId, result.BanDuration);
 		rematchmakingNotifNum++;
 	}));
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[2]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[2]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[2]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[2]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[2]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[2]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[2]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[2]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[2]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[2]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[2]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[2]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 2 Get Matchmaking Notification!"));
 		matchmakingNotifResponse[2] = result;
@@ -5915,35 +5868,35 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobbies[2]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[2]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[2]->SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
+	LobbyApiClients[2]->Lobby.SetRematchmakingNotifDelegate(Api::Lobby::FRematchmakingNotif::CreateLambda([&](FAccelByteModelsRematchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Lobby 2 Get Rematchmaking Notification!"));
-		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *UserCreds[2].GetUserId(), result.BanDuration);
+		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s received: banned for %d secs"), *LobbyUsers[2].UserId, result.BanDuration);
 		rematchmakingNotifNum++;
 	}));
 
-	Lobbies[2]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[2]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -5951,20 +5904,20 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[2]->SendInfoPartyRequest();
+	LobbyApiClients[2]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -5972,25 +5925,25 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[2]->SendLeavePartyRequest();
+		LobbyApiClients[2]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[2]->SendCreatePartyRequest();
+	LobbyApiClients[2]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 0 Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 1 Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -6000,7 +5953,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 		return matchMakingNotifNum >= 2;
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -6020,7 +5973,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[2]->SendStartMatchmaking(ChannelName, "", "", PreferedLatencies);
+	LobbyApiClients[2]->Lobby.SendStartMatchmaking(ChannelName, "", "", PreferredLatencies);
 
 	WaitUntil(bStartMatchmakingSuccess, "Lobby 2 Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -6032,7 +5985,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 	AB_TEST_EQUAL(matchmakingNotifResponse[0].Status, EAccelByteMatchmakingStatus::Done);
 	AB_TEST_EQUAL(matchmakingNotifResponse[2].Status, EAccelByteMatchmakingStatus::Done);
 
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -6042,7 +5995,7 @@ bool LobbyTestReMatchmaking_ReturnOk::RunTest(const FString& Parameters)
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[2]->SendReadyConsentRequest(matchmakingNotifResponse[2].MatchId);
+	LobbyApiClients[2]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[2].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -6082,35 +6035,35 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	LobbyConnect(2);
 	FString ExpectedCustomAttribute {"test"};
 
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[0]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[0]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[0]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[0]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[0]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[0]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[0]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[0]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
-	Lobbies[1]->SetCreatePartyResponseDelegate(CreatePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetCreatePartyResponseDelegate(CreatePartyDelegate);
 
-	Lobbies[1]->SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
+	LobbyApiClients[1]->Lobby.SetInfoPartyResponseDelegate(GetInfoPartyDelegate);
 
-	Lobbies[1]->SetLeavePartyResponseDelegate(LeavePartyDelegate);
+	LobbyApiClients[1]->Lobby.SetLeavePartyResponseDelegate(LeavePartyDelegate);
 
-	Lobbies[1]->SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponseDelegate);
 
-	Lobbies[1]->SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotifDelegate);
 
-	Lobbies[1]->SetDsNotifDelegate(DsNotifDelegate);
+	LobbyApiClients[1]->Lobby.SetDsNotifDelegate(DsNotifDelegate);
 
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[2];
 	bool bMatchmakingNotifSuccess[2] = { false };
 	bool bMatchmakingNotifError[2] = { false };
 	int matchMakingNotifNum = 0;
-	Lobbies[0]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[0]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[0] = result;
@@ -6122,7 +6075,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		}
 	}));
 
-	Lobbies[1]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
+	LobbyApiClients[1]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&](FAccelByteModelsMatchmakingNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Matchmaking Notification!"));
 		matchmakingNotifResponse[1] = result;
@@ -6134,21 +6087,21 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 		}
 	}));
 
-	Lobbies[0]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[0]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[1]->SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
+	LobbyApiClients[1]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingDelegate);
 
-	Lobbies[0]->SendInfoPartyRequest();
+	LobbyApiClients[0]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
 	if (!bGetInfoPartyError)
 	{
-		Lobbies[0]->SendLeavePartyRequest();
+		LobbyApiClients[0]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 
@@ -6156,7 +6109,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 
 	bGetInfoPartySuccess = false;
 	bGetInfoPartyError = false;
-	Lobbies[1]->SendInfoPartyRequest();
+	LobbyApiClients[1]->Lobby.SendInfoPartyRequest();
 
 	WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 
@@ -6164,13 +6117,13 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	{
 		bLeavePartySuccess = false;
 		bLeavePartyError = false;
-		Lobbies[1]->SendLeavePartyRequest();
+		LobbyApiClients[1]->Lobby.SendLeavePartyRequest();
 
 		WaitUntil(bLeavePartySuccess, "Leaving Party...");
 	}
 	bCreatePartySuccess = false;
 	bCreatePartyError = false;
-	Lobbies[1]->SendCreatePartyRequest();
+	LobbyApiClients[1]->Lobby.SendCreatePartyRequest();
 
 	WaitUntil(bCreatePartySuccess, "Creating Party...");
 	AB_TEST_FALSE(bCreatePartyError);
@@ -6204,14 +6157,14 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 
 	WaitUntil(bRegisterLocalServerToDSMDone, "Local DS Register To DSM");
 
-	Lobbies[0]->SendStartMatchmaking(ChannelName, ServerName);
+	LobbyApiClients[0]->Lobby.SendStartMatchmaking(ChannelName, ServerName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
 
 	bStartMatchmakingSuccess = false;
 	bStartMatchmakingError = false;
-	Lobbies[1]->SendStartMatchmaking(ChannelName, ServerName);
+	LobbyApiClients[1]->Lobby.SendStartMatchmaking(ChannelName, ServerName);
 
 	WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 	AB_TEST_FALSE(bStartMatchmakingError);
@@ -6222,7 +6175,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 	}, "Waiting for Matchmaking Notification...", WaitMatchmakingTime);
 
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[2];
-	Lobbies[0]->SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
+	LobbyApiClients[0]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[0].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -6234,7 +6187,7 @@ bool LobbyTestLocalDSWithMatchmaking_ReturnOk::RunTest(const FString& Parameters
 
 	bReadyConsentNotifSuccess = false;
 	bReadyConsentNotifError = false;
-	Lobbies[1]->SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
+	LobbyApiClients[1]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[1].MatchId);
 
 	WaitUntil([&]()
 	{
@@ -6291,7 +6244,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	LobbyConnect(6);
 
 	FThreadSafeCounter readyConsentNoticeCounter = 0;
-	auto ReadyConsentNotif = Lobby::FReadyConsentNotif::CreateLambda([&readyConsentNoticeCounter](FAccelByteModelsReadyConsentNotice result)
+	auto ReadyConsentNotif = AccelByte::Api::Lobby::FReadyConsentNotif::CreateLambda([&readyConsentNoticeCounter](FAccelByteModelsReadyConsentNotice result)
 	{
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Get Ready Consent Notice!"));
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %s is ready for match."), *result.UserId);
@@ -6307,16 +6260,16 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	for (int i = 0; i < 6; i++)
 	{
 		auto CreateParty = CreatePartyDelegate;
-		Lobbies[i]->SetCreatePartyResponseDelegate(CreateParty);
+		LobbyApiClients[i]->Lobby.SetCreatePartyResponseDelegate(CreateParty);
 		auto GetInfoParty = GetInfoPartyDelegate;
-		Lobbies[i]->SetInfoPartyResponseDelegate(GetInfoParty);
+		LobbyApiClients[i]->Lobby.SetInfoPartyResponseDelegate(GetInfoParty);
 		auto LeaveParty = LeavePartyDelegate;
-		Lobbies[i]->SetLeavePartyResponseDelegate(LeaveParty);
+		LobbyApiClients[i]->Lobby.SetLeavePartyResponseDelegate(LeaveParty);
 		auto ReadyConsentResponse = ReadyConsentResponseDelegate;
-		Lobbies[i]->SetReadyConsentResponseDelegate(ReadyConsentResponse);
-		Lobbies[i]->SetReadyConsentNotifDelegate(ReadyConsentNotif);
+		LobbyApiClients[i]->Lobby.SetReadyConsentResponseDelegate(ReadyConsentResponse);
+		LobbyApiClients[i]->Lobby.SetReadyConsentNotifDelegate(ReadyConsentNotif);
 		auto DsNotif = DsNotifDelegate;
-		Lobbies[i]->SetDsNotifDelegate(DsNotif);
+		LobbyApiClients[i]->Lobby.SetDsNotifDelegate(DsNotif);
 	}
 	FAccelByteModelsMatchmakingNotice matchmakingNotifResponse[6];
 	bool bMatchmakingNotifSuccess[6] = { false };
@@ -6325,7 +6278,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	for (int i = 0; i < 6; i++)
 	{
 		int numb = i;
-		Lobbies[i]->SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&, numb](FAccelByteModelsMatchmakingNotice result)
+		LobbyApiClients[i]->Lobby.SetMatchmakingNotifDelegate(Api::Lobby::FMatchmakingNotif::CreateLambda([&, numb](FAccelByteModelsMatchmakingNotice result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("User %d Get Matchmaking Notification!"), numb);
 			matchmakingNotifResponse[numb] = result;
@@ -6337,18 +6290,18 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 			}
 		}));
 		auto StartMatchmakingResponse = StartMatchmakingDelegate;
-		Lobbies[i]->SetStartMatchmakingResponseDelegate(StartMatchmakingResponse);
+		LobbyApiClients[i]->Lobby.SetStartMatchmakingResponseDelegate(StartMatchmakingResponse);
 	}
 
 	for (int i = 0; i < 6; i++)
 	{
-		Lobbies[i]->SendInfoPartyRequest();
+		LobbyApiClients[i]->Lobby.SendInfoPartyRequest();
 		WaitUntil(bGetInfoPartySuccess, "Getting Info Party...");
 		if (!bGetInfoPartyError)
 		{
-			Lobbies[i]->SendLeavePartyRequest();
+			LobbyApiClients[i]->Lobby.SendLeavePartyRequest();
 			WaitUntil(bLeavePartySuccess, "Leaving Party...");
-			Lobbies[i]->SendCreatePartyRequest();
+			LobbyApiClients[i]->Lobby.SendCreatePartyRequest();
 			WaitUntil(bCreatePartySuccess, "Creating Party...");
 			AB_TEST_FALSE(bCreatePartyError);
 			bLeavePartySuccess = false;
@@ -6356,7 +6309,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 		}
 		else
 		{
-			Lobbies[i]->SendCreatePartyRequest();
+			LobbyApiClients[i]->Lobby.SendCreatePartyRequest();
 			WaitUntil(bCreatePartySuccess, "Creating Party...");
 			AB_TEST_FALSE(bCreatePartyError);
 		}
@@ -6367,7 +6320,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	}
 	for (int i = 0; i < 6; i++)
 	{
-		Lobbies[i]->SendStartMatchmaking(ChannelNameTest3v3, "", "", PreferedLatencies);
+		LobbyApiClients[i]->Lobby.SendStartMatchmaking(ChannelNameTest3v3, "", "", PreferredLatencies);
 		WaitUntil(bStartMatchmakingSuccess, "Starting Matchmaking...");
 		AB_TEST_FALSE(bStartMatchmakingError);
 		bStartMatchmakingSuccess = false;
@@ -6382,7 +6335,7 @@ bool LobbyTestStartMatchmaking3vs3_ReturnOk::RunTest(const FString& Parameters)
 	FAccelByteModelsReadyConsentNotice readyConsentNoticeResponse[6];
 	for (int i = 0; i < 6; i++)
 	{
-		Lobbies[i]->SendReadyConsentRequest(matchmakingNotifResponse[i].MatchId);
+		LobbyApiClients[i]->Lobby.SendReadyConsentRequest(matchmakingNotifResponse[i].MatchId);
 		WaitUntil([&]()
 		{
 			return readyConsentNoticeCounter.GetValue() >= 3;
@@ -6448,10 +6401,9 @@ bool LobbyTestSessionAttributesSetGet_Ok::RunTest(const FString& Parameters)
 	sessionAttributes.GenerateKeyArray(sessionAttributesKeys);
 
 	// Arrange setup user & lobby
-	User& User = FRegistry::User;
 	bool bLoginDone = false;
 
-	User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bLoginDone]() { bLoginDone = true; }), LobbyTestErrorHandler);
 
 	WaitUntil([&]() { return bLoginDone; });
 	FThreadSafeCounter setSessionAttributeSuccessCounter;
@@ -6460,10 +6412,9 @@ bool LobbyTestSessionAttributesSetGet_Ok::RunTest(const FString& Parameters)
 	FAccelByteModelsGetAllSessionAttributesResponse getAllSessionAttributesResponse;
 	bool bGetAllSessionAttributeFinish = false;
 
-	Lobby& Lobby = FRegistry::Lobby;
 
 	bool bSetSessionAttributeFailed = false;
-	Lobby.SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&setSessionAttributeSuccessCounter, &bSetSessionAttributeFailed](const FAccelByteModelsSetSessionAttributesResponse& result)
+	FRegistry::Lobby.SetSetSessionAttributeDelegate(THandler<FAccelByteModelsSetSessionAttributesResponse>::CreateLambda([&setSessionAttributeSuccessCounter, &bSetSessionAttributeFailed](const FAccelByteModelsSetSessionAttributesResponse& result)
 	{
 		setSessionAttributeSuccessCounter.Add(1);
 		if (result.Code == "0")
@@ -6477,34 +6428,34 @@ bool LobbyTestSessionAttributesSetGet_Ok::RunTest(const FString& Parameters)
 		}
 	}));
 
-	Lobby.SetGetSessionAttributeDelegate(THandler<FAccelByteModelsGetSessionAttributesResponse>::CreateLambda([&getSessionAttributesResponse, &bGetSessionAttributeFinish](const FAccelByteModelsGetSessionAttributesResponse& result)
+	FRegistry::Lobby.SetGetSessionAttributeDelegate(THandler<FAccelByteModelsGetSessionAttributesResponse>::CreateLambda([&getSessionAttributesResponse, &bGetSessionAttributeFinish](const FAccelByteModelsGetSessionAttributesResponse& result)
 	{
 		bGetSessionAttributeFinish = true;
 		getSessionAttributesResponse = result;
 	}));
 
-	Lobby.SetGetAllSessionAttributeDelegate(THandler<FAccelByteModelsGetAllSessionAttributesResponse>::CreateLambda([&getAllSessionAttributesResponse, &bGetAllSessionAttributeFinish](const FAccelByteModelsGetAllSessionAttributesResponse& result)
+	FRegistry::Lobby.SetGetAllSessionAttributeDelegate(THandler<FAccelByteModelsGetAllSessionAttributesResponse>::CreateLambda([&getAllSessionAttributesResponse, &bGetAllSessionAttributeFinish](const FAccelByteModelsGetAllSessionAttributesResponse& result)
 	{
 		bGetAllSessionAttributeFinish = true;
 		getAllSessionAttributesResponse = result;
 	}));
 
-	Lobby.Connect();
-	WaitUntil([&]() { return Lobby.IsConnected(); }, "", 5);
+	FRegistry::Lobby.Connect();
+	WaitUntil([&]() { return FRegistry::Lobby.IsConnected(); }, "", 5);
 
 	// ACT setting session attribute
 
 	for (auto attribute : sessionAttributes)
 	{
-		Lobby.SetSessionAttribute(attribute.Key, attribute.Value);
+		FRegistry::Lobby.SetSessionAttribute(attribute.Key, attribute.Value);
 	}
 
 	WaitUntil([&setSessionAttributeSuccessCounter, &sessionAttributes]() {return setSessionAttributeSuccessCounter.GetValue() == sessionAttributes.Num(); }, "Waiting set session Attribute", 10);
 
-	Lobby.GetSessionAttribute(sessionAttributesKeys[0]);
+	FRegistry::Lobby.GetSessionAttribute(sessionAttributesKeys[0]);
 	WaitUntil(bGetSessionAttributeFinish, "Wait for get session attribute");
 
-	Lobby.GetAllSessionAttribute();
+	FRegistry::Lobby.GetAllSessionAttribute();
 	WaitUntil(bGetAllSessionAttributeFinish, "Wait for get all session attribute");
 	bool bCompareAllSessionAttributes = CompareSessionAttributes(getAllSessionAttributesResponse.attributes, sessionAttributes);
 
@@ -6513,7 +6464,7 @@ bool LobbyTestSessionAttributesSetGet_Ok::RunTest(const FString& Parameters)
 	AB_TEST_EQUAL(getSessionAttributesResponse.Value, sessionAttributes[sessionAttributesKeys[0]]);
 	AB_TEST_TRUE(bCompareAllSessionAttributes);
 
-	Lobby.Disconnect();
+	FRegistry::Lobby.Disconnect();
 
 	return true;
 }
@@ -6616,11 +6567,11 @@ bool LobbyTestSameUserDifferentToken_Disconnected::RunTest(const FString& Parame
 			NumLobbyConnected++;
 		}));
 	Lobby.SetConnectionClosedDelegate(
-		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
+		AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
 		{
 			bLobbyDisconnected = true;
 		}));
-	Lobby.SetDisconnectNotifDelegate(Lobby::FDisconnectNotif::CreateLambda([&](const FAccelByteModelsDisconnectNotif& Result)
+	Lobby.SetDisconnectNotifDelegate(AccelByte::Api::Lobby::FDisconnectNotif::CreateLambda([&](const FAccelByteModelsDisconnectNotif& Result)
 		{
 			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DisconnectNotif: %s"), *Result.Message);
 			DisconnectNotifResponse = Result;
@@ -6691,7 +6642,7 @@ bool LobbyTestSameUserSameToken_Disconnected::RunTest(const FString& Parameters)
 			NumLobbyConnected++;
 		}));
 	Lobby.SetConnectionClosedDelegate(
-		Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
+		AccelByte::Api::Lobby::FConnectionClosed::CreateLambda([&](int32 CloseCode, FString Reason, bool bWasClean)
 		{
 			bLobbyDisconnected = true;
 		}));
@@ -6985,14 +6936,14 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 		P2PMessage = Message;
 	});
 
-	Lobbies[0]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
-	Lobbies[1]->SetConnectSuccessDelegate(ConnectSuccessDelegate);
-	Lobbies[0]->SetConnectFailedDelegate(ConnectFailedDelegate);
-	Lobbies[1]->SetConnectFailedDelegate(ConnectFailedDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	LobbyApiClients[1]->Lobby.SetConnectSuccessDelegate(ConnectSuccessDelegate);
+	LobbyApiClients[0]->Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
+	LobbyApiClients[1]->Lobby.SetConnectFailedDelegate(ConnectFailedDelegate);
 
-	Lobbies[0]->Connect();
+	LobbyApiClients[0]->Lobby.Connect();
 
-	while (!Lobbies[0]->IsConnected() || !bUsersConnectionSuccess)
+	while (!LobbyApiClients[0]->Lobby.IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestSignalingP2P: Wait user 0"));
@@ -7003,9 +6954,9 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 	bUsersConnectionSuccess = false;
 	bUsersConnected = false;
 
-	Lobbies[1]->Connect();
+	LobbyApiClients[1]->Lobby.Connect();
 
-	while (!Lobbies[1]->IsConnected() || !bUsersConnectionSuccess)
+	while (!LobbyApiClients[1]->Lobby.IsConnected() || !bUsersConnectionSuccess)
 	{
 		FPlatformProcess::Sleep(.5f);
 		UE_LOG(LogAccelByteLobbyTest, Log, TEXT("LobbyTestSignalingP2P: Wait user 1"));
@@ -7020,10 +6971,10 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 		AB_TEST_TRUE(userResponded[i]);
 	}
 
-	Lobbies[0]->SetSignalingP2PDelegate(OnP2PDelegate);
-	Lobbies[1]->SetSignalingP2PDelegate(OnP2PDelegate);
+	LobbyApiClients[0]->Lobby.SetSignalingP2PDelegate(OnP2PDelegate);
+	LobbyApiClients[1]->Lobby.SetSignalingP2PDelegate(OnP2PDelegate);
 	
-	Lobbies[0]->SendSignalingMessage(UserCreds[1].GetUserId(), Message);
+	LobbyApiClients[0]->Lobby.SendSignalingMessage(LobbyUsers[1].UserId, Message);
 	WaitUntil([&P2PMessageAvailable]() ->bool
 	{
 		return P2PMessageAvailable;
@@ -7031,10 +6982,10 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(P2PMessageAvailable);
 	AB_TEST_EQUAL(P2PMessage, Message);
-	AB_TEST_EQUAL(P2PDestinationId, UserCreds[0].GetUserId());
+	AB_TEST_EQUAL(P2PDestinationId, LobbyUsers[0].UserId);
 
 	P2PMessageAvailable = false;
-	Lobbies[1]->SendSignalingMessage(UserCreds[0].GetUserId(), Message);
+	LobbyApiClients[1]->Lobby.SendSignalingMessage(LobbyUsers[0].UserId, Message);
 	WaitUntil([&P2PMessageAvailable]() ->bool
 	{
 		return P2PMessageAvailable;
@@ -7042,7 +6993,7 @@ bool LobbyTestSignalingP2P::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(P2PMessageAvailable);
 	AB_TEST_EQUAL(P2PMessage, Message);
-	AB_TEST_EQUAL(P2PDestinationId, UserCreds[1].GetUserId());
+	AB_TEST_EQUAL(P2PDestinationId, LobbyUsers[1].UserId);
 	
 	LobbyDisconnect(2);
 	ResetResponses();
@@ -7062,7 +7013,7 @@ bool LobbyTestErrorMessage::RunTest(const FString& Parameters)
 	bool bError = false;
 	int32 ErrorCode;
 	FString ErrorMessage = "";
-	Lobbies[0]->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
 	{
 		CreatePartyResult = result;
 		bCreatePartyDone = true;
@@ -7075,12 +7026,12 @@ bool LobbyTestErrorMessage::RunTest(const FString& Parameters)
 	}));
 	
 	// create party
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party");
 
 	// crate party again, error
 	bCreatePartyDone = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party2");
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party2 responded with code %d, codename %s"), ErrorCode, *ErrorMessage);
@@ -7106,19 +7057,19 @@ bool LobbyTestNoErrorHandlerHasResponseCode::RunTest(const FString& Parameters)
 	// ARRANGE
 	FAccelByteModelsCreatePartyResponse CreatePartyResult;
 	bool bCreatePartyDone = false;
-	Lobbies[0]->SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(THandler<FAccelByteModelsCreatePartyResponse>::CreateLambda([&bCreatePartyDone, &CreatePartyResult](const FAccelByteModelsCreatePartyResponse result)
 	{
 		CreatePartyResult = result;
 		bCreatePartyDone = true;
 	}));
 	
 	// create party
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party");
 
 	// crate party again, error
 	bCreatePartyDone = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party2");
 
 	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Create party2 responded with code %s"), *CreatePartyResult.Code);
@@ -7161,16 +7112,16 @@ bool LobbyTestErrorMessageEmptyReconnectHasMessage::RunTest(const FString& Param
 		ErrorMessage = message;
 	});
 	
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
 	
 	// create party
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party");
 
 	// Clear error message, then test error creating party
 	bCreatePartyDone = false;
-	Lobbies[0]->ClearLobbyErrorMessages();
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.ClearLobbyErrorMessages();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party2");
 	bool bIsErrorAfterClear(bError);
 	int32 ErrorCodeAfterClear(ErrorCode);
@@ -7181,20 +7132,20 @@ bool LobbyTestErrorMessageEmptyReconnectHasMessage::RunTest(const FString& Param
 	
 	// Disconnect Lobby, reapply setup then try again.
 	LobbyDisconnect(1);
-	WaitUntil(!Lobbies[0]->IsConnected(), "Waiting lobby disconnect");
+	WaitUntil(!LobbyApiClients[0]->Lobby.IsConnected(), "Waiting lobby disconnect");
 	
 	LobbyConnect(1);
-	Lobbies[0]->SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
-	WaitUntil(Lobbies[0]->IsConnected(), "Wait reconnecting lobby");
+	LobbyApiClients[0]->Lobby.SetCreatePartyResponseDelegate(CreatePartySuccess, CreatePartyError);
+	WaitUntil(LobbyApiClients[0]->Lobby.IsConnected(), "Wait reconnecting lobby");
 
 	// Create party again after disconnect
 	bCreatePartyDone = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party", 3);
 
 	// Create party again to test error after reconnecting
 	bCreatePartyDone = false;
-	Lobbies[0]->SendCreatePartyRequest();
+	LobbyApiClients[0]->Lobby.SendCreatePartyRequest();
 	WaitUntil(bCreatePartyDone, "waiting create party2", 3);
 	bool bIsErrorAfterReconnect(bError);
 	int32 ErrorCodeAfterReconnect(ErrorCode);
@@ -7250,7 +7201,7 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	AB_TEST_TRUE(bSetConfigSuccess);
 	
 	bool bReachedBurst = false;
-	Lobbies[0]->SetErrorNotifDelegate(Lobby::FErrorNotif::CreateLambda([&](int32 Code, const FString& Message)
+	LobbyApiClients[0]->Lobby.SetErrorNotifDelegate(AccelByte::Api::Lobby::FErrorNotif::CreateLambda([&](int32 Code, const FString& Message)
 	{
 		// Too many request
 		if(Code == 429)
@@ -7261,7 +7212,7 @@ bool LobbyTestRequestReachBurst::RunTest(const FString& Parameters)
 	int SendRequestCounter = 0;
 	while(SendRequestCounter <= ShortLimitBurst)
 	{
-		Lobbies[0]->SendGetOnlineUsersRequest();
+		LobbyApiClients[0]->Lobby.SendGetOnlineUsersRequest();
 		SendRequestCounter++;
 	}
 	WaitUntil(bReachedBurst, "Waiting to reach burst limit");

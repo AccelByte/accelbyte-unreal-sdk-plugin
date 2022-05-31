@@ -83,21 +83,19 @@ struct FTestUser
 	FString AvatarSmallUrl = TEXT("http://example.com/avatar/small.jpg");
 	FString AvatarUrl = TEXT("http://example.com/avatar/normal.jpg");
 	FString AvatarLargeUrl = TEXT("http://example.com/avatar/large.jpg");
-	Credentials Credentials;
+	FString UserId;
 
-	FTestUser(const int32 UserIndex = 0) : FTestUser(
-		FGuid::NewGuid().ToString(EGuidFormats::Digits).Left(8), // Random unique ID
-		UserIndex
-		)
+	FTestUser(const int32 UserIndex = 0) : FTestUser(FGuid::NewGuid().ToString(EGuidFormats::Digits).Left(8) // Random unique ID
+		, UserIndex)
 	{}
 
-	FTestUser(const FString& UniqueID, const int32 UserIndex = 0) :
-		DateOfBirth((FDateTime::Today() - FTimespan::FromDays(365 * 21 + 7))
-		            .ToIso8601().Left(10)), // 21 years old as of today, date only
-		DisplayName(FString::Printf(TEXT("%s%s-%s-%02d"), 
-		                            *FirstName, *LastName, *UniqueID, UserIndex).ToLower()),
-		Email(FString::Printf(TEXT("%s-%s-%02d@example.com"), 
-		                      TEXT("justice-unreal-sdk"), *UniqueID, UserIndex).ToLower())
+	FTestUser(const FString& UniqueID, const int32 UserIndex = 0)
+		: DateOfBirth((FDateTime::Today() - FTimespan::FromDays(365 * 21 + 7))
+								.ToIso8601().Left(10)) // 21 years old as of today, date only
+		, DisplayName(FString::Printf(TEXT("%s%s-%s-%02d"), 
+								*FirstName, *LastName, *UniqueID, UserIndex).ToLower())
+		, Email(FString::Printf(TEXT("%s-%s-%02d@example.com"), 
+								TEXT("justice-unreal-sdk"), *UniqueID, UserIndex).ToLower())
 	{}
 };
 
@@ -106,13 +104,13 @@ struct FTestAcceptedPolicy
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool IsAccepted;
+	bool IsAccepted{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString LocalizedPolicyVersionId;
+	FString LocalizedPolicyVersionId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString PolicyId;
+	FString PolicyId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString PolicyVersionId;
+	FString PolicyVersionId{};
 };
 
 USTRUCT(BlueprintType)
@@ -120,25 +118,25 @@ struct FTestUserV4
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TArray<FTestAcceptedPolicy> AcceptedPolicies;
+	TArray<FTestAcceptedPolicy> AcceptedPolicies{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString AuthType;
+	FString AuthType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Country;
+	FString Country{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString DateOfBirth;
+	FString DateOfBirth{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString DisplayName;
+	FString DisplayName{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString EmailAddress;
+	FString EmailAddress{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Password;
+	FString Password{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString PasswordMD5Sum;
+	FString PasswordMD5Sum{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Username;
+	FString Username{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool Verified;
+	bool Verified{};
 };
 
 USTRUCT(BlueprintType)
@@ -146,25 +144,25 @@ struct FCreateTestUserResponseV4
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString AuthType;
+	FString AuthType{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Country;
+	FString Country{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString DateOfBirth;
+	FString DateOfBirth{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Displayname;
+	FString Displayname{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString EmailAddress;
+	FString EmailAddress{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Namespace;
+	FString Namespace{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString UserId;
+	FString UserId{};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Username;
+	FString Username{};
 };
 
-void AdminGetUserMap(const FString& userId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
-void AdminGetUserVerificationCode(const FString& userId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
+void AdminGetUserMap(const FString& UserId, const THandler<FUserMapResponse>& OnSuccess, const FErrorHandler& OnError);
+void AdminGetUserVerificationCode(const FString& UserId, const THandler<FVerificationCode>& OnSuccess, const FErrorHandler& OnError);
 void AdminGetUserByEmailAddress(const FString& EmailAddress, const THandler<FUserResponse>& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteUser(const FString& UserId, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
 void AdminDeleteUserByEmailAddress(const FString& EmailAddress, const FSimpleDelegate& OnSuccess, const FErrorHandler& OnError);
@@ -179,7 +177,9 @@ bool LoginTestUser(FTestUser& TestUser);
 bool DeleteTestUser(FTestUser& InTestUser);
 
 bool SetupTestUsers(const int32 InNumOfTestUsers, TArray<FTestUser>& OutTestUsers);
+bool SetupTestUser(FTestUser& InTestUser);
 bool TeardownTestUsers(TArray<FTestUser>& InTestUsers);
+bool TeardownTestUser(FTestUser& InTestUser);
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FDCreateTestUserResponseV4, FCreateTestUserResponseV4, Response);
 UCLASS(Blueprintable, BlueprintType)

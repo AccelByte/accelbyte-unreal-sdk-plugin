@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Agreement
 {
 public:
-	Agreement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Agreement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Agreement();
 private:
 	FHttpRetryScheduler& HttpRef;

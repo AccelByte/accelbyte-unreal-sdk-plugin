@@ -22,7 +22,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API TurnManager
 {
 public:
-	TurnManager(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& HttpRef);
+	TurnManager(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~TurnManager();
 
 	/**
@@ -42,9 +42,9 @@ public:
 	void GetClosestTurnServer(const THandler<FAccelByteModelsTurnServer>& OnSuccess, const FErrorHandler& OnError);
 	
 private:
-	FHttpRetryScheduler& HttpRef;
-	const Credentials& Credentials;
-	const Settings& Settings;
+	FHttpRetryScheduler & HttpRef;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 	FAccelByteModelsTurnServer ClosestServer;
 	float FastestPing;
 	int Counter;

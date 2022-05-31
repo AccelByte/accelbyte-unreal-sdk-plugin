@@ -17,8 +17,6 @@ DEFINE_LOG_CATEGORY(LogAccelByteHttpClientTest);
 
 static const int32 AutomationFlagMaskCustomization = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-TArray<FTestUser> HttpClientTestUsers;
-
 class FThreadCancellationTestWorker : public FRunnable
 {
 public:
@@ -76,7 +74,10 @@ void DoUStructTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FStrin
 
 bool DoUStructTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -90,7 +91,7 @@ bool DoUStructTest::RunTest(const FString& Method)
 	Content.Name = "John Doe";
 	Content.Age = 24;
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 	
@@ -109,17 +110,17 @@ bool DoUStructTest::RunTest(const FString& Method)
 	WaitUntil(bIsDone, "Waiting ...");
 
 	AB_TEST_TRUE(bIsSuccess);
-	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestUsers[0].Credentials.GetNamespace() + "/" + HttpClientTestUsers[0].Credentials.GetUserId()));
+	AB_TEST_TRUE(Result.Url.Contains(UserCredentials.GetNamespace() + "/" + UserCredentials.GetUserId()));
 	AB_TEST_EQUAL(Result.Method, Method);
 	AB_TEST_EQUAL(Result.Args["q"], Query);
-	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestUsers[0].Credentials.GetAccessToken()));
+	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *UserCredentials.GetAccessToken()));
 	if (!Method.ToUpper().Equals(TEXT("GET")))
 	{
 		AB_TEST_EQUAL(Result.Json.Name, Content.Name);
 		AB_TEST_EQUAL(Result.Json.Age, Content.Age);
 	}
 
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bIsSuccess;
 }
@@ -139,7 +140,10 @@ void DoFormTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray <FString>&
 
 bool DoFormTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -153,7 +157,7 @@ bool DoFormTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 	
@@ -173,16 +177,16 @@ bool DoFormTest::RunTest(const FString& Method)
 
 	AB_TEST_TRUE(bIsSuccess);
 	AB_TEST_EQUAL(Result.Method, Method);
-	AB_TEST_TRUE(Result.Url.Contains(HttpClientTestUsers[0].Credentials.GetNamespace() + "/" + HttpClientTestUsers[0].Credentials.GetUserId()));
+	AB_TEST_TRUE(Result.Url.Contains(UserCredentials.GetNamespace() + "/" + UserCredentials.GetUserId()));
 	AB_TEST_EQUAL(Result.Args["q"], Query);
-	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *HttpClientTestUsers[0].Credentials.GetAccessToken()));
+	AB_TEST_EQUAL(Result.Headers[TEXT("Authorization")], FString::Printf(TEXT("Bearer %s"), *UserCredentials.GetAccessToken()));
 	if (!Method.ToUpper().Equals(TEXT("GET")))
 	{
 		AB_TEST_EQUAL(Result.Form[TEXT("name")], TEXT("John Doe"));
 		AB_TEST_EQUAL(Result.Form[TEXT("age")], TEXT("24"));
 	}
 
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bIsSuccess;
 }
@@ -202,7 +206,10 @@ void DoCancelAfterDoneTest::GetTests(TArray<FString>& OutBeautifiedNames, TArray
 
 bool DoCancelAfterDoneTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -216,7 +223,7 @@ bool DoCancelAfterDoneTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 
@@ -239,7 +246,7 @@ bool DoCancelAfterDoneTest::RunTest(const FString& Method)
 	AB_TEST_TRUE(bIsDone);
 	AB_TEST_FALSE(CancellationToken.IsCancelled());
 
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bIsDone;
 }
@@ -259,7 +266,10 @@ void DoCancelAfterRequestTest::GetTests(TArray<FString>& OutBeautifiedNames, TAr
 
 bool DoCancelAfterRequestTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	FHttpClientTestAnythingResponse Result;
 
@@ -273,7 +283,7 @@ bool DoCancelAfterRequestTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 
@@ -297,7 +307,7 @@ bool DoCancelAfterRequestTest::RunTest(const FString& Method)
 	AB_TEST_TRUE(bIsDone);
 	AB_TEST_TRUE(CancellationToken.IsCancelled());
 
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bIsDone;
 }
@@ -317,7 +327,10 @@ void DoCancelOneofManyThreadRequestTest::GetTests(TArray<FString>& OutBeautified
 
 bool DoCancelOneofManyThreadRequestTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	const int ThreadCount = 10;
 	TArray<TSharedPtr<FThreadCancellationTestWorker>> Tasks;
@@ -332,7 +345,7 @@ bool DoCancelOneofManyThreadRequestTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 
@@ -368,7 +381,7 @@ bool DoCancelOneofManyThreadRequestTest::RunTest(const FString& Method)
 		Task->EnsureCompletion();
 	}
 
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bIsDone;
 }
@@ -388,7 +401,10 @@ void DoCancelOneofManyRequestsTest::GetTests(TArray<FString>& OutBeautifiedNames
 
 bool DoCancelOneofManyRequestsTest::RunTest(const FString& Method)
 {
-	AB_TEST_TRUE(SetupTestUsers(1, HttpClientTestUsers));
+	FTestUser User1{0};
+	AB_TEST_TRUE(SetupTestUser(User1));
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(User1.Email);
+	Credentials UserCredentials = ApiClient->CredentialsRef.Get();
 
 	const int RequestCount = 10;
 	TArray<TSharedPtr<FAccelByteCancellationToken>> CancellationTokens;
@@ -405,7 +421,7 @@ bool DoCancelOneofManyRequestsTest::RunTest(const FString& Method)
 		{"age", "24"},
 	};
 
-	FHttpClient HttpClient(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
+	FHttpClient HttpClient(UserCredentials, FRegistry::Settings, FRegistry::HttpRetryScheduler); // For testing purposes only
 
 	const FString Url = "https://httpbin.org/anything/{namespace}/{userId}"; // {namespace} and {userId} is going to be replaced by actual value in credentials
 
@@ -444,7 +460,7 @@ bool DoCancelOneofManyRequestsTest::RunTest(const FString& Method)
 	AB_TEST_TRUE(bAllIsDone);
 
 	AB_TEST_EQUAL(CancelledCount, 1);
-	AB_TEST_TRUE(TeardownTestUsers(HttpClientTestUsers));
+	AB_TEST_TRUE(TeardownTestUser(User1));
 
 	return bAllIsDone;
 }

@@ -7,14 +7,12 @@
 namespace AccelByte
 {
 	
-FServerApiBase::FServerApiBase(
-	ServerCredentials const& ServerCredentialsRef,
-	ServerSettings const& ServerSettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	ServerCredentialsRef{ ServerCredentialsRef },
-	ServerSettingsRef{ ServerSettingsRef },
-	HttpRef{ HttpRef }
+FServerApiBase::FServerApiBase( ServerCredentials const& InCredentialsRef
+	, ServerSettings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: ServerCredentialsRef{InCredentialsRef}
+	, ServerSettingsRef{InSettingsRef}
+	, HttpRef{InHttpRef}
 {
 }
 

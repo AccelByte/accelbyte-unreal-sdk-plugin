@@ -13,7 +13,12 @@ namespace AccelByte
 namespace GameServerApi
 {
 
-	ServerQosManager::ServerQosManager(const AccelByte::ServerCredentials& Credentials, const AccelByte::ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
+	ServerQosManager::ServerQosManager(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+		, HttpRef{InHttpRef}
 	{}
 
 	ServerQosManager::~ServerQosManager()
@@ -23,7 +28,7 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Url = FString::Printf(TEXT("%s/public/qos"), *Settings.QosManagerServerUrl);
+		FString Url = FString::Printf(TEXT("%s/public/qos"), *SettingsRef.QosManagerServerUrl);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -40,7 +45,7 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Url = FString::Printf(TEXT("%s/public/namespace/%s/qos"), *Settings.QosManagerServerUrl, *Settings.Namespace);
+		FString Url = FString::Printf(TEXT("%s/public/namespace/%s/qos"), *SettingsRef.QosManagerServerUrl, *SettingsRef.Namespace);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

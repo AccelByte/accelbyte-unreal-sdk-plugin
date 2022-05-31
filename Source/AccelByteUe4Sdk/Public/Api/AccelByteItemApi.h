@@ -20,7 +20,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Item
 {
 public:
-	Item(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Item(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Item();
 private:
 	FHttpRetryScheduler& HttpRef;

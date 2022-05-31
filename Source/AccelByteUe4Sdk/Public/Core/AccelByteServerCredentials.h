@@ -33,7 +33,7 @@ public:
 	ServerCredentials();
 
 	void ForgetAll();
-	void SetClientCredentials(const FString& ClientId, const FString& ClientSecret);
+	void SetClientCredentials(const FString& InClientId, const FString& InClientSecret);
 	void SetClientCredentials(const ESettingsEnvironment Environment);
 	void SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace);
 	void ScheduleRefreshToken(double RefreshTime);
@@ -43,6 +43,9 @@ public:
 	void Shutdown();
 	void PollRefreshToken(double CurrentTime);
 
+	const FString& GetOAuthClientId() const;
+	const FString& GetOAuthClientSecret() const;
+	
 	/**
 	 * @brief Get access token expiration in UTC.
 	 */

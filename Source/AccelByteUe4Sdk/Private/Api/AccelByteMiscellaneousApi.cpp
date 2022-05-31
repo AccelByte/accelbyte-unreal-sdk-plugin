@@ -13,17 +13,16 @@ namespace AccelByte
 namespace Api
 {
 
-Miscellaneous::Miscellaneous(
-	const Credentials& CredentialsRef,
-	const Settings& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Miscellaneous::Miscellaneous(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
 Miscellaneous::~Miscellaneous()
-	{}
+{}
 
 	void Miscellaneous::GetServerCurrentTime(const THandler<FTime>& OnSuccess, const FErrorHandler& OnError)
 	{

@@ -14,15 +14,16 @@ namespace AccelByte
 namespace Api
 {
 
-Currency::Currency(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef):
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Currency::Currency(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Currency::~Currency() {}
+Currency::~Currency()
+{}
 
 void Currency::GetCurrencyList(const FString& Namespace, const THandler<TArray<FAccelByteModelsCurrencyList>>& OnSuccess, const FErrorHandler& OnError)
 {

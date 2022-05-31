@@ -15,7 +15,12 @@ namespace AccelByte
 {
 	namespace GameServerApi
 	{
-		ServerSeasonPass::ServerSeasonPass(const ServerCredentials& Credentials, const ServerSettings& Setting, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Setting), HttpRef(InHttpRef)
+		ServerSeasonPass::ServerSeasonPass(ServerCredentials const& InCredentialsRef
+			, ServerSettings const& InSettingsRef
+			, FHttpRetryScheduler& InHttpRef)
+			: CredentialsRef{InCredentialsRef}
+			, SettingsRef{InSettingsRef}
+			, HttpRef{InHttpRef}
 		{
 		}
 
@@ -27,8 +32,8 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 
-			FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp"), *Settings.SeasonPassServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/exp"), *SettingsRef.SeasonPassServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 			FString Verb = TEXT("POST");
 			FString ContentType = TEXT("application/json");
 			FString Accept = TEXT("application/json");
@@ -49,8 +54,8 @@ namespace AccelByte
 		{
 			FReport::Log(FString(__FUNCTION__));
 			
-			FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression"), *Settings.SeasonPassServerUrl, *Credentials.GetClientNamespace(), *UserId);
+			FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+			FString Url = FString::Printf(TEXT("%s/admin/namespaces/%s/users/%s/seasons/current/progression"), *SettingsRef.SeasonPassServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 			FString Verb = TEXT("GET");
 			FString ContentType = TEXT("application/json");
 			FString Accept = TEXT("application/json");

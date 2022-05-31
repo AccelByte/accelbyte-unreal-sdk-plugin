@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Entitlement : public FApiBase
 {
 public:
-	Entitlement(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Entitlement(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Entitlement();
 
 public:

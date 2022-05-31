@@ -23,7 +23,7 @@ namespace GameServerApi
 	class ACCELBYTEUE4SDK_API ServerLobby
 	{
 	public:
-		ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+		ServerLobby(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 		~ServerLobby();
 
 		/**
@@ -130,8 +130,8 @@ namespace GameServerApi
 
 		void WritePartyStorageRecursive(TSharedPtr<PartyStorageWrapper> DataWrapper);
 
-		const ServerCredentials& Credentials;
-		const ServerSettings& Settings;
+		ServerCredentials const& CredentialsRef;
+		ServerSettings const& SettingsRef;
 		FHttpRetryScheduler& HttpRef;
 
 		ServerLobby() = delete;

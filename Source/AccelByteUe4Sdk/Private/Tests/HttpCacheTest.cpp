@@ -30,6 +30,7 @@ BEGIN_DEFINE_SPEC(FHttpCacheTestSpec, "AccelByte.Tests.Core.HttpCache",
 
 TArray<FTestUser> HttpClientTestUsers;
 TArray<TSharedPtr<AccelByte::FHttpClient>> HttpClients;
+int NumTestUsers = 1;
 
 FHttpCacheTestResponse Result;
 
@@ -146,9 +147,15 @@ void FHttpCacheTestSpec::Define()
 
 	BeforeEach([this]()
 		{
-			SetupTestUsers(1, HttpClientTestUsers);
-			HttpClients.Add(MakeShared<AccelByte::FHttpClient>(HttpClientTestUsers[0].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler));  // For testing purposes only
+			SetupTestUsers(NumTestUsers, HttpClientTestUsers);
 
+			for(auto& TestUser : HttpClientTestUsers)
+			{
+				FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+				// For testing purposes only
+				HttpClients.Add(MakeShared<AccelByte::FHttpClient>(ApiClient->CredentialsRef.Get(), FRegistry::Settings, FRegistry::HttpRetryScheduler)); 
+			}
+			
 			bOriginalValueIsCacheEnabled = UAccelByteBlueprintsSettings::IsHttpCacheEnabled();
 			UAccelByteBlueprintsSettings::SetIsHttpCacheEnabled(true);
 		});

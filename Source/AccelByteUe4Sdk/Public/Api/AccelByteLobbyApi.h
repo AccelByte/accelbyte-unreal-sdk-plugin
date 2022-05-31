@@ -56,20 +56,19 @@ enum Notif : uint8;
 class ACCELBYTEUE4SDK_API Lobby
 {
 public:
-	Lobby(
-		Credentials& Credentials,
-		const Settings& Settings,
-		FHttpRetryScheduler& HttpRef,
-		float PingDelay = 30.f,
-		float InitialBackoffDelay = 1.f,
-		float MaxBackoffDelay = 30.f,
-		float TotalTimeout = 60.f,
-		TSharedPtr<IWebSocket> WebSocket = nullptr);
+	Lobby(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef
+		, float InPingDelay = 30.f
+		, float InInitialBackoffDelay = 1.f
+		, float InMaxBackoffDelay = 30.f
+		, float InTotalTimeout = 60.f
+		, TSharedPtr<IWebSocket> InWebSocket = nullptr);
 	~Lobby();
 private:
 	FHttpRetryScheduler& HttpRef;
-	Credentials& Credentials;
-	const Settings& Settings;
+	Credentials& CredentialsRef;
+	Settings const& SettingsRef;
 
 	const FString LobbySessionHeaderName = "X-Ab-LobbySessionID";
 
@@ -1674,7 +1673,7 @@ private:
 
 	const FVoidHandler RefreshTokenDelegate = FVoidHandler::CreateLambda([&]()
 	{
-		RefreshToken(Credentials.GetAccessToken());
+		RefreshToken(CredentialsRef.GetAccessToken());
 	});
 	
 #pragma region Message Id - Response Map
