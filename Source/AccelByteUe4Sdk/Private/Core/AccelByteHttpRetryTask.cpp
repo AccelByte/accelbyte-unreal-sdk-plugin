@@ -2,8 +2,6 @@
 // This is licensed software from AccelByte Inc, for limitations
 // and restrictions contact your company contract manager.
 
-#pragma once
-
 #include "Core/AccelByteHttpRetryTask.h"
 #include "Core/AccelByteReport.h"
 

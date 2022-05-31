@@ -10,7 +10,6 @@
 
 #include <unordered_map>
 
-#include "Models/AccelByteUserModels.h"
 #include "Models/AccelByteLobbyModels.h"
 #include "AccelByteError.generated.h"
 
