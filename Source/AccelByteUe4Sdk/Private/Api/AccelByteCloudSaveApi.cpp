@@ -15,18 +15,16 @@ namespace AccelByte
 {
 namespace Api
 {
-CloudSave::CloudSave(
-	AccelByte::Credentials const& Credentials,
-	AccelByte::Settings const& Setting,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	Credentials{Credentials},
-	Settings{Setting}
-{
-}
+CloudSave::CloudSave(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-CloudSave::~CloudSave(){}
+CloudSave::~CloudSave()
+{}
 
 void CloudSave::SaveUserRecord(const FString& Key, bool bSetPublic, const FJsonObject& RecordRequest, const FVoidHandler& OnSuccess, const FErrorHandler& OnError)
 {
@@ -40,8 +38,8 @@ void CloudSave::SaveUserRecord(FString const& Key, FJsonObject RecordRequest, bo
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
+	FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url             = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
 	FString Verb            = TEXT("POST");
 	FString ContentType     = TEXT("application/json");
 	FString Accept          = TEXT("application/json");
@@ -65,8 +63,8 @@ void CloudSave::GetUserRecord(FString const& Key, THandler<FAccelByteModelsUserR
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -114,8 +112,8 @@ void CloudSave::GetPublicUserRecord(FString const& Key, FString const& UserId, T
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *UserId, *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *UserId, *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -176,8 +174,8 @@ void CloudSave::BulkGetPublicUserRecord(FString const& Key, const TArray<FString
 
 	const FListBulkUserInfoRequest UserList{ UserIds };
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/bulk/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -240,8 +238,8 @@ void CloudSave::ReplaceUserRecord(FString const& Key, FJsonObject RecordRequest,
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key, (IsPublic ? TEXT("/public") : TEXT("")));
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -265,8 +263,8 @@ void CloudSave::ReplaceUserRecord(int TryAttempt, FString const& Key, FAccelByte
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/concurrent/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -391,8 +389,8 @@ void CloudSave::DeleteUserRecord(FString const& Key, FVoidHandler const& OnSucce
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Credentials.GetUserId(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *CredentialsRef.GetUserId(), *Key);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -413,8 +411,8 @@ void CloudSave::SaveGameRecord(FString const& Key, FJsonObject RecordRequest, FV
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("POST");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -438,8 +436,8 @@ void CloudSave::GetGameRecord(FString const& Key, THandler<FAccelByteModelsGameR
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("GET");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -481,8 +479,8 @@ void CloudSave::ReplaceGameRecord(FString const& Key, FJsonObject RecordRequest,
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -506,8 +504,8 @@ void CloudSave::ReplaceGameRecord(int TryAttempt, FString const& Key, FAccelByte
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/concurrent/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/concurrent/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("PUT");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");
@@ -631,8 +629,8 @@ void CloudSave::DeleteGameRecord(FString const& Key, FVoidHandler const& OnSucce
 {
 	FReport::Log(FString(__FUNCTION__));
 
-	FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetAccessToken());
-	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetNamespace(), *Key);
+	FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
+	FString Url = FString::Printf(TEXT("%s/v1/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetNamespace(), *Key);
 	FString Verb = TEXT("DELETE");
 	FString ContentType = TEXT("application/json");
 	FString Accept = TEXT("application/json");

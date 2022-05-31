@@ -23,7 +23,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Category
 {
 public:
-	Category(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Category(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Category();
 private:
 	FHttpRetryScheduler& HttpRef;

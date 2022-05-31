@@ -25,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerQosManager
 {
 public:
-	ServerQosManager(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+	ServerQosManager(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerQosManager();
 
 	/**
@@ -54,8 +54,8 @@ public:
 
 	TArray<TPair<FString, float>> Latencies;
 private:
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 
 	ServerQosManager() = delete;

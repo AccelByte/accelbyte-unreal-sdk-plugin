@@ -7,6 +7,7 @@
 #include "Api/AccelByteCloudSaveApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "UserTestAdmin.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
@@ -17,23 +18,19 @@ using AccelByte::FVoidHandler;
 using AccelByte::FErrorHandler;
 using AccelByte::Credentials;
 using AccelByte::HandleHttpError;
-using AccelByte::Api::User;
-using AccelByte::Api::CloudSave;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogAccelByteCloudSaveTest, Log, All);
 DEFINE_LOG_CATEGORY(LogAccelByteCloudSaveTest);
 
 const int32 AutomationFlagMaskCloudSave = (EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter | EAutomationTestFlags::CommandletContext | EAutomationTestFlags::ClientContext);
 
-static Credentials User2Creds;
-static TSharedPtr<Api::User> User2;
-static TSharedPtr<Api::CloudSave> CloudSave2;
-static FString KeyUserTest = "UE4SDKKeyUserTest";
-static FString KeyUserTestMetaPrivate = "UE4SDKKeyUserTestMetaPrivate";
-static FString KeyPublicUserTest = "UE4SDKKeyPublicUserTest";
-static FString UnexistKeyUserTest = "UnexistUnitySDKKeyUserTest";
-static FString KeyGameTest = "UE4SDKKeyGameTest";
-static FString UnexistKeyGameTest = "UnexistUnitySDKKeyGameTest";
+static FTestUser TestUser1{0};
+static FString KeyUserTest = TEXT("UE4SDKKeyUserTest");
+static FString KeyUserTestMetaPrivate = TEXT("UE4SDKKeyUserTestMetaPrivate");
+static FString KeyPublicUserTest = TEXT("UE4SDKKeyPublicUserTest");
+static FString UnexistKeyUserTest = TEXT("UnexistUnitySDKKeyUserTest");
+static FString KeyGameTest = TEXT("UE4SDKKeyGameTest");
+static FString UnexistKeyGameTest = TEXT("UnexistUnitySDKKeyGameTest");
 static FJsonObject Record1Test;
 static FJsonObject Record2Test;
 static FJsonObject NewRecord1Test;
@@ -99,123 +96,82 @@ bool CloudSaveSetup::RunTest(const FString& Parameters)
 	}
 
 	// user1 preps
-	bool bUserLoginSuccess= false;
-	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUserLoginSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
-		bUserLoginSuccess = true;
-	}), CloudSaveErrorHandler);
-	WaitUntil(bUserLoginSuccess, "Waiting for Login...");
+	bool bUser1Setup= false;
+	FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bUser1Setup]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("User Login Success"));
+				bUser1Setup = true;
+			})
+		, CloudSaveErrorHandler);
+	WaitUntil(bUser1Setup, "Waiting for Login...");
 
 	bool bClientTokenObtained = false;
 
 	FRegistry::ServerOauth2.LoginWithClientCredentials(FVoidHandler::CreateLambda([&]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("    Success"));
-		bClientTokenObtained = true;
-	}), CloudSaveErrorHandler);
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("    Success"));
+				bClientTokenObtained = true;
+			})
+		, CloudSaveErrorHandler);
 
 	WaitUntil(bClientTokenObtained, "Waiting for Login...");
 	
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	bool bDeleteUserRecord1Success = false;
-	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecord1Success, "Waiting for deleting user record ...");
 
 	bool bDeleteGameRecordSuccess = false;
-	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
-		bDeleteGameRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::ServerCloudSave.DeleteGameRecord(KeyGameTest
+		, FVoidHandler::CreateLambda([&bDeleteGameRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
+				bDeleteGameRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
 	bool bDeleteGameRecord1Success = false;
-	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKeyGameTest, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
-		bDeleteGameRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::ServerCloudSave.DeleteGameRecord(UnexistKeyGameTest
+		, FVoidHandler::CreateLambda([&bDeleteGameRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete game record success"));
+				bDeleteGameRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecord1Success, "Waiting for deleting game record ...");
 
 	bool bDeleteUserPublicRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyPublicUserTest, FVoidHandler::CreateLambda([&bDeleteUserPublicRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserPublicRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyPublicUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserPublicRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserPublicRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserPublicRecordSuccess, "Waiting for deleting user record ...");
 
 	// user2 preps
-	User2 = MakeShared<Api::User>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-	FString Email = FString::Printf(TEXT("cloudsaveUE4Test@example.com"));
-	Email.ToLowerInline();
-	FString const Password = TEXT("123Password123");
-	FString const DisplayName = FString::Printf(TEXT("cloudsaveUE4"));
-	FString const Country = "US";
-	FDateTime const DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
-	FString const Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
-	bool bUserCreationSuccess = false;
-	User2->Register(
-		Email,
-		Password,
-		DisplayName,
-		Country,
-		Format,
-		THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-	{
-		bUserCreationSuccess = true;
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User2 is Created"));
+	bool bUser2Setup = SetupTestUser(TestUser1);
 
-	}),
-		FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Code=%d"), Code);
-		if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException || static_cast<ErrorCodes>(Code) == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
-		{
-			bUserCreationSuccess = true;
-			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User2 is already"));
-		}
-		else
-		{
-			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Test CloudSave User can't be created"));
-		}
-	}));
-
-	WaitUntil(bUserCreationSuccess, "Waiting for user created...");
-
-	bool bUser2LoginSuccess = false;
-	User2->LoginWithUsername(
-		Email,
-		Password,
-		FVoidHandler::CreateLambda([&]()
-	{
-		bUser2LoginSuccess = true;
-	}),
-	FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-	}));
-
-	WaitUntil(bUser2LoginSuccess, "Waiting for Login...");
-
-	CloudSave2 = MakeShared<Api::CloudSave>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
-	AB_TEST_TRUE(bUserLoginSuccess);
-	AB_TEST_TRUE(bUserCreationSuccess);
-	AB_TEST_TRUE(bUser2LoginSuccess);
+	AB_TEST_TRUE(bUser1Setup);
+	AB_TEST_TRUE(bUser2Setup);
 	AB_TEST_TRUE(bDeleteUserRecordSuccess);
 	AB_TEST_TRUE(bDeleteUserRecord1Success);
 	AB_TEST_TRUE(bDeleteGameRecordSuccess);
@@ -227,19 +183,27 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveUserRecord, "AccelByte.Tests.Cloud
 bool CloudSaveSaveUserRecord::RunTest(const FString& Parameters)
 {
 	bool bSaveUserRecord1Success = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true, Record1Test, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
-		bSaveUserRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		, Record1Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
 	
 	bool bSaveUserRecord2Success = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true, Record2Test, FVoidHandler::CreateLambda([&bSaveUserRecord2Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
-		bSaveUserRecord2Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		, Record2Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord2Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record2 success"));
+				bSaveUserRecord2Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bSaveUserRecord2Success, "Waiting for saving user record2 ...");
 
 	AB_TEST_TRUE(bSaveUserRecord1Success);
@@ -251,11 +215,15 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveSaveUserRecordWithMetaData, "AccelByte
 bool CloudSaveSaveUserRecordWithMetaData::RunTest(const FString& Parameters)
 {
 	bool bSaveUserRecord1Success = false;
-	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true,Record1Test, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
-		bSaveUserRecord1Success = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.SaveUserRecord(KeyUserTest
+		, true
+		,Record1Test
+		, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
+				bSaveUserRecord1Success = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bSaveUserRecord1Success, "Waiting for saving user record1 ...");
 	
 	bool bSaveUserRecord2Success = false;
@@ -337,12 +305,14 @@ bool CloudSaveGetUserRecord::RunTest(const FString& Parameters)
 {
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	FRegistry::CloudSave.GetUserRecord(KeyUserTest, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
-		getUserRecordResult = userRecord;
-		bGetUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.GetUserRecord(KeyUserTest
+		, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+				getUserRecordResult = userRecord;
+				bGetUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 	
 	AB_TEST_TRUE(bGetUserRecordSuccess);
@@ -449,14 +419,16 @@ bool CloudSaveGetOwnPublicUserRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveGetOtherPublicUserRecord, "AccelByte.Tests.CloudSave.C.GetOtherPublicUserRecord", AutomationFlagMaskCloudSave);
 bool CloudSaveGetOtherPublicUserRecord::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser1.Email);
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	CloudSave2->GetPublicUserRecord(KeyPublicUserTest, FRegistry::Credentials.GetUserId(), THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
-		getUserRecordResult = userRecord;
-		bGetUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	ApiClient->CloudSave.GetPublicUserRecord(KeyPublicUserTest, FRegistry::Credentials.GetUserId(),
+		THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+		{
+			UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record success"));
+			getUserRecordResult = userRecord;
+			bGetUserRecordSuccess = true;
+		}), CloudSaveErrorHandler);
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	AB_TEST_TRUE(bGetUserRecordSuccess);
@@ -538,14 +510,13 @@ bool CloudSaveBulkGetPublicUserRecord::RunTest(const FString& Parameters)
 
 	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
 	
-	for (int i = 0; i < UserCount; i++)
+	for (auto& TestUser : TestUsers)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
-		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+		ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 			{
 				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 				bSaveUserRecord1Success = true;
@@ -625,15 +596,14 @@ bool CloudSaveBulkGetPublicUserRecord_SomeUserNotFound::RunTest(const FString& P
 	FListAccelByteModelsUserRecord getUserRecordResults;
 
 	AB_TEST_TRUE(SetupTestUsers(UserCount, TestUsers));
-
-	for (int i = 0; i < UserCount; i++)
+	
+	for (auto& TestUser : TestUsers)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
-		CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+		ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 			{
 				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 				bSaveUserRecord1Success = true;
@@ -681,15 +651,14 @@ bool CloudSaveBulkGetPublicUserRecord_SomeRecordNotFound::RunTest(const FString&
 
 	for (int i = 0; i < UserCount; i++)
 	{
-		UserIds.Add(TestUsers[i].Credentials.GetUserId());
-		AB_TEST_TRUE(LoginTestUser(TestUsers[i]));
-		TSharedPtr<Api::CloudSave> CloudSave = MakeShared<Api::CloudSave>(TestUsers[i].Credentials, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-
+		FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUsers[i].Email);
+		UserIds.Add(ApiClient->CredentialsRef->GetUserId());
+		
 		bool bSaveUserRecord1Success = false;
 		if (i % 2) //not all user saving the record
 		{
 			ExpectedUserHavingRecord++;
-			CloudSave->SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
+			ApiClient->CloudSave.SaveUserRecord(KeyPublicUserTest, Record1Test, true, FVoidHandler::CreateLambda([&bSaveUserRecord1Success]()
 				{
 					UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Save user record1 success"));
 					bSaveUserRecord1Success = true;
@@ -730,12 +699,14 @@ bool CloudSaveReplaceUserRecord::RunTest(const FString& Parameters)
 
 	bool bGetUserRecordSuccess = false;
 	FAccelByteModelsUserRecord getUserRecordResult;
-	FRegistry::CloudSave.GetUserRecord(KeyUserTest, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record1 success"));
-		getUserRecordResult = userRecord;
-		bGetUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.GetUserRecord(KeyUserTest
+		, THandler<FAccelByteModelsUserRecord>::CreateLambda([&bGetUserRecordSuccess, &getUserRecordResult](FAccelByteModelsUserRecord userRecord)
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Get user record1 success"));
+				getUserRecordResult = userRecord;
+				bGetUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	AB_TEST_TRUE(bGetUserRecordSuccess);
@@ -861,11 +832,13 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(UnexistKeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	AB_TEST_TRUE(bReplaceUserRecordSuccess);
@@ -897,7 +870,7 @@ bool CloudSaveReplaceUserRecordUnexistKey::RunTest(const FString& Parameters)
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceWithSaveUserRecord, "AccelByte.Tests.CloudSave.F.ReplaceWithSaveUserRecord", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
-{ 
+{
 	bool bSaveUserRecordSuccess = false;
 	// We could not replace user record with save user record method 
 	FRegistry::CloudSave.SaveUserRecord(KeyUserTest, true, Record1Test, FVoidHandler::CreateLambda([&bSaveUserRecordSuccess]()
@@ -918,11 +891,13 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 	WaitUntil(bGetUserRecordSuccess, "Waiting for getting user record ...");
 
 	bool bDeleteUserRecordSuccess = false;
-	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
-		bDeleteUserRecordSuccess = true;
-	}), CloudSaveErrorHandler);
+	FRegistry::CloudSave.DeleteUserRecord(KeyUserTest
+		, FVoidHandler::CreateLambda([&bDeleteUserRecordSuccess]()
+			{
+				UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user record success"));
+				bDeleteUserRecordSuccess = true;
+			})
+		, CloudSaveErrorHandler);
 	WaitUntil(bDeleteUserRecordSuccess, "Waiting for deleting user record ...");
 
 	AB_TEST_TRUE(bSaveUserRecordSuccess);
@@ -957,6 +932,7 @@ bool CloudSaveReplaceWithSaveUserRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordRacingConditionManual, "AccelByte.Tests.CloudSave.F.ReplaceUserRecordRacingConditionManual", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceUserRecordRacingConditionManual::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	const FString ConcurrentKey = "UE4KeyConcurrentManualUserRecordTest";
 	int DictIndex = 0;
 	bool bReplaceRecordSuccess = false;
@@ -1020,6 +996,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceUserRecordRacingConditionAuto, 
 bool CloudSaveReplaceUserRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1088,6 +1065,7 @@ bool CloudSaveReplaceUserRecordAutoExhaustAllRetries::RunTest(const FString& Par
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
 
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update user record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1309,6 +1287,7 @@ bool CloudSaveReplaceGameRecord::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordRacingConditionManual, "AccelByte.Tests.CloudSave.J.ReplaceGameRecordRacingConditionManual", AutomationFlagMaskCloudSave);
 bool CloudSaveReplaceGameRecordRacingConditionManual::RunTest(const FString& Parameters)
 {
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	const FString ConcurrentKey = "UE4KeyConcurrentManualGameRecordTest";
 	int DictIndex = 0;
 	bool bReplaceRecordSuccess = false;
@@ -1372,6 +1351,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordRacingConditionAuto, 
 bool CloudSaveReplaceGameRecordRacingConditionAuto::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1439,6 +1419,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(CloudSaveReplaceGameRecordAutoExhaustAllRetries
 bool CloudSaveReplaceGameRecordAutoExhaustAllRetries::RunTest(const FString& Parameters)
 {
 	AB_TEST_SKIP_WHEN_DISABLED();
+	FApiClientPtr ApiClient1 = FMultiRegistry::GetApiClient(TestUser1.Email);
 	// update game record
 	int ConcurrentWriteCount = 5;
 	int UpdateSuccessCount = 0;
@@ -1693,14 +1674,7 @@ bool CloudSaveTearDown::RunTest(const FString& Parameters)
 	}), CloudSaveErrorHandler);
 	WaitUntil(bDeleteGameRecordSuccess, "Waiting for deleting game record ...");
 
-	bool bDeleteSuccess = false;
-	UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("DeleteUserById"));
-	AdminDeleteUser(FRegistry::Credentials.GetUserId(), FSimpleDelegate::CreateLambda([&bDeleteSuccess]()
-	{
-		UE_LOG(LogAccelByteCloudSaveTest, Log, TEXT("Delete user by id success"));
-		bDeleteSuccess = true;
-	}), CloudSaveErrorHandler);
-	WaitUntil(bDeleteSuccess, "Waiting for user deletion...");
+	TeardownTestUser(TestUser1);
 
 	return true;
 }

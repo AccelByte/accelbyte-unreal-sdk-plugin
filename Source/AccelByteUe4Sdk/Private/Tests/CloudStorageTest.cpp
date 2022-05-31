@@ -7,6 +7,7 @@
 #include "Api/AccelByteCloudStorageApi.h"
 #include "Core/AccelByteRegistry.h"
 #include "Core/AccelByteCredentials.h"
+#include "Core/AccelByteMultiRegistry.h"
 #include "TestUtilities.h"
 #include "UserTestAdmin.h"
 
@@ -40,8 +41,7 @@ void FCloudStorageTest::Define()
 {
 	const auto setupOnce = [this]()
 	{
-		AB_TEST_TRUE(RegisterTestUser(TestUser));
-		AB_TEST_TRUE(LoginTestUser(TestUser));
+		AB_TEST_TRUE(SetupTestUser(TestUser));
 		
 		return true;
 	};
@@ -50,7 +50,7 @@ void FCloudStorageTest::Define()
 
 	const auto teardown = [this]()
 	{		
-		AB_TEST_TRUE(DeleteTestUser(TestUser));
+		AB_TEST_TRUE(TeardownTestUser(TestUser));
 
 		return true;
 	};
@@ -61,10 +61,10 @@ void FCloudStorageTest::Define()
 	{
 		It("Should run CRUD test then return true", [this]()
 		{
-			Api::CloudStorage CloudStorage(TestUser.Credentials, FRegistry::Settings);
+			FApiClientPtr ApiClient = FMultiRegistry::GetApiClient(TestUser.Email);
 			
 			bool bSlotCreatedResult = false;
-			CloudStorage.CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags, Labels[0], "customAttributeCreated",
+			ApiClient->CloudStorage.CreateSlot(UAccelByteBlueprintsTest::FStringToBytes(Payloads[0]), "create.txt", Tags, Labels[0], "customAttributeCreated",
 				THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 			{
 				UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Create Slot Success"));
@@ -81,7 +81,7 @@ void FCloudStorageTest::Define()
 			FString UpdateCustomAttribute = TEXT("This is a custom attribute");
 
 			bool bMetadataUpdatedResult = false;
-			CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+			ApiClient->CloudStorage.UpdateSlotMetadata(CreatedSlot.SlotId, UpdateTags, UpdateLabel, UpdateCustomAttribute, THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 			{
 				UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Metadata Success"));
 				bMetadataUpdatedResult = true;
@@ -90,7 +90,7 @@ void FCloudStorageTest::Define()
 			AB_TEST_TRUE(bMetadataUpdatedResult);
 
 			bool bGetSlotAfterUpdateResult = false;
-			CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](TArray<FAccelByteModelsSlot> Result)
+			ApiClient->CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](TArray<FAccelByteModelsSlot> Result)
 			{
 				for (int i = 0; i < Result.Num(); i++)
 				{
@@ -120,7 +120,7 @@ void FCloudStorageTest::Define()
 			AB_TEST_TRUE(bGetSlotAfterUpdateResult);
 
 			bool bSlotUpdatedResult = false;
-			CloudStorage.UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", UpdateTags, Labels[1], "customAttributeUpdated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
+			ApiClient->CloudStorage.UpdateSlot(CreatedSlot.SlotId, UAccelByteBlueprintsTest::FStringToBytes(Payloads[1]), "update.txt", UpdateTags, Labels[1], "customAttributeUpdated", THandler<FAccelByteModelsSlot>::CreateLambda([&](const FAccelByteModelsSlot& Result)
 			{
 				UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Update Slot Success"));
 				bSlotUpdatedResult = true;
@@ -131,7 +131,7 @@ void FCloudStorageTest::Define()
 
 			bool bGetSlotResult = false;
 			bool bSlotContentUpdated = false;
-			CloudStorage.GetSlot(CreatedSlot.SlotId, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& Data)
+			ApiClient->CloudStorage.GetSlot(CreatedSlot.SlotId, THandler<TArray<uint8>>::CreateLambda([&](const TArray<uint8>& Data)
 			{
 				bGetSlotResult = true;
 				bSlotContentUpdated = (UAccelByteBlueprintsTest::BytesToFString(Data) == Payloads[1]);
@@ -143,7 +143,7 @@ void FCloudStorageTest::Define()
 
 			bool bGetAllSlotsResult = false;
 			TArray<FAccelByteModelsSlot> Results;
-			CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
+			ApiClient->CloudStorage.GetAllSlots(THandler<TArray<FAccelByteModelsSlot>>::CreateLambda([&](const TArray<FAccelByteModelsSlot>& Slots)
 			{
 				UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Get All Slots Success"));
 				Results = Slots;
@@ -156,7 +156,7 @@ void FCloudStorageTest::Define()
 			for (int i = 0; i < Results.Num(); i++)
 			{
 				bDeleteSlotResults.Add(false);
-				CloudStorage.DeleteSlot(Results[i].SlotId, FVoidHandler::CreateLambda([&]()
+				ApiClient->CloudStorage.DeleteSlot(Results[i].SlotId, FVoidHandler::CreateLambda([&]()
 				{
 					UE_LOG(LogAccelByteCloudStorageTest, Log, TEXT("Delete Slot %d / %d Success"), i+1, Results.Num());
 					bDeleteSlotResults[i] = true;

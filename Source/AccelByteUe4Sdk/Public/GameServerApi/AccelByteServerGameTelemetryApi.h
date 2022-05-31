@@ -25,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerGameTelemetry
 {
 public:
-	ServerGameTelemetry(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+	ServerGameTelemetry(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerGameTelemetry();
 
 	/**
@@ -81,8 +81,8 @@ private:
 	ServerGameTelemetry(ServerGameTelemetry const&) = delete;
 	ServerGameTelemetry(ServerGameTelemetry&&) = delete;
 
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 
 	FTimespan TelemetryInterval = FTimespan(0, 1, 0);

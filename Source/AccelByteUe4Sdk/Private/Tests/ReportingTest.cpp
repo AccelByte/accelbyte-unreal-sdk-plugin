@@ -30,16 +30,14 @@ void FlushHttpRequests();
 BEGIN_DEFINE_SPEC(FReportingTestSpec, "AccelByte.Tests.Reporting", EAutomationTestFlags::ProductFilter | EAutomationTestFlags::ApplicationContextMask)
 	TArray<FString> ReportingReasonsTest = { TEXT("ReasonTest0"), TEXT("ReasonTest1"), TEXT("ReasonTest2"), TEXT("ReasonTest3") };
 	TArray<FString> ReportingReasonGroupsTest = { TEXT("ReasonGroupTest0"), TEXT("ReasonGroupTest1"), TEXT("ReasonGroupTest2") };
-	Credentials User2Creds;
-	TSharedPtr<Api::User> User2;
 	TArray<FString> TestReportingCodes;
+	FTestUser TestUser{0};
 END_DEFINE_SPEC(FReportingTestSpec)
 
 void FReportingTestSpec::Define()
 {
 	Describe("A.ReportingSetup", [this]() {
 		It("Should Provide TEST Setup config", [this]() {
-			FTestUser TestUser;
 			// Clean up previous user info.
 			bool bReportingLoginUserSuccess;
 			FRegistry::User.LoginWithDeviceId(FVoidHandler::CreateLambda([&bReportingLoginUserSuccess]()
@@ -209,90 +207,52 @@ void FReportingTestSpec::Define()
 
 			// Retrieve User2 info or register it.
 			// user2 preps
-			User2 = MakeShared<Api::User>(User2Creds, FRegistry::Settings, FRegistry::HttpRetryScheduler);
-			FString Email = FString::Printf(TEXT("reporting+test+ue4sdk@example.com"));
-			Email.ToLowerInline();
-			FString const Password = TEXT("1Password1");
-			FString const DisplayName = FString::Printf(TEXT("reportingUE4"));
-			FString const Country = "US";
+			TestUser.Email = FString::Printf(TEXT("reporting+test+ue4sdk@example.com"));
+			TestUser.Email.ToLowerInline();
+			TestUser.Password = TEXT("1Password1");
+			TestUser.DisplayName = TEXT("reportingUE4");
+			TestUser.Country = "US";
 			FDateTime const DateOfBirth = (FDateTime::Now() - FTimespan::FromDays(365 * 35));
-			FString const Format = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
+			TestUser.DateOfBirth = FString::Printf(TEXT("%04d-%02d-%02d"), DateOfBirth.GetYear(), DateOfBirth.GetMonth(), DateOfBirth.GetDay());
 
 			bool bDoneSearchUser = false;
 			FPagedPublicUsersInfo ReceivedUserData;
-			FRegistry::User.SearchUsers(DisplayName, EAccelByteSearchType::DISPLAYNAME, THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
-				{
-					bDoneSearchUser = true;
-					ReceivedUserData = Result;
-					UE_LOG(LogAccelByteReportingTest, Log, TEXT("Success Search User"));
-				}),
-				FErrorHandler::CreateLambda([&](int32 Code, FString Message)
+			FRegistry::User.SearchUsers(TestUser.DisplayName
+				, EAccelByteSearchType::DISPLAYNAME
+				, THandler<FPagedPublicUsersInfo>::CreateLambda([&bDoneSearchUser, &ReceivedUserData](const FPagedPublicUsersInfo& Result)
+					{
+						bDoneSearchUser = true;
+						ReceivedUserData = Result;
+						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Success Search User"));
+					})
+				, FErrorHandler::CreateLambda([&](int32 Code, FString Message)
 					{
 						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Error code: %d\nError message:%s"), Code, *Message);
 						bDoneSearchUser = true;
-					}));
+					})
+				);
 			WaitUntil(bDoneSearchUser, "Waiting for search user");
 			AB_TEST_TRUE(bDoneSearchUser);
 
 			if (ReceivedUserData.Data.Num() > 0)
 			{
 				bool bDeleteUser2 = false;
-				AdminDeleteUser(ReceivedUserData.Data[0].UserId, FSimpleDelegate::CreateLambda([&bDeleteUser2]()
-					{
-						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Delete user Success"));
-						bDeleteUser2 = true;
-					}), ReportingOnError);
+				AdminDeleteUser(ReceivedUserData.Data[0].UserId
+					, FSimpleDelegate::CreateLambda([&bDeleteUser2]()
+						{
+							UE_LOG(LogAccelByteReportingTest, Log, TEXT("Delete user Success"));
+							bDeleteUser2 = true;
+						})
+					, ReportingOnError);
 				FlushHttpRequests();
 				WaitUntil(bDeleteUser2, "Waiting for user deletion...");
 
 				AB_TEST_TRUE(bDeleteUser2);
 			}
 
-			bool bUserCreationSuccess = false;
-			User2->Register(
-				Email,
-				Password,
-				DisplayName,
-				Country,
-				Format,
-				THandler<FRegisterResponse>::CreateLambda([&](const FRegisterResponse& Result)
-					{
-						bUserCreationSuccess = true;
-						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Test Reporting User2 is Created"));
+			bool bUser2CreationSuccess = SetupTestUser(TestUser);
 
-					}),
-				FErrorHandler::CreateLambda([&](int32 Code, FString Message)
-					{
-						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Code=%d"), Code);
-						if (static_cast<ErrorCodes>(Code) == ErrorCodes::UserEmailAlreadyUsedException || static_cast<ErrorCodes>(Code) == ErrorCodes::UserDisplayNameAlreadyUsedException) //email already used
-						{
-							bUserCreationSuccess = true;
-							UE_LOG(LogAccelByteReportingTest, Log, TEXT("Test Reporting User2 is already"));
-						}
-						else
-						{
-							UE_LOG(LogAccelByteReportingTest, Log, TEXT("Test Reporting User can't be created"));
-						}
-					}));
-
-			WaitUntil(bUserCreationSuccess, "Waiting for User2 created...");
-
-			bool bUser2LoginSuccess = false;
-			User2->LoginWithUsername(
-				Email,
-				Password,
-				FVoidHandler::CreateLambda([&]()
-					{
-						bUser2LoginSuccess = true;
-					}),
-					FCustomErrorHandler::CreateLambda([](int32 ErrorCode, const FString& ErrorMessage, const FJsonObject& ErrorJson)
-					{
-						UE_LOG(LogAccelByteReportingTest, Error, TEXT("Error code: %d\nError message:%s"), ErrorCode, *ErrorMessage);
-					}));
-
-			WaitUntil(bUser2LoginSuccess, "Waiting for User2 Login...");
-
-			AB_TEST_TRUE(bUser2LoginSuccess);
+			AB_TEST_TRUE(bUser2CreationSuccess);
 
 			return true;
 			});
@@ -312,19 +272,8 @@ void FReportingTestSpec::Define()
 					FlushHttpRequests();
 					WaitUntil(bDeleteUserSuccess, "Waiting for deleting user...");
 					AB_TEST_TRUE(bDeleteUserSuccess);
-
-					bool bUser2LogoutSuccess = false;
-					User2->Logout(
-						FVoidHandler::CreateLambda([&]()
-							{
-								bUser2LogoutSuccess = true;
-							}),
-						ReportingOnError);
-
-					WaitUntil(bUser2LogoutSuccess, "Waiting for User2 Logout...");
-
-					AB_TEST_TRUE(bUser2LogoutSuccess);
 				}
+				TeardownTestUser(TestUser);
 				return true;
 			}
 		);
@@ -456,12 +405,14 @@ void FReportingTestSpec::Define()
 				SubmitData.ObjectId = "d2cedbbd8751442bb7077fb5c4940dba"; //picked from UUID Generator Online
 				SubmitData.ObjectType = "";
 				SubmitData.Reason = ReasonsResponse.Data[0].Title;
-				SubmitData.UserID = User2Creds.GetUserId();
-				FRegistry::Reporting.SubmitReport(SubmitData, THandler<FAccelByteModelsReportingSubmitResponse>::CreateLambda([&bSubmitReport](const FAccelByteModelsReportingSubmitResponse& Response)
-					{
-						UE_LOG(LogAccelByteReportingTest, Log, TEXT("Submit Report Success"));
-						bSubmitReport = true;
-					}), ReportingOnError);
+				SubmitData.UserID = TestUser.UserId;
+				FRegistry::Reporting.SubmitReport(SubmitData
+					, THandler<FAccelByteModelsReportingSubmitResponse>::CreateLambda([&bSubmitReport](const FAccelByteModelsReportingSubmitResponse& Response)
+						{
+							UE_LOG(LogAccelByteReportingTest, Log, TEXT("Submit Report Success"));
+							bSubmitReport = true;
+						})
+					, ReportingOnError);
 
 				WaitUntil(bSubmitReport, "Waiting for Submit Report...");
 				AB_TEST_TRUE(bSubmitReport);
@@ -469,5 +420,5 @@ void FReportingTestSpec::Define()
 				return true;
 			}
 		);
-		});
+	});
 }

@@ -15,13 +15,16 @@ namespace AccelByte
 namespace Api
 {
 
-Order::Order(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+Order::Order(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Order::~Order(){}
+Order::~Order()
+{}
 
 void Order::CreateNewOrder(const FAccelByteModelsOrderCreate& OrderCreate, const THandler<FAccelByteModelsOrderInfo>& OnSuccess, const FErrorHandler& OnError)
 {

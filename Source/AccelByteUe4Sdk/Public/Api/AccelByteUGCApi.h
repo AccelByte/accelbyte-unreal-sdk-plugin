@@ -25,7 +25,7 @@ class ACCELBYTEUE4SDK_API UGC
 
 public:
 
-	UGC(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	UGC(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~UGC();
 
 private:
