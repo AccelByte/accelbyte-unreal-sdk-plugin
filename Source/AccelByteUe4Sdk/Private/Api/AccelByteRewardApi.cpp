@@ -11,15 +11,16 @@ namespace AccelByte
 {
 namespace Api
 {
-Reward::Reward(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef):
-	HttpRef(HttpRef),
-	CredentialsRef(CredentialsRef),
-	SettingsRef(SettingsRef) {}
+Reward::Reward(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Reward::~Reward() {}
+Reward::~Reward()
+{}
 	
 FString Reward::ConvertRewardSortByToString(EAccelByteRewardListSortBy const& SortBy)
 {

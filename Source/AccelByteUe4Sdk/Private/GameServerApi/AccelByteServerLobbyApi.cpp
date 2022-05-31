@@ -13,7 +13,12 @@ namespace AccelByte
 {
 namespace GameServerApi
 {
-	ServerLobby::ServerLobby(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
+	ServerLobby::ServerLobby(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+		, HttpRef{InHttpRef}
 	{}
 
 	ServerLobby::~ServerLobby()
@@ -29,8 +34,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/users/%s/party"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -60,8 +65,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *PartyId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -80,8 +85,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *PartyId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/party/namespaces/%s/parties/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *PartyId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -156,8 +161,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -188,8 +193,8 @@ namespace GameServerApi
 			return;
 		}
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes/%s"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -223,8 +228,8 @@ namespace GameServerApi
 		FAccelByteModelsSetSessionAttributeRequest Body;
 		Body.Attributes = Attributes;
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *Settings.LobbyServerUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/player/namespaces/%s/users/%s/attributes"), *SettingsRef.LobbyServerUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -252,8 +257,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked"), *SettingsRef.BaseUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -272,8 +277,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by"), *Settings.BaseUrl, *Credentials.GetClientNamespace(), *UserId);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/lobby/v1/admin/player/namespaces/%s/users/%s/blocked-by"), *SettingsRef.BaseUrl, *CredentialsRef.GetClientNamespace(), *UserId);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

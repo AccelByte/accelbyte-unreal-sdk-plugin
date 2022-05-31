@@ -23,7 +23,7 @@ namespace AccelByte
 	class ACCELBYTEUE4SDK_API FHttpClient final
 	{
 	public:
-		FHttpClient(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+		FHttpClient(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 		~FHttpClient();
 
 		/**

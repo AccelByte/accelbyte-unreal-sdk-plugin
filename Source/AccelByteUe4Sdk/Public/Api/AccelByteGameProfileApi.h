@@ -26,7 +26,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API GameProfile
 {
 public:
-	GameProfile(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	GameProfile(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~GameProfile();
 private:
 	FHttpRetryScheduler& HttpRef;

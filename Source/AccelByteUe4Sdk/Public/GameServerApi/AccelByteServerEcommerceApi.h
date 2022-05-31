@@ -22,7 +22,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerEcommerce
 {
 public:
-	ServerEcommerce(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+	ServerEcommerce(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerEcommerce();
 
 	/**
@@ -164,8 +164,8 @@ public:
 	void BulkGetItemsBySkus(TArray<FString> const& Skus, THandler<TArray<FAccelByteModelsBulkGetItemsBySkus>> const& OnSuccess, FErrorHandler const& OnError);
 	
 private:
-	const ServerCredentials& Credentials;
-	const ServerSettings& Settings;
+	ServerCredentials const& CredentialsRef;
+	ServerSettings const& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 
 	ServerEcommerce() = delete;

@@ -15,9 +15,10 @@ namespace Api
 	FDelegateHandle Qos::PollLatenciesHandle;
 	FDelegateHandle Qos::PollServerLatenciesHandle;
 
-	Qos::Qos(Credentials& NewCredentialsRef, const Settings& NewSettingsRef)
-		: CredentialsRef{NewCredentialsRef}
-		, SettingsRef{NewSettingsRef}
+	Qos::Qos(Credentials& InCredentialsRef
+		, Settings const& InSettingsRef)
+		: CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
 	{
 		CredentialsRef.OnLoginSuccess().AddRaw(this, &Qos::OnLoginSuccess);
 	}

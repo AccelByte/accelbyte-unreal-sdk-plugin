@@ -18,8 +18,8 @@ namespace AccelByte
 {
 
 ServerCredentials::ServerCredentials()
-	: ClientAccessToken(TEXT(""))
-	, ClientNamespace(TEXT(""))
+	: ClientAccessToken()
+	, ClientNamespace()
 	, ClientSessionState(ESessionState::Invalid)
 {
 }
@@ -33,10 +33,10 @@ void ServerCredentials::ForgetAll()
 	ClientSessionState = ESessionState::Invalid;
 }
 
-void ServerCredentials::SetClientCredentials(const FString& ClientId_, const FString& ClientSecret_)
+void ServerCredentials::SetClientCredentials(const FString& InClientId, const FString& InClientSecret)
 {
-	ClientId = ClientId_;
-	ClientSecret = ClientSecret_;
+	ClientId = InClientId;
+	ClientSecret = InClientSecret;
 }
 
 void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environment)
@@ -68,6 +68,16 @@ void ServerCredentials::SetClientCredentials(const ESettingsEnvironment Environm
 		GConfig->GetString(*DefaultSection, TEXT("ClientId"), ClientId, GEngineIni);
 		GConfig->GetString(*DefaultSection, TEXT("ClientSecret"), ClientSecret, GEngineIni);
 	}
+}
+
+const FString& ServerCredentials::GetOAuthClientId() const
+{
+	return ClientId;
+}
+
+	const FString& ServerCredentials::GetOAuthClientSecret() const
+{
+	return ClientSecret;
 }
 
 void ServerCredentials::SetClientToken(const FString& AccessToken, double ExpiresIn, const FString& Namespace)

@@ -12,16 +12,16 @@ namespace AccelByte
 {
 namespace Api
 {
-Reporting::Reporting(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{ HttpRef },
-	CredentialsRef{ CredentialsRef },
-	SettingsRef{ SettingsRef } {}
+Reporting::Reporting(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
-Reporting::~Reporting() {}
+Reporting::~Reporting()
+{}
 
 void Reporting::SubmitReport(const FAccelByteModelsReportingSubmitData ReportData, const THandler<FAccelByteModelsReportingSubmitResponse>& OnSuccess, const FErrorHandler & OnError)
 {

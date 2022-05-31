@@ -13,74 +13,99 @@ namespace AccelByte
 {
 namespace Api
 {
-	SessionBrowser::SessionBrowser(
-		Credentials const& CredentialsRef,
-		Settings const& SettingsRef,
-		FHttpRetryScheduler& HttpRef)
-		: HttpRef{HttpRef}
-		, CredentialsRef{CredentialsRef}
-		, SettingsRef{SettingsRef} {}
+	SessionBrowser::SessionBrowser(Credentials const& InCredentialsRef
+		, Settings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: HttpRef{InHttpRef}
+		, CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+	{}
 
 	SessionBrowser::~SessionBrowser()
 	{}
 
-	void SessionBrowser::CreateGameSession(
-		FString const& GameMode,
-		FString const& GameMapName,
-		FString const& GameVersion,
-		uint32 BotCount,
-		uint32 MaxPlayer,
-		TSharedPtr<FJsonObject> OtherSettings,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::CreateGameSession(FString const& GameMode
+		, FString const& GameMapName
+		, FString const& GameVersion
+		, uint32 BotCount
+		, uint32 MaxPlayer
+		, TSharedPtr<FJsonObject> OtherSettings
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
-		CreateGameSession(GameMode, GameMapName, GameVersion, BotCount, MaxPlayer, 0, FString(), OtherSettings, OnSuccess, OnError);
+		CreateGameSession(GameMode
+			, GameMapName
+			, GameVersion
+			, BotCount
+			, MaxPlayer
+			, 0
+			, FString()
+			, OtherSettings
+			, OnSuccess
+			, OnError);
 	}
 
-	void SessionBrowser::CreateGameSession(
-		FString const& GameMode,
-		FString const& GameMapName,
-		FString const& GameVersion,
-		uint32 BotCount,
-		uint32 MaxPlayer,
-		uint32 MaxSpectator,
-		FString const& Password, 
-		TSharedPtr<FJsonObject> OtherSettings,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::CreateGameSession(FString const& GameMode
+		, FString const& GameMapName
+		, FString const& GameVersion
+		, uint32 BotCount
+		, uint32 MaxPlayer
+		, uint32 MaxSpectator
+		, FString const& Password
+		, TSharedPtr<FJsonObject> OtherSettings
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
-		CreateGameSession(EAccelByteSessionType::p2p, GameMode, GameMapName, GameVersion, BotCount, MaxPlayer, MaxSpectator, Password, OtherSettings, OnSuccess, OnError);
+		CreateGameSession(EAccelByteSessionType::p2p
+			, GameMode
+			, GameMapName
+			, GameVersion
+			, BotCount
+			, MaxPlayer
+			, MaxSpectator
+			, Password
+			, OtherSettings
+			, OnSuccess
+			, OnError);
 	}
 
-	void SessionBrowser::CreateGameSession(
-		FString const& SessionTypeString, 
-		FString const& GameMode, 
-		FString const& GameMapName,
-		FString const& GameVersion,
-		uint32 BotCount,
-		uint32 MaxPlayer,
-		uint32 MaxSpectator,
-		FString const& Password,
-		TSharedPtr<FJsonObject> OtherSettings,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::CreateGameSession(FString const& SessionTypeString
+		, FString const& GameMode
+		, FString const& GameMapName
+		, FString const& GameVersion
+		, uint32 BotCount
+		, uint32 MaxPlayer
+		, uint32 MaxSpectator
+		, FString const& Password
+		, TSharedPtr<FJsonObject> OtherSettings
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(SessionTypeString);
-		CreateGameSession(SessionType, GameMode, GameMapName, GameVersion, BotCount, MaxPlayer, MaxSpectator, Password, OtherSettings, OnSuccess, OnError);
+		CreateGameSession(SessionType
+			, GameMode
+			, GameMapName
+			, GameVersion
+			, BotCount
+			, MaxPlayer
+			, MaxSpectator
+			, Password
+			, OtherSettings
+			, OnSuccess
+			, OnError);
 	}
 
-	void SessionBrowser::CreateGameSession(
-		EAccelByteSessionType SessionType,
-		FString const& GameMode,
-		FString const& GameMapName,
-		FString const& GameVersion,
-		uint32 BotCount,
-		uint32 MaxPlayer,
-		uint32 MaxSpectator,
-		FString const& Password,
-		TSharedPtr<FJsonObject> OtherSettings, 
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::CreateGameSession(EAccelByteSessionType SessionType
+		, FString const& GameMode
+		, FString const& GameMapName
+		, FString const& GameVersion
+		, uint32 BotCount
+		, uint32 MaxPlayer
+		, uint32 MaxSpectator
+		, FString const& Password
+		, TSharedPtr<FJsonObject> OtherSettings
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FString SessionTypeString = FAccelByteUtilities::GetUEnumValueAsString(SessionType);
 		
@@ -107,10 +132,9 @@ namespace Api
 		CreateGameSession(NewGameSession, OnSuccess, OnError);
 	}
 
-	void SessionBrowser::CreateGameSession(
-		FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest, 
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::CreateGameSession(FAccelByteModelsSessionBrowserCreateRequest const& CreateSessionRequest
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -154,12 +178,11 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::UpdateGameSession(
-		FString const& SessionId,
-		uint32 MaxPlayer,
-		uint32 CurrentPlayerCount,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::UpdateGameSession(FString const& SessionId
+		, uint32 MaxPlayer
+		, uint32 CurrentPlayerCount
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FAccelByteModelsSessionBrowserUpdateRequest UpdateSessionRequest;
 		UpdateSessionRequest.Game_max_player = MaxPlayer;
@@ -168,11 +191,10 @@ namespace Api
 		UpdateGameSession(SessionId, UpdateSessionRequest, OnSuccess, OnError);
 	}
 
-	void SessionBrowser::UpdateGameSession(
-		FString const& SessionId,
-		FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest,
-		THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess,
-		FErrorHandler const& OnError)
+	void SessionBrowser::UpdateGameSession(FString const& SessionId
+		, FAccelByteModelsSessionBrowserUpdateRequest const& UpdateSessionRequest
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -214,7 +236,9 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::RemoveGameSession(FString const& SessionId, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
+	void SessionBrowser::RemoveGameSession(FString const& SessionId
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -240,23 +264,63 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::GetGameSessions(FString const& SessionTypeString, FString const& GameMode, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset, uint32 Limit)
+	void SessionBrowser::GetGameSessions(FString const& SessionTypeString
+		, FString const& GameMode
+		, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Offset
+		, uint32 Limit)
 	{
-		GetGameSessions(SessionTypeString, GameMode, FString(), OnSuccess, OnError, Offset, Limit);
+		GetGameSessions(SessionTypeString
+			, GameMode
+			, FString()
+			, OnSuccess
+			, OnError
+			, Offset
+			, Limit);
 	}
 
-	void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType, FString const& GameMode, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset, uint32 Limit)
+	void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
+		, FString const& GameMode
+		, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Offset
+		, uint32 Limit)
 	{
-		GetGameSessions(SessionType, GameMode, FString(), OnSuccess, OnError, Offset, Limit);
+		GetGameSessions(SessionType
+			, GameMode
+			, FString()
+			, OnSuccess
+			, OnError
+			, Offset
+			, Limit);
 	}
 
-	void SessionBrowser::GetGameSessions(FString const& SessionTypeString, FString const& GameMode, FString const& MatchExist, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset, uint32 Limit)
+	void SessionBrowser::GetGameSessions(FString const& SessionTypeString
+		, FString const& GameMode
+		, FString const& MatchExist
+		, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Offset
+		, uint32 Limit)
 	{
 		EAccelByteSessionType SessionType = FAccelByteUtilities::GetUEnumValueFromString<EAccelByteSessionType>(SessionTypeString);
-		GetGameSessions(SessionType, GameMode, MatchExist, OnSuccess, OnError, Offset, Limit);
+		GetGameSessions(SessionType
+			, GameMode
+			, MatchExist
+			, OnSuccess
+			, OnError
+			, Offset
+			, Limit);
 	}
 
-	void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType, FString const& GameMode, FString const& MatchExist, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset, uint32 Limit)
+	void SessionBrowser::GetGameSessions(EAccelByteSessionType SessionType
+		, FString const& GameMode
+		, FString const& MatchExist
+		, THandler<FAccelByteModelsSessionBrowserGetResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Offset
+		, uint32 Limit)
 	{
 		FReport::Log(FString(__FUNCTION__));
 		
@@ -284,7 +348,11 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::RegisterPlayer(FString const& SessionId, FString const& PlayerToAdd, bool AsSpectator, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess, FErrorHandler const& OnError)
+	void SessionBrowser::RegisterPlayer(FString const& SessionId
+		, FString const& PlayerToAdd
+		, bool AsSpectator
+		, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -295,10 +363,10 @@ namespace Api
 		}
 
 		const FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetAccessToken());
-        const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
-        const FString Verb = TEXT("POST");
-        const FString ContentType = TEXT("application/json");
-        const FString Accept = TEXT("application/json");
+	    const FString Url = FString::Printf(TEXT("%s/namespaces/%s/gamesession/%s/player"), *SettingsRef.SessionBrowserServerUrl, *CredentialsRef.GetNamespace(), *SessionId);
+	    const FString Verb = TEXT("POST");
+	    const FString ContentType = TEXT("application/json");
+	    const FString Accept = TEXT("application/json");
 
 		FAccelByteModelsSessionBrowserAddPlayerRequest AddPlayerRequest;
 		AddPlayerRequest.User_id = PlayerToAdd;
@@ -306,18 +374,21 @@ namespace Api
 		FString Content;
 		FJsonObjectConverter::UStructToJsonObjectString(AddPlayerRequest, Content);
 		
-        FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
-        Request->SetURL(Url);
-        Request->SetHeader(TEXT("Authorization"), Authorization);
-        Request->SetVerb(Verb);
-        Request->SetHeader(TEXT("Content-Type"), ContentType);
-        Request->SetHeader(TEXT("Accept"), Accept);
+	    FHttpRequestPtr Request = FHttpModule::Get().CreateRequest();
+	    Request->SetURL(Url);
+	    Request->SetHeader(TEXT("Authorization"), Authorization);
+	    Request->SetVerb(Verb);
+	    Request->SetHeader(TEXT("Content-Type"), ContentType);
+	    Request->SetHeader(TEXT("Accept"), Accept);
 		Request->SetContentAsString(Content);
 
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::UnregisterPlayer(FString const& SessionId, FString const& PlayerToRemove, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess, FErrorHandler const& OnError)
+	void SessionBrowser::UnregisterPlayer(FString const& SessionId
+		, FString const& PlayerToRemove
+		, THandler<FAccelByteModelsSessionBrowserAddPlayerResponse> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -343,7 +414,11 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::GetRecentPlayer(FString const& UserId, THandler<FAccelByteModelsSessionBrowserRecentPlayerGetResult> const& OnSuccess, FErrorHandler const& OnError, uint32 Offset, uint32 Limit)
+	void SessionBrowser::GetRecentPlayer(FString const& UserId
+		, THandler<FAccelByteModelsSessionBrowserRecentPlayerGetResult> const& OnSuccess
+		, FErrorHandler const& OnError
+		, uint32 Offset
+		, uint32 Limit)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -369,7 +444,10 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::JoinSession(FString const& SessionId, FString const& Password, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
+	void SessionBrowser::JoinSession(FString const& SessionId
+		, FString const& Password
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -404,7 +482,9 @@ namespace Api
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
 
-	void SessionBrowser::GetGameSession(FString const& SessionId, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess, FErrorHandler const& OnError)
+	void SessionBrowser::GetGameSession(FString const& SessionId
+		, THandler<FAccelByteModelsSessionBrowserData> const& OnSuccess
+		, FErrorHandler const& OnError)
 	{
 		FReport::Log(FString(__FUNCTION__));
 
@@ -429,5 +509,6 @@ namespace Api
 
 		HttpRef.ProcessRequest(Request, CreateHttpResultHandler(OnSuccess, OnError), FPlatformTime::Seconds());
 	}
+	
 }
 }

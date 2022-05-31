@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Reporting
 {
 public:
-	Reporting(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Reporting(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Reporting();
 
 private:

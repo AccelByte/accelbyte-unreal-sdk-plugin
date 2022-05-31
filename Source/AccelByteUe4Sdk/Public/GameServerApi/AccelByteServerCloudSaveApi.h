@@ -23,7 +23,7 @@ namespace GameServerApi
 	class ACCELBYTEUE4SDK_API ServerCloudSave
 	{
 	public:
-		ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+		ServerCloudSave(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 		~ServerCloudSave();
 
 		/**
@@ -229,8 +229,8 @@ namespace GameServerApi
 
 
 	private:
-		const ServerCredentials& Credentials;
-		const ServerSettings& Settings;
+		ServerCredentials const& CredentialsRef;
+		ServerSettings const& SettingsRef;
 		FHttpRetryScheduler& HttpRef;
 
 		ServerCloudSave() = delete;

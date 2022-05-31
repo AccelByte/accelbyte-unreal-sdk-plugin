@@ -30,7 +30,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerOauth2
 {
 public:
-	ServerOauth2(ServerCredentials& Credentials, ServerSettings& Settings, FHttpRetryScheduler& InHttpRef);
+	ServerOauth2(ServerCredentials& InCredentialsRef, ServerSettings& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerOauth2();
 
 	/**
@@ -63,8 +63,8 @@ private:
 	*/
 	void GetAccessTokenWithClientCredentialsGrant(const FString& ClientId, const FString& ClientSecret, const THandler<FOauth2Token>& OnSuccess, const FErrorHandler& OnError);
 
-	ServerCredentials& Credentials;
-	ServerSettings& Settings;
+	ServerCredentials& CredentialsRef;
+	ServerSettings& SettingsRef;
 	FHttpRetryScheduler& HttpRef;
 	ServerOauth2() = delete; // static class can't have instance
 	ServerOauth2(ServerOauth2 const&) = delete;

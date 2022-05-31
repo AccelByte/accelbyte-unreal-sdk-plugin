@@ -13,14 +13,13 @@ namespace AccelByte
 namespace Api
 {
 
-QosManager::QosManager(
-	const Credentials& CredentialsRef,
-	const Settings& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef{CredentialsRef},
-	SettingsRef{SettingsRef} {}
+QosManager::QosManager(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
+{}
 
 	QosManager::~QosManager()
 	{}

@@ -185,6 +185,15 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerInfo
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSM | Models | ServerInfo")
 	FString Last_update{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	FString Region{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	FString Custom_attribute{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | ServerInfo")
+	FString Deployment{};	
 };
 
 USTRUCT(BlueprintType)
@@ -194,4 +203,130 @@ struct ACCELBYTEUE4SDK_API FAccelByteModelsServerSessionResponse
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AccelByte | Server | DSM | Models | SessionResponse")
 	FString Session_id{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsServerCreateSessionRequest
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Client_version {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Configuration {};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Deployment {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Game_mode {};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Namespace {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Pod_name {}; // AKA ServerName
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Region {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	FString Session_id {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionRequest")
+	TArray<FAccelByteModelsMatchingAlly> Matching_allies{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsServerStatusHistory
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | StatusHistory")
+	FString Status{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | StatusHistory")
+	FString Time_stamp{};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMServer
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Custom_attribute{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Deployment{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Game_version{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Image_version{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Ip{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Namespace{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Params{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Pod_name{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	int Port {0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	TMap<FString, int> Ports {};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Protocol {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Provider {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Region {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	FString Session_id {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMServer")
+	TArray<FAccelByteModelsServerStatusHistory> Status_history {};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsDSMSession
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMSession")
+	FAccelByteModelsDSMServer Server {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMSession")
+	FString Id {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMSession")
+	FString Namespace {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMSession")
+	FString Provider {};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | DSMSession")
+	FString Region {};
+};
+
+USTRUCT(BlueprintType)
+struct ACCELBYTEUE4SDK_API FAccelByteModelsServerCreateSessionResponse
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AccelByte | Server | DSM | Models | SessionResponse")
+	FAccelByteModelsDSMSession Session {};
 };

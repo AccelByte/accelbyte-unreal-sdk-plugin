@@ -25,7 +25,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API SessionBrowser 
 {
 public:
-	SessionBrowser(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	SessionBrowser(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~SessionBrowser();
 private:
 	FHttpRetryScheduler& HttpRef;

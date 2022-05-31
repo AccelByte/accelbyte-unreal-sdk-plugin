@@ -13,14 +13,12 @@ namespace AccelByte
 {
 namespace Api
 {
-Agreement::Agreement(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	:
-	HttpRef{HttpRef},
-	CredentialsRef(CredentialsRef),
-	SettingsRef(SettingsRef)
+Agreement::Agreement(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: HttpRef{InHttpRef}
+	, CredentialsRef{InCredentialsRef}
+	, SettingsRef{InSettingsRef}
 {}
 
 Agreement::~Agreement()

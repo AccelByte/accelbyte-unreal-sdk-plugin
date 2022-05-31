@@ -14,7 +14,12 @@ namespace AccelByte
 {
 namespace GameServerApi
 {
-	ServerCloudSave::ServerCloudSave(const ServerCredentials& Credentials, const ServerSettings& Settings, FHttpRetryScheduler& InHttpRef) : Credentials(Credentials), Settings(Settings), HttpRef(InHttpRef)
+	ServerCloudSave::ServerCloudSave(ServerCredentials const& InCredentialsRef
+		, ServerSettings const& InSettingsRef
+		, FHttpRetryScheduler& InHttpRef)
+		: CredentialsRef{InCredentialsRef}
+		, SettingsRef{InSettingsRef}
+		, HttpRef{InHttpRef}
 	{}
 
 	ServerCloudSave::~ServerCloudSave()
@@ -24,8 +29,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace());
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace());
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -67,8 +72,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *Key);
 		FString Verb = TEXT("POST");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -92,8 +97,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *Key);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -143,8 +148,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *Key);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -168,8 +173,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *Key);
 		FString Verb = TEXT("DELETE");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -198,8 +203,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key );
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key );
 		FString Verb            = TEXT("POST");
 		FString ContentType     = TEXT("application/json");
 		FString Accept          = TEXT("application/json");
@@ -231,8 +236,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url             = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
 		FString Verb            = TEXT("POST");
 		FString ContentType     = TEXT("application/json");
 		FString Accept          = TEXT("application/json");
@@ -256,8 +261,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Authorization   = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -301,8 +306,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s/public"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s/public"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key);
 		FString Verb = TEXT("GET");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -354,8 +359,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key);
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key);
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -387,8 +392,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
 		FString Verb = TEXT("PUT");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");
@@ -412,8 +417,8 @@ namespace GameServerApi
 	{
 		FReport::Log(FString(__FUNCTION__));
 
-		FString Authorization = FString::Printf(TEXT("Bearer %s"), *Credentials.GetClientAccessToken());
-		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *Settings.CloudSaveServerUrl, *Credentials.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
+		FString Authorization = FString::Printf(TEXT("Bearer %s"), *CredentialsRef.GetClientAccessToken());
+		FString Url = FString::Printf(TEXT("%s/v1/admin/namespaces/%s/users/%s/records/%s%s"), *SettingsRef.CloudSaveServerUrl, *CredentialsRef.GetClientNamespace(), *UserId, *Key, (bIsPublic ? TEXT("/public") : TEXT("")));
 		FString Verb = TEXT("DELETE");
 		FString ContentType = TEXT("application/json");
 		FString Accept = TEXT("application/json");

@@ -15,14 +15,14 @@ namespace AccelByte
 namespace Api
 {
 
-Group::Group(
-	Credentials const& CredentialsRef,
-	Settings const& SettingsRef,
-	FHttpRetryScheduler& HttpRef)
-	: FApiBase(CredentialsRef, SettingsRef, HttpRef){}
+Group::Group(Credentials const& InCredentialsRef
+	, Settings const& InSettingsRef
+	, FHttpRetryScheduler& InHttpRef)
+	: FApiBase(InCredentialsRef, InSettingsRef, InHttpRef)
+{}
 
-Group::~Group(){}
-	
+Group::~Group()
+{}
 
 #pragma region Utils
 FString Group::ConvertGroupSortByToString(const EAccelByteGroupListSortBy& SortBy)

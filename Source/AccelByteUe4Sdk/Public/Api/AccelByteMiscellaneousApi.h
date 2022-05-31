@@ -20,7 +20,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API Miscellaneous
 {
 public:
-	Miscellaneous(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& HttpRef);
+	Miscellaneous(const Credentials& CredentialsRef, const Settings& SettingsRef, FHttpRetryScheduler& InHttpRef);
 	~Miscellaneous();
 
 	/**

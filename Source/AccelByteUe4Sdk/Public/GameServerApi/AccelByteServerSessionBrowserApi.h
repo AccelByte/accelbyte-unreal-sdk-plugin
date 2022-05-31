@@ -25,7 +25,7 @@ namespace GameServerApi
 class ACCELBYTEUE4SDK_API ServerSessionBrowser
 {
 public:
-	ServerSessionBrowser(const ServerCredentials& InCredentials, const ServerSettings& InSettings, FHttpRetryScheduler& InHttpRef);
+	ServerSessionBrowser(ServerCredentials const& InCredentialsRef, ServerSettings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~ServerSessionBrowser();
 private:
 	const ServerCredentials& CredentialsRef;

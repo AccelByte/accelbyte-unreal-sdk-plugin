@@ -21,7 +21,7 @@ namespace Api
 class ACCELBYTEUE4SDK_API CloudSave
 {
 public:
-	CloudSave(Credentials const& CredentialsRef, Settings const& SettingsRef, FHttpRetryScheduler& HttpRef);
+	CloudSave(Credentials const& InCredentialsRef, Settings const& InSettingsRef, FHttpRetryScheduler& InHttpRef);
 	~CloudSave();
 	
 	/**
@@ -192,8 +192,8 @@ public:
 
 private:
 	FHttpRetryScheduler& HttpRef;
-	Credentials const& Credentials;
-	Settings const& Settings;
+	Credentials const& CredentialsRef;
+	Settings const& SettingsRef;
 
 	int32 const UserIdsRequestLimit = 20;
 

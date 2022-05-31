@@ -23,12 +23,12 @@ namespace Api
 class ACCELBYTEUE4SDK_API UserProfile
 {
 public:
-	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& HttpRef);
+	UserProfile(const Credentials& Credentials, const Settings& Settings, FHttpRetryScheduler& InHttpRef);
 	~UserProfile();
 private:
 	FHttpRetryScheduler& HttpRef;
 	Credentials const& CredentialsRef;
-	Settings const& Settings;
+	Settings const& SettingsRef;
 public:
 	/**
 	 * @brief Get user's own profile information. If it doesn't exist, that will be an error.
