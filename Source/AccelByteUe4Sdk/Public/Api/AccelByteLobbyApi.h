@@ -696,6 +696,13 @@ public:
 	* @param UserId Targeted user ID.
 	*/
 	void RequestFriend(FString UserId);
+	
+	/**
+    * @brief Send friend request by public ID.
+    *
+    * @param PublicId Targeted user's PublicId.
+    */
+    void RequestFriendByPublicId(FString PublicId);
 
 	/**
 	* @brief Send unfriend request.
@@ -1324,6 +1331,18 @@ public:
 		RequestFriendsResponse = OnRequestFriendsResponse;
 		OnRequestFriendsError = OnError;
 	};
+	
+	/**
+	* @brief Set request for friends by public ID response.
+	*
+	* @param OnRequestFriendsResponse Delegate that will be set.
+	* @param OnError Delegate that will be called when operation failed.
+	*/
+	void SetRequestFriendsByPublicIdResponseDelegate(FRequestFriendsResponse OnRequestFriendsResponse, FErrorHandler OnError = {})
+	{
+		RequestFriendsByPublicIdResponse = OnRequestFriendsResponse;
+		OnRequestFriendsByPublicIdError = OnError;
+	};
 
 	/**
 	* @brief Set unfriend response.
@@ -1721,6 +1740,7 @@ private:
 
 	// Friends
 	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsResponseMap;
+	TMap<FString, FRequestFriendsResponse> MessageIdRequestFriendsByPublicIdResponseMap;
 	TMap<FString, FUnfriendResponse> MessageIdUnfriendResponseMap;
 	TMap<FString, FListOutgoingFriendsResponse> MessageIdListOutgoingFriendsResponseMap;
 	TMap<FString, FCancelFriendsResponse> MessageIdCancelFriendsResponseMap;
@@ -1798,6 +1818,7 @@ private:
 
 	// Friends
 	FRequestFriendsResponse RequestFriendsResponse;
+	FRequestFriendsResponse RequestFriendsByPublicIdResponse;
 	FUnfriendResponse UnfriendResponse;
 	FListOutgoingFriendsResponse ListOutgoingFriendsResponse;
 	FCancelFriendsResponse CancelFriendsResponse;
@@ -1876,6 +1897,7 @@ private:
 	FErrorHandler OnMatchmakingCancelError;
 	FErrorHandler OnReadyConsentError;
 	FErrorHandler OnRequestFriendsError;
+	FErrorHandler OnRequestFriendsByPublicIdError;
 	FErrorHandler OnUnfriendError;
 	FErrorHandler OnListOutgoingFriendsError;
 	FErrorHandler OnCancelFriendsError;

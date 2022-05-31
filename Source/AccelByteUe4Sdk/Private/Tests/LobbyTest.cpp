@@ -22,6 +22,7 @@
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
 
+#include "Api/AccelByteUserProfileApi.h"
 #include "Core/AccelByteEntitlementTokenGenerator.h"
 
 using AccelByte::THandler;
@@ -49,7 +50,7 @@ TArray<TPair<FString, float>> PreferredLatencies;
 //General
 bool bUsersConnected, bUsersConnectionSuccess, bGetMessage, bGetAllUserPresenceSuccess, bGetFriendsPresenceSuccess;
 //Friends
-bool bRequestFriendError, bAcceptFriendSuccess, bAcceptFriendError, bRequestFriendSuccess, bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError;
+bool bRequestFriendError, bRequestFriendByPublicIdError, bAcceptFriendSuccess, bAcceptFriendError, bRequestFriendSuccess, bRequestFriendByPublicIdSuccess, bRejectFriendSuccess, bRejectFriendError, bCancelFriendSuccess, bCancelFriendError;
 bool bGetFriendshipStatusError, bListOutgoingFriendSuccess, bListOutgoingFriendError, bListIncomingFriendSuccess, bListIncomingFriendError;
 bool bLoadFriendListSuccess, bLoadFriendListError, bOnIncomingRequestNotifSuccess, bOnIncomingRequestNotifError, bOnRequestAcceptedNotifSuccess, bOnRequestAcceptedNotifError;
 bool bUnfriendNotifSuccess, bCancelFriendNotifSuccess, bRejectFriendNotifSuccess;
@@ -189,6 +190,8 @@ void ResetResponses()
 	bGetFriendsPresenceSuccess = false;
 	bRequestFriendSuccess = false;
 	bRequestFriendError = false;
+	bRequestFriendByPublicIdSuccess = false;
+	bRequestFriendByPublicIdError = false;
 	bAcceptFriendSuccess = false;
 	bAcceptFriendError = false;
 
@@ -312,6 +315,16 @@ const auto RequestFriendDelegate = Api::Lobby::FRequestFriendsResponse::CreateLa
 	if (result.Code != "0")
 	{
 		bRequestFriendError = true;
+	}
+});
+
+const auto RequestFriendByPublicIdDelegate = Api::Lobby::FRequestFriendsResponse::CreateLambda([](FAccelByteModelsRequestFriendsResponse result)
+{
+	bRequestFriendByPublicIdSuccess = true;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("Request Friend by public ID Success!"));
+	if (result.Code != "0")
+	{
+		bRequestFriendByPublicIdError = true;
 	}
 });
 
@@ -1529,6 +1542,65 @@ bool LobbyTestListOnlineFriends_MultipleUsersConnected_ReturnAllUsers::RunTest(c
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[1].UserId));
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[2].UserId));
 	AB_TEST_TRUE(onlineUserResponse.friendsId.Contains(LobbyUsers[3].UserId));
+	ResetResponses();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(LobbyTestListOnlineFriends_InviteByPublicId_Success, "AccelByte.Tests.Lobby.B.InviteFriendByPublicId", AutomationFlagMaskLobby);
+bool LobbyTestListOnlineFriends_InviteByPublicId_Success::RunTest(const FString& Parameters)
+{
+	bRequestFriendByPublicIdError = false;
+	const int LobbyUserCount {2};
+	LobbyConnect(LobbyUserCount);
+	
+	LobbyApiClients[0]->Lobby.SetRequestFriendsByPublicIdResponseDelegate(RequestFriendByPublicIdDelegate);
+	LobbyApiClients[0]->Lobby.SetCancelFriendsResponseDelegate(CancelFriendDelegate);
+
+	FAccelByteModelsUserProfileCreateRequest ProfileCreate;
+	ProfileCreate.FirstName = "first";
+	ProfileCreate.LastName = "last";
+	ProfileCreate.Language = "en";
+	ProfileCreate.Timezone = "Etc/UTC";
+	ProfileCreate.DateOfBirth = "1970-01-01";
+	ProfileCreate.AvatarSmallUrl = "http://example.com";
+	ProfileCreate.AvatarUrl = "http://example.com";
+	ProfileCreate.AvatarLargeUrl = "http://example.com";
+
+	bool bCreateUserProfileDone {false};
+	FAccelByteModelsUserProfileInfo ProfileInfo;
+	const auto OnCreateProfileSuccess = THandler<FAccelByteModelsUserProfileInfo>::CreateLambda(
+		[&bCreateUserProfileDone, &ProfileInfo](const FAccelByteModelsUserProfileInfo& Result)
+		{
+			ProfileInfo = Result;
+			bCreateUserProfileDone = true;
+		});
+	
+	LobbyApiClients[1]->UserProfile.CreateUserProfile(ProfileCreate, OnCreateProfileSuccess, LobbyTestErrorHandler);
+
+	WaitUntil(bCreateUserProfileDone, "Wait creating user profile");
+	
+	LobbyApiClients[0]->Lobby.RequestFriendByPublicId(ProfileInfo.PublicId);
+
+	WaitUntil(bRequestFriendByPublicIdSuccess, "Wait sending friend request");
+
+	LobbyApiClients[0]->Lobby.CancelFriendRequest(LobbyApiClients[1]->CredentialsRef->GetUserId());
+	WaitUntil(bCancelFriendSuccess, "wait cancelling friend request");
+
+	bool bDeleteProfileDone = false;
+	bool bDeleteProfileSuccessful = false;
+	UE_LOG(LogAccelByteLobbyTest, Log, TEXT("DeleteUserProfile"));
+	AdminDeleteUserProfile(LobbyApiClients[1]->CredentialsRef->GetNamespace(), LobbyApiClients[1]->CredentialsRef->GetUserId(), FVoidHandler::CreateLambda([&bDeleteProfileDone, &bDeleteProfileSuccessful]()
+		{
+			UE_LOG(LogAccelByteLobbyTest, Log, TEXT("    Success"));
+			bDeleteProfileSuccessful = true;
+			bDeleteProfileDone = true;
+		}), LobbyTestErrorHandler);
+
+	WaitUntil(bDeleteProfileDone, "Waiting for Deletion...");
+
+	AB_TEST_FALSE(bRequestFriendByPublicIdError);
+
+	LobbyDisconnect(LobbyUserCount);
 	ResetResponses();
 	return true;
 }
